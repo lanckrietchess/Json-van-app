@@ -1,0 +1,213 @@
+{
+ "app": "lanckrietchess-hub-backup",
+ "kind": "database",
+ "v": 2,
+ "hub": "3.3.0",
+ "exported": "2026-09-22T12:45:10.511Z",
+ "site": "file:///C:/Users/zrmme/Downloads/files/indexjson.html",
+ "counts": {
+  "items": 63,
+  "texts": 0,
+  "keys": 0,
+  "reps": 0,
+  "lines": 0,
+  "drills": 16
+ },
+ "draft": {
+  "app": "lanckrietchess-hub",
+  "schema": 1,
+  "updated": "2026-09-21T12:46:05.518Z",
+  "copy": {},
+  "settings": {
+   "fastTrack": "2 years and 10 months",
+   "about": {
+    "chesscomUsername": "Lanckrietchess_YT",
+    "avatarUrl": "https://www.chess.com/member/lanckrietchess_yt"
+   },
+   "pricing": {
+    "mentorship": {
+     "per": "/6weeks"
+    }
+   }
+  },
+  "lists": {},
+  "gates": {},
+  "bots": {},
+  "keys": [],
+  "folders": []
+ },
+ "keybook": {},
+ "published": null,
+ "local": {
+  "state": {
+   "v": 2,
+   "profile": {
+    "name": "",
+    "elo": null,
+    "leak": "",
+    "goal": "",
+    "created": "2026-09-19",
+    "focus": null,
+    "struggles": [],
+    "rep": {
+     "w": "",
+     "e4": "",
+     "d4": ""
+    },
+    "openings": [],
+    "checkins": []
+   },
+   "access": {
+    "tier": "free",
+    "keyHash": "",
+    "verifiedAt": "",
+    "source": "",
+    "remote": false,
+    "label": "",
+    "exp": "",
+    "bound": false,
+    "pending": "",
+    "checkedAt": "",
+    "key": ""
+   },
+   "stats": {
+    "think": {
+     "tries": 18,
+     "correct": 17,
+     "streak": 9,
+     "best": 9
+    },
+    "openings": {
+     "tries": 57,
+     "correct": 47,
+     "streak": 0,
+     "best": 13
+    },
+    "middlegame": {
+     "tries": 6,
+     "correct": 5,
+     "streak": 5,
+     "best": 5
+    },
+    "endgame": {
+     "tries": 14,
+     "correct": 13,
+     "streak": 11,
+     "best": 11
+    }
+   },
+   "progress": {
+    "ck-advance-dxc5": {
+     "best": 0.8571428571428571,
+     "runs": 2,
+     "last": 1789828408499
+    },
+    "colle-c4-trap": {
+     "best": 0.8,
+     "runs": 1,
+     "last": 1789823634442
+    },
+    "eg-opposition-win": {
+     "best": 0.9285714285714286,
+     "runs": 1,
+     "last": 1789823754329
+    },
+    "ck-advance-c3": {
+     "best": 0.5714285714285714,
+     "runs": 1,
+     "last": 1789840584248
+    },
+    "colle-koltanowski": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789840665735
+    },
+    "think-quiet-queen": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789840842409
+    },
+    "think-pawn-fork": {
+     "best": 0.75,
+     "runs": 1,
+     "last": 1789840881243
+    },
+    "think-smothered": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789840922347
+    },
+    "mg800-fm-1": {
+     "best": 0,
+     "runs": 1,
+     "last": 1789841351600
+    },
+    "mg800-fm-2": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789841356722
+    },
+    "mg800-fm-3": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789841360374
+    },
+    "mg800-free-material": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789841361619
+    },
+    "ab-rt-1": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789841392141
+    },
+    "ab-rt-2": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789841399276
+    },
+    "ab-read-threat": {
+     "best": 1,
+     "runs": 1,
+     "last": 1789841401115
+    },
+    "ck-karpov-trap": {
+     "best": 0.8571428571428571,
+     "runs": 1,
+     "last": 1789994656537
+    }
+   },
+   "daily": {
+    "last": "2026-09-21",
+    "count": 1
+   },
+   "settings": {
+    "sound": true,
+    "board": false,
+    "autoVault": true,
+    "lines": 3
+   },
+   "onboarded": true
+  },
+  "repertoire": null,
+  "avatar": null,
+  "adminUI": {
+   "edit": true,
+   "preview": "free",
+   "tier": "free"
+  },
+  "attempts": [
+   {
+    "id": "ck-karpov-trap",
+    "k": "openings",
+    "a": 0.8571428571428571,
+    "ms": 20480,
+    "mv": 7,
+    "d": 1100,
+    "t": 1789994656537
+   }
+  ],
+  "vault": null
+ }
+}
