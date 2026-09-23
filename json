@@ -4,7 +4,7 @@
     "version": "3.1.0",
     "last_updated": "2026-09-23",
     "author": "Kyenzo (Lanckrietchess)",
-    "description": "Central dynamic JSON database hosted on GitHub Raw. Powers Opening Lines, Think Section, Theory Section, and AI Coaches."
+    "description": "Central dynamic JSON database hosted on GitHub Raw."
   },
   "app_settings": {
     "hero_title": "If you want to change the output, focus on the input.",
@@ -143,15 +143,6 @@
         "target_move": "Rxe4",
         "continuation": ["dxe4", "Rh4"],
         "explanation": "Mandatory Rook recapture! 12.Rxe4! allows the Rook Lift to h4 for a winning king attack."
-      },
-      {
-        "id": "puzzle_colle_phoenix_push",
-        "category": "Openings",
-        "repertoire_id": "colle_1_v3",
-        "fen": "r1bq1rk1/pp1n1ppp/2pbpn2/2pp4/3P4/2PBPN2/PP1N1PPP/R1BQ1RK1 w - - 0 9",
-        "target_move": "b4",
-        "continuation": ["Bd6", "Bb2"],
-        "explanation": "The Phoenix! 9.b4! gains queenside space and creates a reversed Semi-Slav with an extra tempo."
       }
     ]
   },
@@ -161,30 +152,12 @@
         "id": "blunder_bootcamp",
         "title": "The Blunder Bootcamp (0 - 400 ELO)",
         "tier_access": 1,
-        "description": "Break legal-move bias, build piece comfort, and eliminate hanging pieces through basic Move (M) checks."
-      },
-      {
-        "id": "anti_blunder_bootcamp",
-        "title": "Anti-Blunder Bootcamp (400 - 800 ELO)",
-        "tier_access": 1,
-        "description": "Master basic Specifics (S) and verify candidate move safety with Checks, Captures, and Attacks."
-      },
-      {
-        "id": "beyond_the_blunder",
-        "title": "Beyond the Blunder (800 - 1200 ELO)",
-        "tier_access": 2,
-        "description": "Automate board vision, build reliable opening structures, and take control with Priorities (P)."
-      },
-      {
-        "id": "force_the_blunder",
-        "title": "Force the Blunder (1200 - 1600 ELO)",
-        "tier_access": 2,
-        "description": "Extract enemy weaknesses using deep Specifics (S) and execute relentless tactical calculation."
+        "description": "Break legal-move bias, build piece comfort, and eliminate hanging pieces."
       }
     ]
   },
   "ai_coaches": {
-    "free_bot_instructions": "You are the Free Lanckrietchess AI Coach. Guide students through Socratic questions using the 4-step MSPC Framework (Move, Specifics, Priorities, Calculation). Focus on identifying blunders and guiding them to basic candidate moves.",
-    "paid_bot_instructions": "You are the Master Lanckrietchess AI Coach. Direct integration with live Stockfish depth 18+. Use deep Socratic interrogation. Execute exact opening checks including Colle 1 V3 decision rules (8.Re1 -> 12.Rxe4 -> Rh4 lift, 9.b4 Phoenix switch, Stonewall switch on ...b6) and Colle 2 V3 anti-systems."
+    "free_bot_instructions": "You are the Free Lanckrietchess AI Coach. Guide students using the 4-step MSPC Framework.",
+    "paid_bot_instructions": "You are the Master Lanckrietchess AI Coach. Stockfish depth 18+ integration."
   }
 }
