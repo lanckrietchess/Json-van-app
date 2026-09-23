@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "title": "Lanckrietchess Dynamic Training Hub Data Engine",
+    "version": "3.1.0",
+    "last_updated": "2026-09-23",
+    "author": "Kyenzo (Lanckrietchess)",
+    "description": "Central dynamic JSON database hosted on GitHub Raw. Powers Opening Lines, Think Section, Theory Section, and AI Coaches."
+  },
+  "app_settings": {
+    "hero_title": "If you want to change the output, focus on the input.",
+    "hero_subtitle": "Master the 2100+ ELO MSPC Decision-Making System",
+    "featured_repertoire": "Colle-Koltanowski V3 System"
+  },
+  "opening_lines": [
+    {
+      "id": "colle-1-mainline-nc6",
+      "title": "Colle 1 V3: Mainline vs 7...Nc6",
+      "tier": "Free",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Nf6 3. e3 e6 4. Bd3 c5 5. c3 Nc6 6. Nbd2 Bd6 7. O-O O-O 8. dxc5 Bxc5 9. e4 Qc7 10. Qe2 Bd6 11. Re1 Ng4 12. h3 Nge5 13. Nxe5 Nxe5 14. Bc2 d4 15. f4 d3 16. Bxd3 Nxd3 17. Qxd3 Bxf4",
+      "description": "Standard 8.dxc5 transition leading to central initiative and king attack."
+    },
+    {
+      "id": "colle-1-rook-lift",
+      "title": "Colle 1 V3: Mainline vs 7...Nbd7 (Rook Lift)",
+      "tier": "Free",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Nf6 3. e3 e6 4. Bd3 c5 5. c3 Nbd7 6. Nbd2 Bd6 7. O-O O-O 8. Re1 e5 9. e4 cxd4 10. cxd4 exd4 11. e5 Nxe5 12. Rxe4!! dxe4 13. Rh4",
+      "description": "Mandatory Rook recapture 12.Rxe4! swinging directly to h4 for decisive tactical play."
+    },
+    {
+      "id": "colle-1-phoenix",
+      "title": "Colle 1 V3: The Phoenix (9.b4 Secret Weapon)",
+      "tier": "Paid",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Nf6 3. e3 e6 4. Bd3 c5 5. c3 Nc6 6. Nbd2 Bd6 7. O-O O-O 8. dxc5 Bxc5 9. b4! Bd6 10. Bb2 a6 11. a3 b5 12. a4",
+      "description": "Reversed Semi-Slav with extra tempo. Punishes Black's preparation and h6 prophylaxis."
+    },
+    {
+      "id": "colle-1-stonewall-switch",
+      "title": "Colle 1 V3: Stonewall Switch vs ...b6 / ...Bb7",
+      "tier": "Free",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Nf6 3. e3 e6 4. Bd3 c5 5. c3 b6 6. Nbd2 Bb7 7. Ne5 Nbd7 8. f4",
+      "description": "Plan A blocked? Switch to Plan B (Stonewall) with Ne5, f4, and g-pawn storm."
+    },
+    {
+      "id": "colle-1-anti-bg4",
+      "title": "Colle 1 V3: Anti-Colle vs 3...Bg4",
+      "tier": "Free",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Nf6 3. e3 Bg4 4. h3 Bh5 5. g4 Bg6 6. Ne5 Nfd7 7. Nxg6 hxg6 8. c4",
+      "description": "Directly punish early bishop walk, secure bishop pair and positional grind."
+    },
+    {
+      "id": "colle-2-baltic",
+      "title": "Colle 2 V3: Baltic Defence (2...Bf5)",
+      "tier": "Free",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Bf5 3. c4 e6 4. Qb3 Nc6 5. c5 Rb8 6. Nc3",
+      "description": "Queenside b4-b5 pawn storm punishing early active bishop development."
+    },
+    {
+      "id": "colle-2-chigorin",
+      "title": "Colle 2 V3: Chigorin Defence (2...Nc6 3.e3 Bg4)",
+      "tier": "Paid",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Nc6 3. e3 Bg4 4. c4 e5 5. Qb3! Bxf3 6. gxf3",
+      "description": "Steinitz method: grab the bishop pair and exert heavy g-file pressure."
+    },
+    {
+      "id": "colle-2-early-c5",
+      "title": "Colle 2 V3: Early Central Counter (2...c5)",
+      "tier": "Free",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 c5 3. dxc5 e6 4. e4 Bxc5 5. exd5",
+      "description": "Transpose into an advantageous Queen's Gambit Accepted structure with extra tempo."
+    },
+    {
+      "id": "colle-2-black-stonewall",
+      "title": "Colle 2 V3: Black Stonewall (3...f5)",
+      "tier": "Paid",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 e6 3. e3 f5 4. Bd3 Nf6 5. O-O Bd6 6. c4 c6 7. b3 Qe7 8. Ba3!",
+      "description": "Trade dark-squared bishops via 7.b3 and 8.Ba3! to dismantle Black's attack."
+    },
+    {
+      "id": "colle-2-reversed-london",
+      "title": "Colle 2 V3: Reversed London System (3...Bf5)",
+      "tier": "Free",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Nf6 3. e3 Bf5 4. c4 c6 5. Nc3 e6 6. Nh4 Bg6 7. Nxg6 hxg6",
+      "description": "Neutralize Black's open h-file and maintain complete central mastery."
+    },
+    {
+      "id": "colle-2-fianchetto",
+      "title": "Colle 2 V3: Fianchetto / Kings Indian (3...g6)",
+      "tier": "Free",
+      "category": "Colle-Koltanowski",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. Nf3 Nf6 3. e3 g6 4. Bd3 Bg7 5. O-O O-O 6. Nbd2",
+      "description": "STRICT RULE: Do NOT play the Stonewall! Dominate center via 4.Bd3, 5.O-O, 6.Nbd2."
+    },
+    {
+      "id": "ck-advance-dxc5",
+      "title": "Advance: 3...c5, White grabs",
+      "tier": "Free",
+      "category": "Caro-Kann",
+      "type": "Interactive",
+      "pgn": "1. e4 c6 2. d4 d5 3. e5 c5 4. dxc5",
+      "description": "Mainline Advance Caro-Kann response."
+    },
+    {
+      "id": "semislav-setup",
+      "title": "The Semi-Slav setup",
+      "tier": "Free",
+      "category": "Semi-Slav",
+      "type": "Interactive",
+      "pgn": "1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6",
+      "description": "Solid central defense for Black against 1.d4."
+    }
+  ],
+  "think_section": {
+    "title": "Ultimate Shuffle Trainer",
+    "modes": ["Openings", "Middlegames", "Endgames", "Shuffle All"],
+    "auto_advance_default": true,
+    "puzzles": [
+      {
+        "id": "puzzle_colle_rook_lift",
+        "category": "Openings",
+        "repertoire_id": "colle_1_v3",
+        "fen": "r1b2rk1/pp1n1ppp/4p3/2ppP3/3P3q/2PB1N2/PP1N1PPP/R2QR1K1 w - - 0 12",
+        "target_move": "Rxe4",
+        "continuation": ["dxe4", "Rh4"],
+        "explanation": "Mandatory Rook recapture! 12.Rxe4! allows the Rook Lift to h4 for a winning king attack."
+      },
+      {
+        "id": "puzzle_colle_phoenix_push",
+        "category": "Openings",
+        "repertoire_id": "colle_1_v3",
+        "fen": "r1bq1rk1/pp1n1ppp/2pbpn2/2pp4/3P4/2PBPN2/PP1N1PPP/R1BQ1RK1 w - - 0 9",
+        "target_move": "b4",
+        "continuation": ["Bd6", "Bb2"],
+        "explanation": "The Phoenix! 9.b4! gains queenside space and creates a reversed Semi-Slav with an extra tempo."
+      }
+    ]
+  },
+  "theory_section": {
+    "courses": [
+      {
+        "id": "blunder_bootcamp",
+        "title": "The Blunder Bootcamp (0 - 400 ELO)",
+        "tier_access": 1,
+        "description": "Break legal-move bias, build piece comfort, and eliminate hanging pieces through basic Move (M) checks."
+      },
+      {
+        "id": "anti_blunder_bootcamp",
+        "title": "Anti-Blunder Bootcamp (400 - 800 ELO)",
+        "tier_access": 1,
+        "description": "Master basic Specifics (S) and verify candidate move safety with Checks, Captures, and Attacks."
+      },
+      {
+        "id": "beyond_the_blunder",
+        "title": "Beyond the Blunder (800 - 1200 ELO)",
+        "tier_access": 2,
+        "description": "Automate board vision, build reliable opening structures, and take control with Priorities (P)."
+      },
+      {
+        "id": "force_the_blunder",
+        "title": "Force the Blunder (1200 - 1600 ELO)",
+        "tier_access": 2,
+        "description": "Extract enemy weaknesses using deep Specifics (S) and execute relentless tactical calculation."
+      }
+    ]
+  },
+  "ai_coaches": {
+    "free_bot_instructions": "You are the Free Lanckrietchess AI Coach. Guide students through Socratic questions using the 4-step MSPC Framework (Move, Specifics, Priorities, Calculation). Focus on identifying blunders and guiding them to basic candidate moves.",
+    "paid_bot_instructions": "You are the Master Lanckrietchess AI Coach. Direct integration with live Stockfish depth 18+. Use deep Socratic interrogation. Execute exact opening checks including Colle 1 V3 decision rules (8.Re1 -> 12.Rxe4 -> Rh4 lift, 9.b4 Phoenix switch, Stonewall switch on ...b6) and Colle 2 V3 anti-systems."
+  }
+}
