@@ -15,6 +15,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2045%2045%22%3E%3Crect%20width%3D%2245%22%20height%3D%2245%22%20rx%3D%2210%22%20fill%3D%22%2338bdf8%22/%3E%3Cg%20transform%3D%22translate%284.5%204%29%20scale%28.8%29%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M%2022%2C10%20C%2032.5%2C11%2038.5%2C18%2038%2C39%20L%2015%2C39%20C%2015%2C30%2025%2C32.5%2023%2C18%22%20style%3D%22fill%3A%23000000%3B%20stroke%3A%23000000%3B%22/%3E%3Cpath%20d%3D%22M%2024%2C18%20C%2024.38%2C20.91%2018.45%2C25.37%2016%2C27%20C%2013%2C29%2013.18%2C31.34%2011%2C31%20C%209.958%2C30.06%2012.41%2C27.96%2011%2C28%20C%2010%2C28%2011.19%2C29.23%2010%2C30%20C%209%2C30%205.997%2C31%206%2C26%20C%206%2C24%2012%2C14%2012%2C14%20C%2012%2C14%2013.89%2C12.1%2014%2C10.5%20C%2013.27%2C9.506%2013.5%2C8.5%2013.5%2C7.5%20C%2014.5%2C6.5%2016.5%2C10%2016.5%2C10%20L%2018.5%2C10%20C%2018.5%2C10%2019.28%2C8.008%2021%2C7%20C%2022%2C7%2022%2C10%2022%2C10%22%20style%3D%22fill%3A%23000000%3B%20stroke%3A%23000000%3B%22/%3E%3Cpath%20d%3D%22M%209.5%2025.5%20A%200.5%200.5%200%201%201%208.5%2C25.5%20A%200.5%200.5%200%201%201%209.5%2025.5%20z%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3A%23ececec%3B%22/%3E%3Cpath%20d%3D%22M%2015%2015.5%20A%200.5%201.5%200%201%201%2014%2C15.5%20A%200.5%201.5%200%201%201%2015%2015.5%20z%22%20transform%3D%22matrix%280.866%2C0.5%2C-0.5%2C0.866%2C9.693%2C-5.173%29%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3A%23ececec%3B%22/%3E%3Cpath%20d%3D%22M%2024.55%2C10.4%20L%2024.1%2C11.85%20L%2024.6%2C12%20C%2027.75%2C13%2030.25%2C14.49%2032.5%2C18.75%20C%2034.75%2C23.01%2035.75%2C29.06%2035.25%2C39%20L%2035.2%2C39.5%20L%2037.45%2C39.5%20L%2037.5%2C39%20C%2038%2C28.94%2036.62%2C22.15%2034.25%2C17.66%20C%2031.88%2C13.17%2028.46%2C11.02%2025.06%2C10.5%20L%2024.55%2C10.4%20z%20%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3Anone%3B%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="canonical" href="https://lanckrietchess-app.vercel.app/">
+<meta property="og:url" content="https://lanckrietchess-app.vercel.app/">
+<link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
@@ -207,6 +210,8 @@ ul,ol{margin:0}
 .mspc-steps .is-miss{color:var(--miss);border-color:rgba(251,113,133,.35)}
 .st-title{font-size:21px}
 .st-kicker{color:var(--accent);font-size:13px;font-weight:700;margin-bottom:4px}
+.hero-kicker{font-size:14px;margin-bottom:12px;max-width:44ch}
+.sync-list{padding-left:18px;display:grid;gap:5px;color:#cbd5e1;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
 .st-brief{color:var(--fog);margin-top:8px}
 .st-stage{margin-top:16px}
 .st-prompt{font-weight:700;font-size:16.5px;line-height:1.4}
@@ -1074,7 +1079,7 @@ a.cc-frame:hover{border-color:var(--accent)}
 <script>
 "use strict";
 /* ==========================================================================
-   LANCKRIETCHESS TRAINING HUB  v3.1
+   LANCKRIETCHESS TRAINING HUB  v3.5.1
    One self-contained page: vanilla JS + Tailwind (CDN) + chess.js 0.10.3 +
    chessboard.js 1.0.0, with Stockfish loaded on demand in a Web Worker.
    Host it on any static host, install it as a PWA, wrap it for the Play
@@ -1085,7 +1090,7 @@ a.cc-frame:hover{border-color:var(--accent)}
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '3.4.0',
+  version: '3.5.1',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -1182,9 +1187,33 @@ const CONFIG = {
     sessionDays: 14
   },
 
-  /* Published content: the file admin mode exports. Upload it next to
-     index.html and every player gets your edits on their next visit. */
-  content: { url: 'content.json', timeoutMs: 5000 },
+  /* v3.5: live data. The hub reads its database straight from GitHub (raw),
+     so an edit to that one file reaches every player without a new upload of
+     index.html. The hub tries, in this order:
+       1. GitHub raw: https://raw.githubusercontent.com/OWNER/REPO/BRANCH/PATH
+       2. the same file on this site (Vercel serves the repository as well)
+       3. the last good copy on this device (localStorage)
+       4. the built-in content in this file
+     The file may be a content.json from admin mode, a database export from
+     Data management, or the hand-written data engine format (meta,
+     app_settings, opening_lines, think_section, theory_section, ai_coaches).
+     All three are read; sections that are missing or empty are skipped, never
+     fatal. GitHub caches raw files for about five minutes. */
+  remote: {
+    owner: 'lanckrietchess',
+    repo: 'Json-van-app',
+    branch: 'main',
+    path: 'json',                        // the database file inside the repository
+    mirrors: ['json', 'content.json'],   // the same file on this site, tried when GitHub can't be reached
+    timeoutMs: 6000,
+    refreshMinutes: 10                   // look for a newer file while the hub stays open
+  },
+
+  /* v3.5: where the hub lives. Links that leave the device (unlock links,
+     exports) follow the deployment the hub is running on: production or your
+     own domain. A Vercel preview, localhost or a file on disk falls back to the
+     production address below, so a member never receives a link that expires. */
+  site: { production: 'https://lanckrietchess-app.vercel.app/' },
 
   engine: { base: 'https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/', liveDepth: 18, deeperStep: 6, lines: 3, reviewMs: 260 },
   limits: { freeCustomLines: 10 },
@@ -3169,6 +3198,7 @@ const CONTENT = {
        and {coach} fill in from CONFIG, and **double stars** make text bold.
    ========================================================================== */
 const COPY = {
+  'home.kicker': ['Line above the headline (empty hides it)', 'Home', ''],
   'home.title': ['Headline', 'Home', 'If you want to change the output, focus on the input.'],
   'home.lede': ['Intro under the headline', 'Home', 'More puzzles won’t fix the way you decide. This hub trains the decision itself: the MSPC System makes you read every move, name what the position asks for and calculate to the end, so the structural blunders behind your losses stop showing up. I’m {coach}, a certified chess coach with a {peak} peak, and this is the system I used, in the order I used it.'],
   'home.methodTitle': ['Method title', 'Home', 'The 3T Method'],
@@ -3378,6 +3408,90 @@ function fetchWithTimeout(url, init, ms) {
   const ctl = typeof AbortController === 'function' ? new AbortController() : null;
   const timer = setTimeout(() => { if (ctl) ctl.abort(); }, ms || 8000);
   return fetch(url, Object.assign({}, init, ctl ? { signal: ctl.signal } : {})).finally(() => clearTimeout(timer));
+}
+
+/* ---------- v3.5: where the hub lives ----------
+   here(): the folder the page is served from right now (production, your own
+   domain or a Vercel preview). base(): the address for links that leave this
+   device. It is this deployment when that is production or your own domain,
+   and CONFIG.site.production for a Vercel preview, localhost or a file on
+   disk, because nobody else can open those (and previews expire). */
+const SiteURL = (() => {
+  function production() {
+    try { return new URL(String((CONFIG.site && CONFIG.site.production) || '')).href; } catch (e) { return ''; }
+  }
+  const served = () => /^https?:$/.test(location.protocol) && !!location.host;
+  const isLocal = () => /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])$/.test(location.hostname) || /\.local$/i.test(location.hostname);
+  const prodHost = () => { const p = production(); return p ? new URL(p).hostname : ''; };
+  const isPreview = () => served() && /\.vercel\.app$/i.test(location.hostname) && location.hostname !== prodHost();
+  function kind() {
+    if (!served()) return 'file';
+    if (isLocal()) return 'local';
+    if (isPreview()) return 'preview';
+    return location.hostname === prodHost() ? 'production' : 'custom';
+  }
+  function here() { return served() ? location.origin + location.pathname.replace(/[^/]*$/, '') : (production() || './'); }
+  function base() { const k = kind(); return k === 'production' || k === 'custom' ? here() : (production() || here()); }
+  function share(params, hash) {
+    let u;
+    try { u = new URL(base()); } catch (e) { u = new URL(location.href); }
+    Object.keys(params || {}).forEach((k) => u.searchParams.set(k, params[k]));
+    if (hash) u.hash = hash;
+    return u.href;
+  }
+  /* The canonical link and og:url in the head follow the live address too. */
+  function tagHead() {
+    const href = base();
+    if (!/^https:\/\//.test(href)) return;
+    const put = (sel, make) => { let el = document.head.querySelector(sel); if (!el) { el = make(); document.head.appendChild(el); } return el; };
+    put('link[rel="canonical"]', () => Object.assign(document.createElement('link'), { rel: 'canonical' })).href = href;
+    put('meta[property="og:url"]', () => { const m = document.createElement('meta'); m.setAttribute('property', 'og:url'); return m; }).setAttribute('content', href);
+  }
+  return { here, base, share, kind, production, isPreview, tagHead };
+})();
+
+/* ---------- v3.5: JSON that was typed by hand ----------
+   Strict JSON first. When that fails, the parser forgives what hand-edited
+   files usually get wrong: a byte-order mark, // and block comments, trailing
+   commas and text around the object (a pasted "const data = {...};"). It
+   never guesses at quotes. Returns { data } or { error } with a line number. */
+function parseLax(text) {
+  const src = String(text == null ? '' : text).replace(/^\uFEFF/, '').trim();
+  if (!src) return { error: 'The file is empty.' };
+  let firstError = null;
+  try { return { data: JSON.parse(src) }; } catch (e) { firstError = e; }
+  let out = '', inStr = false;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i], n = src[i + 1];
+    if (inStr) {
+      out += c;
+      if (c === '\\') { out += n === undefined ? '' : n; i++; }
+      else if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') { inStr = true; out += c; continue; }
+    if (c === '/' && n === '/') { while (i < src.length && src[i] !== '\n') i++; out += '\n'; continue; }
+    if (c === '/' && n === '*') { const j = src.indexOf('*/', i + 2); i = j < 0 ? src.length : j + 1; continue; }
+    if (c === ',') {
+      let j = i + 1;
+      for (;;) {                                               // skip spaces and comments
+        if (j < src.length && /\s/.test(src[j])) j++;
+        else if (src[j] === '/' && src[j + 1] === '/') { while (j < src.length && src[j] !== '\n') j++; }
+        else if (src[j] === '/' && src[j + 1] === '*') { const k = src.indexOf('*/', j + 2); j = k < 0 ? src.length : k + 2; }
+        else break;
+      }
+      if (src[j] === '}' || src[j] === ']') continue;          // trailing comma
+    }
+    out += c;
+  }
+  const a = out.search(/[[{]/), b = Math.max(out.lastIndexOf('}'), out.lastIndexOf(']'));
+  if (a >= 0 && b > a) out = out.slice(a, b + 1);
+  try { return { data: JSON.parse(out), repaired: true }; }
+  catch (e) {
+    const msg = String((firstError && firstError.message) || ''), byLine = /line (\d+)/.exec(msg), byPos = /position (\d+)/.exec(msg);
+    const line = byLine ? +byLine[1] : byPos ? src.slice(0, +byPos[1]).split('\n').length : 0;
+    return { error: 'That file is not valid JSON' + (line ? ' (look at line ' + line + ')' : '') + '.' };
+  }
 }
 function copyText(text) {
   const fallback = () => {
@@ -4160,9 +4274,475 @@ function checkItem(name, it) {
   return '';
 }
 
-/* ---------- Site: defaults + published content.json (+ admin draft) ---------- */
+/* ---------- v3.5 Feed: read any Lanckrietchess data file ----------
+   Three shapes reach the hub:
+     - a content.json from admin mode (a "hub doc": copy, settings, lists, ...)
+     - a database export from Data management (a "backup": draft + local)
+     - the hand-written data engine file in the GitHub repository (a "feed":
+       meta, app_settings, opening_lines, think_section, theory_section,
+       ai_coaches)
+   Feed turns any of them into a hub doc that Site.cleanDoc accepts and
+   reports what it skipped and why. It is deliberately forgiving about the
+   shape: a missing or empty section is simply not there, arrays may sit
+   inside wrapper objects ({ items: [...] }), tiers may be written as "Free",
+   "Paid" or a number, sides as "white" or "zwart". It is strict about chess:
+   every move and FEN is still checked with chess.js, because a broken line
+   must never reach a player.
+   A feed updates what it names. Lists it mentions become the built-in items
+   plus the feed's items (same id: the feed's fields win, except that a
+   shorter line never cuts a longer verified one). Member keys, gates and
+   shared folders are not part of the feed format, so they are carried over
+   from the previous file; otherwise every member would be signed out. */
+const Feed = (() => {
+  const HUB = 'lanckrietchess-hub', BACKUP = 'lanckrietchess-hub-backup';
+  const HUB_KEYS = ['copy', 'settings', 'lists', 'gates', 'bots', 'keys', 'folders'];
+  const FEED_KEYS = ['opening_lines', 'openings', 'think_section', 'puzzles', 'theory_section', 'courses', 'ai_coaches', 'app_settings', 'groups'];
+  const WRAP = ['items', 'list', 'entries', 'data', 'values', 'rows', 'records'];
+  const COURSE_TRACKS = ['middlegame', 'antiblunder', 'endgame'];
+  const BOT_ALIAS = {
+    coachFree: ['coachFree', 'free', 'free_bot', 'free_bot_instructions', 'free_coach', 'free_coach_instructions'],
+    coachPaid: ['coachPaid', 'paid', 'pro', 'paid_bot', 'paid_bot_instructions', 'pro_bot_instructions', 'pro_coach', 'paid_coach_instructions'],
+    sales: ['sales', 'sales_bot', 'sales_bot_instructions', 'sales_assistant', 'sales_instructions']
+  };
+  const COPY_ALIAS = {
+    hero_title: 'home.title', headline: 'home.title', hero_subtitle: 'home.kicker', tagline: 'home.kicker',
+    hero_lede: 'home.lede', hero_text: 'home.lede', hero_intro: 'home.lede', founder_text: 'home.founder'
+  };
+  const isObj = (x) => !!x && typeof x === 'object' && !Array.isArray(x);
+  const has = (x, k) => isObj(x) && x[k] !== undefined && x[k] !== null;
+  function str(x, n) {
+    if (Array.isArray(x)) x = x.filter((v) => typeof v === 'string').join('\n');
+    return (typeof x === 'string' ? x : typeof x === 'number' && Number.isFinite(x) ? String(x) : '').trim().slice(0, n || 4000);
+  }
+  /* An array, or the first array inside a wrapper object ({ items: [...] }). */
+  function arr(x, keys) {
+    if (Array.isArray(x)) return x;
+    if (!isObj(x)) return null;
+    for (const k of (keys || []).concat(WRAP)) if (Array.isArray(x[k])) return x[k];
+    return null;
+  }
+  function pick(o, keys) {
+    if (!isObj(o)) return undefined;
+    for (const k of keys) { const v = o[k]; if (v !== undefined && v !== null && v !== '') return v; }
+    return undefined;
+  }
+  /* "Free", "Paid", "Skool", 1, 2, 3 ... -> free | community | vault ('' when unknown) */
+  function lockOf(v) {
+    if (v === undefined || v === null || v === '' || typeof v === 'boolean') return '';
+    const s = String(v).toLowerCase().trim();
+    if (/^\d+$/.test(s)) return +s <= 1 ? 'free' : 'vault';            // tier_access: 1 free, 2 and 3 paid
+    if (hasOwn(LOCK_RANK, s)) return s;
+    if (/^(gratis|open|public|tier ?1|t1)$/.test(s)) return 'free';
+    if (/(community|skool|member)/.test(s)) return 'community';
+    if (/(paid|premium|pro|accelerator|mentor|locked|betaald|tier ?[23]|t[23])/.test(s)) return 'vault';
+    return '';
+  }
+  function sideWord(v) {
+    const s = String(v == null ? '' : v).toLowerCase().trim();
+    if (/^(w|white|wit|blanc|weiss|weiß)$/.test(s)) return 'w';
+    if (/^(b|black|zwart|noir|schwarz)$/.test(s)) return 'b';
+    return '';
+  }
+  function hash(s) { let h = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }
+  function idOf(v, fallback) {
+    const s = str(v, 80).replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+    return s.length >= 2 ? s : fallback;
+  }
+  const human = (id) => String(id).replace(/^(puzzle|pz|feed)[_-]+/i, '').replace(/[_-]+/g, ' ').trim().replace(/^\w/, (c) => c.toUpperCase()).slice(0, 90);
+  const snake = (path) => path.replace(/\./g, '_').replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+  function copyKey(k) {
+    if (hasOwn(COPY, k)) return k;
+    if (COPY_ALIAS[k]) return COPY_ALIAS[k];
+    const i = k.indexOf('_');
+    if (i > 0) { const d = k.slice(0, i) + '.' + k.slice(i + 1).replace(/_([a-z])/g, (m, c) => c.toUpperCase()); if (hasOwn(COPY, d)) return d; }
+    return '';
+  }
+
+  /* Moves in any notation -> SAN. "1. d4 d5", "1.d4 d5", ["d4", "d5"], move
+     numbers, !, ?, $1, comments, results and variations are all fine. Returns
+     { sans, bad }: bad names the first move that is not legal (the line stops
+     there) or is empty when the whole line was played. */
+  function sans(moves, fen) {
+    let text = Array.isArray(moves) ? moves.map((m) => (m == null ? '' : String(m))).join(' ') : String(moves == null ? '' : moves);
+    text = text.replace(/\{[^}]*\}/g, ' ').replace(/;[^\n]*/g, ' ');
+    while (/\([^()]*\)/.test(text)) text = text.replace(/\([^()]*\)/g, ' ');
+    const toks = pgnTokens(text).map((t) => t.replace(/[!?]+$/, '').replace(/^0-0-0([+#]?)$/, 'O-O-O$1').replace(/^0-0([+#]?)$/, 'O-O$1'))
+      .filter((t) => t && !/^\$\d+$/.test(t) && !/^\.+$/.test(t));
+    const g = new Chess();
+    if (fen && !g.load(fen)) return { sans: [], bad: 'the start position (FEN)' };
+    const out = [];
+    for (const t of toks) {
+      const before = g.fen(), mv = g.move(t, { sloppy: true });
+      if (!mv) return { sans: out, bad: moveLabel(fullmove(before), sideOf(before), t) };
+      out.push(mv.san);
+    }
+    return { sans: out, bad: '' };
+  }
+  /* Keep only annotations whose move is still in the line. */
+  function pruneAnn(ann, pgn, fen) {
+    if (!isObj(ann)) return undefined;
+    const keys = {}, out = {};
+    buildPlies(fen || START_FEN, pgnTokens(pgn)).forEach((p) => { keys[p.key] = 1; });
+    Object.keys(ann).forEach((k) => { if (keys[k]) out[k] = ann[k]; });
+    return Object.keys(out).length ? out : undefined;
+  }
+  function tally(rep, section, what) {
+    const s = rep.sections[section] || (rep.sections[section] = { added: 0, updated: 0, skipped: 0 });
+    s[what]++;
+    if (what === 'added') rep.added++; else if (what === 'updated') rep.updated++;
+  }
+  /* The list an update lands on: the current draft's list when a file is
+     imported in admin mode (so your own edits stay), otherwise the built-in
+     items. Never an empty list when there is something to start from. */
+  let seed = null;
+  function listBase(doc, n) {
+    if (Array.isArray(doc.lists[n])) return doc.lists[n];
+    const own = seed && isObj(seed.lists) && Array.isArray(seed.lists[n]) && seed.lists[n].length ? seed.lists[n] : null;
+    const d = Site.defaults();
+    return (doc.lists[n] = clone(own || getPath(d ? d.content : CONTENT, n)) || []);
+  }
+  /* Add or update one item in a list, then check it like every other item.
+     A broken update leaves the existing item alone. */
+  function put(doc, n, item, rep, section) {
+    const list = listBase(doc, n), i = list.findIndex((x) => x && x.id === item.id), old = i >= 0 ? list[i] : null;
+    let next = item;
+    if (old) {
+      next = Object.assign({}, old);
+      Object.keys(item).forEach((k) => { if (item[k] !== undefined && item[k] !== '') next[k] = item[k]; });
+      if (old.pgn && item.pgn && (n === 'openings' || n === 'spotlights')) {
+        const a = pgnTokens(old.pgn).map(cleanSan).join(' '), b = pgnTokens(item.pgn).map(cleanSan).join(' ');
+        if (a === b || a.indexOf(b + ' ') === 0) next.pgn = old.pgn;          // a shorter feed line never cuts a longer verified line
+        else if (item.subtitle === undefined) delete next.subtitle;            // the old subtitle described the old moves
+        const ann = pruneAnn(Object.assign({}, old.ann || {}, item.ann || {}), next.pgn);
+        if (ann) next.ann = ann; else delete next.ann;
+      }
+    }
+    const err = checkItem(n, next);
+    if (err) {
+      rep.skipped.push(section + ' “' + item.id + '”: ' + err + (old ? ' The version that was already there stays.' : ''));
+      tally(rep, section, 'skipped');
+      return false;
+    }
+    if (old) { list[i] = next; tally(rep, section, 'updated'); } else { list.push(next); tally(rep, section, 'added'); }
+    return true;
+  }
+
+  function opening(o, sideFor) {
+    if (typeof o === 'string') o = { pgn: o };
+    if (!isObj(o)) return { error: 'is not readable' };
+    const title = str(pick(o, ['title', 'name', 'label']), 90);
+    const id = idOf(pick(o, ['id', 'slug', 'key']), title ? idOf(title, 'line-' + hash(title)) : '');
+    if (!id) return { error: 'needs an id or a title' };
+    const start = str(pick(o, ['fen', 'start_fen', 'startFen']), 120);
+    if (start && start.split(' ')[0] !== START_FEN.split(' ')[0]) return { id, error: 'starts from a custom position; opening lines start from the initial position (add it as an MSPC position instead)' };
+    const r = sans(pick(o, ['pgn', 'moves', 'line', 'san', 'movetext']));
+    if (r.bad) return { id, error: 'move ' + r.bad + ' is not legal' + (r.sans.length ? ' after ' + lineText(r.sans, START_FEN).split(' ').slice(-2).join(' ') : '') };
+    if (!r.sans.length) return { id, error: 'has no moves' };
+    const group = str(pick(o, ['group', 'category', 'repertoire', 'opening', 'course', 'section']), 60) || 'Imported lines';
+    const side = sideWord(pick(o, ['side', 'color', 'colour', 'play_as', 'playAs', 'player'])) || sideFor(group) || 'w';
+    const item = { id, group, side, title: title || lineText(r.sans, START_FEN, 6), pgn: lineText(r.sans, START_FEN) };
+    const subtitle = str(o.subtitle, 120), idea = str(pick(o, ['idea', 'description', 'summary', 'explanation', 'note']), 1500);
+    const lock = lockOf(pick(o, ['lock', 'tier', 'access', 'tier_access', 'tierAccess'])), level = str(pick(o, ['level', 'elo', 'rating']), 20);
+    const mode = str(pick(o, ['mode', 'type']), 30);
+    if (subtitle) item.subtitle = subtitle;
+    if (idea) item.idea = idea;
+    if (lock) item.lock = lock;
+    if (level) item.level = level;
+    if (/static|silent/i.test(mode)) item.mode = 'static';
+    if (isObj(o.ann)) { const ann = pruneAnn(o.ann, item.pgn); if (ann) item.ann = ann; }
+    return { item };
+  }
+
+  /* A puzzle (fen + target move + continuation) becomes an MSPC position with
+     one calculation stage. A puzzle that already has hub-style stages is used
+     as it is. */
+  function puzzle(p) {
+    if (!isObj(p)) return { error: 'is not readable' };
+    const fen = str(pick(p, ['fen', 'FEN', 'position']), 120), givenId = pick(p, ['id', 'slug', 'key']);
+    if (!fenOk(fen)) return { id: str(givenId, 60), error: 'the FEN is not a legal position' };
+    const side = sideOf(fen), lock = lockOf(pick(p, ['lock', 'tier', 'access', 'tier_access', 'tierAccess'])) || 'free';
+    const base = { title: str(p.title, 90), tag: str(pick(p, ['tag', 'category', 'opening', 'theme']), 40) || 'Puzzle', lock, fen, orientation: sideWord(p.orientation) || side };
+    const level = str(pick(p, ['level', 'elo', 'rating']), 20), track = str(p.track, 20);
+    if (level) base.level = level;
+    if (track === 'starter' || track === 'repertoire') base.track = track;
+    if (Array.isArray(p.stages) && p.stages.length) {
+      const id = idOf(givenId, 'pz-' + hash(fen));
+      return { item: Object.assign(clone(p), base, { id, title: base.title || human(id), brief: str(p.brief, 600) || colorName(side) + ' to move.' }) };
+    }
+    const first = pick(p, ['target_move', 'targetMove', 'solution', 'best', 'best_move', 'bestMove', 'move', 'answer']);
+    const cont = pick(p, ['continuation', 'line', 'replies', 'moves', 'pv']);
+    const r = sans([].concat(Array.isArray(first) ? first : [first == null ? '' : first], Array.isArray(cont) ? cont : [cont == null ? '' : cont]), fen);
+    const id = idOf(givenId, 'pz-' + hash(fen + ' ' + r.sans.join(' ')));
+    if (r.bad) return { id, error: 'move ' + r.bad + ' is not legal in that position' + (r.sans.length ? ' (after ' + r.sans.join(' ') + ')' : '') };
+    if (!r.sans.length) return { id, error: 'has no solution move' };
+    const explain = str(pick(p, ['explanation', 'explain', 'why', 'note', 'description']), 1200);
+    const stage = { k: 'C', type: 'line', prompt: 'Play the whole line. The replies come automatically.', pgn: lineText(r.sans, fen) };
+    if (explain) stage.ann = { [moveLabel(fullmove(fen), side, cleanSan(r.sans[0]))]: { note: explain } };
+    return { item: Object.assign(base, { id, title: base.title || human(id), brief: str(pick(p, ['brief', 'prompt', 'question']), 600) || colorName(side) + ' to move. Find the strongest continuation.', stages: [stage] }) };
+  }
+
+  function trackOf(c) {
+    const t = str(pick(c, ['track', 'list', 'section', 'bootcamp']), 30).toLowerCase().replace(/[^a-z]/g, '');
+    if (COURSE_TRACKS.indexOf(t) >= 0) return t;
+    const title = str(pick(c, ['title', 'name']), 90);
+    return /endgame/i.test(title) ? 'endgame' : /anti.?blunder/i.test(title) ? 'antiblunder' : 'middlegame';
+  }
+  function lessonItem(l, parent) {
+    const x = clone(l), id = idOf(pick(l, ['id', 'slug']), 'lesson-' + hash(JSON.stringify(l)));
+    x.id = id;
+    if (!x.title) x.title = human(id);
+    const lock = lockOf(pick(l, ['lock', 'tier', 'access', 'tier_access'])) || lockOf(pick(parent || {}, ['lock', 'tier', 'access', 'tier_access']));
+    delete x.tier; delete x.tier_access;
+    if (lock) x.lock = lock; else delete x.lock;
+    return x;
+  }
+  /* Course cards without exercises go into the course index (the curriculum
+     the coach points to), unless a module with that name is already there.
+     Courses with hub-style lessons are added to the matching bootcamp. */
+  function courses(list, doc, rep) {
+    let text = typeof doc.settings.curriculum === 'string' && doc.settings.curriculum.trim() ? doc.settings.curriculum : DEFAULT_CURRICULUM;
+    const norm = (t) => String(t).toLowerCase().replace(/\[[^\]]*\]|\([^)]*\)|\|.*$/g, ' ').replace(/^\s*#+\s*/, '').replace(/^the\s+/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+    const have = {};
+    text.split('\n').forEach((l) => { if (/^#\s/.test(l)) have[norm(l)] = l.replace(/^#\s*/, '').replace(/\s*[[|].*$/, '').trim(); });
+    let added = 0;
+    list.forEach((c, i) => {
+      if (!isObj(c)) { rep.skipped.push('Course #' + (i + 1) + ' is not readable.'); return; }
+      const title = str(pick(c, ['title', 'name']), 90);
+      const selfLesson = !arr(c.lessons) && Array.isArray(c.steps), lessons = selfLesson ? [c] : arr(c.lessons);
+      if (lessons) lessons.forEach((l) => { if (isObj(l)) put(doc, 'courses.' + trackOf(c), lessonItem(l, c), rep, 'Bootcamp lessons'); });
+      if (!title || selfLesson) return;
+      if (have[norm(title)]) { rep.notes.push('Course “' + title + '” is already in the course index as “' + have[norm(title)] + '”.'); return; }
+      const tier = lockOf(pick(c, ['tier', 'lock', 'access', 'tier_access', 'tierAccess'])) || 'free';
+      const tags = Array.isArray(c.tags) ? c.tags.map((t) => str(t, 24)).filter(Boolean).join(', ') : str(c.tags, 120);
+      const desc = str(pick(c, ['description', 'summary', 'idea']), 300).replace(/\s+/g, ' ').replace(/\|/g, '/');
+      const safe = title.replace(/[[\]|#\n]/g, ' ').replace(/\s+/g, ' ').trim();
+      text += '\n\n# ' + safe + ' [' + tier + ']' + (tags ? ' | ' + tags.replace(/[[\]#\n]/g, ' ') : '') + (desc ? '\n- ' + safe + ' | ' + desc : '');
+      have[norm(title)] = title; added++;
+      tally(rep, 'Course index', 'added');
+    });
+    if (added) doc.settings.curriculum = text.slice(0, 20000);
+  }
+
+  /* A content.json or backup draft, forgiving about wrappers and tier words. */
+  function laxHub(src, rep, dropEmpty) {
+    const d = Object.assign({}, src, { app: HUB }), lists = isObj(src.lists) ? src.lists : {};
+    d.lists = {};
+    Object.keys(Site.LISTS).forEach((n) => {
+      const v = arr(lists[n] !== undefined ? lists[n] : getPath(lists, n));
+      if (!v) return;
+      /* v3.5.1: an empty list in an imported or hand-written file is read as
+         "not in this file", so it can never drop a list to zero. A content.json
+         published from admin mode keeps an empty list you emptied on purpose. */
+      if (dropEmpty && !v.some(isObj)) { rep.notes.push(Site.LISTS[n][0] + ': the list in the file is empty, so the current items stay.'); return; }
+      d.lists[n] = v.filter(isObj).map((it) => {
+        const x = Object.assign({}, it);
+        if (x.lock !== undefined && !hasOwn(LOCK_RANK, x.lock)) { const l = lockOf(x.lock); if (l) x.lock = l; else delete x.lock; }
+        if (x.lock === undefined && x.tier !== undefined) { const l = lockOf(x.tier); if (l) x.lock = l; }
+        if (x.mode && x.mode !== 'interactive' && x.mode !== 'static') x.mode = /static|silent/i.test(x.mode) ? 'static' : 'interactive';
+        const err = checkItem(n, x);
+        if (err) rep.skipped.push(Site.LISTS[n][0] + ' “' + (x.id || x.title || x.name || '?') + '”: ' + err + ' It stays hidden until it is fixed.');
+        return x;
+      });
+    });
+    if (!Array.isArray(src.keys) && src.keys !== undefined) d.keys = arr(src.keys) || [];
+    if (isObj(src.copy)) { d.copy = {}; Object.keys(src.copy).forEach((k) => { const ck = copyKey(k); if (ck) d.copy[ck] = src.copy[k]; }); }
+    return d;
+  }
+
+  function applyFeed(doc, src, rep) {
+    const groups = () => listBase(doc, 'groups');
+    const sideFor = (name) => { const g = groups().filter((x) => x && String(x.name).toLowerCase() === String(name).toLowerCase())[0]; return g ? g.side : ''; };
+    const addGroup = (name, side, intro) => {
+      const list = groups(), g = list.filter((x) => x && String(x.name).toLowerCase() === name.toLowerCase())[0];
+      if (g) { if (side) g.side = side; if (intro) g.intro = intro; return; }
+      list.push({ name, side: side || 'w', intro: intro || '' });
+      rep.notes.push('New repertoire tab “' + name + '” (' + colorName(side || 'w') + ').');
+    };
+    const theory = isObj(src.theory_section) ? src.theory_section : {}, think = isObj(src.think_section) ? src.think_section : {};
+
+    (arr(src.groups) || arr(theory.groups) || []).forEach((g) => {
+      if (!isObj(g)) return;
+      const name = str(pick(g, ['name', 'title']), 60);
+      if (name) addGroup(name, sideWord(pick(g, ['side', 'color', 'colour'])), str(pick(g, ['intro', 'description']), 600));
+    });
+    (arr(pick(src, ['opening_lines', 'openings'])) || arr(pick(theory, ['opening_lines', 'openings'])) || []).forEach((o, i) => {
+      const r = opening(o, sideFor);
+      if (r.error) { rep.skipped.push('Opening line ' + (r.id ? '“' + r.id + '”' : '#' + (i + 1)) + ': ' + r.error + '.'); tally(rep, 'Opening lines', 'skipped'); return; }
+      if (put(doc, 'openings', r.item, rep, 'Opening lines') && !sideFor(r.item.group)) addGroup(r.item.group, r.item.side, '');
+    });
+    (arr(pick(think, ['puzzles', 'positions'])) || arr(pick(src, ['puzzles', 'positions'])) || []).forEach((p, i) => {
+      const r = puzzle(p);
+      if (r.error) { rep.skipped.push('Puzzle ' + (r.id ? '“' + r.id + '”' : '#' + (i + 1)) + ': ' + r.error + '.'); tally(rep, 'MSPC positions', 'skipped'); return; }
+      put(doc, 'think', r.item, rep, 'MSPC positions');
+    });
+    const clist = arr(theory.courses) || arr(src.courses);
+    if (clist) courses(clist, doc, rep);
+    else if (isObj(src.courses)) COURSE_TRACKS.forEach((t) => (arr(src.courses[t]) || []).forEach((l) => { if (isObj(l)) put(doc, 'courses.' + t, lessonItem(l), rep, 'Bootcamp lessons'); }));
+
+    const app = isObj(src.app_settings) ? src.app_settings : {}, used = {};
+    Object.keys(app).forEach((k) => { const ck = copyKey(k); if (ck && typeof app[k] === 'string') { doc.copy[ck] = app[k].slice(0, 4000); used[k] = 1; tally(rep, 'Texts', 'updated'); } });
+    if (isObj(app.copy)) { used.copy = 1; Object.keys(app.copy).forEach((k) => { const ck = copyKey(k); if (ck && typeof app.copy[k] === 'string') { doc.copy[ck] = app.copy[k].slice(0, 4000); tally(rep, 'Texts', 'updated'); } }); }
+    if (typeof think.title === 'string' && think.title.trim()) { doc.copy['think.shuffleTitle'] = think.title.trim().slice(0, 200); tally(rep, 'Texts', 'updated'); }
+    const setSrc = [app, isObj(src.settings) ? src.settings : null];
+    Site.SETTINGS.forEach((s) => {
+      for (const o of setSrc) {
+        if (!o) continue;
+        let v = getPath(o, s[0]), from = s[0];
+        if (v === undefined && o[snake(s[0])] !== undefined) { v = o[snake(s[0])]; from = snake(s[0]); }
+        if (v === undefined) continue;
+        setPath(doc.settings, s[0], v);
+        if (o === app) used[from.split('.')[0]] = 1;
+        tally(rep, 'Numbers and links', 'updated');
+        break;
+      }
+    });
+    Object.keys(app).forEach((k) => { if (!used[k]) rep.unused.push('app_settings.' + k); });
+
+    const ai = isObj(src.ai_coaches) ? src.ai_coaches : null;
+    if (ai) {
+      const taken = {};
+      Object.keys(BOT_ALIAS).forEach((b) => {
+        const key = BOT_ALIAS[b].filter((k) => ai[k] !== undefined && ai[k] !== null && ai[k] !== '')[0];
+        if (!key) return;
+        taken[key] = 1;
+        const v = str(ai[key], 12000);
+        if (v.length < 20) { rep.skipped.push('AI instructions “' + key + '” are too short to use; the current instructions stay.'); return; }
+        doc.bots[b] = v; tally(rep, 'AI instructions', 'updated');
+      });
+      Object.keys(ai).forEach((k) => { if (!taken[k]) rep.unused.push('ai_coaches.' + k); });
+    }
+    Object.keys(think).forEach((k) => { if (['puzzles', 'positions', 'title'].indexOf(k) < 0) rep.unused.push('think_section.' + k); });
+    Object.keys(theory).forEach((k) => { if (['courses', 'opening_lines', 'openings', 'groups'].indexOf(k) < 0) rep.unused.push('theory_section.' + k); });
+  }
+
+  function detect(data) {
+    if (Array.isArray(data)) return 'list';
+    if (!isObj(data)) return 'unknown';
+    if (data.app === BACKUP || (isObj(data.draft) && (isObj(data.local) || isObj(data.keybook)))) return 'backup';
+    if (data.app === HUB) return 'doc';
+    if (FEED_KEYS.some((k) => has(data, k))) return 'feed';
+    if (HUB_KEYS.some((k) => has(data, k))) return 'doc';
+    if (isObj(data.local)) return 'local';
+    return 'unknown';
+  }
+  /* Any file -> { doc, report }. doc is null when the file holds no hub
+     content at all (a file with only player data, for example). */
+  function toDoc(data, opts) {
+    const rep = { format: detect(data), added: 0, updated: 0, sections: {}, skipped: [], notes: [], unused: [], warnings: [] };
+    let src = data;
+    if (rep.format === 'backup') {
+      if (isObj(data.keybook) && Object.keys(data.keybook).length) rep.warnings.push('This is a private database export with member keys in plain text. Keep it off any public repository.');
+      src = isObj(data.draft) ? data.draft : isObj(data.published) ? data.published : {};
+    }
+    if (!isObj(src)) return { doc: null, report: rep };
+    const hubish = src.app === HUB || HUB_KEYS.some((k) => has(src, k));
+    const feedish = FEED_KEYS.some((k) => has(src, k));
+    if (!hubish && !feedish) return { doc: null, report: rep };
+    const imported = !!(opts && opts.imported);
+    let doc = (hubish && Site.cleanDoc(laxHub(src, rep, imported || src.app !== HUB))) || Site.emptyDoc();
+    const prev = opts && isObj(opts.prev) ? opts.prev : null;
+    if (prev) {
+      if (!has(src, 'keys') && Array.isArray(prev.keys)) doc.keys = clone(prev.keys);
+      if (!has(src, 'gates') && isObj(prev.gates)) doc.gates = clone(prev.gates);
+      if (!has(src, 'folders') && Array.isArray(prev.folders)) doc.folders = clone(prev.folders);
+    }
+    seed = imported && prev ? prev : null;
+    try { if (feedish) applyFeed(doc, src, rep); } finally { seed = null; }
+    const upd = str(src.updated, 40) || str(getPath(src, 'meta.last_updated'), 40) || str(getPath(src, 'meta.updated'), 40) || str(data.exported, 40);
+    doc.updated = upd;
+    doc.app = HUB;
+    return { doc: Site.cleanDoc(doc) || doc, report: rep };
+  }
+
+  /* ----- player data: custom repertoires, progress, attempts, the vault ----- */
+  function repEntry(r, i) {
+    if (typeof r === 'string' || Array.isArray(r)) r = { lines: [r] };
+    if (!isObj(r)) return { error: 'Repertoire #' + (i + 1) + ' is not readable.' };
+    const name = cleanName(str(pick(r, ['name', 'title', 'label']), 60));
+    const side = sideWord(pick(r, ['side', 'color', 'colour', 'play_as', 'playAs'])) || (/(black|zwart|caro|slav|sicilian|french|scandinavian|defen[cs]e)/i.test(name) ? 'b' : 'w');
+    const raw = [];
+    const add = (x) => {
+      if (x == null || x === '') return;
+      if (typeof x === 'string') raw.push(x);
+      else if (Array.isArray(x)) { if (x.length && x.every((m) => typeof m === 'string' && !/\s/.test(m.trim()))) raw.push(x); else x.forEach(add); }
+      else if (isObj(x)) add(pick(x, ['moves', 'pgn', 'line', 'san', 'sans', 'lines']));
+    };
+    ['lines', 'pgn', 'moves', 'line', 'items'].forEach((k) => add(r[k]));
+    const lines = [], seen = {};
+    let cut = 0;
+    raw.forEach((x) => {
+      let found = [];
+      if (typeof x === 'string') {
+        const p = PGN.parse(x);
+        if (p.startFen !== START_FEN) { cut++; return; }
+        if (p.errors.length) cut++;
+        found = p.lines;
+      } else { const s = sans(x); if (s.bad) cut++; found = [s.sans]; }
+      found.forEach((l) => { const k = l.join(' '); if (l.length && !seen[k]) { seen[k] = 1; lines.push(l.slice(0, 400)); } });
+    });
+    if (!lines.length) return { error: 'Repertoire “' + (name || '#' + (i + 1)) + '” has no readable moves.' };
+    const id = /^[\w-]{1,40}$/.test(String(r.id || '')) ? String(r.id) : 'r' + hash(name + '|' + side + '|' + lines[0].join(' '));
+    const created = /^\d{4}-\d{2}-\d{2}/.test(String(r.created || '')) ? String(r.created).slice(0, 10) : dayKey(new Date());
+    return { rep: { id, name: name || (side === 'w' ? 'Imported White repertoire' : 'Imported Black repertoire'), side, created, lines }, cut };
+  }
+  /* Any shape -> { list, skipped, state }. state: absent (no section), empty
+     (a section with nothing in it), ok, or unreadable (entries, none usable). */
+  function reps(src) {
+    if (src === undefined || src === null) return { list: [], skipped: [], state: 'absent', cut: 0 };
+    let items = [];
+    if (typeof src === 'string') items = src.trim() ? [src] : [];
+    else if (Array.isArray(src)) items = src.length && src.every((x) => Array.isArray(x) || typeof x === 'string') ? [{ lines: src }] : src;
+    else if (isObj(src)) {
+      const inner = arr(src, ['reps', 'repertoires', 'repertoire']);
+      if (inner) items = inner;
+      else if (has(src, 'lines') || has(src, 'pgn') || has(src, 'moves')) items = [src];
+      else items = Object.keys(src).filter((k) => (isObj(src[k]) && (has(src[k], 'lines') || has(src[k], 'pgn') || has(src[k], 'moves'))) || Array.isArray(src[k]))
+        .map((k) => (isObj(src[k]) ? Object.assign({ id: k }, src[k]) : { id: k, name: k, lines: src[k] }));
+    }
+    const list = [], skipped = [];
+    let cut = 0;
+    items.forEach((r, i) => { const x = repEntry(r, i); if (x.error) skipped.push(x.error); else { list.push(x.rep); cut += x.cut; } });
+    return { list, skipped, cut, state: !items.length ? 'empty' : list.length ? 'ok' : 'unreadable' };
+  }
+  function local(data) {
+    const src = isObj(data) ? data : Array.isArray(data) ? { repertoire: data } : {}, L = isObj(src.local) ? src.local : isObj(src.device) ? src.device : {};
+    const get = (keys) => {
+      for (const o of [L, src]) for (const k of keys) if (o[k] !== undefined && o[k] !== null) return o[k];
+      return undefined;
+    };
+    const r = reps(get(['repertoire', 'repertoires', 'reps', 'customRepertoires', 'custom_repertoires', 'myRepertoire', 'my_repertoire']));
+    let state = get(['state']);
+    if (!isObj(state)) { const prog = get(['progress']); state = isObj(prog) ? { v: 2, progress: prog } : null; }
+    const vault = get(['vault']), all = arr(get(['attempts'])), attempts = all && all.length ? all : null;
+    const fc = isObj(src.counts) ? src.counts : isObj(L.counts) ? L.counts : null;
+    return {
+      state, repertoire: r.list, repSkipped: r.skipped, repState: r.state, repCut: r.cut,
+      attempts: attempts || undefined,
+      vault: isObj(vault) ? vault : Array.isArray(vault) ? { items: vault } : undefined,
+      avatar: isObj(L.avatar) ? L.avatar : undefined,
+      fileReps: fc && Number.isFinite(+fc.reps) ? +fc.reps : null
+    };
+  }
+
+  function rawUrl() {
+    const r = CONFIG.remote || {};
+    if (!r.owner || !r.repo || !r.path) return '';
+    return 'https://raw.githubusercontent.com/' + encodeURIComponent(r.owner) + '/' + encodeURIComponent(r.repo) + '/' + String(r.branch || 'main').split('/').map(encodeURIComponent).join('/') + '/' + String(r.path).replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+  }
+  function pageUrl() {
+    const r = CONFIG.remote || {};
+    if (!r.owner || !r.repo) return '';
+    return 'https://github.com/' + encodeURIComponent(r.owner) + '/' + encodeURIComponent(r.repo) + '/blob/' + encodeURIComponent(r.branch || 'main') + '/' + String(r.path || '').replace(/^\/+/, '');
+  }
+  return { toDoc, local, reps, detect, sans, lockOf, rawUrl, pageUrl };
+})();
+
+/* ---------- Site: defaults + published data (+ admin draft) ----------
+   v3.5: the published data comes from CONFIG.remote (GitHub raw), with the
+   same file on this site as a mirror and the last good copy on this device
+   as the fallback. See Feed above for the formats it reads. */
 const Site = (() => {
-  const LS_PUB = 'lc-hub-published';
+  const LS_PUB = 'lc-hub-published', LS_SYNC = 'lc-hub-sync', HOLD_MS = 10 * 60000;
   const LISTS = {
     think: ['MSPC positions', 'Think'],
     clinic: ['Blunder Clinic cases', 'Think'],
@@ -4192,7 +4772,7 @@ const Site = (() => {
     ['leaderboard.weights.accuracy', 'Leaderboard weight: accuracy (default 0.6)', 'num'], ['leaderboard.weights.speed', 'Leaderboard weight: speed (default 0.25)', 'num'],
     ['leaderboard.weights.gain', 'Leaderboard weight: rating gain (default 0.15)', 'num']
   ];
-  let defaults = null, published = null, keys = [], known = false, inflight = null;
+  let defaults = null, published = null, keys = [], known = false, inflight = null, status = {}, adoptedAt = 0, watching = false;
   const emptyDoc = () => ({ app: 'lanckrietchess-hub', schema: 1, updated: '', copy: {}, settings: {}, lists: {}, gates: {}, bots: {}, keys: [], folders: [] });
   function cleanSetting(v, type) {
     if (type === 'outline') return typeof v === 'string' ? v.slice(0, 20000) : undefined;
@@ -4248,31 +4828,103 @@ const Site = (() => {
     defaults = { content: clone(CONTENT), config: clone(CONFIG) };
     const cached = cleanDoc(Store.get(LS_PUB, null));
     if (cached) { published = cached; known = true; }
+    const st = Store.get(LS_SYNC, null);
+    status = st && typeof st === 'object' ? st : {};
     apply();
   }
-  /* Network first, cached copy when offline. A missing file (404) means "built-in content only". */
-  function fetchPublished() {
+  /* Where to look, in order: GitHub raw, then the same file on this site. */
+  function sources() {
+    const r = CONFIG.remote || {}, out = [], seen = {};
+    const add = (kind, label, url) => { if (url && !seen[url]) { seen[url] = 1; out.push({ kind, label, url }); } };
+    add('github', 'GitHub', Feed.rawUrl());
+    if (/^https?:$/.test(location.protocol)) {
+      (Array.isArray(r.mirrors) ? r.mirrors : []).forEach((m) => {
+        if (typeof m !== 'string' || !m.trim()) return;
+        try { add('site', 'this site (' + m.trim() + ')', new URL(m.trim(), SiteURL.here()).href); } catch (e) { /* not a usable path */ }
+      });
+    }
+    return out;
+  }
+  function saveStatus(s) {
+    const cap = (a, n) => (Array.isArray(a) ? a.slice(0, n) : []), r = s.report;
+    status = {
+      source: s.source, label: s.label || '', url: s.url || '', ok: !!s.ok, at: s.at || 0, checked: Date.now(), tried: cap(s.tried, 6),
+      report: r ? { format: r.format || '', added: r.added || 0, updated: r.updated || 0, sections: r.sections || {}, skipped: cap(r.skipped, 40), notes: cap(r.notes, 20), unused: cap(r.unused, 30), warnings: cap(r.warnings, 5) } : null
+    };
+    Store.set(LS_SYNC, status);
+  }
+  /* GitHub first, then this site, then the copy on this device, then the
+     built-in content. A source that fails (offline, a 404, a broken file)
+     hands over to the next one: nothing is wiped, nothing crashes, and the
+     page never waits for it. */
+  function fetchPublished(force) {
+    if (inflight && !force) return inflight;
     const run = (async () => {
-      const url = CONFIG.content && CONFIG.content.url;
-      if (!url || !/^https?:$/.test(location.protocol)) { known = true; return false; }
-      try {
-        const res = await fetchWithTimeout(url, { cache: 'no-cache' }, CONFIG.content.timeoutMs || 5000);
-        if (res.status === 404) { const had = !!published; published = null; Store.del(LS_PUB); known = true; if (had) apply(); return had; }
-        if (!res.ok) return false;
-        const doc = cleanDoc(await res.json());
-        known = true;
-        if (!doc) return false;
+      const tried = [], ms = clamp(+((CONFIG.remote || {}).timeoutMs) || 6000, 1500, 30000);
+      for (const src of sources()) {
+        let text;
+        try {
+          const url = src.kind === 'github' ? src.url + '?v=' + Math.floor(Date.now() / 60000) : src.url;
+          const res = await fetchWithTimeout(url, { cache: 'no-store', credentials: 'omit' }, ms);
+          if (!res.ok) { tried.push(src.label + ': ' + (res.status === 404 ? 'file not found (404)' : 'HTTP ' + res.status)); continue; }
+          text = await res.text();
+        } catch (e) {
+          tried.push(src.label + ': ' + (e && e.name === 'AbortError' ? 'no answer within ' + Math.round(ms / 1000) + ' seconds' : navigator.onLine === false ? 'offline' : 'not reachable'));
+          continue;
+        }
+        const parsed = parseLax(text);
+        if (parsed.error) { tried.push(src.label + ': ' + parsed.error); continue; }
+        let out;
+        try { out = Feed.toDoc(parsed.data, { prev: published }); }
+        catch (e) { tried.push(src.label + ': the file could not be read (' + String((e && e.message) || e).slice(0, 80) + ')'); continue; }
+        if (!out.doc) { tried.push(src.label + ': the file holds no hub content'); continue; }
+        if (parsed.repaired) out.report.notes.unshift('The file had comments or trailing commas; the hub ignored them.');
+        const doc = out.doc;
+        /* Right after a publish from this device, GitHub's cache can still
+           serve the older file for a few minutes: keep the newer copy. */
+        if (published && Date.now() - adoptedAt < HOLD_MS && doc.updated && published.updated && doc.updated < published.updated) {
+          tried.push(src.label + ': still serves the copy from before your publish (GitHub caches for about five minutes)');
+          saveStatus({ source: 'cache', ok: true, at: status.at, tried, report: status.report });
+          return false;
+        }
         const changed = JSON.stringify(doc) !== JSON.stringify(published);
-        published = doc; Store.set(LS_PUB, doc);
+        published = doc; known = true; Store.set(LS_PUB, doc);
+        saveStatus({ source: src.kind, label: src.label, url: src.url, ok: true, at: Date.now(), tried, report: out.report });
         if (changed) apply();
         return changed;
-      } catch (e) { return false; }
+      }
+      saveStatus({ source: published ? 'cache' : 'builtin', ok: false, at: status.at || 0, tried, report: status.report });
+      return false;
     })();
     inflight = run;
-    run.then(() => { if (inflight === run) inflight = null; });
+    run.then(() => { if (inflight === run) inflight = null; }, () => { if (inflight === run) inflight = null; });
     return run;
   }
-  return { init, apply, fetchPublished, cleanDoc, emptyDoc, LISTS, SETTINGS, keys: () => keys, published: () => published, known: () => known, pending: () => inflight, defaults: () => defaults };
+  /* Look for a newer file while the hub stays open: every refreshMinutes,
+     when the tab comes back into view and when the connection returns. */
+  function watch(cb) {
+    if (watching) return;
+    watching = true;
+    const every = clamp(+((CONFIG.remote || {}).refreshMinutes) || 10, 2, 240) * 60000;
+    let last = Date.now();
+    const tick = () => {
+      if (document.visibilityState === 'hidden' || navigator.onLine === false || Date.now() - last < every - 5000) return;
+      last = Date.now();
+      fetchPublished().then((changed) => { if (cb) cb(changed); }).catch(() => {});
+    };
+    setInterval(tick, every);
+    document.addEventListener('visibilitychange', tick);
+    window.addEventListener('online', () => { last = 0; tick(); });
+  }
+  /* After a successful publish to GitHub: this device already knows what is live. */
+  function adopt(raw) {
+    const doc = cleanDoc(raw);
+    if (!doc) return;
+    published = doc; known = true; adoptedAt = Date.now(); Store.set(LS_PUB, doc);
+    saveStatus({ source: 'github', label: 'GitHub', url: Feed.rawUrl(), ok: true, at: Date.now(), tried: [], report: { format: 'doc' } });
+    apply();
+  }
+  return { init, apply, fetchPublished, watch, adopt, cleanDoc, emptyDoc, LISTS, SETTINGS, keys: () => keys, published: () => published, known: () => known, pending: () => inflight, defaults: () => defaults, status: () => status, sources };
 })();
 
 /* ---------- Admin: sign-in, session, local draft ---------- */
@@ -4460,8 +5112,63 @@ const CMS = (() => {
     });
   }
 
+  /* ----- v3.5: live data status ----- */
+  function ago(t) {
+    const s = Math.max(0, Math.round((Date.now() - t) / 1000));
+    return s < 60 ? 'just now' : s < 3600 ? Math.round(s / 60) + ' min ago' : s < 86400 ? Math.round(s / 3600) + ' h ago' : 'on ' + fmtDate(new Date(t).toISOString());
+  }
+  function syncLine() {
+    const st = Site.status() || {}, r = CONFIG.remote || {};
+    if (st.source === 'github' && st.at) return 'Live data from GitHub (' + r.owner + '/' + r.repo + ', file ' + r.path + '), synced ' + ago(st.at) + '.';
+    if (st.source === 'site' && st.at) return 'GitHub did not answer, so the hub used the copy on this site, synced ' + ago(st.at) + '.';
+    if (Site.published()) return 'GitHub did not answer; players keep the copy on their device' + (st.at ? ' from ' + ago(st.at) : '') + '.';
+    return 'No data file reached yet, so players see the built-in content.';
+  }
+  function syncSub() {
+    const st = Site.status() || {}, r = st.report || {}, n = (r.skipped || []).length;
+    return (st.at ? 'Synced ' + ago(st.at) : 'Not synced yet') + (n ? ', ' + plural(n, 'item') + ' skipped' : '') + (st.ok ? '' : ', last check failed');
+  }
+  function syncSheet(note) {
+    const st = Site.status() || {}, r = st.report || {}, src = Site.sources();
+    const list = (title, items) => (items && items.length ? '<h3>' + esc(title) + '</h3><ul class="sync-list">' + items.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '');
+    const secs = Object.keys(r.sections || {}).map((k) => {
+      const x = r.sections[k];
+      return k + ': ' + [x.added ? x.added + ' new' : '', x.updated ? x.updated + ' updated' : '', x.skipped ? x.skipped + ' skipped' : ''].filter(Boolean).join(', ');
+    });
+    const fmt = { feed: 'the data engine format', doc: 'a content.json from admin mode', backup: 'a database export' }[r.format] || '';
+    const good = st.ok && (st.source === 'github' || st.source === 'site');
+    openSheet({
+      title: 'Live data', noFocus: true,
+      html: backRow() +
+        '<div class="access-status' + (good ? '' : ' is-on') + '"><span class="ico">' + icon(good ? 'circle-check' : 'triangle-exclamation') + '</span><div><strong>' + esc(syncLine()) + '</strong>' +
+          (fmt ? '<span>The file is in ' + esc(fmt) + '. The hub reads all three formats.</span>' : '') + '</div></div>' +
+        '<p class="small muted">Order: ' + esc(src.map((x, i) => (i + 1) + '. ' + x.label).join(', ')) + (src.length ? ', then ' : '') + 'the last good copy on each device, then the built-in content. The hub checks again every ' + esc(String((CONFIG.remote || {}).refreshMinutes || 10)) + ' minutes while it is open; GitHub caches the file for about five minutes.</p>' +
+        list('What the last sync loaded', secs) +
+        list('Skipped, so no player sees a broken line', r.skipped) +
+        list('Worth knowing', (r.warnings || []).concat(r.notes || [])) +
+        list('In the file, not used by the hub', r.unused) +
+        list('Sources that were skipped', st.tried) +
+        '<p class="form-msg' + (note ? ' is-good' : '') + '" id="sync-msg" aria-live="polite">' + esc(note || '') + '</p>' +
+        '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-sync="now">' + icon('rotate') + ' Sync now</button>' +
+          (Feed.pageUrl() ? '<a class="btn btn-ghost btn-sm" href="' + esc(Feed.pageUrl()) + '" target="_blank" rel="noopener">' + icon('code-branch') + ' Open the file on GitHub</a>' : '') + '</div>' +
+        (Admin.draft() ? '<p class="small dim">Admin mode shows your draft. Players see the live data.</p>' : ''),
+      onMount(s) {
+        onBack(s);
+        s.el.addEventListener('click', async (e) => {
+          const b = e.target.closest('[data-sync]');
+          if (!b) return;
+          b.disabled = true;
+          qs('#sync-msg', s.el).textContent = 'Checking\u2026';
+          const changed = await Site.fetchPublished(true).catch(() => false);
+          s.close(); refreshChip(); rerender();
+          const now = Site.status() || {};
+          later(() => syncSheet(changed ? 'New data loaded.' : now.ok ? 'Already up to date.' : 'No source answered. The copy on this device stays.'));
+        });
+      }
+    });
+  }
   function manager() {
-    const pub = Site.published(), dirty = Admin.dirty(), pv = Admin.preview();
+    const dirty = Admin.dirty(), pv = Admin.preview();
     const row = (act, ico, title, sub) => '<button type="button" data-m="' + esc(act) + '">' + icon(ico) + '<span>' + esc(title) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' + icon('chevron-right') + '</button>';
     const opt = (v, t) => '<option value="' + v + '"' + (pv === v ? ' selected' : '') + '>' + t + '</option>';
     const nGates = Object.keys(GATE_OVR).length, nBots = Object.keys(BOT_OVR).length;
@@ -4469,7 +5176,7 @@ const CMS = (() => {
       title: 'Admin', noFocus: true,
       html: tierSwitchHTML() +
         '<div class="access-status' + (dirty ? ' is-on' : '') + '"><span class="ico">' + icon(dirty ? 'pen-ruler' : 'circle-check') + '</span><div><strong>' + (dirty ? 'You have unpublished changes' : 'Everything is published') + '</strong><span>' +
-          esc(pub ? 'Live content.json from ' + (pub.updated ? fmtDate(pub.updated) : 'an earlier upload') + '.' : 'No content.json on the site yet, so players see the built-in content.') + '</span></div></div>' +
+          esc(syncLine()) + '</span></div></div>' +
         '<label class="switch-row"><span>Show edit buttons on the pages</span><input type="checkbox" data-m-edit' + (Admin.prefs().edit !== false ? ' checked' : '') + '></label>' +
         '<label class="field"><span class="field-label">Preview the hub as</span><select class="input" data-m-preview>' + opt('', 'My own access') + opt('free', 'A free player') + opt('community', 'A free Skool member') + opt('vault', 'An Accelerator member') + opt('mentor', 'A Mentorship member') + '</select></label>' +
         '<div class="menu-rows">' + row('gating', 'layer-group', 'Content gating', 'Free or Paid for every module, line and lesson' + (nGates ? ', ' + nGates + (nGates === 1 ? ' module' : ' modules') + ' changed' : '')) +
@@ -4478,7 +5185,7 @@ const CMS = (() => {
           row('editor', 'chess-board', 'Board editor', 'Build any position by hand, then save it as a drill') + '</div>' +
         '<div class="menu-rows">' + row('copy', 'font', 'Texts', 'Headlines and paragraphs on every page') + row('settings', 'sliders', 'Numbers and links', 'Peak rating, percentile, fast track, Skool, socials') + '</div>' +
         '<div class="menu-rows">' + Object.keys(Site.LISTS).map((n) => row('list:' + n, 'list', Site.LISTS[n][0], Site.LISTS[n][1] + ', ' + (getPath(CONTENT, n) || []).length + ' items')).join('') + '</div>' +
-        '<div class="menu-rows">' + row('keys', 'key', 'Member keys', Site.keys().length + (Site.keys().length === 1 ? ' key' : ' keys')) + row('publish', 'cloud-arrow-up', 'Publish', dirty ? 'Download content.json and upload it' : 'Up to date') + row('data', 'database', 'Data management & backups', 'Export or import the whole database as JSON') + '</div>' +
+        '<div class="menu-rows">' + row('keys', 'key', 'Member keys', Site.keys().length + (Site.keys().length === 1 ? ' key' : ' keys')) + row('sync', 'rotate', 'Live data (GitHub)', syncSub()) + row('publish', 'cloud-arrow-up', 'Publish', dirty ? 'Send your draft to GitHub' : 'Up to date') + row('data', 'database', 'Data management & backups', 'Export or import the whole database as JSON') + '</div>' +
         '<div class="menu-rows">' + row('insights', 'chart-column', 'Insights', 'What your players miss, ask and struggle with') + row('vaultbrowser', 'magnifying-glass-chart', 'Vault & Mistake Browser', 'Games, mistakes and brilliant moves by chapter') + row('course', 'graduation-cap', 'Course index', 'The curriculum the coach points to') + row('lb', 'ranking-star', 'Leaderboard', 'Hide or show players, ranking numbers') + '</div>' +
         '<div class="btn-row"><button type="button" class="btn btn-quiet btn-sm" data-m="signout">' + icon('right-from-bracket') + ' Sign out of admin</button></div>',
       onMount(s) {
@@ -4508,6 +5215,7 @@ const CMS = (() => {
             else if (m === 'avatar') avatarSheet();
             else if (m === 'keys') keysSheet();
             else if (m === 'publish') publish();
+            else if (m === 'sync') syncSheet();
             else if (m === 'data') dataSheet();
             else if (m === 'vaultbrowser') { if (routeFromHash() === 'vault-browser') rerender(); else location.hash = '#vault-browser'; }
             else if (m === 'course') openCourseSheet();
@@ -4822,7 +5530,7 @@ const CMS = (() => {
           d.keys.push({ tier, sha256: sha, label, created: dayKey(new Date()), exp: /^\d{4}-\d{2}-\d{2}$/.test(exp) ? exp : '', revoked: false });
           Admin.saveDraft(d);
           const bk = Admin.keybook(); bk[sha] = key; Admin.saveKeybook(bk);
-          s.close(); later(() => keysSheet({ key, label, link: location.origin + location.pathname + '?' + CONFIG.access.param + '=' + encodeURIComponent(key) }));
+          s.close(); later(() => keysSheet({ key, label, link: SiteURL.share({ [CONFIG.access.param]: key }) }));
         });
         s.el.addEventListener('click', async (e) => {
           const c = e.target.closest('[data-copy]');
@@ -4854,11 +5562,12 @@ const CMS = (() => {
   function publish() {
     const d = Admin.draft() || Site.published() || Site.emptyDoc();
     const json = JSON.stringify(Object.assign({}, d, { updated: new Date().toISOString() }), null, 1);
+    const r = CONFIG.remote || {}, file = String(r.path || 'content.json').split('/').pop();
     openSheet({
       title: 'Publish', noFocus: true,
-      html: backRow() + '<p>Your edits are saved on this device only. To publish them for every player:</p>' +
-        '<ol style="padding-left:20px;display:grid;gap:6px;color:#cbd5e1"><li>Download <strong>content.json</strong>.</li><li>Upload it to your site, in the same folder as index.html. On GitHub: Add file, Upload files, Commit changes.</li><li>Players get the update the next time they open the hub.</li></ol>' +
-        '<div class="btn-row"><button type="button" class="btn btn-primary" data-p="dl">' + icon('file-export') + ' Download content.json</button><button type="button" class="btn btn-ghost" data-p="copy">' + icon('copy') + ' Copy the JSON</button></div>' +
+      html: backRow() + '<p>Your edits are saved on this device only. The hub reads its data live from <strong>' + esc(r.owner + '/' + r.repo) + '</strong> on GitHub, file <strong>' + esc(r.path) + '</strong>. To publish:</p>' +
+        '<ol style="padding-left:20px;display:grid;gap:6px;color:#cbd5e1"><li>Use <strong>Publish straight to GitHub</strong> below, or download the file.</li><li>Downloaded? Upload it to the repository as <strong>' + esc(r.path) + '</strong>: Add file, Upload files, Commit changes. Rename it first if your phone added an extension.</li><li>Every player gets it within a few minutes, without a new index.html.</li></ol>' +
+        '<div class="btn-row"><button type="button" class="btn btn-primary" data-p="dl">' + icon('file-export') + ' Download ' + esc(file) + '</button><button type="button" class="btn btn-ghost" data-p="copy">' + icon('copy') + ' Copy the JSON</button></div>' +
         GitHubPublish.html() + '<p class="small muted">' + (Admin.dirty() ? 'Your draft differs from what is live.' : 'Your draft matches what is live.') + ' The file never contains your admin sign-in or the member keys themselves, only their hashes.</p>' +
         (Admin.draft() ? '<div class="divider"></div><button type="button" class="btn btn-quiet btn-sm" data-p="discard">' + icon('rotate-left') + ' Throw away my draft and use what is live</button>' : ''),
       onMount(s) {
@@ -4868,7 +5577,7 @@ const CMS = (() => {
           const b = e.target.closest('[data-p]');
           if (!b) return;
           const act = b.getAttribute('data-p');
-          if (act === 'dl') { download('content.json', json, 'application/json'); toast('content.json downloaded. Upload it next to index.html.', 'good'); }
+          if (act === 'dl') { download(file, json, 'application/json'); toast(file + ' downloaded. Upload it to ' + r.repo + ' on GitHub.', 'good'); }
           else if (act === 'copy') copyText(json).then((ok) => toast(ok ? 'JSON copied.' : 'Copy failed.'));
           else if (act === 'discard') { s.close(); if (await confirmSheet('Throw away your draft?', 'Every unpublished edit on this device is removed.', 'Throw away')) { Admin.discardDraft(); rerender(); toast('Draft removed.'); } }
         });
@@ -5062,26 +5771,31 @@ const CMS = (() => {
     });
   }
 
-  /* ----- data management: the whole local database in one JSON file ----- */
+  /* ----- data management: the whole local database in one JSON file -----
+     v3.5: the import reads any Lanckrietchess file (a database export, a
+     content.json, the data engine file from GitHub, or a file with only player
+     data) and forgives missing parts: an absent or empty section is skipped,
+     repertoires may be an array, { items: [...] } or a map, and every count is
+     computed from what the file really holds, never read from its "counts". */
   const BACKUP_APP = 'lanckrietchess-hub-backup';
   function dbCounts() {
     const d = Admin.ensureDraft(), reps = Repertoire.list();
     let items = 0;
     Object.keys(Site.LISTS).forEach((n) => { items += (getPath(CONTENT, n) || []).length; });
     return { items, texts: Object.keys(d.copy || {}).length, keys: (d.keys || []).length,
-      reps: reps.length, lines: reps.reduce((a, r) => a + r.lines.length, 0), drills: Object.keys(App.progress || {}).length };
+      reps: reps.length, lines: reps.reduce((a, r) => a + (Array.isArray(r.lines) ? r.lines.length : 0), 0), drills: Object.keys(App.progress || {}).length };
   }
   function dbFile() {
     return {
       app: BACKUP_APP, kind: 'database', v: 2, hub: CONFIG.version,
-      exported: new Date().toISOString(), site: location.origin + location.pathname,
-      counts: dbCounts(),
+      exported: new Date().toISOString(), site: SiteURL.base(),
+      counts: dbCounts(),                         /* for people reading the file; the import recounts */
       draft: Admin.ensureDraft(),                 /* courses, lessons, lines, FENs, texts, tiers, bots, key hashes */
       keybook: Admin.keybook(),                   /* the member keys in plain text */
       published: Site.published() || null,        /* what is live on the site right now */
       local: {                                    /* this device: progress, custom repertoires, settings */
         state: Store.get(KEYS.state, null),
-        repertoire: Store.get(KEYS.rep, null),
+        repertoire: Repertoire.list(),
         avatar: Store.get('lc-hub-avatar', null),
         adminUI: Store.get('lc-admin-ui', null),
         attempts: Attempts.all(),                 /* v3.3: puzzle attempts behind the leaderboard score */
@@ -5089,40 +5803,90 @@ const CMS = (() => {
       }
     };
   }
+  const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many || one + 's');
   function readBackup(text) {
-    let data = null;
-    try { data = JSON.parse(text); } catch (e) { return { error: 'That file is not valid JSON.' }; }
-    if (!data || typeof data !== 'object' || Array.isArray(data)) return { error: 'That file is not a Lanckrietchess backup.' };
-    const mine = data.app === BACKUP_APP;
-    const doc = Site.cleanDoc(mine ? data.draft : data);
-    if (!doc) return { error: 'That file is not a Lanckrietchess backup or a content.json.' };
-    const raw = mine && data.keybook && typeof data.keybook === 'object' ? data.keybook : {}, book = {};
+    const parsed = parseLax(text);
+    if (parsed.error) return { error: parsed.error };
+    const data = parsed.data;
+    if (!data || typeof data !== 'object') return { error: 'That file holds no hub data.' };
+    let out;
+    const draftNow = Admin.ensureDraft();
+    try { out = Feed.toDoc(data, { prev: draftNow, imported: true }); } catch (e) { out = { doc: null, report: { format: 'unknown', skipped: [], notes: [], warnings: [] } }; }
+    const L = Feed.local(data), rep = out.report, doc = out.doc;
+    const raw = isObj(data) && isObj(data.keybook) ? data.keybook : {}, book = {};
     Object.keys(raw).forEach((h) => { if (/^[0-9a-f]{64}$/.test(h) && /^LC-[A-Z0-9-]{4,60}$/.test(String(raw[h]))) book[h] = raw[h]; });
-    const local = mine && data.local && typeof data.local === 'object' && !Array.isArray(data.local) ? data.local : {};
-    const state = local.state && typeof local.state === 'object' ? local.state : null;
-    return {
-      doc, book, local,
-      kind: mine ? (data.kind === 'database' ? 'a full database export' : 'an admin backup') : 'a published content.json',
-      when: String(data.exported || data.updated || '').slice(0, 40),
-      counts: {
-        items: Object.keys(doc.lists || {}).reduce((a, n) => a + doc.lists[n].length, 0),
-        texts: Object.keys(doc.copy || {}).length, keys: (doc.keys || []).length, book: Object.keys(book).length,
-        reps: Array.isArray(local.repertoire) ? local.repertoire.length : 0,
-        drills: state && state.progress ? Object.keys(state.progress).length : 0
-      }
+    const state = isObj(L.state) ? L.state : null;
+    const counts = {
+      items: !doc ? 0 : rep.format === 'feed' ? rep.added + rep.updated : Object.keys(doc.lists || {}).reduce((a, n) => a + doc.lists[n].length, 0),
+      texts: doc ? Object.keys(doc.copy || {}).length : 0, keys: doc && isObj(data) && (has(data, 'keys') || has(data.draft, 'keys') || has(data.published, 'keys')) ? (doc.keys || []).length : 0,
+      book: Object.keys(book).length, reps: L.repertoire.length, lines: L.repertoire.reduce((a, r) => a + r.lines.length, 0),
+      drills: state && isObj(state.progress) ? Object.keys(state.progress).length : 0,
+      attempts: Array.isArray(L.attempts) ? L.attempts.length : 0, vault: L.vault ? (arr(L.vault.items) || []).length : 0
     };
+    const vaultFolders = L.vault && Array.isArray(L.vault.folders) ? L.vault.folders.length : 0;
+    const docUsable = !!doc && (Object.keys(doc.lists || {}).length || Object.keys(doc.copy || {}).length || Object.keys(doc.bots || {}).length ||
+      Object.keys(doc.gates || {}).length || Object.keys(doc.settings || {}).length || rep.added + rep.updated > 0 || counts.keys);
+    const usable = docUsable || state || L.repertoire.length || counts.attempts || counts.vault || vaultFolders || counts.book || L.avatar;
+    if (!usable) {
+      const mine = Repertoire.list().length;
+      return { info: L.repState !== 'unreadable' && (L.repState === 'empty' || L.fileReps != null), error: L.repState === 'unreadable' ? 'The file has repertoires, but none of them could be read: ' + (L.repSkipped[0] || 'no moves found')
+        : L.repState === 'empty' || L.fileReps != null ? 'The file\u2019s repertoire list is empty, so there is nothing to import. ' + (mine ? 'The ' + plural(mine, 'custom repertoire') + ' on this device stay as they are.' : '')
+          : 'This file holds nothing the hub can use: no courses, lines, texts, keys, repertoires or progress.' };
+    }
+    const kinds = { backup: data.kind === 'database' ? 'a full database export' : 'an admin backup', doc: 'a published content.json', feed: 'a data engine file (the GitHub format)', local: 'a file with player data', list: 'a list of repertoires' };
+    const notes = [].concat(rep.warnings || [], rep.skipped || [], L.repSkipped || [], rep.notes || []);
+    if (L.repCut) notes.push(plural(L.repCut, 'repertoire line') + ' stopped at an illegal move; the moves before it were kept.');
+    if (L.fileReps != null && L.fileReps !== L.repertoire.length) notes.push('The file says ' + plural(L.fileReps, 'custom repertoire') + '; ' + L.repertoire.length + ' could be read, so the hub counted them itself.');
+    if (L.repState === 'empty') notes.push('The file\u2019s repertoire list is empty, so the custom repertoires on this device stay as they are.');
+    if (parsed.repaired) notes.unshift('The file had comments or trailing commas; they were ignored.');
+    return { doc: docUsable ? doc : null, book, local: L, report: rep, counts, notes, kind: (kinds[rep.format] || 'a JSON file') + (parsed.repaired ? ', repaired' : ''), when: isObj(data) ? String(data.exported || data.updated || getPath(data, 'meta.last_updated') || '').slice(0, 40) : '' };
+  }
+  const has = (o, k) => isObj(o) && o[k] !== undefined && o[k] !== null;
+  function arr(x) { return Array.isArray(x) ? x : isObj(x) ? ['items', 'list', 'entries'].map((k) => x[k]).filter(Array.isArray)[0] || null : null; }
+  /* Lists merge by id (or name or title): the file's fields win, items that
+     are only on this device stay, and a list the draft never changed starts
+     from the built-in items so nothing disappears. */
+  function mergeList(base, inc) {
+    if (!Array.isArray(inc) || !inc.length) return clone(base) || [];
+    if (!Array.isArray(base) || !base.length) return clone(inc);
+    const key = (x) => (x && x.id ? 'id:' + x.id : x && x.name ? 'name:' + String(x.name).toLowerCase() : x && x.title ? 'title:' + String(x.title).toLowerCase() : 'json:' + JSON.stringify(x));
+    const out = clone(base), at = {};
+    out.forEach((x, i) => { at[key(x)] = i; });
+    inc.forEach((x) => { const k = key(x); if (hasOwn(at, k)) out[at[k]] = Object.assign({}, out[at[k]], clone(x)); else { at[k] = out.length; out.push(clone(x)); } });
+    return out;
   }
   function mergeDoc(base, inc) {
-    const out = clone(base);
+    const out = clone(base) || Site.emptyDoc(), defs = (Site.defaults() || {}).content || CONTENT;
+    ['copy', 'settings', 'lists', 'gates', 'bots'].forEach((k) => { if (!isObj(out[k])) out[k] = {}; });
+    if (!Array.isArray(out.keys)) out.keys = [];
     Object.keys(inc.copy || {}).forEach((k) => { out.copy[k] = inc.copy[k]; });
     Object.keys(inc.gates || {}).forEach((k) => { out.gates[k] = inc.gates[k]; });
     Object.keys(inc.bots || {}).forEach((k) => { out.bots[k] = inc.bots[k]; });
     Site.SETTINGS.forEach((x) => { const v = getPath(inc.settings || {}, x[0]); if (v !== undefined) setPath(out.settings, x[0], v); });
-    Object.keys(inc.lists || {}).forEach((n) => { out.lists[n] = clone(inc.lists[n]); });
+    Object.keys(inc.lists || {}).forEach((n) => {
+      if (!Array.isArray(inc.lists[n]) || !inc.lists[n].length) return;              // an empty list never wipes one
+      out.lists[n] = mergeList(Array.isArray(out.lists[n]) && out.lists[n].length ? out.lists[n] : getPath(defs, n), inc.lists[n]);
+    });
     if (Array.isArray(inc.folders) && inc.folders.length) out.folders = (out.folders || []).filter((f) => !inc.folders.some((g) => g && g.id === f.id)).concat(clone(inc.folders));
     const seen = {};
-    (out.keys || []).forEach((k) => { seen[k.sha256] = 1; });
-    (inc.keys || []).forEach((k) => { if (!seen[k.sha256]) { out.keys.push(k); seen[k.sha256] = 1; } });
+    out.keys.forEach((k) => { seen[k.sha256] = 1; });
+    (inc.keys || []).forEach((k) => { if (k && !seen[k.sha256]) { out.keys.push(k); seen[k.sha256] = 1; } });
+    return Site.cleanDoc(out) || out;
+  }
+  /* v3.5.1: Replace swaps only the parts the file has. Texts, numbers, tiers
+     and bot instructions go key by key (a file with one text doesn't erase the
+     others); each list in the file replaces that list; empty parts are skipped. */
+  function replaceDoc(base, inc) {
+    const out = clone(base) || Site.emptyDoc();
+    ['copy', 'settings', 'lists', 'gates', 'bots'].forEach((k) => { if (!isObj(out[k])) out[k] = {}; });
+    Object.keys(inc.copy || {}).forEach((k) => { out.copy[k] = inc.copy[k]; });
+    Object.keys(inc.gates || {}).forEach((k) => { out.gates[k] = inc.gates[k]; });
+    Object.keys(inc.bots || {}).forEach((k) => { out.bots[k] = inc.bots[k]; });
+    Site.SETTINGS.forEach((x) => { const v = getPath(inc.settings || {}, x[0]); if (v !== undefined) setPath(out.settings, x[0], v); });
+    Object.keys(inc.lists || {}).forEach((n) => { if (Array.isArray(inc.lists[n]) && inc.lists[n].length) out.lists[n] = clone(inc.lists[n]); });
+    if (Array.isArray(inc.keys) && inc.keys.length) out.keys = clone(inc.keys);
+    if (Array.isArray(inc.folders) && inc.folders.length) out.folders = clone(inc.folders);
+    if (inc.updated) out.updated = inc.updated;
     return Site.cleanDoc(out) || out;
   }
   function mergeState(cur, inc) {
@@ -5130,13 +5894,13 @@ const CMS = (() => {
     out.profile = out.profile && out.profile.name ? out.profile : (inc.profile || out.profile);
     out.settings = Object.assign({}, inc.settings || {}, out.settings || {});
     out.progress = Object.assign({}, out.progress || {});
-    Object.keys(inc.progress || {}).forEach((k) => {
-      const a = out.progress[k], b = inc.progress[k] || {};
+    Object.keys(isObj(inc.progress) ? inc.progress : {}).forEach((k) => {
+      const a = out.progress[k], b = isObj(inc.progress[k]) ? inc.progress[k] : {};
       out.progress[k] = a ? { best: Math.max(num(a.best), num(b.best)), runs: num(a.runs) + num(b.runs), last: Math.max(num(a.last), num(b.last)) } : b;
     });
     out.stats = Object.assign({}, out.stats || {});
-    Object.keys(inc.stats || {}).forEach((k) => {
-      const a = out.stats[k], b = inc.stats[k] || {};
+    Object.keys(isObj(inc.stats) ? inc.stats : {}).forEach((k) => {
+      const a = out.stats[k], b = isObj(inc.stats[k]) ? inc.stats[k] : {};
       out.stats[k] = a ? { tries: num(a.tries) + num(b.tries), correct: num(a.correct) + num(b.correct), streak: Math.max(num(a.streak), num(b.streak)), best: Math.max(num(a.best), num(b.best)) } : b;
     });
     const d1 = out.daily || {}, d2 = inc.daily || {};
@@ -5144,58 +5908,118 @@ const CMS = (() => {
     out.onboarded = !!(out.onboarded || inc.onboarded);
     return out;
   }
-  function mergeReps(cur, inc) {
-    const out = clone(cur) || [], by = {};
-    out.forEach((r) => { by[r.id] = r; });
+  /* Repertoires are matched by id (when the name and colour agree), then by
+     name and colour. Merge: a repertoire on both sides keeps every line from
+     both. Replace (fileWins): a matching repertoire takes the file's lines.
+     Either way, repertoires that are only on this device stay; nothing drops
+     to zero. An id that belongs to a different repertoire gets a new id. */
+  function mergeReps(cur, inc, fileWins) {
+    const out = (Array.isArray(cur) ? cur : []).filter((r) => r && Array.isArray(r.lines))
+      .map((r) => Object.assign({}, r, { lines: r.lines.filter(Array.isArray).map((l) => l.slice()) }));
+    const byId = {}, byName = {}, low = (x) => String(x || '').toLowerCase().trim(), nameKey = (r) => low(r.name) + '|' + r.side;
+    const generic = (n) => !low(n) || /^(imported (white|black) repertoire|my repertoire|my (white|black) repertoire)$/.test(low(n));
+    out.forEach((r) => { byId[r.id] = r; byName[nameKey(r)] = r; });
+    let added = 0, grown = 0, lines = 0, replaced = 0;
     (Array.isArray(inc) ? inc : []).forEach((r) => {
-      if (!r || typeof r !== 'object' || !Array.isArray(r.lines)) return;
-      const have = by[r.id];
-      if (!have) { out.push(r); by[r.id] = r; return; }
+      if (!r || !Array.isArray(r.lines) || !r.lines.length) return;
+      const a = byId[r.id];
+      const have = a && a.side === r.side && (low(a.name) === low(r.name) || generic(a.name) || generic(r.name)) ? a : byName[nameKey(r)] || null;
+      if (!have) {
+        const c = clone(r);
+        if (byId[c.id]) { let n = 2; while (byId[String(c.id).slice(0, 36) + '-' + n]) n++; c.id = String(c.id).slice(0, 36) + '-' + n; }
+        out.push(c); byId[c.id] = c; byName[nameKey(c)] = c; added++; lines += c.lines.length; return;
+      }
       const seen = {};
       have.lines.forEach((l) => { seen[l.join(' ')] = 1; });
-      r.lines.forEach((l) => { if (Array.isArray(l) && !seen[l.join(' ')]) { have.lines.push(l); seen[l.join(' ')] = 1; } });
+      if (fileWins) {
+        const same = have.lines.length === r.lines.length && r.lines.every((l) => seen[l.join(' ')]);
+        if (!same) { lines += r.lines.filter((l) => !seen[l.join(' ')]).length; have.lines = r.lines.map((l) => l.slice()); replaced++; }
+        return;
+      }
+      let n = 0;
+      r.lines.forEach((l) => { const k = l.join(' '); if (!seen[k]) { have.lines.push(l.slice()); seen[k] = 1; n++; } });
+      if (n) { grown++; lines += n; }
     });
-    return out;
+    return { list: out, added, grown, lines, replaced };
   }
-  /* how: 'merge' keeps this device and adds the file, 'replace' takes the file. The
-     admin sign-in, the device id and the worker password are never part of it. */
+  /* how: 'merge' keeps this device and adds the file, 'replace' takes the file,
+     but only for the parts the file actually has. The admin sign-in, the
+     device id and the worker password are never part of it. */
   function applyBackup(b, how) {
+    const done = [], L = b.local || {};
     const keepAccess = (Store.get(KEYS.state, null) || {}).access || null;
-    Admin.saveDraft(how === 'merge' ? mergeDoc(Admin.ensureDraft(), b.doc) : b.doc);
-    Admin.saveKeybook(how === 'merge' ? Object.assign(Admin.keybook(), b.book) : b.book);
-    const L = b.local || {};
-    if (L.state && typeof L.state === 'object') {
+    if (b.doc) {
+      Admin.saveDraft(how === 'merge' ? mergeDoc(Admin.ensureDraft(), b.doc) : replaceDoc(Admin.ensureDraft(), b.doc));
+      if (b.counts.items) done.push(plural(b.counts.items, 'item'));
+      if (b.counts.texts) done.push(plural(b.counts.texts, 'text'));
+    }
+    if (b.counts.book) { Admin.saveKeybook(how === 'merge' ? Object.assign(Admin.keybook(), b.book) : b.book); done.push(plural(b.counts.book, 'member key')); }
+    if (isObj(L.state)) {
       const next = how === 'merge' ? mergeState(Store.get(KEYS.state, null), L.state) : clone(L.state);
       if (keepAccess) next.access = keepAccess;
       Store.set(KEYS.state, next);
       App.load(); App.save();
+      if (b.counts.drills) done.push('progress on ' + plural(b.counts.drills, 'drill'));
     }
-    if (Array.isArray(L.repertoire)) {
-      Store.set(KEYS.rep, how === 'merge' ? mergeReps(Repertoire.list(), L.repertoire) : clone(L.repertoire));
-      Repertoire.save(Repertoire.list());
+    if (L.repState === 'ok' && L.repertoire.length) {
+      const before = Repertoire.list();
+      const m = mergeReps(before, L.repertoire, how !== 'merge');
+      if (m.list.length >= before.length) Repertoire.save(m.list.slice(0, 60));   // a merge can only grow the list
+      const kept = m.list.length - m.added - (how === 'merge' ? m.grown : m.replaced);
+      done.push(!m.added && !m.grown && !m.replaced ? 'repertoires: nothing new, all ' + plural(L.repertoire.length, 'repertoire') + ' were already on this device'
+        : how === 'merge' ? plural(m.added, 'new repertoire') + (m.grown ? ', ' + plural(m.grown, 'repertoire') + ' extended' : '') + ', ' + plural(m.lines, 'new line')
+          : [m.added ? plural(m.added, 'new repertoire') : '', m.replaced ? plural(m.replaced, 'repertoire') + ' replaced by the file\u2019s version' : '', kept > 0 ? plural(kept, 'other repertoire') + ' kept' : ''].filter(Boolean).join(', '));
+      if (m.list.length > 60) b.notes.push('Only the first 60 repertoires are kept; ' + (m.list.length - 60) + ' did not fit.');
     }
-    if (L.avatar && typeof L.avatar === 'object') {
+    if (L.avatar) {
       const url = typeof L.avatar.url === 'string' && /^https:\/\/\S{4,2000}$/i.test(L.avatar.url) ? L.avatar.url : null;
       Store.set('lc-hub-avatar', { user: cleanName(L.avatar.user || ''), url, at: Date.now() });
     }
-    V33.importLocal(L, how);
+    V33.importLocal({ attempts: L.attempts, vault: L.vault }, how);
+    if (b.counts.attempts) done.push(plural(b.counts.attempts, 'puzzle attempt'));
+    if (b.counts.vault) done.push(plural(b.counts.vault, 'Game Vault entry', 'Game Vault entries'));
     Site.apply(); refreshChip(); rerender();
+    return done;
   }
-  function dataSheet(note) {
+  function describe(b, how) {
+    const k = b.counts, parts = [];
+    if (k.items) parts.push(plural(k.items, 'course item'));
+    if (k.texts) parts.push(plural(k.texts, 'text'));
+    if (k.keys) parts.push(plural(k.keys, 'member key hash', 'member key hashes'));
+    if (k.book) parts.push(plural(k.book, 'plain member key'));
+    if (k.reps) parts.push(plural(k.reps, 'custom repertoire') + ' (' + plural(k.lines, 'line') + ')');
+    if (k.drills) parts.push('progress on ' + plural(k.drills, 'drill'));
+    if (k.attempts) parts.push(plural(k.attempts, 'puzzle attempt'));
+    if (k.vault) parts.push(plural(k.vault, 'Game Vault entry', 'Game Vault entries'));
+    let t = 'The file is ' + b.kind + (b.when ? ' from ' + fmtDate(b.when) : '') + '. It holds ' + (parts.length ? parts.join(', ') : 'nothing new for this device') + '.';
+    if (how === 'merge') t += ' Merging adds it to what is on this device; nothing on this device is removed.';
+    else {
+      t += ' Replacing swaps only these parts for the file\u2019s version; everything the file doesn\u2019t have stays as it is. Custom repertoires with the same name take the file\u2019s lines; the others on this device stay.';
+      const d = Admin.ensureDraft(), cur = (n) => (Array.isArray(d.lists[n]) && d.lists[n].length ? d.lists[n] : getPath(((Site.defaults() || {}).content) || CONTENT, n) || []).length;
+      const shorter = b.doc ? Object.keys(b.doc.lists || {}).filter((n) => Site.LISTS[n] && b.doc.lists[n].length && b.doc.lists[n].length < cur(n))
+        .map((n) => Site.LISTS[n][0] + ' (' + cur(n) + ' \u2192 ' + b.doc.lists[n].length + ')') : [];
+      if (shorter.length) t += ' Lists that get shorter: ' + shorter.join(', ') + '. Use Merge to keep the items that are only on this device.';
+    }
+    return t;
+  }
+  function dataSheet(note, details) {
     const c = dbCounts(), cards = [[c.items, 'Items in the hub'], [c.texts, 'Edited texts'], [c.keys, 'Member keys'], [c.reps, 'Custom repertoires'], [c.lines, 'Custom lines'], [c.drills, 'Drills with progress']];
     let how = 'merge';
+    const MERGE_TXT = 'Merge keeps what is on this device and adds the file on top: items with the same id take the file\u2019s version, everything else stays, repertoires keep every line from both, progress keeps its best score.';
+    const REPLACE_TXT = 'Replace takes the file\u2019s version of each part it contains: each list in the file replaces that list, texts and settings are swapped one by one, repertoires with the same name take the file\u2019s lines. Parts the file doesn\u2019t have, or has empty, are left alone.';
     openSheet({
       title: 'Data management & backups', noFocus: true,
       html: backRow() +
         '<div class="data-stats">' + cards.map((x) => '<div><b>' + x[0] + '</b><span>' + esc(x[1]) + '</span></div>').join('') + '</div>' +
-        '<h3>Export</h3><p class="small muted">One file with every course, lesson, drill, position, text and member key, plus your own progress and custom repertoires as they stand on this device. It is private: keep it off your website.</p>' +
+        '<h3>Export</h3><p class="small muted">One file with every course, lesson, drill, position, text and member key, plus your own progress and custom repertoires as they stand on this device. It is private: keep it off your website and out of the GitHub repository.</p>' +
         '<div class="btn-row"><button type="button" class="btn btn-primary" data-d="export">' + icon('file-export') + ' Export database (JSON)</button>' +
         '<button type="button" class="btn btn-ghost" data-d="copy">' + icon('copy') + ' Copy the JSON</button></div>' +
         '<div class="divider"></div><h3>Import</h3>' +
         '<div class="seg" role="group" aria-label="How to import"><button type="button" data-how="merge" aria-pressed="true">Merge</button><button type="button" data-how="replace" aria-pressed="false">Replace</button></div>' +
-        '<p class="small muted" id="d-how">Merge keeps what is on this device and adds the file on top: edited texts and lists from the file win, member keys are added, progress keeps its best score.</p>' +
-        '<label class="field"><span class="field-label">Import database (JSON)</span><input class="input" type="file" accept=".json,application/json" data-d-file></label>' +
+        '<p class="small muted" id="d-how">' + esc(MERGE_TXT) + '</p>' +
+        '<label class="field"><span class="field-label">Import database (JSON) <small>a database export, a content.json, the GitHub data file or a file with repertoires</small></span><input class="input" type="file" accept=".json,application/json,text/plain,*/*" data-d-file></label>' +
         '<p class="form-msg' + (note ? ' is-good' : '') + '" id="d-msg" aria-live="polite">' + esc(note || '') + '</p>' +
+        (details && details.length ? '<ul class="sync-list">' + details.slice(0, 30).map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') +
         '<p class="small dim">Exports and imports never touch your admin sign-in, this device\u2019s id or the worker password. After an import, publish to put the content live for players.</p>',
       onMount(s) {
         onBack(s);
@@ -5206,9 +6030,7 @@ const CMS = (() => {
           if (h) {
             how = h.getAttribute('data-how');
             qsa('[data-how]', s.el).forEach((b) => b.setAttribute('aria-pressed', String(b === h)));
-            qs('#d-how', s.el).textContent = how === 'merge'
-              ? 'Merge keeps what is on this device and adds the file on top: edited texts and lists from the file win, member keys are added, progress keeps its best score.'
-              : 'Replace throws away the draft, the key list and the progress on this device and takes the file instead.';
+            qs('#d-how', s.el).textContent = how === 'merge' ? MERGE_TXT : REPLACE_TXT;
             return;
           }
           const b = e.target.closest('[data-d]');
@@ -5226,18 +6048,16 @@ const CMS = (() => {
           say('Reading\u2026');
           file.text().then(async (text) => {
             const b = readBackup(text);
-            if (b.error) { say(b.error, true); return; }
-            const k = b.counts;
-            const what = 'The file is ' + b.kind + (b.when ? ' from ' + fmtDate(b.when) : '') + '. It holds ' + k.items + ' items, ' + k.texts + ' texts, ' +
-              k.keys + ' member keys, ' + k.reps + ' custom repertoires and progress on ' + k.drills + ' drills.';
+            if (b.error) { say(b.error, !b.info); return; }
             s.close();
-            const ok = await confirmSheet(how === 'merge' ? 'Merge this file in?' : 'Replace everything with this file?',
-              what + (how === 'merge' ? ' Merging adds it to what is already on this device.' : ' Replacing removes the draft, keys and progress on this device first.'),
-              how === 'merge' ? 'Merge' : 'Replace');
+            const extra = b.notes.length ? ' ' + plural(b.notes.length, 'remark') + ' after the import.' : '';
+            const ok = await confirmSheet(how === 'merge' ? 'Merge this file in?' : 'Replace with this file?', describe(b, how) + extra, how === 'merge' ? 'Merge' : 'Replace');
             if (!ok) { later(() => dataSheet()); return; }
-            applyBackup(b, how);
+            let done;
+            try { done = applyBackup(b, how); }
+            catch (err) { console.error(err); later(() => dataSheet('The import stopped halfway: ' + String((err && err.message) || err).slice(0, 120) + '. Export first, then try Merge.', b.notes)); return; }
             toast('Database imported.', 'good');
-            later(() => dataSheet('Imported ' + k.items + ' items. Check them, then publish.'));
+            later(() => dataSheet('Imported ' + (done.length ? done.join(', ') : 'the file') + '. Check it, then publish.', b.notes));
           }).catch(() => say('That file could not be read.', true));
         });
       }
@@ -6660,6 +7480,7 @@ function mountHome(view) {
     : spot.lineId ? '<a class="btn btn-quiet btn-sm" href="#openings" data-hero-line="' + esc(spot.lineId) + '">Drill this line</a>' : '';
   view.innerHTML = cmsBar() +
     '<section class="hero"><div>' +
+      (T('home.kicker').trim() || Admin.editing() ? '<p class="st-kicker hero-kicker">' + esc(T('home.kicker').trim() || (Admin.editing() ? 'Line above the headline' : '')) + ed('home.kicker') + '</p>' : '') +
       '<h1>' + esc(T('home.title')) + ed('home.title') + '</h1>' +
       '<p class="lede">' + H('home.lede') + ed('home.lede') + '</p>' +
       '<div class="btn-row"><a class="btn btn-primary" href="#think">Start a free MSPC drill</a><a class="btn btn-ghost" href="#trim">Trim one of your games</a></div>' +
@@ -7124,13 +7945,35 @@ function mountTheory(view, sub) {
 
 /* ---------- OPENINGS ---------- */
 const Repertoire = {
+  /* v3.5.1: forgiving and self-repairing. The list on this device may have
+     been written by an older version or by hand: { items: [...] }, a map by
+     id, lines as PGN text, "white" or "zwart", a missing id or name. Every
+     readable repertoire is kept (never dropped to zero); a list that needed
+     repair is written back once in the clean shape, and the original is kept
+     under lc-hub-repertoire-v2-before-repair. */
   list() {
     const d = Store.get(KEYS.rep, null);
-    if (!Array.isArray(d)) return [];
-    return d.filter((r) => r && typeof r.id === 'string' && typeof r.name === 'string' && (r.side === 'w' || r.side === 'b') && Array.isArray(r.lines))
-      .map((r) => ({ id: r.id.slice(0, 40), name: cleanName(r.name) || 'My repertoire', side: r.side, created: r.created || '',
-        lines: r.lines.filter(Array.isArray).map((l) => l.filter((s) => typeof s === 'string' && s.length < 12).slice(0, 400)).filter((l) => l.length) }))
-      .slice(0, 60);
+    if (d === null || d === undefined) return [];
+    const seen = {};
+    const clean = (r) => {
+      const ok = !!r && typeof r === 'object' && typeof r.id === 'string' && /^[\w-]{1,40}$/.test(r.id) && !seen[r.id] &&
+        typeof r.name === 'string' && (r.side === 'w' || r.side === 'b') && Array.isArray(r.lines) && r.lines.length > 0 &&
+        r.lines.every((l) => Array.isArray(l) && l.length > 0 && l.length <= 400 && l.every((m) => typeof m === 'string' && m.length > 0 && m.length < 12));
+      if (ok) seen[r.id] = 1;
+      return ok;
+    };
+    if (Array.isArray(d) && d.every(clean)) {
+      return d.map((r) => ({ id: r.id, name: cleanName(r.name) || 'My repertoire', side: r.side, created: r.created || '', lines: r.lines.map((l) => l.slice()) })).slice(0, 60);
+    }
+    let fixed = [];
+    try { fixed = Feed.reps(d).list; } catch (e) { fixed = []; }
+    const ids = {};
+    fixed.forEach((r) => { let id = r.id, n = 2; while (ids[id]) id = r.id.slice(0, 36) + '-' + n++; ids[id] = 1; r.id = id; });
+    if (fixed.length) {
+      if (Store.get(KEYS.rep + '-before-repair', null) === null) Store.set(KEYS.rep + '-before-repair', d);
+      Store.set(KEYS.rep, fixed.slice(0, 60));
+    }
+    return fixed.slice(0, 60);
   },
   save(list) { Store.set(KEYS.rep, list); },
   add(name, side, lines) {
@@ -9834,7 +10677,10 @@ const Vault = (() => {
     return Object.keys(c).sort((a, b) => c[b] - c[a]);
   }
   function importDb(v, how) {
-    if (!v || typeof v !== 'object' || !Array.isArray(v.folders)) return;
+    if (!v || typeof v !== 'object') return;
+    if (Array.isArray(v)) v = { items: v };
+    v = Object.assign({}, v, { folders: Array.isArray(v.folders) ? v.folders : [], items: Array.isArray(v.items) ? v.items : [] });
+    if (!v.folders.length && !v.items.length) return;
     if (how !== 'merge') { Store.set(KEY, v); db = null; load(); save(); return; }
     load();
     v.folders.forEach((f) => { if (f && /^f-[\w-]{2,40}$/.test(f.id || '') && !folder(f.id) && folders().length < 60) folders().push({ id: f.id, name: str(f.name, 40) || 'Folder', rule: cleanRule(f.rule), created: +f.created || Date.now(), sys: false }); });
@@ -12505,20 +13351,24 @@ function openCourseSheet() {
   });
 }
 
-/* ---------- admin: publish content.json straight to GitHub ----------
+/* ---------- admin: publish straight to GitHub ----------
    A fine-grained personal access token with "Contents: read and write" on
    the one repository that hosts the hub. The token stays in this browser tab
-   only (sessionStorage) and is forgotten when the tab closes. */
+   only (sessionStorage) and is forgotten when the tab closes.
+   v3.5: the defaults are the repository and file in CONFIG.remote, the same
+   file every player reads live, and the file name may have no extension. */
 const GitHubPublish = (() => {
   const KEY = 'lc-hub-gh', TOK = 'lc-hub-gh-token';
-  const cfg = () => Object.assign({ owner: '', repo: '', branch: 'main', path: 'content.json' }, Store.get(KEY, {}) || {});
+  const R = () => CONFIG.remote || {};
+  const cfg = () => Object.assign({ owner: R().owner || '', repo: R().repo || '', branch: R().branch || 'main', path: R().path || 'content.json' }, Store.get(KEY, {}) || {});
+  const pathOk = (s) => /^[\w.-]+(\/[\w.-]+)*$/.test(s) && s.length <= 200 && !/(^|\/)\.\.?(\/|$)/.test(s);
   const token = () => { try { return sessionStorage.getItem(TOK) || ''; } catch (e) { return ''; } };
   function b64(text) { const bytes = new TextEncoder().encode(text); let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin); }
   function html() {
     const c = cfg(), f = (n, label, v, ph) => '<label>' + esc(label) + '<input class="input" name="' + n + '" value="' + esc(v) + '" placeholder="' + esc(ph) + '" autocapitalize="off" spellcheck="false" autocomplete="off"></label>';
     return '<div class="divider"></div><div class="gh-box"><h3 style="font-size:16px">' + icon('code-branch') + ' Publish straight to GitHub</h3>' +
-      '<p class="small muted">Commits content.json to your repository, so every device gets your edits without uploading files. GitHub Pages usually updates within a minute.</p>' +
-      '<form class="stack" id="gh-form" autocomplete="off"><div class="rule-grid">' + f('owner', 'Owner (your GitHub name)', c.owner, 'lanckrietchess') + f('repo', 'Repository', c.repo, 'training-hub') + f('branch', 'Branch', c.branch, 'main') + f('path', 'File path', c.path, 'content.json') + '</div>' +
+      '<p class="small muted">Commits your draft to the data file every player reads live, so nobody has to upload anything. Players get it within a few minutes (GitHub caches the file for about five). The file is written in the hub\u2019s own format, with every line, text and key hash; the hub reads that format and the hand-written one alike.</p>' +
+      '<form class="stack" id="gh-form" autocomplete="off"><div class="rule-grid">' + f('owner', 'Owner (your GitHub name)', c.owner, R().owner || 'lanckrietchess') + f('repo', 'Repository', c.repo, R().repo || 'Json-van-app') + f('branch', 'Branch', c.branch, R().branch || 'main') + f('path', 'File path', c.path, R().path || 'json') + '</div>' +
       '<label class="field"><span class="field-label">Access token <small>fine-grained, Contents: read and write, this repository only</small></span><input class="input" name="token" type="password" value="' + esc(token()) + '" autocomplete="off"></label>' +
       '<div class="btn-row"><button class="btn btn-primary btn-sm" type="submit">' + icon('cloud-arrow-up') + ' Publish to GitHub</button></div><p class="form-msg" id="gh-msg" aria-live="polite"></p></form>' +
       '<p class="small muted">The token is kept in this browser tab only. Never paste it anywhere else, and never commit it.</p></div>';
@@ -12531,7 +13381,7 @@ const GitHubPublish = (() => {
     if (g.status === 200) sha = (await g.json()).sha;
     else if (g.status === 401 || g.status === 403) throw new Error('token');
     else if (g.status !== 404) throw new Error('read ' + g.status);
-    const p = await fetchWithTimeout(base, { method: 'PUT', headers: Object.assign({ 'Content-Type': 'application/json' }, h), body: JSON.stringify({ message: 'Publish content.json from the hub admin', content: b64(json), branch: c.branch, sha }) }, 20000);
+    const p = await fetchWithTimeout(base, { method: 'PUT', headers: Object.assign({ 'Content-Type': 'application/json' }, h), body: JSON.stringify({ message: 'Publish ' + c.path + ' from the hub admin', content: b64(json), branch: c.branch, sha }) }, 20000);
     if (p.status === 200 || p.status === 201) return true;
     if (p.status === 401 || p.status === 403) throw new Error('token');
     if (p.status === 409) throw new Error('conflict');
@@ -12542,15 +13392,21 @@ const GitHubPublish = (() => {
     if (!f) return;
     f.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const c = { owner: f.elements.owner.value.trim(), repo: f.elements.repo.value.trim(), branch: f.elements.branch.value.trim() || 'main', path: f.elements.path.value.trim().replace(/^\/+/, '') || 'content.json' };
+      const c = { owner: f.elements.owner.value.trim(), repo: f.elements.repo.value.trim(), branch: f.elements.branch.value.trim() || 'main', path: f.elements.path.value.trim().replace(/^\/+/, '') || R().path || 'content.json' };
       const tok = f.elements.token.value.trim(), say = (t, bad) => { msg.textContent = t; msg.className = 'form-msg ' + (bad ? 'is-bad' : 'is-good'); };
-      if (!/^[\w.-]{1,100}$/.test(c.owner) || !/^[\w.-]{1,100}$/.test(c.repo) || !/^[\w./-]{1,100}$/.test(c.branch) || !/^[\w./-]{1,200}\.json$/.test(c.path)) { say('Check the owner, repository, branch and file path.', true); return; }
+      if (!/^[\w.-]{1,100}$/.test(c.owner) || !/^[\w.-]{1,100}$/.test(c.repo) || !/^[\w./-]{1,100}$/.test(c.branch) || !pathOk(c.path)) { say('Check the owner, repository, branch and file path.', true); return; }
       if (!/^[\w-]{20,255}$/.test(tok)) { say('Paste a GitHub access token first.', true); return; }
       Store.set(KEY, c);
       try { sessionStorage.setItem(TOK, tok); } catch (err) { /* this tab only */ }
       const btn = qs('button[type=submit]', f);
       btn.disabled = true; say('Publishing…');
-      try { await put(json, c, tok); say('Published to GitHub. Players get it once GitHub Pages has updated, usually within a minute.'); toast('content.json published to GitHub.', 'good'); }
+      try {
+        await put(json, c, tok);
+        const live = c.owner === R().owner && c.repo === R().repo && c.branch === (R().branch || 'main') && c.path === R().path;
+        if (live) { try { Site.adopt(JSON.parse(json)); } catch (err) { /* the next sync picks it up */ } }
+        say(live ? 'Published. Players get it within a few minutes.' : 'Published to ' + c.repo + '/' + c.path + '. The hub reads ' + R().repo + '/' + R().path + ', so change CONFIG.remote if this is the new home of your data.');
+        toast('Published to GitHub.', 'good');
+      }
       catch (err) { say(err.message === 'token' ? 'GitHub refused the token. It needs Contents: read and write on this repository.' : err.message === 'conflict' ? 'Someone changed the file at the same time. Try again.' : 'GitHub could not be reached or refused the file (' + err.message + ').', true); }
       finally { btn.disabled = false; }
     });
@@ -12652,12 +13508,18 @@ function boot() {
   };
   if (expired) lost(expired);
   Admin.restore().then((ok) => { if (ok) { refreshChip(); rerender(); } }).catch(() => {});
-  Site.fetchPublished().then((changed) => {
+  /* v3.5: live data from GitHub. The page is already on screen with the copy
+     on this device (or the built-in content); a newer file is applied quietly
+     and only redraws pages where that can't interrupt a drill. */
+  const afterSync = (changed) => {
     const gone = Access.recheck();
     if (gone) { lost(gone); return; }
     refreshChip();
     if (changed && !qs('.sheet-wrap') && ['home', 'about', 'upgrades'].indexOf(routeFromHash()) >= 0) rerender();
-  });
+  };
+  Site.fetchPublished().then(afterSync).catch(() => {});
+  Site.watch(afterSync);
+  SiteURL.tagHead();
   Access.recheckRemote().then((why) => { if (why) lost(why); });
   let linkToken = null;
   try {
@@ -12681,7 +13543,7 @@ function boot() {
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && CONFIG.pwa.serviceWorker) navigator.serviceWorker.register(CONFIG.pwa.serviceWorker).catch(() => {});
   V33.boot();
   V34.boot();
-  window.LC = { version: CONFIG.version, hashKey: Access.hashKey, profileToken: Access.encodeProfile, ai: AI.on() };
+  window.LC = { version: CONFIG.version, hashKey: Access.hashKey, profileToken: Access.encodeProfile, ai: AI.on(), site: SiteURL.base(), deployment: SiteURL.kind(), data: () => Site.status() };
 }
 boot();
 
