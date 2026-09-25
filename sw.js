@@ -1,7 +1,7 @@
 /* Lanckrietchess Training Hub service worker.
    Bump VERSION whenever you upload a new index.html so returning users get it. */
-const VERSION = 'lc-hub-3.4.0';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
+const VERSION = 'lc-hub-3.5.1';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'];
 /* [url, mode]: the mode must match how index.html requests the file, or the cached copy is refused. */
 const CDN = [
   ['https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js', 'no-cors'],
@@ -24,8 +24,10 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  // Pages and published content (content.json): network first, so a new upload is picked up; cached copy when offline.
-  if (req.mode === 'navigate' || (url.origin === location.origin && /\.(html?|json)$/.test(url.pathname))) {
+  // Pages and published data (content.json, or the extension-less "json" file Vercel serves from the
+  // repository): network first, so a new upload is picked up; cached copy when offline.
+  // GitHub raw is not handled here: the hub keeps its own last good copy in localStorage.
+  if (req.mode === 'navigate' || (url.origin === location.origin && /(\.(html?|json)|\/json)$/.test(url.pathname))) {
     e.respondWith(fetch(req).then((res) => {
       if (res && res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); }
       return res;
