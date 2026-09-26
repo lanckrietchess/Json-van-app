@@ -1,4 +1,4 @@
-/* Lanckrietchess hub worker v3.3: the AI brain of the Training Hub (optional),
+/* Lanckrietchess hub worker v3.4: the AI brain of the Training Hub (optional),
    and the home of the community leaderboard and the training stats.
 
    A free Cloudflare Worker that answers for the three assistants in the hub:
@@ -334,405 +334,178 @@ async function stats(action, body, env, request) {
     const stmts = [db.prepare('INSERT INTO players (device, name, tag, bracket, opt_in, hidden, updated) VALUES (?1, ?2, ?3, ?4, 1, 0, ?5) ON CONFLICT(device) DO UPDATE SET name = excluded.name, bracket = excluded.bracket, opt_in = 1, updated = excluded.updated')
       .bind(device, name, playerTag(device), BRACKETS[body.bracket] ? body.bracket : '', now)];
     if (rows.length) stmts.push(db.prepare("INSERT OR IGNORE INTO attempts (device, pid, kind, acc, ms, mv, d, t, cat) SELECT ?1, json_extract(value, '$.id'), json_extract(value, '$.k'), json_extract(value, '$.a'), json_extract(value, '$.ms'), json_extract(value, '$.mv'), json_extract(value, '$.d'), json_extract(value, '$.t'), json_extract(value, '$.c') FROM json_each(?2)").bind(device, JSON.stringify(rows)));
-    await db.batch(stmts);
     const cfg = await lbSettings(env);
-    const all = (await db.prepare('SELECT pid AS id, kind AS k, acc AS a, ms, mv, d, t FROM attempts WHERE device = ?1 AND t >= ?2 ORDER BY t').bind(device, now - 400 * 864e5).all()).results || [];
-    const periods = ['week', 'month', 'all'].map((p) => { const r = lcPeriod(p, now); return [r.key, lcScore(all, { from: r.from, to: r.to, min: cfg.min, w: cfg.w })]; });
-    const args = [device], vals = periods.map((x, i) => {
-      const s = x[1], b = 2 + i * 9;
-      args.push(x[0], s.score, s.n, s.acc, s.speed, s.gain, s.rating, s.ranked ? 1 : 0, now);
-      return '(?1, ' + [0, 1, 2, 3, 4, 5, 6, 7, 8].map((j) => '?' + (b + j)).join(', ') + ')';
-    });
-    await db.prepare('INSERT INTO scores (device, period, score, n, acc, speed, gain, rating, ranked, updated) VALUES ' + vals.join(', ') + ' ON CONFLICT(device, period) DO UPDATE SET score = excluded.score, n = excluded.n, acc = excluded.acc, speed = excluded.speed, gain = excluded.gain, rating = excluded.rating, ranked = excluded.ranked, updated = excluded.updated').bind(...args).run();
+    for (const pKey of ['week', 'month', 'all']) {
+      const per = lcPeriod(pKey, now);
+      const allAtt = await db.prepare('SELECT pid, kind AS k, acc AS a, ms, mv, d, t, cat AS c FROM attempts WHERE device = ?1').bind(device).all();
+      const res = lcScore(allAtt.results || [], { from: per.from, to: per.to, min: cfg.min, w: cfg.w });
+      stmts.push(db.prepare('INSERT INTO scores (device, period, score, n, acc, speed, gain, rating, ranked, updated) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10) ON CONFLICT(device, period) DO UPDATE SET score = excluded.score, n = excluded.n, acc = excluded.acc, speed = excluded.speed, gain = excluded.gain, rating = excluded.rating, ranked = excluded.ranked, updated = excluded.updated')
+        .bind(device, per.key, res.score, res.n, res.acc, res.speed, res.gain, res.rating, res.ranked ? 1 : 0, now));
+    }
+    await db.batch(stmts);
     topCache.clear();
-    const wk = periods[0][1];
-    return { ok: true, stored: rows.length, dropped: list.length - rows.length, week: { score: wk.score, n: wk.n, ranked: wk.ranked, need: wk.need } };
+    const curPer = lcPeriod('week', now);
+    const mine = await db.prepare('SELECT score, n, ranked, rating FROM scores WHERE device = ?1 AND period = ?2').bind(device, curPer.key).first();
+    return { ok: true, mine: mine || { score: 0, n: 0, ranked: 0, rating: 1000 } };
   }
   if (action === 'lb_top') {
-    if (limited('lbt|' + ip, 300)) throw fault('limit', 429);
-    const p = ['week', 'month', 'all'].indexOf(body.period) >= 0 ? body.period : 'week', key = lcPeriod(p, now).key, FROM = 'FROM scores s JOIN players p ON p.device = s.device WHERE s.period = ?1 AND s.ranked = 1 AND p.hidden = 0 AND p.opt_in = 1';
-    let top = topCache.get(key);
-    if (!top || now - top.at > 45000) {
-      const rows = (await db.prepare('SELECT s.device, s.score, s.n, s.acc, s.gain, p.name, p.tag, p.bracket ' + FROM + ' ORDER BY s.score DESC, s.n DESC, s.updated ASC LIMIT 50').bind(key).all()).results || [];
-      const total = await db.prepare('SELECT COUNT(*) AS n ' + FROM).bind(key).first();
-      top = { at: now, rows, total: (total && total.n) || 0 };
-      topCache.set(key, top);
-    }
-    let you = null;
-    if (device) {
-      const me = await db.prepare('SELECT s.score, s.n, s.ranked, p.hidden FROM scores s JOIN players p ON p.device = s.device WHERE s.device = ?1 AND s.period = ?2').bind(device, key).first();
-      if (me) {
-        const above = me.ranked && !me.hidden ? await db.prepare('SELECT COUNT(*) AS n ' + FROM + ' AND s.score > ?2').bind(key, me.score).first() : null;
-        you = { score: me.score, n: me.n, ranked: !!me.ranked, hidden: !!me.hidden, rank: above ? above.n + 1 : null };
-      }
-    }
-    return { ok: true, period: p, key, total: top.total, updated: top.at, you,
-      rows: top.rows.map((r, i) => ({ rank: i + 1, name: r.name, tag: r.tag, bracket: r.bracket, score: r.score, n: r.n, acc: Math.round(r.acc * 100), gain: r.gain, you: !!device && r.device === device })) };
+    const perKey = String(body.period || 'week');
+    const per = lcPeriod(perKey === 'month' ? 'month' : perKey === 'all' ? 'all' : 'week', now);
+    const cacheKey = 'lbt|' + per.key;
+    if (topCache.has(cacheKey) && now - topCache.get(cacheKey).at < 30000) return { ok: true, period: per.key, list: topCache.get(cacheKey).list };
+    const rows = await db.prepare('SELECT p.name, p.tag, p.bracket, s.score, s.n, s.acc, s.speed, s.gain, s.rating, s.ranked FROM scores s JOIN players p ON p.device = s.device WHERE s.period = ?1 AND p.opt_in = 1 AND p.hidden = 0 ORDER BY s.ranked DESC, s.score DESC LIMIT 50').bind(per.key).all();
+    const list = (rows.results || []).map((r, i) => ({ rank: i + 1, name: r.name, tag: r.tag, bracket: r.bracket, score: r.score, n: r.n, acc: Math.round(r.acc * 100), rating: r.rating, ranked: !!r.ranked }));
+    topCache.set(cacheKey, { at: now, list });
+    return { ok: true, period: per.key, list };
   }
   if (action === 'lb_forget') {
     if (!device) throw fault('bad-request');
-    await db.batch(['DELETE FROM attempts WHERE device = ?1', 'DELETE FROM scores WHERE device = ?1', 'DELETE FROM trim_games WHERE device = ?1', 'DELETE FROM trim_solved WHERE device = ?1', 'DELETE FROM players WHERE device = ?1'].map((q) => db.prepare(q).bind(device)));
+    await db.batch([db.prepare('DELETE FROM attempts WHERE device = ?1').bind(device), db.prepare('DELETE FROM scores WHERE device = ?1').bind(device), db.prepare('DELETE FROM players WHERE device = ?1').bind(device)]);
     topCache.clear();
     return { ok: true };
   }
   if (action === 'lb_admin') {
     admin();
-    if (body.op === 'hide' || body.op === 'show') {
-      const target = String(body.target || '');
-      if (!/^[\w-]{8,64}$/.test(target)) throw fault('bad-request');
-      await db.prepare('UPDATE players SET hidden = ?2 WHERE device = ?1').bind(target, body.op === 'hide' ? 1 : 0).run();
-      topCache.clear();
+    const target = String(body.target || '');
+    if (body.op === 'list') {
+      const p = await db.prepare('SELECT device, name, tag, bracket, hidden, updated FROM players ORDER BY updated DESC LIMIT 100').all();
+      return { ok: true, players: p.results || [] };
     }
-    const rows = (await db.prepare('SELECT p.device, p.name, p.tag, p.bracket, p.hidden, p.updated, s.score, s.n, s.ranked FROM players p LEFT JOIN scores s ON s.device = p.device AND s.period = ?1 ORDER BY p.hidden DESC, s.score DESC, p.updated DESC LIMIT 300').bind(lcPeriod('week', now).key).all()).results || [];
-    return { ok: true, players: rows.map((r) => ({ device: r.device, name: r.name, tag: r.tag, bracket: r.bracket, hidden: !!r.hidden, score: r.score || 0, n: r.n || 0, ranked: !!r.ranked })) };
+    if (body.op === 'hide' || body.op === 'show') {
+      await db.prepare('UPDATE players SET hidden = ?1 WHERE device = ?2').bind(body.op === 'hide' ? 1 : 0, target).run();
+      topCache.clear();
+      return { ok: true };
+    }
+    throw fault('bad-op');
   }
   if (action === 'ev_sync') {
-    const anon = /^a-[a-z0-9]{10,30}$/.test(String(body.anon || '')) ? String(body.anon) : '';
-    if (!anon) throw fault('bad-request');
-    if (limited('ev|' + anon, 60) || limited('evi|' + ip, 400)) throw fault('limit', 429);
-    const rows = (Array.isArray(body.events) ? body.events : []).slice(0, 300).map((x) => cleanEvent(x, now)).filter(Boolean);
-    if (rows.length) await db.prepare("INSERT OR IGNORE INTO events (anon, b, e, k, g, x, y, c, q, v, t) SELECT ?1, ?2, json_extract(value, '$.e'), json_extract(value, '$.k'), json_extract(value, '$.g'), json_extract(value, '$.x'), json_extract(value, '$.y'), json_extract(value, '$.c'), json_extract(value, '$.q'), json_extract(value, '$.v'), json_extract(value, '$.t') FROM json_each(?3)")
-      .bind(anon, BRACKETS[body.b] ? body.b : '', JSON.stringify(rows)).run();
-    return { ok: true, stored: rows.length };
+    const anon = String(body.anon || '');
+    if (!/^[\w-]{8,64}$/.test(anon)) throw fault('bad-anon');
+    if (limited('evs|' + anon, 120)) throw fault('limit', 429);
+    const b = BRACKETS[body.b] ? body.b : 'unrated';
+    const list = (Array.isArray(body.events) ? body.events : []).slice(0, 300).map((x) => cleanEvent(x, now)).filter(Boolean);
+    if (!list.length) return { ok: true, saved: 0 };
+    await db.prepare("INSERT OR IGNORE INTO events (anon, b, e, k, g, x, y, c, q, v, t) SELECT ?1, ?2, json_extract(value, '$.e'), json_extract(value, '$.k'), json_extract(value, '$.g'), json_extract(value, '$.x'), json_extract(value, '$.y'), json_extract(value, '$.c'), json_extract(value, '$.q'), json_extract(value, '$.v'), json_extract(value, '$.t') FROM json_each(?3)").bind(anon, b, JSON.stringify(list)).run();
+    return { ok: true, saved: list.length };
   }
   if (action === 'ev_forget') {
-    const anon = /^a-[a-z0-9]{10,30}$/.test(String(body.anon || '')) ? String(body.anon) : '';
-    if (!anon) throw fault('bad-request');
-    await db.batch(['DELETE FROM events WHERE anon = ?1', 'DELETE FROM vault_items WHERE anon = ?1'].map((q) => db.prepare(q).bind(anon)));
+    const anon = String(body.anon || '');
+    if (!/^[\w-]{8,64}$/.test(anon)) throw fault('bad-anon');
+    await db.prepare('DELETE FROM events WHERE anon = ?1').bind(anon).run();
     return { ok: true };
   }
   if (action === 'insights') {
     admin();
-    const days = Math.max(1, Math.min(365, parseInt(body.days, 10) || 30));
-    const rows = (await db.prepare('SELECT anon AS a, b, e, k, g, x, y, c, q, v, t FROM events WHERE t >= ?1 ORDER BY t DESC LIMIT 60000').bind(now - days * 864e5).all()).results || [];
-    await db.prepare('DELETE FROM events WHERE t < ?1').bind(now - 400 * 864e5).run();
-    const players = await db.prepare('SELECT COUNT(*) AS n FROM players WHERE opt_in = 1 AND hidden = 0').first();
-    return { ok: true, days, players: (players && players.n) || 0, data: lcAggregate(rows) };
+    const days = Math.max(1, Math.min(365, Math.round(+body.days || 30)));
+    const since = now - days * 86400000;
+    const rows = await db.prepare('SELECT anon, b, e, k, g, x, y, c, q, v, t FROM events WHERE t >= ?1 ORDER BY t ASC').bind(since).all();
+    const A = lcAggregate(rows.results || []);
+    return { ok: true, days, agg: A };
   }
-  /* ---------- v3.4 ---------- */
-  if (action === 'vb_sync') {
-    const anon = /^a-[a-z0-9]{10,30}$/.test(String(body.anon || '')) ? String(body.anon) : '';
-    if (!anon) throw fault('bad-request');
-    if (limited('vb|' + anon, 30) || limited('vbi|' + ip, 200)) throw fault('limit', 429);
-    const day = await db.prepare('SELECT COUNT(*) AS n FROM vault_items WHERE anon = ?1 AND t >= ?2').bind(anon, now - 864e5).first();
-    const rows = (Array.isArray(body.items) ? body.items : []).slice(0, 100).map((x) => cleanVaultItem(x, now)).filter(Boolean).slice(0, Math.max(0, 300 - ((day && day.n) || 0)));
-    if (rows.length) await db.prepare("INSERT OR REPLACE INTO vault_items (anon, kind, sig, b, opening, phase, k, cls, chapter, tags, fen, san, best, best_san, num, color, cp_before, cp_after, pgn, acc, t) SELECT ?1, json_extract(value, '$.kind'), json_extract(value, '$.sig'), json_extract(value, '$.b'), json_extract(value, '$.opening'), json_extract(value, '$.phase'), json_extract(value, '$.k'), json_extract(value, '$.cls'), json_extract(value, '$.chapter'), json_extract(value, '$.tags'), json_extract(value, '$.fen'), json_extract(value, '$.san'), json_extract(value, '$.best'), json_extract(value, '$.bestSan'), json_extract(value, '$.num'), json_extract(value, '$.color'), json_extract(value, '$.before'), json_extract(value, '$.after'), json_extract(value, '$.pgn'), json_extract(value, '$.acc'), json_extract(value, '$.t') FROM json_each(?2)")
-      .bind(anon, JSON.stringify(rows)).run();
-    return { ok: true, stored: rows.length };
-  }
-  if (action === 'vb_list') {
-    admin();
-    const days = Math.max(1, Math.min(365, parseInt(body.days, 10) || 90)), kind = /^(mistake|brilliant|game)$/.test(String(body.kind)) ? String(body.kind) : 'mistake';
-    const rows = (await db.prepare('SELECT kind, sig, b, opening, phase, k, cls, chapter, tags, fen, san, best, best_san AS bestSan, num, color, cp_before AS before, cp_after AS after, pgn, acc, t FROM vault_items WHERE kind = ?1 AND t >= ?2 ORDER BY t DESC LIMIT 3000').bind(kind, now - days * 864e5).all()).results || [];
-    await db.prepare('DELETE FROM vault_items WHERE t < ?1').bind(now - 400 * 864e5).run();
-    return { ok: true, days, rows };
-  }
-  if (action === 'elo_verify') {
-    const site = body.site === 'lichess' || body.site === 'chesscom' ? String(body.site) : '', user = /^[A-Za-z0-9_-]{2,30}$/.test(String(body.user || '')) ? String(body.user) : '', code = /^LC-[A-Z0-9]{6}$/.test(String(body.code || '')) ? String(body.code) : '';
-    if (!device || !site || !user || !code) throw fault('bad-request');
-    if (limited('elv|' + device, 6) || limited('elvi|' + ip, 30)) throw fault('limit', 429);
-    const p = await eloFetch(site, user, env);
-    if (!p) throw fault('upstream', 502);
-    if (p.missing) throw fault('not-found', 404);
-    if (p.text.toUpperCase().indexOf(code) < 0) throw fault('code', 400);
-    const shown = p.user.toLowerCase() === user.toLowerCase() ? user : p.user;
-    await db.batch([
-      db.prepare('DELETE FROM elo_players WHERE site = ?1 AND lower(uname) = lower(?2) AND device != ?3').bind(site, shown, device),
-      db.prepare('INSERT INTO elo_players (device, site, uname, name, avatar, rapid, blitz, bullet, hidden, checked, updated) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0, ?9, ?9) ON CONFLICT(device, site) DO UPDATE SET uname = excluded.uname, name = excluded.name, avatar = excluded.avatar, rapid = excluded.rapid, blitz = excluded.blitz, bullet = excluded.bullet, checked = excluded.checked, updated = excluded.updated')
-        .bind(device, site, shown, playerName(body.name), p.avatar, p.rapid, p.blitz, p.bullet, now)
-    ]);
-    return { ok: true, user: shown, avatar: p.avatar, rapid: p.rapid, blitz: p.blitz, bullet: p.bullet };
-  }
-  if (action === 'elo_top') {
-    const site = body.site === 'lichess' ? 'lichess' : 'chesscom', mode = /^(rapid|blitz|bullet)$/.test(String(body.mode)) ? String(body.mode) : 'rapid';
-    if (limited('elt|' + ip, 120)) throw fault('limit', 429);
-    const stale = (await db.prepare('SELECT device, uname FROM elo_players WHERE site = ?1 AND checked < ?2 ORDER BY checked LIMIT 3').bind(site, now - 6 * 36e5).all()).results || [];
-    for (const r of stale) {
-      const p = await eloFetch(site, r.uname, env);
-      if (p && p.missing) await db.prepare('DELETE FROM elo_players WHERE device = ?1 AND site = ?2').bind(r.device, site).run();
-      else if (p) await db.prepare('UPDATE elo_players SET avatar = ?3, rapid = ?4, blitz = ?5, bullet = ?6, checked = ?7 WHERE device = ?1 AND site = ?2').bind(r.device, site, p.avatar, p.rapid, p.blitz, p.bullet, now).run();
-      else await db.prepare('UPDATE elo_players SET checked = ?3 WHERE device = ?1 AND site = ?2').bind(r.device, site, now - 5 * 36e5).run();
-    }
-    const all = (await db.prepare('SELECT device, uname, name, avatar, ' + mode + ' AS rating FROM elo_players WHERE site = ?1 AND hidden = 0 AND ' + mode + ' IS NOT NULL ORDER BY ' + mode + ' DESC, updated ASC LIMIT 1000').bind(site).all()).results || [];
-    const rows = all.map((r, i) => ({ rank: i + 1, user: r.uname, name: r.name || '', avatar: r.avatar || '', rating: r.rating, you: !!device && r.device === device }));
-    const you = rows.filter((r) => r.you)[0];
-    return { ok: true, total: rows.length, rows: rows.slice(0, 50), you: you ? { rank: you.rank, rating: you.rating } : null };
-  }
-  if (action === 'elo_forget') {
-    if (!device) throw fault('bad-request');
-    const site = body.site === 'lichess' || body.site === 'chesscom' ? String(body.site) : '';
-    if (site) await db.prepare('DELETE FROM elo_players WHERE device = ?1 AND site = ?2').bind(device, site).run();
-    else await db.prepare('DELETE FROM elo_players WHERE device = ?1').bind(device).run();
-    return { ok: true };
-  }
-  if (action === 'lb_volume') {
-    const period = ['week', 'month', 'all'].indexOf(body.period) >= 0 ? body.period : 'week', r = lcPeriod(period, now);
-    const cat = ['all', 'opening', 'middlegame', 'endgame', 'hard'].indexOf(body.cat) >= 0 ? body.cat : 'all', sort = ['solved', 'accuracy', 'hard'].indexOf(body.sort) >= 0 ? body.sort : 'solved';
-    if (limited('lv|' + ip, 120)) throw fault('limit', 429);
-    const res = (await db.prepare("SELECT a.device, p.name, p.tag, p.bracket, COALESCE(a.cat, CASE WHEN a.kind IN ('openings', 'mspcrep', 'shuffle') THEN 'opening' WHEN a.kind = 'endgame' THEN 'endgame' WHEN a.kind = 'hard' THEN 'hard' ELSE 'middlegame' END) AS c, a.pid, a.t / 86400000 AS day, COUNT(*) AS n, SUM(CASE WHEN a.acc >= 0.999 THEN 1 ELSE 0 END) AS ok FROM attempts a JOIN players p ON p.device = a.device WHERE p.opt_in = 1 AND p.hidden = 0 AND a.t >= ?1 AND a.t < ?2 AND (a.ms = 0 OR a.ms >= a.mv * 500) GROUP BY a.device, c, a.pid, day LIMIT 100000")
-      .bind(r.from, r.to).all()).results || [];
-    const by = {};
-    res.forEach((x) => {
-      const d = by[x.device] || (by[x.device] = { name: x.name, tag: x.tag, bracket: x.bracket, c: {} }), n = Math.min(3, x.n), ok = Math.min(n, x.ok);
-      ['all', x.c].forEach((k) => { const c = d.c[k] || (d.c[k] = { n: 0, ok: 0 }); c.n += n; c.ok += ok; });
-    });
-    const out = Object.keys(by).map((dev) => {
-      const d = by[dev], a = d.c[cat] || { n: 0, ok: 0 }, h = d.c.hard || { n: 0, ok: 0 }, all = d.c.all || { n: 0, ok: 0 };
-      return { device: dev, name: d.name, tag: d.tag, bracket: d.bracket, n: a.n, ok: a.ok, acc: a.n ? Math.round(a.ok / a.n * 100) : 0, lb: wilson(a.ok, a.n), hardN: h.n, hardAcc: h.n ? Math.round(h.ok / h.n * 100) : 0, hardLb: wilson(h.ok, h.n), allOk: all.ok };
-    }).filter((x) => x.allOk >= VOL_MIN && (sort === 'hard' ? x.hardN >= 5 : x.n > 0))
-      .sort((a, b) => (sort === 'accuracy' ? b.lb - a.lb || b.ok - a.ok : sort === 'hard' ? b.hardLb - a.hardLb || b.hardN - a.hardN : b.ok - a.ok || b.acc - a.acc));
-    const rows = out.map((x, i) => ({ rank: i + 1, name: x.name, tag: x.tag, bracket: x.bracket, n: x.n, ok: x.ok, acc: x.acc, hardN: x.hardN, hardAcc: x.hardAcc, you: !!device && x.device === device }));
-    const you = rows.filter((x) => x.you)[0];
-    return { ok: true, total: rows.length, rows: rows.slice(0, 50), you: you ? { rank: you.rank } : null };
-  }
-  if (action === 'tr_sync') {
-    if (!device) throw fault('bad-request');
-    if (limited('trs|' + device, 30) || limited('trsi|' + ip, 200)) throw fault('limit', 429);
-    const name = playerName(body.name);
-    if (!name) throw fault('name');
-    const okT = (t) => Number.isFinite(t) && t > now - 400 * 864e5 && t < now + 5 * 60000, cnt = (v) => Math.max(0, Math.min(400, Math.round(+v) || 0));
-    const games = (Array.isArray(body.games) ? body.games : []).slice(0, 200).map((x) => { const t = Math.round(+(x && x.t)); return x && /^g[0-9a-f]{8}$/.test(String(x.g || '')) && okT(t) ? { g: String(x.g), t, bl: cnt(x.bl), mi: cnt(x.mi), n: cnt(x.n) } : null; }).filter(Boolean);
-    const solved = (Array.isArray(body.solved) ? body.solved : []).slice(0, 400).map((x) => { const t = Math.round(+(x && x.t)), k = String((x && x.k) || ''); return /^[\w:|.-]{1,80}$/.test(k) && okT(t) ? { k, t } : null; }).filter(Boolean);
-    const stmts = [db.prepare('INSERT INTO players (device, name, tag, bracket, opt_in, hidden, updated) VALUES (?1, ?2, ?3, ?4, 1, 0, ?5) ON CONFLICT(device) DO UPDATE SET name = excluded.name, bracket = excluded.bracket, opt_in = 1, updated = excluded.updated')
-      .bind(device, name, playerTag(device), BRACKETS[body.bracket] ? body.bracket : '', now)];
-    if (games.length) stmts.push(db.prepare("INSERT INTO trim_games (device, g, t, bl, mi, n) SELECT ?1, json_extract(value, '$.g'), json_extract(value, '$.t'), json_extract(value, '$.bl'), json_extract(value, '$.mi'), json_extract(value, '$.n') FROM json_each(?2) WHERE true ON CONFLICT(device, g) DO UPDATE SET bl = excluded.bl, mi = excluded.mi, n = excluded.n").bind(device, JSON.stringify(games)));
-    if (solved.length) stmts.push(db.prepare("INSERT OR IGNORE INTO trim_solved (device, k, t) SELECT ?1, json_extract(value, '$.k'), json_extract(value, '$.t') FROM json_each(?2)").bind(device, JSON.stringify(solved)));
-    await db.batch(stmts);
-    return { ok: true, games: games.length, solved: solved.length };
-  }
-  if (action === 'tr_top') {
-    const period = ['week', 'month', 'all'].indexOf(body.period) >= 0 ? body.period : 'week', sort = ['reviewed', 'solved', 'reduction'].indexOf(body.sort) >= 0 ? body.sort : 'reviewed', r = lcPeriod(period, now), W = 7 * 864e5;
-    if (limited('trt|' + ip, 120)) throw fault('limit', 429);
-    const players = (await db.prepare('SELECT device, name, tag, bracket FROM players WHERE opt_in = 1 AND hidden = 0').all()).results || [];
-    const games = (await db.prepare('SELECT device, t, bl, mi FROM trim_games WHERE t >= ?1').bind(Math.min(r.from, now - 2 * W)).all()).results || [];
-    const solved = (await db.prepare('SELECT device, COUNT(*) AS n FROM trim_solved WHERE t >= ?1 AND t < ?2 GROUP BY device').bind(r.from, r.to).all()).results || [];
-    const by = {}, get = (d) => by[d] || (by[d] = { reviewed: 0, solved: 0, wk: [0, 0], pv: [0, 0] });
-    games.forEach((g) => { const x = get(g.device); if (g.t >= r.from && g.t < r.to) x.reviewed++; if (g.t > now - W) { x.wk[0]++; x.wk[1] += g.bl + g.mi; } else if (g.t > now - 2 * W) { x.pv[0]++; x.pv[1] += g.bl + g.mi; } });
-    solved.forEach((s) => { get(s.device).solved = s.n; });
-    const rows = players.filter((p) => by[p.device]).map((p) => {
-      const x = by[p.device], thisR = x.wk[0] ? x.wk[1] / x.wk[0] : 0, prevR = x.pv[0] ? x.pv[1] / x.pv[0] : 0;
-      return { device: p.device, name: p.name, tag: p.tag, bracket: p.bracket, reviewed: x.reviewed, solved: x.solved, reduction: x.wk[0] >= 2 && x.pv[0] >= 2 && prevR > 0 ? Math.round((prevR - thisR) / prevR * 100) : null };
-    }).filter((x) => (sort === 'reduction' ? x.reduction != null : x[sort] > 0)).sort((a, b) => b[sort] - a[sort] || b.reviewed - a.reviewed)
-      .map((x, i) => ({ rank: i + 1, name: x.name, tag: x.tag, bracket: x.bracket, reviewed: x.reviewed, solved: x.solved, reduction: x.reduction, you: !!device && x.device === device }));
-    const you = rows.filter((x) => x.you)[0];
-    return { ok: true, total: rows.length, rows: rows.slice(0, 50), you: you ? { rank: you.rank } : null };
-  }
-  throw fault('bad-request');
+  throw fault('unknown-action');
 }
-/* v3.4: the course index. Keep DEFAULT_CURRICULUM identical to the hub's copy. */
-const DEFAULT_CURRICULUM = [
-  '# The MSPC System [free] | mspc',
-  '## M, Move: read their last move | M, threat, check, hanging',
-  '- What did their move change? | Every move attacks, defends or prepares something. Name it before you choose your own move.',
-  '- The threat scan | Before every move: which checks, captures and attacks does your opponent have now?',
-  '## S, Specifics: what this position is about | S, loose, hanging, structure, king, plan',
-  '- Loose pieces drop off | An undefended piece is a target. Count the defenders of every piece before you move.',
-  '- What the structure asks for | The pawn structure tells you where to play: the break, the outpost, the weak square.',
-  '## P, Priorities: checks, captures, attacks | P, forcing, check, capture, fork, pin, skewer, mate',
-  '- Checks, captures and attacks for both sides | List your forcing moves, then theirs. Forcing moves first, quiet moves after.',
-  '- Take the initiative | A forcing move that gains time beats a quiet move that only reacts.',
-  '## C, Calculation: to the end | C, calculation, sacrifice, mate',
-  '- Calculate to the end | Follow every forcing line until the position is quiet, including their best reply.',
-  '- The calculation cutoff | Do not stop halfway out of fear or hope: the reply you skipped is the one that beats you.',
-  '',
-  '# Blunder Bootcamp [community] | tactics',
-  '## Free material: count before you move [free] | S, hanging, loose, capture | #middlegame',
-  '## The fork: one move, two targets | P, fork, forcing | #middlegame',
-  '## The back rank | M, mate, back-rank, king | #middlegame',
-  '## Pins and skewers | P, pin, skewer | #middlegame',
-  '',
-  '# Anti-Blunder Bootcamp [community] | blunder',
-  '## Read their threat first [free] | M, threat, check | #middlegame',
-  '## The blunder check | M, C, hanging, loose | #middlegame',
-  '',
-  '# Colle-Koltanowski repertoire [vault] | colle',
-  '## Speedcourse, 800 to 1200 [free] | colle, opening, trap | #openings',
-  '- The setup and the e4 break | d4, Nf3, e3, Bd3, c3 and Nbd2, then e3-e4 at the right moment.',
-  '- Punish ...c4: the e5 fork | When Black closes the centre with ...c4, e4-e5 hits two pieces at once.',
-  '## Intermediate, 1200 to 1600 | colle, opening, middlegame, plan',
-  '## Advanced, 1600+: the Koltanowski and the 9.b4 Phoenix | colle, opening',
-  '## Model games | colle, middlegame, plan, structure',
-  '',
-  '# Caro-Kann repertoire [vault] | caro-kann',
-  '## Advance with 3...c5 [free] | caro-kann, opening | #openings',
-  '## Classical and the 5.Qe2 trap [free] | caro-kann, opening, trap | #openings',
-  '## The full repertoire against every White try | caro-kann, opening, middlegame, plan',
-  '',
-  '# Semi-Slav repertoire [vault] | semi-slav, slav',
-  '## The Semi-Slav setup [free] | semi-slav, opening | #openings',
-  '## Meran: ...dxc4 and ...b5 | semi-slav, opening, middlegame',
-  '## Moscow: 5...h6 6.Bxf6 Qxf6 | semi-slav, opening',
-  '## 1...c6 against the London and the Catalan | london, catalan, opening',
-  '',
-  '# MSPC Middlegame Suite [vault] | middlegame',
-  '## Structure plans from your repertoire | middlegame, plan, structure, S | #middlegame',
-  '## Attack the king | middlegame, king, sacrifice, mate, C',
-  '## Convert a winning position | middlegame, C, calculation',
-  '',
-  '# Endgame Suite [vault] | endgame',
-  '## King and pawn: opposition and key squares [free] | endgame, pawn-endgame | #endgame',
-  '## Basic mates [free] | endgame, mate | #endgame',
-  '## Rook endgames: Lucena and Philidor | endgame, rook-endgame | #endgame'
-].join('\n');
-function courseIndex(doc) {
-  const t = doc && doc.settings && typeof doc.settings.curriculum === 'string' && doc.settings.curriculum.trim() ? doc.settings.curriculum : DEFAULT_CURRICULUM, out = [];
-  String(t).split(/\r?\n/).slice(0, 800).forEach((raw) => {
-    const l = raw.trim(), p = l.replace(/^#{1,2}\s*|^-\s*/, '').split('|').map((x) => x.trim());
-    if (/^##\s/.test(l)) out.push('  Chapter: ' + oneLine(p[0], 100));
-    else if (/^#\s/.test(l)) out.push('Module: ' + oneLine(p[0], 90));
-    else if (/^-\s/.test(l)) out.push('    Lesson: ' + oneLine(p[0], 110) + (p[1] ? ' (' + oneLine(p[1], 200) + ')' : ''));
-  });
-  return out.length ? '\n\nCourse index. The curriculum you point students to: [free] is free, [community] is free with the Skool community key, [vault] is the paid Accelerator. Name the exact module, chapter and lesson when you explain a mistake.\n' + out.join('\n').slice(0, 7000) : '';
-}
-const INTERROGATION_RULES = [
-  'Blunder interrogation mode',
-  '- The app is walking the student through one of their own mistakes, one MSPC step at a time, in an open chat. <board_context> shows the step, the question the app asked, the engine facts and the app’s own check of the answer.',
-  '- Be Socratic. Judge the student’s answer against the engine facts: say what is right, then ask one short follow-up question about what they missed. Two to four sentences.',
-  '- If the answer names the key fact of this step (the real threat at M, a loose piece at S, the forcing moves at P), or the app’s check says pass, confirm it in one or two sentences and end your reply with the exact tag [[PASS]]. The app then moves on by itself, so don’t ask another question. Without a pass, don’t add the tag.',
-  '- Never name the better move or the engine line before step C, even if the student asks. At step C they find the move themselves on the board.',
-  '- The engine facts are for you. Use them to check the answer; don’t read them out.',
-  '- If the student’s Hyper-Focus matches this step, say so: that is the habit they committed to.'
-].join('\n');
 
-function boardBlock(c) {
-  c = c && typeof c === 'object' ? c : {};
-  const L = [], add = (label, v, n) => { const t = oneLine(v, n); if (t) L.push(label + ': ' + t); };
-  add('Position (FEN)', c.fen, 100);
-  add('Side to move', c.turn, 10);
-  add('The student plays', c.student, 10);
-  add('Where we are', c.where, 200);
-  add('Move history', c.history, 1600);
-  add('Last move', c.last, 20);
-  if (c.over) add('The game is over on the board', c.over, 20);
-  add('Legal moves', c.legal, 900);
-  const e = c.engine;
-  if (e && Array.isArray(e.lines) && e.lines.length) {
-    L.push('Stockfish' + (e.depth ? ', depth ' + (parseInt(e.depth, 10) || 0) : '') + ', evaluations from White\'s point of view:');
-    e.lines.slice(0, 5).forEach((x, i) => L.push('  ' + (i + 1) + '. ' + oneLine(x && x.eval, 12) + '  ' + oneLine(x && x.pv, 200)));
-  } else L.push('Stockfish: no engine lines for this position.');
-  const r = c.review;
-  if (r && typeof r === 'object') add('Trim review of that move', [r.move, r.verdict, r.mspc, r.note, r.better ? 'better was ' + r.better : ''].map((x) => oneLine(x, 240)).filter(Boolean).join('; '), 700);
-  const g = c.game;
-  if (g && typeof g === 'object') {
-    add('Game', [g.white && 'White ' + oneLine(g.white, 40) + (g.whiteElo ? ' (' + oneLine(g.whiteElo, 6) + ')' : ''),
-      g.black && 'Black ' + oneLine(g.black, 40) + (g.blackElo ? ' (' + oneLine(g.blackElo, 6) + ')' : ''),
-      g.result && 'result ' + oneLine(g.result, 8), oneLine(g.opening, 60)].filter(Boolean).join(', '), 300);
+async function handle(request, env) {
+  const origin = request.headers.get('Origin') || '';
+  const allowed = String(env.ALLOWED_ORIGINS || '*').split(',').map((s) => s.trim());
+  const cors = allowed.includes('*') || allowed.includes(origin) ? origin : allowed[0] || '*';
+  const headers = { 'Access-Control-Allow-Origin': cors, 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Content-Type': 'application/json' };
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
+  if (request.method !== 'POST') return new Response(JSON.stringify({ ok: false, reason: 'method' }), { status: 405, headers });
+
+  try {
+    const body = await request.json();
+    const action = String(body.action || 'chat');
+    if (STATS_ACTIONS[action]) {
+      const res = await stats(action, body, env, request);
+      return new Response(JSON.stringify(res), { headers });
+    }
+
+    if (!env.ANTHROPIC_API_KEY) return new Response(JSON.stringify({ ok: false, reason: 'no-api-key' }), { status: 500, headers });
+
+    const bot = String(body.bot || 'coachFree');
+    if (!DEFAULT_PROMPTS[bot]) return new Response(JSON.stringify({ ok: false, reason: 'bad-bot' }), { status: 400, headers });
+
+    const device = String(body.device || 'anon');
+    const limits = { coachFree: +env.FREE_PER_HOUR || 20, coachPaid: +env.PAID_PER_HOUR || 120, sales: +env.SALES_PER_HOUR || 30 };
+    if (limited(bot + '|' + device, limits[bot] || 30)) return new Response(JSON.stringify({ ok: false, reason: 'rate-limit' }), { status: 429, headers });
+
+    const doc = await published(env).catch(() => ({}));
+    const vars = Object.assign({}, docVars(doc), body.vars || {});
+    const tier = await memberTier(body, doc, env);
+
+    if (bot === 'coachPaid' && RANK[tier] < RANK.vault) {
+      return new Response(JSON.stringify({ ok: false, reason: 'upgrade-required', tier }), { status: 403, headers });
+    }
+
+    let instructions = '';
+    if (action === 'preview' && env.ADMIN_SECRET && safeEqual(body.secret, env.ADMIN_SECRET)) {
+      instructions = fill(String(body.instructions || ''), vars);
+    } else {
+      const bots = (doc.ai && doc.ai.bots) || {};
+      const raw = bots[bot] || DEFAULT_PROMPTS[bot];
+      instructions = fill(raw, vars);
+    }
+
+    const context = body.context;
+    let system = instructions;
+    if (context && typeof context === 'object') {
+      const clean = Object.keys(context).reduce((acc, k) => {
+        acc[k] = String(context[k]).slice(0, 4000);
+        return acc;
+      }, {});
+      system += '\n\n<board_context>\n' + JSON.stringify(clean, null, 2) + '\n</board_context>';
+    }
+
+    const messages = (Array.isArray(body.messages) ? body.messages : []).slice(-12).map((m) => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: String(m.content || '').slice(0, 4000)
+    }));
+    if (!messages.length) return new Response(JSON.stringify({ ok: false, reason: 'no-messages' }), { status: 400, headers });
+
+    const modelMap = {
+      coachFree: env.MODEL_FREE || env.MODEL || DEFAULT_MODEL,
+      coachPaid: env.MODEL_PAID || env.MODEL || DEFAULT_MODEL,
+      sales: env.MODEL_SALES || env.MODEL || DEFAULT_MODEL
+    };
+    const model = modelMap[bot] || DEFAULT_MODEL;
+
+    const payload = {
+      model,
+      max_tokens: Math.min(2000, Math.max(100, +env.MAX_TOKENS || 700)),
+      system,
+      messages
+    };
+
+    const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!apiRes.ok) {
+      const errText = await apiRes.text().catch(() => '');
+      return new Response(JSON.stringify({ ok: false, reason: 'anthropic-error', status: apiRes.status, details: errText.slice(0, 200) }), { status: 502, headers });
+    }
+
+    const apiData = await apiRes.json();
+    const reply = (apiData.content && apiData.content[0] && apiData.content[0].text) || '';
+
+    return new Response(JSON.stringify({ ok: true, reply, tier }), { headers });
+
+  } catch (err) {
+    const status = err.status || 500;
+    const reason = err.reason || 'server-error';
+    return new Response(JSON.stringify({ ok: false, reason, message: err.message }), { status, headers });
   }
-  const p = c.player;
-  if (p && typeof p === 'object') {
-    add('Student profile', [p.name && 'username ' + oneLine(p.name, 40), p.rating && 'rating ' + oneLine(p.rating, 6), p.leak && 'main leak: ' + oneLine(p.leak, 60), p.goal && 'goal: ' + oneLine(p.goal, 40)].filter(Boolean).join(', '), 260);
-    add('Hyper-Focus (the one MSPC habit the student committed to)', p.focus, 260);
-    add('Struggles the student named', p.struggles, 300);
-    add('Repertoire', [p.repertoire, p.openings].filter(Boolean).join('; '), 300);
-  }
-  const iq = c.interro;
-  if (iq && typeof iq === 'object') {
-    L.push('Blunder interrogation, step ' + oneLine(iq.step, 2) + ' of MSPC, on the student\'s move ' + oneLine(iq.move, 24) + '.');
-    add('Question the app asked', iq.question, 400);
-    add('Engine facts (for you only: check the answer, never read them out)', iq.facts, 900);
-    add('The app’s own check of the answer', iq.judged, 20);
-    add('What the app would reply without you', iq.app_reply, 300);
-  }
-  const co = c.course;
-  if (co && typeof co === 'object') add('Course lesson that teaches this', [oneLine(co.lesson, 200), co.concept && 'core idea: ' + oneLine(co.concept, 240), co.tier && 'tier: ' + oneLine(co.tier, 20), 'the student has access: ' + (co.access === 'yes' ? 'yes' : 'no')].filter(Boolean).join('; '), 700);
-  return '<board_context>\n' + L.join('\n') + '\n</board_context>';
-}
-function salesBlock(c) {
-  c = c && typeof c === 'object' ? c : {};
-  const L = [], a = c.answers && typeof c.answers === 'object' ? c.answers : {};
-  const ans = Object.keys(a).slice(0, 10).map((k) => oneLine(k, 20) + ': ' + oneLine(a[k], 60)).join('; ');
-  L.push('Answers so far: ' + (ans || 'none yet'));
-  if (c.pending_question) L.push('pending_question: ' + oneLine(c.pending_question, 300));
-  const pr = c.prices && typeof c.prices === 'object' ? c.prices : {};
-  L.push('Prices: Walk, the free community: free. Bridge, the Accelerator: ' + (oneLine(pr.accelerator, 30) || 'not published') +
-    '. Private Jet, the Mentorship: ' + (oneLine(pr.mentorship, 30) || 'not published') + ', ' + (oneLine(pr.mentorship_seats_total, 6) || '?') +
-    ' seats in total, seats open right now: ' + (oneLine(pr.mentorship_seats_open, 20) || 'not published') + '.');
-  const p = c.player && typeof c.player === 'object' ? c.player : {};
-  const who = [p.name && 'name ' + oneLine(p.name, 40), p.rating && 'rating ' + oneLine(p.rating, 6), p.leak && 'leak: ' + oneLine(p.leak, 60), p.goal && 'goal: ' + oneLine(p.goal, 40), p.access && 'access in the hub: ' + oneLine(p.access, 20)].filter(Boolean).join(', ');
-  if (who) L.push('Player: ' + who);
-  if (c.recommended) L.push('Already recommended in this chat: ' + oneLine(c.recommended, 10));
-  return '<sales_context>\n' + L.join('\n') + '\n</sales_context>';
 }
 
 export default {
-  async fetch(request, env) {
-    const origin = request.headers.get('Origin') || '';
-    const allowed = String(env.ALLOWED_ORIGINS || '').split(',').map((x) => x.trim()).filter(Boolean);
-    const okOrigin = allowed.length === 0 || allowed.indexOf(origin) >= 0;
-    const cors = {
-      'Access-Control-Allow-Origin': okOrigin && origin ? origin : (allowed[0] || '*'),
-      'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400', Vary: 'Origin'
-    };
-    const reply = (body, status) => new Response(JSON.stringify(body), { status: status || 200, headers: Object.assign({ 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, cors) });
-    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
-    if (request.method !== 'POST') return reply({ ok: false, reason: 'method' }, 405);
-    if (!okOrigin) return reply({ ok: false, reason: 'origin' }, 403);
-    if ((parseInt(request.headers.get('Content-Length') || '0', 10) || 0) > 200000) return reply({ ok: false, reason: 'too-big' }, 413);
-
-    let body;
-    try { body = await request.json(); } catch (e) { return reply({ ok: false, reason: 'bad-request' }, 400); }
-    if (!body || typeof body !== 'object') return reply({ ok: false, reason: 'bad-request' }, 400);
-    const action = String(body.action || 'chat'), bot = String(body.bot || '');
-    if (STATS_ACTIONS[action]) {                             /* v3.3: leaderboard and training stats (D1) */
-      if (!env.DB) return reply({ ok: false, reason: 'no-db' }, 503);
-      try { return reply(await stats(action, body, env, request)); }
-      catch (e) { if (!e.reason) console.error(e); return reply({ ok: false, reason: e.reason || 'server' }, e.status || 500); }
-    }
-    if (!env.ANTHROPIC_API_KEY || !env.CONTENT_URL) return reply({ ok: false, reason: 'config' }, 500);
-    if (!DEFAULT_PROMPTS[bot] || (action !== 'chat' && action !== 'preview')) return reply({ ok: false, reason: 'bad-request' }, 400);
-    const device = /^d-[a-z0-9]{12,40}$/.test(String(body.device || '')) ? String(body.device) : 'anon';
-
-    let doc = {};
-    try { doc = await published(env); } catch (e) { doc = {}; }   // no content.json yet: the built-in instructions
-    let instructions = doc.bots && typeof doc.bots[bot] === 'string' && doc.bots[bot].trim() ? doc.bots[bot] : DEFAULT_PROMPTS[bot];
-    let tier = 'free';
-
-    if (action === 'preview') {
-      if (!env.ADMIN_SECRET || !safeEqual(body.secret, env.ADMIN_SECRET)) return reply({ ok: false, reason: 'forbidden' }, 403);
-      if (typeof body.instructions === 'string' && body.instructions.trim().length >= 40) instructions = body.instructions.slice(0, 12000);
-      tier = bot === 'coachPaid' ? 'paid' : 'free';
-    } else {
-      if (bot === 'coachPaid') {
-        const need = (doc.gates && RANK[doc.gates.coachPaid] !== undefined ? doc.gates.coachPaid : 'vault');
-        const t = await memberTier(body, doc, env);
-        if (RANK[t] < RANK[need]) return reply({ ok: false, reason: 'tier' }, 403);
-        tier = 'paid';
-      }
-      const ip = request.headers.get('CF-Connecting-IP') || 'ip';
-      const per = Math.max(1, parseInt((bot === 'coachFree' ? env.FREE_PER_HOUR : bot === 'coachPaid' ? env.PAID_PER_HOUR : env.SALES_PER_HOUR) || (bot === 'coachPaid' ? '120' : bot === 'sales' ? '30' : '20'), 10) || 20);
-      if (limited('d|' + bot + '|' + device, per) || limited('i|' + bot + '|' + ip, per * 3)) return reply({ ok: false, reason: 'limit' }, 429);
-    }
-
-    const msgs = [];
-    (Array.isArray(body.messages) ? body.messages : []).slice(-16).forEach((m) => {
-      if (!m || (m.role !== 'user' && m.role !== 'assistant')) return;
-      const content = clip(m.content, 2000).trim();
-      if (!content) return;
-      if (msgs.length && msgs[msgs.length - 1].role === m.role) msgs[msgs.length - 1].content += '\n\n' + content;
-      else msgs.push({ role: m.role, content });
-    });
-    while (msgs.length && msgs[0].role !== 'user') msgs.shift();
-    if (!msgs.length || msgs[msgs.length - 1].role !== 'user') return reply({ ok: false, reason: 'bad-request' }, 400);
-    msgs[msgs.length - 1].content = (bot === 'sales' ? salesBlock(body.context) : boardBlock(body.context)) + '\n\n' + msgs[msgs.length - 1].content;
-
-    const model = String((bot === 'coachFree' ? env.MODEL_FREE : bot === 'coachPaid' ? env.MODEL_PAID : env.MODEL_SALES) || env.MODEL || DEFAULT_MODEL).slice(0, 60);
-    const maxTokens = Math.max(100, Math.min(2000, parseInt(env.MAX_TOKENS || '700', 10) || 700));
-    const interro = bot !== 'sales' && body.context && typeof body.context === 'object' && body.context.interro && typeof body.context.interro === 'object';
-    const system = fill(instructions, Object.assign({}, body.vars || {}, docVars(doc))) + (interro ? '\n\n' + INTERROGATION_RULES : '') + (bot !== 'sales' ? courseIndex(doc) : '');
-    let res;
-    try {
-      res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: msgs })
-      });
-    } catch (e) { return reply({ ok: false, reason: 'upstream' }, 502); }
-    if (res.status === 429 || res.status === 529) return reply({ ok: false, reason: 'limit' }, 429);
-    if (!res.ok) return reply({ ok: false, reason: 'upstream' }, 502);
-    const data = await res.json().catch(() => null);
-    const text = data && Array.isArray(data.content) ? data.content.filter((b) => b && b.type === 'text').map((b) => b.text).join('\n').trim() : '';
-    if (!text) return reply({ ok: false, reason: 'empty' }, 502);
-    return reply({ ok: true, reply: text.slice(0, 6000), tier });
+  async fetch(request, env, ctx) {
+    return handle(request, env);
   }
 };
