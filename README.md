@@ -1,6 +1,85 @@
-# Lanckrietchess Training Hub v3.6.0
+# Lanckrietchess Training Hub v3.7.0
 
 One self-contained `index.html` (vanilla JavaScript, Tailwind via CDN, no build step) plus a few small files. It runs on Vercel, GitHub Pages or any static host, installs as a PWA and can be wrapped for the Play Store.
+
+## What's new in v3.7
+
+- **The GitHub file is the only source of course content.** `index.html` no longer carries any repertoire, opening line, chapter, MSPC position, middlegame or endgame drill, bootcamp lesson, spotlight, Blunder Clinic case or course index. Every list starts empty and holds exactly what the data file holds. Nothing is merged on top any more: in v3.6 the live file (11 Colle lines, 1 Caro-Kann line, 1 Semi-Slav line) was mixed with the built-in lines, so players saw 13, 4 and 4. The old rule that "a shorter line never cuts a longer one" is gone too: the file wins, moves included. The About page story (Kyenzo's ELO chapters, proofs, credentials) stays in the file as brand copy, and the data file can still replace it.
+- **Chapters come from the file.** The repertoire tabs show the chapter count from the file, the list shows "7 chapters, 9 lines", and every line carries its chapter number. Two ways to write chapters: a `"chapter"` field on an opening line (lines with the same chapter are grouped; a line without one is a chapter of its own), or a nested `repertoires` list:
+
+  ```json
+  "repertoires": [
+    { "name": "Caro-Kann", "side": "black", "intro": "1...c6 against 1.e4.",
+      "chapters": [
+        { "title": "Advance with 3...c5", "lines": [ { "id": "ck-adv-1", "pgn": "1.e4 c6 2.d4 d5 3.e5 c5", "tier": "Free" } ] },
+        { "title": "Classical", "pgn": "1.e4 c6 2.d4 d5 3.Nc3 dxe4 4.Nxe4 Bf5", "tier": "Paid" }
+      ] }
+  ]
+  ```
+
+  A repertoire without a side is played with Black when its name sounds like a defence (Caro, Slav, French, Sicilian, Defence…), otherwise with White. Admin menu > Live data lists the chapters and lines per repertoire exactly as players see them.
+- **Cache busting that actually works.** GitHub's raw CDN caches for five minutes and ignores query strings (tested: every unique `?v=` came back as a cache hit of the same age). So the hub first asks the GitHub API for the newest commit on the branch and reads the file at that commit, an address that can never be stale. Every request also carries a fresh `?v=` and `cache: 'no-store'`, so no browser, PWA or service-worker cache answers it. Without the API (GitHub allows 60 anonymous calls per hour per network; the hub asks at most once a minute and pauses 15 minutes after a limit), it falls back to the branch, then to this site's copy, then to the last good copy on the device. The device copy moved to a new key, so the v3.6 mix is dropped once. `CONFIG.remote.pinCommit: false` switches the commit lookup off.
+- **Theory > Puzzles (`#puzzles`).** Rated tactics from the Lichess puzzle API, on a clean board with the player card, the Puzzle ELO (with a provisional mark for the first 10), peak, solve rate, the streak counter under the board and a green or red rating change after every result. The opponent's last move plays first, then it's your turn; any mating move counts, as on Lichess. A wrong move costs rating once, and you can keep trying unrated. Hint shows the piece (free); showing the move or the solution counts as a miss. Every puzzle counts once; retries and repeats are unrated. The first visit asks for a starting level (or the player's verified rating).
+- **Difficulty selector.** Easier (−200), My level (±0), Harder (+200) and Deep calc (+400), remembered per device. The public Lichess endpoint takes a difficulty level, not a rating: without a Lichess login its levels sit around 900, 1200, 1500, 1800 and 2100. The hub picks the level closest to your Puzzle ELO plus the offset, checks the real rating of every puzzle, and asks again (up to 3 times) until one lands within 250 of the target. Puzzles that don't fit wait in a small queue, and the next one is fetched while you solve the current one.
+- **Puzzle bank.** For players below ~900, and when Lichess can't be reached, the hub uses `puzzle_bank` from the data file: rows copied straight from the Lichess puzzle database CSV (`"00008,r6k/pp2r2p/...,f2g3 e6e7 b2b1 b3c1 b1c1 h6c1,1913,..."`) or objects `{ "id", "fen", "moves", "rating", "themes" }`. The FEN is the position before the opponent's move, `moves[0]` is that move, the rest is the solution. Every move is checked with chess.js.
+- **Leaderboard > Puzzles.** Your Puzzle ELO, peak, solve rate and form over the last 20, and the community board with the gold, silver and bronze trophies for the top three and every player's own trophy next to their name. It needs two new actions on the hub worker (below). Until they are there, players see their own rating and a calm "goes live with the next worker update".
+- **Achievement pop-ups, now routed.** Settings > Show achievement pop-ups was already there since v3.6. Off now means: nothing covers the board, and every moment that would have popped up (brilliant move, streaks of 10 and more, first ranked week, badges, a new Puzzle ELO hundred) is kept in a "Kept quietly" list in the profile sheet, with a dot on the profile chip in the top bar until it's opened.
+- **Empty states.** A page whose section isn't in the file yet says so ("No middlegame lessons, drills or plans in the course file yet"), says "Loading the course data…" while the first sync runs, and redraws itself as soon as the file arrives. Middlegame and Endgame show only the sections the file fills (admin mode keeps every section so you can add items).
+- **Service worker.** Cached pages and data are stored under the address without the query string, so cache-busted requests don't pile up and unlock links (`?lc_token=`) never sit in the cache. Version `lc-hub-3.7.0`.
+
+**Deploy.**
+
+1. Check `json-v3.7-migration.json`. It is your live file, unchanged in the parts you wrote (meta, app_settings, opening_lines, think_section, theory_section, ai_coaches), plus everything that used to be built into `index.html`: the repertoire intros (`groups`), the MSPC positions, middlegame plans and drills, endgame drills, the three bootcamps, spotlights and Blunder Clinic cases (`lists`), and the course index (`course_index`). The 9 old built-in opening lines are under `archived_opening_lines`: players don't see them until you move them into `opening_lines`, so your chapter counts stay yours.
+2. Upload it to `lanckrietchess/Json-van-app` **as `json`** (replace the file), then upload `index.html` and `sw.js`. Upload the data file first, or the middlegame, endgame and MSPC pages are empty until you do.
+3. Open the site, then Admin menu > Live data. It should say "GitHub, commit …" and list the chapters per repertoire. If you were editing in admin mode before, your draft still wins on your own device: Admin menu > Publish > "Throw away my draft" shows the live file.
+
+**Fix in the data file.** `colle-1-rook-lift` and `puzzle_colle_rook_lift` are skipped: 12.Rxe4 is illegal after 11.e5 Nxe5 (e4 is empty). Re-export that line from ChessTempo. Admin menu > Live data lists every skipped item with the move that failed.
+
+**Hub worker: the Puzzle ELO board.** Add this to `hub-worker.js` and call it from the action switch, with the same JSON response and CORS helper the other actions use: `if (body.action === 'pz_sync' || body.action === 'pz_top') return <yourJsonResponse>(await puzzleBoard(body, env));`. It recomputes every rating from the raw results with the same formula as the hub, so a typed-in rating never reaches the board.
+
+```js
+async function puzzleBoard(body, env) {
+  if (!env.DB) return { ok: false, reason: 'no-db' };
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS pz_players (device TEXT PRIMARY KEY, name TEXT, bracket TEXT, trophy TEXT, start INTEGER, rating INTEGER, peak INTEGER, games INTEGER, wins INTEGER, hidden INTEGER DEFAULT 0, updated INTEGER)').run();
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS pz_results (device TEXT, id TEXT, r INTEGER, w INTEGER, t INTEGER, PRIMARY KEY (device, id))').run();
+  const dev = String(body.device || '').slice(0, 64), now = Date.now();
+  if (body.action === 'pz_sync') {
+    if (!/^[\w-]{8,64}$/.test(dev)) return { ok: false, reason: 'device' };
+    const name = String(body.name || '').replace(/[\u0000-\u001f<>"'`\\]/g, '').trim().slice(0, 24);
+    if (!name) return { ok: false, reason: 'name' };
+    const start = Math.min(2800, Math.max(400, Math.round(+body.start || 1200)));
+    const list = (Array.isArray(body.results) ? body.results : []).slice(0, 150)
+      .filter((x) => x && /^[\w-]{2,60}$/.test(String(x.id)) && +x.r >= 100 && +x.r <= 3500 && +x.t > 0 && +x.t <= now + 60000);
+    for (const x of list) await env.DB.prepare('INSERT OR IGNORE INTO pz_results (device, id, r, w, t) VALUES (?, ?, ?, ?, ?)').bind(dev, String(x.id), Math.round(+x.r), x.w ? 1 : 0, Math.round(+x.t)).run();
+    const all = (await env.DB.prepare('SELECT r, w FROM pz_results WHERE device = ? ORDER BY t').bind(dev).all()).results || [];
+    let rating = start, peak = start, wins = 0;
+    all.forEach((x, i) => {
+      const k = i < 10 ? 48 : i < 30 ? 32 : 20, e = 1 / (1 + Math.pow(10, (x.r - rating) / 400));
+      let d = Math.round(k * ((x.w ? 1 : 0) - e));
+      if (x.w && d < 1) d = 1; if (!x.w && d > -1) d = -1;
+      rating = Math.min(3300, Math.max(100, rating + d)); peak = Math.max(peak, rating); wins += x.w ? 1 : 0;
+    });
+    const trophy = ['bronze', 'silver', 'gold', 'platinum', 'diamond'].indexOf(body.trophy) >= 0 ? body.trophy : '';
+    await env.DB.prepare('INSERT INTO pz_players (device, name, bracket, trophy, start, rating, peak, games, wins, updated) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(device) DO UPDATE SET name=excluded.name, bracket=excluded.bracket, trophy=excluded.trophy, start=excluded.start, rating=excluded.rating, peak=excluded.peak, games=excluded.games, wins=excluded.wins, updated=excluded.updated')
+      .bind(dev, name, String(body.bracket || '').slice(0, 20), trophy, start, rating, peak, all.length, wins, now).run();
+    return { ok: true, rating };
+  }
+  const limit = Math.min(100, Math.max(1, Math.round(+body.limit || 50)));
+  const where = 'hidden = 0 AND games >= 5';
+  const rows = (await env.DB.prepare('SELECT device, name, bracket, trophy, rating, peak, games FROM pz_players WHERE ' + where + ' ORDER BY rating DESC, peak DESC LIMIT ?').bind(limit).all()).results || [];
+  const total = ((await env.DB.prepare('SELECT COUNT(*) AS n FROM pz_players WHERE ' + where).first()) || {}).n || 0;
+  let you = null;
+  if (dev && !rows.some((r) => r.device === dev)) {
+    const mine = await env.DB.prepare('SELECT rating FROM pz_players WHERE device = ? AND ' + where).bind(dev).first();
+    if (mine) { const above = await env.DB.prepare('SELECT COUNT(*) AS n FROM pz_players WHERE ' + where + ' AND rating > ?').bind(mine.rating).first(); you = { rank: ((above && above.n) || 0) + 1 }; }
+  }
+  return { ok: true, total, you, rows: rows.map((r, i) => ({ rank: i + 1, name: r.name, bracket: r.bracket, trophy: r.trophy, rating: r.rating, peak: r.peak, games: r.games, you: r.device === dev })) };
+}
+```
+
+To hide a player from this board, set `hidden = 1` on their row in the D1 console (Admin > Leaderboard doesn't reach this table yet).
+
+**Honest limits.** The Puzzle ELO lives in the browser that earned it, like the rest of the progress. The worker recomputes ratings from raw results, but it trusts the puzzle ratings and outcomes the device sends, so treat this board as motivation, not a tournament. Lichess puzzles need a connection to lichess.org, and Lichess can pause the hub for a minute when many players on one network fetch at once; the bank covers that if you fill it. Below ~900 Lichess can't match a rating without a login, which is what the bank is for. The commit lookup counts against GitHub's 60 anonymous API calls per hour per network: a school or office full of players shares that budget, and the hub then falls back to the branch file (at most five minutes old). The ELO gates in `CONFIG.eloGates` (Semi-Slav Meran and Moscow at 1400) still apply by line id; put `elo_gates` in the data file to change them.
 
 ## What's new in v3.6
 
@@ -101,7 +180,7 @@ One self-contained `index.html` (vanilla JavaScript, Tailwind via CDN, no build 
 
 1. Upload `index.html`, `sw.js`, `vercel.json`, `manifest.webmanifest` and the `icons` folder to `lanckrietchess/Json-van-app` (Add file > Upload files, drag the folder in as well > Commit). Vercel deploys the commit to `https://lanckrietchess-app.vercel.app/` by itself. Leave the data file `json` where it is.
 2. Check the deployment: open the site, then Admin menu > Live data (GitHub). It should say the data came from GitHub. Later, for the Play Store, add `.well-known/assetlinks.json`.
-3. `sw.js` carries version `lc-hub-3.6.0`; bump it every time you upload a new `index.html`, so returning players get it.
+3. `sw.js` carries version `lc-hub-3.7.0`; bump it every time you upload a new `index.html`, so returning players get it.
 4. Moving the data file? Change `CONFIG.remote` (owner, repo, branch, path). A custom domain? Nothing to change: links follow the address the hub is served from. Only `CONFIG.site.production` is used as the fallback address.
 5. Before launch, check `CONFIG.access.demoKeys` is `false` in `index.html` (it is in this build).
 
@@ -184,4 +263,4 @@ Deploy `activation-worker.js` as described at the top of that file (free Cloudfl
 
 ## Updating content by hand
 
-Everything in `CONFIG`, `CONTENT` and `COPY` near the top of `index.html` can still be edited in a text editor. Admin mode just makes it faster and checks your chess for you. The gates in `GATES` and the default bot instructions (`DEFAULT_COACH_PROMPT`, `DEFAULT_SALES_PROMPT`) sit right under `COPY`.
+Everything in `CONFIG` and `COPY` near the top of `index.html` can still be edited in a text editor. Since v3.7 `CONTENT` holds no course content: repertoires, lines, chapters, drills and lessons live in the data file on GitHub. Admin mode just makes it faster and checks your chess for you. The gates in `GATES` and the default bot instructions (`DEFAULT_COACH_PROMPT`, `DEFAULT_SALES_PROMPT`) sit right under `COPY`.
