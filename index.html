@@ -1818,7 +1818,20 @@ function fmtDate(iso) {
 function fetchWithTimeout(url, init, ms) {
   const ctl = typeof AbortController === 'function' ? new AbortController() : null;
   const timer = setTimeout(() => { if (ctl) ctl.abort(); }, ms || 8000);
-  return fetch(url, Object.assign({}, init, ctl ? { signal: ctl.signal } : {})).finally(() => clearTimeout(timer));
+
+  // 1. Voeg een unieke timestamp toe om GitHub/Browser-caching te bypassen
+  const separator = url.includes('?') ? '&' : '?';
+  const freshUrl = `${url}${separator}t=${new Date().getTime()}`;
+
+  // 2. Forceer cache: 'no-store' in de fetch-opties
+  const options = Object.assign(
+    {}, 
+    init || {}, 
+    { cache: 'no-store' },
+    ctl ? { signal: ctl.signal } : {}
+  );
+
+  return fetch(freshUrl, options).finally(() => clearTimeout(timer));
 }
 
 /* ---------- v3.5: where the hub lives ----------
