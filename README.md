@@ -1,4 +1,57 @@
-# Lanckrietchess Training Hub v3.8.0
+# Lanckrietchess Training Hub v3.9.0
+
+## What's new in v3.9: one five-level system for everything
+
+**Breaking change.** All the old access checks are gone: the `lock` words (free, community, vault) on content, the v3.8 ladder (`freeSample`, `tiers`, `tierKey`, `CONFIG.ladder`), the ELO gates (`minElo`, `elo_gates`, the admin sheet) and the free/advanced zones in Middlegame and Endgame. Every chapter and topic in every module now has the same five levels, and there is exactly one check in the whole app: `Levels.open(item)`.
+
+| Level | Name | ELO advice | Access |
+|---|---|---|---|
+| 1 | Free | none | everyone (`isFree: true`, `requiredTier: 0`) |
+| 2 | Beginner | 800–1200 | paid token (`requiredTier: 2`, the Accelerator) |
+| 3 | Intermediate | 1200–1600 | paid token |
+| 4 | Advanced | 1600–1800 | paid token |
+| 5 | Master | 1800+ | paid token (`requiredTier: 3` makes a level Mentorship-only) |
+
+The ELO is advice on the button and never blocks anything. Level 1 is always free and levels 2–5 always paid: an `isFree` or `requiredTier` that contradicts the level is ignored and named in the Live data report.
+
+### Data shape (content.json)
+
+Openings, in `repertoires[].chapters` or a top-level `chapters` list:
+
+```json
+{ "topicId": "caro-advance", "title": "Caro-Kann Advance", "repertoire": "Caro-Kann",
+  "levels": [
+    { "level": 1, "isFree": true,  "requiredTier": 0, "pgn": "1.e4 c6 2.d4 d5 3.e5 c5", "skoolUrl": "" },
+    { "level": 2, "isFree": false, "requiredTier": 2, "pgn": "1.e4 c6 2.d4 d5 3.e5 c5 4.c3 Nc6 5.Nf3 cxd4 6.cxd4 Bg4" },
+    { "level": 3, "isFree": false, "requiredTier": 2, "pgn": "… (4.dxc5 Nc6 5.Bb5) …", "skoolUrl": "https://www.skool.com/…" }
+  ] }
+```
+
+- **Cut-off:** Level N plays the lines of levels 1 to N and nothing deeper. A line that is only the start of a longer line drops out. The Explore tree stops at the same point.
+- Variations in `( )` become extra lines of that level. `{comments}` become coach notes on every line that plays those moves.
+- `stopMoveIndex` (half-moves, or a move such as `"9.e4"`) cuts a level short. A level with a stop but no `pgn` takes the chapter's `pgn`, else the next deeper level's moves.
+- `id` on a level keeps an existing line id, so players keep their progress (the migrated content.json uses this for every Level 1).
+- A missing or empty level shows as **Soon**; the five buttons are always there.
+
+Puzzles, courses, bootcamps, middlegame, endgame and plans use `topics` (with `"module"`), `think_section.puzzles` or `courses`/`bootcamps`: each level holds `items` (or `puzzles`, `lessons`, `drills`) in their usual shape. Here a level is its own set, not a longer version of the level below.
+
+`skoolUrl` is optional per level and shows a discreet "Watch the video on Skool ↗" link (text editable as `lv.skool` in the copy editor). Only `https` links to `skool.com` are kept.
+
+### Links
+
+`#chapter/<topicId>/<level>` and `#topic/<topicId>/<level>` (level 1–5 or its name) open that chapter or topic on that level, in any module. The link button next to a level bar copies one.
+
+### Older files
+
+Files, drafts and cached copies from before v3.9 still load. Their access words are translated once, at import, and then deleted: free and Skool-community items land on Level 1, paid (vault) items on Level 2, Mentorship items on Level 2 with `requiredTier: 3`. The Live data report says how many items were translated. v3.8 ladder chapters (`freeSample`/`tiers`) are not translated: the report names them so they can be rewritten with `levels`.
+
+### Honest limits (v3.9)
+
+- The gate is front-end, like every gate in this hub: it stops casual access, not a determined developer.
+- Content that was "free in Skool" (community key) is now Level 1 and open to everyone. Put it on Level 2 if it should stay behind a token.
+- Module gates (GATES), shared coach folders and the course index keep their own tiers; the Lichess rated Puzzles page is unchanged.
+- The admin level pickers (L1–L5 in the gating sheet, the level tag, the item form fields `lvl`, `requiredTier`, `skoolUrl`, `topicId`) were checked for syntax but not clicked through in a browser test.
+
 
 One self-contained `index.html` (vanilla JavaScript, Tailwind via CDN, no build step) plus a few small files. It runs on Vercel, GitHub Pages or any static host, installs as a PWA and can be wrapped for the Play Store.
 
