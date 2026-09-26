@@ -1273,6 +1273,60 @@ a.cc-frame:hover{border-color:var(--accent)}
 .pz37-skel{height:64px;margin-top:14px;border-radius:12px;background:linear-gradient(90deg,var(--ink-2),var(--raised),var(--ink-2));background-size:200% 100%;animation:pz37sk 1.2s linear infinite}
 @keyframes pz37sk{from{background-position:200% 0}to{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){.pz37-delta.is-in,.pz37-skel{animation:none}}
+/* v3.8: the five-level chapter ladder */
+.lad38{margin:0 0 14px}
+.lad38-rail{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:1px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 26px),transparent)}
+.lad38-rail::-webkit-scrollbar{display:none}
+.lad38-tab,.lad38-step{position:relative;display:grid;gap:3px;align-content:start;text-align:left;overflow:hidden;color:var(--chalk);font:inherit}
+.lad38-tab{flex:1 0 auto;min-width:108px;scroll-snap-align:start;min-height:58px;padding:9px 12px 11px;border-radius:12px;border:1px solid var(--rule);background:var(--ink-2);transition:border-color .15s,background-color .15s}
+.lad38-tab:hover{border-color:var(--accent-line)}
+.lad38-tab[aria-selected="true"]{background:var(--raised);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.lad38-tab.is-free{background:var(--accent-soft);border-color:var(--accent-line)}
+.lad38-tab.is-free[aria-selected="true"]{border-color:var(--accent)}
+.lad38-name{display:flex;align-items:center;gap:7px;font-weight:800;font-size:14px;white-space:nowrap}
+.lad38-n{flex:none;display:inline-grid;place-items:center;width:19px;height:19px;border-radius:6px;background:var(--surface);border:1px solid var(--rule);color:var(--fog);font-size:11px;font-weight:800;font-variant-numeric:tabular-nums}
+.lad38-n i{font-size:8px}
+.is-free .lad38-n,.lad38-play{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+[aria-selected="true"] .lad38-n{border-color:var(--accent-line);color:var(--accent)}
+.is-free[aria-selected="true"] .lad38-n{color:var(--accent-ink)}
+.lad38-meta{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--fog);white-space:nowrap;font-variant-numeric:tabular-nums}
+.is-free .lad38-meta{color:var(--accent)}
+.lad38-meta .fa-crown{color:var(--warn)}.lad38-meta .fa-lock{color:var(--accent)}.lad38-meta .fa-check{color:var(--good)}
+.is-locked .lad38-name{color:var(--fog)}
+.lad38-tab.is-soon,.lad38-step.is-soon,.lad38-hook.is-soon{opacity:.5}
+.lad38-tab.is-soon[aria-selected="true"]{opacity:1}
+.lad38-bar{position:absolute;left:0;right:0;bottom:0;height:3px}
+.lad38-bar i{display:block;height:100%;background:var(--good);border-radius:0 2px 2px 0}
+.lad38-tab.is-you::after{content:"";position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px var(--good-soft)}
+.lad38-hint{display:flex;align-items:flex-start;gap:9px;margin-top:9px;color:var(--fog);font-size:13px;line-height:1.45}
+.lad38-hint>i{color:var(--accent);margin-top:3px;flex:none}
+.lad38-hint p{flex:1;min-width:0;max-width:78ch}
+.lad38-share{flex:none;width:34px;height:34px;min-height:34px;margin-top:-4px}
+@media (min-width:640px){.lad38-rail{display:grid;grid-template-columns:1.15fr repeat(4,minmax(0,1fr));overflow:visible;-webkit-mask-image:none;mask-image:none}.lad38-tab{min-width:0}}
+.seg.is-dim{opacity:.55}
+.lad38-shell{position:relative}
+.lad38-shell .board-host{transition:filter .2s}
+.lad38-gated .board-host{filter:saturate(.45) brightness(.72)}
+.lad38-veil{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:6;display:inline-flex;align-items:center;gap:8px;max-width:calc(100% - 24px);padding:7px 13px;border-radius:999px;background:rgba(15,23,42,.9);border:1px solid var(--rule);color:var(--chalk);font-size:13px;font-weight:700;white-space:nowrap;pointer-events:none}
+.lad38-veil[hidden]{display:none}
+.lad38-veil i{color:var(--warn)}
+.lad38-veil span{overflow:hidden;text-overflow:ellipsis}
+.lad38-kick{display:flex;align-items:center;gap:7px;color:var(--warn);font-size:13px;font-weight:800;margin-bottom:6px}
+.lad38-cta{margin-top:16px}
+.lad38-fine{margin-top:12px;max-width:62ch}
+.lad38-next{display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:#fde68a;font-size:14px;font-weight:600}
+.lad38-bot{padding:0}
+.lad38-bot .chat{max-height:44vh;min-height:180px}
+.lad38-rows .lad38-hook{box-shadow:inset 3px 0 0 var(--accent)}
+.lad38-play{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;font-size:12px}
+.lad38-hook.is-soon .lad38-play{background:var(--raised);color:var(--fog)}
+.lad38-free{font-size:12px;font-weight:800;color:var(--accent)}
+.lad38-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--hair);border-top:1px solid var(--hair)}
+.lad38-step{min-height:60px;padding:11px 14px 13px;border:0;background:var(--surface)}
+.lad38-step:not([disabled]):hover{background:var(--raised)}
+.lad38-step[disabled]{cursor:default}
+@media (min-width:560px){.lad38-steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){.lad38-tab,.lad38-shell .board-host{transition:none}}
 </style>
 </head>
 <body>
@@ -1301,7 +1355,7 @@ a.cc-frame:hover{border-color:var(--accent)}
 <script>
 "use strict";
 /* ==========================================================================
-   LANCKRIETCHESS TRAINING HUB  v3.6.0
+   LANCKRIETCHESS TRAINING HUB  v3.8.0
    One self-contained page: vanilla JS + Tailwind (CDN) + chess.js 0.10.3 +
    chessboard.js 1.0.0, with Stockfish loaded on demand in a Web Worker.
    Host it on any static host, install it as a PWA, wrap it for the Play
@@ -1312,7 +1366,7 @@ a.cc-frame:hover{border-color:var(--accent)}
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '3.7.0',
+  version: '3.8.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -1454,6 +1508,13 @@ const CONFIG = {
      Keys are item ids, or group:<repertoire name> for a whole repertoire.
      Easier: Admin menu > ELO gates, published with content.json. */
   eloGates: { 'semislav-meran': 1400, 'semislav-moscow': 1400 },
+  /* v3.8: the five-level chapter ladder: Free Sample, Beginner, Intermediate,
+     Advanced and Masters. The levels are a recommended mastery path, never an
+     ELO block: ELO gates don't apply to them, and a player may open any level
+     their membership covers. access: the membership each level needs (free,
+     community or vault). A level in the data file can set its own with "lock".
+     The Free Sample is always free, whatever is written here. */
+  ladder: { access: { beginner: 'vault', intermediate: 'vault', advanced: 'vault', masters: 'vault' } },
   /* v3.7: rated puzzles from the Lichess puzzle API (lichess.org/api). The
      public endpoint takes a difficulty level, not a rating: for a visitor
      without a Lichess login the levels sit around anonBase (easiest -600 to
@@ -1939,6 +2000,21 @@ const LEAKS = { threats: 'Blunders and missed threats', opening: 'Lost after the
 const GOALS = { p200: '+200 rating', p400: '+400 rating', r1500: 'Reach 1500', r2000: 'Reach 2000' };
 const TIERS = { free: { rank: 0, label: 'Free' }, community: { rank: 1, label: 'Community' }, vault: { rank: 2, label: 'Accelerator' }, mentor: { rank: 3, label: 'Mentorship' } };
 const LOCK_RANK = { free: 0, community: 1, vault: 2 };
+/* v3.8: the five levels of a chapter, in the order of the mastery path.
+   elo is the default guideline; a chapter's guidelineElo in the data file wins. */
+const LADDER = [
+  { key: 'free', label: 'Free Sample', step: 0, elo: '', alias: ['freeSample', 'free_sample', 'free', 'sample'] },
+  { key: 'beginner', label: 'Beginner', step: 1, elo: '0-800', alias: ['beginner'] },
+  { key: 'intermediate', label: 'Intermediate', step: 2, elo: '800-1200', alias: ['intermediate'] },
+  { key: 'advanced', label: 'Advanced', step: 3, elo: '1200-1600+', alias: ['advanced'] },
+  { key: 'masters', label: 'Masters', step: 4, elo: '1600-2200+', alias: ['masters', 'master'] }
+];
+function ladderLevel(key) { return LADDER.filter((L) => L.key === key)[0] || null; }
+function ladderLock(key) {
+  if (key === 'free') return 'free';
+  const a = (CONFIG.ladder && CONFIG.ladder.access) || {};
+  return hasOwn(LOCK_RANK, a[key]) ? a[key] : 'vault';
+}
 const LEAK_ROUTE = { threats: 'think', opening: 'openings', plan: 'middlegame', endgame: 'endgame', time: 'think' };
 function bracketOf(elo) {
   if (elo == null) return null;
@@ -2011,7 +2087,7 @@ const App = {
       if (/^[a-z]{2,20}$/.test(key)) this.stats[key] = { tries: +v.tries || 0, correct: +v.correct || 0, streak: +v.streak || 0, best: +v.best || 0 };
     });
     this.progress = {};
-    Object.keys(s.progress || {}).slice(0, 600).forEach((key) => {
+    Object.keys(s.progress || {}).slice(0, 2000).forEach((key) => {
       const v = s.progress[key] || {};
       this.progress[String(key).slice(0, 90)] = { best: clamp(+v.best || 0, 0, 1), runs: +v.runs || 0, last: +v.last || 0 };
     });
@@ -2676,7 +2752,7 @@ function checkItem(name, it) {
 const Feed = (() => {
   const HUB = 'lanckrietchess-hub', BACKUP = 'lanckrietchess-hub-backup';
   const HUB_KEYS = ['copy', 'settings', 'lists', 'gates', 'bots', 'keys', 'folders'];
-  const FEED_KEYS = ['opening_lines', 'openings', 'think_section', 'puzzles', 'theory_section', 'courses', 'ai_coaches', 'app_settings', 'groups', 'community_puzzles', 'peer_puzzles', 'featured_games', 'games_of_the_day', 'student_mistakes', 'elo_gates', 'repertoires', 'puzzle_bank', 'course_index'];
+  const FEED_KEYS = ['opening_lines', 'openings', 'think_section', 'puzzles', 'theory_section', 'courses', 'ai_coaches', 'app_settings', 'groups', 'community_puzzles', 'peer_puzzles', 'featured_games', 'games_of_the_day', 'student_mistakes', 'elo_gates', 'repertoires', 'puzzle_bank', 'course_index', 'chapters', 'tier_chapters'];
   const WRAP = ['items', 'list', 'entries', 'data', 'values', 'rows', 'records'];
   const COURSE_TRACKS = ['middlegame', 'antiblunder', 'endgame'];
   const BOT_ALIAS = {
@@ -2834,6 +2910,134 @@ const Feed = (() => {
     if (isObj(o.ann)) { const ann = pruneAnn(o.ann, item.pgn); if (ann) item.ann = ann; }
     return { item };
   }
+  /* v3.8: the five-level chapter ladder. One object per chapter:
+       { "chapterId", "title", "repertoire" (optional), "side" (optional),
+         "freeSample": { "stopMoveIndex", "moves", "description" },
+         "tiers": { "beginner" | "intermediate" | "advanced" | "masters":
+                    { "guidelineElo", "stopMoveIndex", "moves", "description" (optional), "lock" (optional) } } }
+     Each level becomes one opening line with the id <chapterId>--<level>, and
+     carries chapterId, tierKey, guideline and stop. Every trainer, spaced
+     repetition, progress and the Explore tree work on it like on any line.
+     moves: PGN or SAN. A comment in { } after a move becomes the coach's note
+     on that move (Learn mode and drills show it); variations are skipped.
+     stopMoveIndex: how many half-moves the level plays (6 = 1.e4 c6 2.d4 d5
+     3.e5 c5), or a move written like "9.e4" or "9...Nf6"; null or missing
+     means the whole line. A level without moves but with a stopMoveIndex takes
+     the moves of the next deeper level, so one full line with five stop points
+     is enough. A level that isn't in the file shows as "soon". */
+  function isLadder(c) { return isObj(c) && (isObj(c.tiers) || isObj(pick(c, ['freeSample', 'free_sample']))); }
+  /* PGN -> the main line in SAN, the comment after each move (by half-move
+     index) and a comment before the first move. Stops at the first illegal move. */
+  function mainline(moves) {
+    let text = Array.isArray(moves) ? moves.map((m) => (m == null ? '' : String(m))).join(' ') : String(moves == null ? '' : moves);
+    text = text.slice(0, 60000).replace(/^\s*\[[^\]\n]*\]\s*$/gm, ' ');
+    const g = new Chess(), sans = [], notes = {};
+    let pre = '', depth = 0, i = 0, bad = '', vars = false;
+    const note = (body) => {
+      body = body.replace(/\[%[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!body || depth > 0 || bad) return;
+      if (sans.length) { const k = sans.length - 1; notes[k] = (notes[k] ? notes[k] + ' ' : '') + body; } else pre = (pre ? pre + ' ' : '') + body;
+    };
+    while (i < text.length) {
+      const c = text[i];
+      if (c === '{') { const j = text.indexOf('}', i + 1); note(text.slice(i + 1, j < 0 ? text.length : j)); i = j < 0 ? text.length : j + 1; continue; }
+      if (c === ';') { const j = text.indexOf('\n', i + 1); note(text.slice(i + 1, j < 0 ? text.length : j)); i = j < 0 ? text.length : j + 1; continue; }
+      if (c === '(') { depth++; vars = true; i++; continue; }
+      if (c === ')') { depth = Math.max(0, depth - 1); i++; continue; }
+      if (/\s/.test(c)) { i++; continue; }
+      let j = i;
+      while (j < text.length && !/[\s(){};]/.test(text[j])) j++;
+      let w = text.slice(i, j); i = j;
+      if (depth > 0 || bad) continue;
+      if (/^\$\d+$/.test(w) || /^(1-0|0-1|1\/2-1\/2|\*)$/.test(w)) continue;
+      w = w.replace(/^\d+\.+/, '').replace(/[!?]+$/, '').replace(/^0-0-0/, 'O-O-O').replace(/^0-0/, 'O-O');
+      if (!w || /^\.+$/.test(w) || /^\d+$/.test(w)) continue;
+      const before = g.fen(), mv = g.move(w, { sloppy: true });
+      if (!mv) { bad = moveLabel(fullmove(before), sideOf(before), w); continue; }
+      sans.push(mv.san);
+    }
+    return { sans, notes, pre, bad, vars };
+  }
+  /* stopMoveIndex -> the number of half-moves a level plays. */
+  function stopOf(v, sans) {
+    const all = sans.length;
+    if (v === undefined || v === null || v === '') return { n: all };
+    if (typeof v === 'number' || /^\s*\d+\s*$/.test(String(v))) {
+      const n = Math.round(+v);
+      if (!(n >= 1)) return { n: all, note: 'stopMoveIndex ' + v + ' is not a number of half-moves, so the whole line is used.' };
+      return n > all ? { n: all, note: 'stopMoveIndex ' + n + ' is past the end of its moves (' + all + ' half-moves), so the whole line is used.' } : { n };
+    }
+    const m = String(v).trim().match(/^(\d+)\s*(\.{1,3}|…)\s*(\S+)$/);
+    if (m) {
+      const color = m[2] === '.' ? 'w' : 'b', want = cleanSan(m[3]);
+      const hit = buildPlies(START_FEN, sans).findIndex((p) => p.num === +m[1] && p.color === color && cleanSan(p.san) === want);
+      if (hit >= 0) return { n: hit + 1 };
+    }
+    return { n: all, note: 'stopMoveIndex “' + String(v).slice(0, 20) + '” is not in its moves, so the whole line is used.' };
+  }
+  function ladderChapter(doc, c, ctx, rep) {
+    const title = str(pick(c, ['title', 'name', 'chapter', 'chapter_title']), 90);
+    const chapterId = idOf(pick(c, ['chapterId', 'chapter_id', 'id', 'slug', 'key']), title ? idOf(title, '') : '').slice(0, 44).replace(/-+$/, '');
+    const label = '“' + (title || chapterId || '#' + ctx.n) + '”';
+    if (chapterId.length < 2) { rep.skipped.push('Chapter #' + ctx.n + ' needs a chapterId or a title.'); tally(rep, 'Chapter levels', 'skipped'); return; }
+    const name = title || human(chapterId);
+    const group = ctx.group || str(pick(c, ['repertoire', 'group', 'opening', 'course', 'category']), 60) || ctx.match(name) || 'Chapters';
+    const side = sideWord(pick(c, ['side', 'color', 'colour', 'play_as', 'playAs'])) || ctx.side || ctx.sideFor(group) || guessSide(group + ' ' + name);
+    const tiers = isObj(c.tiers) ? c.tiers : {};
+    const raw = LADDER.map((L) => (L.key === 'free' ? pick(c, ['freeSample', 'free_sample']) || pick(tiers, L.alias) : pick(tiers, L.alias) || pick(c, L.alias)));
+    const parsed = raw.map((t) => {
+      if (typeof t === 'string' || Array.isArray(t)) t = { moves: t };
+      if (!isObj(t)) return null;
+      const mv = pick(t, ['moves', 'pgn', 'line', 'san', 'movetext']), own = mv !== undefined && !(Array.isArray(mv) && !mv.length) && String(mv).trim() !== '';
+      const sk = ['stopMoveIndex', 'stop_move_index', 'stopMove', 'stop_move', 'stopAt', 'stop'].filter((k) => t[k] !== undefined)[0];
+      const stop = sk ? t[sk] : undefined;
+      return { t, own: own ? mainline(mv) : null, stop, hasStop: stop !== undefined && stop !== null && stop !== '' };
+    });
+    /* a level without moves (but with a stop) plays the next deeper level's moves */
+    const src = new Array(LADDER.length).fill(null);
+    let deeper = null;
+    for (let i = LADDER.length - 1; i >= 0; i--) {
+      const p = parsed[i];
+      if (!p) continue;
+      if (p.own && !p.own.bad && p.own.sans.length) { src[i] = p.own; deeper = p.own; }
+      else if (p.own) src[i] = p.own;                                 // broken: reported below
+      else if (p.hasStop && deeper) src[i] = deeper;
+    }
+    const made = [];
+    LADDER.forEach((L, i) => {
+      const p = parsed[i], s = src[i];
+      if (!p || !s) { if (p) rep.notes.push('Chapter ' + label + ', ' + L.label + ': no moves yet, so the level shows as “soon”.'); return; }
+      if (s.bad) { rep.skipped.push('Chapter ' + label + ', ' + L.label + ': move ' + s.bad + ' is not legal' + (s.sans.length ? ' after ' + lineText(s.sans, START_FEN).split(' ').slice(-2).join(' ') : '') + '. The level shows as “soon” until it is fixed.'); tally(rep, 'Chapter levels', 'skipped'); return; }
+      if (!s.sans.length) { rep.skipped.push('Chapter ' + label + ', ' + L.label + ': has no moves.'); tally(rep, 'Chapter levels', 'skipped'); return; }
+      const st = stopOf(p.stop, s.sans);
+      if (st.note) rep.notes.push('Chapter ' + label + ', ' + L.label + ': ' + st.note);
+      if (s.vars && s === p.own) rep.notes.push('Chapter ' + label + ', ' + L.label + ': the variations in ( ) are skipped. One level plays one line; put a side line in its own chapter.');
+      const sans = s.sans.slice(0, st.n), t = p.t;
+      const item = { id: chapterId + '--' + L.key, group, side, title: name + ' (' + L.label + ')', pgn: lineText(sans, START_FEN), chapter: name, chapterId, tierKey: L.key, stop: sans.length };
+      const guide = str(pick(t, ['guidelineElo', 'guideline_elo', 'guideline', 'elo', 'level']), 20) || L.elo;
+      if (guide && L.key !== 'free') item.guideline = guide;
+      const desc = str(pick(t, ['description', 'idea', 'hook', 'summary', 'intro']), 1500) || s.pre.slice(0, 1500);
+      if (desc) item.idea = desc;
+      const own = lockOf(pick(t, ['lock', 'access', 'tier_access', 'tierAccess', 'membership']));
+      item.lock = L.key === 'free' ? 'free' : own || ladderLock(L.key);
+      const ann = {}, plies = buildPlies(START_FEN, sans);
+      Object.keys(s.notes).forEach((k) => { if (+k < plies.length) ann[plies[+k].key] = { note: s.notes[k].slice(0, 1500) }; });
+      /* a note written once on a deeper level reaches every shallower level that plays the same moves */
+      for (let j = i + 1; j < LADDER.length; j++) {
+        const d = src[j];
+        if (!d || d.bad || d === s || d.sans.length < sans.length || !sans.every((x, k) => d.sans[k] === x)) continue;
+        Object.keys(d.notes).forEach((k) => { if (+k < plies.length && !ann[plies[+k].key]) ann[plies[+k].key] = { note: d.notes[k].slice(0, 1500) }; });
+      }
+      if (isObj(t.ann)) Object.keys(t.ann).forEach((k) => { ann[k] = t.ann[k]; });
+      const pruned = pruneAnn(ann, item.pgn);
+      if (pruned) item.ann = pruned;
+      if (put(doc, 'openings', item, rep, 'Chapter levels')) {
+        made.push(L.label + ' ' + sans.length + (item.lock === 'free' ? '' : ' (' + item.lock + ')'));
+        if (!ctx.sideFor(group)) ctx.addGroup(group, side, '');
+      }
+    });
+    if (made.length) rep.ladders.push(name + ' (' + group + '): ' + made.join(', ') + ' half-moves');
+  }
   /* A repertoire name that sounds like a defence is played with Black. Only
      used when neither the line nor the file's groups say which side. */
   function guessSide(name) {
@@ -2978,6 +3182,13 @@ const Feed = (() => {
       if (r.error) { rep.skipped.push('Opening line ' + (r.id ? '“' + r.id + '”' : label) + ': ' + r.error + '.'); tally(rep, 'Opening lines', 'skipped'); return; }
       if (put(doc, 'openings', r.item, rep, 'Opening lines') && !sideFor(r.item.group)) addGroup(r.item.group, r.item.side, '');
     };
+    /* v3.8: the five-level chapters, at the top level ("chapters" or
+       "tier_chapters", each with a "repertoire") or inside repertoires[].chapters. */
+    const flat = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+    const ladderCtx = {
+      sideFor, addGroup,
+      match: (title) => { const t = flat(title), g = groups().filter((x) => x && x.name && t.indexOf(flat(x.name)) >= 0).sort((a, b) => flat(b.name).length - flat(a.name).length)[0]; return g ? g.name : ''; }
+    };
     /* v3.7: repertoires with chapters, [{ name, side, intro, chapters: [{ title, lines: [...] }] }].
        A chapter may also be one line itself ({ title, pgn }). */
     (arr(src.repertoires) || arr(theory.repertoires) || []).forEach((r, ri) => {
@@ -2987,6 +3198,7 @@ const Feed = (() => {
       const side = sideWord(pick(r, ['side', 'color', 'colour', 'play_as'])) || sideFor(name) || guessSide(name);
       addGroup(name, side, str(pick(r, ['intro', 'description']), 600));
       (arr(r.chapters) || []).forEach((c, ci) => {
+        if (isLadder(c)) { ladderChapter(doc, c, Object.assign({}, ladderCtx, { group: name, side, n: ci + 1 }), rep); return; }   // v3.8
         const title = isObj(c) ? str(pick(c, ['title', 'name', 'chapter']), 90) : '';
         const chapter = title || 'Chapter ' + (ci + 1);
         const lines = isObj(c) ? (arr(pick(c, ['lines', 'opening_lines', 'variations'])) || (has(c, 'pgn') || has(c, 'moves') ? [c] : [])) : [c];
@@ -3002,6 +3214,10 @@ const Feed = (() => {
       });
     });
     (arr(pick(src, ['opening_lines', 'openings'])) || arr(pick(theory, ['opening_lines', 'openings'])) || []).forEach((o, i) => addLine(o, '#' + (i + 1)));
+    (arr(pick(src, ['tier_chapters', 'chapters'])) || arr(pick(theory, ['tier_chapters', 'chapters'])) || []).forEach((c, i) => {
+      if (isLadder(c)) ladderChapter(doc, c, Object.assign({}, ladderCtx, { n: i + 1 }), rep);
+      else rep.skipped.push('Chapter #' + (i + 1) + ' has no freeSample or tiers, so it isn’t a five-level chapter. Lines without levels go in opening_lines or repertoires.');
+    });
     const archived = arr(src.archived_opening_lines);
     if (archived && archived.length) rep.notes.push(archived.length + ' archived opening ' + (archived.length === 1 ? 'line is' : 'lines are') + ' in the file (archived_opening_lines). Players don’t see them until you move them into opening_lines.');
     (arr(pick(src, ['puzzle_bank', 'puzzleBank'])) || arr(pick(think, ['puzzle_bank'])) || []).slice(0, 5000).forEach((o, i) => {
@@ -3093,7 +3309,7 @@ const Feed = (() => {
       Object.keys(ai).forEach((k) => { if (!taken[k]) rep.unused.push('ai_coaches.' + k); });
     }
     Object.keys(think).forEach((k) => { if (['puzzles', 'positions', 'title', 'community_puzzles', 'peer_puzzles', 'puzzle_bank'].indexOf(k) < 0) rep.unused.push('think_section.' + k); });
-    Object.keys(theory).forEach((k) => { if (['courses', 'opening_lines', 'openings', 'groups', 'repertoires', 'course_index'].indexOf(k) < 0) rep.unused.push('theory_section.' + k); });
+    Object.keys(theory).forEach((k) => { if (['courses', 'opening_lines', 'openings', 'groups', 'repertoires', 'course_index', 'chapters', 'tier_chapters'].indexOf(k) < 0) rep.unused.push('theory_section.' + k); });
   }
 
   function detect(data) {
@@ -3109,7 +3325,7 @@ const Feed = (() => {
   /* Any file -> { doc, report }. doc is null when the file holds no hub
      content at all (a file with only player data, for example). */
   function toDoc(data, opts) {
-    const rep = { format: detect(data), added: 0, updated: 0, sections: {}, skipped: [], notes: [], unused: [], warnings: [] };
+    const rep = { format: detect(data), added: 0, updated: 0, sections: {}, skipped: [], notes: [], unused: [], warnings: [], ladders: [] };
     let src = data;
     if (rep.format === 'backup') {
       if (isObj(data.keybook) && Object.keys(data.keybook).length) rep.warnings.push('This is a private database export with member keys in plain text. Keep it off any public repository.');
@@ -3305,7 +3521,8 @@ const Site = (() => {
     Object.keys(copy).forEach((k) => { if (COPY[k] && typeof copy[k] === 'string') out.copy[k] = copy[k].slice(0, 4000); });
     SETTINGS.forEach((s) => { const v = getPath(doc.settings || {}, s[0]); if (v === undefined) return; const c = cleanSetting(v, s[2]); if (c !== undefined) setPath(out.settings, s[0], c); });
     const lists = doc.lists && typeof doc.lists === 'object' ? doc.lists : {};
-    Object.keys(LISTS).forEach((n) => { if (Array.isArray(lists[n])) out.lists[n] = clone(lists[n].filter((x) => x && typeof x === 'object' && !Array.isArray(x)).slice(0, 400)); });
+    /* v3.8: five levels per chapter, so the opening list holds up to 1500 lines. */
+    Object.keys(LISTS).forEach((n) => { if (Array.isArray(lists[n])) out.lists[n] = clone(lists[n].filter((x) => x && typeof x === 'object' && !Array.isArray(x)).slice(0, n === 'openings' ? 1500 : 400)); });
     out.keys = (Array.isArray(doc.keys) ? doc.keys : []).map(cleanKey).filter(Boolean).slice(0, 3000);
     const gates = doc.gates && typeof doc.gates === 'object' ? doc.gates : {};
     Object.keys(GATES).forEach((g) => { if (hasOwn(LOCK_RANK, gates[g])) out.gates[g] = gates[g]; });
@@ -3359,7 +3576,7 @@ const Site = (() => {
     const cap = (a, n) => (Array.isArray(a) ? a.slice(0, n) : []), r = s.report;
     status = {
       source: s.source, label: s.label || '', url: s.url || '', commit: s.commit || '', ok: !!s.ok, at: s.at || 0, checked: Date.now(), tried: cap(s.tried, 6),
-      report: r ? { format: r.format || '', added: r.added || 0, updated: r.updated || 0, sections: r.sections || {}, skipped: cap(r.skipped, 40), notes: cap(r.notes, 20), unused: cap(r.unused, 30), warnings: cap(r.warnings, 5), repertoires: cap(r.repertoires, 30) } : null
+      report: r ? { format: r.format || '', added: r.added || 0, updated: r.updated || 0, sections: r.sections || {}, skipped: cap(r.skipped, 40), notes: cap(r.notes, 20), unused: cap(r.unused, 30), warnings: cap(r.warnings, 5), repertoires: cap(r.repertoires, 30), ladders: cap(r.ladders, 80) } : null
     };
     Store.set(LS_SYNC, status);
   }
@@ -3676,6 +3893,7 @@ const CMS = (() => {
           (fmt ? '<span>The file is in ' + esc(fmt) + '. The hub reads all three formats.</span>' : '') + '</div></div>' +
         '<p class="small muted">Order: ' + ((CONFIG.remote || {}).pinCommit === false ? '' : '0. the newest commit on ' + esc((CONFIG.remote || {}).branch || 'main') + ' (never stale), ') + esc(src.map((x, i) => (i + 1) + '. ' + x.label).join(', ')) + (src.length ? ', then ' : '') + 'the last good copy on each device. Nothing is built in: the file is the only source of course content. Every request carries a fresh ?v= and skips every cache. The hub checks again every ' + esc(String((CONFIG.remote || {}).refreshMinutes || 10)) + ' minutes while it is open.</p>' +
         list('What players see per repertoire', (r.repertoires || []).map((x) => x.name + ': ' + x.chapters + (x.chapters === 1 ? ' chapter, ' : ' chapters, ') + x.lines + (x.lines === 1 ? ' line' : ' lines'))) +
+        list('Five-level chapters: half-moves per level', r.ladders) +
         list('What the last sync loaded', secs) +
         list('Skipped, so no player sees a broken line', r.skipped) +
         list('Worth knowing', (r.warnings || []).concat(r.notes || [])) +
@@ -6570,9 +6788,10 @@ function chaptersOf(lines) {
   const out = [], by = {};
   (lines || []).forEach((l) => {
     if (!l) return;
-    const t = typeof l.chapter === 'string' ? l.chapter.trim() : '', key = t ? 'c:' + t.toLowerCase() : 'l:' + l.id;
+    /* v3.8: the five levels of a chapter share a chapterId */
+    const t = typeof l.chapter === 'string' ? l.chapter.trim() : '', key = l.chapterId ? 'x:' + l.chapterId : t ? 'c:' + t.toLowerCase() : 'l:' + l.id;
     let c = by[key];
-    if (!c) { c = by[key] = { title: t, lines: [] }; out.push(c); }
+    if (!c) { c = by[key] = { title: t, lines: [], id: l.chapterId || '', ladder: !!(l.chapterId && l.tierKey) }; out.push(c); }
     c.lines.push(l);
   });
   return out;
@@ -6600,14 +6819,155 @@ function builtinGroup(name) {
   const meta = CONTENT.groups.filter((g) => g.name === name)[0] || CONTENT.groups[0];
   if (!meta) return { name: name || '', side: 'w', intro: '', custom: false, lines: [] };
   return { name: meta.name, side: meta.side, intro: meta.intro, custom: false,
-    lines: CONTENT.openings.filter((o) => o.group === meta.name).map((o) => ({ id: o.id, title: o.title, subtitle: o.subtitle, idea: o.idea, side: o.side || meta.side, moves: pgnTokens(o.pgn), ann: o.ann || {}, mode: o.mode, lock: o.lock, group: meta.name, minElo: o.minElo, chapter: o.chapter })) };
+    lines: CONTENT.openings.filter((o) => o.group === meta.name).map((o) => ({ id: o.id, title: o.title, subtitle: o.subtitle, idea: o.idea, side: o.side || meta.side, moves: pgnTokens(o.pgn), ann: o.ann || {}, mode: o.mode, lock: o.lock, group: meta.name, minElo: o.minElo, chapter: o.chapter, chapterId: o.chapterId, tierKey: o.tierKey, guideline: o.guideline, stop: o.stop })) };
 }
 function chapterRowsHTML(group) {
   const chs = chaptersOf(group.lines), grouped = group.lines.some((l) => l.chapter);
   if (!group.lines.length) return dataEmptyHTML('lines for ' + group.name);
   if (!grouped) return '<div class="rows">' + group.lines.map((l, i) => lineRow(l, { n: i + 1 })).join('') + '</div>';
-  return chs.map((c, i) => '<section class="ch37"><h3 class="ch37-h"><span class="ch37-n">' + (i + 1) + '</span><span class="ch37-t">' + esc(chapterName(c, i)) + '</span><small>' + c.lines.length + (c.lines.length === 1 ? ' line' : ' lines') + '</small></h3>' +
+  return chs.map((c, i) => c.ladder ? ladderCardHTML(c, i) : '<section class="ch37"><h3 class="ch37-h"><span class="ch37-n">' + (i + 1) + '</span><span class="ch37-t">' + esc(chapterName(c, i)) + '</span><small>' + c.lines.length + (c.lines.length === 1 ? ' line' : ' lines') + '</small></h3>' +
     '<div class="rows">' + c.lines.map((l) => lineRow(l)).join('') + '</div></section>').join('');
+}
+/* ---------- v3.8: the five-level chapter ladder ----------
+   A chapter in the data file with a freeSample and tiers arrives as five
+   opening lines sharing one chapterId (Feed.ladderChapter). The list shows it
+   as one card; the trainer shows a level bar above the board. The Free Sample
+   is open to everyone; Beginner to Masters check the membership and open the
+   gateway to Kyenzo's assistant when it doesn't cover them. The levels are a
+   recommended path, never an ELO block. */
+const Ladder = (() => {
+  let pending = null;
+  const is = (l) => !!(l && l.chapterId && l.tierKey);
+  const step = (l) => (ladderLevel(l && l.tierKey) || { step: 9 }).step;
+  const members = (lines, chapterId) => (lines || []).filter((l) => l && l.chapterId === chapterId).sort((a, b) => step(a) - step(b));
+  const byKey = (list, key) => (list || []).filter((l) => l.tierKey === key)[0] || null;
+  const movesOf = (l) => (!l ? [] : Array.isArray(l.moves) ? l.moves : pgnTokens(l.pgn));
+  /* The level a gated chapter falls back to: the free sample, else the lowest level this player can open. */
+  const openLevel = (list) => ((list || []).filter((l) => App.unlocked(l))[0] || null);
+  const guideText = (g) => String(g || '').trim().replace(/\s*-\s*/, '–');
+  const guideOf = (list, L) => { const it = byKey(list, L.key); return (it && it.guideline) || L.elo; };
+  function range(g) { const m = String(g || '').match(/(\d{1,4})\D+(\d{2,4})/); return m ? [+m[1], +m[2]] : null; }
+  /* A verified Chess.com or Lichess rating first, then the rating in the profile. Only used to suggest, never to block. */
+  function rating() {
+    const b = typeof Elo !== 'undefined' ? Elo.best() : null;
+    if (b && b.rating) return { value: b.rating, label: b.label + ' rating' };
+    return App.profile.elo ? { value: App.profile.elo, label: 'profile rating' } : null;
+  }
+  function suggest(list) {
+    const r = rating();
+    if (!r) return '';
+    const paid = LADDER.filter((L) => L.key !== 'free' && byKey(list, L.key)).map((L) => ({ L, g: range(guideOf(list, L)) })).filter((x) => x.g);
+    const hit = paid.filter((x) => r.value >= x.g[0] && r.value < x.g[1])[0] || (paid.length && r.value >= paid[paid.length - 1].g[1] ? paid[paid.length - 1] : null);
+    return hit ? hit.L.key : '';
+  }
+  /* Your own moves in a level (the ones you play in the drill). */
+  const yours = (it) => { const n = +it.stop || movesOf(it).length; return it.side === 'w' ? Math.ceil(n / 2) : Math.floor(n / 2); };
+  const reach = (it) => Math.ceil((+it.stop || movesOf(it).length) / 2);
+  /* Where a gated level carries on: the last position it shares with the free sample. */
+  function teaser(list, key) {
+    const fs = byKey(list, 'free'), t = byKey(list, key);
+    const a = movesOf(fs).map(cleanSan), b = t ? movesOf(t).map(cleanSan) : a;
+    let n = 0;
+    while (n < a.length && n < b.length && a[n] === b[n]) n++;
+    const plies = buildPlies(START_FEN, movesOf(fs).slice(0, n)), p = plies[plies.length - 1];
+    return { fen: p ? p.fen : START_FEN, last: p ? { from: p.from, to: p.to } : null };
+  }
+  function next(list, key) {
+    const i = LADDER.findIndex((L) => L.key === key);
+    for (let j = i + 1; j < LADDER.length; j++) { const it = byKey(list, LADDER[j].key); if (it) return { L: LADDER[j], it, open: App.unlocked(it) }; }
+    return null;
+  }
+  /* Deep links for video descriptions and bios:
+       #chapter/<chapterId>          opens the chapter on its free sample
+       #chapter/<chapterId>/<level>  free, beginner, intermediate, advanced or masters (or 0-4) */
+  const LVL = { free: 'free', sample: 'free', 'free-sample': 'free', freesample: 'free', beginner: 'beginner', intermediate: 'intermediate', advanced: 'advanced', masters: 'masters', master: 'masters', 0: 'free', 1: 'beginner', 2: 'intermediate', 3: 'advanced', 4: 'masters' };
+  function fromHash() {
+    let h = '';
+    try { h = decodeURIComponent((location.hash || '').replace(/^#/, '')); } catch (e) { return false; }
+    const m = h.match(/^(?:chapter|ch)[/:=]([\w-]{2,60})(?:[/:=]([\w-]{1,14}))?\/?$/i);
+    if (!m) return false;
+    pending = { id: m[1].toLowerCase(), tier: LVL[String(m[2] || '').toLowerCase()] || 'free' };
+    try { history.replaceState(null, '', location.pathname + location.search + '#openings'); } catch (e) { /* the router falls back to home */ }
+    return true;
+  }
+  function take(ui) {
+    if (!pending) return;
+    const hit = (CONTENT.openings || []).filter((o) => o && o.chapterId && String(o.chapterId).toLowerCase() === pending.id);
+    if (!hit.length) { if (!Site.loading()) { toast('That chapter isn’t in the course file yet.', 'bad'); pending = null; } return; }
+    const it = hit.filter((o) => o.tierKey === pending.tier)[0] || hit.filter((o) => o.tierKey === 'free')[0] || hit[0];
+    Object.assign(ui, { tab: it.group, screen: 'train', lineId: it.id, mode: 'drill', only: false });
+    pending = null;
+  }
+  const link = (chapterId, key) => SiteURL.share({}, 'chapter/' + chapterId + (key && key !== 'free' ? '/' + key : ''));
+  return { is, members, byKey, movesOf, openLevel, guideText, guideOf, rating, suggest, yours, reach, teaser, next, fromHash, take, link };
+})();
+function ladderPlan(lock) { return lock === 'community' ? 'the free Skool community' : lock === 'vault' ? 'the Accelerator' : 'your membership'; }
+/* The list: one card per chapter, the free sample as the hook, the four levels under it. */
+function ladderCardHTML(c, i) {
+  const list = Ladder.members(c.lines, c.id), fs = Ladder.byKey(list, 'free'), fp = fs ? App.progress[fs.id] : null;
+  const n = LADDER.filter((L) => Ladder.byKey(list, L.key)).length;
+  const steps = LADDER.filter((L) => L.key !== 'free').map((L) => {
+    const it = Ladder.byKey(list, L.key), open = it && App.unlocked(it), p = it && open ? App.progress[it.id] : null;
+    return '<button type="button" class="lad38-step' + (!it ? ' is-soon' : open ? '' : ' is-locked') + '"' + (it ? ' data-lad-open="' + esc(c.id) + '" data-tier="' + L.key + '"' : ' disabled') + '>' +
+      '<span class="lad38-name"><span class="lad38-n" aria-hidden="true">' + L.step + '</span>' + esc(L.label) + '</span>' +
+      '<span class="lad38-meta">' + (!it ? 'Soon' : (open ? '' : lockIcon(it.lock) + ' ') + esc(Ladder.guideText(Ladder.guideOf(list, L))) + ' ELO') + '</span>' +
+      (p && p.best > 0 ? '<span class="lad38-bar" aria-hidden="true"><i style="width:' + Math.round(p.best * 100) + '%"></i></span>' : '') + '</button>';
+  }).join('');
+  return '<section class="ch37 lad38-card"><h3 class="ch37-h"><span class="ch37-n">' + (i + 1) + '</span><span class="ch37-t">' + esc(chapterName(c, i)) + '</span><small>' + (n === 5 ? '5 levels' : n + ' of 5 levels') + '</small></h3>' +
+    '<div class="rows lad38-rows">' +
+      (fs ? '<button type="button" class="row lad38-hook" data-lad-open="' + esc(c.id) + '" data-tier="free"><span class="lad38-play" aria-hidden="true">' + icon('play') + '</span>' +
+        '<span class="row-main"><span class="row-title">Free sample</span><span class="row-sub">' + esc(fs.idea || lineText(Ladder.movesOf(fs), START_FEN, 8)) + '</span></span>' +
+        '<span class="row-side">' + (fp ? progressBadge(fs.id) : '<span class="lad38-free">Free</span>') + icon('chevron-right') + '</span></button>'
+        : '<div class="row lad38-hook is-soon"><span class="lad38-play" aria-hidden="true">' + icon('hourglass-half') + '</span><span class="row-main"><span class="row-title">Free sample</span><span class="row-sub">On its way.</span></span></div>') +
+      '<div class="lad38-steps">' + steps + '</div></div></section>';
+}
+/* The trainer: the level bar above the board. */
+function ladderHint(list, sel) {
+  const i = LADDER.findIndex((L) => L.key === sel);
+  const t = i >= 2 ? 'Recommended guideline: Master the ' + LADDER[i - 1].label + ' section before moving to ' + LADDER[i].label + ', but you are free to explore at your own pace.'
+    : 'Recommended guideline: Master the Beginner section before moving to Intermediate, but you are free to explore at your own pace.';
+  const r = Ladder.rating(), s = Ladder.suggest(list);
+  return t + (r && s ? ' Your ' + r.label + ' (' + r.value + ') points to ' + ladderLevel(s).label + '.' : '');
+}
+function ladderBarHTML(list, sel) {
+  const sug = Ladder.suggest(list), name = (list[0] && list[0].chapter) || 'this chapter';
+  const tabs = LADDER.map((L) => {
+    const it = Ladder.byKey(list, L.key), open = it && App.unlocked(it), p = it && open ? App.progress[it.id] : null, best = p ? p.best : 0;
+    const meta = !it ? 'Soon' : L.key === 'free' ? 'Open to everyone' : (open ? (best >= 0.9 ? icon('check') + ' ' : '') : lockIcon(it.lock) + ' ') + esc(Ladder.guideText(Ladder.guideOf(list, L))) + ' ELO';
+    return '<button type="button" role="tab" class="lad38-tab' + (L.key === 'free' ? ' is-free' : '') + (!it ? ' is-soon' : open ? '' : ' is-locked') + (sug === L.key ? ' is-you' : '') + '" data-lad="' + L.key + '" aria-selected="' + (sel === L.key) + '" tabindex="' + (sel === L.key ? 0 : -1) + '"' +
+      (sug === L.key ? ' title="Suggested for your rating"' : '') + '><span class="lad38-name"><span class="lad38-n" aria-hidden="true">' + (L.key === 'free' ? icon('play') : L.step) + '</span>' + esc(L.label) + '</span>' +
+      '<span class="lad38-meta">' + meta + '</span>' + (best > 0 ? '<span class="lad38-bar" aria-hidden="true"><i style="width:' + Math.round(best * 100) + '%"></i></span>' : '') + '</button>';
+  }).join('');
+  return '<div class="lad38-rail" role="tablist" aria-label="Levels of ' + esc(name) + '">' + tabs + '</div>' +
+    '<div class="lad38-hint">' + icon('circle-info') + '<p>' + esc(ladderHint(list, sel)) + '</p><button type="button" class="icon-btn lad38-share" data-lad-act="share" aria-label="Copy a link to this chapter" title="Copy a link that opens this chapter">' + icon('link') + '</button></div>';
+}
+function ladderGateHTML(list, it, L, back) {
+  const fs = Ladder.byKey(list, 'free'), notes = it.ann ? Object.keys(it.ann).length : 0, mine = Ladder.yours(it);
+  const lead = (fs && fs !== it ? 'The free sample stops at move ' + Ladder.reach(fs) + '. ' : '') + L.label + ' takes this line to move ' + Ladder.reach(it) + ': ' + mine + (mine === 1 ? ' move' : ' moves') + ' of yours to learn' +
+    (notes ? ', with ' + notes + ' of ' + CONFIG.coach + '’s notes on the way.' : '.');
+  return '<p class="lad38-kick">' + lockIcon(it.lock) + ' ' + esc(L.label) + ' level' + (it.guideline ? ', ' + esc(Ladder.guideText(it.guideline)) + ' ELO guideline' : '') + '</p>' +
+    '<h2 class="st-title">Go deeper into ' + esc(it.chapter) + '</h2><p class="st-brief">' + esc(lead) + '</p>' + (it.idea ? '<p class="st-brief">' + esc(it.idea) + '</p>' : '') +
+    '<div class="st-actions lad38-cta"><button type="button" class="btn btn-primary" data-lad-act="assistant">' + icon('comments') + ' ' + esc(T('up.botTitle')) + '</button>' +
+      '<button type="button" class="btn btn-ghost" data-lad-act="key">' + icon('key') + ' I have a member key</button>' +
+      (back ? '<button type="button" class="btn btn-quiet" data-lad-act="back">Back to ' + esc(ladderLevel(back.tierKey).label) + '</button>' : '') + '</div>' +
+    '<p class="small muted lad38-fine">' + esc(L.label) + ' is part of ' + esc(ladderPlan(it.lock)) + '. The levels are a guideline, not a gate: members open every level and move up when they are ready.</p>';
+}
+function ladderSoonHTML(list, L, back) {
+  const name = (list[0] && list[0].chapter) || 'this chapter';
+  return '<p class="lad38-kick">' + icon('hourglass-half') + ' ' + esc(L.label) + ' level</p><h2 class="st-title">' + esc(L.label) + ' is on its way</h2>' +
+    '<p class="st-brief">' + esc(CONFIG.coach) + ' is still preparing the ' + esc(L.label) + ' level of ' + esc(name) + '. It appears here the moment it is in the course file, without an app update.</p>' +
+    (back ? '<div class="st-actions"><button type="button" class="btn btn-ghost" data-lad-act="back">Back to ' + esc(ladderLevel(back.tierKey).label) + '</button></div>' : '');
+}
+/* "Talk to Kyenzo's assistant", opened over the trainer so the player keeps their place. */
+function openLadderAssistant(interest) {
+  let bot = null;
+  openSheet({
+    title: T('up.botTitle'), noFocus: true,
+    html: '<div class="bot lad38-bot"><div class="chat" role="log" aria-live="polite"></div><div class="quick"></div><form class="chat-form" autocomplete="off"><input class="input" name="msg" maxlength="280" placeholder="Type a message…" aria-label="Message the assistant"><button class="btn btn-primary" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form></div>' +
+      '<div class="btn-row"><a class="btn btn-quiet btn-sm" href="#upgrades" data-close>' + icon('crown') + ' See every upgrade path</a></div>',
+    onMount(sh) { bot = SalesBot(qs('.bot', sh.el), { interest }); },
+    onClose() { if (bot) { bot.destroy(); bot = null; } }
+  });
 }
 function customGroup(rep) {
   return { name: rep.name, side: rep.side, intro: 'Your own lines. Drill them like the course repertoire.', custom: true, rep,
@@ -6626,6 +6986,9 @@ function lineRow(l, opt) {
 function mountOpenings(root) {
   const firstTab = () => (CONTENT.groups[0] || {}).name || 'mine';
   const ui = App.ui.op || (App.ui.op = { tab: firstTab(), screen: 'list', lineId: null, mode: 'drill', repId: null, engine: false });
+  Ladder.take(ui);                                                 // v3.8: #chapter/<id>/<level> links
+  /* v3.8: a first visit renders before the course file arrives, so the tab fell back to My repertoire; show the first repertoire once it is there. */
+  if (ui.tab === 'mine' && !ui.picked && ui.screen === 'list' && CONTENT.groups.length) ui.tab = firstTab();
   let cleanup = null;
   function go(patch) { Object.assign(ui, patch); render(); scrollToEl(root); }
   function render() {
@@ -6637,7 +7000,7 @@ function mountOpenings(root) {
     root.innerHTML = '<div id="metrics-openings">' + metricsHTML('openings') + '</div>' + (CONTENT.groups.length ? '' : dataEmptyHTML('opening repertoires')) +
       '<div class="chips" style="margin-bottom:16px" role="tablist" aria-label="Repertoires">' + tabs.map((t) => '<button type="button" class="chip" role="tab" data-tab="' + esc(t) + '" aria-pressed="' + (ui.tab === t) + '">' +
         (t === 'mine' ? icon('pen-to-square') + ' My repertoire' : esc(t) + ' <span class="chip-n" title="Chapters in the course file">' + count(t) + '</span>') + '</button>').join('') + '</div><div id="op-body"></div>';
-    qsa('[data-tab]', root).forEach((b) => b.addEventListener('click', () => go({ tab: b.getAttribute('data-tab'), screen: 'list' })));
+    qsa('[data-tab]', root).forEach((b) => b.addEventListener('click', () => go({ tab: b.getAttribute('data-tab'), screen: 'list', picked: true })));
     const body = qs('#op-body', root);
     if (ui.tab === 'mine') {
       const rep = Repertoire.list().filter((r) => r.id === ui.repId)[0];
@@ -6648,7 +7011,7 @@ function mountOpenings(root) {
     } else {
       const group = builtinGroup(ui.tab);
       const line = group.lines.filter((l) => l.id === ui.lineId)[0];
-      if (ui.screen === 'train' && line && App.unlocked(line)) cleanup = trainScreen(body, group, go);
+      if (ui.screen === 'train' && line && (App.unlocked(line) || Ladder.is(line))) cleanup = trainScreen(body, group, go);   // v3.8: a locked level opens on its gateway
       else { ui.screen = 'list'; cleanup = listScreen(body, group, go); }
     }
     theoryHead(ui.screen === 'list');
@@ -6658,9 +7021,10 @@ function mountOpenings(root) {
 }
 function listScreen(body, group, go) {
   const open = group.lines.filter((l) => App.unlocked(l));
-  const nCh = chaptersOf(group.lines).length;
+  const chs = chaptersOf(group.lines), nCh = chs.length, nLad = chs.filter((c) => c.ladder).length;
   body.innerHTML = (group.intro ? '<p class="muted" style="max-width:70ch;margin-bottom:10px">' + esc(group.intro) + '</p>' : '') +
-    (group.lines.length ? '<p class="ch37-sum">' + icon('book-open') + ' <b>' + nCh + (nCh === 1 ? ' chapter' : ' chapters') + '</b>, ' + group.lines.length + (group.lines.length === 1 ? ' line' : ' lines') + '. You play ' + colorName(group.side) + '.</p>' : '') +
+    (group.lines.length ? '<p class="ch37-sum">' + icon('book-open') + ' <span><b>' + nCh + (nCh === 1 ? ' chapter' : ' chapters') + '</b>' +
+      (!nLad ? ', ' + group.lines.length + (group.lines.length === 1 ? ' line' : ' lines') : nLad === nCh ? (nCh === 1 ? ' in five levels' : ', each in five levels') + ', from Free Sample to Masters' : ', ' + nLad + ' of them in five levels') + '. You play ' + colorName(group.side) + '.</span></p>' : '') +
     '<div class="btn-row" style="margin-bottom:16px"><button type="button" class="btn btn-primary" data-act="random">' + icon('shuffle') + ' Drill a random line</button>' +
     '<button type="button" class="btn btn-ghost" data-act="explore">' + icon('sitemap') + ' Explore the tree</button>' +
     (() => { const mist = V36.mistakeLines(group.lines), pc = V36.peerCount(group.name); return '<button type="button" class="btn btn-ghost" data-act="mistakes"' + (mist.length ? '' : ' disabled title="No missed moves in this repertoire yet"') + '>' + icon('crosshairs') + ' Train only my mistakes' + (mist.length ? ' (' + mist.length + ')' : '') + '</button>' +
@@ -6668,6 +7032,12 @@ function listScreen(body, group, go) {
     manageBtn('openings', 'Lines') + manageBtn('groups', 'Repertoires') + '</div>' +
     chapterRowsHTML(group);
   function onClick(e) {
+    const lad = e.target.closest('[data-lad-open]');
+    if (lad) {                                                     // v3.8: a level of a five-level chapter
+      const list = Ladder.members(group.lines, lad.getAttribute('data-lad-open')), it = Ladder.byKey(list, lad.getAttribute('data-tier'));
+      if (it) go({ screen: 'train', lineId: it.id, mode: 'drill', only: false });
+      return;
+    }
     const row = e.target.closest('[data-line]'), act = e.target.closest('[data-act]');
     if (row) {
       const l = group.lines.filter((x) => x.id === row.getAttribute('data-line'))[0];
@@ -6683,30 +7053,57 @@ function listScreen(body, group, go) {
 function trainScreen(body, group, go) {
   const ui = App.ui.op;
   let line = group.lines.filter((l) => l.id === ui.lineId)[0] || group.lines.filter((l) => App.unlocked(l))[0];
-  body.innerHTML = backBar(group.custom ? 'My repertoire' : 'All lines', esc(group.name) + ' › <strong id="op-title">' + esc(line.title) + '</strong>') +
+  body.innerHTML = backBar(group.custom ? 'My repertoire' : 'All lines', esc(group.name) + ' › <strong id="op-title">' + esc(Ladder.is(line) ? line.chapter : line.title) + '</strong>') +
     (ui.only ? '<div class="only36"><span>' + icon('crosshairs') + ' Mistakes only: the lines where you missed a move.</span><button type="button" class="btn btn-quiet btn-sm" data-act="only-off">Show all lines</button></div>' : '') +
+    '<div class="lad38" id="op-ladder" hidden></div>' +
     '<div class="seg" style="margin-bottom:14px" role="tablist"><button type="button" data-mode="learn">' + icon('graduation-cap') + ' Learn</button><button type="button" data-mode="drill">' + icon('dumbbell') + ' Drill</button><button type="button" data-mode="explore">' + icon('sitemap') + ' Explore</button></div>' +
     trainerShell('op-board', 'op-panel', { eval: true });
   const board = Board(qs('#op-board', body), { orientation: line.side === 'w' ? 'white' : 'black' });
   qs('[data-flip="op-board"]', body).addEventListener('click', () => board.flip());
-  const panel = qs('#op-panel', body), evalbar = qs('#op-board-eval', body);
-  let runner = null, explorer = null, curLearn = false;
-  const syncMode = () => qsa('[data-mode]', body).forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-mode') === ui.mode)));
+  const panel = qs('#op-panel', body), evalbar = qs('#op-board-eval', body), seg = qs('.seg', body);
+  /* v3.8: the level bar and the gateway. gated is the level on screen that the
+     player can't open (or that isn't published yet); no line runs meanwhile. */
+  const ladderHost = qs('#op-ladder', body), shell = qs('.board-shell', body), veil = document.createElement('div');
+  veil.className = 'lad38-veil'; veil.hidden = true; shell.classList.add('lad38-shell'); shell.appendChild(veil);
+  let runner = null, explorer = null, curLearn = false, gated = '', lastOpen = null;
+  const chapter = () => (Ladder.is(line) ? Ladder.members(group.lines, line.chapterId) : []);
+  const syncMode = () => {
+    seg.classList.toggle('is-dim', !!gated);
+    qsa('[data-mode]', body).forEach((b) => b.setAttribute('aria-pressed', String(!gated && b.getAttribute('data-mode') === ui.mode)));
+  };
+  function renderLadder() {
+    if (!Ladder.is(line)) { ladderHost.hidden = true; ladderHost.innerHTML = ''; return; }
+    const focused = ladderHost.contains(document.activeElement);
+    ladderHost.hidden = false;
+    ladderHost.innerHTML = ladderBarHTML(chapter(), gated || line.tierKey);
+    const rail = qs('.lad38-rail', ladderHost), on = qs('[aria-selected="true"]', ladderHost);
+    if (rail && on && rail.scrollWidth > rail.clientWidth) rail.scrollLeft = Math.max(0, on.offsetLeft - (rail.clientWidth - on.offsetWidth) / 2);
+    if (focused && on) try { on.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+  }
+  function ungate() { gated = ''; veil.hidden = true; shell.classList.remove('lad38-gated'); }
   function drillPanel(v) {
-    const mine = v.played.filter((p) => p.color === line.side).length;
-    panel.innerHTML = (curLearn ? '<span class="learn36">' + icon('graduation-cap') + ' Learn mode</span>' : '') + '<p class="st-kicker">' + esc(group.name) + '</p><h2 class="st-title">' + esc(line.title) + '</h2>' +
+    const mine = v.played.filter((p) => p.color === line.side).length, lad = Ladder.is(line);
+    const nx = lad && !ui.only ? Ladder.next(chapter(), line.tierKey) : null;
+    const nextBtn = (cls) => (nx ? '<button type="button" class="btn ' + cls + '" data-act="next-tier">' + (nx.open ? icon('arrow-trend-up') + ' Next level: ' : lockIcon(nx.it.lock) + ' Unlock ') + esc(nx.L.label) + '</button>'
+      : lad && !ui.only ? '<button type="button" class="btn ' + cls + '" data-act="next-chapter">Next chapter</button>' : '<button type="button" class="btn ' + cls + '" data-act="next">Next line</button>');
+    panel.innerHTML = (curLearn ? '<span class="learn36">' + icon('graduation-cap') + ' Learn mode</span>' : '') +
+      '<p class="st-kicker">' + esc(group.name) + (lad ? ', ' + esc(ladderLevel(line.tierKey).label) + (line.tierKey === 'free' ? '' : ' level') : '') + '</p><h2 class="st-title">' + esc(lad ? line.chapter : line.title) + '</h2>' +
       (line.idea ? '<p class="st-brief">' + esc(line.idea) + '</p>' : '') +
       turnHTML(v, 'Your move as ' + colorName(line.side)) + '<span class="dim small" style="margin-left:auto">' + Math.min(mine, v.userPlies) + ' / ' + v.userPlies + '</span></div>' +
       '<div class="st-feedback">' + feedbackHTML(v.feedback) + '</div>' + playedHTML(v.played) +
+      (v.finished && nx && !nx.open ? '<p class="lad38-next">' + icon('lock') + ' ' + esc(nx.L.label) + ' takes this line on to move ' + Ladder.reach(nx.it) + '.</p>' : '') +
       '<div class="st-actions">' + (v.finished && curLearn
-        ? '<button type="button" class="btn btn-primary" data-act="drill-now">' + icon('dumbbell') + ' Drill it from memory</button><button type="button" class="btn btn-ghost" data-act="restart">Learn it again</button><button type="button" class="btn btn-quiet" data-act="next">Next line</button>'
+        ? '<button type="button" class="btn btn-primary" data-act="drill-now">' + icon('dumbbell') + ' Drill it from memory</button><button type="button" class="btn btn-ghost" data-act="restart">Learn it again</button>' + nextBtn('btn-quiet')
         : v.finished
-        ? '<button type="button" class="btn btn-primary" data-act="next">Next line</button><button type="button" class="btn btn-ghost" data-act="restart">Drill it again</button><button type="button" class="btn btn-quiet" data-act="to-explore">Explore it</button>'
+        ? nextBtn('btn-primary') + '<button type="button" class="btn btn-ghost" data-act="restart">Drill it again</button><button type="button" class="btn btn-quiet" data-act="to-explore">Explore it</button>'
         : '<button type="button" class="btn btn-ghost btn-sm" data-act="hint">' + icon('lightbulb') + ' Hint</button><button type="button" class="btn btn-quiet btn-sm" data-act="show">Show move</button><button type="button" class="btn btn-quiet btn-sm" data-act="restart">Restart</button>') + '</div>';
   }
   function startDrill(l, learn) {
-    line = l; ui.lineId = l.id; ui.mode = learn ? 'learn' : 'drill'; curLearn = !!learn; syncMode();
-    qs('#op-title', body).textContent = l.title;
+    line = l; ui.lineId = l.id; ui.mode = learn ? 'learn' : 'drill'; curLearn = !!learn;
+    ungate();
+    if (Ladder.is(l)) lastOpen = l;
+    syncMode(); renderLadder();
+    qs('#op-title', body).textContent = Ladder.is(l) ? l.chapter : l.title;
     if (explorer) { explorer.destroy(); explorer = null; }
     evalbar.hidden = true;
     if (runner) runner.destroy();
@@ -6714,21 +7111,81 @@ function trainScreen(body, group, go) {
     runner.start();
   }
   function startExplore() {
-    ui.mode = 'explore'; syncMode();
+    ui.mode = 'explore'; ungate(); syncMode();
     if (runner) { runner.destroy(); runner = null; }
     if (explorer) explorer.destroy();
     board.orientation(group.side === 'w' ? 'white' : 'black');
     explorer = Explorer({ board, panel, group, evalbar, onDrill: startDrill });
   }
+  /* A level the player can't open (or that isn't published yet): the board
+     waits where the level carries on from the free sample, and the panel is
+     the gateway to the assistant. Nothing runs, nothing is scored. */
+  function showGate(key) {
+    const list = chapter(), it = Ladder.byKey(list, key), L = ladderLevel(key), back = lastOpen && lastOpen.chapterId === line.chapterId ? lastOpen : Ladder.openLevel(list);
+    gated = key;
+    if (runner) { runner.destroy(); runner = null; }
+    if (explorer) { explorer.destroy(); explorer = null; }
+    if (it) { line = it; ui.lineId = it.id; }                       // a key typed in now reopens this exact level
+    evalbar.hidden = true;
+    const tz = Ladder.teaser(list, key);
+    board.setOnMove(null); board.setTapMode(null); board.setInteractive(null); board.clearMarks(); board.setArrows([]);
+    board.orientation(line.side === 'w' ? 'white' : 'black');
+    board.setPosition(tz.fen, { animate: false, lastMove: tz.last });
+    veil.innerHTML = icon(it ? 'lock' : 'hourglass-half') + '<span>' + esc(it ? L.label + ' carries on from here' : L.label + ' is on its way') + '</span>';
+    veil.hidden = false; shell.classList.add('lad38-gated');
+    qs('#op-title', body).textContent = line.chapter;
+    panel.innerHTML = it ? ladderGateHTML(list, it, L, back) : ladderSoonHTML(list, L, back);
+    syncMode(); renderLadder();
+  }
+  /* A tap on a level: it runs straight away on the same board (no reload). */
+  function selectLevel(key) {
+    if (!Ladder.is(line)) return;
+    const it = Ladder.byKey(chapter(), key);
+    if (!it || !App.unlocked(it)) { showGate(key); return; }
+    startDrill(it, ui.mode === 'learn' || V36.autoLearn(it));
+  }
+  function nextChapter() {
+    const chs = chaptersOf(group.lines).filter((c) => c.ladder), i = chs.findIndex((c) => c.id === line.chapterId), c2 = chs[i + 1];
+    if (!c2) { toast('That was the last chapter of ' + group.name + '. Well played.', 'good'); go({ screen: 'list', only: false }); return; }
+    const list = Ladder.members(c2.lines, c2.id), it = Ladder.byKey(list, line.tierKey) || Ladder.byKey(list, 'free') || list[0];
+    line = it;
+    if (App.unlocked(it)) startDrill(it, V36.autoLearn(it)); else showGate(it.tierKey);
+    scrollToEl(body);
+  }
+  function ladderAct(a) {
+    const list = chapter(), it = Ladder.byKey(list, gated), L = ladderLevel(gated);
+    if (a === 'share') {
+      copyText(Ladder.link(line.chapterId)).then((ok) => toast(ok ? 'Link copied. It opens the free sample of ' + line.chapter + '.' : 'Copying was blocked. The link is ' + Ladder.link(line.chapterId), ok ? 'good' : 'bad'));
+    } else if (a === 'assistant' && it) {
+      openLadderAssistant({ chapter: it.chapter, repertoire: group.name, level: L.label, guideline: it.guideline ? Ladder.guideText(it.guideline) : '', lock: it.lock, plan: ladderPlan(it.lock) });
+    } else if (a === 'key' && it) {
+      openUnlock(it.lock, it.chapter + ', ' + L.label + ' level');
+    } else if (a === 'back') {
+      const b = lastOpen && lastOpen.chapterId === line.chapterId ? lastOpen : Ladder.openLevel(list);
+      if (b) startDrill(b, V36.autoLearn(b));
+    }
+  }
   function onClick(e) {
+    const lv = e.target.closest('[data-lad]');
+    if (lv && ladderHost.contains(lv)) { const k = lv.getAttribute('data-lad'); if (k !== (gated || line.tierKey) || gated) selectLevel(k); return; }
+    const la = e.target.closest('[data-lad-act]');
+    if (la) { ladderAct(la.getAttribute('data-lad-act')); return; }
     const m = e.target.closest('[data-mode]');
-    if (m) { const md = m.getAttribute('data-mode'); if (md === 'explore') startExplore(); else startDrill(line, md === 'learn'); return; }
+    if (m) {
+      const md = m.getAttribute('data-mode');
+      if (md === 'explore') { startExplore(); return; }
+      const l = App.unlocked(line) ? line : (lastOpen && lastOpen.chapterId === line.chapterId ? lastOpen : Ladder.openLevel(chapter()));
+      if (l) startDrill(l, md === 'learn');
+      return;
+    }
     const a = e.target.closest('[data-act]');
     if (!a) return;
     const act = a.getAttribute('data-act');
     if (act === 'back') { go({ screen: 'list', only: false }); return; }
     if (act === 'only-off') { go({ screen: 'list', only: false }); return; }
     if (act === 'drill-now') { startDrill(line, false); return; }
+    if (act === 'next-tier') { const nx = Ladder.next(chapter(), line.tierKey); if (nx) { selectLevel(nx.L.key); scrollToEl(body); } return; }
+    if (act === 'next-chapter') { nextChapter(); return; }
     if (!runner) return;
     if (act === 'hint') runner.hint();
     else if (act === 'show') runner.showMove();
@@ -6743,9 +7200,21 @@ function trainScreen(body, group, go) {
       const nxt = weakest(group.lines.filter((l) => App.unlocked(l) && l.id !== line.id)) || line; startDrill(nxt, V36.autoLearn(nxt)); scrollToEl(body);
     }
   }
+  /* Arrow keys move along the level bar (a tablist). */
+  function onKey(e) {
+    const t = e.target.closest('[data-lad]');
+    if (!t || !ladderHost.contains(t) || ['ArrowLeft', 'ArrowRight', 'Home', 'End'].indexOf(e.key) < 0) return;
+    e.preventDefault();
+    const keys = LADDER.map((L) => L.key), i = keys.indexOf(t.getAttribute('data-lad'));
+    const j = e.key === 'Home' ? 0 : e.key === 'End' ? keys.length - 1 : clamp(i + (e.key === 'ArrowRight' ? 1 : -1), 0, keys.length - 1);
+    if (j !== i) selectLevel(keys[j]);
+  }
   body.addEventListener('click', onClick);
-  if (ui.mode === 'explore') startExplore(); else startDrill(line, ui.mode === 'learn' || (!ui.only && V36.autoLearn(line)));
-  return () => { body.removeEventListener('click', onClick); if (runner) runner.destroy(); if (explorer) explorer.destroy(); board.destroy(); };
+  ladderHost.addEventListener('keydown', onKey);
+  if (ui.mode === 'explore') { startExplore(); renderLadder(); }
+  else if (Ladder.is(line) && !App.unlocked(line)) showGate(line.tierKey);
+  else startDrill(line, ui.mode === 'learn' || (!ui.only && V36.autoLearn(line)));
+  return () => { body.removeEventListener('click', onClick); ladderHost.removeEventListener('keydown', onKey); if (runner) runner.destroy(); if (explorer) explorer.destroy(); board.destroy(); };
 }
 function Explorer(cfg) {
   const board = cfg.board, panel = cfg.panel, group = cfg.group, evalbar = cfg.evalbar;
@@ -7966,11 +8435,13 @@ function mountUpgrades(view) {
    sales assistant answers with the instructions from admin mode, sees the
    answers so far and turns [[PATH:...]] tags into the right buttons. Without
    the worker, or when it fails, the scripted assistant answers. */
-function SalesBot(host) {
+function SalesBot(host, opts) {
   const chat = qs('.chat', host), quick = qs('.quick', host), form = qs('form', host), P = CONFIG.pricing, coach = CONFIG.coach;
+  /* v3.8: opened from a locked chapter level, the assistant knows which one. */
+  const I = opts && opts.interest && typeof opts.interest === 'object' ? opts.interest : null;
   let A = {}, step = null, busy = false, timers = [], history = [], alive = true, lastRoute = '';
   const FLOW = {
-    start: { say: () => ['Hey' + (App.profile.name ? ' ' + App.profile.name : '') + '! I’m ' + coach + '’s assistant.', 'A few quick questions and I’ll show you the fastest route to your next rating jump' + (AI.on() ? ', or just type your own question' : '') + '. First: what’s your rating right now?'], opts: [['u800', 'Under 800'], ['800', '800–1200'], ['1200', '1200–1600'], ['1600', '1600+']], key: 'rating', next: 'leak' },
+    start: { say: () => ['Hey' + (App.profile.name ? ' ' + App.profile.name : '') + '! I’m ' + coach + '’s assistant.', (I ? 'You were about to open the ' + I.level + ' level of ' + I.chapter + (I.guideline ? ' (' + I.guideline + ' ELO guideline)' : '') + ', which is part of ' + I.plan + '. ' : '') + 'A few quick questions and I’ll show you the fastest route to your next rating jump' + (AI.on() ? ', or just type your own question' : '') + '. First: what’s your rating right now?'], opts: [['u800', 'Under 800'], ['800', '800–1200'], ['1200', '1200–1600'], ['1600', '1600+']], key: 'rating', next: 'leak' },
     leak: { say: () => ['Got it. Be honest with me: what costs you the most games?'], opts: Object.keys(LEAKS).map((k) => [k, LEAKS[k]]), key: 'leak', next: 'stuck' },
     stuck: { say: () => ['How long have you been stuck around this rating?'], opts: [['m1', 'Less than a month'], ['m6', '1–6 months'], ['m6p', 'More than 6 months'], ['years', 'Years']], key: 'stuck', next: 'goal' },
     goal: { say: () => ['Where do you want to be six months from now?'], opts: [['p200', '+200'], ['p400', '+400'], ['p600', '+600 or more'], ['stop', 'I just want to stop blundering']], key: 'goal', next: 'time' },
@@ -8050,7 +8521,7 @@ function SalesBot(host) {
     if (!App.profile.leak && LEAKS[A.leak]) { App.profile.leak = A.leak; App.save(); }
     const lines = {
       walk: ['Then start with the free community. You get the Blunder Bootcamp, the Anti-Blunder Bootcamp, the free MSPC course and the community key that unlocks those lessons in this app.'],
-      bridge: ['Based on your answers, the Accelerator fits you best: the full system at your own speed, for ' + P.accelerator.price + P.accelerator.per + '.', focusLine()],
+      bridge: ['Based on your answers, the Accelerator fits you best: the full system at your own speed, for ' + P.accelerator.price + P.accelerator.per + '.', I && I.lock === 'vault' ? 'It opens the ' + I.level + ' level of ' + I.chapter + ' right away, and every other level of every chapter with it.' : focusLine()],
       jet: ['Perfect. Apply below and ' + coach + ' reads your application himself.']
     }[route];
     botSay(lines, () => { showRec(route); resume(); });
@@ -8065,7 +8536,8 @@ function SalesBot(host) {
       pending_question: s ? said[said.length - 1] + ' (buttons: ' + s.opts.map((o) => o[1]).join(' / ') + ')' : '',
       prices: { accelerator: P.accelerator.price + P.accelerator.per, mentorship: P.mentorship.price + P.mentorship.per, mentorship_seats_total: P.mentorship.cap, mentorship_seats_open: P.mentorship.seatsLeft == null ? 'not published' : P.mentorship.seatsLeft },
       player: { name: App.profile.name || '', rating: App.profile.elo || null, leak: LEAKS[App.profile.leak] || '', goal: GOALS[App.profile.goal] || '', access: TIERS[App.access.tier].label },
-      recommended: lastRoute
+      recommended: lastRoute,
+      interest: I ? { chapter: String(I.chapter || ''), repertoire: String(I.repertoire || ''), level: String(I.level || ''), guideline: String(I.guideline || ''), membership_needed: String(I.plan || '') } : null
     };
   }
   async function aiReply(text) {
@@ -12186,6 +12658,7 @@ const EloGate = (() => {
   }
   function need(item) {
     if (!item || typeof item !== 'object') return 0;
+    if (item.tierKey) return 0;           // v3.8: ladder levels are a guideline, never an ELO block
     if (Number.isFinite(+item.minElo) && +item.minElo > 0) return Math.round(+item.minElo);
     const map = CONFIG.eloGates && typeof CONFIG.eloGates === 'object' ? CONFIG.eloGates : {};
     const id = String(item.id || '').replace(/^(c|p):/, ''), g = groupOf(item);
@@ -13853,6 +14326,7 @@ function renderFoot() {
     '<a href="' + esc(CONFIG.links.youtube) + '" target="_blank" rel="noopener">YouTube</a><a href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">Skool</a><a href="#upgrades">Upgrades</a><a href="#about">About</a><span>v' + CONFIG.version + '</span></span>';
 }
 function render() {
+  Ladder.fromHash();                                               // v3.8: #chapter/<id>/<level> becomes #openings
   const route = routeFromHash();
   if (current.dispose) { try { current.dispose(); } catch (e) { console.error(e); } }
   current = { route, dispose: null };

@@ -1,6 +1,35 @@
-# Lanckrietchess Training Hub v3.7.0
+# Lanckrietchess Training Hub v3.8.0
 
 One self-contained `index.html` (vanilla JavaScript, Tailwind via CDN, no build step) plus a few small files. It runs on Vercel, GitHub Pages or any static host, installs as a PWA and can be wrapped for the Play Store.
+
+## What's new in v3.8
+
+- **Five-level chapters.** A chapter can now come in five levels: Free Sample, Beginner (0–800), Intermediate (800–1200), Advanced (1200–1600+) and Masters (1600–2200+). Put them in the data file as a top-level `"chapters"` list (each with a `"repertoire"`), or inside `repertoires[].chapters`:
+
+  ```json
+  "chapters": [
+    { "chapterId": "caro-advance-3c5", "title": "Caro-Kann Advance: the 3...c5 break", "repertoire": "Caro-Kann",
+      "freeSample": { "stopMoveIndex": 6, "moves": "1.e4 c6 2.d4 d5 3.e5 c5", "description": "Strike at White's centre straight away with 3...c5." },
+      "tiers": {
+        "beginner":     { "guidelineElo": "0-800",      "stopMoveIndex": 10,   "moves": "1.e4 c6 2.d4 d5 3.e5 c5 4.c3 Nc6 5.Nf3 cxd4" },
+        "intermediate": { "guidelineElo": "800-1200",   "stopMoveIndex": 14,   "moves": "..." },
+        "advanced":     { "guidelineElo": "1200-1600+", "stopMoveIndex": 16,   "moves": "..." },
+        "masters":      { "guidelineElo": "1600-2200+", "stopMoveIndex": null, "moves": "..." } } }
+  ]
+  ```
+
+  `stopMoveIndex` counts half-moves (6 = 1.e4 c6 2.d4 d5 3.e5 c5); a move like `"8.dxc5"` or `"5...cxd4"` works too, and `null` plays the whole line. Two shortcuts: a comment in `{ }` after a move becomes your note on that move (Learn mode shows it, and it reaches every shallower level that plays the same moves), and a level with a `stopMoveIndex` but no `moves` uses the moves of the next deeper level, so one full line with five stop points is enough. A level that isn't in the file shows as "Soon". `tier-chapters-example.json` has two chapters built from your Caro-Kann Advance and Colle lessons, with your own notes.
+- **The level bar.** Every five-level chapter shows the five levels above the board. The Free Sample is open to everyone and styled as the hook; a tap on any level loads its line on the same board at once (no reload), in Learn or Drill mode. Under the bar: "Recommended guideline: Master the Beginner section before moving to Intermediate, but you are free to explore at your own pace." With a verified Chess.com or Lichess rating, or a rating in the profile, the level that fits gets a green dot and one extra sentence. Nothing is ever blocked by rating: ELO gates don't apply to levels.
+- **The gateway.** A level the player's membership doesn't cover dims the board on the position where that level carries on from the free sample ("Beginner carries on from here"), and the panel says how far it goes ("to move 8: 8 moves of yours to learn, with 5 of Kyenzo's notes"). "Talk to Kyenzo's assistant" opens the sales assistant over the trainer, and the assistant already knows the chapter and level (the AI worker gets it as `interest` in the context). "I have a member key" opens the key sheet; after a valid key the level starts right away.
+- **Next level.** A finished level offers "Next level: Intermediate" (or "Unlock Intermediate", with a line on how far it goes), and the last level offers the next chapter.
+- **Chapter cards.** The list shows each five-level chapter as one card: the free sample as the main row, the four levels underneath with their guideline, lock and progress.
+- **Chapter links.** `https://lanckrietchess-app.vercel.app/#chapter/caro-advance-3c5` opens a chapter's free sample, `…/#chapter/caro-advance-3c5/intermediate` a level. For video descriptions and bios. The link button next to the guideline copies it.
+- **Access per level.** `CONFIG.ladder.access` sets the membership each paid level needs (default: `vault`, the Accelerator). A level in the file can set its own with `"lock": "community"` or `"vault"`. The Free Sample is always free.
+- **Live data.** Admin menu > Live data lists every five-level chapter with the half-moves each level plays, so you can check your stop points.
+
+**Deploy.** Add your chapters to the `json` file in `lanckrietchess/Json-van-app` (the example file shows the shape), then upload `index.html` and `sw.js` (version `lc-hub-3.8.0`). Every level becomes one opening line with the id `<chapterId>--<level>`, so progress, spaced repetition, Shuffle and Explore work on it like on any line. Nothing changes on the worker.
+
+**Honest limits.** Levels are a front-end gate like every tier: a determined visitor can read the locked moves with developer tools. Masters currently needs the Accelerator like the other paid levels; a mentorship-only level needs one more lock level in the hub.
 
 ## What's new in v3.7
 
@@ -180,7 +209,7 @@ To hide a player from this board, set `hidden = 1` on their row in the D1 consol
 
 1. Upload `index.html`, `sw.js`, `vercel.json`, `manifest.webmanifest` and the `icons` folder to `lanckrietchess/Json-van-app` (Add file > Upload files, drag the folder in as well > Commit). Vercel deploys the commit to `https://lanckrietchess-app.vercel.app/` by itself. Leave the data file `json` where it is.
 2. Check the deployment: open the site, then Admin menu > Live data (GitHub). It should say the data came from GitHub. Later, for the Play Store, add `.well-known/assetlinks.json`.
-3. `sw.js` carries version `lc-hub-3.7.0`; bump it every time you upload a new `index.html`, so returning players get it.
+3. `sw.js` carries version `lc-hub-3.8.0`; bump it every time you upload a new `index.html`, so returning players get it.
 4. Moving the data file? Change `CONFIG.remote` (owner, repo, branch, path). A custom domain? Nothing to change: links follow the address the hub is served from. Only `CONFIG.site.production` is used as the fallback address.
 5. Before launch, check `CONFIG.access.demoKeys` is `false` in `index.html` (it is in this build).
 
@@ -263,4 +292,4 @@ Deploy `activation-worker.js` as described at the top of that file (free Cloudfl
 
 ## Updating content by hand
 
-Everything in `CONFIG` and `COPY` near the top of `index.html` can still be edited in a text editor. Since v3.7 `CONTENT` holds no course content: repertoires, lines, chapters, drills and lessons live in the data file on GitHub. Admin mode just makes it faster and checks your chess for you. The gates in `GATES` and the default bot instructions (`DEFAULT_COACH_PROMPT`, `DEFAULT_SALES_PROMPT`) sit right under `COPY`.
+Everything in `CONFIG` and `COPY` near the top of `index.html` can still be edited in a text editor. Since v3.7 `CONTENT` holds no course content: repertoires, lines, chapters (including the five-level chapters of v3.8), drills and lessons live in the data file on GitHub. `CONFIG.ladder` sets which membership opens each level. Admin mode just makes it faster and checks your chess for you. The gates in `GATES` and the default bot instructions (`DEFAULT_COACH_PROMPT`, `DEFAULT_SALES_PROMPT`) sit right under `COPY`.
