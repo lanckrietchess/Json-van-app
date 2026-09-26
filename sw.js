@@ -1,6 +1,6 @@
 /* Lanckrietchess Training Hub service worker.
    Bump VERSION whenever you upload a new index.html so returning users get it. */
-const VERSION = 'lc-hub-3.5.1';
+const VERSION = 'lc-hub-3.6.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'];
 /* [url, mode]: the mode must match how index.html requests the file, or the cached copy is refused. */
 const CDN = [

@@ -1,6 +1,24 @@
-# Lanckrietchess Training Hub v3.5.1
+# Lanckrietchess Training Hub v3.6.0
 
 One self-contained `index.html` (vanilla JavaScript, Tailwind via CDN, no build step) plus a few small files. It runs on Vercel, GitHub Pages or any static host, installs as a PWA and can be wrapped for the Play Store.
+
+## What's new in v3.6
+
+- **Trophy room (`#trophies`).** 27 badges in seven groups (streaks, volume and accuracy, openings, thinking, game review, rating, community), each with a progress bar. The badge count sets a trophy: Bronze (3), Silver (8), Gold (14), Platinum (20), Diamond (25). The trophy shows in the top bar and next to the player's own name on every leaderboard; ranks 1 to 3 get a gold, silver and bronze trophy. Open it from the profile sheet or the Home "Today" strip.
+- **Settings > Show achievement popups.** Off: nothing covers the board while a player calculates. Badges still collect, and a dot on the trophy in the top bar says something new is waiting. Also new in Settings: Learn mode on new opening lines, Stockfish check in Learn mode, and Spaced repetition.
+- **Streak HUD and quieter streaks.** Every trainer shows a live first-try streak under the board (flame, count, best). 5, 10 and 20 in a row get a flare on the HUD and at most one slim banner per day that never covers the board; 30 and up keep the full celebration.
+- **Learn mode.** The first time a player opens an opening line, it starts in Learn mode: an arrow shows every move, the annotation explains it, and Stockfish checks the move against its top three (the course move is called out only when Stockfish really prefers something else, shown as a green arrow). Nothing is scored. The trainer now has Learn | Drill | Explore.
+- **Spaced repetition and Think > My mistakes (`#srs`).** Every move missed on the first try is saved per position (FEN, so transpositions count) and comes back until it is played right twice in a row, here or in any trainer. Finished lines return after 1, 3, 7, 14, 30 and 60 days (10 minutes after a bad run). "Train only my mistakes" plays just those positions; "Review due lines" plays whole lines that are due. The opening list has its own "Train only my mistakes" button per repertoire.
+- **Think > Peer puzzles (`#peer`).** Real blunders from players in this hub, with their username and rating: find the move that punishes it. Filter by opening and by level (defaults to the player's own bracket). Moves that win just as much are accepted too. Peer puzzles are rated by the player's rating on the leaderboard.
+- **Blunder Clinic per opening.** Cases filter by opening and show the student's name and rating. Student cases are strictly MSPC: exactly four steps, M, S, P and C, in that order, each with a text (the editor and the data import refuse anything else).
+- **Leaderboard > Games.** The Game of the Day (the featured game dated today, otherwise the latest) with a replay board, move tags and an MSPC breakdown, and a ranking of the most accurate featured games, filterable by level.
+- **Admin > Review Queue (`#review-queue`).** Paste PGN (one game or many), import from your own Game Vault, or pull anonymous community games from the hub worker. Stockfish trims every game on this device: each of the student's moves is sorted into good, bad or blunder and every leak gets an MSPC letter. Check the verdicts, rewrite the comments, choose what each blunder becomes (peer puzzle, Clinic case with editable M, S, P and C texts) and whether the game is featured (with a Game of the Day date). Approve adds it all to your draft in one tap; publish as always. Keep the page open while it trims.
+- **ELO gates.** A module can require a minimum rating on top of its tier. Default: the Meran and Moscow Semi-Slav lines need 1400. The unlock rating is the higher of a verified Chess.com or Lichess rating and the hub rating (rated puzzles); a rating typed into the profile never opens a gate. Locked rows show "1400 ELO", and tapping one shows how far the player is and how to get there. Admin menu > ELO gates edits them per repertoire, line, drill or lesson; admin mode always sees everything (preview as a player to test).
+- **Data file.** The hand-written data file in the GitHub repository can now carry `community_puzzles` (fen, solution, alternatives, player, elo, opening, played, note, last_move), `featured_games` (pgn, player, elo, opening, date, accuracy, color, result, mspc), `student_mistakes` (fen, played, best, player, elo, opening, M, S, P, C) and `elo_gates` (`{ "semislav-meran": 1400, "group:Semi-Slav": 1200 }`).
+
+**Deploy.** Upload `index.html` and `sw.js` (version `lc-hub-3.6.0`). Nothing changes on the worker.
+
+**Honest limits.** Badges, spaced repetition and the queue live in the browser that made them, like the rest of the progress. Trophies next to other players' names on the community boards need the hub worker to store a trophy per player: send `trophy` (bronze, silver, gold, platinum or diamond) with `lb_sync` and return it on each row; the hub already shows it when a row carries it. Until then the community boards show the top-3 trophies and your own. ELO gates are a front-end gate like the tiers: a determined visitor can open the content with developer tools. A paid member below a gate's rating can't open that module, so say so on your sales page.
 
 ## What's new in v3.5.1
 
@@ -83,7 +101,7 @@ One self-contained `index.html` (vanilla JavaScript, Tailwind via CDN, no build 
 
 1. Upload `index.html`, `sw.js`, `vercel.json`, `manifest.webmanifest` and the `icons` folder to `lanckrietchess/Json-van-app` (Add file > Upload files, drag the folder in as well > Commit). Vercel deploys the commit to `https://lanckrietchess-app.vercel.app/` by itself. Leave the data file `json` where it is.
 2. Check the deployment: open the site, then Admin menu > Live data (GitHub). It should say the data came from GitHub. Later, for the Play Store, add `.well-known/assetlinks.json`.
-3. `sw.js` carries version `lc-hub-3.5.1`; bump it every time you upload a new `index.html`, so returning players get it.
+3. `sw.js` carries version `lc-hub-3.6.0`; bump it every time you upload a new `index.html`, so returning players get it.
 4. Moving the data file? Change `CONFIG.remote` (owner, repo, branch, path). A custom domain? Nothing to change: links follow the address the hub is served from. Only `CONFIG.site.production` is used as the fallback address.
 5. Before launch, check `CONFIG.access.demoKeys` is `false` in `index.html` (it is in this build).
 
