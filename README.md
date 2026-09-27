@@ -1,5 +1,17 @@
 # Lanckrietchess Training Hub v4.0.0
 
+## What's new: Credits, a pay-per-level micro-economy
+
+Next to the membership tiers (free/community/vault/mentor), a visitor can now unlock **one locked level** on their own device without joining the Accelerator or Mentorship.
+
+- **Daily free credits.** Every device gets `CONFIG.credits.daily` credits each calendar day (default 1), reset on the same clock as the streak counter. They don't carry over.
+- **Purchased credits never expire.** Bought in a package (Profile > Credits > Get more credits), they sit in a separate balance and are spent only after the daily credits run out.
+- **Unlocking is permanent, per device.** From any level gate, "Unlock just this level" spends `CONFIG.credits.unlockCost` credits (`unlockCostMentor` for a Mentorship-only level) and remembers that one item's id forever, exactly like a member key does for a whole tier — `Levels.open()` is still the only gate the hub checks, so nothing elsewhere needed to change.
+- **Front-end simulation.** There is no payment processor wired in: clicking a package in the buy-credits sheet grants the credits immediately, the same way every other unfinished integration in this project is marked. Before you take real payments, connect Stripe, Paddle or similar and call `Credits.grant(amount)` from its success handler instead of the simulated click in `openBuyCredits()`.
+- **Honest limit.** Like member keys, a credit unlock lives in `localStorage` on that device: clearing site data resets it, and nothing here proves a device really paid. Treat it as a convenience upsell, not a licensing system.
+
+Edit `CONFIG.credits` in `index.html` to change the daily allowance, unlock costs and package prices.
+
 ## What's new in v4.0: opening chapters are trees
 
 The Opening Trainer no longer plays straight "stems". Every chapter is a **tree**: one position can hold several replies of your opponent and several moves of your own, exactly as in ChessTempo.
