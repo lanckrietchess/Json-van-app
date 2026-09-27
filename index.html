@@ -1331,6 +1331,44 @@ a.cc-frame:hover{border-color:var(--accent)}
 .lv39-topic .lv39-gate{padding:6px 2px 2px}
 .lv39-lock{white-space:nowrap}
 @media (prefers-reduced-motion:reduce){.lv39-tab,.lv39-shell .board-host{transition:none}}
+/* v4.0 tree trainer */
+.tt40-bar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:10px}
+.tt40-bar.is-dim .seg{opacity:.55}
+.tt40-scope button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.tt40-scope button:disabled{opacity:.45;cursor:default}
+.tt40-nav{display:flex;align-items:center;gap:8px;margin-bottom:12px;min-width:0}
+.tt40-nav[hidden]{display:none}
+.tt40-pick{flex:1 1 auto;min-width:0}
+.tt40-pick select{width:100%;min-height:40px;padding:6px 10px;font-weight:600;font-size:14px;text-overflow:ellipsis}
+.tt40-count{flex:none;font-variant-numeric:tabular-nums;color:var(--fog);font-size:13px;font-weight:700}
+.tt40-nav .icon-btn:disabled{opacity:.35}
+.tt40-cover{flex:1;display:flex;flex-direction:column;gap:6px;padding:10px 12px;border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:var(--r);font-size:14px}
+.tt40-cover i.fa-solid{color:var(--accent)}
+.tt40-meter{display:block;height:6px;border-radius:99px;background:var(--ink-2);overflow:hidden}
+.tt40-meter i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .35s ease}
+.tt40-line{margin:-4px 0 10px;color:var(--fog);font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.tt40-line i{color:var(--accent);margin-right:4px}
+.tt40-branch{margin:8px 0 0;padding:8px 10px;border-radius:var(--r-sm);background:var(--warn-soft);color:var(--chalk);font-size:14px}
+.tt40-branch i{color:var(--warn);margin-right:4px}
+.tt40-notes{margin-top:10px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2);padding:10px 12px;max-height:340px;overflow:auto}
+.tt40-nh{margin:0 0 6px;font-size:13px;font-weight:800;color:var(--accent);letter-spacing:.01em}
+.tt40-note{font-family:var(--read);font-size:15.5px;line-height:1.5;color:var(--chalk);overflow-wrap:anywhere}
+.tt40-note+.tt40-note{margin-top:10px;padding-top:10px;border-top:1px dashed var(--hair)}
+.tt40-notes summary{cursor:pointer;font-weight:700;color:var(--chalk);font-size:14px;margin-bottom:6px}
+.tt40-ask{flex-basis:100%;margin:0 0 4px;font-weight:700}
+.moves .mv.is-carried{opacity:.6}
+@media (max-width:520px){.tt40-bar .seg{width:100%}.tt40-bar .seg button{flex:1 1 0;padding:8px 6px;font-size:13px}.tt40-notes{max-height:260px}}
+/* v4.0 import sheet */
+.ti40-table{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.ti40-row{display:grid;grid-template-columns:1fr;gap:6px;padding:10px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.ti40-use{display:flex;gap:8px;align-items:center}
+.ti40-row .bad{color:var(--miss)}
+.ti40-opts{font-size:14px;color:var(--fog);margin-bottom:8px}
+.ti40-opts .input{width:70px;display:inline-block;min-height:34px;padding:4px 8px;margin:0 4px}
+.ti40-h{font-size:16px;margin:14px 0 6px}.ti40-h small{color:var(--fog);font-weight:600}
+.ti40-ch{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.ti40-ch li{display:flex;flex-direction:column;gap:2px}
+@media (min-width:640px){.ti40-row{grid-template-columns:1.2fr 1.3fr 1fr .8fr;align-items:center}}
 </style>
 </head>
 <body>
@@ -1370,7 +1408,7 @@ a.cc-frame:hover{border-color:var(--accent)}
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '3.9.0',
+  version: '4.0.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -2123,13 +2161,27 @@ const Levels = (() => {
     out.forEach((t) => { if (!t.title) t.title = human(t.id); });
     return out;
   }
-  const has = (t, k) => !!(t && t.byLevel && t.byLevel[k] && t.byLevel[k].length);
-  const lead = (t, k) => (has(t, k) ? t.byLevel[k][0] : null);
+  /* v4.0: a tree chapter knows its own levels. A level can replay the tree of
+     the level below it (a free sample, or a level that adds no new moves), so
+     its slot in byLevel may be empty while the level is full of lines. */
+  const tl = (t, k) => (t && t.tree && t.tree.levels ? t.tree.levels[k] || null : undefined);
+  const has = (t, k) => { const L = tl(t, k); return L !== undefined ? !!(L && L.leaves.length) : !!(t && t.byLevel && t.byLevel[k] && t.byLevel[k].length); };
+  function lead(t, k) {
+    const L = tl(t, k);
+    if (L === undefined) return has(t, k) ? t.byLevel[k][0] : null;
+    if (!L || !L.leaves.length) return null;
+    const it = { id: t.id + '--L' + k, topicId: t.id, topic: t.tree.title, title: t.tree.title, subtitle: t.tree.path, lvl: k, requiredTier: L.rt, group: t.tree.group };
+    if (L.g) it.guideline = L.g;
+    if (L.s) it.skoolUrl = L.s;
+    return it;
+  }
   function progress(t, k) {
+    const L = tl(t, k);
+    if (L !== undefined) return L && L.ids.length ? L.ids.reduce((s, id) => s + ((App.progress[id] || {}).best || 0), 0) / L.ids.length : 0;
     const l = has(t, k) ? t.byLevel[k] : [];
     return l.length ? l.reduce((s, it) => s + ((App.progress[it.id] || {}).best || 0), 0) / l.length : 0;
   }
-  const skoolOf = (t, k) => { const it = has(t, k) ? t.byLevel[k].filter((x) => x.skoolUrl)[0] : null; return it ? skool(it.skoolUrl) : ''; };
+  const skoolOf = (t, k) => { if (tl(t, k) !== undefined) { const L = tl(t, k); return L && L.s ? skool(L.s) : ''; } const it = has(t, k) ? t.byLevel[k].filter((x) => x.skoolUrl)[0] : null; return it ? skool(it.skoolUrl) : ''; };
   /* The level a topic opens on: the one asked for, else the lowest level with content the player can open, else Level 1. */
   function pick(t, want) {
     const w = num(want);
@@ -2148,6 +2200,8 @@ const Levels = (() => {
   /* Openings: level k plays every line of levels 1 to k and nothing deeper.
      A line that is only the start of a longer line in the set drops out. */
   function cut(t, k) {
+    const TL = tl(t, k);                                           // v4.0: a tree level is exactly its own lines, branches included
+    if (TL !== undefined) return TL ? TL.ids.map((id) => (t.itemsById && t.itemsById[id]) || Trees.line(id)).filter(Boolean) : [];
     const pool = [];
     for (let j = 1; j <= Math.min(5, k); j++) ((t && t.byLevel[j]) || []).forEach((l) => pool.push({ l, m: movesOf(l).map(cleanSan) }));
     return pool.filter((a, i) => !pool.some((b, j) => j !== i && (b.m.length > a.m.length || (b.m.length === a.m.length && j < i)) && a.m.every((s, x) => b.m[x] === s))).map((a) => a.l);
@@ -2927,7 +2981,7 @@ function checkItem(name, it) {
    from the previous file; otherwise every member would be signed out. */
 const Feed = (() => {
   const HUB = 'lanckrietchess-hub', BACKUP = 'lanckrietchess-hub-backup';
-  const HUB_KEYS = ['copy', 'settings', 'lists', 'gates', 'bots', 'keys', 'folders'];
+  const HUB_KEYS = ['copy', 'settings', 'lists', 'gates', 'bots', 'keys', 'folders', 'trees'];
   const FEED_KEYS = ['opening_lines', 'openings', 'think_section', 'puzzles', 'theory_section', 'courses', 'ai_coaches', 'app_settings', 'groups', 'community_puzzles', 'peer_puzzles', 'featured_games', 'games_of_the_day', 'student_mistakes', 'elo_gates', 'repertoires', 'puzzle_bank', 'course_index', 'chapters', 'tier_chapters', 'topics', 'bootcamps'];
   const WRAP = ['items', 'list', 'entries', 'data', 'values', 'rows', 'records'];
   const COURSE_TRACKS = ['middlegame', 'antiblunder', 'endgame'];
@@ -3257,6 +3311,17 @@ const Feed = (() => {
     });
     if (made.length) { if (!ctx.sideFor(group)) ctx.addGroup(group, side, ''); rep.levels.push(name + ' (' + group + '): ' + made.join('; ')); }
   }
+  /* v4.0: a chapter with a "tree" (see TreeData): checked move by move, then kept as one tree. */
+  function treeTopic(doc, c, ctx, rep) {
+    const group = ctx.group || str(pick(c, ['repertoire', 'group', 'opening', 'course', 'category']), 60) || ctx.match(str(pick(c, ['title', 'name']), 90)) || 'Chapters';
+    const side = ctx.side || sideWord(pick(c, ['side', 'color', 'colour', 'play_as'])) || ctx.sideFor(group) || guessSide(group);
+    const r = TreeData.fromFeed(c, { group, side, n: ctx.n }, rep);
+    if (r.error) { rep.skipped.push(r.error); tally(rep, 'Chapter trees', 'skipped'); return; }
+    const list = Array.isArray(doc.trees) ? doc.trees : (doc.trees = []);
+    const i = list.findIndex((x) => x.id === r.entry.id);
+    if (i >= 0) { list[i] = r.entry; tally(rep, 'Chapter trees', 'updated'); } else { list.push(r.entry); tally(rep, 'Chapter trees', 'added'); }
+    if (!ctx.sideFor(group)) ctx.addGroup(group, side, '');
+  }
   const MODULES = {
     puzzles: 'think', puzzle: 'think', positions: 'think', mspc: 'think', think: 'think',
     courses: 'course', course: 'course', lessons: 'course', bootcamp: 'course', bootcamps: 'course',
@@ -3459,6 +3524,7 @@ const Feed = (() => {
       const side = sideWord(pick(r, ['side', 'color', 'colour', 'play_as'])) || sideFor(name) || guessSide(name);
       addGroup(name, side, str(pick(r, ['intro', 'description']), 600));
       (arr(r.chapters) || []).forEach((c, ci) => {
+        if (TreeData.isTree(c)) { treeTopic(doc, c, Object.assign({}, ladderCtx, { group: name, side, n: ci + 1 }), rep); return; }   // v4.0
         if (isLeveled(c)) { openingTopic(doc, c, Object.assign({}, ladderCtx, { group: name, side, n: ci + 1 }), rep); return; }   // v3.9
         if (isOldLadder(c)) { oldLadder(c, ci + 1, rep); return; }
         const title = isObj(c) ? str(pick(c, ['title', 'name', 'chapter']), 90) : '';
@@ -3477,7 +3543,8 @@ const Feed = (() => {
     });
     (arr(pick(src, ['opening_lines', 'openings'])) || arr(pick(theory, ['opening_lines', 'openings'])) || []).forEach((o, i) => addLine(o, '#' + (i + 1)));
     (arr(pick(src, ['tier_chapters', 'chapters'])) || arr(pick(theory, ['tier_chapters', 'chapters'])) || []).forEach((c, i) => {
-      if (isLeveled(c)) openingTopic(doc, c, Object.assign({}, ladderCtx, { n: i + 1 }), rep);
+      if (TreeData.isTree(c)) treeTopic(doc, c, Object.assign({}, ladderCtx, { n: i + 1 }), rep);   // v4.0
+      else if (isLeveled(c)) openingTopic(doc, c, Object.assign({}, ladderCtx, { n: i + 1 }), rep);
       else if (isOldLadder(c)) oldLadder(c, i + 1, rep);
       else rep.skipped.push('Chapter #' + (i + 1) + ' has no levels array, so it isn’t a five-level chapter. Lines without levels go in opening_lines or repertoires.');
     });
@@ -3619,7 +3686,10 @@ const Feed = (() => {
     doc.updated = upd;
     doc.app = HUB;
     const clean = Site.cleanDoc(doc) || doc;
-    rep.repertoires = repSummary(clean.lists.groups, clean.lists.openings);
+    clean.trees = TreeData.validateAll(clean.trees || [], rep);      // v4.0: cached, so an unchanged file is not replayed
+    const tlines = Trees.linesFor(clean.trees);
+    rep.repertoires = repSummary(clean.lists.groups, (clean.lists.openings || []).filter((o) => !o.tree).concat(tlines));
+    Trees.report(clean.trees).forEach((t) => rep.levels.push(t.title + ' (' + t.group + '): tree, ' + t.levels.map((x) => 'L' + x.k + ' ' + x.lines + (x.lines === 1 ? ' line' : ' lines') + ' to move ' + Math.ceil(x.plies / 2)).join('; ')));
     if (rep.legacy) rep.notes.push(rep.legacy + (rep.legacy === 1 ? ' item still uses' : ' items still use') + ' the old access words (lock, tier, isFree…). Each now sits on a level: free and Skool-community items on Level 1, paid items on Level 2. Write lvl, or put them in a levels array, to choose yourself.');
     return { doc: clean, report: rep };
   }
@@ -3752,7 +3822,7 @@ const Site = (() => {
     ['leaderboard.weights.gain', 'Leaderboard weight: rating gain (default 0.15)', 'num']
   ];
   let defaults = null, published = null, keys = [], known = false, inflight = null, status = {}, adoptedAt = 0, watching = false;
-  const emptyDoc = () => ({ app: 'lanckrietchess-hub', schema: 1, updated: '', copy: {}, settings: {}, lists: {}, gates: {}, bots: {}, keys: [], folders: [], bank: [] });
+  const emptyDoc = () => ({ app: 'lanckrietchess-hub', schema: 1, updated: '', copy: {}, settings: {}, lists: {}, gates: {}, bots: {}, keys: [], folders: [], bank: [], trees: [] });
   /* v3.7: the rated puzzle bank (checked with chess.js in Feed.bankItem). */
   function cleanBank(list) {
     const UCI = /^[a-h][1-8][a-h][1-8][qrbn]?$/;
@@ -3801,19 +3871,23 @@ const Site = (() => {
     Object.keys(BOTS).forEach((b) => { if (typeof bots[b] === 'string' && bots[b].trim()) out.bots[b] = bots[b].slice(0, 12000); });
     out.folders = CoachFolders.clean(doc.folders);
     out.bank = cleanBank(doc.bank);
+    out.trees = TreeData.clean(doc.trees);                         // v4.0: opening chapters as trees
     return out;
   }
   function apply() {
     if (!defaults) return;
     SETTINGS.forEach((s) => setPath(CONFIG, s[0], clone(getPath(defaults.config, s[0]))));
     Object.keys(LISTS).forEach((n) => setPath(CONTENT, n, clone(getPath(defaults.content, n)) || []));
-    COPY_OVR = {}; GATE_OVR = {}; BOT_OVR = {}; COACH_FOLDERS = []; PUZZLE_BANK = []; keys = [];
+    COPY_OVR = {}; GATE_OVR = {}; BOT_OVR = {}; COACH_FOLDERS = []; PUZZLE_BANK = []; keys = []; Trees.load([]);
     const doc = (Admin.active && Admin.draft()) || published;
     if (!doc) return;
     Object.keys(doc.copy).forEach((k) => { COPY_OVR[k] = doc.copy[k]; });
     SETTINGS.forEach((s) => { const v = getPath(doc.settings, s[0]); if (v !== undefined) setPath(CONFIG, s[0], v); });
     /* v3.9: every course item lands on its level first (an older file or draft is translated once, here). */
     Object.keys(doc.lists).forEach((n) => { if (LISTS[n]) setPath(CONTENT, n, (TIER_LISTS.indexOf(n) >= 0 ? doc.lists[n].map(Levels.normalize) : doc.lists[n]).filter((it) => !checkItem(n, it))); });
+    /* v4.0: every leaf of every tree chapter is a line too (checked once, when the file came in), so every page that plays lines keeps working. */
+    Trees.load(doc.trees);
+    if (Trees.count()) CONTENT.openings = (CONTENT.openings || []).filter((o) => !o.tree).concat(Trees.lines());
     Object.keys(doc.gates || {}).forEach((g) => { GATE_OVR[g] = doc.gates[g]; });
     Object.keys(doc.bots || {}).forEach((b) => { BOT_OVR[b] = doc.bots[b]; });
     COACH_FOLDERS = CoachFolders.clean(doc.folders);
@@ -4207,7 +4281,8 @@ const CMS = (() => {
         '<div class="menu-rows">' + row('gating', 'layer-group', 'Levels and gating', 'A level for every line, drill and lesson; a tier for every module' + (nGates ? ', ' + nGates + (nGates === 1 ? ' module' : ' modules') + ' changed' : '')) +
           row('bots', 'robot', 'AI assistants', 'Free coach, Pro coach and sales assistant' + (nBots ? ', ' + nBots + ' edited' : '')) +
           row('avatar', 'camera', 'Profile image', 'Your Chess.com picture on the About page') +
-          row('editor', 'chess-board', 'Board editor', 'Build any position by hand, then save it as a drill') + '</div>' +
+          row('editor', 'chess-board', 'Board editor', 'Build any position by hand, then save it as a drill') +
+          row('treeimport', 'diagram-project', 'Import ChessTempo trees', Trees.count() + ' tree chapters live; a ChessTempo export becomes chapters, every branch kept') + '</div>' +
         '<div class="menu-rows">' + row('copy', 'font', 'Texts', 'Headlines and paragraphs on every page') + row('settings', 'sliders', 'Numbers and links', 'Peak rating, percentile, fast track, Skool, socials') + '</div>' +
         '<div class="menu-rows">' + Object.keys(Site.LISTS).map((n) => row('list:' + n, 'list', Site.LISTS[n][0], Site.LISTS[n][1] + ', ' + (getPath(CONTENT, n) || []).length + ' items')).join('') + '</div>' +
         '<div class="menu-rows">' + row('keys', 'key', 'Member keys', Site.keys().length + (Site.keys().length === 1 ? ' key' : ' keys')) + row('sync', 'rotate', 'Live data (GitHub)', syncSub()) + row('publish', 'cloud-arrow-up', 'Publish', dirty ? 'Send your draft to GitHub' : 'Up to date') + row('data', 'database', 'Data management & backups', 'Export or import the whole database as JSON') + '</div>' +
@@ -4248,6 +4323,7 @@ const CMS = (() => {
             else if (m === 'insights') { if (routeFromHash() === 'insights') rerender(); else location.hash = '#insights'; }
             else if (m === 'lb') V33.boardAdmin();
             else if (m === 'editor') boardEditor({});
+            else if (m === 'treeimport') TreeImport.open();
             else if (m === 'signout') { Admin.signOut(); refreshChip(); rerender(); toast('Signed out of admin mode.'); }
             else if (m.indexOf('list:') === 0) listSheet(m.slice(5));
           });
@@ -6477,11 +6553,11 @@ function methodCard(title, text, links, key) {
 let SPOT = null;
 function spotlightPool() {
   const lines = (CONTENT.openings || []).map((o) => ({
-    id: 'line:' + o.id, title: o.title, group: o.group, lvl: Levels.of(o), requiredTier: Levels.required(o), side: o.side || 'w', pgn: o.pgn, lineId: o.id, k: 'S',
+    id: 'line:' + o.id, tree: o.tree, title: o.title, group: o.group, lvl: Levels.of(o), requiredTier: Levels.required(o), side: o.side || 'w', pgn: o.pgn, lineId: o.id, k: 'S',
     intro: o.group + ': ' + o.title + '.', outro: o.idea || o.title,
     notes: Object.keys(o.ann || {}).reduce((m, key) => { if (o.ann[key] && o.ann[key].note) m[key] = o.ann[key].note; return m; }, {})
   }));
-  return (CONTENT.spotlights || []).concat(lines).filter((x) => x && x.pgn && !lineOk(START_FEN, x.pgn));
+  return (CONTENT.spotlights || []).concat(lines).filter((x) => x && x.pgn && (x.tree || !lineOk(START_FEN, x.pgn)));
 }
 function pickSpotlight() {
   const rnd = App.can('spotlightRandom'), r = App.rank() + (rnd ? 10 : 0);
@@ -7137,7 +7213,7 @@ function builtinGroup(name) {
   const meta = CONTENT.groups.filter((g) => g.name === name)[0] || CONTENT.groups[0];
   if (!meta) return { name: name || '', side: 'w', intro: '', custom: false, lines: [] };
   return { name: meta.name, side: meta.side, intro: meta.intro, custom: false,
-    lines: CONTENT.openings.filter((o) => o.group === meta.name).map((o) => ({ id: o.id, title: o.title, subtitle: o.subtitle, idea: o.idea, side: o.side || meta.side, moves: pgnTokens(o.pgn), ann: o.ann || {}, mode: o.mode, group: meta.name, chapter: o.chapter, topic: o.topic, topicId: o.topicId, lvl: Levels.of(o), requiredTier: Levels.required(o), guideline: o.guideline, skoolUrl: o.skoolUrl })) };
+    lines: CONTENT.openings.filter((o) => o.group === meta.name).map((o) => ({ id: o.id, title: o.title, subtitle: o.subtitle, idea: o.idea, side: o.side || meta.side, moves: pgnTokens(o.pgn), ann: o.ann || {}, mode: o.mode, group: meta.name, chapter: o.chapter, topic: o.topic, topicId: o.topicId, lvl: Levels.of(o), requiredTier: Levels.required(o), guideline: o.guideline, skoolUrl: o.skoolUrl, tree: o.tree, treePath: o.treePath })) };
 }
 function chapterRowsHTML(group) {
   if (!group.lines.length) return dataEmptyHTML('lines for ' + group.name);
@@ -7154,7 +7230,7 @@ function chapterRowsHTML(group) {
 function levelCellHTML(t, k, sel, attr, sug) {
   const L = LEVELS[k - 1], it = Levels.lead(t, k), open = !!it && Levels.open(it), best = open ? Levels.progress(t, k) : 0;
   const tab = attr === 'data-lv', skool = it ? Levels.skoolOf(t, k) : '', e = it ? Levels.elo(it, k) : L.elo;
-  const meta = !it ? 'Soon' : k === 1 ? 'Open to everyone' : (open ? (best >= 0.9 ? icon('check') + ' ' : '') : icon('crown') + ' ') + esc(e) + ' ELO';
+  const meta = !it ? (t.tree && t.tree.first > k ? 'From Level ' + t.tree.first : 'Soon') : k === 1 ? 'Open to everyone' : (open ? (best >= 0.9 ? icon('check') + ' ' : '') : icon('crown') + ' ') + esc(e) + ' ELO';
   const say = Levels.name(k) + (it && k > 1 ? ', ' + e + ' ELO' : '') + (!it ? ', coming soon' : open ? '' : ', locked') + (sug === k ? ', suggested for your rating' : '');
   return '<div class="lv39-cell"><button type="button" ' + (tab ? 'role="tab" aria-selected="' + (sel === k) + '" tabindex="' + (sel === k ? 0 : -1) + '" ' : '') +
     'class="lv39-tab' + (k === 1 ? ' is-free' : '') + (!it ? ' is-soon' : open ? '' : ' is-locked') + (sug === k ? ' is-you' : '') + '" ' + attr + '="' + k + '" aria-label="' + esc(say) + '">' +
@@ -7315,6 +7391,8 @@ function topicCards(root, where) {
 function opTopic(c, i) {
   const t = { id: c.id, key: 'op:' + c.id, title: chapterName(c, i || 0), items: c.lines, byLevel: [[], [], [], [], [], []] };
   c.lines.forEach((l) => t.byLevel[Levels.of(l)].push(l));
+  const tr = Trees.info(c.id);                                     // v4.0: a tree chapter
+  if (tr) { t.tree = tr; t.itemsById = {}; c.lines.forEach((l) => { t.itemsById[l.id] = l; }); }
   return t;
 }
 const maxMove = (lines) => Math.max.apply(null, [0].concat((lines || []).map((l) => Math.ceil(Levels.movesOf(l).length / 2))));
@@ -7413,6 +7491,8 @@ function listScreen(body, group, go) {
 }
 function trainScreen(body, group, go) {
   const ui = App.ui.op;
+  { const l0 = group.lines.filter((l) => l.id === ui.lineId)[0];   // v4.0: a tree chapter trains as a tree
+    if (l0 && l0.tree && !group.custom && !ui.exploreAll && !ui.only && Trees.has(l0.tree)) return treeTrainScreen(body, group, go, l0); }
   let line = group.lines.filter((l) => l.id === ui.lineId)[0] || group.lines[0];
   /* v3.9: the chapter of this line, as a topic with five levels (a custom
      repertoire and "Explore the tree" of a whole repertoire have none). */
@@ -14595,6 +14675,1199 @@ const V37 = {
     setTimeout(() => { PuzzleBoard.sync(); }, 8000);
   }
 };
+
+/* ==========================================================================
+   v4.0 RepTree: opening repertoires as trees, not as flat lines.
+
+   One module, no DOM, used in three places:
+   - Admin > Import ChessTempo tree: a ChessTempo (or any) PGN export with
+     variations becomes one tree per game, every comment block kept.
+   - The data file: chapters carry a "tree" of nodes instead of a list of
+     lines, so a branch point can hold several opponent replies and several
+     moves of the player's own.
+   - The trainer: Trees (below) walks the same nodes.
+
+   JSON node (content.json, "tree" of a chapter, from the start position):
+     { "m": "Nf3",                 SAN, checked with chess.js
+       "n": ["note", "note"],      comment blocks, in the file's order (optional)
+       "g": [1, 6],                NAGs ($1 = !, $2 = ?, $5 = !?, $6 = ?!) (optional)
+       "ar": ["Gc4e3"],            [%cal] arrows (optional)
+       "sq": ["Gh3"],              [%csl] squares (optional)
+       "l": 3,                     first level that has this move; omitted = the parent's
+       "x": [4],                   deeper levels that do NOT have it (rare, optional)
+       "c": [ ...children ] }      first child is the main line (optional)
+   ========================================================================== */
+(function (root) {
+  'use strict';
+  const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  const ChessCtor = () => (root.Chess || (typeof require === 'function' ? require('chess.js').Chess : null));
+  const CMD = /\[%(cal|csl)\s+([^\]]*)\]/g;
+
+  /* ---------- 1. PGN text -> games, each a tree ---------- */
+  function splitGames(text) {
+    const out = [];
+    let cur = null, inBody = false;
+    String(text || '').replace(/\r\n?/g, '\n').replace(/^\uFEFF/, '').split('\n').forEach((line) => {
+      const h = line.match(/^\s*\[(\w+)\s+"((?:[^"\\]|\\.)*)"\]\s*$/);
+      if (h) {
+        if (!cur || inBody) { cur = { headers: {}, body: [] }; out.push(cur); inBody = false; }
+        cur.headers[h[1]] = h[2].replace(/\\(.)/g, '$1');
+        return;
+      }
+      if (!cur) { if (!line.trim()) return; cur = { headers: {}, body: [] }; out.push(cur); }
+      if (line.trim()) inBody = true;
+      cur.body.push(line);
+    });
+    return out.map((g) => ({ headers: g.headers, body: g.body.join('\n') }));
+  }
+  function cleanNote(raw) {
+    const ar = [], sq = [];
+    const text = String(raw).replace(CMD, (all, kind, list) => {
+      String(list).split(/[\s,]+/).filter(Boolean).forEach((t) => {
+        if (kind === 'cal' && /^[RGBY]?[a-h][1-8][a-h][1-8]$/.test(t)) ar.push(t.length === 4 ? 'G' + t : t);
+        if (kind === 'csl' && /^[RGBY]?[a-h][1-8]$/.test(t)) sq.push(t.length === 2 ? 'G' + t : t);
+      });
+      return ' ';
+    });
+    return { text: text.replace(/[ \t]+\n/g, '\n').replace(/^\s+|\s+$/g, ''), ar, sq };
+  }
+  /* SAN -> a move played on g, without chess.js 0.10's slow SAN search (it
+     builds the SAN of every legal move, twice). Returns the chess.js move or null. */
+  const FILES = 'abcdefgh';
+  function playSan(g, san) {
+    const t = String(san || '').replace(/[+#]+$/, '').replace(/[!?]+$/, '').replace(/^0-0-0$/, 'O-O-O').replace(/^0-0$/, 'O-O');
+    const turn = g.turn();
+    if (t === 'O-O' || t === 'O-O-O') { const r = turn === 'w' ? '1' : '8'; return g.move({ from: 'e' + r, to: (t === 'O-O' ? 'g' : 'c') + r }); }
+    const m = t.match(/^([NBRQK])?([a-h])?([1-8])?x?([a-h][1-8])(?:=?([NBRQnbrq]))?$/);
+    if (m) {
+      const piece = (m[1] || 'P').toLowerCase(), to = m[4], promo = m[5] ? m[5].toLowerCase() : 'q';
+      for (let fi = 0; fi < 8; fi++) {
+        const f = FILES[fi];
+        if (m[2] && m[2] !== f) continue;
+        for (let r = 1; r <= 8; r++) {
+          if (m[3] && +m[3] !== r) continue;
+          const sq = f + r, p = g.get(sq);
+          if (!p || p.type !== piece || p.color !== turn || sq === to) continue;
+          const mv = g.move({ from: sq, to, promotion: promo });
+          if (mv) return mv;
+        }
+      }
+    }
+    return g.move(san, { sloppy: true });
+  }
+  const NAG_OF = { '!': 1, '?': 2, '!!': 3, '??': 4, '!?': 5, '?!': 6 };
+  function newNode(parent, san, uci, fen) {
+    return { san, uci, fen, parent, kids: [], notes: [], nags: [], ar: [], sq: [], ply: parent ? parent.ply + 1 : 0 };
+  }
+  /* One game body -> { root, errors, intro }. Illegal moves close their
+     variation (nothing after them is kept) and are named in errors. */
+  function parseBody(body, startFen) {
+    const Chess = ChessCtor();
+    const fen0 = startFen || START;
+    const rootNode = newNode(null, null, null, fen0);
+    const g = new Chess(fen0);
+    if (g.fen().split(' ').slice(0, 4).join(' ') !== fen0.split(' ').slice(0, 4).join(' ')) return { root: rootNode, errors: ['The start position (FEN) is not legal.'], intro: [] };
+    const errors = [], intro = [];
+    const stack = [];
+    let cur = rootNode, dead = false, pendingPre = [], afterOpen = false, deadDepth = 0;
+    /* one board for the whole game: it follows the node being read (undo to the
+       common ancestor, then play forward), which is ~20x faster than a new
+       position per move with chess.js 0.10 */
+    let onBoard = [];
+    const pathTo = (n) => { const p = []; for (let x = n; x && x.parent; x = x.parent) p.unshift(x); return p; };
+    const sync = (n) => {
+      const want = pathTo(n);
+      let k = 0;
+      while (k < onBoard.length && k < want.length && onBoard[k] === want[k]) k++;
+      while (onBoard.length > k) { g.undo(); onBoard.pop(); }
+      for (; k < want.length; k++) { g.move({ from: want[k].uci.slice(0, 2), to: want[k].uci.slice(2, 4), promotion: want[k].uci[4] || 'q' }); onBoard.push(want[k]); }
+    };
+    const addNote = (n, raw) => {
+      const c = cleanNote(raw);
+      if (c.text && n.notes.indexOf(c.text) < 0) n.notes.push(c.text);
+      c.ar.forEach((a) => { if (n.ar.indexOf(a) < 0) n.ar.push(a); });
+      c.sq.forEach((q) => { if (n.sq.indexOf(q) < 0) n.sq.push(q); });
+    };
+    const label = (n) => pathTo(n).map((x) => x.san).join(' ');
+    let i = 0;
+    const s = String(body || '');
+    while (i < s.length) {
+      const ch = s[i];
+      if (ch === '{') {
+        const j = s.indexOf('}', i + 1), txt = s.slice(i + 1, j < 0 ? s.length : j);
+        i = j < 0 ? s.length : j + 1;
+        if (dead) continue;
+        if (afterOpen) pendingPre.push(txt);
+        else if (cur === rootNode) { const c = cleanNote(txt); if (c.text) intro.push(c.text); }
+        else addNote(cur, txt);
+        continue;
+      }
+      if (ch === ';') { const j = s.indexOf('\n', i + 1); const txt = s.slice(i + 1, j < 0 ? s.length : j); i = j < 0 ? s.length : j + 1; if (!dead && cur !== rootNode && !afterOpen) addNote(cur, txt); continue; }
+      if (ch === '(') {
+        i++;
+        if (dead) { deadDepth++; continue; }
+        if (!cur.parent) { errors.push('A variation opens before any move.'); dead = true; deadDepth = 1; continue; }
+        stack.push(cur); cur = cur.parent; afterOpen = true; pendingPre = [];
+        continue;
+      }
+      if (ch === ')') {
+        i++;
+        if (dead && deadDepth > 1) { deadDepth--; continue; }
+        if (dead) { dead = false; deadDepth = 0; }
+        if (stack.length) cur = stack.pop();
+        afterOpen = false; pendingPre = [];
+        continue;
+      }
+      if (/\s/.test(ch)) { i++; continue; }
+      let j = i;
+      while (j < s.length && !/[\s(){};]/.test(s[j])) j++;
+      let w = s.slice(i, j); i = j;
+      if (dead) continue;
+      if (/^\$\d+$/.test(w)) { if (cur !== rootNode) { const n = +w.slice(1); if (cur.nags.indexOf(n) < 0) cur.nags.push(n); } continue; }
+      if (/^(1-0|0-1|1\/2-1\/2|\*)$/.test(w)) continue;
+      w = w.replace(/^\d+\.+/, '');
+      if (!w || /^\.+$/.test(w) || /^\d+$/.test(w)) continue;
+      const suf = (w.match(/[!?]+$/) || [''])[0];
+      w = w.slice(0, w.length - suf.length).replace(/^0-0-0/, 'O-O-O').replace(/^0-0/, 'O-O');
+      if (!w) continue;
+      sync(cur);
+      const mv = playSan(g, w);
+      if (!mv) {
+        errors.push((label(cur) ? 'After ' + label(cur) + ': ' : '') + w + ' is not a legal move; the rest of that variation is left out.');
+        dead = true; deadDepth = stack.length ? 1 : 1e9;
+        continue;
+      }
+      const uci = mv.from + mv.to + (mv.promotion || '');
+      let kid = cur.kids.filter((k) => k.uci === uci)[0];
+      if (!kid) { kid = newNode(cur, mv.san, uci, ''); cur.kids.push(kid); onBoard.push(kid); }
+      else { g.undo(); }
+      if (NAG_OF[suf] && kid.nags.indexOf(NAG_OF[suf]) < 0) kid.nags.push(NAG_OF[suf]);
+      pendingPre.forEach((t) => addNote(kid, t)); pendingPre = [];
+      afterOpen = false;
+      cur = kid;
+    }
+    rootNode.side0 = fen0.split(' ')[1] === 'b' ? 'b' : 'w';
+    return { root: rootNode, errors, intro };
+  }
+  function parse(text) {
+    return splitGames(text).map((g) => {
+      const fen = g.headers.FEN && /^(1|true)$/i.test(g.headers.SetUp || '1') ? g.headers.FEN : START;
+      const r = parseBody(g.body, fen);
+      const colour = String(g.headers.ChesstempoRepertoireColour || g.headers.Colour || '').toLowerCase();
+      const name = [g.headers.White, g.headers.Black, g.headers.Event].map((x) => String(x || '').trim()).filter((x) => x && x !== '?')[0] || 'Imported tree';
+      return { headers: g.headers, name, side: colour === 'white' ? 'w' : colour === 'black' ? 'b' : '', fen, root: r.root, errors: r.errors, intro: r.intro };
+    }).filter((g) => g.root.kids.length || g.errors.length);
+  }
+
+  /* ---------- 2. counting ---------- */
+  function walk(n, fn) { fn(n); n.kids.forEach((k) => walk(k, fn)); }
+  function count(n) { let nodes = -1, leaves = 0, notes = 0; walk(n, (x) => { nodes++; if (!x.kids.length) leaves++; notes += x.notes.length; }); return { nodes, leaves, notes }; }
+  const leafCount = (n) => (n.kids.length ? n.kids.reduce((s, k) => s + leafCount(k), 0) : 1);
+
+  /* ---------- 3. several levels of one course -> one tree ----------
+     levels: [{ level: 2, root }, { level: 3, root }, ...]. Every node gets
+     the levels it appears in: l = the first, x = deeper ones without it. */
+  function merge(levels) {
+    const list = levels.slice().sort((a, b) => a.level - b.level), all = list.map((x) => x.level);
+    const out = newNode(null, null, null, list.length ? list[0].root.fen : START);
+    out.side0 = list.length ? list[0].root.side0 || 'w' : 'w';
+    out.in = all.slice();
+    const add = (dst, src, k) => {
+      src.kids.forEach((sk) => {
+        let dk = dst.kids.filter((x) => x.uci === sk.uci)[0];
+        if (!dk) { dk = newNode(dst, sk.san, sk.uci, sk.fen); dk.in = []; dst.kids.push(dk); }
+        if (dk.in.indexOf(k) < 0) dk.in.push(k);
+        sk.notes.forEach((t) => { if (dk.notes.indexOf(t) < 0) dk.notes.push(t); });
+        sk.nags.forEach((t) => { if (dk.nags.indexOf(t) < 0) dk.nags.push(t); });
+        sk.ar.forEach((t) => { if (dk.ar.indexOf(t) < 0) dk.ar.push(t); });
+        sk.sq.forEach((t) => { if (dk.sq.indexOf(t) < 0) dk.sq.push(t); });
+        add(dk, sk, k);
+      });
+    };
+    list.forEach((x) => add(out, x.root, x.level));
+    walk(out, (n) => {
+      if (!n.parent) return;
+      n.in.sort((a, b) => a - b);
+      n.l = n.in[0];
+      n.x = all.filter((k) => k > n.l && n.in.indexOf(k) < 0);
+    });
+    out.levels = all;
+    return out;
+  }
+
+  /* ---------- 4. the tree -> chapters ----------
+     A chapter is a subtree that starts at a branch point. The tree is split
+     at a branch point while the part below it holds more than maxLeaves
+     lines and the branch point comes before maxPly; the player's own
+     choices are split only when splitOwn is on (model games). Children with
+     at most tinyLeaves lines and tinyNodes moves are grouped into one
+     chapter, so a two-move sideline never becomes a chapter of its own.
+     Nothing is ever dropped: every leaf lands in exactly one chapter. */
+  function chapters(tree, side, opts) {
+    const o = Object.assign({ maxLeaves: 12, maxPly: 14, splitOwn: false, tinyLeaves: 1, tinyNodes: 4, plan: null }, opts || {});
+    const out = [], used = {};
+    const side0 = tree.side0 || 'w', mover = (n) => ((n.ply % 2 === 0) === (side0 === 'w') ? 'w' : 'b');
+    const size = (n) => { let c = 0; walk(n, () => c++); return c; };
+    const key = (n) => { const p = []; for (let x = n; x && x.parent; x = x.parent) p.unshift(x.san); return p.join(' '); };
+    const branchBelow = (n) => { while (n.kids.length === 1) n = n.kids[0]; return n; };
+    /* plan: { "<SAN path of a branch point>": [["Nc3", "Nd2"], ["e5"]] } splits there;
+       a child not named in a group becomes a chapter of its own. */
+    function planned(n) {
+      const b = branchBelow(n), groups = o.plan[key(b)];
+      if (!groups || !b.kids.length) { out.push({ at: n.parent || n, kids: n.parent ? [n] : n.kids.slice() }); return; }
+      used[key(b)] = 1;
+      const named = {};
+      const gs = groups.map((g) => g.map((sanX) => b.kids.filter((k) => k.san === sanX)[0]).filter(Boolean));
+      gs.forEach((g) => g.forEach((k) => { named[k.uci] = 1; }));
+      b.kids.forEach((k) => { if (!named[k.uci]) gs.push([k]); });
+      gs.sort((a, c) => b.kids.indexOf(a[0]) - b.kids.indexOf(c[0]));
+      gs.forEach((g) => { if (!g.length) return; if (g.length === 1) planned(g[0]); else out.push({ at: b, kids: g }); });
+    }
+    function rec(node, sel) {
+      let n = node;
+      if (!sel) while (n.kids.length === 1) n = n.kids[0];
+      const kids = sel || n.kids;
+      if (!kids.length) { out.push({ at: n.parent || n, kids: n.parent ? [n] : [] }); return; }
+      const leaves = kids.reduce((s, k) => s + leafCount(k), 0);
+      const own = mover(n) === side;
+      if (kids.length === 1 || leaves <= o.maxLeaves || n.ply + 1 > o.maxPly || (own && !o.splitOwn)) { out.push({ at: n, kids: kids.slice() }); return; }
+      const tiny = kids.filter((k) => leafCount(k) <= o.tinyLeaves && size(k) <= o.tinyNodes);
+      const big = kids.filter((k) => tiny.indexOf(k) < 0);
+      big.forEach((k) => rec(k, null));
+      if (tiny.length) out.push({ at: n, kids: tiny });
+    }
+    if (o.plan) { const b = branchBelow(tree); if (o.plan[key(b)]) planned(tree); else out.push({ at: b, kids: b.kids.slice() }); }
+    else rec(tree, null);
+    const unused = o.plan ? Object.keys(o.plan).filter((k) => !used[k]) : [];
+    const res = out.map((c, i) => {
+      const prefix = [];
+      for (let x = c.at; x && x.parent; x = x.parent) prefix.unshift(x);
+      return { index: i, at: c.at, prefix, kids: c.kids, leaves: c.kids.reduce((s, k) => s + leafCount(k), 0) || 1 };
+    });
+    res.unusedPlan = unused;
+    return res;
+  }
+  /* Short name from the moves: the part after the previous branch point. */
+  function autoTitle(ch) {
+    const path = ch.prefix.slice();
+    if (ch.kids.length === 1) { let n = ch.kids[0]; path.push(n); while (n.kids.length === 1 && path.length < ch.prefix.length + 3) { n = n.kids[0]; path.push(n); } }
+    let from = 0;
+    for (let i = path.length - 1; i > 0; i--) if (path[i - 1].kids.length > 1) { from = i; break; }
+    from = Math.max(0, Math.min(from, path.length - 3));
+    const txt = sanText(path.slice(from).map((n) => n.san), path[from] ? path[from].ply - 1 : 0);
+    return ch.kids.length > 1 ? txt + ' (' + ch.kids.map((k) => k.san).join(', ') + ')' : txt;
+  }
+  function sanText(sans, ply0) {
+    return sans.map((s, i) => { const p = ply0 + i, num = Math.floor(p / 2) + 1; return p % 2 === 0 ? num + '.' + s : i === 0 ? num + '...' + s : s; }).join(' ');
+  }
+
+  /* ---------- 5. JSON ---------- */
+  function nodeJSON(n, parentL) {
+    const o = { m: n.san };
+    if (n.notes.length) o.n = n.notes.slice();
+    if (n.nags.length) o.g = n.nags.slice();
+    if (n.ar.length) o.ar = n.ar.slice();
+    if (n.sq.length) o.sq = n.sq.slice();
+    if (n.l && n.l !== parentL) o.l = n.l;
+    if (n.x && n.x.length) o.x = n.x.slice();
+    if (n.kids.length) o.c = n.kids.map((k) => nodeJSON(k, n.l || parentL));
+    return o;
+  }
+  /* A chapter as data: the moves from the start to its branch point (one
+     child each), then the chosen children with everything below them. The
+     moves on the way get the chapter's first level, so a level never shows
+     only the approach to a chapter that starts deeper. */
+  function chapterJSON(ch) {
+    const first = Math.min.apply(null, ch.kids.length ? ch.kids.map((k) => k.l || 1) : [ch.at.l || 1]);
+    const lift = (n) => Math.max(n.l || 1, first);
+    const copy = (n, keepKids) => Object.assign(Object.create(null), n, { kids: keepKids ? n.kids : [] });
+    const chain = ch.prefix.map((n) => Object.assign(copy(n, false), { l: lift(n) }));
+    for (let i = 0; i < chain.length - 1; i++) chain[i].kids = [chain[i + 1]];
+    const selected = ch.kids.length ? ch.kids : [];
+    if (chain.length) chain[chain.length - 1].kids = selected;
+    const tops = chain.length ? [chain[0]] : selected;
+    return tops.map((n) => nodeJSON(n, 0));
+  }
+  /* Levels in which the chapter exists: its whole approach and at least one chosen child. */
+  function chapterLevels(ch, all) {
+    const inL = (n, k) => !n.l || (n.l <= k && !(n.x || []).some((z) => z === k));
+    return all.filter((k) => ch.prefix.every((n) => inL(n, k)) && (!ch.kids.length || ch.kids.some((n) => inL(n, k))));
+  }
+  /* Notes are written once per repertoire: a move that several chapters
+     play (the approach to each branch point) keeps its comment blocks, arrows
+     and NAGs only in the first chapter that plays it. Trees.notesAt() finds
+     them again by move path, for every chapter. */
+  function dedupeNotes(chapterTrees) {
+    const seen = {};
+    chapterTrees.forEach((list) => {
+      const w = (o, path) => {
+        const k = path ? path + ' ' + o.m : o.m;
+        if (seen[k]) { delete o.n; delete o.ar; delete o.sq; delete o.g; }
+        else if (o.n || o.ar || o.sq || o.g) seen[k] = 1;
+        (o.c || []).forEach((c) => w(c, k));
+      };
+      list.forEach((o) => w(o, ''));
+    });
+    return chapterTrees;
+  }
+  function fromJSON(list, startFen) {
+    const r = newNode(null, null, null, startFen || START);
+    const add = (parent, o, pl) => {
+      if (!o || typeof o !== 'object' || typeof o.m !== 'string') return;
+      const n = newNode(parent, o.m, '', '');
+      n.notes = Array.isArray(o.n) ? o.n.filter((t) => typeof t === 'string') : [];
+      n.nags = Array.isArray(o.g) ? o.g.filter((t) => typeof t === 'number') : [];
+      n.ar = Array.isArray(o.ar) ? o.ar.filter((t) => typeof t === 'string') : [];
+      n.sq = Array.isArray(o.sq) ? o.sq.filter((t) => typeof t === 'string') : [];
+      n.l = +o.l >= 1 && +o.l <= 5 ? +o.l : pl;
+      n.x = Array.isArray(o.x) ? o.x.filter((k) => +k >= 1 && +k <= 5).map(Number) : [];
+      parent.kids.push(n);
+      (Array.isArray(o.c) ? o.c : []).forEach((c) => add(n, c, n.l));
+    };
+    (Array.isArray(list) ? list : []).forEach((o) => add(r, o, 1));
+    return r;
+  }
+
+  const api = { START, playSan, parse, splitGames, parseBody, merge, chapters, chapterJSON, chapterLevels, dedupeNotes, autoTitle, sanText, fromJSON, nodeJSON, count, leafCount, walk, cleanNote };
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.RepTree = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ==========================================================================
+   v4.0 TREE OPENINGS
+   A chapter is a tree of moves, not a list of lines. The data file carries
+   it as nodes (see RepTree above): one branch point can hold several replies
+   of the opponent and several moves of the player's own. The trainer walks
+   the tree: any move that is in the chapter is right, and the run follows
+   the branch it opens. Straight lines are still made from every leaf, so
+   Shuffle, spaced repetition, the MSPC repertoire trainer, Explore and the
+   progress bars keep working on the same ids.
+
+   doc.trees (content.json from admin mode, or built from a data file):
+     [{ id, title, group, side: 'w'|'b', path, levels: [{ k, rt, g, s, stop, src }], tree: [nodes] }]
+     k = level 1-5, rt = requiredTier (0, 2 or 3), g = ELO guideline, s = skoolUrl,
+     stop = half-moves from the start (a level with a stop and no moves of its
+     own plays the next deeper level up to there), src = where the moves came from.
+   ========================================================================== */
+const TreeData = (() => {
+  const MAX_NODES = 40000, MAX_NOTE = 12000;
+  const isObj = (x) => !!x && typeof x === 'object' && !Array.isArray(x);
+  const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : typeof v === 'number' ? String(v).slice(0, n) : '');
+  const fnv = (s) => { let h = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+  const idOf = (v) => { const s = String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 44).replace(/-+$/, ''); return s.length >= 2 ? s : ''; };
+  const sideWord = (v) => { const s = String(v || '').toLowerCase(); return /^(w|white|wit)$/.test(s) ? 'w' : /^(b|black|zwart)$/.test(s) ? 'b' : ''; };
+  function stopPlies(v) {
+    if (v === undefined || v === null || v === '') return 0;
+    if (typeof v === 'number' || /^\s*\d+\s*$/.test(String(v))) { const n = Math.round(+v); return n >= 1 && n <= 999 ? n : 0; }
+    const m = String(v).trim().match(/^(\d+)\s*(\.{1,3}|…)/);
+    return m ? (+m[1] - 1) * 2 + (m[2] === '.' ? 1 : 2) : 0;
+  }
+  /* One node, checked for shape only (legality is checked in validate). */
+  function cleanNode(o, budget) {
+    if (!isObj(o) || typeof o.m !== 'string' || budget.n <= 0) return null;
+    const m = o.m.trim().slice(0, 12);
+    if (!m) return null;
+    budget.n--;
+    const out = { m };
+    const n = (Array.isArray(o.n) ? o.n : typeof o.n === 'string' ? [o.n] : []).filter((t) => typeof t === 'string' && t.trim()).slice(0, 16).map((t) => t.slice(0, MAX_NOTE));
+    if (n.length) out.n = n;
+    const g = (Array.isArray(o.g) ? o.g : []).map(Number).filter((x) => x >= 1 && x <= 255 && x === Math.round(x)).slice(0, 6);
+    if (g.length) out.g = g;
+    const ar = (Array.isArray(o.ar) ? o.ar : []).filter((x) => typeof x === 'string' && /^[RGBY][a-h][1-8][a-h][1-8]$/.test(x)).slice(0, 16);
+    if (ar.length) out.ar = ar;
+    const sq = (Array.isArray(o.sq) ? o.sq : []).filter((x) => typeof x === 'string' && /^[RGBY][a-h][1-8]$/.test(x)).slice(0, 16);
+    if (sq.length) out.sq = sq;
+    if (+o.l >= 1 && +o.l <= 5 && +o.l === Math.round(+o.l)) out.l = +o.l;
+    const x = (Array.isArray(o.x) ? o.x : []).map(Number).filter((k) => k >= 1 && k <= 5 && k === Math.round(k));
+    if (x.length) out.x = x;
+    const c = (Array.isArray(o.c) ? o.c : []).map((k) => cleanNode(k, budget)).filter(Boolean);
+    if (c.length) out.c = c;
+    return out;
+  }
+  function cleanLevels(list, rep, label) {
+    const out = [], seen = {};
+    (Array.isArray(list) ? list : []).slice(0, 12).forEach((L, i) => {
+      if (!isObj(L)) return;
+      const k = Levels.num(L.level !== undefined ? L.level : L.k !== undefined ? L.k : L.lvl) || (i < 5 ? i + 1 : 0);
+      if (!k || seen[k]) { if (rep && k) rep.notes.push(label + ': Level ' + k + ' is in the file twice; the first one is used.'); return; }
+      seen[k] = 1;
+      const x = { k, rt: 0 };
+      const rt = Math.round(+(L.requiredTier !== undefined ? L.requiredTier : L.rt));
+      if (k > 1) x.rt = rt === TOP_TIER ? TOP_TIER : PAID_TIER;
+      else if (rep && (L.isFree === false || (L.requiredTier !== undefined && rt !== 0))) rep.notes.push(label + ': Level 1 is always free for everyone, so its isFree / requiredTier is ignored.');
+      if (k > 1 && rep && L.isFree === true) rep.notes.push(label + ': levels 2 to 5 always need a paid token, so isFree: true is ignored.');
+      const g = str(L.elo !== undefined ? L.elo : L.guideline !== undefined ? L.guideline : L.g, 20);
+      if (g) x.g = g;
+      const su = L.skoolUrl !== undefined ? L.skoolUrl : L.s;
+      if (su) { const u = Levels.skool(String(su)); if (u) x.s = u; else if (rep) rep.notes.push(label + ', Level ' + k + ': skoolUrl must be an https link to skool.com, so it is left out.'); }
+      const stop = stopPlies(L.stopMoveIndex !== undefined ? L.stopMoveIndex : L.stop);
+      if (stop) x.stop = stop;
+      const src = str(L.source !== undefined ? L.source : L.src, 60);
+      if (src) x.src = src;
+      out.push(x);
+    });
+    return out.sort((a, b) => a.k - b.k);
+  }
+  /* Every move is played with chess.js from the start position. An illegal
+     move is dropped with everything after it, and named in the report. The
+     result is remembered by a fingerprint, so an unchanged file is not
+     checked again (on this device, across reloads). */
+  const LS_OK = 'lc-hub-tree-ok-v40';
+  let okMemo = null;
+  const okSet = () => okMemo || (okMemo = Store.get(LS_OK, {}) || {});
+  function validate(t, report) {
+    const key = fnv(JSON.stringify(t.tree)) + ':' + t.id;
+    if (okSet()[key]) return t;
+    const g = new Chess(), bad = [];
+    const walk = (list, sans) => list.filter((o) => {
+      const mv = RepTree.playSan(g, o.m);
+      if (!mv) { bad.push((sans.length ? RepTree.sanText(sans, 0) + ' ' : '') + o.m); return false; }
+      o.m = mv.san;
+      if (o.c) { o.c = walk(o.c, sans.concat(mv.san)); if (!o.c.length) delete o.c; }
+      g.undo();
+      return true;
+    });
+    t.tree = walk(t.tree, []);
+    if (bad.length && report) report(bad);
+    if (!bad.length) { const s = okSet(); s[fnv(JSON.stringify(t.tree)) + ':' + t.id] = 1; const ks = Object.keys(s); if (ks.length > 400) ks.slice(0, ks.length - 400).forEach((k) => delete s[k]); Store.set(LS_OK, s); }
+    return t;
+  }
+  /* A chapter from a data file ({ topicId, title, levels, tree }) -> one doc entry. */
+  function fromFeed(c, ctx, rep) {
+    const title = str(c.title || c.name || c.chapter, 90);
+    const id = idOf(c.topicId || c.topic_id || c.chapterId || c.id || title);
+    const label = 'Chapter “' + (title || id || '#' + ctx.n) + '”';
+    if (!id) return { error: 'Chapter #' + ctx.n + ' needs a topicId or a title.' };
+    const budget = { n: MAX_NODES };
+    const tree = (Array.isArray(c.tree) ? c.tree : isObj(c.tree) ? [c.tree] : []).map((o) => cleanNode(o, budget)).filter(Boolean);
+    if (!tree.length) return { error: label + ' has an empty tree.' };
+    const levels = cleanLevels(c.levels, rep, label);
+    if (!levels.length) return { error: label + ' has no levels.' };
+    const t = { id, title: title || id, group: ctx.group, side: ctx.side, path: str(c.path, 300), levels, tree };
+    validate(t, (bad) => rep.skipped.push(label + ': ' + bad.length + (bad.length === 1 ? ' move is' : ' moves are') + ' not legal and left out with what follows them (' + bad.slice(0, 3).join('; ') + (bad.length > 3 ? '; …' : '') + ').'));
+    if (!t.tree.length) return { error: label + ': no legal moves left.' };
+    return { entry: t };
+  }
+  /* Shape check for doc.trees (cleanDoc): no legality check here. */
+  function clean(list) {
+    const budget = { n: MAX_NODES * 4 }, seen = {};
+    return (Array.isArray(list) ? list : []).slice(0, 600).map((t) => {
+      if (!isObj(t)) return null;
+      const id = idOf(t.id);
+      if (!id || seen[id]) return null;
+      seen[id] = 1;
+      const tree = (Array.isArray(t.tree) ? t.tree : []).map((o) => cleanNode(o, budget)).filter(Boolean);
+      const levels = cleanLevels(t.levels, null, '');
+      if (!tree.length || !levels.length) return null;
+      return { id, title: str(t.title, 90) || id, group: str(t.group, 60) || 'Chapters', side: sideWord(t.side) || 'w', path: str(t.path, 300), levels, tree };
+    }).filter(Boolean);
+  }
+  function validateAll(list, rep) {
+    (list || []).forEach((t) => validate(t, (bad) => { if (rep) rep.skipped.push('Chapter “' + t.title + '”: ' + bad.length + ' illegal ' + (bad.length === 1 ? 'move' : 'moves') + ' left out (' + bad.slice(0, 3).join('; ') + ').'); }));
+    return (list || []).filter((t) => t.tree.length);
+  }
+  const isTree = (c) => isObj(c) && (Array.isArray(c.tree) || isObj(c.tree));
+  return { fromFeed, clean, validate, validateAll, isTree, idOf, stopPlies, fnv };
+})();
+
+/* ---------- Trees: the chapters as the trainer and the lists see them ---------- */
+const Trees = (() => {
+  const NAG = { 1: '!', 2: '?', 3: '!!', 4: '??', 5: '!?', 6: '?!', 7: '□', 10: '=', 13: '∞', 14: '⩲', 15: '⩱', 16: '±', 17: '∓', 18: '+−', 19: '−+' };
+  let list = [], by = {}, lines = [], lineBy = {}, noteIdx = {};
+  const key = (s) => cleanSan(s);
+  const labelOf = (n) => moveLabel(n.num || Math.floor((n.ply - 1) / 2) + 1, n.color || (n.ply % 2 ? 'w' : 'b'), n.san);
+  function prep(e) {
+    const root = RepTree.fromJSON(e.tree);
+    root.path = ''; root.ply = 0;
+    const idx = {};
+    let minL = 9;
+    RepTree.walk(root, (n) => {
+      if (!n.parent) return;
+      n.path = (n.parent.path ? n.parent.path + ' ' : '') + key(n.san);
+      n.num = Math.floor((n.ply - 1) / 2) + 1; n.color = n.ply % 2 ? 'w' : 'b'; n.turn = n.color === 'w' ? 'b' : 'w';
+      idx[n.path] = n;
+      if (n.l < minL) minL = n.l;
+      const g = noteIdx[e.group] || (noteIdx[e.group] = {});
+      if (!g[n.path] && (n.notes.length || n.ar.length || n.sq.length || n.nags.length)) g[n.path] = { n: n.notes, ar: n.ar, sq: n.sq, g: n.nags };
+    });
+    root.turn = 'w';
+    const t = { id: e.id, title: e.title, group: e.group, side: e.side, path: e.path || '', root, idx, minL, levels: {}, first: 0, live: false };
+    const ks = e.levels.map((x) => x.k);
+    e.levels.forEach((x) => {
+      const L = { k: x.k, rt: x.k === 1 ? 0 : x.rt === TOP_TIER ? TOP_TIER : PAID_TIER, g: x.g || '', s: x.s || '', stop: x.stop || 0, src: x.src || '', leaves: [], ids: [], labels: [], plies: 0 };
+      L.srcK = minL <= x.k ? x.k : ks.filter((j) => j > x.k && minL <= j).sort((a, b) => a - b)[0] || 0;
+      if (!L.srcK || (L.srcK !== x.k && !L.stop)) return;
+      L.has = (n) => n.l <= L.srcK && (!n.x.length || n.x.indexOf(L.srcK) < 0) && (!L.stop || n.ply <= L.stop);
+      const walk = (n) => { const ks2 = n.kids.filter(L.has); if (n.parent && !ks2.length) L.leaves.push(n); ks2.forEach(walk); };
+      walk(root);
+      if (!L.leaves.length) return;
+      L.plies = Math.max.apply(null, L.leaves.map((n) => n.ply));
+      t.levels[x.k] = L;
+    });
+    const ls = Object.keys(t.levels).map(Number).filter((k) => k >= 2);
+    t.first = ls.length ? Math.min.apply(null, ls) : 0;
+    return t;
+  }
+  /* The label of a line: its moves from the last branch point on. */
+  function lineLabel(L, leaf) {
+    const path = [];
+    for (let x = leaf; x && x.parent; x = x.parent) path.unshift(x);
+    let i = 0;
+    for (let j = path.length - 1; j >= 1; j--) if (path[j - 1].kids.filter(L.has).length > 1) { i = j; break; }
+    if (!i && path[0] && path[0].parent && path[0].parent.kids.filter(L.has).length > 1) i = 0;
+    else if (!i) return 'main line';
+    const bit = path.slice(i, i + 4);
+    return RepTree.sanText(bit.map((n) => n.san), bit[0].ply - 1) + (path.length > i + 4 ? ' …' : '');
+  }
+  function load(entries) {
+    list = []; by = {}; lines = []; lineBy = {}; noteIdx = {};
+    (Array.isArray(entries) ? entries : []).forEach((e) => {
+      let t;
+      try { t = prep(e); } catch (err) { return; }
+      if (!Object.keys(t.levels).length) return;
+      list.push(t); by[t.id] = t;
+      const made = {};
+      Object.keys(t.levels).map(Number).sort((a, b) => a - b).forEach((k) => {
+        const L = t.levels[k];
+        L.leaves.forEach((leaf) => {
+          let item = made[leaf.path];
+          const label = lineLabel(L, leaf);
+          if (!item) {
+            const sans = [];
+            for (let x = leaf; x && x.parent; x = x.parent) sans.unshift(x.san);
+            item = { id: t.id + '--' + TreeData.fnv(leaf.path), group: t.group, side: t.side, title: t.title + ' · ' + label, subtitle: label, topic: t.title, topicId: t.id,
+              pgn: lineText(sans, START_FEN), lvl: k, requiredTier: L.rt, tree: t.id, treePath: leaf.path };
+            if (L.g) item.guideline = L.g;
+            if (L.s) item.skoolUrl = L.s;
+            Object.defineProperty(item, 'ann', { get: () => annFor(item), enumerable: false, configurable: true });
+            made[leaf.path] = item; lines.push(item); lineBy[item.id] = item;
+          }
+          L.ids.push(item.id); L.labels.push(label);
+        });
+      });
+    });
+  }
+  /* Line counts for a report (Live data), without touching what players see. */
+  function temp(entries, fn) {
+    const keep = { list, by, lines, lineBy, noteIdx };
+    try { load(entries); return fn(); } finally { ({ list, by, lines, lineBy, noteIdx } = keep); }
+  }
+  const count2 = (entries) => temp(entries, summaryOf);
+  const linesFor = (entries) => temp(entries, () => lines.slice());
+  const summaryOf = () => list.map((t) => ({ id: t.id, group: t.group, title: t.title, lines: lines.filter((l) => l.tree === t.id).length, levels: Object.keys(t.levels).map((k) => ({ k: +k, lines: t.levels[k].leaves.length, plies: t.levels[k].plies })) }));
+  function notesOf(t, n) { const g = noteIdx[t.group] || {}; return (n && g[n.path]) || { n: [], ar: [], sq: [], g: [] }; }
+  const nag = (list2) => (list2 || []).map((x) => NAG[x] || '').join('');
+  /* Coach notes by move (the ann shape older pages read). */
+  function annFor(item) {
+    const t = by[item.tree];
+    if (!t) return {};
+    const out = {}, path = [];
+    for (let x = t.idx[item.treePath]; x && x.parent; x = x.parent) path.unshift(x);
+    path.forEach((n) => { const o = notesOf(t, n); if (o.n.length) out[labelOf({ num: n.num, color: n.color, san: key(n.san) })] = { note: o.n.join('\n\n') }; });
+    return out;
+  }
+  /* chess.js positions for one chapter, made when the trainer opens it. */
+  function runtime(id) {
+    const t = by[id];
+    if (!t) return null;
+    if (t.live) return t;
+    const g = new Chess();
+    const walk = (n) => {
+      n.kids = n.kids.filter((k) => {
+        const mv = RepTree.playSan(g, k.san);
+        if (!mv) return false;
+        Object.assign(k, { san: mv.san, from: mv.from, to: mv.to, uci: mv.from + mv.to + (mv.promotion || ''), captured: !!mv.captured, fen: g.fen(), key: moveLabel(k.num, k.color, key(mv.san)) });
+        walk(k);
+        g.undo();
+        return true;
+      });
+    };
+    t.root.fen = START_FEN;
+    walk(t.root);
+    t.live = true;
+    return t;
+  }
+  /* The same move in another chapter of the repertoire: a move of the player's own repertoire, just not this chapter's. */
+  function elsewhere(id, path) {
+    const t = by[id];
+    if (!t) return null;
+    return list.filter((o) => o.id !== id && o.group === t.group && o.idx[path])[0] || null;
+  }
+  return {
+    load, runtime, notesOf, annFor, elsewhere, nag,
+    has: (id) => !!by[id],
+    info: (id) => by[id] || null,
+    lines: () => lines.slice(),
+    line: (id) => lineBy[id] || null,
+    all: () => list.slice(),
+    count: () => list.length,
+    summary: summaryOf, report: count2, linesFor
+  };
+})();
+
+/* ---------- TreeRunner: one chapter tree on one level ----------
+   States: the opponent is moving (locked) -> your move -> (right: play it,
+   carry on | a move of this chapter that isn't the planned one: pivot to
+   its branch | a move of another chapter: say so, no penalty | anything
+   else: try again) -> a leaf: the line is done.
+   scope 'line':    one line at a time; the opponent plays that line's moves.
+   scope 'chapter': the whole tree in one session; the opponent picks among
+                    the replies you haven't covered yet, and after every leaf
+                    the run jumps back to the nearest branch point that still
+                    has lines waiting, until every line is covered. */
+function TreeRunner(cfg) {
+  const T = cfg.T, L = cfg.L, board = cfg.board, side = T.side, learn = !!cfg.learn;
+  const leaves = L.leaves, has = L.has;
+  const kids = (n) => n.kids.filter(has);
+  const underMemo = new Map();
+  const leafSet = (n) => {
+    if (underMemo.has(n)) return underMemo.get(n);
+    const ks = kids(n), r = ks.length ? [].concat.apply([], ks.map(leafSet)) : [leaves.indexOf(n)];
+    underMemo.set(n, r);
+    return r;
+  };
+  let scope = cfg.scope === 'chapter' ? 'chapter' : 'line';
+  let target = clamp(Math.round(+cfg.leaf) || 0, 0, Math.max(0, leaves.length - 1));
+  const covered = new Set();
+  let cur = T.root, played = [], first = true, hints = 0, locked = false, finished = false, done = false, feedback = null, noteNode = null;
+  let run = { total: 0, clean: 0 }, sess = { total: 0, clean: 0, lines: 0 }, timers = [], pivots = 0, destroyed = false;
+  const later = (fn, ms) => timers.push(setTimeout(() => { if (!destroyed) fn(); }, ms));
+  const pathTo = (n) => { const p = []; for (let x = n; x && x.parent; x = x.parent) p.unshift(x); return p; };
+  const onPath = (n, i) => leafSet(n).indexOf(i) >= 0;
+  const open = (n) => leafSet(n).filter((i) => !covered.has(i));
+  const idAt = (i) => L.ids[i];
+  const lastMv = () => (played.length ? { from: played[played.length - 1].from, to: played[played.length - 1].to } : null);
+  const nagOf = (n) => Trees.nag(Trees.notesOf(T, n).g);
+  const lbl = (n) => moveLabel(n.num, n.color, n.san) + nagOf(n);
+  const srsCfg = (i) => ({ id: idAt(i), section: 'openings', kind: 'openings', title: T.group + ': ' + T.title + ' · ' + (L.labels[i] || '') });
+  function expected() {
+    const ks = kids(cur);
+    if (!ks.length) return null;
+    if (scope === 'line') return ks.filter((k) => onPath(k, target))[0] || ks[0];
+    return ks.filter((k) => open(k).length)[0] || ks[0];
+  }
+  const leafFor = (n) => { const o = open(n); return scope === 'line' && onPath(n, target) ? target : (o[0] !== undefined ? o[0] : leafSet(n)[0]); };
+  function marks(n) {
+    board.unmark('hl-good'); board.unmark('hl-bad'); board.unmark('hl-key'); board.unmark('hl-hint');
+    const o = n ? Trees.notesOf(T, n) : null, K = { G: 'good', R: 'bad', Y: 'plan', B: 'best' }, S = { G: 'hl-good', R: 'hl-bad', Y: 'hl-hint', B: 'hl-key' };
+    board.setArrows(o ? o.ar.map((a) => ({ from: a.slice(1, 3), to: a.slice(3, 5), kind: K[a[0]] || 'good', w: 0.8 })) : []);
+    if (o) o.sq.forEach((s) => board.mark(s.slice(1, 3), S[s[0]] || 'hl-key'));
+  }
+  function view() {
+    const yourTurn = !finished && !locked && cur.turn === side && kids(cur).length > 0;
+    const branch = kids(cur);
+    const tPath = scope === 'line' && leaves[target] ? pathTo(leaves[target]) : [];
+    return { scope, target, n: leaves.length, covered: covered.size, coveredSet: covered, finished, done, locked, yourTurn, learn, played: played.slice(), feedback,
+      note: noteNode ? { label: lbl(noteNode), blocks: Trees.notesOf(T, noteNode).n } : null,
+      branchMine: yourTurn ? branch.length : 0, branchOpen: yourTurn && scope === 'chapter' ? branch.filter((k) => open(k).length).length : 0,
+      mine: played.filter((p) => p.color === side && !p.carried).length, lineMine: tPath.filter((n) => n.color === side).length,
+      run: Object.assign({}, run), sess: Object.assign({}, sess), pivots, ply: cur.ply };
+  }
+  const emit = () => { if (cfg.onUpdate && !destroyed) cfg.onUpdate(view()); };
+  function begin(node, initial) {
+    timers.forEach(clearTimeout); timers = [];
+    cur = node; finished = false; done = false; locked = false; first = true; hints = 0;
+    run = { total: 0, clean: 0 };
+    played = pathTo(node).map((n) => ({ san: n.san + nagOf(n), color: n.color, num: n.num, from: n.from, to: n.to, verdict: 'carried', carried: true }));
+    noteNode = node.parent ? node : null;
+    board.setTapMode(null); board.setOnMove(onMove); board.clearMarks(); board.setArrows([]);
+    board.orientation(side === 'w' ? 'white' : 'black');
+    board.setPosition(node.fen, { animate: !initial, lastMove: node.from ? { from: node.from, to: node.to } : null });
+    marks(noteNode);
+    if (scope === 'line' && !learn && idAt(target)) V33.begin(idAt(target), { kind: 'openings', moves: view().lineMine || 1 });
+    step(initial);
+  }
+  function start() {
+    covered.clear(); sess = { total: 0, clean: 0, lines: 0 }; pivots = 0;
+    feedback = learn ? { v: 'info', label: 'Learn mode', text: 'Follow the arrows once. Then drill the line from memory.' }
+      : scope === 'chapter' ? { v: 'info', label: 'Full chapter', text: 'Every line of this level in one session. The opponent varies his replies until you have covered them all.' } : null;
+    V36.hud('openings');
+    begin(T.root, true);
+  }
+  function play(n, verdict) {
+    cur = n;
+    played.push({ san: n.san + nagOf(n), color: n.color, num: n.num, from: n.from, to: n.to, verdict });
+    board.setPosition(n.fen, { lastMove: { from: n.from, to: n.to }, sound: n.captured ? 'capture' : 'move' });
+    noteNode = n; marks(n);
+  }
+  function step(initial) {
+    board.unmark('hl-hint');
+    const ks = kids(cur);
+    if (!ks.length) { lineDone(); return; }
+    if (cur.turn !== side) {
+      let pick = scope === 'line' ? ks.filter((k) => onPath(k, target))[0] : null;
+      if (!pick) {
+        const pool = ks.filter((k) => open(k).length);
+        const use = pool.length ? pool : ks, w = use.map((k) => Math.max(1, open(k).length));
+        let r = Math.random() * w.reduce((a, b) => a + b, 0);
+        pick = use[use.length - 1];
+        for (let i = 0; i < use.length; i++) { r -= w[i]; if (r <= 0) { pick = use[i]; break; } }
+      }
+      locked = true; board.setInteractive(null); emit();
+      later(() => {
+        locked = false; play(pick, null);
+        if (scope === 'chapter' && ks.length > 1) feedback = { v: 'info', label: 'Your opponent chose ' + lbl(pick), text: 'One of ' + ks.length + ' replies this chapter prepares here' + (open(pick).length ? '.' : ' (a line you already covered).') };
+        step(false);
+      }, initial ? 600 : (cfg.delay || CONFIG.opponentDelay));
+      return;
+    }
+    first = true; hints = 0; board.setInteractive(side);
+    if (learn) {
+      const e = expected(), at = cur, o = Trees.notesOf(T, e);
+      V36.learnStep(board, cur.fen, { num: e.num, color: e.color, san: e.san, from: e.from, to: e.to }, o.n.length ? { note: '' } : null, (fb) => { if (!finished && cur === at) { feedback = fb; emit(); } });
+    } else emit();
+  }
+  function onMove(m) {
+    if (locked || finished || cur.turn !== side || !kids(cur).length) { board.setPosition(cur.fen, { lastMove: lastMv() }); return; }
+    const g = new Chess(cur.fen), mv = g.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
+    if (!mv) { board.setPosition(cur.fen, { lastMove: lastMv() }); return; }
+    const uci = mv.from + mv.to + (mv.promotion || ''), ks = kids(cur), hit = ks.filter((k) => k.uci === uci)[0];
+    const clean1 = first && hints === 0 && !learn;
+    if (hit) {
+      if (first && !learn) { run.total++; sess.total++; }
+      first = false;
+      const exp = expected();
+      let fb;
+      if (scope === 'line' && !onPath(hit, target)) {
+        const pool = leafSet(hit), fresh = pool.filter((i) => !((App.progress[idAt(i)] || {}).runs));
+        target = fresh.length ? fresh[0] : pool[0]; pivots++;
+        fb = { v: 'alt', label: 'Also in this chapter', san: lbl(hit), text: 'That opens line ' + (target + 1) + ' of ' + leaves.length + ' (' + (L.labels[target] || '') + '). The trainer follows you there.' };
+        if (cfg.onPivot) cfg.onPivot(target);
+      } else if (scope === 'chapter' && hit !== exp && !open(hit).length && open(cur).length) {
+        fb = { v: 'alt', label: 'Right, and already covered', san: lbl(hit), text: 'Your other move here still has lines waiting. The run carries on with this one.' };
+      } else fb = { v: 'good', label: 'Correct', san: lbl(hit), text: ks.length > 1 ? 'One of ' + ks.length + ' moves of yours this chapter prepares here.' : '' };
+      if (clean1) { run.clean++; sess.clean++; App.score('openings', true); V36.srsHit(srsCfg(leafFor(hit)), { san: hit.san, color: hit.color, from: hit.from, to: hit.to, num: hit.num, key: hit.key }, cur.fen); }
+      Sound.good(); feedback = fb; play(hit, clean1 ? 'good' : 'fixed'); step(false);
+      return;
+    }
+    const other = Trees.elsewhere(T.id, (cur.path ? cur.path + ' ' : '') + cleanSan(mv.san));
+    if (other) {
+      feedback = { v: 'alt', label: 'That is your repertoire too', san: mv.san, text: mv.san + ' is in the chapter “' + other.title + '”. This chapter trains the other ' + (kids(cur).length === 1 ? 'move' : 'moves') + ' here: try again (no penalty).' };
+      board.setPosition(cur.fen, { lastMove: lastMv() }); emit();
+      return;
+    }
+    const e = expected();
+    if (first && !learn) { run.total++; sess.total++; }
+    if (clean1) {
+      App.score('openings', false);
+      V33.miss(idAt(leafFor(e)), 'openings', cur.ply, mv.san);
+      V36.srsMiss(srsCfg(leafFor(e)), { san: e.san, color: e.color, from: e.from, to: e.to, num: e.num, key: e.key }, cur.fen, lastMv());
+    }
+    first = false;
+    Sound.bad();
+    feedback = { v: 'off', label: 'Not in this chapter', san: mv.san, text: 'That move is not in your repertoire here. Try again, or tap Hint.' };
+    board.setPosition(cur.fen, { lastMove: lastMv() }); board.shake(); emit();
+  }
+  function miss() {
+    if (first) { if (!learn) { run.total++; sess.total++; App.score('openings', false); const e = expected(); V36.srsMiss(srsCfg(leafFor(e)), { san: e.san, color: e.color, from: e.from, to: e.to, num: e.num, key: e.key }, cur.fen, lastMv()); } first = false; }
+  }
+  function hint() {
+    if (finished || locked || cur.turn !== side || !kids(cur).length) return;
+    const e = expected(), n = kids(cur).length;
+    miss(); hints++;
+    if (hints === 1) { board.mark(e.from, 'hl-hint'); feedback = { v: 'hint', label: 'Hint', text: (n > 1 && scope === 'chapter' ? n + ' moves of yours are in this chapter here. One of them: the piece' : 'The piece to move') + ' stands on ' + e.from + '.' }; }
+    else { board.setArrows([{ from: e.from, to: e.to, kind: 'best' }]); feedback = { v: 'hint', label: 'Hint', text: 'Play ' + lbl(e) + '.' }; }
+    emit();
+  }
+  function showMove() {
+    if (finished || locked || cur.turn !== side || !kids(cur).length) return;
+    const e = expected();
+    miss();
+    feedback = { v: 'info', label: 'The move was ' + lbl(e), text: '' };
+    play(e, 'shown'); step(false);
+  }
+  function lineDone() {
+    const i = leaves.indexOf(cur), id = idAt(i), acc = run.total ? run.clean / run.total : 1;
+    if (i < 0) { finished = true; emit(); return; }
+    if (learn) V36.learned(id);
+    else if (id) { const before = (App.progress[id] || {}).best || 0; App.finish(id, acc); V33.afterFinish(id, acc, { kind: 'openings', moves: Math.max(1, run.total) }, before); V36.srsDone(srsCfg(i), acc); }
+    covered.add(i); sess.lines++;
+    Sound.done();
+    if (scope === 'line' || learn) {
+      finished = true; locked = false; board.setInteractive(null);
+      feedback = learn ? { v: 'done', label: 'Line learned', text: 'You have seen every move of line ' + (i + 1) + '. Now play it from memory.' }
+        : { v: 'done', label: 'Line ' + (i + 1) + ' complete', text: (run.total ? run.clean + ' of ' + run.total + ' moves right on the first try.' : '') };
+      emit(); if (cfg.onLineDone) cfg.onLineDone({ leaf: i, acc });
+      return;
+    }
+    if (covered.size >= leaves.length) {
+      finished = true; done = true; locked = false; board.setInteractive(null);
+      feedback = { v: 'done', label: 'Full chapter complete', text: 'All ' + leaves.length + (leaves.length === 1 ? ' line' : ' lines') + ' covered. ' + sess.clean + ' of ' + sess.total + ' moves right on the first try.' };
+      if (sess.total && sess.clean === sess.total) setTimeout(() => Celebrate.perfect('The whole chapter without a single slip.'), 400);
+      emit(); if (cfg.onChapterDone) cfg.onChapterDone({ acc: sess.total ? sess.clean / sess.total : 1 });
+      return;
+    }
+    let a = cur.parent;
+    while (a && !open(a).length) a = a.parent;
+    a = a || T.root;
+    feedback = { v: 'done', label: 'Line covered (' + covered.size + ' of ' + leaves.length + ')', text: 'Back to ' + (a.parent ? lbl(a) : 'the start') + ', where the tree branches: ' + open(a).length + (open(a).length === 1 ? ' line waits.' : ' lines wait.') };
+    locked = true; board.setInteractive(null); emit();
+    later(() => { locked = false; const keep = feedback; begin(a, false); if (!feedback || feedback === keep) { feedback = keep; emit(); } }, 1500);
+  }
+  return {
+    start, restart: start, onMove, hint, showMove, view,
+    expectedUci: () => { const e = !finished && cur.turn === side ? expected() : null; return e ? e.uci : ''; },
+    setTarget(i) { target = clamp(i, 0, leaves.length - 1); },
+    destroy() { destroyed = true; timers.forEach(clearTimeout); timers = []; locked = true; finished = true; if (learn) V36.learnStop(); board.setOnMove(null); }
+  };
+}
+
+/* ---------- the trainer screen for a tree chapter ---------- */
+function treeTrainScreen(body, group, go, line0) {
+  const ui = App.ui.op;
+  const chs = chaptersOf(group.lines);
+  let ci = chs.findIndex((c) => c.id === line0.tree);
+  if (ci < 0) ci = 0;
+  let topic = opTopic(chs[ci], ci), info = topic.tree;
+  let sel = (ui.lvLine === line0.id && Levels.num(ui.lv)) || Levels.of(line0);
+  let scope = ui.scope === 'chapter' ? 'chapter' : 'line';
+  let mode = ui.mode === 'explore' ? 'explore' : ui.mode === 'learn' ? 'learn' : 'drill';
+  let T = null, L = null, li = 0, runner = null, explorer = null, gated = 0, lastOpen = 0, finishedLine = false, chapterDone = false;
+  let wantPath = line0.treePath;
+  body.innerHTML = backBar('All chapters', esc(group.name) + ' › <strong id="op-title">' + esc(info.title) + '</strong>') +
+    '<div class="lv39" id="op-levels"></div>' +
+    '<div class="tt40-bar"><div class="seg" role="tablist" aria-label="Mode"><button type="button" data-mode="learn">' + icon('graduation-cap') + ' Learn</button><button type="button" data-mode="drill">' + icon('dumbbell') + ' Drill</button><button type="button" data-mode="explore">' + icon('sitemap') + ' Explore</button></div>' +
+      '<div class="seg tt40-scope" role="tablist" aria-label="What to train"><button type="button" data-scope="line">' + icon('route') + ' Single line</button><button type="button" data-scope="chapter">' + icon('diagram-project') + ' Full chapter</button></div></div>' +
+    '<div class="tt40-nav" id="op-nav"></div>' +
+    trainerShell('op-board', 'op-panel', { eval: true });
+  const board = Board(qs('#op-board', body), { orientation: info.side === 'w' ? 'white' : 'black' });
+  qs('[data-flip="op-board"]', body).addEventListener('click', () => board.flip());
+  const panel = qs('#op-panel', body), evalbar = qs('#op-board-eval', body), levelsHost = qs('#op-levels', body), nav = qs('#op-nav', body), veil = boardVeil(body, 'op-board');
+  const lineItem = (i) => (L && L.ids[i] ? Trees.line(L.ids[i]) : null);
+  const reviewed = (i) => !!(L && L.ids[i] && ((App.progress[L.ids[i]] || {}).runs || !SRS.isNew(L.ids[i])));
+  const allReviewed = () => !!L && L.ids.every((id, i) => reviewed(i));
+  const remember = () => { ui.lv = sel; const it = lineItem(li); if (it) { ui.lineId = it.id; ui.lvLine = it.id; } ui.scope = scope; ui.mode = mode; };
+  function syncSeg() {
+    qsa('[data-mode]', body).forEach((b) => b.setAttribute('aria-pressed', String(!gated && b.getAttribute('data-mode') === mode)));
+    qsa('[data-scope]', body).forEach((b) => { b.setAttribute('aria-pressed', String(!gated && mode !== 'explore' && b.getAttribute('data-scope') === (mode === 'learn' ? 'line' : scope))); b.disabled = !!gated || mode === 'explore'; });
+    qs('.tt40-bar', body).classList.toggle('is-dim', !!gated);
+  }
+  function renderLevels() {
+    const focused = levelsHost.contains(document.activeElement);
+    levelsHost.innerHTML = levelBarHTML(topic, sel, { share: true });
+    const rail = qs('.lv39-rail', levelsHost), on = qs('[aria-selected="true"]', levelsHost);
+    if (rail && on && rail.scrollWidth > rail.clientWidth) rail.scrollLeft = Math.max(0, on.parentNode.offsetLeft - (rail.clientWidth - on.offsetWidth) / 2);
+    if (focused && on) try { on.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
+  }
+  function renderNav(v) {
+    if (gated || !L || mode === 'explore') { nav.hidden = true; nav.innerHTML = ''; return; }
+    nav.hidden = false;
+    const n = L.leaves.length;
+    if (scope === 'chapter' && mode !== 'learn') {
+      const c = v ? v.covered : 0;
+      nav.innerHTML = '<div class="tt40-cover" role="status"><span>' + icon('diagram-project') + ' <b>Full chapter</b>: ' + c + ' of ' + n + (n === 1 ? ' line' : ' lines') + ' covered</span><span class="tt40-meter" aria-hidden="true"><i style="width:' + Math.round(c / Math.max(1, n) * 100) + '%"></i></span></div>';
+      return;
+    }
+    const opt = L.labels.map((lab, i) => '<option value="' + i + '"' + (i === li ? ' selected' : '') + '>' + (reviewed(i) ? '✓ ' : '') + 'Line ' + (i + 1) + ' · ' + esc(lab) + '</option>').join('');
+    nav.innerHTML = '<button type="button" class="icon-btn" data-tt="prev" aria-label="Previous line"' + (li <= 0 ? ' disabled' : '') + '>' + icon('chevron-left') + '</button>' +
+      '<label class="tt40-pick"><span class="sr-only">Choose a line</span><select class="input" data-tt="pick">' + opt + '</select></label>' +
+      '<button type="button" class="icon-btn" data-tt="next" aria-label="Next line"' + (li >= n - 1 ? ' disabled' : '') + '>' + icon('chevron-right') + '</button>' +
+      '<span class="tt40-count">' + (li + 1) + ' / ' + n + '</span>';
+  }
+  function notesHTML(note) {
+    if (!note || !note.blocks.length) return '';
+    const b = note.blocks, long = b.join('').length > 900;
+    const one = (t) => '<div class="tt40-note">' + rich(t) + '</div>';
+    return '<div class="tt40-notes"><p class="tt40-nh">' + icon('comment') + ' ' + esc(CONFIG.coach) + '’s ' + (b.length > 1 ? b.length + ' notes' : 'note') + ' on ' + esc(note.label) + '</p>' +
+      (long ? '<details' + (b.length === 1 && b[0].length < 1400 ? ' open' : '') + '><summary>' + esc(b[0].split('\n')[0].slice(0, 90)) + (b[0].length > 90 ? '…' : '') + '</summary>' + b.map(one).join('') + '</details>' : b.map(one).join('')) + '</div>';
+  }
+  function movesHTML(played) {
+    if (!played.length) return '';
+    let h = '<div class="moves">';
+    played.forEach((p, i) => {
+      if (p.color === 'w') h += '<span class="mv-n">' + p.num + '.</span>'; else if (i === 0) h += '<span class="mv-n">' + p.num + '...</span>';
+      h += '<span class="mv' + (p.verdict === 'fixed' || p.verdict === 'shown' ? ' is-miss' : p.carried ? ' is-carried' : '') + '">' + esc(p.san) + '</span>';
+    });
+    return h + '</div>';
+  }
+  const nextLevel = (k) => { for (let j = k + 1; j <= 5; j++) if (Levels.has(topic, j)) return j; return 0; };
+  const openBelow = (k) => { for (let j = k - 1; j >= 1; j--) if (Levels.has(topic, j) && Levels.open(Levels.lead(topic, j))) return j; return 0; };
+  function panelHTML(v) {
+    const n = L.leaves.length, isLine = v.scope === 'line' || v.learn;
+    const kick = esc(group.name) + ', ' + esc(Levels.name(sel)) + (isLine ? ', line ' + (li + 1) + ' of ' + n : ', full chapter');
+    let actions;
+    if (v.finished && v.done) {
+      const nk = nextLevel(sel), nOpen = nk && Levels.open(Levels.lead(topic, nk));
+      actions = '<button type="button" class="btn btn-primary" data-act="tt-again">' + icon('rotate') + ' Train the full chapter again</button>' +
+        (nk ? '<button type="button" class="btn btn-ghost" data-act="tt-level">' + (nOpen ? icon('arrow-trend-up') + ' Next level: ' : icon('crown') + ' Unlock ') + esc(Levels.name(nk)) + '</button>' : '') +
+        '<button type="button" class="btn btn-quiet" data-act="tt-chapter">Next chapter</button>';
+    } else if (v.finished && isLine) {
+      const more = li < n - 1;
+      actions = '<p class="tt40-ask">' + (v.learn ? 'Drill it from memory now, or see the next line first?' : 'Would you like to see the next line or practice this one first?') + '</p>' +
+        (v.learn ? '<button type="button" class="btn btn-primary" data-act="tt-drill">' + icon('dumbbell') + ' Drill this line</button>' : '') +
+        (more ? '<button type="button" class="btn ' + (v.learn ? 'btn-ghost' : 'btn-primary') + '" data-act="tt-next">' + icon('forward') + ' Next line (' + (li + 2) + ' of ' + n + ')</button>' : '') +
+        (!v.learn ? '<button type="button" class="btn btn-ghost" data-act="tt-repeat">' + icon('rotate') + ' Practice this line again</button>' : '') +
+        (n > 1 ? '<button type="button" class="btn ' + (!more && !v.learn || allReviewed() ? 'btn-primary' : 'btn-quiet') + '" data-act="tt-full">' + icon('diagram-project') + ' Train the full chapter (' + n + ' lines)</button>' : '') +
+        (!more && n === 1 ? '<button type="button" class="btn btn-quiet" data-act="tt-chapter">Next chapter</button>' : '');
+    } else {
+      actions = '<button type="button" class="btn btn-ghost btn-sm" data-act="hint">' + icon('lightbulb') + ' Hint</button><button type="button" class="btn btn-quiet btn-sm" data-act="show">Show move</button>' +
+        '<button type="button" class="btn btn-quiet btn-sm" data-act="restart">' + (isLine ? 'Restart line' : 'Restart chapter') + '</button>';
+    }
+    const status = isLine ? Math.min(v.mine, v.lineMine) + ' / ' + v.lineMine : v.covered + ' / ' + n + ' lines';
+    const branch = v.yourTurn && v.branchMine > 1 ? '<p class="tt40-branch">' + icon('code-branch') + ' ' + v.branchMine + ' moves of yours are in this chapter here' + (v.scope === 'chapter' && !v.learn ? (v.branchOpen ? ', ' + v.branchOpen + ' with lines still to cover.' : '.') : ': any of them is right.') + '</p>' : '';
+    return (v.learn ? '<span class="learn36">' + icon('graduation-cap') + ' Learn mode</span>' : '') +
+      '<p class="st-kicker">' + kick + '</p><h2 class="st-title">' + esc(info.title) + '</h2>' +
+      (isLine && L.labels[li] ? '<p class="tt40-line">' + icon('route') + ' ' + esc(L.labels[li]) + '</p>' : '') +
+      turnHTML(v, 'Your move as ' + colorName(info.side)) + '<span class="dim small" style="margin-left:auto">' + status + '</span></div>' + branch +
+      '<div class="st-feedback" aria-live="polite">' + feedbackHTML(v.feedback) + '</div>' + notesHTML(v.note) + movesHTML(v.played) +
+      '<div class="st-actions">' + actions + '</div>';
+  }
+  function draw(v) { if (!L) return; panel.innerHTML = panelHTML(v); renderNav(v); }
+  function stopAll() {
+    if (runner) { runner.destroy(); runner = null; }
+    if (explorer) { explorer.destroy(); explorer = null; }
+    evalbar.hidden = true;
+    board.setOnMove(null); board.setTapMode(null); board.setInteractive(null); board.clearMarks(); board.setArrows([]);
+  }
+  function ungate() { gated = 0; veil.hide(); }
+  function run() {
+    stopAll(); ungate();
+    finishedLine = false; chapterDone = false;
+    syncSeg(); renderLevels(); remember();
+    if (mode === 'explore') { startExplore(); return; }
+    const learn = mode === 'learn';
+    runner = TreeRunner({ T, L, board, scope: learn ? 'line' : scope, leaf: li, learn,
+      onUpdate: draw,
+      onPivot: (i) => { li = i; remember(); },
+      onLineDone: () => { finishedLine = true; renderNav(runner.view()); },
+      onChapterDone: () => { chapterDone = true; } });
+    runner.start();
+  }
+  function startExplore() {
+    mode = 'explore'; ungate(); syncSeg(); renderLevels(); renderNav();
+    board.orientation(info.side === 'w' ? 'white' : 'black');
+    const lines = Levels.cut(topic, sel);
+    explorer = Explorer({ board, panel, group: Object.assign({}, group, { lines }), evalbar, onDrill: (l) => { const i = L.ids.indexOf(l.id); if (i >= 0) li = i; mode = 'drill'; scope = 'line'; run(); } });
+  }
+  function showGate(k) {
+    gated = k; stopAll();
+    T = Trees.runtime(info.id);
+    const Lk = info.levels[k], below = openBelow(k), Lb = below ? info.levels[below] : null;
+    let at = T.root;                                                // where the open level stops branching out: no move of the locked level is shown
+    if (Lb) for (let ks = at.kids.filter(Lb.has); ks.length === 1; ks = at.kids.filter(Lb.has)) at = ks[0];
+    board.orientation(info.side === 'w' ? 'white' : 'black');
+    board.setPosition(at.fen || START_FEN, { animate: false, lastMove: at.from ? { from: at.from, to: at.to } : null });
+    veil.show('lock', 'Level ' + k + ' carries on from here');
+    const mv = (p) => Math.ceil(p / 2);
+    const lead = (Lb ? 'Level ' + below + ' plays ' + Lb.leaves.length + (Lb.leaves.length === 1 ? ' line' : ' lines') + ' up to move ' + mv(Lb.plies) + '. ' : '') +
+      'Level ' + k + ' plays ' + Lk.leaves.length + (Lk.leaves.length === 1 ? ' line' : ' lines') + ' up to move ' + mv(Lk.plies) + ', every branch included.';
+    panel.innerHTML = levelGateHTML(topic, k, { title: 'Go deeper into ' + info.title, lead, back: lastOpen && lastOpen !== k ? lastOpen : below });
+    syncSeg(); renderLevels(); renderNav();
+  }
+  function showNotYet(k) {
+    gated = k; stopAll(); veil.show('hourglass-half', info.first > k ? 'This chapter starts at Level ' + info.first : 'Level ' + k + ' is on its way');
+    const back = lastOpen && lastOpen !== k ? lastOpen : openBelow(k) || (info.first && Levels.open(Levels.lead(topic, info.first)) ? info.first : 0);
+    panel.innerHTML = info.first > k
+      ? '<div class="lv39-gate"><p class="lv39-kick is-soon">' + icon('layer-group') + ' ' + esc(Levels.name(k)) + '</p><h2 class="st-title">Not part of Level ' + k + '</h2><p class="st-brief">' + esc(info.title) + ' belongs to ' + esc(Levels.name(info.first)) + ' and up. The free sample on Level 1 shows how it starts.</p>' +
+        '<div class="st-actions">' + (back ? '<button type="button" class="btn btn-ghost" data-lv-act="back">Back to Level ' + back + '</button>' : '') + '<button type="button" class="btn btn-quiet" data-lv-act="first">Go to Level ' + info.first + '</button></div></div>'
+      : levelSoonHTML(topic, k, back);
+    syncSeg(); renderLevels(); renderNav();
+  }
+  function select(k) {
+    sel = k; remember();
+    if (!Levels.has(topic, k)) { showNotYet(k); return; }
+    if (!Levels.open(Levels.lead(topic, k))) { showGate(k); return; }
+    T = Trees.runtime(info.id); L = info.levels[k]; lastOpen = k;
+    const want = wantPath || (lineItem(li) || {}).treePath;
+    const at = want ? L.leaves.findIndex((n) => n.path === want || n.path.indexOf(want + ' ') === 0) : -1;
+    li = at >= 0 ? at : Math.min(li, L.leaves.length - 1);
+    wantPath = '';
+    if (mode === 'drill' && scope === 'line' && !ui.pickedMode && V36.autoLearn(lineItem(li))) mode = 'learn';
+    run();
+  }
+  function toChapter(delta) {
+    const c2 = chs[ci + delta];
+    if (!c2) { toast('That was the last chapter of ' + group.name + '. Well played.', 'good'); go({ screen: 'list' }); return; }
+    const t2 = opTopic(c2, ci + delta), k = Levels.has(t2, sel) ? sel : 1, start = Levels.cut(t2, k)[0] || c2.lines[0];
+    go({ screen: 'train', lineId: start.id, lv: k, lvLine: start.id });
+  }
+  function onClick(e) {
+    const lv = e.target.closest('[data-lv]');
+    if (lv && levelsHost.contains(lv)) { const k = +lv.getAttribute('data-lv'); if (k !== sel || gated || mode === 'explore') { if (mode === 'explore') mode = 'drill'; select(k); } return; }
+    const la = e.target.closest('[data-lv-act]');
+    if (la) {
+      const a = la.getAttribute('data-lv-act');
+      if (a === 'share') { const url = Levels.link(info.id, sel, 'openings'); copyText(url).then((ok) => toast(ok ? 'Link copied. It opens ' + Levels.name(sel) + ' of ' + info.title + '.' : 'Copying was blocked. The link is ' + url, ok ? 'good' : 'bad')); }
+      else if (a === 'back') select(lastOpen && lastOpen !== sel ? lastOpen : openBelow(sel) || 1);
+      else if (a === 'first') select(info.first);
+      else levelAct(a, topic, gated || sel, group.name);
+      return;
+    }
+    const m = e.target.closest('[data-mode]');
+    if (m) { ui.pickedMode = true; const md = m.getAttribute('data-mode'); if (gated) { const b = lastOpen || openBelow(sel); if (!b) return; sel = b; } mode = md; if (gated) select(sel); else run(); return; }
+    const sc = e.target.closest('[data-scope]');
+    if (sc && !sc.disabled) { scope = sc.getAttribute('data-scope'); if (mode === 'learn' && scope === 'chapter') mode = 'drill'; run(); return; }
+    const tt = e.target.closest('[data-tt]');
+    if (tt && tt.getAttribute('data-tt') !== 'pick') { const d = tt.getAttribute('data-tt') === 'prev' ? -1 : 1; li = clamp(li + d, 0, L.leaves.length - 1); scope = 'line'; if (mode !== 'learn' && !ui.pickedMode && V36.autoLearn(lineItem(li))) mode = 'learn'; run(); return; }
+    const a = e.target.closest('[data-act]');
+    if (!a) return;
+    const act = a.getAttribute('data-act');
+    if (act === 'back') { go({ screen: 'list' }); return; }
+    if (act === 'tt-next') { li = Math.min(li + 1, L.leaves.length - 1); if (!ui.pickedMode && V36.autoLearn(lineItem(li))) mode = 'learn'; else if (mode === 'learn') mode = 'drill'; run(); scrollToEl(body); return; }
+    if (act === 'tt-repeat') { mode = 'drill'; run(); return; }
+    if (act === 'tt-drill') { mode = 'drill'; scope = 'line'; run(); return; }
+    if (act === 'tt-full' || act === 'tt-again') { mode = 'drill'; scope = 'chapter'; run(); scrollToEl(body); return; }
+    if (act === 'tt-level') { const nk = nextLevel(sel); if (nk) { scope = 'line'; li = 0; select(nk); scrollToEl(body); } return; }
+    if (act === 'tt-chapter') { toChapter(1); return; }
+    if (!runner) return;
+    if (act === 'hint') runner.hint();
+    else if (act === 'show') runner.showMove();
+    else if (act === 'restart') runner.restart();
+  }
+  function onChange(e) {
+    const s = e.target.closest('[data-tt="pick"]');
+    if (!s) return;
+    li = clamp(+s.value || 0, 0, L.leaves.length - 1); scope = 'line';
+    if (mode !== 'learn' && !ui.pickedMode && V36.autoLearn(lineItem(li))) mode = 'learn';
+    run();
+  }
+  body.addEventListener('click', onClick);
+  body.addEventListener('change', onChange);
+  body.__tt = { runner: () => runner, state: () => ({ sel, scope, mode, li, gated }) };   // for tests and the console
+  const stopKeys = levelKeys(levelsHost, (k) => select(k));
+  select(sel);
+  return () => { body.removeEventListener('click', onClick); body.removeEventListener('change', onChange); stopKeys(); stopAll(); board.destroy(); };
+}
+
+/* ---------- Admin > Import ChessTempo trees ----------
+   A ChessTempo export (one game per repertoire, variations included) becomes
+   tree chapters: games with the same repertoire name are merged, each on its
+   level, and the tree is split into chapters at its branch points. Nothing
+   is added and nothing is dropped: every move and comment block of the file
+   lands in exactly one chapter. The result goes into the admin draft or
+   downloads as a data file in the repertoires format. */
+const TreeImport = (() => {
+  const flat = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+  function guess(name, side) {
+    const s = String(name || '').toLowerCase();
+    const model = /(master|model)\s*games?/.test(s);
+    const m = s.match(/(?:^|[^\d])([1-4])\s*v\s*\d/) || s.match(/(?:^|\D)([1-4])(?:\D|$)/);
+    const level = model ? 5 : m ? Math.min(5, +m[1] + 1) : 2;
+    const base = s.replace(/(master|model)\s*games?/, '').replace(/\d+\s*v\s*\d+|\bv\d+\b|\d/g, ' ').replace(/[^a-z-]+/g, ' ').trim();
+    const cap = (x) => x.replace(/(^|[\s-])\w/g, (c) => c.toUpperCase());
+    const hit = (x) => base && (flat(x.name).indexOf(flat(base)) >= 0 || flat(base).indexOf(flat(x.name)) >= 0);
+    const g = (CONTENT.groups || []).filter((x) => x && x.name && hit(x) && /games/i.test(x.name) === model)[0];
+    const rep = g ? g.name : model ? (base ? cap(base) : side === 'b' ? 'Black' : 'White') + ' Model Games' : cap(base);
+    return { rep: rep || 'Imported repertoire', level };
+  }
+  function build(games, rows, o) {
+    const reps = {};
+    rows.forEach((r, i) => {
+      if (!r.use) return;
+      const g = games[i], key = r.rep.trim() || 'Imported repertoire';
+      const R = reps[key] || (reps[key] = { name: key, side: g.side || r.side || 'w', files: [] });
+      R.files.push({ level: r.level, root: g.root, name: g.name });
+    });
+    return Object.keys(reps).map((name) => {
+      const R = reps[name], seen = {};
+      const byLevel = {};
+      R.files.forEach((f) => { (byLevel[f.level] = byLevel[f.level] || []).push(f); });
+      const levels = Object.keys(byLevel).map(Number).sort((a, b) => a - b).map((k) => {
+        if (byLevel[k].length === 1) return { level: k, root: byLevel[k][0].root };
+        return { level: k, root: RepTree.merge(byLevel[k].map((f) => ({ level: k, root: f.root }))) };   // two games on one level: one tree
+      });
+      const u = RepTree.merge(levels);
+      const model = levels.every((x) => x.level === 5);
+      const chs = RepTree.chapters(u, R.side, { maxLeaves: o.maxLeaves, maxPly: o.maxMove * 2, splitOwn: model });
+      const src = {};
+      R.files.forEach((f) => { src[f.level] = src[f.level] ? src[f.level] + ' + ' + f.name : f.name; });
+      const chapters = chs.map((c, i) => {
+        const title = RepTree.autoTitle(c).slice(0, 90);
+        let id = TreeData.idOf(flat(name).slice(0, 12) + '-' + title) || 'chapter-' + (i + 1);
+        while (seen[id]) id = id.slice(0, 40) + '-' + (i + 1);
+        seen[id] = 1;
+        const lv = RepTree.chapterLevels(c, u.levels);
+        const r = c.prefix.length + 1, own = R.side === 'w' ? 1 : 0, s1 = r % 2 === own ? r : r + 1;
+        const lvls = [{ level: 1, isFree: true, requiredTier: 0, stopMoveIndex: s1 + 4 }].concat(lv.map((k) => ({ level: k, isFree: false, requiredTier: 2, source: src[k] })));
+        const shown = c.prefix.concat(c.kids.length === 1 ? [c.kids[0]] : []).map((n) => n.san);
+        return { topicId: id, title, path: RepTree.sanText(shown, 0) + (c.kids.length > 1 ? ' {' + c.kids.map((k) => k.san).join(', ') + '}' : ''), levels: lvls, tree: RepTree.chapterJSON(c), lines: c.leaves };
+      });
+      RepTree.dedupeNotes(chapters.map((c) => c.tree));
+      return { name, side: R.side === 'w' ? 'white' : 'black', sources: src, chapters };
+    });
+  }
+  function open() {
+    let games = [], rows = [], built = null;
+    openSheet({
+      title: 'Import a ChessTempo tree', noFocus: true,
+      html: '<p class="muted small">Paste the export or pick the .pgn file. Every game is one repertoire tree; games you give the same repertoire name are merged, each on its level (Level 2 = course 1, 3 = course 2, 4 = course 3, 5 = model games). Every move and every comment block is kept; nothing is added.</p>' +
+        '<label class="field"><span class="field-label">PGN file</span><input class="input" type="file" accept=".pgn,.txt" data-ti="file"></label>' +
+        '<label class="field"><span class="field-label">…or paste it</span><textarea class="input" rows="4" data-ti="text" placeholder="[Event &quot;Wit repertoire&quot;] …"></textarea></label>' +
+        '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-ti="read">' + icon('file-import') + ' Read the export</button></div>' +
+        '<div data-ti="games"></div><div data-ti="out"></div><p class="form-msg" data-ti="msg" aria-live="polite"></p>',
+      onMount(s) {
+        const $ = (k) => qs('[data-ti="' + k + '"]', s.el), say = (t, bad) => { $('msg').textContent = t; $('msg').className = 'form-msg' + (bad ? ' is-bad' : ' is-good'); };
+        function readText(text) {
+          const t0 = Date.now();
+          try { games = RepTree.parse(text); } catch (e) { say('The file could not be read: ' + e.message, true); return; }
+          if (!games.length) { say('No games with moves in that text.', true); return; }
+          rows = games.map((g) => Object.assign({ use: true, side: g.side }, guess(g.name, g.side)));
+          const groups = (CONTENT.groups || []).map((x) => x.name);
+          $('games').innerHTML = '<datalist id="ti-reps">' + groups.map((n) => '<option value="' + esc(n) + '">').join('') + '</datalist>' +
+            '<div class="ti40-table" role="table">' + games.map((g, i) => {
+              const c = RepTree.count(g.root);
+              return '<div class="ti40-row" role="row"><label class="ti40-use"><input type="checkbox" data-ti-use="' + i + '" checked><b>' + esc(g.name) + '</b></label>' +
+                '<span class="small muted">' + colorName(g.side || 'w') + ', ' + c.nodes + ' moves, ' + c.leaves + ' lines, ' + c.notes + ' notes' + (g.errors.length ? ', <span class="bad">' + g.errors.length + ' illegal (left out)</span>' : '') + '</span>' +
+                '<input class="input" list="ti-reps" data-ti-rep="' + i + '" value="' + esc(rows[i].rep) + '" aria-label="Repertoire for ' + esc(g.name) + '">' +
+                '<select class="input" data-ti-lvl="' + i + '" aria-label="Level for ' + esc(g.name) + '">' + [2, 3, 4, 5].map((k) => '<option value="' + k + '"' + (rows[i].level === k ? ' selected' : '') + '>' + esc(Levels.name(k)) + '</option>').join('') + '</select></div>';
+            }).join('') + '</div>' +
+            '<div class="ti40-opts"><label>Split a branch point into chapters while it holds more than <input class="input" type="number" min="1" max="99" value="12" data-ti="max"> lines, up to move <input class="input" type="number" min="1" max="60" value="7" data-ti="ply"></label></div>' +
+            '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-ti="build">' + icon('diagram-project') + ' Build chapters</button></div>';
+          say(games.length + (games.length === 1 ? ' tree' : ' trees') + ' read in ' + (Date.now() - t0) + ' ms. Check the repertoire and level of each, then build.');
+          $('out').innerHTML = '';
+        }
+        function preview() {
+          $('out').innerHTML = built.map((R, ri) => '<h3 class="ti40-h">' + esc(R.name) + ' <small>' + esc(R.side) + ', ' + R.chapters.length + ' chapters</small></h3><ol class="ti40-ch">' +
+            R.chapters.map((c, ci) => '<li><input class="input" data-ti-title="' + ri + ':' + ci + '" value="' + esc(c.title) + '" aria-label="Chapter title"><span class="small muted">' + c.lines + (c.lines === 1 ? ' line' : ' lines') + ', levels ' + c.levels.map((x) => x.level).join(', ') + '</span></li>').join('') + '</ol>').join('') +
+            '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-ti="draft">' + icon('pen-ruler') + ' Put in my draft</button><button type="button" class="btn btn-ghost btn-sm" data-ti="dl">' + icon('download') + ' Download data file</button></div>' +
+            '<p class="small muted">The draft replaces the tree chapters of these repertoires only. Publish to make it live, or upload the data file to the repository as your course file.</p>';
+        }
+        function titles() { qsa('[data-ti-title]', s.el).forEach((inp) => { const [a, b] = inp.getAttribute('data-ti-title').split(':').map(Number); const v = inp.value.trim(); if (v) built[a].chapters[b].title = v.slice(0, 90); }); }
+        s.el.addEventListener('change', (e) => {
+          const f = e.target.closest('[data-ti="file"]');
+          if (f && f.files && f.files[0]) { const r = new FileReader(); r.onload = () => { $('text').value = ''; readText(String(r.result || '')); }; r.readAsText(f.files[0]); return; }
+          const u = e.target.getAttribute('data-ti-use'), rp = e.target.getAttribute('data-ti-rep'), lv = e.target.getAttribute('data-ti-lvl');
+          if (u !== null) rows[+u].use = e.target.checked;
+          if (rp !== null) rows[+rp].rep = e.target.value;
+          if (lv !== null) rows[+lv].level = +e.target.value;
+        });
+        s.el.addEventListener('input', (e) => { const rp = e.target.getAttribute('data-ti-rep'); if (rp !== null) rows[+rp].rep = e.target.value; });
+        s.el.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-ti]');
+          if (!b) return;
+          const k = b.getAttribute('data-ti');
+          if (k === 'read') { const t = $('text').value; if (t.trim()) readText(t); else say('Paste the export or pick a file first.', true); }
+          if (k === 'build') {
+            if (!rows.some((r) => r.use)) { say('Tick at least one tree.', true); return; }
+            const o = { maxLeaves: clamp(+$('max').value || 12, 1, 99), maxMove: clamp(+$('ply').value || 7, 1, 60) };
+            try { built = build(games, rows, o); } catch (err) { say('Building failed: ' + err.message, true); return; }
+            preview(); say('Built. Rename chapters if you like, then put them in your draft or download the file.');
+          }
+          if (k === 'draft' && built) {
+            titles();
+            const d = Admin.ensureDraft(), rep = { notes: [], skipped: [] };
+            d.lists.groups = Array.isArray(d.lists.groups) ? d.lists.groups : clone(CONTENT.groups || []);
+            const names = built.map((R) => R.name);
+            d.trees = (Array.isArray(d.trees) ? d.trees : []).filter((t) => names.indexOf(t.group) < 0);
+            built.forEach((R) => {
+              const side = R.side === 'white' ? 'w' : 'b';
+              if (!d.lists.groups.some((g) => g && g.name === R.name)) d.lists.groups.push({ name: R.name, side, intro: '' });
+              R.chapters.forEach((c, i) => { const r = TreeData.fromFeed(c, { group: R.name, side, n: i + 1 }, rep); if (r.entry) d.trees.push(r.entry); else rep.skipped.push(r.error); });
+            });
+            Admin.saveDraft(d); s.close(); rerender();
+            toast('Tree chapters are in your draft' + (rep.skipped.length ? ' (' + rep.skipped.length + ' skipped)' : '') + '. Publish to make them live.', rep.skipped.length ? 'bad' : 'good');
+          }
+          if (k === 'dl' && built) {
+            titles();
+            const out = { meta: { app: 'Lanckrietchess Training Hub', format: 'tree-v1', updated: new Date().toISOString() }, repertoires: built.map((R) => ({ name: R.name, side: R.side, sources: R.sources, chapters: R.chapters.map((c) => ({ topicId: c.topicId, title: c.title, path: c.path, levels: c.levels, tree: c.tree })) })) };
+            download('repertoire-trees.json', JSON.stringify(out), 'application/json');
+          }
+        });
+      }
+    });
+  }
+  return { open, build, guess };
+})();
 
 /* ==========================================================================
    12. SHELL, ROUTER AND BOOT

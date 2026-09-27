@@ -1,4 +1,53 @@
-# Lanckrietchess Training Hub v3.9.0
+# Lanckrietchess Training Hub v4.0.0
+
+## What's new in v4.0: opening chapters are trees
+
+The Opening Trainer no longer plays straight "stems". Every chapter is a **tree**: one position can hold several replies of your opponent and several moves of your own, exactly as in ChessTempo.
+
+- **Any move of the chapter is right.** If you play a move that exists elsewhere in the chapter tree, the trainer does not mark it wrong: it says *Also in this chapter* and follows you into that branch (the line counter jumps with it). A move that belongs to **another chapter** of the same repertoire (for example 9.b4 inside the 9.e4 chapter) gets *That is your repertoire too*, with no penalty. Only a move that is nowhere in the repertoire counts as a mistake.
+- **Single line mode.** One line at a time, with ◀ ▶ arrows and a line picker (✓ marks the lines you have done). At the end of every line: *Would you like to see the next line or practice this one first?* with Next line, Practice this line again and Train the full chapter.
+- **Full chapter mode.** The whole branching chapter in one session. The opponent picks among the replies you have not covered yet; after every leaf the run jumps back to the nearest branch point that still has lines waiting, until every line of the level is covered. A meter shows *x of n lines covered*.
+- Learn (arrows, first time through) and Explore (the tree with Stockfish) work on the same chapters. Kyenzo's notes show in full under the board, arrows and coloured squares from the file (`[%cal]`, `[%csl]`) are drawn on the board, and !/?/!? symbols show next to the moves.
+- Progress, spaced repetition, streaks, the leaderboard and "Train only my mistakes" keep working: every leaf of a tree is still a line with a stable id.
+
+### Course data (content.json, format `tree-v1`)
+
+`content.json` was rebuilt **move for move from the ChessTempo export** (`ct-all-repertoires`, 11 trees). Nothing was added and nothing left out: a check replays every level against its source file (same moves, same comment blocks, 0 differences). Earlier versions added Semi-Slav chapters that are not in your export (such as the Botvinnik) and missed the Réti and the Exchange Slav; the file now holds exactly what the export holds. Note: 5.g3 (the Catalan set-up) *is* in your export, on levels 3 and 4, so it is in the course with your moves.
+
+| Level | Source in the export |
+|---|---|
+| 1 Free | the chapter's first level, up to your third move after the chapter's branch point (`stopMoveIndex`) |
+| 2 Beginner | course 1 (`Colle 1 V3`, `caro-kann 1V2`, `semi-slav 1V2`) |
+| 3 Intermediate | course 2 (`… 2 V3`, `… 2V2`) |
+| 4 Advanced | course 3 (`… 3 V3`, `… 3V2`) |
+| 5 Master | the model games, as two repertoire tabs: Colle Model Games and Black Model Games |
+
+Each level is exactly its own file, so a move that a later course dropped is not in that later level. A level a chapter doesn't have shows *From Level 3* (the chapter starts later) or *Soon*.
+
+A chapter in the file:
+
+```json
+{ "topicId": "semislav-anti-moscow-6-bh4", "title": "Anti-Moscow: 6.Bh4",
+  "path": "1.d4 c6 2.c4 d5 3.Nf3 Nf6 4.Nc3 e6 5.Bg5 h6 6.Bh4",
+  "levels": [ { "level": 1, "isFree": true, "requiredTier": 0, "stopMoveIndex": 16 },
+              { "level": 2, "isFree": false, "requiredTier": 2, "source": "semi-slav 1V2" } ],
+  "tree": [ { "m": "d4", "n": ["Kyenzo's note"], "c": [ { "m": "c6", "c": [ … ] } ] } ] }
+```
+
+A node: `m` move (SAN), `n` comment blocks, `g` NAGs, `ar`/`sq` drawings (`"Gc4e3"`, `"Rh3"`), `l` the first level that has the move (left out = same as the move before), `x` deeper levels that dropped it, `c` the moves after it (the first is the main line). The notes of a move that several chapters play (the approach moves) are written once, in the first chapter that plays it; every chapter shows them.
+
+**Hand edits:** you can still edit `content.json` by hand. Every move is replayed with chess.js when the file comes in; an illegal move is left out with what follows it and named in Admin > Live data. The old v3.9 format (`levels[].pgn`) still loads.
+
+### Admin > Import ChessTempo trees
+
+Paste your export or pick the `.pgn` file. The hub reads every tree (about a second), guesses the repertoire and level of each (edit them), splits the trees into chapters at their branch points, lets you rename the chapters, and then either puts them in your admin draft (publish as usual) or downloads a data file in the format above. This is how a new ChessTempo export becomes an app update without a developer.
+
+### Honest limits of v4.0
+
+- ChessTempo stores comments **per position**, not per line. When two of your courses reach the same position, the export repeats that position's comments in both files (for example the Colle model-games introduction on 1.d4 in the Semi-Slav course). The hub keeps them as exported; clean them in ChessTempo and export again.
+- Chapter splits and titles of the delivered file were set by hand once; the in-app importer splits automatically (rename chapters in its preview).
+- "My repertoire" (the custom builder) still trains line by line.
+- The first time a new course file arrives, the hub replays every move once (about half a second on a laptop, a bit more on a phone); after that it is remembered on the device.
 
 ## What's new in v3.9: one five-level system for everything
 
