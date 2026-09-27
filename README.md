@@ -311,7 +311,7 @@ To hide a player from this board, set `hidden = 1` on their row in the D1 consol
 
 1. Upload `index.html`, `sw.js`, `vercel.json`, `manifest.webmanifest` and the `icons` folder to `lanckrietchess/Json-van-app` (Add file > Upload files, drag the folder in as well > Commit). Vercel deploys the commit to `https://lanckrietchess-app.vercel.app/` by itself. Leave the data file `json` where it is.
 2. Check the deployment: open the site, then Admin menu > Live data (GitHub). It should say the data came from GitHub. Later, for the Play Store, add `.well-known/assetlinks.json`.
-3. `sw.js` carries version `lc-hub-3.8.0`; bump it every time you upload a new `index.html`, so returning players get it.
+3. `sw.js` carries version `lc-hub-4.0.0`; bump it every time you upload a new `index.html`, so returning players get it.
 4. Moving the data file? Change `CONFIG.remote` (owner, repo, branch, path). A custom domain? Nothing to change: links follow the address the hub is served from. Only `CONFIG.site.production` is used as the fallback address.
 5. Before launch, check `CONFIG.access.demoKeys` is `false` in `index.html` (it is in this build).
 
