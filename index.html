@@ -1491,6 +1491,26 @@ const CONFIG = {
     allowedParentOrigins: ['https://www.skool.com', 'https://skool.com']
   },
 
+  /* Credits: a small pay-per-level economy next to the tiers above, for a
+     visitor who wants one locked level without the Accelerator. Every device
+     gets `daily` free credits each calendar day (never carried over); credits
+     bought in a package are `purchased` and never expire or reset. Unlocking a
+     level spends `unlockCost` credits (or `unlockCostMentor` for a level that
+     needs the Mentorship) and is remembered forever on that device, exactly
+     like a member key. See Credits (below Access) and CONFIG.credits.packages
+     for the checkout, which is a front-end simulation: wire a real processor
+     (Stripe, Paddle...) into Credits.grant() before you take payments. */
+  credits: {
+    daily: 1,
+    unlockCost: 5,
+    unlockCostMentor: 15,
+    packages: [
+      { id: 'small', price: '€1', credits: 3 },
+      { id: 'medium', price: '€10', credits: 100 },
+      { id: 'large', price: '€20', credits: 300 }
+    ]
+  },
+
   /* Admin mode. Type the trigger into any key field. The first time, a setup
      screen creates the three values below; paste them in here and upload.
      Only a salted hash of your email and an encrypted authenticator secret
@@ -2084,8 +2104,10 @@ const Levels = (() => {
     const t = Math.round(+(it && it.requiredTier));
     return t >= PAID_TIER && t <= TOP_TIER ? t : PAID_TIER;
   }
-  /* THE gate. Nothing else in the hub decides whether course content opens. */
-  const open = (it) => App.rank() >= required(it);
+  /* THE gate. Nothing else in the hub decides whether course content opens.
+     v4.1: a level bought outright with credits (App.unlocks, by item id) opens
+     it too, on top of the tier rank. */
+  const open = (it) => App.rank() >= required(it) || !!(it && it.id && App.unlocks && App.unlocks.indexOf(it.id) >= 0);
   const elo = (it, k) => String((it && it.guideline) || meta(k || of(it)).elo || '').trim().replace(/\s*-\s*/, '–');
   const plan = (t) => (t >= TOP_TIER ? 'the Mentorship' : 'the Accelerator');
   const name = (k) => 'Level ' + meta(k).n + ', ' + meta(k).label;
@@ -2291,6 +2313,7 @@ const App = {
   profile: sanitizeProfile({}),
   access: { tier: 'free', key: '', keyHash: '', verifiedAt: '', source: '', remote: false },
   stats: {}, progress: {}, daily: { last: '', count: 0 }, settings: { sound: true, board: false, autoVault: true }, onboarded: false,
+  credits: { daily: 0, purchased: 0, lastReset: '' }, unlocks: [],
   ui: {},
   load() {
     const s = Store.get(KEYS.state, null);
@@ -2317,8 +2340,11 @@ const App = {
     this.daily = { last: String((s.daily || {}).last || '').slice(0, 10), count: +(s.daily || {}).count || 0 };
     this.settings = Object.assign({ sound: true, board: false, autoVault: true }, s.settings || {});
     this.onboarded = !!s.onboarded;
+    const c = s.credits || {};
+    this.credits = { daily: Math.max(0, +c.daily || 0), purchased: Math.max(0, +c.purchased || 0), lastReset: /^\d{4}-\d{2}-\d{2}$/.test(c.lastReset || '') ? c.lastReset : '' };
+    this.unlocks = (Array.isArray(s.unlocks) ? s.unlocks : []).map((id) => String(id).slice(0, 90)).filter((id, i, a) => id && a.indexOf(id) === i).slice(0, 500);
   },
-  save() { Store.set(KEYS.state, { v: 2, profile: this.profile, access: this.access, stats: this.stats, progress: this.progress, daily: this.daily, settings: this.settings, onboarded: this.onboarded }); },
+  save() { Store.set(KEYS.state, { v: 2, profile: this.profile, access: this.access, stats: this.stats, progress: this.progress, daily: this.daily, settings: this.settings, onboarded: this.onboarded, credits: this.credits, unlocks: this.unlocks }); },
   rank() { const pv = Admin.preview(); return pv ? TIERS[pv].rank : (TIERS[this.access.tier] || TIERS.free).rank; },
   unlocked(item) { return Levels.open(item); },                 // v3.9: course content opens by its level, nothing else
   hasTier(lock) { return this.rank() >= (LOCK_RANK[lock] || 0); },   // module gates and shared coach folders
@@ -2501,6 +2527,50 @@ const Access = (() => {
   return { clean, hashKey, accept, encodeProfile, decodeProfile, recheck, recheckRemote, signOut, throttled, PREFIX };
 })();
 
+/* Credits: the pay-per-level micro-economy (CONFIG.credits), next to the
+   member-key tiers above. A locked level opens for good, on this device,
+   the moment enough credits are spent on it (App.unlocks, read by
+   Levels.open). Nothing here calls a real payment processor: grant() is the
+   one place a Stripe/Paddle webhook or success callback should call once
+   money has actually moved. */
+const Credits = (() => {
+  function resetIfNeeded() {
+    const today = dayKey(new Date());
+    if (App.credits.lastReset === today) return;
+    App.credits.daily = Math.max(0, +CONFIG.credits.daily || 0);
+    App.credits.lastReset = today;
+    App.save();
+  }
+  function balance() { resetIfNeeded(); return App.credits.daily + App.credits.purchased; }
+  function has(id) { return !!id && App.unlocks.indexOf(id) >= 0; }
+  function costOf(it) { return Levels.required(it) >= TOP_TIER ? CONFIG.credits.unlockCostMentor : CONFIG.credits.unlockCost; }
+  function spend(n) {
+    resetIfNeeded();
+    const fromDaily = Math.min(App.credits.daily, n);
+    App.credits.daily -= fromDaily;
+    App.credits.purchased -= (n - fromDaily);
+  }
+  /* Unlocks one item (by id) forever on this device. Returns { ok, cost, short }. */
+  function unlock(it) {
+    if (!it || !it.id) return { ok: false };
+    if (has(it.id)) return { ok: true, already: true };
+    const cost = costOf(it), bal = balance();
+    if (bal < cost) return { ok: false, cost, short: cost - bal };
+    spend(cost);
+    App.unlocks.push(it.id);
+    App.save();
+    return { ok: true, cost };
+  }
+  /* Adds purchased (non-expiring) credits. Call this from a real checkout's success handler. */
+  function grant(amount) {
+    const n = Math.max(0, Math.round(+amount) || 0);
+    if (!n) return;
+    App.credits.purchased += n;
+    App.save();
+  }
+  return { resetIfNeeded, balance, has, costOf, unlock, grant };
+})();
+
 function coachBriefing(extra) {
   const p = App.profile, b = bracketOf(p.elo), t = App.totals();
   const lines = ['[LANCKRIETCHESS PROFILE TOKEN]', Access.encodeProfile(), '',
@@ -2678,6 +2748,32 @@ function openUnlock(lock, what) {
         : '<a class="btn btn-gold" href="' + esc(CONFIG.links.accelerator) + '" target="_blank" rel="noopener">' + icon('crown') + ' Upgrade in Skool</a><a class="btn btn-ghost" href="#upgrades" data-close>Which path fits me?</a>') + '</div><div class="divider"></div>' +
       '<p class="small muted">Already a member? Paste your key.</p>' + tokenFormHTML('unlock'),
     onMount(s) { bindTokenForms(s.el, () => setTimeout(() => { s.close(); rerender(); }, 700)); }
+  });
+}
+/* Buy credits. There is no payment processor wired in: clicking a package
+   simulates the purchase and grants the credits straight away, exactly like
+   every other "TODO" placeholder in CONFIG. Replace the click handler below
+   with a real checkout (Stripe Checkout, Paddle...) before taking payments;
+   Credits.grant(amount) is the one call a success webhook needs to make. */
+function openBuyCredits(onDone) {
+  openSheet({
+    title: 'Get more credits',
+    html: '<p>Credits unlock one level of a chapter, drill or lesson for good on this device, without a full membership. ' + CONFIG.credits.daily + ' free credit' + (CONFIG.credits.daily === 1 ? '' : 's') + ' every day, and purchased credits never expire.</p>' +
+      '<div class="btn-row" style="flex-direction:column;align-items:stretch">' + CONFIG.credits.packages.map((p) => '<button type="button" class="btn btn-ghost" data-buy="' + esc(p.id) + '">' + icon('coins') + ' ' + p.credits + ' credits — ' + esc(p.price) + '</button>').join('') + '</div>' +
+      '<p class="small muted" style="margin-top:10px">Simulated checkout: no payment is taken yet. A real processor needs to be connected before launch.</p>',
+    onMount(s) {
+      s.el.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-buy]');
+        if (!b) return;
+        const pkg = CONFIG.credits.packages.filter((p) => p.id === b.getAttribute('data-buy'))[0];
+        if (!pkg) return;
+        Credits.grant(pkg.credits);
+        toast('Added ' + pkg.credits + ' credits.', 'good');
+        s.close();
+        refreshChip();
+        if (onDone) setTimeout(onDone, 260); else rerender();
+      });
+    }
   });
 }
 function openLocked(item) { openLevelGate(item); }             // v3.9: every locked item opens the level gateway
@@ -7274,6 +7370,7 @@ function levelGateHTML(t, k, o) {
     (o.lead ? '<p class="st-brief">' + esc(o.lead) + '</p>' : '') + (it && it.idea && !o.noIdea ? '<p class="st-brief">' + esc(it.idea) + '</p>' : '') +
     '<div class="st-actions lv39-cta"><button type="button" class="btn btn-primary" data-lv-act="assistant">' + icon('comments') + ' ' + esc(T('up.botTitle')) + '</button>' +
       '<button type="button" class="btn btn-ghost" data-lv-act="key">' + icon('key') + ' I have a member key</button>' +
+      (it ? '<button type="button" class="btn btn-ghost" data-lv-act="credits">' + icon('coins') + ' Unlock just this level — ' + Credits.costOf(it) + ' credits (you have ' + Credits.balance() + ')</button>' : '') +
       (skool ? '<a class="btn btn-quiet" href="' + esc(skool) + '" target="_blank" rel="noopener noreferrer">' + icon('circle-play') + ' ' + esc(T('lv.skool')) + ' ↗</a>' : '') +
       (o.back ? '<button type="button" class="btn btn-quiet" data-lv-act="back">Back to Level ' + o.back + '</button>' : '') + '</div>' +
     '<p class="small muted lv39-fine">Level ' + k + ' is part of ' + esc(Levels.plan(Levels.required(it))) + '. The ELO on each level is advice, not a block: members open every level and move up when they are ready.</p></div>';
@@ -7301,6 +7398,11 @@ function levelAct(a, t, k, where) {
   if (!it) return;
   if (a === 'assistant') openLevelAssistant(t, k, where);
   else if (a === 'key') openUnlock(Levels.required(it) >= TOP_TIER ? 'mentor' : 'vault', (t.title || 'This topic') + ', ' + Levels.name(k));
+  else if (a === 'credits') {
+    const r = Credits.unlock(it);
+    if (r.ok) { toast(r.already ? 'Already unlocked.' : 'Unlocked with ' + r.cost + ' credits.', 'good'); refreshChip(); rerender(); }
+    else { toast('Not enough credits — ' + r.short + ' more needed.', 'bad'); openBuyCredits(() => { if (Credits.unlock(it).ok) { toast('Unlocked.', 'good'); } refreshChip(); rerender(); }); }
+  }
 }
 /* A locked item opened from a list, a coach tip or a link: the same gateway, as a sheet. */
 function openLevelGate(item) {
@@ -9236,7 +9338,9 @@ function refreshChip() {
   if (!chip) return;
   const days = App.streakDays(), tier = Admin.preview() || App.access.tier;
   const initials = App.profile.name ? App.profile.name.split(' ').map((w) => w.charAt(0)).join('').slice(0, 2).toUpperCase() : '';
+  const credBal = Credits.balance();
   chip.innerHTML = '<span class="chip-streak' + (days ? ' is-on' : '') + '" title="Days in a row">' + icon('fire') + '<span>' + days + '</span></span>' + V36.chipTrophy() +
+    (tier === 'free' || tier === 'community' ? '<span class="chip-streak" title="Credits: unlock one level without a membership">' + icon('coins') + '<span>' + credBal + '</span></span>' : '') +
     '<span class="chip-tier tier-' + tier + '">' + esc(TIERS[tier].label) + '</span><span class="chip-avatar">' + (initials ? esc(initials) : icon('user')) + '</span>';
   chip.setAttribute('aria-label', 'Your profile: ' + TIERS[tier].label + ' access, ' + days + '-day streak' + V36.chipLabel());
   const slot = qs('#admin-slot');
@@ -9253,6 +9357,8 @@ function openProfile() {
         '<div class="token-box">' + esc(token) + '</div><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-p="copy-token">' + icon('copy') + ' Copy token</button><button type="button" class="btn btn-ghost btn-sm" data-p="copy-brief">' + icon('clipboard') + ' Copy coach briefing</button></div></section>' +
       '<div class="divider"></div><section class="stack"><h3>Membership</h3><p class="small">' + (tier === 'free' ? 'Free access on this device.' : '<strong>' + TIERS[tier].label + '</strong> access' + (App.access.verifiedAt ? ', verified on ' + esc(fmtDate(App.access.verifiedAt)) : '') + '.') + '</p>' +
         tokenFormHTML('profile') + (tier !== 'free' ? '<button type="button" class="btn btn-quiet btn-sm" data-p="signout" style="justify-self:start">Remove membership from this device</button>' : '') + '</section>' +
+      (tier === 'free' || tier === 'community' ? '<div class="divider"></div><section class="stack"><h3>Credits</h3><p class="small">' + Credits.balance() + ' credit' + (Credits.balance() === 1 ? '' : 's') + ' on this device' + (App.unlocks.length ? ', ' + App.unlocks.length + ' level' + (App.unlocks.length === 1 ? '' : 's') + ' unlocked with them' : '') + '. ' + CONFIG.credits.daily + ' free every day; unlock a locked level from its Level gate any time.</p>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-p="buy-credits" style="justify-self:start">' + icon('coins') + ' Get more credits</button></section>' : '') +
       '<div class="divider"></div><section class="stack"><h3>Settings</h3><label class="switch-row"><span>Sounds</span><input type="checkbox" data-p="sound"' + (App.settings.sound ? ' checked' : '') + '></label>' + V36.settingsHTML() +
         (installPrompt ? '<button type="button" class="btn btn-ghost btn-sm" data-p="install" style="justify-self:start">' + icon('download') + ' Install the app</button>' : '') +
         '<button type="button" class="btn btn-quiet btn-sm" data-p="reset" style="justify-self:start">' + icon('rotate') + ' Reset my progress</button></section>' +
@@ -9270,6 +9376,7 @@ function openProfile() {
         else if (act === 'copy-brief') copyText(coachBriefing()).then((ok) => toast(ok ? 'Coach briefing copied.' : 'Copy failed.', ok ? 'good' : 'bad'));
         else if (act === 'edit') { s.close(); setTimeout(() => openOnboarding(false), 230); }
         else if (act === 'signout') { if (await confirmSheet('Remove membership?', 'This device goes back to free access. Your progress stays.', 'Remove')) { Access.signOut(); refreshChip(); s.close(); rerender(); } }
+        else if (act === 'buy-credits') { s.close(); setTimeout(openBuyCredits, 260); }
         else if (act === 'install' && installPrompt) { installPrompt.prompt(); installPrompt = null; s.close(); }
         else if (act === 'reset') {
           if (await confirmSheet('Reset your progress?', 'Accuracy, streaks, drill progress, badges and saved mistakes on this device go back to zero. Your profile and membership stay.', 'Reset')) {
