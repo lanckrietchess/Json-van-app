@@ -1228,6 +1228,10 @@ a.cc-frame:hover{border-color:var(--accent)}
 .ctx-menu button.is-danger{color:var(--miss)}
 .ctx-menu hr{border:0;border-top:1px solid var(--hair);margin:4px 2px}
 .lv39-tree-slot{margin-top:8px;padding:10px;border:1px solid var(--hair);border-radius:10px;max-height:320px;overflow:auto}
+.board-tree-pane{margin-top:10px;padding:12px;border:1px solid var(--hair);border-radius:12px;background:var(--surface);max-height:360px;overflow:auto}
+.te-mv-btn{background:none;border:0;padding:0;font:inherit;cursor:pointer;color:inherit}
+.te-row.is-cur .te-mv-btn .te-mv{color:var(--accent);text-decoration:underline}
+.te-row.is-cur{background:var(--ink-2);border-radius:6px}
 /* v3.7: chapters straight from the data file */
 .chip-n{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--ink-2);border:1px solid var(--hair);color:var(--fog);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"] .chip-n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -4482,7 +4486,7 @@ const CMS = (() => {
           row('avatar', 'camera', 'Profile image', 'Your Chess.com picture on the About page') +
           row('editor', 'chess-board', 'Board editor', 'Build any position by hand, then save it as a drill') +
           row('treeimport', 'diagram-project', 'Import ChessTempo trees', Trees.count() + ' tree chapters live; a ChessTempo export becomes chapters, every branch kept') +
-          row('treeedit', 'sitemap', 'Opening Tree Editor', 'Inspect the branches of a chapter and prune redundant alternates') + '</div>' +
+          row('treeedit', 'sitemap', 'Opening Tree Editor', 'Opens live under the board in Explore mode — pick a chapter to jump there') + '</div>' +
         '<div class="menu-rows">' + row('copy', 'font', 'Texts', 'Headlines and paragraphs on every page') + row('settings', 'sliders', 'Numbers and links', 'Peak rating, percentile, fast track, Skool, socials') + '</div>' +
         '<div class="menu-rows">' + Object.keys(Site.LISTS).map((n) => row('list:' + n, 'list', Site.LISTS[n][0], Site.LISTS[n][1] + ', ' + (getPath(CONTENT, n) || []).length + ' items')).join('') + '</div>' +
         '<div class="menu-rows">' + row('keys', 'key', 'Member keys', Site.keys().length + (Site.keys().length === 1 ? ' key' : ' keys')) + row('sync', 'rotate', 'Live data (GitHub)', syncSub()) + row('publish', 'cloud-arrow-up', 'Publish', dirty ? 'Send your draft to GitHub' : 'Up to date') + row('data', 'database', 'Data management & backups', 'Export or import the whole database as JSON') + '</div>' +
@@ -4524,7 +4528,7 @@ const CMS = (() => {
             else if (m === 'lb') V33.boardAdmin();
             else if (m === 'editor') boardEditor({});
             else if (m === 'treeimport') TreeImport.open();
-            else if (m === 'treeedit') TreeEditor.open();
+            else if (m === 'treeedit') TreeEditor.pick();
             else if (m === 'signout') { Admin.signOut(); refreshChip(); rerender(); toast('Signed out of admin mode.'); }
             else if (m.indexOf('list:') === 0) listSheet(m.slice(5));
           });
@@ -6723,7 +6727,8 @@ function trainerShell(boardId, panelId, opts) {
   return '<div class="trainer"><div class="board-col"><div class="board-shell">' +
     (opts.eval ? '<div class="evalbar" id="' + boardId + '-eval" hidden><div class="evalfill"></div></div>' : '') +
     '<div id="' + boardId + '" class="board-host"></div></div><div class="board-tools"><div class="hud36" data-hud36 hidden aria-live="off"></div>' + (opts.tools || '') +
-    '<button type="button" class="icon-btn" data-flip="' + boardId + '" aria-label="Flip board" title="Flip board">' + icon('retweet') + '</button></div></div>' +
+    '<button type="button" class="icon-btn" data-flip="' + boardId + '" aria-label="Flip board" title="Flip board">' + icon('retweet') + '</button></div>' +
+    '<div class="board-tree-pane" id="' + boardId + '-tree" hidden></div></div>' +
     '<div class="trainer-panel panel" id="' + panelId + '"></div></div>';
 }
 function scrollToEl(el) {
@@ -7623,6 +7628,44 @@ function chapterTreeHTML(chapterId) {
   if (!t || !t.root || !t.root.kids || !t.root.kids.length) return '<p class="small muted" style="padding:8px 2px">No tree data for this chapter.</p>';
   return '<ul class="te-tree">' + t.root.kids.map((k, i) => prepTreeHTML(k, i === 0)).join('') + '</ul>';
 }
+/* v4.3: the same read-only branch view as chapterTreeHTML, but mounted
+   under a live board (board-tree-pane, from trainerShell) so a click on a
+   move updates that board instantly, Chess Tempo style. Every player gets
+   this in Explore mode of a tree chapter; treeTrainScreen swaps it for
+   TreeEditor.mount()'s editable version when Admin.active. */
+function mountChapterTreeView(host, chapterId, board) {
+  const info = Trees.info(chapterId);
+  if (!info || !info.root || !info.root.kids || !info.root.kids.length) { host.hidden = true; return { destroy() { host.hidden = true; host.innerHTML = ''; } }; }
+  let curPath = '';
+  function fenOf(n) {
+    const g = new Chess(), sans = [];
+    for (let x = n; x && x.parent; x = x.parent) sans.unshift(x.san);
+    sans.forEach((s) => g.move(s, { sloppy: true }));
+    return g.fen();
+  }
+  function nodeHTML(node, isMain) {
+    const kids = node.kids || [];
+    return '<li><div class="te-row' + (node.path === curPath ? ' is-cur' : '') + '"><button type="button" class="te-mv-btn" data-rt-jump="' + esc(node.path) + '"><span class="te-mv">' + esc(node.san) + '</span></button>' +
+      (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
+      (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
+      (node.notes && node.notes.length ? '<span class="te-note" title="' + esc(node.notes.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') + '</div>' +
+      (kids.length ? '<ul>' + kids.map((k, i) => nodeHTML(k, i === 0)).join('') + '</ul>' : '') + '</li>';
+  }
+  function render() {
+    host.hidden = false;
+    host.innerHTML = '<p class="small muted">' + icon('sitemap') + ' <b>' + esc(info.title) + '</b>: click a move to see it on the board.</p>' +
+      '<ul class="te-tree">' + info.root.kids.map((k, i) => nodeHTML(k, i === 0)).join('') + '</ul>' +
+      '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-quiet btn-sm" data-rt="root">' + icon('house') + ' Start position</button></div>';
+  }
+  function onClick(e) {
+    const jumpBtn = e.target.closest('[data-rt-jump]');
+    if (jumpBtn) { curPath = jumpBtn.getAttribute('data-rt-jump'); const n = info.idx[curPath]; if (n) { board.setPosition(fenOf(n), { lastMove: null }); render(); } return; }
+    if (e.target.closest('[data-rt="root"]')) { curPath = ''; board.setPosition(START_FEN, { lastMove: null }); render(); }
+  }
+  host.addEventListener('click', onClick);
+  render();
+  return { destroy() { host.removeEventListener('click', onClick); host.hidden = true; host.innerHTML = ''; } };
+}
 function levelCardHTML(c, i) {
   const t = opTopic(c, i), n = LEVELS.filter((L) => Levels.has(t, L.n)).length, sug = Levels.suggest();
   const first = Levels.lead(t, 1) || c.lines[0], desc = (first && (first.idea || first.subtitle)) || '';
@@ -7745,8 +7788,8 @@ function trainScreen(body, group, go) {
     trainerShell('op-board', 'op-panel', { eval: true });
   const board = Board(qs('#op-board', body), { orientation: line.side === 'w' ? 'white' : 'black' });
   qs('[data-flip="op-board"]', body).addEventListener('click', () => board.flip());
-  const panel = qs('#op-panel', body), evalbar = qs('#op-board-eval', body), seg = qs('.seg', body), levelsHost = qs('#op-levels', body), veil = boardVeil(body, 'op-board');
-  let runner = null, explorer = null, curLearn = false;
+  const panel = qs('#op-panel', body), evalbar = qs('#op-board-eval', body), seg = qs('.seg', body), levelsHost = qs('#op-levels', body), veil = boardVeil(body, 'op-board'), treeHost = qs('#op-board-tree', body);
+  let runner = null, explorer = null, treePane = null, curLearn = false;
   const syncMode = () => {
     seg.classList.toggle('is-dim', !!gated);
     qsa('[data-mode]', body).forEach((b) => b.setAttribute('aria-pressed', String(!gated && b.getAttribute('data-mode') === ui.mode)));
@@ -7785,6 +7828,7 @@ function trainScreen(body, group, go) {
   function stopAll() {
     if (runner) { runner.destroy(); runner = null; }
     if (explorer) { explorer.destroy(); explorer = null; }
+    if (treePane) { treePane.destroy(); treePane = null; }
     evalbar.hidden = true;
     board.setOnMove(null); board.setTapMode(null); board.setInteractive(null); board.clearMarks(); board.setArrows([]);
   }
@@ -7795,6 +7839,7 @@ function trainScreen(body, group, go) {
     syncMode(); renderLevels();
     qs('#op-title', body).textContent = topic ? topic.title : l.title;
     if (explorer) { explorer.destroy(); explorer = null; }
+    if (treePane) { treePane.destroy(); treePane = null; }
     evalbar.hidden = true;
     if (runner) runner.destroy();
     runner = LineRunner({ board, moves: l.moves, side: l.side, ann: l.ann, section: 'openings', id: l.id, title: group.name + ': ' + l.title, learn: !!learn, silent: isStatic(l), onUpdate: drillPanel });
@@ -7842,9 +7887,14 @@ function trainScreen(body, group, go) {
     syncMode(); renderLevels();
     if (runner) { runner.destroy(); runner = null; }
     if (explorer) explorer.destroy();
+    if (treePane) { treePane.destroy(); treePane = null; }
     board.orientation(group.side === 'w' ? 'white' : 'black');
     const lines = topic ? Levels.cut(topic, sel) : group.lines;              // v3.9: the tree stops where the level stops
     explorer = Explorer({ board, panel, group: Object.assign({}, group, { lines }), evalbar, onDrill: (l) => { set = topic ? lines : set; startDrill(l, false); } });
+    /* v4.3: My repertoire gets the same persistent, editable branch pane
+       under the board as the course chapters (TreeEditor.mount) — right-click
+       Delete / Promote / Add, but free to use (own data) and auto-saved. */
+    if (group.custom && group.rep && treeHost) treePane = mountRepTreeView(treeHost, group.rep.id, board, startExplore);
   }
   function nextChapter() {
     const c2 = chs[ci + 1];
@@ -7982,8 +8032,7 @@ function mineScreen(body, go) {
     (App.can('customLines') ? '' : '<p class="small dim" style="margin-bottom:12px">' + total + ' of ' + CONFIG.limits.freeCustomLines + ' free lines used. Members have no limit.</p>') +
     (reps.length ? '<div class="rows">' + reps.map((r) => '<div class="row" style="flex-wrap:wrap"><span class="side-dot ' + r.side + '"></span><span class="row-main"><span class="row-title">' + esc(r.name) + '</span><span class="row-sub">' +
         r.lines.length + (r.lines.length === 1 ? ' line' : ' lines') + ', you play ' + colorName(r.side) + '</span></span><span class="rep-actions" style="margin-left:auto">' +
-        '<button type="button" class="btn btn-primary btn-sm" data-act="drill" data-id="' + esc(r.id) + '">Drill</button><button type="button" class="btn btn-ghost btn-sm" data-act="explore" data-id="' + esc(r.id) + '">Explore</button>' +
-        '<button type="button" class="btn btn-ghost btn-sm" data-act="tree" data-id="' + esc(r.id) + '">' + icon('sitemap') + ' Tree</button>' +
+        '<button type="button" class="btn btn-primary btn-sm" data-act="drill" data-id="' + esc(r.id) + '">Drill</button><button type="button" class="btn btn-ghost btn-sm" data-act="explore" data-id="' + esc(r.id) + '">' + icon('sitemap') + ' Explore / tree</button>' +
         '<button type="button" class="icon-btn" data-act="export" data-id="' + esc(r.id) + '" aria-label="Export PGN" title="Export PGN">' + icon('download') + '</button><button type="button" class="icon-btn" data-act="delete" data-id="' + esc(r.id) + '" aria-label="Delete" title="Delete">' + icon('trash') + '</button></span></div>').join('') +
         '</div><div class="btn-row" style="margin-top:12px"><button type="button" class="btn btn-quiet btn-sm" data-act="clear">' + icon('trash-can') + ' Clear all</button></div>'
       : '<div class="panel pad"><p class="muted">No lines saved yet. Record your first line or paste a PGN.</p></div>');
@@ -7996,7 +8045,6 @@ function mineScreen(body, go) {
     else if (act === 'import') go({ screen: 'import' });
     else if (act === 'drill' && rep) go({ screen: 'train', repId: rep.id, lineId: weakest(customGroup(rep).lines).id, mode: 'drill' });
     else if (act === 'explore' && rep) go({ screen: 'train', repId: rep.id, lineId: 'custom:' + rep.id + ':0', mode: 'explore' });
-    else if (act === 'tree' && rep) myRepTreeSheet(rep.id, go);
     else if (act === 'export' && rep) {
       const pgn = PGN.fromLines(rep.lines, { Event: rep.name, White: rep.side === 'w' ? 'Me' : '?', Black: rep.side === 'b' ? 'Me' : '?', Annotator: 'lanckrietchess Training Hub' });
       download((rep.name.replace(/[^\w-]+/g, '_') || 'repertoire') + '.pgn', pgn, 'application/x-chess-pgn');
@@ -8046,93 +8094,93 @@ function repPromoteAtPath(lines, path) {
   lines.forEach((l) => ((l.length >= path.length && l.slice(0, path.length).join(' ') === key) ? matches : rest).push(l));
   return matches.concat(rest);
 }
-function myRepTreeSheet(repId, listGo) {
+/* v4.3: no more modal here either. Exploring a custom repertoire
+   (customGroup, "My repertoire" > Explore) mounts this straight under the
+   board, next to Explorer's own candidate-move panel: the same three
+   actions as the course chapters, but free to use (own data, own device)
+   and auto-saved on every edit, since there is no separate "Publish" step
+   for a student's own lines the way there is for the master curriculum. A
+   change re-mounts everything (onChange) so Explorer's candidate list and
+   this pane never drift out of sync with Repertoire's storage. */
+function mountRepTreeView(host, repId, board, onChange) {
   const rep = Repertoire.list().filter((r) => r.id === repId)[0];
-  if (!rep) return;
-  let lines = rep.lines.map((l) => l.slice()), dirty = false;
+  if (!rep) { host.hidden = true; return { destroy() { host.hidden = true; host.innerHTML = ''; } }; }
+  let lines = rep.lines.map((l) => l.slice()), curKey = '';
+  function fenOf(sans) { const g = new Chess(); sans.forEach((s) => g.move(s, { sloppy: true })); return g.fen(); }
   function nodeHTML(node, path, isMain) {
-    const p = path.concat([node.m]), pj = esc(JSON.stringify(p));
-    return '<li><div class="te-row" data-rt-path="' + pj + '"><span class="te-mv">' + esc(node.m) + '</span>' +
+    const p = path.concat([node.m]), pj = esc(JSON.stringify(p)), key = p.join(' ');
+    return '<li><div class="te-row' + (key === curKey ? ' is-cur' : '') + '" data-rp-path="' + pj + '"><button type="button" class="te-mv-btn" data-rp-jump="' + pj + '"><span class="te-mv">' + esc(node.m) + '</span></button>' +
       (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
-      '<button type="button" class="icon-btn te-menu-btn" data-rt-menu="' + pj + '" aria-label="Actions for ' + esc(node.m) + '">' + icon('ellipsis-vertical') + '</button></div>' +
+      '<button type="button" class="icon-btn te-menu-btn" data-rp-menu="' + pj + '" aria-label="Actions for ' + esc(node.m) + '">' + icon('ellipsis-vertical') + '</button></div>' +
       (node.c.length ? '<ul>' + node.c.map((k, i) => nodeHTML(k, p, i === 0)).join('') + '</ul>' : '') + '</li>';
   }
-  const treeHTML = () => { const trie = repBuildTrie(lines); return trie.length ? '<ul class="te-tree" id="rt-tree">' + trie.map((n, i) => nodeHTML(n, [], i === 0)).join('') + '</ul>' : '<p class="muted" id="rt-tree">No lines yet. Add your first move.</p>'; };
-  const metaHTML = () => '<p class="small muted" id="rt-meta">' + lines.length + ' line' + (lines.length === 1 ? '' : 's') + (dirty ? ', unsaved changes' : '') + '.</p>';
-  openSheet({
-    title: rep.name + ': tree', noFocus: true,
-    html: '<p class="small muted">Right-click a move, or tap ' + icon('ellipsis-vertical') + ', to delete it, promote it to the main line, or add a move after it. Save writes it back to this repertoire.</p>' +
-      metaHTML() + treeHTML() +
-      '<div class="btn-row" style="margin-top:14px"><button type="button" class="btn btn-ghost btn-sm" data-rt="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-primary btn-sm" data-rt="save">' + icon('floppy-disk') + ' Save</button></div>',
-    onMount(s) {
-      function paint() {
-        const meta = qs('#rt-meta', s.el), body = qs('#rt-tree', s.el);
-        if (meta) meta.outerHTML = metaHTML();
-        if (body) body.outerHTML = treeHTML();
-      }
-      function doDelete(path) {
-        const key = path.join(' '), n = lines.filter((l) => l.length >= path.length && l.slice(0, path.length).join(' ') === key).length;
-        confirmSheet('Delete this move?', '“' + path[path.length - 1] + '” is removed, and with it ' + n + ' line' + (n === 1 ? '' : 's') + (path.length === 1 ? ' — your whole repertoire' : '') + '.', 'Delete').then((ok) => {
-          if (!ok) return;
-          lines = repDeleteAtPath(lines, path);
-          dirty = true;
-          paint();
-        });
-      }
-      function doPromote(path) {
-        lines = repPromoteAtPath(lines, path);
-        dirty = true;
-        paint();
-        toast('Promoted to the main line.', 'good');
-      }
-      function doAdd(path) {
-        const g = new Chess();
-        for (const san of path) if (!g.move(san, { sloppy: true })) { toast('That line has an illegal move.', 'bad'); return; }
-        const input = window.prompt('Add a move after ' + (path.length ? path[path.length - 1] : 'the start') + ' (SAN, e.g. Nf3):');
-        if (!input) return;
-        const mv = g.move(input.trim(), { sloppy: true });
-        if (!mv) { toast('“' + input.trim() + '” is not legal there.', 'bad'); return; }
-        const already = lines.filter((l) => l.join(' ') === path.join(' '))[0];
-        if (already) { already.push(mv.san); dirty = true; paint(); toast('Added ' + mv.san + '.', 'good'); return; }
-        const otherTotal = Repertoire.list().reduce((n, r) => n + (r.id === repId ? 0 : r.lines.length), 0);
-        const cap = App.can('customLines') ? Infinity : CONFIG.limits.freeCustomLines;
-        if (otherTotal + lines.length >= cap) { toast('Free limit reached (' + CONFIG.limits.freeCustomLines + ' lines).', 'bad'); openUnlock(gateLevel('customLines'), 'Unlimited custom lines'); return; }
-        lines.push(path.concat([mv.san]));
-        dirty = true;
-        paint();
-        toast('Added ' + mv.san + '.', 'good');
-      }
-      function menuFor(path, x, y) {
-        openContextMenu(x, y, [
-          { label: 'Add a move after ' + path[path.length - 1], icon: 'plus', run: () => doAdd(path) },
-          { label: 'Promote to main line', icon: 'star', run: () => doPromote(path) },
-          { sep: true },
-          { label: 'Delete this move', icon: 'trash', danger: true, run: () => doDelete(path) }
-        ]);
-      }
-      s.el.addEventListener('click', async (e) => {
-        const menuBtn = e.target.closest('[data-rt-menu]');
-        if (menuBtn) { const r = menuBtn.getBoundingClientRect(); menuFor(JSON.parse(menuBtn.getAttribute('data-rt-menu')), r.left, r.bottom + 4); return; }
-        if (e.target.closest('[data-rt="add-root"]')) { doAdd([]); return; }
-        if (e.target.closest('[data-rt="save"]')) {
-          if (!lines.length && !(await confirmSheet('Save with no lines?', 'This repertoire has no lines left, so saving removes it.', 'Remove it'))) return;
-          const list = Repertoire.list(), r = list.filter((x) => x.id === repId)[0];
-          if (!r) { s.close(); return; }
-          if (lines.length) { r.lines = lines; Repertoire.save(list); } else Repertoire.remove(repId);
-          dirty = false;
-          toast('Saved.', 'good');
-          s.close();
-          listGo({});
-        }
-      });
-      s.el.addEventListener('contextmenu', (e) => {
-        const row = e.target.closest('[data-rt-path]');
-        if (!row) return;
-        e.preventDefault();
-        menuFor(JSON.parse(row.getAttribute('data-rt-path')), e.clientX, e.clientY);
-      });
-    }
-  });
+  function render() {
+    host.hidden = false;
+    const trie = repBuildTrie(lines);
+    host.innerHTML = '<p class="small muted">' + icon('sitemap') + ' <b>' + esc(rep.name) + '</b>: click a move to see it on the board; right-click, or ' + icon('ellipsis-vertical') + ', to edit. ' + lines.length + ' line' + (lines.length === 1 ? '' : 's') + '.</p>' +
+      (trie.length ? '<ul class="te-tree">' + trie.map((n, i) => nodeHTML(n, [], i === 0)).join('') + '</ul>' : '<p class="muted">No lines yet.</p>') +
+      '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-rp="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-rp="root">' + icon('house') + ' Start position</button></div>';
+  }
+  function persist() {
+    const list = Repertoire.list(), r = list.filter((x) => x.id === repId)[0];
+    if (!r) return;
+    if (lines.length) { r.lines = lines; Repertoire.save(list); } else Repertoire.remove(repId);
+  }
+  function jump(path) { curKey = path.join(' '); board.setPosition(fenOf(path), { lastMove: null }); render(); }
+  function doDelete(path) {
+    const key = path.join(' '), n = lines.filter((l) => l.length >= path.length && l.slice(0, path.length).join(' ') === key).length;
+    confirmSheet('Delete this move?', '“' + path[path.length - 1] + '” is removed, and with it ' + n + ' line' + (n === 1 ? '' : 's') + (path.length === 1 ? ' — your whole repertoire' : '') + '.', 'Delete').then((ok) => {
+      if (!ok) return;
+      lines = repDeleteAtPath(lines, path);
+      persist();
+      toast('Deleted.', 'good');
+      onChange();
+    });
+  }
+  function doPromote(path) { lines = repPromoteAtPath(lines, path); persist(); toast('Promoted to the main line.', 'good'); onChange(); }
+  function doAdd(path) {
+    const g = new Chess();
+    for (const san of path) if (!g.move(san, { sloppy: true })) { toast('That line has an illegal move.', 'bad'); return; }
+    const input = window.prompt('Add a move after ' + (path.length ? path[path.length - 1] : 'the start') + ' (SAN, e.g. Nf3):');
+    if (!input) return;
+    const mv = g.move(input.trim(), { sloppy: true });
+    if (!mv) { toast('“' + input.trim() + '” is not legal there.', 'bad'); return; }
+    const already = lines.filter((l) => l.join(' ') === path.join(' '))[0];
+    if (already) { already.push(mv.san); persist(); toast('Added ' + mv.san + '.', 'good'); onChange(); return; }
+    const otherTotal = Repertoire.list().reduce((n, r) => n + (r.id === repId ? 0 : r.lines.length), 0);
+    const cap = App.can('customLines') ? Infinity : CONFIG.limits.freeCustomLines;
+    if (otherTotal + lines.length >= cap) { toast('Free limit reached (' + CONFIG.limits.freeCustomLines + ' lines).', 'bad'); openUnlock(gateLevel('customLines'), 'Unlimited custom lines'); return; }
+    lines.push(path.concat([mv.san]));
+    persist();
+    toast('Added ' + mv.san + '.', 'good');
+    onChange();
+  }
+  function menuFor(path, x, y) {
+    openContextMenu(x, y, [
+      { label: 'Add a move after ' + path[path.length - 1], icon: 'plus', run: () => doAdd(path) },
+      { label: 'Promote to main line', icon: 'star', run: () => doPromote(path) },
+      { sep: true },
+      { label: 'Delete this move', icon: 'trash', danger: true, run: () => doDelete(path) }
+    ]);
+  }
+  function onClick(e) {
+    const jumpBtn = e.target.closest('[data-rp-jump]');
+    if (jumpBtn) { jump(JSON.parse(jumpBtn.getAttribute('data-rp-jump'))); return; }
+    const menuBtn = e.target.closest('[data-rp-menu]');
+    if (menuBtn) { const r = menuBtn.getBoundingClientRect(); menuFor(JSON.parse(menuBtn.getAttribute('data-rp-menu')), r.left, r.bottom + 4); return; }
+    if (e.target.closest('[data-rp="add-root"]')) { doAdd([]); return; }
+    if (e.target.closest('[data-rp="root"]')) { jump([]); return; }
+  }
+  function onCtx(e) {
+    const row = e.target.closest('[data-rp-path]');
+    if (!row) return;
+    e.preventDefault();
+    menuFor(JSON.parse(row.getAttribute('data-rp-path')), e.clientX, e.clientY);
+  }
+  host.addEventListener('click', onClick);
+  host.addEventListener('contextmenu', onCtx);
+  render();
+  return { destroy() { host.removeEventListener('click', onClick); host.removeEventListener('contextmenu', onCtx); host.hidden = true; host.innerHTML = ''; } };
 }
 function recordScreen(body, go) {
   body.innerHTML = backBar('My repertoire', 'Record a line') + trainerShell('rec-board', 'rec-panel');
@@ -15934,7 +15982,8 @@ function treeTrainScreen(body, group, go, line0) {
   let sel = (ui.lvLine === line0.id && Levels.num(ui.lv)) || Levels.of(line0);
   let scope = ui.scope === 'chapter' ? 'chapter' : 'line';
   let mode = ui.mode === 'explore' ? 'explore' : ui.mode === 'learn' ? 'learn' : 'drill';
-  let T = null, L = null, li = 0, runner = null, explorer = null, gated = 0, lastOpen = 0, finishedLine = false, chapterDone = false;
+  let T = null, L = null, li = 0, runner = null, explorer = null, treePane = null, gated = 0, lastOpen = 0, finishedLine = false, chapterDone = false;
+  const treeHost = () => qs('#op-board-tree', body);
   let wantPath = line0.treePath;
   body.innerHTML = backBar('All chapters', esc(group.name) + ' › <strong id="op-title">' + esc(info.title) + '</strong>') +
     '<div class="lv39" id="op-levels"></div>' +
@@ -16028,6 +16077,7 @@ function treeTrainScreen(body, group, go, line0) {
   function stopAll() {
     if (runner) { runner.destroy(); runner = null; }
     if (explorer) { explorer.destroy(); explorer = null; }
+    if (treePane) { treePane.destroy(); treePane = null; }
     evalbar.hidden = true;
     board.setOnMove(null); board.setTapMode(null); board.setInteractive(null); board.clearMarks(); board.setArrows([]);
   }
@@ -16045,11 +16095,26 @@ function treeTrainScreen(body, group, go, line0) {
       onChapterDone: () => { chapterDone = true; } });
     runner.start();
   }
+  /* v4.3: the persistent, board-linked branch pane under the board, Chess
+     Tempo style — no modal. Admin gets the live, editable one (right-click /
+     ⋮ for Delete, Promote, Add, Export JSON with its backup); every other
+     player still gets the same pane, read-only, since browsing the whole
+     tree at a glance is useful on its own and this chapter is public course
+     content either way. */
   function startExplore() {
     mode = 'explore'; ungate(); syncSeg(); renderLevels(); renderNav();
     board.orientation(info.side === 'w' ? 'white' : 'black');
     const lines = Levels.cut(topic, sel);
     explorer = Explorer({ board, panel, group: Object.assign({}, group, { lines }), evalbar, onDrill: (l) => { const i = L.ids.indexOf(l.id); if (i >= 0) li = i; mode = 'drill'; scope = 'line'; run(); } });
+    const host = treeHost();
+    if (host) {
+      if (Admin.active) {
+        const d = Admin.ensureDraft(), entry = (d.trees || []).filter((x) => x.id === info.id)[0];
+        if (entry) treePane = TreeEditor.mount(host, entry, (fen) => board.setPosition(fen, { lastMove: null }));
+      } else {
+        treePane = mountChapterTreeView(host, info.id, board);
+      }
+    }
   }
   function showGate(k) {
     gated = k; stopAll();
@@ -16327,121 +16392,143 @@ const TreeEditor = (() => {
     for (const i of idx) { const node = arr[i]; if (!node) break; sans.push(node.m); arr = node.c || []; }
     return sans;
   }
-  function open(chapterId) {
-    const d = Admin.ensureDraft();
-    const trees = Array.isArray(d.trees) ? d.trees : [];
-    if (!chapterId) {
-      openSheet({
-        title: 'Opening Tree Editor', noFocus: true,
-        html: '<p class="small muted">Inspect a chapter’s move tree, delete a redundant branch (tap ' + icon('trash') + ' or right-click a move), then Export JSON to save it to your draft. Nothing here reaches GitHub until you Publish.</p>' +
-          (trees.length ? '<div class="menu-rows">' + trees.map((t) => '<button type="button" data-te-open="' + esc(t.id) + '"><span>' + esc(t.title) + '<small>' + esc(t.group || 'Chapters') + ', ' + countNodes(t.tree) + ' moves, ' + countLeaves(t.tree) + ' lines</small></span>' + icon('chevron-right') + '</button>').join('') + '</div>'
-            : '<p class="muted">No tree chapters in your draft yet. Import one first (Admin menu > Import ChessTempo trees).</p>'),
-        onMount(s) {
-          s.el.addEventListener('click', (e) => {
-            const b = e.target.closest('[data-te-open]');
-            if (b) { s.close(); setTimeout(() => open(b.getAttribute('data-te-open')), 240); }
-          });
-        }
-      });
-      return;
-    }
-    const t = trees.filter((x) => x.id === chapterId)[0];
-    if (!t) { open(); return; }
-    const original = clone(t.tree);
-    let tree = clone(t.tree), dirty = false;
-    function nodeHTML(node, path, isMain) {
-      const kids = Array.isArray(node.c) ? node.c : [];
-      return '<li data-te-path="' + esc(path) + '"><div class="te-row" data-te-path="' + esc(path) + '"><span class="te-mv">' + esc(node.m) + '</span>' +
-        (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
-        (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
-        (node.n && node.n.length ? '<span class="te-note" title="' + esc(node.n.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') +
-        '<button type="button" class="icon-btn te-menu-btn" data-te-menu="' + esc(path) + '" aria-label="Actions for ' + esc(node.m) + '" title="Right-click also opens this menu">' + icon('ellipsis-vertical') + '</button></div>' +
-        (kids.length ? '<ul>' + kids.map((k, i) => nodeHTML(k, path + '.' + i, i === 0)).join('') + '</ul>' : '') + '</li>';
-    }
-    const treeHTML = () => '<ul class="te-tree" id="te-tree">' + tree.map((n, i) => nodeHTML(n, String(i), i === 0)).join('') + '</ul>';
-    const metaHTML = () => '<p class="small muted" id="te-meta">' + countNodes(tree) + ' moves, ' + countLeaves(tree) + ' lines' + (dirty ? ', unsaved changes' : '') + '.</p>';
+  /* v4.3: no more modal. Picking a chapter (Admin menu > Opening Tree Editor)
+     jumps straight to it in Theory > Openings, Explore mode, where mount()
+     below has already put a live, editable branch pane under the board
+     (board-tree-pane, from trainerShell). This function only ever lists
+     chapters and navigates; it never renders or edits a tree itself. */
+  function pick() {
+    const d = Admin.ensureDraft(), trees = Array.isArray(d.trees) ? d.trees : [];
+    if (!trees.length) { toast('No tree chapters in your draft yet. Import one first (Admin menu > Import ChessTempo trees).'); return; }
     openSheet({
-      title: t.title, noFocus: true,
-      html: '<div><button type="button" class="btn btn-quiet btn-sm" data-te-back>' + icon('chevron-left') + ' Opening Tree Editor</button></div>' +
-        '<p class="small muted">Right-click a move, or tap ' + icon('ellipsis-vertical') + ', to delete it, promote it to the main line (' + icon('star') + '), or add a move after it. This edits your admin draft only.</p>' +
-        metaHTML() + treeHTML() +
-        '<div class="btn-row" style="margin-top:14px"><button type="button" class="btn btn-ghost btn-sm" data-te="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button></div>',
+      title: 'Opening Tree Editor', noFocus: true,
+      html: '<p class="small muted">Pick a chapter. Its tree opens live, under the board, in Explore mode — right-click a move there, or tap ' + icon('ellipsis-vertical') + ', to edit it.</p>' +
+        '<div class="menu-rows">' + trees.map((t) => '<button type="button" data-te-pick="' + esc(t.id) + '"><span>' + esc(t.title) + '<small>' + esc(t.group || 'Chapters') + ', ' + countNodes(t.tree) + ' moves, ' + countLeaves(t.tree) + ' lines</small></span>' + icon('chevron-right') + '</button>').join('') + '</div>',
       onMount(s) {
-        function paint() {
-          const meta = qs('#te-meta', s.el), body = qs('#te-tree', s.el);
-          if (meta) meta.outerHTML = metaHTML();
-          if (body) body.outerHTML = treeHTML();
-        }
-        function doDelete(path) {
-          const node = nodeAt(tree, path);
-          if (!node) return;
-          const kids = countNodes(node.c || []);
-          confirmSheet('Delete this move?', '“' + node.m + '”' + (kids ? ' and ' + kids + ' move' + (kids === 1 ? '' : 's') + ' after it' : '') + ' are removed from this chapter. Export JSON keeps a backup before you save.', 'Delete').then((ok) => {
-            if (!ok) return;
-            removeAt(tree, path);
-            dirty = true;
-            paint();
-          });
-        }
-        function doPromote(path) {
-          if (!promoteAt(tree, path)) return;
-          dirty = true;
-          paint();
-          toast('Promoted to the main line.', 'good');
-        }
-        function doAdd(path) {
-          const sans = path ? sansAlongPath(tree, path) : [];
-          const g = new Chess();
-          for (const san of sans) if (!g.move(san, { sloppy: true })) { toast('That branch has an illegal move; fix it before adding here.', 'bad'); return; }
-          const input = window.prompt('Add a move after ' + (sans.length ? sans[sans.length - 1] : 'the start') + ' (SAN, e.g. Nf3):');
-          if (!input) return;
-          const mv = g.move(input.trim(), { sloppy: true });
-          if (!mv) { toast('“' + input.trim() + '” is not legal there.', 'bad'); return; }
-          if (path) { const node = nodeAt(tree, path); if (!node) return; node.c = node.c || []; node.c.push({ m: mv.san }); }
-          else tree.push({ m: mv.san });
-          dirty = true;
-          paint();
-          toast('Added ' + mv.san + '.', 'good');
-        }
-        function menuFor(path, x, y) {
-          const node = nodeAt(tree, path);
-          if (!node) return;
-          const idx = path.split('.').map(Number), isMain = idx[idx.length - 1] === 0;
-          openContextMenu(x, y, [
-            { label: 'Add a move after ' + node.m, icon: 'plus', run: () => doAdd(path) },
-            { label: isMain ? 'Already the main line' : 'Promote to main line', icon: 'star', run: () => doPromote(path) },
-            { sep: true },
-            { label: 'Delete this move and its branch', icon: 'trash', danger: true, run: () => doDelete(path) }
-          ]);
-        }
         s.el.addEventListener('click', (e) => {
-          if (e.target.closest('[data-te-back]')) { s.close(); setTimeout(open, 240); return; }
-          const menuBtn = e.target.closest('[data-te-menu]');
-          if (menuBtn) { const r = menuBtn.getBoundingClientRect(); menuFor(menuBtn.getAttribute('data-te-menu'), r.left, r.bottom + 4); return; }
-          if (e.target.closest('[data-te="add-root"]')) { doAdd(''); return; }
-          if (e.target.closest('[data-te="export"]')) {
-            confirmSheet('Export and save to your draft?', 'This downloads a safety backup of the chapter as it was before this session, then the edited chapter, then saves your changes into the admin draft. Nothing on GitHub changes until you Publish.', 'Export').then((ok) => {
-              if (!ok) return;
-              download('lanckrietchess-tree-backup-' + t.id + '-' + dayKey(new Date()) + '.json', JSON.stringify({ id: t.id, title: t.title, tree: original }, null, 2), 'application/json');
-              download('lanckrietchess-tree-' + t.id + '-' + dayKey(new Date()) + '.json', JSON.stringify({ id: t.id, title: t.title, tree }, null, 2), 'application/json');
-              t.tree = tree;
-              Admin.saveDraft(d);
-              dirty = false;
-              paint();
-              toast('Backup and export downloaded. Changes saved to your draft — Publish to make them live.', 'good');
-            });
-          }
-        });
-        s.el.addEventListener('contextmenu', (e) => {
-          const row = e.target.closest('[data-te-path]');
-          if (!row) return;
-          e.preventDefault();
-          menuFor(row.getAttribute('data-te-path'), e.clientX, e.clientY);
+          const b = e.target.closest('[data-te-pick]');
+          if (b) { s.close(); setTimeout(() => goToChapter(b.getAttribute('data-te-pick')), 240); }
         });
       }
     });
   }
-  return { open };
+  function goToChapter(chapterId) {
+    const info = Trees.info(chapterId);
+    if (!info) { toast('This chapter needs a Publish (or an admin preview refresh) before it can open here.', 'bad'); return; }
+    const l0 = Trees.lines().filter((l) => l.tree === chapterId)[0];
+    if (!l0) { toast('This chapter has no lines yet.', 'bad'); return; }
+    Object.assign(App.ui.op, { tab: info.group, screen: 'train', lineId: l0.id, lvLine: l0.id, mode: 'explore', exploreAll: false, only: false, picked: true });
+    location.hash = '#openings';
+    rerender();
+  }
+  /* The live, editable branch pane: mounted under the board in Explore mode
+     (Admin only — see treeTrainScreen), backed by the raw draft JSON, same
+     shape TreeData/RepTree read and write ({ m, c, n, g, ar, sq, l, x }).
+     Every edit is instant in memory and on screen; nothing reaches the admin
+     draft until Export JSON, which backs up the chapter as it stood before
+     this session first. onJump(fen) runs whenever a move is clicked, so the
+     caller's board follows along like any other line in this hub. */
+  function mount(host, t, onJump) {
+    const original = clone(t.tree);
+    let tree = clone(t.tree), dirty = false, curPath = '';
+    function fenAt(path) {
+      const g = new Chess();
+      (path ? sansAlongPath(tree, path) : []).forEach((san) => g.move(san, { sloppy: true }));
+      return g.fen();
+    }
+    function nodeHTML(node, path, isMain) {
+      const pe = esc(path);
+      return '<li data-te-path="' + pe + '"><div class="te-row' + (path === curPath ? ' is-cur' : '') + '" data-te-path="' + pe + '">' +
+        '<button type="button" class="te-mv-btn" data-te-jump="' + pe + '"><span class="te-mv">' + esc(node.m) + '</span></button>' +
+        (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
+        (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
+        (node.n && node.n.length ? '<span class="te-note" title="' + esc(node.n.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') +
+        '<button type="button" class="icon-btn te-menu-btn" data-te-menu="' + pe + '" aria-label="Actions for ' + esc(node.m) + '">' + icon('ellipsis-vertical') + '</button></div>' +
+        ((node.c || []).length ? '<ul>' + node.c.map((k, i) => nodeHTML(k, path + '.' + i, i === 0)).join('') + '</ul>' : '') + '</li>';
+    }
+    function render() {
+      host.hidden = false;
+      host.innerHTML = '<p class="small muted" id="te-meta">' + icon('sitemap') + ' <b>' + esc(t.title) + '</b> — ' + countNodes(tree) + ' moves, ' + countLeaves(tree) + ' lines' + (dirty ? ', unsaved changes' : '') + '. Click a move to see it on the board; right-click, or ' + icon('ellipsis-vertical') + ', to edit.</p>' +
+        '<ul class="te-tree" id="te-tree">' + tree.map((n, i) => nodeHTML(n, String(i), i === 0)).join('') + '</ul>' +
+        '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-te="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-te="root">' + icon('house') + ' Start position</button><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button></div>';
+    }
+    function jump(path) { curPath = path; onJump(fenAt(path)); render(); }
+    function doDelete(path) {
+      const node = nodeAt(tree, path);
+      if (!node) return;
+      const kids = countNodes(node.c || []);
+      confirmSheet('Delete this move?', '“' + node.m + '”' + (kids ? ' and ' + kids + ' move' + (kids === 1 ? '' : 's') + ' after it' : '') + ' are removed from this chapter. Export JSON keeps a backup before you save.', 'Delete').then((ok) => {
+        if (!ok) return;
+        removeAt(tree, path);
+        if (curPath === path || curPath.indexOf(path + '.') === 0) jump('');
+        dirty = true;
+        render();
+      });
+    }
+    function doPromote(path) {
+      if (!promoteAt(tree, path)) return;
+      dirty = true;
+      render();
+      toast('Promoted to the main line.', 'good');
+    }
+    function doAdd(path) {
+      const sans = path ? sansAlongPath(tree, path) : [];
+      const g = new Chess();
+      for (const san of sans) if (!g.move(san, { sloppy: true })) { toast('That branch has an illegal move; fix it before adding here.', 'bad'); return; }
+      const input = window.prompt('Add a move after ' + (sans.length ? sans[sans.length - 1] : 'the start') + ' (SAN, e.g. Nf3):');
+      if (!input) return;
+      const mv = g.move(input.trim(), { sloppy: true });
+      if (!mv) { toast('“' + input.trim() + '” is not legal there.', 'bad'); return; }
+      if (path) { const node = nodeAt(tree, path); if (!node) return; node.c = node.c || []; node.c.push({ m: mv.san }); }
+      else tree.push({ m: mv.san });
+      dirty = true;
+      render();
+      toast('Added ' + mv.san + '.', 'good');
+    }
+    function menuFor(path, x, y) {
+      const node = nodeAt(tree, path);
+      if (!node) return;
+      const idx = path.split('.').map(Number), isMain = idx[idx.length - 1] === 0;
+      openContextMenu(x, y, [
+        { label: 'Add a move after ' + node.m, icon: 'plus', run: () => doAdd(path) },
+        { label: isMain ? 'Already the main line' : 'Promote to main line', icon: 'star', run: () => doPromote(path) },
+        { sep: true },
+        { label: 'Delete this move and its branch', icon: 'trash', danger: true, run: () => doDelete(path) }
+      ]);
+    }
+    function onClick(e) {
+      const jumpBtn = e.target.closest('[data-te-jump]');
+      if (jumpBtn) { jump(jumpBtn.getAttribute('data-te-jump')); return; }
+      const menuBtn = e.target.closest('[data-te-menu]');
+      if (menuBtn) { const r = menuBtn.getBoundingClientRect(); menuFor(menuBtn.getAttribute('data-te-menu'), r.left, r.bottom + 4); return; }
+      if (e.target.closest('[data-te="add-root"]')) { doAdd(''); return; }
+      if (e.target.closest('[data-te="root"]')) { jump(''); return; }
+      if (e.target.closest('[data-te="export"]')) {
+        confirmSheet('Export and save to your draft?', 'This downloads a safety backup of the chapter as it was before this session, then the edited chapter, then saves your changes into the admin draft. Nothing on GitHub changes until you Publish.', 'Export').then((ok) => {
+          if (!ok) return;
+          const d = Admin.ensureDraft(), entry = (d.trees || []).filter((x) => x.id === t.id)[0];
+          download('lanckrietchess-tree-backup-' + t.id + '-' + dayKey(new Date()) + '.json', JSON.stringify({ id: t.id, title: t.title, tree: original }, null, 2), 'application/json');
+          download('lanckrietchess-tree-' + t.id + '-' + dayKey(new Date()) + '.json', JSON.stringify({ id: t.id, title: t.title, tree }, null, 2), 'application/json');
+          if (entry) entry.tree = tree;
+          Admin.saveDraft(d);
+          dirty = false;
+          render();
+          toast('Backup and export downloaded. Changes saved to your draft — Publish to make them live.', 'good');
+        });
+      }
+    }
+    function onCtx(e) {
+      const row = e.target.closest('[data-te-path]');
+      if (!row) return;
+      e.preventDefault();
+      menuFor(row.getAttribute('data-te-path'), e.clientX, e.clientY);
+    }
+    host.addEventListener('click', onClick);
+    host.addEventListener('contextmenu', onCtx);
+    render();
+    return { destroy() { host.removeEventListener('click', onClick); host.removeEventListener('contextmenu', onCtx); host.hidden = true; host.innerHTML = ''; } };
+  }
+  return { pick, mount };
 })();
 
 /* ==========================================================================
