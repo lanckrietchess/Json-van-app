@@ -1220,6 +1220,14 @@ a.cc-frame:hover{border-color:var(--accent)}
 .te-del{margin-left:auto;color:var(--dim);flex:0 0 auto}
 .te-del:hover{color:var(--miss)}
 .te-lvl{font-size:11px;color:var(--dim);border:1px solid var(--hair);border-radius:999px;padding:0 5px}
+.te-menu-btn{margin-left:auto;flex:0 0 auto;color:var(--dim)}
+.te-menu-btn:hover{color:var(--chalk)}
+.ctx-menu{position:fixed;z-index:1200;min-width:200px;background:var(--surface);border:1px solid var(--hair);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.4);padding:6px;display:flex;flex-direction:column}
+.ctx-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;background:none;border:0;border-radius:8px;font-size:14px;font-family:inherit;color:var(--chalk);cursor:pointer}
+.ctx-menu button:hover,.ctx-menu button:focus-visible{background:var(--ink-2)}
+.ctx-menu button.is-danger{color:var(--miss)}
+.ctx-menu hr{border:0;border-top:1px solid var(--hair);margin:4px 2px}
+.lv39-tree-slot{margin-top:8px;padding:10px;border:1px solid var(--hair);border-radius:10px;max-height:320px;overflow:auto}
 /* v3.7: chapters straight from the data file */
 .chip-n{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--ink-2);border:1px solid var(--hair);color:var(--fog);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"] .chip-n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -2682,6 +2690,39 @@ function toast(message, kind) {
   document.body.appendChild(el);
   requestAnimationFrame(() => el.classList.add('is-in'));
   setTimeout(() => { el.classList.remove('is-in'); setTimeout(() => el.remove(), 260); }, 2800);
+}
+/* v4.2: a small right-click / tap context menu, shared by every editable move
+   tree (the admin Opening Tree Editor and My Repertoire). One at a time. */
+let CTX_MENU = null;
+function closeContextMenu() {
+  if (!CTX_MENU) return;
+  CTX_MENU.remove(); CTX_MENU = null;
+  document.removeEventListener('click', closeContextMenu, true);
+  document.removeEventListener('keydown', ctxMenuEsc, true);
+}
+function ctxMenuEsc(e) { if (e.key === 'Escape') closeContextMenu(); }
+function openContextMenu(x, y, items) {
+  closeContextMenu();
+  const el = document.createElement('div');
+  el.className = 'ctx-menu';
+  el.setAttribute('role', 'menu');
+  el.innerHTML = items.map((it, i) => it.sep ? '<hr>' : '<button type="button" role="menuitem" data-ctx="' + i + '"' + (it.danger ? ' class="is-danger"' : '') + '>' + (it.icon ? icon(it.icon) : '') + '<span>' + esc(it.label) + '</span></button>').join('');
+  document.body.appendChild(el);
+  const vw = window.innerWidth, vh = window.innerHeight, r = el.getBoundingClientRect();
+  el.style.left = Math.max(6, Math.min(x, vw - r.width - 6)) + 'px';
+  el.style.top = Math.max(6, Math.min(y, vh - r.height - 6)) + 'px';
+  CTX_MENU = el;
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ctx]');
+    if (!b) return;
+    const it = items[+b.getAttribute('data-ctx')];
+    closeContextMenu();
+    if (it && it.run) it.run();
+  });
+  setTimeout(() => {
+    document.addEventListener('click', closeContextMenu, true);
+    document.addEventListener('keydown', ctxMenuEsc, true);
+  }, 0);
 }
 function openSheet(opts) {
   const wrap = document.createElement('div');
@@ -7563,12 +7604,33 @@ function opTopic(c, i) {
 }
 const maxMove = (lines) => Math.max.apply(null, [0].concat((lines || []).map((l) => Math.ceil(Levels.movesOf(l).length / 2))));
 /* The list: one card per chapter, with the five levels on it. */
+/* v4.2: a read-only branch diagram of a tree chapter (Trees.info, the prepped
+   walkable format), for "View the tree" under a chapter card. Editing a
+   published chapter's tree stays in the Admin > Opening Tree Editor, which
+   works off the raw draft JSON and has the backup-before-export step; this
+   view is browse-only for players and admin alike, so there is only one
+   place that ever writes to a chapter's tree. */
+function prepTreeHTML(node, isMain) {
+  const kids = node.kids || [];
+  return '<li><div class="te-row"><span class="te-mv">' + esc(node.san) + '</span>' +
+    (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
+    (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
+    (node.notes && node.notes.length ? '<span class="te-note" title="' + esc(node.notes.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') + '</div>' +
+    (kids.length ? '<ul>' + kids.map((k, i) => prepTreeHTML(k, i === 0)).join('') + '</ul>' : '') + '</li>';
+}
+function chapterTreeHTML(chapterId) {
+  const t = Trees.info(chapterId);
+  if (!t || !t.root || !t.root.kids || !t.root.kids.length) return '<p class="small muted" style="padding:8px 2px">No tree data for this chapter.</p>';
+  return '<ul class="te-tree">' + t.root.kids.map((k, i) => prepTreeHTML(k, i === 0)).join('') + '</ul>';
+}
 function levelCardHTML(c, i) {
   const t = opTopic(c, i), n = LEVELS.filter((L) => Levels.has(t, L.n)).length, sug = Levels.suggest();
   const first = Levels.lead(t, 1) || c.lines[0], desc = (first && (first.idea || first.subtitle)) || '';
+  const hasTree = !!Trees.info(c.id);
   return '<section class="ch37 lv39-card" data-lv-card="' + esc(c.id) + '"><h3 class="ch37-h"><span class="ch37-n">' + (i + 1) + '</span><span class="ch37-t">' + esc(t.title) + '</span><small>' + (n === 5 ? '5 levels' : n + ' of 5 levels') + '</small></h3>' +
     '<div class="lv39-card-body">' + (desc ? '<p class="lv39-desc">' + esc(desc.length > 170 ? desc.slice(0, 167).replace(/\s+\S*$/, '') + '…' : desc) + '</p>' : '') +
     '<div class="lv39-rail is-card" role="group" aria-label="' + esc('Levels of ' + t.title) + '">' + LEVELS.map((L) => levelCellHTML(t, L.n, 0, 'data-lv-go', sug)).join('') + '</div>' +
+    (hasTree ? '<button type="button" class="btn btn-quiet btn-sm" data-lv-tree="' + esc(c.id) + '" aria-expanded="false" style="margin-top:8px">' + icon('sitemap') + ' View the tree</button><div class="lv39-tree-slot" hidden></div>' : '') +
     (Admin.editing() ? '<p class="small muted lv39-pins">' + c.lines.map((l) => esc(l.title) + tierPin(l, 'openings')).join(' ') + '</p>' : '') + '</div></section>';
 }
 function customGroup(rep) {
@@ -7635,6 +7697,14 @@ function listScreen(body, group, go) {
     manageBtn('openings', 'Lines') + manageBtn('groups', 'Repertoires') + '</div>' +
     chapterRowsHTML(group);
   function onClick(e) {
+    const treeBtn = e.target.closest('[data-lv-tree]');
+    if (treeBtn) {
+      const slot = treeBtn.nextElementSibling, opening = slot.hidden;
+      slot.hidden = !opening;
+      treeBtn.setAttribute('aria-expanded', String(opening));
+      if (opening && !slot.dataset.filled) { slot.innerHTML = chapterTreeHTML(treeBtn.getAttribute('data-lv-tree')); slot.dataset.filled = '1'; }
+      return;
+    }
     const lv = e.target.closest('[data-lv-go]');
     if (lv) {                                                      // v3.9: a level on a chapter card
       const card = lv.closest('[data-lv-card]'), c = chaptersOf(group.lines).filter((x) => card && x.id === card.getAttribute('data-lv-card'))[0];
@@ -7913,6 +7983,7 @@ function mineScreen(body, go) {
     (reps.length ? '<div class="rows">' + reps.map((r) => '<div class="row" style="flex-wrap:wrap"><span class="side-dot ' + r.side + '"></span><span class="row-main"><span class="row-title">' + esc(r.name) + '</span><span class="row-sub">' +
         r.lines.length + (r.lines.length === 1 ? ' line' : ' lines') + ', you play ' + colorName(r.side) + '</span></span><span class="rep-actions" style="margin-left:auto">' +
         '<button type="button" class="btn btn-primary btn-sm" data-act="drill" data-id="' + esc(r.id) + '">Drill</button><button type="button" class="btn btn-ghost btn-sm" data-act="explore" data-id="' + esc(r.id) + '">Explore</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-act="tree" data-id="' + esc(r.id) + '">' + icon('sitemap') + ' Tree</button>' +
         '<button type="button" class="icon-btn" data-act="export" data-id="' + esc(r.id) + '" aria-label="Export PGN" title="Export PGN">' + icon('download') + '</button><button type="button" class="icon-btn" data-act="delete" data-id="' + esc(r.id) + '" aria-label="Delete" title="Delete">' + icon('trash') + '</button></span></div>').join('') +
         '</div><div class="btn-row" style="margin-top:12px"><button type="button" class="btn btn-quiet btn-sm" data-act="clear">' + icon('trash-can') + ' Clear all</button></div>'
       : '<div class="panel pad"><p class="muted">No lines saved yet. Record your first line or paste a PGN.</p></div>');
@@ -7925,6 +7996,7 @@ function mineScreen(body, go) {
     else if (act === 'import') go({ screen: 'import' });
     else if (act === 'drill' && rep) go({ screen: 'train', repId: rep.id, lineId: weakest(customGroup(rep).lines).id, mode: 'drill' });
     else if (act === 'explore' && rep) go({ screen: 'train', repId: rep.id, lineId: 'custom:' + rep.id + ':0', mode: 'explore' });
+    else if (act === 'tree' && rep) myRepTreeSheet(rep.id, go);
     else if (act === 'export' && rep) {
       const pgn = PGN.fromLines(rep.lines, { Event: rep.name, White: rep.side === 'w' ? 'Me' : '?', Black: rep.side === 'b' ? 'Me' : '?', Annotator: 'lanckrietchess Training Hub' });
       download((rep.name.replace(/[^\w-]+/g, '_') || 'repertoire') + '.pgn', pgn, 'application/x-chess-pgn');
@@ -7937,6 +8009,130 @@ function mineScreen(body, go) {
   }
   body.addEventListener('click', onClick);
   return () => body.removeEventListener('click', onClick);
+}
+/* v4.2: My repertoire as a tree. The lines stay flat in storage (Repertoire,
+   unchanged), so a student's device keeps working exactly as before; this
+   merges them into a tree purely for display, by shared prefix, and Delete /
+   Promote / Add translate that node action back into edits on the flat
+   lines the moment Save is pressed. Own data, own device, so it's a real
+   editor here (unlike the read-only course-chapter tree above). */
+function repBuildTrie(lines) {
+  const root = [];
+  (lines || []).forEach((line) => {
+    let arr = root;
+    (line || []).forEach((san) => {
+      let node = arr.filter((n) => n.m === san)[0];
+      if (!node) { node = { m: san, c: [] }; arr.push(node); }
+      arr = node.c;
+    });
+  });
+  return root;
+}
+function repDeleteAtPath(lines, path) {
+  const key = path.join(' '), seen = {}, out = [];
+  lines.forEach((l) => {
+    const passes = l.length >= path.length && l.slice(0, path.length).join(' ') === key;
+    const kept = passes ? l.slice(0, path.length - 1) : l;
+    if (passes && !kept.length) return;
+    const k2 = kept.join(' ');
+    if (seen[k2]) return;
+    seen[k2] = 1;
+    out.push(kept);
+  });
+  return out;
+}
+function repPromoteAtPath(lines, path) {
+  const key = path.join(' '), matches = [], rest = [];
+  lines.forEach((l) => ((l.length >= path.length && l.slice(0, path.length).join(' ') === key) ? matches : rest).push(l));
+  return matches.concat(rest);
+}
+function myRepTreeSheet(repId, listGo) {
+  const rep = Repertoire.list().filter((r) => r.id === repId)[0];
+  if (!rep) return;
+  let lines = rep.lines.map((l) => l.slice()), dirty = false;
+  function nodeHTML(node, path, isMain) {
+    const p = path.concat([node.m]), pj = esc(JSON.stringify(p));
+    return '<li><div class="te-row" data-rt-path="' + pj + '"><span class="te-mv">' + esc(node.m) + '</span>' +
+      (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
+      '<button type="button" class="icon-btn te-menu-btn" data-rt-menu="' + pj + '" aria-label="Actions for ' + esc(node.m) + '">' + icon('ellipsis-vertical') + '</button></div>' +
+      (node.c.length ? '<ul>' + node.c.map((k, i) => nodeHTML(k, p, i === 0)).join('') + '</ul>' : '') + '</li>';
+  }
+  const treeHTML = () => { const trie = repBuildTrie(lines); return trie.length ? '<ul class="te-tree" id="rt-tree">' + trie.map((n, i) => nodeHTML(n, [], i === 0)).join('') + '</ul>' : '<p class="muted" id="rt-tree">No lines yet. Add your first move.</p>'; };
+  const metaHTML = () => '<p class="small muted" id="rt-meta">' + lines.length + ' line' + (lines.length === 1 ? '' : 's') + (dirty ? ', unsaved changes' : '') + '.</p>';
+  openSheet({
+    title: rep.name + ': tree', noFocus: true,
+    html: '<p class="small muted">Right-click a move, or tap ' + icon('ellipsis-vertical') + ', to delete it, promote it to the main line, or add a move after it. Save writes it back to this repertoire.</p>' +
+      metaHTML() + treeHTML() +
+      '<div class="btn-row" style="margin-top:14px"><button type="button" class="btn btn-ghost btn-sm" data-rt="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-primary btn-sm" data-rt="save">' + icon('floppy-disk') + ' Save</button></div>',
+    onMount(s) {
+      function paint() {
+        const meta = qs('#rt-meta', s.el), body = qs('#rt-tree', s.el);
+        if (meta) meta.outerHTML = metaHTML();
+        if (body) body.outerHTML = treeHTML();
+      }
+      function doDelete(path) {
+        const key = path.join(' '), n = lines.filter((l) => l.length >= path.length && l.slice(0, path.length).join(' ') === key).length;
+        confirmSheet('Delete this move?', '“' + path[path.length - 1] + '” is removed, and with it ' + n + ' line' + (n === 1 ? '' : 's') + (path.length === 1 ? ' — your whole repertoire' : '') + '.', 'Delete').then((ok) => {
+          if (!ok) return;
+          lines = repDeleteAtPath(lines, path);
+          dirty = true;
+          paint();
+        });
+      }
+      function doPromote(path) {
+        lines = repPromoteAtPath(lines, path);
+        dirty = true;
+        paint();
+        toast('Promoted to the main line.', 'good');
+      }
+      function doAdd(path) {
+        const g = new Chess();
+        for (const san of path) if (!g.move(san, { sloppy: true })) { toast('That line has an illegal move.', 'bad'); return; }
+        const input = window.prompt('Add a move after ' + (path.length ? path[path.length - 1] : 'the start') + ' (SAN, e.g. Nf3):');
+        if (!input) return;
+        const mv = g.move(input.trim(), { sloppy: true });
+        if (!mv) { toast('“' + input.trim() + '” is not legal there.', 'bad'); return; }
+        const already = lines.filter((l) => l.join(' ') === path.join(' '))[0];
+        if (already) { already.push(mv.san); dirty = true; paint(); toast('Added ' + mv.san + '.', 'good'); return; }
+        const otherTotal = Repertoire.list().reduce((n, r) => n + (r.id === repId ? 0 : r.lines.length), 0);
+        const cap = App.can('customLines') ? Infinity : CONFIG.limits.freeCustomLines;
+        if (otherTotal + lines.length >= cap) { toast('Free limit reached (' + CONFIG.limits.freeCustomLines + ' lines).', 'bad'); openUnlock(gateLevel('customLines'), 'Unlimited custom lines'); return; }
+        lines.push(path.concat([mv.san]));
+        dirty = true;
+        paint();
+        toast('Added ' + mv.san + '.', 'good');
+      }
+      function menuFor(path, x, y) {
+        openContextMenu(x, y, [
+          { label: 'Add a move after ' + path[path.length - 1], icon: 'plus', run: () => doAdd(path) },
+          { label: 'Promote to main line', icon: 'star', run: () => doPromote(path) },
+          { sep: true },
+          { label: 'Delete this move', icon: 'trash', danger: true, run: () => doDelete(path) }
+        ]);
+      }
+      s.el.addEventListener('click', async (e) => {
+        const menuBtn = e.target.closest('[data-rt-menu]');
+        if (menuBtn) { const r = menuBtn.getBoundingClientRect(); menuFor(JSON.parse(menuBtn.getAttribute('data-rt-menu')), r.left, r.bottom + 4); return; }
+        if (e.target.closest('[data-rt="add-root"]')) { doAdd([]); return; }
+        if (e.target.closest('[data-rt="save"]')) {
+          if (!lines.length && !(await confirmSheet('Save with no lines?', 'This repertoire has no lines left, so saving removes it.', 'Remove it'))) return;
+          const list = Repertoire.list(), r = list.filter((x) => x.id === repId)[0];
+          if (!r) { s.close(); return; }
+          if (lines.length) { r.lines = lines; Repertoire.save(list); } else Repertoire.remove(repId);
+          dirty = false;
+          toast('Saved.', 'good');
+          s.close();
+          listGo({});
+        }
+      });
+      s.el.addEventListener('contextmenu', (e) => {
+        const row = e.target.closest('[data-rt-path]');
+        if (!row) return;
+        e.preventDefault();
+        menuFor(JSON.parse(row.getAttribute('data-rt-path')), e.clientX, e.clientY);
+      });
+    }
+  });
 }
 function recordScreen(body, go) {
   body.innerHTML = backBar('My repertoire', 'Record a line') + trainerShell('rec-board', 'rec-panel');
@@ -16114,6 +16310,23 @@ const TreeEditor = (() => {
     arr.splice(last, 1);
     return true;
   }
+  /* Moves the node at path to index 0 of its siblings: c[0] (or tree[0]) is
+     the main line by this file's own PGN convention (README, "the first is
+     the main line"), so Promote is exactly that. */
+  function promoteAt(tree, path) {
+    const idx = path.split('.').map(Number), last = idx.pop();
+    let arr = tree;
+    for (const i of idx) { const node = arr[i]; if (!node) return false; arr = node.c || (node.c = []); }
+    if (last <= 0 || last >= arr.length) return false;
+    arr.unshift(arr.splice(last, 1)[0]);
+    return true;
+  }
+  function sansAlongPath(tree, path) {
+    const idx = path.split('.').map(Number);
+    let arr = tree, sans = [];
+    for (const i of idx) { const node = arr[i]; if (!node) break; sans.push(node.m); arr = node.c || []; }
+    return sans;
+  }
   function open(chapterId) {
     const d = Admin.ensureDraft();
     const trees = Array.isArray(d.trees) ? d.trees : [];
@@ -16136,29 +16349,30 @@ const TreeEditor = (() => {
     if (!t) { open(); return; }
     const original = clone(t.tree);
     let tree = clone(t.tree), dirty = false;
-    function nodeHTML(node, path) {
+    function nodeHTML(node, path, isMain) {
       const kids = Array.isArray(node.c) ? node.c : [];
       return '<li data-te-path="' + esc(path) + '"><div class="te-row" data-te-path="' + esc(path) + '"><span class="te-mv">' + esc(node.m) + '</span>' +
+        (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
         (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
         (node.n && node.n.length ? '<span class="te-note" title="' + esc(node.n.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') +
-        '<button type="button" class="icon-btn te-del" data-te-del="' + esc(path) + '" aria-label="Delete ' + esc(node.m) + ' and everything after it">' + icon('trash') + '</button></div>' +
-        (kids.length ? '<ul>' + kids.map((k, i) => nodeHTML(k, path + '.' + i)).join('') + '</ul>' : '') + '</li>';
+        '<button type="button" class="icon-btn te-menu-btn" data-te-menu="' + esc(path) + '" aria-label="Actions for ' + esc(node.m) + '" title="Right-click also opens this menu">' + icon('ellipsis-vertical') + '</button></div>' +
+        (kids.length ? '<ul>' + kids.map((k, i) => nodeHTML(k, path + '.' + i, i === 0)).join('') + '</ul>' : '') + '</li>';
     }
-    const treeHTML = () => '<ul class="te-tree" id="te-tree">' + tree.map((n, i) => nodeHTML(n, String(i))).join('') + '</ul>';
-    const metaHTML = () => '<p class="small muted" id="te-meta">' + countNodes(tree) + ' moves, ' + countLeaves(tree) + ' lines' + (dirty ? ', unsaved deletions' : '') + '.</p>';
+    const treeHTML = () => '<ul class="te-tree" id="te-tree">' + tree.map((n, i) => nodeHTML(n, String(i), i === 0)).join('') + '</ul>';
+    const metaHTML = () => '<p class="small muted" id="te-meta">' + countNodes(tree) + ' moves, ' + countLeaves(tree) + ' lines' + (dirty ? ', unsaved changes' : '') + '.</p>';
     openSheet({
       title: t.title, noFocus: true,
       html: '<div><button type="button" class="btn btn-quiet btn-sm" data-te-back>' + icon('chevron-left') + ' Opening Tree Editor</button></div>' +
-        '<p class="small muted">Tap ' + icon('trash') + ' or right-click a move to delete it and every branch after it. This edits your admin draft only.</p>' +
+        '<p class="small muted">Right-click a move, or tap ' + icon('ellipsis-vertical') + ', to delete it, promote it to the main line (' + icon('star') + '), or add a move after it. This edits your admin draft only.</p>' +
         metaHTML() + treeHTML() +
-        '<div class="btn-row" style="margin-top:14px"><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button></div>',
+        '<div class="btn-row" style="margin-top:14px"><button type="button" class="btn btn-ghost btn-sm" data-te="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button></div>',
       onMount(s) {
         function paint() {
           const meta = qs('#te-meta', s.el), body = qs('#te-tree', s.el);
           if (meta) meta.outerHTML = metaHTML();
           if (body) body.outerHTML = treeHTML();
         }
-        function del(path) {
+        function doDelete(path) {
           const node = nodeAt(tree, path);
           if (!node) return;
           const kids = countNodes(node.c || []);
@@ -16169,12 +16383,44 @@ const TreeEditor = (() => {
             paint();
           });
         }
+        function doPromote(path) {
+          if (!promoteAt(tree, path)) return;
+          dirty = true;
+          paint();
+          toast('Promoted to the main line.', 'good');
+        }
+        function doAdd(path) {
+          const sans = path ? sansAlongPath(tree, path) : [];
+          const g = new Chess();
+          for (const san of sans) if (!g.move(san, { sloppy: true })) { toast('That branch has an illegal move; fix it before adding here.', 'bad'); return; }
+          const input = window.prompt('Add a move after ' + (sans.length ? sans[sans.length - 1] : 'the start') + ' (SAN, e.g. Nf3):');
+          if (!input) return;
+          const mv = g.move(input.trim(), { sloppy: true });
+          if (!mv) { toast('“' + input.trim() + '” is not legal there.', 'bad'); return; }
+          if (path) { const node = nodeAt(tree, path); if (!node) return; node.c = node.c || []; node.c.push({ m: mv.san }); }
+          else tree.push({ m: mv.san });
+          dirty = true;
+          paint();
+          toast('Added ' + mv.san + '.', 'good');
+        }
+        function menuFor(path, x, y) {
+          const node = nodeAt(tree, path);
+          if (!node) return;
+          const idx = path.split('.').map(Number), isMain = idx[idx.length - 1] === 0;
+          openContextMenu(x, y, [
+            { label: 'Add a move after ' + node.m, icon: 'plus', run: () => doAdd(path) },
+            { label: isMain ? 'Already the main line' : 'Promote to main line', icon: 'star', run: () => doPromote(path) },
+            { sep: true },
+            { label: 'Delete this move and its branch', icon: 'trash', danger: true, run: () => doDelete(path) }
+          ]);
+        }
         s.el.addEventListener('click', (e) => {
           if (e.target.closest('[data-te-back]')) { s.close(); setTimeout(open, 240); return; }
-          const delBtn = e.target.closest('[data-te-del]');
-          if (delBtn) { del(delBtn.getAttribute('data-te-del')); return; }
+          const menuBtn = e.target.closest('[data-te-menu]');
+          if (menuBtn) { const r = menuBtn.getBoundingClientRect(); menuFor(menuBtn.getAttribute('data-te-menu'), r.left, r.bottom + 4); return; }
+          if (e.target.closest('[data-te="add-root"]')) { doAdd(''); return; }
           if (e.target.closest('[data-te="export"]')) {
-            confirmSheet('Export and save to your draft?', 'This downloads a safety backup of the chapter as it was before this session, then the edited chapter, then saves your deletions into the admin draft. Nothing on GitHub changes until you Publish.', 'Export').then((ok) => {
+            confirmSheet('Export and save to your draft?', 'This downloads a safety backup of the chapter as it was before this session, then the edited chapter, then saves your changes into the admin draft. Nothing on GitHub changes until you Publish.', 'Export').then((ok) => {
               if (!ok) return;
               download('lanckrietchess-tree-backup-' + t.id + '-' + dayKey(new Date()) + '.json', JSON.stringify({ id: t.id, title: t.title, tree: original }, null, 2), 'application/json');
               download('lanckrietchess-tree-' + t.id + '-' + dayKey(new Date()) + '.json', JSON.stringify({ id: t.id, title: t.title, tree }, null, 2), 'application/json');
@@ -16182,7 +16428,7 @@ const TreeEditor = (() => {
               Admin.saveDraft(d);
               dirty = false;
               paint();
-              toast('Backup and export downloaded. Deletions saved to your draft — Publish to make them live.', 'good');
+              toast('Backup and export downloaded. Changes saved to your draft — Publish to make them live.', 'good');
             });
           }
         });
@@ -16190,7 +16436,7 @@ const TreeEditor = (() => {
           const row = e.target.closest('[data-te-path]');
           if (!row) return;
           e.preventDefault();
-          del(row.getAttribute('data-te-path'));
+          menuFor(row.getAttribute('data-te-path'), e.clientX, e.clientY);
         });
       }
     });
