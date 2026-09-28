@@ -1,5 +1,16 @@
 # Lanckrietchess Training Hub v4.0.0
 
+## What's new: the admin expansion (infinite credits, Content and Teacher bots, the Opening Tree Editor)
+
+Three additions to Admin Mode, none of which change what a player sees.
+
+- **Admin never spends credits.** While `Admin.active` is true, `Credits.balance()` reports unlimited and `Credits.unlock()` opens a level for free without touching the real daily/purchased balance, and every Credits counter, badge and "Unlock with credits" button is hidden from the UI. This is scoped to the Credits system only: the existing **Preview the hub as** switch (Admin menu), which deliberately shows a locked level as a free or paid player would see it, is untouched — flip it to "A free player" and the level gates, member-key prompts and upgrade sales copy still show exactly as before. Only the Credits layer is suppressed for the coach's own testing.
+- **Content Bot and Teacher Bot** (Admin menu > Review Queue > open a trimmed game > "AI content tools"). Two one-shot AI tools, not chat: each reads the game's flagged moves (the verdict you set per move — Good, Inaccuracy, Mistake or Blunder — Stockfish's best move and your note) and writes one piece of copy.
+  - **Content Bot** writes a short-form video script (Hook / Setup / The Moment / The Lesson / CTA) for Shorts, Reels, TikTok and Instagram, built from the worst flagged move.
+  - **Teacher Bot** drafts a coaching message ready to copy and send to the student as-is: what they did well, how the opening went, the mistakes worst-first with the MSPC correction for each, and a next step.
+  - Both need `CONFIG.ai.endpoint` set (see "AI assistants" below) and are gated **on the worker itself** by `ADMIN_SECRET`, the same secret the "Test these instructions" and Insights features already ask for — not just hidden in the UI. Their instructions are editable like the other three bots (Admin menu > AI assistants > Content Bot / Teacher Bot).
+- **Opening Tree Editor** (Admin menu > Opening Tree Editor). Pick a tree chapter (Colle-Koltanowski, Caro-Kann, Semi-Slav, or anything TreeImport built) and its move tree opens as a branching, collapsible list — this hub draws every list this way; there's no canvas/graph library on the page, so a draggable node-and-wire graph would be the one thing built differently from everywhere else. Tap the trash icon or right-click a move to delete it and every branch after it, to prune a redundant alternate down to one clean line. **Export JSON** always downloads a timestamped backup of the chapter as it stood before that editing session first, then the edited chapter, then saves the deletions into your admin draft — nothing reaches `content.json` on GitHub until you separately hit Publish, same as every other admin edit.
+
 ## What's new: Credits, a pay-per-level micro-economy
 
 Next to the membership tiers (free/community/vault/mentor), a visitor can now unlock **one locked level** on their own device without joining the Accelerator or Mentorship.
