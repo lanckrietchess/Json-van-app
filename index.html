@@ -932,6 +932,30 @@ a.cc-frame:hover{border-color:var(--accent)}
 .iq-verdict h3{font-size:17px}
 .iq-verdict .chip-row button{min-height:32px;padding:0 11px;border-radius:999px;border:1px solid var(--rule);background:transparent;color:var(--fog);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
 .iq-verdict .chip-row button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent-line);color:var(--chalk)}
+.iq-mark-hint{display:block;width:100%;margin-top:2px}
+/* v4.5: interrogation focus mode. Trim's page is long by design (import,
+   game meta, board, engine lines, the move list, the review button, the
+   full report, the coach aside) — useful before and after a review, dead
+   weight while a blunder interrogation is open. mountTrim toggles this
+   class on the view itself the moment TrimInterrogation starts/stops, so
+   only the board, its nav and the interrogation panel stay on screen; the
+   compaction on top of that only kicks in on a phone-width viewport, where
+   the extra scrolling actually hurts. Not verified on a physical device —
+   check it on a phone before shipping. */
+.iq-focus #an-import,.iq-focus #an-meta,.iq-focus .cp,.iq-focus #an-var,.iq-focus #an-movespanel,.iq-focus #an-report,.iq-focus #coach{display:none}
+@media (max-width:720px){
+  .iq-focus .an-grid{display:block}
+  .iq-focus .page-head p{display:none}
+  .iq-focus .page-head{margin-bottom:10px}
+  .iq-focus .board-shell{max-width:min(94vw,380px)}
+  .iq-focus .nav-row{margin:6px 0}
+  .iq-focus .iq{margin-top:8px;padding:10px;gap:8px}
+  .iq-focus .iq-head strong{font-size:18px}
+  .iq-focus .iq-steps li{height:26px;font-size:12px}
+  .iq-focus .iq-log{max-height:20vh;overflow-y:auto}
+  .iq-focus .iq-msg{padding:7px 10px;font-size:13.5px}
+  .iq-focus .iq-verdict{padding:10px 12px}
+}
 /* the course bridge */
 .bridge{display:grid;grid-template-columns:40px minmax(0,1fr);gap:4px 12px;align-items:start;padding:12px 14px;border-radius:14px;border:1px solid var(--hair);background:var(--ink)}
 .bridge>i{grid-row:span 3;width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
@@ -8817,7 +8841,7 @@ function mountTrim(view) {
       '<div id="an-interro"></div>' +
       '<div class="cp"><div class="cp-head"><span class="cp-eval" id="cp-eval">–</span><span class="cp-meta" id="cp-meta">Stockfish 10</span><div class="cp-tools"><div class="seg" role="group" aria-label="Engine lines">' + [1, 3, 5].map((n) => '<button type="button" data-lines="' + n + '" aria-pressed="' + (A.lines === n) + '">' + n + (n === 1 ? ' line' : ' lines') + '</button>').join('') + '</div>' +
         '<button type="button" class="icon-btn" data-act="deeper" aria-label="Search deeper" title="Search deeper">' + icon('magnifying-glass-plus') + '</button></div></div><ol class="cp-lines" id="an-engine"></ol></div><div id="an-var"></div>' +
-      '<div class="panel pad" style="margin-top:14px"><div class="switch-row" style="flex-wrap:wrap"><h3 style="font-size:15px">Moves</h3><div class="seg" id="an-side" role="group" aria-label="Which side you played"><button type="button" data-side="w">I was White</button><button type="button" data-side="b">I was Black</button></div></div>' +
+      '<div class="panel pad" id="an-movespanel" style="margin-top:14px"><div class="switch-row" style="flex-wrap:wrap"><h3 style="font-size:15px">Moves</h3><div class="seg" id="an-side" role="group" aria-label="Which side you played"><button type="button" data-side="w">I was White</button><button type="button" data-side="b">I was Black</button></div></div>' +
         '<div class="moves" id="an-moves" style="max-height:220px;overflow-y:auto"></div>' +
         '<div class="btn-row" style="margin-top:14px"><button type="button" class="btn btn-primary" data-act="review">' + icon('magnifying-glass-chart') + ' Run the Trim review</button><button type="button" class="btn btn-ghost btn-sm" data-act="save-pos">' + icon('bookmark') + ' Save position</button><span class="small muted" id="an-review-status"></span></div>' +
         '<div class="review-bar" id="an-review-bar" hidden><span></span></div><p class="quota-note" id="an-quota" aria-live="polite"></p></div>' +
@@ -11211,6 +11235,7 @@ function TrimInterrogation(T) {
     if (!list.length) { toast('No mistakes or blunders on your side in this game.'); return; }
     Q = { list, at: 0, verdicts: [], token: 0 };
     A.interro = true; A.explore = null; A.focus = null;
+    view.classList.add('iq-focus');
     Telemetry.log({ e: 'iq', v: list.length });
     enter(clamp(Math.round(+at || 0), 0, list.length - 1));
     scrollToEl(qs('#an-board', view) || host());
@@ -11229,10 +11254,11 @@ function TrimInterrogation(T) {
   function enter(n) {
     Q.at = n; Q.s = 0; Q.log = []; Q.hints = { M: 0, S: 0, P: 0, C: 0 }; Q.miss = { M: 0, S: 0, P: 0, C: 0 }; Q.gave = {};
     Q.pre = null; Q.busy = false; Q.got = null; Q.tries = 0; Q.verdict = null; Q.why = ''; Q.committed = false; Q.done = false; Q.token++;
+    Q.markMode = null; Q.marks = [];
     const it = Q.list[n], tok = Q.token;
     A.idx = it.i; A.iqArrows = [];
     T.show(false);
-    board.setInteractive(null); board.setArrows([]); board.clearMarks();
+    board.setTapMode(null); board.setInteractive(null); board.setArrows([]); board.clearMarks();
     V34.saveTrimSoon(T);
     if (n >= limit()) { renderLocked(); return; }
     Q.facts = facts(it);
@@ -11255,16 +11281,50 @@ function TrimInterrogation(T) {
     const lead = m.w === 'bot' && m.k ? '<b class="k">' + (m.k === 'V' ? icon('gavel') : m.k) + '</b>' : m.w === 'hint' ? '💡 ' : '';
     return '<p class="iq-msg' + cls + '">' + lead + esc(m.t) + '</p>';
   }
-  /* v4.4: hardcoded, zero-token quick phrases per step. Tapping one inserts
-     the phrase into the answer box (not an instant pass — M and S are
-     judged on the actual square or piece named, so these are vocabulary,
-     not a shortcut around thinking); "No threat" is unambiguous and answers
-     on its own. */
-  const QUICK = { M: ['Fork', 'Pin', 'Hanging piece', 'Discovered attack', 'No threat'], S: ['Open Center', 'Closed Center', 'Bishop Pair', 'Weak Squares', 'Pawn Structure'], P: ['No forcing moves'] };
+  /* v4.5: board-driven marking, zero-token, replaces the v4.4 category chips
+     (Fork/Pin/... were generic labels; tapping squares names the actual
+     piece involved, which is what M and S already judge). Tapping "Mark New
+     Threats" (M), "Mark New Weaknesses" (S) or "Mark Tactics / CCAs" (P)
+     puts the board itself into tap mode (Board.setTapMode, the same
+     primitive Explorer and the drill runners use): every square tapped
+     toggles into Q.marks and gets highlighted, and Q.marks is kept written
+     into the answer box as plain square text ("e5, f7") the whole time, so
+     it reaches judge()/aiJudge() exactly like a typed answer would — no
+     new state channel, no extra API call. "Type Thought / Custom Note"
+     always switches back to the plain keyboard, which stays available the
+     entire time as the fallback. C keeps its own board mode (playing the
+     actual move) untouched by any of this. */
+  const MARK_LABEL = { M: 'Mark New Threats', S: 'Mark New Weaknesses', P: 'Mark Tactics / CCAs' };
+  function repaintMarks() {
+    board.unmark('hl-hint');
+    (Q.marks || []).forEach((sq) => board.mark(sq, 'hl-hint'));
+  }
+  function syncMarksToInput() {
+    const inp = qs('.iq-ai input', host());
+    if (inp) inp.value = (Q.marks || []).join(', ');
+  }
+  function toggleMark(sq) {
+    if (!Q || !Q.marks) return;
+    const i = Q.marks.indexOf(sq);
+    if (i >= 0) Q.marks.splice(i, 1); else Q.marks.push(sq);
+    repaintMarks();
+    syncMarksToInput();
+    paint();
+  }
+  function setMarkMode(k) {
+    Q.markMode = k;
+    Q.marks = [];
+    board.unmark('hl-hint');
+    board.setTapMode(k ? toggleMark : null);
+    if (!k) { const inp = qs('.iq-ai input', host()); if (inp) { inp.value = ''; try { inp.focus({ preventScroll: true }); } catch (e) { /* ignore */ } } }
+  }
   function quickHTML(k) {
-    const list = QUICK[k];
-    if (!list || !list.length || Q.busy) return '';
-    return '<div class="iq-quick" role="group" aria-label="Quick phrases">' + list.map((t) => '<button type="button" class="btn btn-quiet btn-sm" data-iq-tpl="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>';
+    if (Q.busy || !MARK_LABEL[k]) return '';
+    const marking = Q.markMode === k;
+    return '<div class="iq-quick" role="group" aria-label="Answer mode">' +
+      '<button type="button" class="btn btn-sm ' + (marking ? 'btn-primary' : 'btn-quiet') + '" data-iq-mark="' + k + '" aria-pressed="' + marking + '">' + icon('hand-pointer') + ' ' + esc(MARK_LABEL[k]) + '</button>' +
+      '<button type="button" class="btn btn-quiet btn-sm" data-iq-mark="" aria-pressed="' + (!marking) + '">' + icon('keyboard') + ' Type Thought / Custom Note</button>' +
+      (marking ? '<span class="small muted iq-mark-hint">Tap squares on the board' + (Q.marks.length ? ': ' + esc(Q.marks.join(', ')) : '') + '</span>' : '') + '</div>';
   }
   function toolsHTML(k) {
     if (k === 'V') return '';
@@ -11423,6 +11483,7 @@ function TrimInterrogation(T) {
   }
   function next() {
     const tok = Q.token, it = Q.list[Q.at];
+    Q.markMode = null; Q.marks = []; board.setTapMode(null);
     Q.s++;
     const k = STEPS[Q.s];
     if (k === 'V') { toVerdict(); return; }
@@ -11659,21 +11720,20 @@ function TrimInterrogation(T) {
   function close() {
     commit();
     Q = null; A.interro = false; A.iqArrows = [];
+    view.classList.remove('iq-focus');
     const h = host();
     if (h) h.innerHTML = '';
-    board.clearMarks(); board.setArrows([]);
+    board.setTapMode(null); board.clearMarks(); board.setArrows([]);
     T.show(false);
     V34.saveTrimSoon(T);
   }
   function onClick(e) {
-    const b = e.target.closest('[data-iq],[data-iq-v],[data-iq-tpl]'), h = host();
+    const b = e.target.closest('[data-iq],[data-iq-v],[data-iq-mark]'), h = host();
     if (!b || !Q || !h || !h.contains(b) || b.disabled) return;
     if (b.hasAttribute('data-iq-v')) { if (!Q.committed) { Q.verdict = b.getAttribute('data-iq-v'); paint(); } return; }
-    if (b.hasAttribute('data-iq-tpl')) {
-      const t = b.getAttribute('data-iq-tpl');
-      if (/^(no threat|no forcing moves)$/i.test(t)) { answer(t); return; }
-      const inp = qs('.iq-ai input', h);
-      if (inp) { inp.value = (inp.value.trim() ? inp.value.trim() + ', ' : '') + t + ' '; inp.focus(); }
+    if (b.hasAttribute('data-iq-mark')) {
+      setMarkMode(b.getAttribute('data-iq-mark') || null);
+      paint();
       return;
     }
     const a = b.getAttribute('data-iq');
@@ -11710,8 +11770,8 @@ function TrimInterrogation(T) {
   return {
     start, onMove, active: () => !!Q,
     state: () => (Q && !Q.done ? { at: Q.at } : null),
-    stop(quiet) { if (!Q) return; if (quiet) { Q = null; A.interro = false; A.iqArrows = []; const h = host(); if (h) h.innerHTML = ''; } else close(); },
-    destroy() { Q = null; A.interro = false; view.removeEventListener('click', onClick); view.removeEventListener('submit', onSubmit); }
+    stop(quiet) { if (!Q) return; if (quiet) { Q = null; A.interro = false; A.iqArrows = []; view.classList.remove('iq-focus'); const h = host(); if (h) h.innerHTML = ''; } else close(); },
+    destroy() { Q = null; A.interro = false; view.classList.remove('iq-focus'); view.removeEventListener('click', onClick); view.removeEventListener('submit', onSubmit); }
   };
 }
 
