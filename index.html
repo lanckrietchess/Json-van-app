@@ -926,6 +926,8 @@ a.cc-frame:hover{border-color:var(--accent)}
 .iq-msg.is-typing{color:var(--fog);font-style:italic}
 .iq-tools{display:flex;flex-wrap:wrap;gap:8px}
 .iq-tools .btn small{font-weight:600;color:var(--fog)}
+.iq-quick{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-bottom:2px}
+.iq-bridge{display:grid;gap:8px}
 .iq-verdict{display:grid;gap:10px;padding:12px 14px;border-radius:12px;background:var(--ink);border:1px solid var(--hair)}
 .iq-verdict h3{font-size:17px}
 .iq-verdict .chip-row button{min-height:32px;padding:0 11px;border-radius:999px;border:1px solid var(--rule);background:transparent;color:var(--fog);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
@@ -1210,18 +1212,24 @@ a.cc-frame:hover{border-color:var(--accent)}
 .q36-mspc summary{cursor:pointer;color:var(--accent);font-weight:700;font-size:14px}
 .q36-mspc .field{margin-top:8px}
 .q36-foot{margin-top:24px;padding-top:16px;border-top:1px solid var(--hair)}
-/* v4.1: the admin-only opening tree editor */
-.te-tree,.te-tree ul{list-style:none;margin:0;padding-left:0}
-.te-tree ul{padding-left:16px;border-left:1px dashed var(--hair);margin-top:2px}
-.te-row{display:flex;align-items:center;gap:8px;padding:3px 0;border-radius:6px}
-.te-row:hover{background:var(--ink-2)}
-.te-mv{font-weight:700;font-variant-numeric:tabular-nums}
-.te-note{color:var(--dim);cursor:help}
-.te-del{margin-left:auto;color:var(--dim);flex:0 0 auto}
-.te-del:hover{color:var(--miss)}
-.te-lvl{font-size:11px;color:var(--dim);border:1px solid var(--hair);border-radius:999px;padding:0 5px}
-.te-menu-btn{margin-left:auto;flex:0 0 auto;color:var(--dim)}
-.te-menu-btn:hover{color:var(--chalk)}
+/* v4.4: the branch panes, Chess Tempo style — a single continuation flows
+   as one horizontal line of moves (.te-chain); only a real fork (2+ replies)
+   drops to an indented list (.te-branch), each branch compressed the same
+   way in turn. */
+.te-tree{font-size:14.5px;line-height:2.15}
+.te-chain{display:block}
+.te-branch{list-style:none;margin:2px 0 4px 14px;padding-left:12px;border-left:2px solid var(--hair)}
+.te-branch>li{margin:0}
+.te-mvwrap{display:inline-flex;align-items:center;border-radius:6px}
+.te-mvwrap.is-cur{background:var(--accent)}
+.te-mvwrap.is-cur .te-mv-btn{color:var(--accent-ink)}
+.te-mv-btn{background:none;border:0;padding:2px 3px;border-radius:4px;font:inherit;font-weight:700;cursor:pointer;color:inherit;font-variant-numeric:tabular-nums}
+.te-mv-btn:hover{background:var(--ink-2)}
+.te-mvnum{color:var(--dim);font-variant-numeric:tabular-nums;margin-right:1px;font-weight:400}
+.te-note{color:var(--dim);cursor:help;margin:0 1px}
+.te-lvl{font-size:11px;color:var(--dim);border:1px solid var(--hair);border-radius:999px;padding:0 5px;margin:0 2px}
+.te-menu-btn{opacity:.4;padding:1px 2px;color:var(--dim)}
+.te-menu-btn:hover,.te-menu-btn:focus-visible{opacity:1;color:var(--chalk)}
 .ctx-menu{position:fixed;z-index:1200;min-width:200px;background:var(--surface);border:1px solid var(--hair);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.4);padding:6px;display:flex;flex-direction:column}
 .ctx-menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;background:none;border:0;border-radius:8px;font-size:14px;font-family:inherit;color:var(--chalk);cursor:pointer}
 .ctx-menu button:hover,.ctx-menu button:focus-visible{background:var(--ink-2)}
@@ -1229,9 +1237,6 @@ a.cc-frame:hover{border-color:var(--accent)}
 .ctx-menu hr{border:0;border-top:1px solid var(--hair);margin:4px 2px}
 .lv39-tree-slot{margin-top:8px;padding:10px;border:1px solid var(--hair);border-radius:10px;max-height:320px;overflow:auto}
 .board-tree-pane{margin-top:10px;padding:12px;border:1px solid var(--hair);border-radius:12px;background:var(--surface);max-height:360px;overflow:auto}
-.te-mv-btn{background:none;border:0;padding:0;font:inherit;cursor:pointer;color:inherit}
-.te-row.is-cur .te-mv-btn .te-mv{color:var(--accent);text-decoration:underline}
-.te-row.is-cur{background:var(--ink-2);border-radius:6px}
 /* v3.7: chapters straight from the data file */
 .chip-n{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--ink-2);border:1px solid var(--hair);color:var(--fog);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"] .chip-n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -7609,24 +7614,64 @@ function opTopic(c, i) {
 }
 const maxMove = (lines) => Math.max.apply(null, [0].concat((lines || []).map((l) => Math.ceil(Levels.movesOf(l).length / 2))));
 /* The list: one card per chapter, with the five levels on it. */
+/* v4.4: Chess Tempo-style compression, shared by every branch pane in the
+   hub. A node with exactly one child renders inline in the same horizontal
+   move chain as its parent (1. e4 c6 2. d4 d5 ...); only a real fork (2 or
+   more replies) drops to an indented list, and each branch is compressed
+   the same way from there — no vertical list for a line with no choices
+   in it. getKids(node) returns a node's children in whatever shape the
+   caller's data uses (.c or .kids); renderMove(node, ply, isFirstOfChain)
+   returns that one move's clickable HTML. Move numbers come from ply alone
+   (0 = White's first move), so callers never track their own numbering. */
+function chainNodeHTML(node, ply, getKids, renderMove) {
+  const chain = [node];
+  let cur = node, kids = getKids(cur);
+  while (kids.length === 1) { cur = kids[0]; chain.push(cur); kids = getKids(cur); }
+  const spans = chain.map((n, i) => renderMove(n, ply + i, i === 0)).join('');
+  let out = '<div class="te-chain">' + spans + '</div>';
+  if (kids.length) out += '<ul class="te-branch">' + kids.map((k) => '<li>' + chainNodeHTML(k, ply + chain.length, getKids, renderMove) + '</li>').join('') + '</ul>';
+  return out;
+}
+function chainTreeHTML(nodes, getKids, renderMove) {
+  return '<div class="te-tree">' + (nodes || []).map((n) => chainNodeHTML(n, 0, getKids, renderMove)).join('') + '</div>';
+}
+function plyPrefix(ply, isFirst) {
+  const num = Math.floor(ply / 2) + 1, white = ply % 2 === 0;
+  return white ? '<span class="te-mvnum">' + num + '.</span>' : isFirst ? '<span class="te-mvnum">' + num + '…</span>' : '';
+}
+/* Raw-JSON trees ({m, c, ...}: the admin draft and the My Repertoire trie)
+   carry no path of their own, unlike the prepped course format (node.path).
+   One annotation pass before each render gives every node a stable _path
+   (dot-indices for the admin tree, a SAN array for the repertoire, matching
+   whatever repDeleteAtPath/nodeAt already expect), so the renderer and the
+   edit actions agree on identity without threading a path through every
+   recursive call by hand. */
+function annotateIndexPaths(nodes, prefix) {
+  (nodes || []).forEach((n, i) => {
+    n._path = prefix === '' ? String(i) : prefix + '.' + i;
+    if (n.c && n.c.length) annotateIndexPaths(n.c, n._path);
+  });
+}
+function annotateSanPaths(nodes, prefix) {
+  (nodes || []).forEach((n) => {
+    n._path = prefix.concat([n.m]);
+    if (n.c && n.c.length) annotateSanPaths(n.c, n._path);
+  });
+}
 /* v4.2: a read-only branch diagram of a tree chapter (Trees.info, the prepped
    walkable format), for "View the tree" under a chapter card. Editing a
    published chapter's tree stays in the Admin > Opening Tree Editor, which
    works off the raw draft JSON and has the backup-before-export step; this
    view is browse-only for players and admin alike, so there is only one
    place that ever writes to a chapter's tree. */
-function prepTreeHTML(node, isMain) {
-  const kids = node.kids || [];
-  return '<li><div class="te-row"><span class="te-mv">' + esc(node.san) + '</span>' +
-    (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
-    (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
-    (node.notes && node.notes.length ? '<span class="te-note" title="' + esc(node.notes.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') + '</div>' +
-    (kids.length ? '<ul>' + kids.map((k, i) => prepTreeHTML(k, i === 0)).join('') + '</ul>' : '') + '</li>';
+function prepMoveHTML(node, ply, isFirst) {
+  return plyPrefix(ply, isFirst) + '<span class="te-mvwrap"><button type="button" class="te-mv-btn">' + esc(node.san) + '</button>' +
+    (node.notes && node.notes.length ? '<span class="te-note" title="' + esc(node.notes.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') + '</span> ';
 }
 function chapterTreeHTML(chapterId) {
   const t = Trees.info(chapterId);
   if (!t || !t.root || !t.root.kids || !t.root.kids.length) return '<p class="small muted" style="padding:8px 2px">No tree data for this chapter.</p>';
-  return '<ul class="te-tree">' + t.root.kids.map((k, i) => prepTreeHTML(k, i === 0)).join('') + '</ul>';
+  return chainTreeHTML(t.root.kids, (n) => n.kids || [], prepMoveHTML);
 }
 /* v4.3: the same read-only branch view as chapterTreeHTML, but mounted
    under a live board (board-tree-pane, from trainerShell) so a click on a
@@ -7643,18 +7688,14 @@ function mountChapterTreeView(host, chapterId, board) {
     sans.forEach((s) => g.move(s, { sloppy: true }));
     return g.fen();
   }
-  function nodeHTML(node, isMain) {
-    const kids = node.kids || [];
-    return '<li><div class="te-row' + (node.path === curPath ? ' is-cur' : '') + '"><button type="button" class="te-mv-btn" data-rt-jump="' + esc(node.path) + '"><span class="te-mv">' + esc(node.san) + '</span></button>' +
-      (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
-      (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
-      (node.notes && node.notes.length ? '<span class="te-note" title="' + esc(node.notes.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') + '</div>' +
-      (kids.length ? '<ul>' + kids.map((k, i) => nodeHTML(k, i === 0)).join('') + '</ul>' : '') + '</li>';
+  function renderMove(node, ply, isFirst) {
+    return plyPrefix(ply, isFirst) + '<span class="te-mvwrap' + (node.path === curPath ? ' is-cur' : '') + '"><button type="button" class="te-mv-btn" data-rt-jump="' + esc(node.path) + '">' + esc(node.san) + '</button>' +
+      (node.notes && node.notes.length ? '<span class="te-note" title="' + esc(node.notes.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') + '</span> ';
   }
   function render() {
     host.hidden = false;
     host.innerHTML = '<p class="small muted">' + icon('sitemap') + ' <b>' + esc(info.title) + '</b>: click a move to see it on the board.</p>' +
-      '<ul class="te-tree">' + info.root.kids.map((k, i) => nodeHTML(k, i === 0)).join('') + '</ul>' +
+      chainTreeHTML(info.root.kids, (n) => n.kids || [], renderMove) +
       '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-quiet btn-sm" data-rt="root">' + icon('house') + ' Start position</button></div>';
   }
   function onClick(e) {
@@ -8107,18 +8148,18 @@ function mountRepTreeView(host, repId, board, onChange) {
   if (!rep) { host.hidden = true; return { destroy() { host.hidden = true; host.innerHTML = ''; } }; }
   let lines = rep.lines.map((l) => l.slice()), curKey = '';
   function fenOf(sans) { const g = new Chess(); sans.forEach((s) => g.move(s, { sloppy: true })); return g.fen(); }
-  function nodeHTML(node, path, isMain) {
-    const p = path.concat([node.m]), pj = esc(JSON.stringify(p)), key = p.join(' ');
-    return '<li><div class="te-row' + (key === curKey ? ' is-cur' : '') + '" data-rp-path="' + pj + '"><button type="button" class="te-mv-btn" data-rp-jump="' + pj + '"><span class="te-mv">' + esc(node.m) + '</span></button>' +
-      (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
-      '<button type="button" class="icon-btn te-menu-btn" data-rp-menu="' + pj + '" aria-label="Actions for ' + esc(node.m) + '">' + icon('ellipsis-vertical') + '</button></div>' +
-      (node.c.length ? '<ul>' + node.c.map((k, i) => nodeHTML(k, p, i === 0)).join('') + '</ul>' : '') + '</li>';
+  function renderMove(node, ply, isFirst) {
+    const p = node._path, pj = esc(JSON.stringify(p)), key = p.join(' ');
+    return plyPrefix(ply, isFirst) + '<span class="te-mvwrap' + (key === curKey ? ' is-cur' : '') + '" data-rp-path="' + pj + '">' +
+      '<button type="button" class="te-mv-btn" data-rp-jump="' + pj + '">' + esc(node.m) + '</button>' +
+      '<button type="button" class="icon-btn te-menu-btn" data-rp-menu="' + pj + '" aria-label="Actions for ' + esc(node.m) + '">' + icon('ellipsis-vertical') + '</button></span> ';
   }
   function render() {
     host.hidden = false;
     const trie = repBuildTrie(lines);
+    annotateSanPaths(trie, []);
     host.innerHTML = '<p class="small muted">' + icon('sitemap') + ' <b>' + esc(rep.name) + '</b>: click a move to see it on the board; right-click, or ' + icon('ellipsis-vertical') + ', to edit. ' + lines.length + ' line' + (lines.length === 1 ? '' : 's') + '.</p>' +
-      (trie.length ? '<ul class="te-tree">' + trie.map((n, i) => nodeHTML(n, [], i === 0)).join('') + '</ul>' : '<p class="muted">No lines yet.</p>') +
+      (trie.length ? chainTreeHTML(trie, (n) => n.c || [], renderMove) : '<p class="muted">No lines yet.</p>') +
       '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-rp="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-rp="root">' + icon('house') + ' Start position</button></div>';
   }
   function persist() {
@@ -11214,10 +11255,21 @@ function TrimInterrogation(T) {
     const lead = m.w === 'bot' && m.k ? '<b class="k">' + (m.k === 'V' ? icon('gavel') : m.k) + '</b>' : m.w === 'hint' ? '💡 ' : '';
     return '<p class="iq-msg' + cls + '">' + lead + esc(m.t) + '</p>';
   }
+  /* v4.4: hardcoded, zero-token quick phrases per step. Tapping one inserts
+     the phrase into the answer box (not an instant pass — M and S are
+     judged on the actual square or piece named, so these are vocabulary,
+     not a shortcut around thinking); "No threat" is unambiguous and answers
+     on its own. */
+  const QUICK = { M: ['Fork', 'Pin', 'Hanging piece', 'Discovered attack', 'No threat'], S: ['Open Center', 'Closed Center', 'Bishop Pair', 'Weak Squares', 'Pawn Structure'], P: ['No forcing moves'] };
+  function quickHTML(k) {
+    const list = QUICK[k];
+    if (!list || !list.length || Q.busy) return '';
+    return '<div class="iq-quick" role="group" aria-label="Quick phrases">' + list.map((t) => '<button type="button" class="btn btn-quiet btn-sm" data-iq-tpl="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>';
+  }
   function toolsHTML(k) {
     if (k === 'V') return '';
     const off = Q.busy ? ' disabled' : '';
-    return '<button type="button" class="btn btn-ghost btn-sm" data-iq="hint"' + off + '>💡 Hint' + (Q.hints[k] ? ' (' + Q.hints[k] + ' of 3)' : '') + '</button>' +
+    return quickHTML(k) + '<button type="button" class="btn btn-ghost btn-sm" data-iq="hint"' + off + '>💡 Hint' + (Q.hints[k] ? ' (' + Q.hints[k] + ' of 3)' : '') + '</button>' +
       '<button type="button" class="btn btn-quiet btn-sm" data-iq="giveup"' + off + '>🏳️ Give up <small>(Toon antwoord)</small></button>';
   }
   function logHTML() { return Q.log.map(msgHTML).join('') + (Q.busy ? '<p class="iq-msg is-typing">' + esc(Q.busyText || 'The coach is thinking…') + '</p>' : ''); }
@@ -11528,15 +11580,41 @@ function TrimInterrogation(T) {
   function toVerdict() {
     const it = Q.list[Q.at], v = autoVerdict(it);
     Q.s = 4; Q.verdict = v.k; Q.why = v.why; Q.committed = false;
+    /* v4.4: recurring-weakness check, against struggles from BEFORE this
+       game (commit() below only adds today's verdict after this point), so
+       "again" really means again, not "for the first time, right now". */
+    const sk = VERDICT_STRUGGLE[v.k];
+    Q.recurring = !!(sk && App.profile.struggles.indexOf(sk) >= 0);
+    Q.bridgeStage = '';
     board.setInteractive(null);
     say('bot', 'Verdict on ' + moveLabel(it.num, it.color, it.san) + ': ' + v.why, 'V');
     V34.saveTrimSoon(T);
   }
+  /* v4.4: the sales-bridge funnel, on top of the course-chapter Bridge that
+     already exists below. It only replaces that bridge when both are true:
+     this is a RECURRING leak (the struggle was already on the profile
+     before this game) and the player doesn't yet have the chapter that
+     teaches it (Bridge.access) — a first-time miss just gets pointed to the
+     lesson as before, no pitch. There is no ManyChat integration wired in:
+     "check if you qualify" opens this hub's own Upgrades page and its sales
+     assistant, the same funnel every other upsell in the hub already uses.
+     Swap the close()+hash line for a real ManyChat webhook call if Kyenzo
+     wants that specific routing later. */
+  function salesBridgeHTML() {
+    const label = (STRUGGLES[VERDICT_STRUGGLE[Q.verdict]] || 'this').toLowerCase();
+    if (Q.bridgeStage === 'offer') {
+      return '<div class="iq-bridge bridge"><p>' + esc(CONFIG.coach) + ' offers extra support for exactly this. It is not the cheapest option, but it is the most direct one. Want to check if it fits you?</p>' +
+        '<div class="btn-row"><button type="button" class="btn btn-gold btn-sm" data-iq="bridge-qualify">' + icon('crown') + ' Yes, check</button><button type="button" class="btn btn-ghost btn-sm" data-iq="bridge-no">Not now</button></div></div>';
+    }
+    return '<div class="iq-bridge bridge">' + icon('rotate') + '<p>I see you stumbling over <b>' + esc(label) + '</b> again. Want extra support with this?</p>' +
+      '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-iq="bridge-yes">Yes</button><button type="button" class="btn btn-ghost btn-sm" data-iq="bridge-no">No</button></div></div>';
+  }
   function verdictHTML(it) {
     const v = Q.verdict, ref = Course.forItem(Object.assign({}, it, { k: /^[MSPC]$/.test(v) ? v : it.k }), A.fens[it.i], (A.opening || {}).name || '');
+    const showBridge = Q.recurring && ref.ch && !Bridge.access(ref.ch) && Q.bridgeStage !== 'done';
     return '<div class="iq-verdict"><h3>Where your thinking broke: ' + esc(v === 'time' ? 'the clock' : v + ', ' + MSPC_NAME[v]) + '</h3>' +
       '<div class="chip-row" role="group" aria-label="Change the verdict">' + VERDICTS.map((x) => '<button type="button" data-iq-v="' + x[0] + '" aria-pressed="' + (v === x[0]) + '" title="' + esc(x[1]) + '">' + (x[0] === 'time' ? icon('stopwatch') + ' Clock' : x[0] + ', ' + MSPC_NAME[x[0]]) + '</button>').join('') + '</div>' +
-      (ref.ch ? Bridge.html(ref, { k: v === 'time' ? '' : v, lead: 'Taught in' }) : '') +
+      (showBridge ? salesBridgeHTML() : (ref.ch ? Bridge.html(ref, { k: v === 'time' ? '' : v, lead: 'Taught in' }) : '')) +
       '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-iq="after">' + (Q.at < Q.list.length - 1 ? 'Next mistake' : 'See my summary') + '</button></div></div>';
   }
   function commit() {
@@ -11588,14 +11666,30 @@ function TrimInterrogation(T) {
     V34.saveTrimSoon(T);
   }
   function onClick(e) {
-    const b = e.target.closest('[data-iq],[data-iq-v]'), h = host();
+    const b = e.target.closest('[data-iq],[data-iq-v],[data-iq-tpl]'), h = host();
     if (!b || !Q || !h || !h.contains(b) || b.disabled) return;
     if (b.hasAttribute('data-iq-v')) { if (!Q.committed) { Q.verdict = b.getAttribute('data-iq-v'); paint(); } return; }
+    if (b.hasAttribute('data-iq-tpl')) {
+      const t = b.getAttribute('data-iq-tpl');
+      if (/^(no threat|no forcing moves)$/i.test(t)) { answer(t); return; }
+      const inp = qs('.iq-ai input', h);
+      if (inp) { inp.value = (inp.value.trim() ? inp.value.trim() + ', ' : '') + t + ' '; inp.focus(); }
+      return;
+    }
     const a = b.getAttribute('data-iq');
     if (a === 'close') close();
     else if (a === 'hint') hint();
     else if (a === 'giveup') giveUp();
     else if (a === 'after') after();
+    else if (a === 'bridge-yes') { Q.bridgeStage = 'offer'; paint(); }
+    else if (a === 'bridge-no') { Q.bridgeStage = 'done'; paint(); }
+    else if (a === 'bridge-qualify') {
+      Q.bridgeStage = 'done';
+      Telemetry.log({ e: 'q', x: 'iq-bridge-qualify' });
+      close();
+      location.hash = '#upgrades';
+      toast('Opening ' + CONFIG.coach + '’s assistant to see what fits you.');
+    }
     else if (a === 'unlock') openUnlock(gateLevel('interrogationFull'), 'The full blunder interrogation');
     else if (a === 'summary') summary();
     else if (a === 'focus') { const k = b.getAttribute('data-k'); Focus.set(k); toast('Your Hyper-Focus is now ' + FOCUS[k][0] + '.', 'good'); Q.done = false; summary(); }
@@ -16436,20 +16530,19 @@ const TreeEditor = (() => {
       (path ? sansAlongPath(tree, path) : []).forEach((san) => g.move(san, { sloppy: true }));
       return g.fen();
     }
-    function nodeHTML(node, path, isMain) {
-      const pe = esc(path);
-      return '<li data-te-path="' + pe + '"><div class="te-row' + (path === curPath ? ' is-cur' : '') + '" data-te-path="' + pe + '">' +
-        '<button type="button" class="te-mv-btn" data-te-jump="' + pe + '"><span class="te-mv">' + esc(node.m) + '</span></button>' +
-        (isMain ? '<span class="te-lvl" title="Main line">' + icon('star') + '</span>' : '') +
-        (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
+    function renderMove(node, ply, isFirst) {
+      const p = node._path, pe = esc(p);
+      return plyPrefix(ply, isFirst) + '<span class="te-mvwrap' + (p === curPath ? ' is-cur' : '') + '" data-te-path="' + pe + '">' +
+        '<button type="button" class="te-mv-btn" data-te-jump="' + pe + '">' + esc(node.m) + '</button>' +
         (node.n && node.n.length ? '<span class="te-note" title="' + esc(node.n.join(' — ')) + '">' + icon('note-sticky') + '</span>' : '') +
-        '<button type="button" class="icon-btn te-menu-btn" data-te-menu="' + pe + '" aria-label="Actions for ' + esc(node.m) + '">' + icon('ellipsis-vertical') + '</button></div>' +
-        ((node.c || []).length ? '<ul>' + node.c.map((k, i) => nodeHTML(k, path + '.' + i, i === 0)).join('') + '</ul>' : '') + '</li>';
+        (node.l ? '<span class="te-lvl">L' + node.l + '</span>' : '') +
+        '<button type="button" class="icon-btn te-menu-btn" data-te-menu="' + pe + '" aria-label="Actions for ' + esc(node.m) + '">' + icon('ellipsis-vertical') + '</button></span> ';
     }
     function render() {
+      annotateIndexPaths(tree, '');
       host.hidden = false;
       host.innerHTML = '<p class="small muted" id="te-meta">' + icon('sitemap') + ' <b>' + esc(t.title) + '</b> — ' + countNodes(tree) + ' moves, ' + countLeaves(tree) + ' lines' + (dirty ? ', unsaved changes' : '') + '. Click a move to see it on the board; right-click, or ' + icon('ellipsis-vertical') + ', to edit.</p>' +
-        '<ul class="te-tree" id="te-tree">' + tree.map((n, i) => nodeHTML(n, String(i), i === 0)).join('') + '</ul>' +
+        chainTreeHTML(tree, (n) => n.c || [], renderMove) +
         '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-te="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-te="root">' + icon('house') + ' Start position</button><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button></div>';
     }
     function jump(path) { curPath = path; onJump(fenAt(path)); render(); }
