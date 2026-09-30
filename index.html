@@ -1451,6 +1451,7 @@ body.is-resizing5,body.is-resizing5 *{cursor:col-resize!important;-webkit-user-s
 .trainer[data-split5-on] .board-shell,.trainer[data-split5-on] .board-host{max-width:none}
 .arena5{display:grid;gap:16px;margin:0 0 22px}
 .ar5-grid{display:grid;gap:16px}
+.ar5-grid+.ar5-friends{margin-top:16px}
 @media (min-width:900px){.ar5-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}}
 .ar5-kicker{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .arena5 h2{font-size:20px;margin:4px 0 4px}
@@ -5670,7 +5671,7 @@ const CMS = (() => {
         '<div class="access-status' + (AI.on() ? ' is-on' : '') + '"><span class="ico">' + icon(AI.on() ? 'plug-circle-check' : 'plug') + '</span><div><strong>' + (AI.on() ? 'Connected to ' + esc(AI.host()) : 'No AI server connected yet') + '</strong><span>' +
           (AI.on() ? 'The Pro coach answers members through your server (' + esc(AI.host()) + ') with the published instructions below. Test new instructions with your admin token.' : 'Until you set the Arena server address (Admin menu, Weekly tournament and sales bridge), the bots use their built-in answers on the device.') + '</span></div></div>' +
         '<div class="menu-rows">' + Object.keys(BOTS).map(row).join('') + '</div>' +
-        '<p class="small muted">The instructions are published in content.json, where your hub worker reads them. Anyone can open content.json, so never put passwords or private notes in them.</p>',
+        '<p class="small muted">The instructions are published in content.json, where your Arena server reads them. Anyone can open content.json, so never put passwords or private notes in them.</p>',
       onMount(s) {
         onBack(s);
         s.el.addEventListener('click', (e) => { const b = e.target.closest('[data-bot]'); if (b) { s.close(); later(() => botEditor(b.getAttribute('data-bot'))); } });
@@ -5696,7 +5697,7 @@ const CMS = (() => {
           (edited ? '<button class="btn btn-ghost" type="button" data-bot-reset>Use the default instructions</button>' : '') +
           (other ? '<button class="btn btn-ghost" type="button" data-bot-copy>Copy from the ' + esc(BOTS[other][0].toLowerCase()) + '</button>' : '') +
           '<button class="btn btn-quiet" type="button" data-close>Cancel</button></div></form>' +
-        (AI.on() ? '<details class="panel pad bot-test"><summary>' + icon('flask') + ' Test these instructions before you publish</summary><div class="stack" style="margin-top:12px"><p class="small muted">Sends one message with the text above (saved or not) through your hub worker. It asks once for the worker’s ADMIN_SECRET.</p>' +
+        (AI.on() ? '<details class="panel pad bot-test"><summary>' + icon('flask') + ' Test these instructions before you publish</summary><div class="stack" style="margin-top:12px"><p class="small muted">Sends one message with the text above (saved or not) through your Arena server. It asks once for the server’s admin token.</p>' +
           '<div class="chat-form"><input class="input" id="bot-q" maxlength="400" placeholder="' + (key === 'sales' ? 'e.g. I am 1100 and I keep blundering' : 'e.g. What should Black play here?') + '"><button type="button" class="btn btn-primary" data-bot-test aria-label="Send">' + icon('paper-plane') + '</button></div>' +
           '<div class="msg msg-bot" id="bot-a" hidden></div></div></details>' : ''),
       onMount(s) {
@@ -10850,7 +10851,7 @@ const V33 = {
       html: '<div><button type="button" class="btn btn-quiet btn-sm" data-lb="back">' + icon('chevron-left') + ' Admin menu</button></div>' +
         '<p class="small muted">A player needs ' + Ranks.min() + ' different puzzles in a period to get ranked. That number and the three weights are under Numbers and links. Here you hide a player (a rude name, an obvious cheat) or bring them back.</p>' +
         (Ranks.on() ? '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-lb="load">' + icon('users') + ' Load the players</button><button type="button" class="btn btn-ghost btn-sm" data-lb="settings">' + icon('sliders') + ' Numbers and links</button></div><div class="stack" id="lb-adm"></div>'
-          : '<p>The community board needs the hub worker with a D1 database bound as DB (README, “Leaderboard and insights”).</p>'),
+          : '<p>The community board needs the Arena server (Admin menu > Weekly tournament and sales bridge).</p>'),
       onMount(s) {
         const out = qs('#lb-adm', s.el);
         async function run(op, target) {
@@ -12177,7 +12178,7 @@ function mountLeaderboard(view) {
   }
   async function paintBoard() {
     const host = qs('#lb-board', view), p = ui.p;
-    if (!Ranks.on()) { host.innerHTML = '<h2>Community board</h2><p class="muted">The community board isn’t switched on yet. Your score on the left already counts from today, so you’re ready the moment it goes live.</p>' + (Admin.active ? '<p class="small">Admin: bind a D1 database to the hub worker as DB and set its URL in Numbers and links (README, “Leaderboard and insights”).</p>' : ''); return; }
+    if (!Ranks.on()) { host.innerHTML = '<h2>Community board</h2><p class="muted">The community board isn’t switched on yet. Your own score already counts from today, so you’re ready the moment it goes live.</p>' + (Admin.active ? '<p class="small">Admin: set up the Arena server (Admin menu > Weekly tournament and sales bridge > Arena server) and publish.</p>' : ''); return; }
     if (!App.can('leaderboard')) { host.innerHTML = '<h2>Community board</h2><p class="muted">See where you stand against the other players. Joining the board is ' + (gateLevel('leaderboard') === 'community' ? 'free for members of the Skool community' : 'part of the Accelerator') + '.</p><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-lb="unlock">' + icon('lock-open') + ' Unlock the board</button></div>'; }
     else host.innerHTML = '<h2>Community board</h2><p class="small muted">Loading…</p>';
     let d;
@@ -12270,9 +12271,9 @@ function mountInsights(view) {
     if (ui.src === 'device') { const b = bracketOf(App.profile.elo); D = lcAggregate(Telemetry.all().map((x) => Object.assign({ a: 'me', b: b ? b.id : 'unrated' }, x))); info = 'Only what happened on this device.'; }
     else if (ui.src === 'reports') { D = lcAggregate([]); Reports.list().forEach((r) => CoachReport.expand(r, D)); info = Reports.list().length + ' imported student ' + (Reports.list().length === 1 ? 'report' : 'reports') + '.'; }
     else {
-      if (!Ranks.on()) { body.innerHTML = '<p class="ins-empty">The community data needs the hub worker with a D1 database (README, “Leaderboard and insights”). Until then, use student reports or this device.</p>'; return; }
+      if (!Ranks.on()) { body.innerHTML = '<p class="ins-empty">The community data needs the Arena server (Admin menu > Weekly tournament and sales bridge). Until then, use student reports or this device.</p>'; return; }
       const secret = adminSecret();
-      if (!secret) { body.innerHTML = '<p class="ins-empty">The worker’s ADMIN_SECRET is needed to read the community data.</p><div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-ia="reload">Try again</button></div>'; return; }
+      if (!secret) { body.innerHTML = '<p class="ins-empty">The Arena server’s admin token is needed to read the community data.</p><div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-ia="reload">Try again</button></div>'; return; }
       body.innerHTML = '<p class="small muted">Loading the last ' + ui.days + ' days…</p>';
       try { const r = await Ranks.post({ action: 'insights', secret, days: ui.days }); D = r.data; info = 'Last ' + r.days + ' days, from players who share anonymous stats. ' + r.players + ' on the leaderboard.'; }
       catch (e) {
@@ -13519,7 +13520,7 @@ function mountBoards(view) {
   }
   async function paintBoard() {
     const host = qs('#vb-board', view), key = JSON.stringify(ui) + mode;
-    if (!Ranks.on()) { host.innerHTML = '<h2>Community board</h2><p class="muted">The community board isn’t switched on yet. Your numbers on the left already count.</p>'; return; }
+    if (!Ranks.on()) { host.innerHTML = '<h2>Community board</h2><p class="muted">The community board isn’t switched on yet. Your own numbers already count.</p>'; return; }
     if (!App.can('leaderboard')) { host.innerHTML = '<h2>Community board</h2><p class="muted">See where you stand against the other players. Joining is ' + (gateLevel('leaderboard') === 'community' ? 'free for members of the Skool community' : 'part of the Accelerator') + '.</p><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-vb="unlock">Unlock the board</button></div>'; return; }
     host.innerHTML = '<h2>Community board</h2><p class="small muted">Loading…</p>';
     let d;
@@ -13630,9 +13631,9 @@ function mountVaultBrowser(view) {
     rows = []; info = ''; ui.sel = ''; prev.hidden = true;
     if (ui.src === 'device') { rows = vbDeviceRows(ui.kind); info = 'From this device: your own reviews, Game Vault and brilliant moves.'; }
     else {
-      if (!Ranks.on()) { listEl.innerHTML = '<p class="ins-empty">The community view needs the hub worker with a D1 database (README, “Leaderboard and insights”). Until then, use This device.</p>'; side.innerHTML = ''; agg.innerHTML = ''; return; }
+      if (!Ranks.on()) { listEl.innerHTML = '<p class="ins-empty">The community view needs the Arena server (Admin menu > Weekly tournament and sales bridge). Until then, use This device.</p>'; side.innerHTML = ''; agg.innerHTML = ''; return; }
       const secret = adminSecret();
-      if (!secret) { listEl.innerHTML = '<p class="ins-empty">The worker’s ADMIN_SECRET is needed to read the community data.</p>'; return; }
+      if (!secret) { listEl.innerHTML = '<p class="ins-empty">The Arena server’s admin token is needed to read the community data.</p>'; return; }
       listEl.innerHTML = '<p class="small muted">Loading the last ' + ui.days + ' days…</p>';
       try { const r = await Ranks.post({ action: 'vb_list', secret, kind: ui.kind, days: ui.days }); rows = (r.rows || []).map(vbNormalize); info = rows.length + ' from players who share anonymous stats, last ' + r.days + ' days. No names, no member keys.'; }
       catch (e) { if (e.reason === 'forbidden') forgetSecret(); listEl.innerHTML = '<p class="ins-empty">' + (e.reason === 'forbidden' ? 'The worker refused the admin secret.' : e.reason === 'no-db' ? 'The worker has no D1 database bound as DB yet.' : 'Could not reach the worker.') + '</p>'; return; }
@@ -14800,7 +14801,7 @@ function mountQueue(view) {
         ['M', 'S', 'P', 'C'].map((k) => '<label class="field"><span class="field-label">' + k + ', ' + MSPC_NAME[k] + '</span><textarea class="input" rows="2" data-qf="mspc.' + k + '">' + esc((f.mspc || {})[k] || '') + '</textarea></label>').join('') + '</div></section>' +
       '<section class="section">' + sectionHead('AI content tools', 'Admin only. Each one reads the flagged moves above and writes one piece of copy — nothing is sent to the student or published on its own.') +
         (AI.on() ? '<div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-q="content-bot">' + icon('clapperboard') + ' Content Bot: video script</button><button type="button" class="btn btn-ghost btn-sm" data-q="teacher-bot">' + icon('chalkboard-user') + ' Teacher Bot: coaching message</button></div>'
-          : '<p class="small muted">Deploy hub-worker.js and set CONFIG.ai.endpoint to use these (README, "AI assistants").</p>') + '</section>' +
+          : '<p class="small muted">Set up the Arena server with your Anthropic API key to use these (server/README.md).</p>') + '</section>' +
       '<div class="btn-row q36-foot"><button type="button" class="btn btn-primary" data-q="approve-one">' + icon('check') + ' Approve and add to my draft</button><button type="button" class="btn btn-ghost" data-q="retrim-one">' + icon('rotate') + ' Trim again</button><button type="button" class="btn btn-quiet" data-q="reject-one">Reject</button></div>';
     board = Board(qs('#q36-board', view), { orientation: x.side === 'b' ? 'black' : 'white' });
     show(-1);
@@ -15590,7 +15591,7 @@ function mountPuzzleBoard(view) {
   }
   async function paintBoard() {
     const host = qs('#pzb-board', view);
-    if (!Ranks.on()) { host.innerHTML = '<h2>Community board</h2><p class="muted">The community board isn’t switched on yet. Your Puzzle ELO on the left already counts.</p>'; return; }
+    if (!Ranks.on()) { host.innerHTML = '<h2>Community board</h2><p class="muted">The community board isn’t switched on yet. Your own Puzzle ELO already counts.</p>'; return; }
     if (!App.can('leaderboard')) {
       host.innerHTML = '<h2>Community board</h2><p class="muted">See where your Puzzle ELO stands against the other players. Joining is ' + (gateLevel('leaderboard') === 'community' ? 'free for members of the Skool community' : 'part of the Accelerator') + '.</p><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-pzb="unlock">' + icon('lock-open') + ' Unlock the board</button></div>';
       return;
@@ -15599,8 +15600,8 @@ function mountPuzzleBoard(view) {
     let d;
     try { d = await PuzzleBoard.top(); } catch (e) {
       if (!view.isConnected) return;
-      const why = e.reason === 'no-db' ? 'The community board isn’t switched on yet.' : e.reason === 'network' ? 'Couldn’t reach the board.' : 'The Puzzle ELO board goes live with the next hub worker update. Your rating on the left already counts.';
-      host.innerHTML = '<h2>Community board</h2><p class="muted">' + esc(why) + '</p>' + (Admin.active && e.reason !== 'network' && e.reason !== 'no-db' ? '<p class="small">Admin: add the pz_sync and pz_top actions to hub-worker.js (README, v3.7).</p>' : '') +
+      const why = e.reason === 'no-db' ? 'The community board isn’t switched on yet.' : e.reason === 'network' ? 'Couldn’t reach the board.' : 'Couldn’t load the Puzzle ELO board. Your own rating already counts.';
+      host.innerHTML = '<h2>Community board</h2><p class="muted">' + esc(why) + '</p>' + (Admin.active && e.reason !== 'network' && e.reason !== 'no-db' ? '<p class="small">Admin: update the Arena server (server/README.md) so it has the Puzzle ELO board.</p>' : '') +
         '<div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-pzb="retry">Try again</button></div>';
       return;
     }
