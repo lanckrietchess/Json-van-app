@@ -54,6 +54,8 @@ try:
         out('after the reset [B asks, then A asks]', [ask(pb), ask(pa)])
         out('admin prompt test (preview)', pd.evaluate("(t) => AI.chat('coachPaid', [{ role: 'user', content: 'Test run' }], {}, { action: 'preview', instructions: 'PREVIEW PROMPT', secret: t }).then((r) => 'answered', (e) => 'refused: ' + e.reason)", TOKEN))
         out('preview used the new prompt', 'PREVIEW PROMPT' in LAST['body']['system'])
+        # With the Arena server on, the community stats are live and the hub asks once to share them (see the community suite): B already answered.
+        pb.evaluate("Store.set('lc-hub-consent-asked', Date.now())")
         pb.evaluate("location.hash = '#trim'"); pb.wait_for_selector('#coach', timeout=15000); pb.click('[data-act="sample"]'); pb.wait_for_timeout(800); pb.click('[data-act="review"]')
         for i in range(60):
             pb.wait_for_timeout(1500); pb.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach((b) => b.click())")

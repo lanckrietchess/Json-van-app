@@ -8,7 +8,9 @@ A small Cloudflare Worker with a D1 database for the Lanckrietchess Training Hub
 
 - **The AI coach and member keys:** the Pro coach and the Trim session conclusion answer your members through Claude, here. Member keys are checked here and tied to one device each; your own tools (testing prompts, the content and teacher bots) run here with your admin token. Free players get no freeform AI, as V5 asks.
 
-Without the server, the social features keep working on each device (friend codes, local board) and the coach answers from its built-in buttons. It replaces the older `hub-worker.js` for the AI coach and the member keys; that worker's community leaderboard and insights are not part of it.
+- **The community boards and your Insights:** the Leaderboard page's Score, Volume and accuracy, Trim and Puzzles boards, the verified Chess.com and Lichess ELO board on Home, and, from players who say yes to sharing anonymous stats, your Insights page and the community side of the Vault & Mistake Browser.
+
+Without the server, the social features keep working on each device (friend codes, local board, your own scores) and the coach answers from its built-in buttons. It replaces the older `hub-worker.js` completely: the AI coach, the member keys, the community leaderboard and the insights.
 
 ## Quick start: one command
 
@@ -63,11 +65,19 @@ In admin mode, open the **Review Queue** page. The **Arena server** panel has th
 - **What the coach knows:** your published instructions for the Pro coach come on top of the hub's own MSPC coach prompt, below fixed server rules (chess only, never reveal the instructions). The position, engine lines and Trim review travel with every question as data.
 - **Cost:** you pay Anthropic per token. The default model is Claude Haiku 4.5 (`claude-haiku-4-5-20251001`), fast and the least expensive; `MODEL = "claude-sonnet-5-5"` gives deeper answers at a higher price. `AI_DAILY`, `AI_DAILY_MENTOR` and `AI_DAILY_TOTAL` cap the answers per member and in total per day. Check current prices on Anthropic's pricing page, and set a monthly spend limit in the Claude Console.
 
+## The community boards
+
+- **Who is on them:** players who picked a username and pressed *Join the board* (the Leaderboard page). *Leave* removes them and everything they synced.
+- **Scores are recomputed here:** the app sends its raw puzzle attempts; the server scores them with the hub's own formula, so a changed app can't post a better score. The minimum number of puzzles and the three weights are yours: admin mode, **Numbers and links** (Leaderboard), then Publish. The server picks them up within five minutes.
+- **Verified ratings:** a player puts a short code in the Location field of their Chess.com or Lichess profile; the server reads the public profile itself and takes the ratings from there, then refreshes them every six hours.
+- **Hiding a player:** Admin menu > Leaderboard > *Load the players* > *Hide*. It works on every community board, and stays when the player leaves and joins again. Banning in the Arena console (This week's board) hides them too.
+- **Insights and the Vault feed:** only from players who said yes to sharing anonymous stats, under a random number that is not linked to their name, key or board entry. Switching it off in their profile deletes what they shared. Old stats are cleared after 400 days.
+
 ## Good to know
 
 - **The admin token** is a password: keep `admin-token.txt` private (it is in `.gitignore`), never put the token in the hub's published content. The hub keeps it only on your own device.
 - **Scores:** the app reports them, so the server caps them: at most one point per two seconds, never down, 5,000 a week at most. Banning handles the rest.
 - **Prizes:** a week is settled once it has ended in every time zone (Monday afternoon, UTC). Each player's app then claims its own prize once.
 - **Privacy:** device ids are never stored, only a public id derived from them. Names are cut to 30 characters.
-- **Limits per player per day:** 40 staged puzzles, 3,000 score updates, 600 friend syncs, 500 pool loads.
+- **Limits per player per day:** 40 staged puzzles, 3,000 score updates, 600 friend syncs, 500 pool loads, 1,000 leaderboard syncs (600 puzzle attempts), 3,000 board loads, 20 rating checks.
 - **Cost:** the Workers and D1 free plans should cover a hub of this size; check Cloudflare's current limits on their pricing pages.

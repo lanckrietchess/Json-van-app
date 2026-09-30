@@ -10,3 +10,24 @@ CREATE INDEX IF NOT EXISTS puzzles_created ON puzzles (created DESC);
 CREATE TABLE IF NOT EXISTS quota (pid TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (pid, day, kind));
 CREATE TABLE IF NOT EXISTS activations (hash TEXT NOT NULL, pid TEXT NOT NULL, created INTEGER NOT NULL, last INTEGER NOT NULL, PRIMARY KEY (hash, pid));
 CREATE TABLE IF NOT EXISTS ai_usage (day TEXT NOT NULL, pid TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, input INTEGER NOT NULL DEFAULT 0, output INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, pid));
+-- v3: the community protocol (leaderboards, anonymous training stats, Trim, Vault feed, verified ratings, Puzzle ELO).
+-- Players are the same public pid as above; the anonymous stats use their own hashed id (aid), never linked to a pid.
+CREATE TABLE IF NOT EXISTS lb_players (pid TEXT PRIMARY KEY, name TEXT NOT NULL DEFAULT '', bracket TEXT NOT NULL DEFAULT '', hidden INTEGER NOT NULL DEFAULT 0, updated INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS lb_attempts (pid TEXT NOT NULL, id TEXT NOT NULL, k TEXT NOT NULL DEFAULT '', c TEXT NOT NULL DEFAULT '', a REAL NOT NULL, ms INTEGER NOT NULL, mv INTEGER NOT NULL, d INTEGER NOT NULL, t INTEGER NOT NULL, PRIMARY KEY (pid, id, t));
+CREATE INDEX IF NOT EXISTS lb_attempts_t ON lb_attempts (pid, t);
+CREATE TABLE IF NOT EXISTS lb_scores (pid TEXT NOT NULL, period TEXT NOT NULL, score INTEGER NOT NULL, n INTEGER NOT NULL, acc REAL NOT NULL, gain INTEGER NOT NULL, rating INTEGER NOT NULL, ranked INTEGER NOT NULL, updated INTEGER NOT NULL, PRIMARY KEY (pid, period));
+CREATE INDEX IF NOT EXISTS lb_scores_rank ON lb_scores (period, ranked, score DESC);
+CREATE TABLE IF NOT EXISTS lb_vol (pid TEXT NOT NULL, period TEXT NOT NULL, cat TEXT NOT NULL, n INTEGER NOT NULL, ok INTEGER NOT NULL, PRIMARY KEY (pid, period, cat));
+CREATE INDEX IF NOT EXISTS lb_vol_board ON lb_vol (period, cat);
+CREATE TABLE IF NOT EXISTS ev_events (aid TEXT NOT NULL, b TEXT NOT NULL, e TEXT NOT NULL, k TEXT NOT NULL DEFAULT '', g TEXT, x TEXT, y TEXT, c TEXT, q TEXT, v REAL, t INTEGER NOT NULL, PRIMARY KEY (aid, t, e, k));
+CREATE INDEX IF NOT EXISTS ev_events_t ON ev_events (t);
+CREATE TABLE IF NOT EXISTS vb_items (aid TEXT NOT NULL, kind TEXT NOT NULL, sig TEXT NOT NULL, b TEXT NOT NULL DEFAULT '', opening TEXT, phase TEXT, k TEXT, cls TEXT, chapter TEXT, tags TEXT, fen TEXT, san TEXT, best TEXT, best_san TEXT, num INTEGER, color TEXT, cp_before INTEGER, cp_after INTEGER, pgn TEXT, acc INTEGER, t INTEGER NOT NULL, PRIMARY KEY (aid, kind, sig));
+CREATE INDEX IF NOT EXISTS vb_items_t ON vb_items (kind, t DESC);
+CREATE TABLE IF NOT EXISTS tr_games (pid TEXT NOT NULL, g TEXT NOT NULL, t INTEGER NOT NULL, bl INTEGER NOT NULL, mi INTEGER NOT NULL, n INTEGER NOT NULL, PRIMARY KEY (pid, g));
+CREATE INDEX IF NOT EXISTS tr_games_t ON tr_games (t);
+CREATE TABLE IF NOT EXISTS tr_solved (pid TEXT NOT NULL, k TEXT NOT NULL, t INTEGER NOT NULL, PRIMARY KEY (pid, k));
+CREATE INDEX IF NOT EXISTS tr_solved_t ON tr_solved (t);
+CREATE TABLE IF NOT EXISTS elo_accounts (pid TEXT NOT NULL, site TEXT NOT NULL, uname TEXT NOT NULL, name TEXT NOT NULL DEFAULT '', avatar TEXT NOT NULL DEFAULT '', rapid INTEGER, blitz INTEGER, bullet INTEGER, checked INTEGER NOT NULL, updated INTEGER NOT NULL, PRIMARY KEY (pid, site));
+CREATE UNIQUE INDEX IF NOT EXISTS elo_accounts_user ON elo_accounts (site, uname COLLATE NOCASE);
+CREATE TABLE IF NOT EXISTS pz_players (pid TEXT PRIMARY KEY, rating INTEGER NOT NULL, peak INTEGER NOT NULL, start INTEGER NOT NULL, games INTEGER NOT NULL, wins INTEGER NOT NULL, trophy TEXT NOT NULL DEFAULT '', updated INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS pz_players_rating ON pz_players (rating DESC);

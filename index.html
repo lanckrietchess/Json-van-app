@@ -10434,7 +10434,8 @@ const Attempts = (() => {
 const Ranks = (() => {
   const SYNC = 'lc-hub-lb-sync', SIG = 'lc-hub-lb-sig';
   let timer = null, busy = false, cache = {};
-  const endpoint = () => String((CONFIG.community && CONFIG.community.endpoint) || (CONFIG.ai && CONFIG.ai.endpoint) || '').trim();
+  /* v5: without its own address the board uses the Arena server (admin mode), like the AI coach. The raw ev_sync call in Telemetry goes through endpoint() too. */
+  const endpoint = () => String((CONFIG.community && CONFIG.community.endpoint) || (CONFIG.ai && CONFIG.ai.endpoint) || '').trim() || arenaUrl();
   const on = () => /^https:\/\/\S+$/i.test(endpoint()) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/\S*)?$/i.test(endpoint());
   const min = () => clamp(Math.round(+getPath(CONFIG, 'leaderboard.minPuzzles') || 10), 1, 500);
   function weights() {

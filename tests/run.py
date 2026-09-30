@@ -4,8 +4,8 @@
   python tests/run.py            all suites
   python tests/run.py mspc ai    only these
 
-Suites: unit (server, Node), mspc, arena, formats (browser), server, ai, members
-(browser + a local Arena server on ports 8787/8799, Node 22.5+). Each browser
+Suites: unit (server, Node), mspc, arena, formats (browser), server, ai, members,
+community (browser + a local Arena server on ports 8787/8789/8799, Node 22.5+). Each browser
 suite prints labelled results; the expectations below are what a correct build
 prints. Exit code 1 when anything fails. Screenshots land in tests/shots/."""
 import os, re, sys, subprocess, shutil
@@ -34,9 +34,14 @@ EXPECT = {
          r"admin prompt test \(preview\): answered", r"preview used the new prompt: True", r"B: AI session conclusion: Coach \(test\)", r"the conclusion request carried the session: \[True, True\]"],
   'members': [r"before the server: unlocked on the device \[ok, tier, remote\]: \[True, 'vault', False\]", r"server goes live, weekly check \[result, tier kept\]: \[None, 'vault'\]", r"AI coach on this device: answered",
               r"re-enter the key \[ok, tier\]: \[True, 'vault'\]", r"weekly check after connecting: \[None, 'vault'\]", r"a second device with the same key \[ok, message\]: \[False, 'This key is already active on another device"],
+  'community': [r"endpoint falls back to the Arena server \[A synced, B synced, endpoint\]: \[True, True, 'http://127\.0\.0\.1:8789'\]", r"A score board: \*1 Anna \d+ / 2 Bram \d+",
+                r"A: the server ranks the score the device shows: True", r"B is asked once to share stats \[title, again\]: \['Help shape the next lessons', \[False, False\]\]", r"B score board \(phone\): \['1 Anna \d+ / \*2 Bram \d+', '.*2 ranked players\.'\]", r"B phone \[overflow-x\]: 0",
+                r"B volume board \(20 solved to rank\): 1 Anna 22 *\n", r"B volume board, accuracy: 1 Anna 92%", r"A verifies Chess\.com: \[True, True, 'KyenzoTest', 2105\]", r"B tries a wrong code: \[False, 'code'\]",
+                r"B sees the ELO board: .*#1 KY KyenzoTest 2105", r"admin insights: Last 30 days, from players who share anonymous stats\. 2 on the leaderboard\. 1 Players 1 Drills finished 25% First-try accuracy 1 Coach questions",
+                r"admin insights \[players on the board, question\]: \[True, True\]", r"admin insights, wrong token: The worker refused the admin secret\.", r"admin hides Bram: Bram \(hidden\), Anna", r"A board after the admin hid Bram: Anna / 1"],
 }
-ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members']
-NEEDS_NODE = {'unit', 'server', 'ai', 'members'}
+ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community']
+NEEDS_NODE = {'unit', 'server', 'ai', 'members', 'community'}
 def node_ok():
     try: v = subprocess.run(['node', '--version'], capture_output=True, text=True).stdout.strip().lstrip('v').split('.'); return (int(v[0]), int(v[1])) >= (22, 5)
     except Exception: return False

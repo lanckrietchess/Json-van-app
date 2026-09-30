@@ -4,12 +4,19 @@ import worker from '../arena-worker.js';
 import { makeD1 } from './d1shim.mjs';
 const env = { DB: makeD1(), ADMIN_TOKEN: 'test-admin-token-0123456789', ALLOWED_ORIGINS: 'https://hub.test', PID_SALT: 'unit', MAX_PUZZLES: '6', CONTENT_URL: 'https://content.test/content.json', ANTHROPIC_API_KEY: 'sk-test-key' };
 const H = (k) => crypto.createHash('sha256').update('lc-key|' + k.toUpperCase()).digest('hex');
-const CONTENT = { app: 'lanckrietchess-hub', keys: [{ tier: 'vault', sha256: H('LC-VAULT-ANNA'), label: 'Anna' }, { tier: 'community', sha256: H('LC-COMM-CAS'), label: 'Cas' }, { tier: 'mentor', sha256: H('LC-OLD-MENTOR'), label: 'Old', exp: '2020-01-01' }, { tier: 'vault', sha256: H('LC-OFF-VAULT'), label: 'Off', revoked: true }], gates: { coachChat: 'vault' }, bots: { coachPaid: 'Always end with one MSPC question for {coach}.' } };
+const CONTENT = { app: 'lanckrietchess-hub', keys: [{ tier: 'vault', sha256: H('LC-VAULT-ANNA'), label: 'Anna' }, { tier: 'community', sha256: H('LC-COMM-CAS'), label: 'Cas' }, { tier: 'mentor', sha256: H('LC-OLD-MENTOR'), label: 'Old', exp: '2020-01-01' }, { tier: 'vault', sha256: H('LC-OFF-VAULT'), label: 'Off', revoked: true }], gates: { coachChat: 'vault' }, settings: { leaderboard: { minPuzzles: 3, weights: { accuracy: 0.7, speed: 0.2, gain: 0.1 } } }, bots: { coachPaid: 'Always end with one MSPC question for {coach}.' } };
 let lastAI = null, aiMode = 'ok';
+/* Public profiles for elo_verify: Chess.com (profile + stats) and Lichess. */
+const PROFILES = { 'https://api.chess.com/pub/player/kyenzo': { username: 'kyenzo', url: 'https://www.chess.com/member/Kyenzo', avatar: 'https://images.chesscomfiles.com/a.png', location: 'Ghent LC-ABC234', name: 'K' },
+  'https://api.chess.com/pub/player/kyenzo/stats': { chess_rapid: { last: { rating: 2105 } }, chess_blitz: { last: { rating: 1990 } } },
+  'https://api.chess.com/pub/player/bram/stats': { chess_rapid: { last: { rating: 1500 } } }, 'https://api.chess.com/pub/player/bram': { username: 'bram', location: 'LC-BRAM22' },
+  'https://lichess.org/api/user/anna': { username: 'Anna', profile: { location: 'nowhere' }, perfs: { rapid: { rating: 1800, games: 10 } } } };
+const profileMock = (url) => (PROFILES[url] ? new Response(JSON.stringify(PROFILES[url]), { status: 200, headers: { 'content-type': 'application/json' } }) : new Response('{}', { status: 404 }));
 const realFetch = globalThis.fetch;
 globalThis.fetch = async (url, init) => {
   url = String(url);
   if (url.startsWith('https://content.test/')) return new Response(JSON.stringify(CONTENT), { status: 200, headers: { 'content-type': 'application/json' } });
+  if (url.startsWith('https://api.chess.com/pub/player/') || url.startsWith('https://lichess.org/api/user/')) return profileMock(url);
   if (url.startsWith('https://api.anthropic.com/')) {
     lastAI = { headers: init.headers, body: JSON.parse(init.body) };
     if (aiMode === 'busy') return new Response(JSON.stringify({ type: 'error', error: { type: 'overloaded_error', message: 'Overloaded' } }), { status: 529 });
@@ -125,5 +132,98 @@ r = await call({ action: 'a5_unbind', token: env.ADMIN_TOKEN, hash: H('LC-VAULT-
   check('guessing keys: the 121st check from one IP in a day is refused', hit === 120, hit);
   const other = await worker.fetch(new Request('https://arena.test/', { method: 'POST', headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '203.0.113.10' }, body: JSON.stringify({ action: 'verify', token: 'LC-GUESS-X', __ip: '203.0.113.9' }) }), env, { waitUntil() {} });
   check('another IP is not affected, and a client cannot fake its IP', other.status === 200, other.status);
+}
+// ---- v3: the community protocol ----
+{
+  /* The hub's own scoring functions, straight from index.html, to prove the server's copy ranks the same. */
+  const html = fs.readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
+  const hub = new Function(html.slice(html.indexOf('const LC_PAR = {'), html.indexOf('\nconst BRACKET_LABEL')) + '; return { lcPeriod, lcScore };')();
+  const t0 = Date.now(), att = (id, a, over) => Object.assign({ id, k: 'think', c: 'middlegame', a, ms: 20000, mv: 2, d: 1300, t: t0 - 60000 }, over);
+  const annaAtt = [att('d1', 1), att('d2', 1), att('d3', 0.5), att('d4', 1, { c: 'hard', k: 'hard' }), att('d5', 1, { ms: 100 })];   // d5: faster than a human, ignored
+  r = await call({ action: 'lb_sync', device: dev('z'), bracket: 'climber', attempts: annaAtt }); check('lb_sync needs a name', r.j.reason === 'name', r.j);
+  r = await call({ action: 'lb_sync', device: dev('a'), name: 'Anna', bracket: 'climber', attempts: annaAtt.concat([{ id: 'custom:x', a: 1, t: t0 }, { id: 'old', a: 1, t: t0 - 500 * DAY }]) });
+  check('lb_sync stores the valid attempts only', r.j.ok && r.j.added === 5 && r.j.mine.n === 4 && r.j.mine.ranked === true, r.j);
+  const hubScore = hub.lcScore(annaAtt, Object.assign({ min: 3, w: CONTENT.settings.leaderboard.weights }, hub.lcPeriod('week')));
+  await call({ action: 'lb_sync', device: dev('b'), name: 'Bram', bracket: 'builder', attempts: [att('d1', 0), att('d2', 1)] });
+  r = await call({ action: 'lb_top', period: 'week', device: dev('a') });
+  check('lb_top: the server score is the hub\'s lcScore with the published weights', r.j.rows.length === 1 && r.j.rows[0].score === hubScore.score && r.j.rows[0].you === true && r.j.rows[0].rank === 1 && r.j.rows[0].acc === Math.round(hubScore.acc * 100) && r.j.total === 1, { got: r.j, hub: hubScore.score });
+  r = await call({ action: 'lb_top', period: 'week', device: dev('b') }); check('lb_top: an unranked player sees their own row', r.j.you && r.j.you.rank === 0 && r.j.you.n === 2 && !r.j.rows.some((x) => x.you), r.j);
+  r = await call({ action: 'lb_top', period: 'month', device: dev('a') }); check('lb_top: month and all time', r.j.rows.length === 1 && /^m\d{4}-\d{2}$/.test(r.j.period), r.j);
+  const many = []; for (let i = 0; i < 24; i++) many.push(att('v' + i, i < 22 ? 1 : 0, { c: i < 6 ? 'hard' : 'endgame' }));
+  await call({ action: 'lb_sync', device: dev('c'), name: 'Cas', attempts: many });
+  r = await call({ action: 'lb_volume', period: 'week', cat: 'all', sort: 'solved', device: dev('a') });
+  check('lb_volume: 20 solved to rank, Anna (4) is not on it', r.j.rows.length === 1 && r.j.rows[0].name === 'Cas' && r.j.rows[0].ok === 22 && r.j.rows[0].n === 24 && r.j.rows[0].hardN === 6 && r.j.you === null, r.j);
+  r = await call({ action: 'lb_volume', period: 'week', cat: 'endgame', sort: 'accuracy', device: dev('c') }); check('lb_volume: per category, accuracy', r.j.rows[0].you && r.j.rows[0].n === 18 && r.j.rows[0].acc === 89, r.j);
+  r = await call({ action: 'lb_volume', period: 'week', cat: 'all', sort: 'hard', device: dev('c') }); check('lb_volume: Hard Mode needs 5 Hard puzzles', r.j.rows.length === 1 && r.j.rows[0].hardAcc === 100, r.j);
+  r = await call({ action: 'lb_admin', secret: 'wrong-secret-0000000000', op: 'list' }); check('lb_admin needs the admin token', r.status === 403 && r.j.reason === 'forbidden', r.j);
+  r = await call({ action: 'lb_admin', secret: env.ADMIN_TOKEN, op: 'list' }); const cas = r.j.players.filter((x) => x.name === 'Cas')[0];
+  check('lb_admin list: names, pids (never device ids)', r.j.players.length === 3 && cas && cas.device !== dev('c') && /^[a-z0-9]{14}$/.test(cas.device), r.j);
+  r = await call({ action: 'lb_admin', secret: env.ADMIN_TOKEN, op: 'hide', target: cas.device }); check('lb_admin hide', r.j.players.filter((x) => x.name === 'Cas')[0].hidden === true, r.j);
+  r = await call({ action: 'lb_volume', period: 'week', cat: 'all', sort: 'solved', device: dev('a') }); check('a hidden player leaves the boards', r.j.rows.length === 0, r.j);
+  await call({ action: 'lb_forget', device: dev('c') });
+  r = await call({ action: 'lb_admin', secret: env.ADMIN_TOKEN, op: 'list' }); check('lb_forget keeps a hidden player hidden', r.j.players.filter((x) => x.device === cas.device && x.hidden).length === 1, r.j);
+  r = await call({ action: 'lb_forget', device: dev('b') }); r = await call({ action: 'lb_top', period: 'week', device: dev('b') });
+  check('lb_forget removes the player and their scores', r.j.ok && !r.j.you, r.j);
+  for (const tb of ['lb_attempts', 'lb_players', 'ev_events', 'tr_games', 'elo_accounts', 'pz_players', 'vb_items']) {
+    const cols = (await env.DB.prepare('SELECT * FROM ' + tb).all()).results;
+    if (cols.some((row) => Object.values(row).some((v) => typeof v === 'string' && /^d-[a-z]{14}$/.test(v)))) check('no device id stored in ' + tb, false, tb);
+  }
+
+  const anon = 'a-' + 'k'.repeat(20), ev = (e, over) => Object.assign({ e, t: t0 - 1000, k: 'think-1', g: 'MSPC', x: '', v: 0 }, over);
+  r = await call({ action: 'ev_sync', anon: 'nope', events: [ev('s')] }); check('ev_sync: bad anon refused', r.j.reason === 'bad_anon', r.j);
+  r = await call({ action: 'ev_sync', app: 'lanckrietchess-hub', version: '5.0.0', anon, b: 'climber', events: [ev('s'), ev('f', { v: 40 }), ev('m', { x: '3', q: 'Nf3' }), ev('q', { x: 'plan', q: 'mail me at x@y.com', t: t0 - 500 }), ev('zz')] });
+  check('ev_sync: 4 valid events', r.j.saved === 4, r.j);
+  await call({ action: 'ev_sync', anon: 'a-' + 'm'.repeat(20), b: 'bogus', events: [ev('s', { t: t0 - 2000 })] });
+  r = await call({ action: 'insights', secret: 'nope', days: 30 }); check('insights needs the admin token', r.j.reason === 'forbidden', r.j);
+  r = await call({ action: 'insights', secret: env.ADMIN_TOKEN, days: 30 }); const D = r.j.data;
+  check('insights: aggregated by the hub\'s lcAggregate, no ids, emails scrubbed', r.j.days === 30 && D.events === 5 && Object.keys(D.users).length === 2 && D.brackets.climber === 1 && D.brackets.unrated === 1 && D.drills['climber|think-1'].s === 1 && D.drills['climber|think-1'].f === 1 && D.questions[0].q === 'mail me at [email]' && !JSON.stringify(D).includes(anon) && r.j.players === 1, r.j);
+  // Beacon: the hub sends ev_sync as text/plain.
+  const beacon = await worker.fetch(new Request('https://arena.test/', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ action: 'ev_sync', anon, b: 'climber', events: [ev('v', { k: 'home', t: t0 - 10 })] }) }), env, { waitUntil() {} });
+  check('ev_sync by sendBeacon (text/plain)', (await beacon.json()).saved === 1, beacon.status);
+
+  const game = (g, t, bl, mi) => ({ g, t, bl, mi, n: 20 });
+  r = await call({ action: 'tr_sync', device: dev('a'), name: 'Anna', bracket: 'climber', games: [game('g1', t0 - 1000, 1, 1), game('g2', t0 - 2000, 0, 1), game('g3', t0 - 8 * DAY, 3, 2), game('g4', t0 - 9 * DAY, 2, 2), game('bad sig!', t0, 1, 1)], solved: [{ k: 's1', t: t0 - 1000 }, { k: 's2', t: t0 - 3000 }] });
+  check('tr_sync: 4 games, 2 solved', r.j.games === 4 && r.j.solved === 2, r.j);
+  await call({ action: 'tr_sync', device: dev('e'), name: 'Eve', games: [game('g9', t0 - 1000, 0, 0)], solved: [] });
+  r = await call({ action: 'tr_top', period: 'all', sort: 'reviewed', device: dev('a') });
+  check('tr_top reviewed (a banned player stays off)', r.j.rows.length === 1 && r.j.rows[0].reviewed === 4 && r.j.rows[0].solved === 2 && r.j.rows[0].you, r.j);
+  r = await call({ action: 'tr_top', period: 'all', sort: 'reduction', device: dev('a') }); check('tr_top reduction: 4.5 to 1.5 mistakes a game is 67% fewer', r.j.rows[0] && r.j.rows[0].reduction === 67, r.j);
+
+  const mis = { kind: 'mistake', sig: 'm1', b: 'climber', opening: 'Caro-Kann', phase: 'opening', k: 'M', cls: 'blunder', chapter: 'ck-1', tags: 'loose', fen: FEN, san: 'Ngf6', best: 'd7f6', bestSan: 'Ndf6', num: 5, color: 'b', before: 20, after: -900, t: t0 - 1000 };
+  const gm = { kind: 'game', sig: 'g1', b: 'climber', opening: 'Caro-Kann', cls: 'loss', fen: FEN, color: 'b', pgn: '[White "Real Name"]\n[Result "1-0"]\n1. e4 c6', acc: 71, tags: 'blunder:1', t: t0 - 900 };
+  r = await call({ action: 'vb_sync', anon, items: [mis, gm, Object.assign({}, mis, { fen: 'x' })] }); check('vb_sync: 2 valid items', r.j.saved === 2, r.j);
+  r = await call({ action: 'vb_list', secret: 'nope', kind: 'mistake' }); check('vb_list needs the admin token', r.j.reason === 'forbidden', r.j);
+  r = await call({ action: 'vb_list', secret: env.ADMIN_TOKEN, kind: 'mistake', days: 90 }); check('vb_list: the mistake with its tags', r.j.rows.length === 1 && r.j.rows[0].bestSan === 'Ndf6' && r.j.rows[0].after === -900 && r.j.days === 90, r.j);
+  r = await call({ action: 'vb_list', secret: env.ADMIN_TOKEN, kind: 'game', days: 30 }); check('vb_list: games keep their moves, not the names', r.j.rows.length === 1 && /1\. e4 c6/.test(r.j.rows[0].pgn) && !/Real Name/.test(r.j.rows[0].pgn), r.j);
+  r = await call({ action: 'ev_forget', anon }); r = await call({ action: 'vb_list', secret: env.ADMIN_TOKEN, kind: 'game', days: 30 });
+  check('ev_forget deletes the stats and the Vault feed of that id', r.j.rows.length === 0, r.j);
+
+  r = await call({ action: 'elo_verify', device: dev('a'), site: 'chesscom', user: 'kyenzo', code: 'LC-ZZZ999', name: 'Anna' }); check('elo_verify: code missing from the profile', r.j.reason === 'code', r.j);
+  r = await call({ action: 'elo_verify', device: dev('a'), site: 'chesscom', user: 'nobody', code: 'LC-ABC234' }); check('elo_verify: unknown account', r.j.reason === 'not-found', r.j);
+  r = await call({ action: 'elo_verify', device: dev('a'), site: 'chesscom', user: 'kyenzo', code: 'lc-abc234', name: 'Anna' });
+  check('elo_verify: the code in Location, ratings from Chess.com', r.j.ok && r.j.user === 'Kyenzo' && r.j.rapid === 2105 && r.j.blitz === 1990 && r.j.bullet === null && /^https:/.test(r.j.avatar), r.j);
+  await call({ action: 'elo_verify', device: dev('b'), site: 'chesscom', user: 'bram', code: 'LC-BRAM22', name: 'Bram' });
+  r = await call({ action: 'elo_top', site: 'chesscom', mode: 'rapid', device: dev('b') });
+  check('elo_top: verified rapid board', r.j.rows.length === 2 && r.j.rows[0].user === 'Kyenzo' && r.j.rows[0].rating === 2105 && r.j.rows[1].you && r.j.you.rank === 2 && r.j.total === 2, r.j);
+  r = await call({ action: 'elo_top', site: 'chesscom', mode: 'blitz', device: dev('b') }); check('elo_top: only players with a rating in that mode', r.j.rows.length === 1, r.j);
+  r = await call({ action: 'elo_verify', device: dev('f'), site: 'chesscom', user: 'Kyenzo', code: 'LC-ABC234' }); r = await call({ action: 'elo_top', site: 'chesscom', mode: 'rapid', device: dev('a') });
+  check('an account proven again by another player moves to them', r.j.rows.length === 2 && !r.j.rows.some((x) => x.you), r.j);
+  r = await call({ action: 'elo_verify', device: dev('a'), site: 'lichess', user: 'Anna', code: 'LC-ABC234' }); check('elo_verify on Lichess checks the profile too', r.j.reason === 'code', r.j);
+  r = await call({ action: 'elo_forget', device: dev('b'), site: 'chesscom' }); check('elo_forget', r.j.removed === 1, r.j);
+  let lim = null; for (let i = 0; i < 25 && !lim; i++) { const x = await call({ action: 'elo_verify', device: dev('g'), site: 'chesscom', user: 'nobody', code: 'LC-ABC234' }); if (x.j.reason === 'limit') lim = i; }
+  check('elo_verify: 20 checks a day, then "limit"', lim === 20, lim);
+
+  r = await call({ action: 'pz_sync', device: dev('a'), name: 'Anna', bracket: 'climber', rating: 1290, peak: 1300, start: 1200, games: 6, wins: 5, trophy: 'gold', results: [] });
+  check('pz_sync stores the Puzzle ELO', r.j.ok && r.j.rating === 1290 && r.j.peak === 1300, r.j);
+  r = await call({ action: 'pz_sync', device: dev('a'), name: 'Anna', bracket: 'climber', trophy: 'gold', rating: 2800, peak: 2800, start: 400, games: 7, wins: 7 }); check('pz_sync: one more game moves it 48 points at most, the start stays', r.j.rating === 1338 && r.j.games === 7, r.j);
+  r = await call({ action: 'pz_sync', device: dev('a'), name: 'Anna', bracket: 'climber', trophy: 'gold', rating: 1300, games: 2, wins: 1 }); check('pz_sync: games never go down', r.j.games === 7 && r.j.rating === 1338, r.j);
+  await call({ action: 'pz_sync', device: dev('h'), name: 'Hugo', rating: 1400, start: 1400, games: 3, wins: 3 });
+  r = await call({ action: 'pz_top', device: dev('h'), limit: 50 });
+  check('pz_top: 5 rated puzzles to appear, trophy and peak', r.j.rows.length === 1 && r.j.rows[0].name === 'Anna' && r.j.rows[0].trophy === 'gold' && r.j.rows[0].peak === 1338 && !r.j.you && r.j.total === 1, r.j);
+  r = await call({ action: 'lb_top', period: 'week', device: dev('a') }); check('the Puzzle ELO trophy shows on the other boards', r.j.rows[0].trophy === 'gold', r.j);
+
+  r = await call({ action: 'lb_sync', device: dev('i'), name: 'Ivo', attempts: [] }); await env.DB.exec("UPDATE elo_accounts SET checked = 0, rapid = 1");
+  await worker.scheduled({}, env, { waitUntil: (p) => p }); await new Promise((res) => setTimeout(res, 50));
+  r = await call({ action: 'elo_top', site: 'chesscom', mode: 'rapid', device: dev('a') }); check('cron refreshes the verified ratings', r.j.rows[0].rating === 2105, r.j);
 }
 console.log(fails ? fails + ' FAILED' : 'ALL PASSED');
