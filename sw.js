@@ -1,6 +1,6 @@
 /* Lanckrietchess Training Hub service worker.
    Bump VERSION whenever you upload a new index.html so returning users get it. */
-const VERSION = 'lc-hub-4.0.0';
+const VERSION = 'lc-hub-5.0.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png'];
 /* [url, mode]: the mode must match how index.html requests the file, or the cached copy is refused. */
 const CDN = [
@@ -38,11 +38,13 @@ self.addEventListener('fetch', (e) => {
     }).catch(() => caches.match(key, { ignoreSearch: true }).then((r) => r || (req.mode === 'navigate' ? caches.match('./index.html') : Response.error()))));
     return;
   }
-  // Libraries, fonts, icons and the Stockfish engine: cache first.
-  const cacheable = url.origin === location.origin || /(^|\.)cdnjs\.cloudflare\.com$|(^|\.)fonts\.(googleapis|gstatic)\.com$|^cdn\.tailwindcss\.com$|(^|\.)chesscomfiles\.com$/.test(url.hostname);
+  // Libraries, fonts, icons and the Stockfish engine (engine/, ~1.8 MB WASM, or its jsDelivr fallback):
+  // cache first. A new VERSION clears it, so a new engine build ships with the next upload.
+  const cacheable = url.origin === location.origin || /(^|\.)cdnjs\.cloudflare\.com$|^cdn\.jsdelivr\.net$|(^|\.)fonts\.(googleapis|gstatic)\.com$|^cdn\.tailwindcss\.com$|(^|\.)chesscomfiles\.com$/.test(url.hostname);
   if (!cacheable) return;
   e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-    if (res && (res.ok || res.type === 'opaque')) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); }
+    // Only complete responses: a 206 (range request) cannot be stored and would make put() throw.
+    if (res && (res.status === 200 || res.type === 'opaque')) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)).catch(() => null); }
     return res;
   })));
 });

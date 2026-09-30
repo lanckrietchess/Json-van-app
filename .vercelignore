@@ -1,0 +1,5 @@
+# Keep the server code, the tests and the notes off the public site.
+server/
+tests/
+CLAUDE.md
+HANDOFF.md
