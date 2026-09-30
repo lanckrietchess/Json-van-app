@@ -1565,6 +1565,23 @@ body.is-resizing5,body.is-resizing5 *{cursor:col-resize!important;-webkit-user-s
 .fn5-opt[open] summary::after{content:"\f077"}
 .fn5-opt>.stack{padding:0 14px 14px}
 .fn5-opt .input{background:var(--ink)}
+
+/* v5.2: the Upgrade chat editor, the popup triggers, the My mistakes panel */
+.pp-panel{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:14px;padding:14px;margin:12px 0}
+.pp-panel>i{color:var(--accent);margin-top:3px}
+.pp-panel p{margin:0 0 10px;line-height:1.45}
+.pp-opts{flex-direction:column;align-items:stretch}
+.pp-opts button{text-align:left;width:100%}
+.pp-form textarea{resize:vertical}
+.uc-btn{display:grid;gap:8px;padding:10px;border:1px solid var(--hair);border-radius:12px;background:var(--ink-2)}
+.uc-btn-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.uc-tools{display:flex;gap:6px;flex-wrap:wrap}
+.uc-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.uc textarea.uc-json{min-height:260px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.45;white-space:pre}
+.uc code{font-size:12.5px;background:var(--ink-2);padding:1px 5px;border-radius:5px;color:var(--chalk)}
+.uc h3{font-size:16px;margin-top:10px}
+.uc-file{cursor:pointer}
+@media (max-width:520px){.uc-btn-row{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -4809,6 +4826,8 @@ const CMS = (() => {
           row('mspc5', 'brain', 'MSPC framework and coach buttons', 'Step names, tag buttons, mistake tags, fixed coach answers, panel sizes') +
           row('arena5', 'trophy', 'Weekly tournament and sales bridge', 'Metric, prizes, players needed, ManyChat link') +
           row('funnel51', 'filter-circle-dollar', 'Pop-up & Funnel Manager', 'Growth Path pop-up: texts, prices, options A, B and C, the Tier 3 queue' + (Funnel.on() ? '' : ', switched off')) +
+          row('chat52', 'comments', 'Upgrade chat', 'Every message, reply and button of the chat on the Upgrades page' + (UpChat.on() ? '' : ', switched off')) +
+          row('popups52', 'window-restore', 'Popup triggers', 'Support inquiry, timeline question and the rules that open pop-ups') +
           row('bots', 'robot', 'AI assistants', 'Coaches, the Growth Path bots and the sales assistant' + (nBots ? ', ' + nBots + ' edited' : '')) +
           row('avatar', 'camera', 'Profile image', 'Your Chess.com picture on the About page') +
           row('editor', 'chess-board', 'Board editor', 'Build any position by hand, then save it as a drill') +
@@ -4846,6 +4865,8 @@ const CMS = (() => {
             else if (m === 'mspc5') V5Admin.framework();
             else if (m === 'arena5') V5Admin.arena();
             else if (m === 'funnel51') V5Admin.funnel();
+            else if (m === 'chat52') V5Admin.chat();
+            else if (m === 'popups52') V5Admin.popups();
             else if (m === 'avatar') avatarSheet();
             else if (m === 'keys') keysSheet();
             else if (m === 'publish') publish();
@@ -10015,6 +10036,18 @@ function accessStatusHTML() {
   return '<div class="access-status' + (on ? ' is-on' : '') + '"><span class="ico">' + icon(on ? 'crown' : 'lock') + '</span><div><strong>' + esc(on ? TIERS[a.tier].label + ' access' : 'Free access') + '</strong><span>' +
     esc(on ? bits.join(', ').replace(/^./, (c) => c.toUpperCase()) + '.' : 'Paste your member key to unlock your upgrade on this device.') + '</span></div></div>';
 }
+/* v5.2: the assistant section of the Upgrades page. The hardcoded chat (Admin menu > Upgrade chat) is the default;
+   switched off there, the page goes back to the AI sales assistant. */
+function upBotSection() {
+  const hard = UpChat.on();
+  return '<section class="section" id="up-bot"><div class="panel gateway"><div class="gateway-head"><h3>' + icon('comments') + ' ' + esc(T('up.botTitle')) + ed('up.botTitle') + '</h3><p>' + H('up.botText') + ed('up.botText') + '</p>' +
+    (hard ? '' : (AI.forBot('sales') ? '<p class="bot-status">' + icon('circle', 'ai-dot') + ' AI assistant online. Tap an answer, or ask anything.</p>' : '') +
+      (CONFIG.links.salesBot ? '<div><a class="btn btn-ghost btn-sm" href="' + esc(CONFIG.links.salesBot) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Open the full assistant</a></div>' : '')) +
+    (Admin.editing() ? '<div class="btn-row"><button type="button" class="cms-manage" data-cms-chat>' + icon('comments') + ' Edit the chat</button><button type="button" class="cms-manage" data-cms-popups>' + icon('window-restore') + ' Popup triggers</button>' +
+      (hard ? '' : '<button type="button" class="cms-manage" data-cms-bots="sales">' + icon('robot') + ' Assistant instructions</button>') + '</div>' : '') + '</div>' +
+    (hard ? UpChat.html() : '<div class="bot"><div class="chat" role="log" aria-live="polite"></div><div class="quick"></div><form class="chat-form" autocomplete="off"><input class="input" name="msg" maxlength="280" placeholder="Type a message…" aria-label="Message the assistant"><button class="btn btn-primary" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form></div>') +
+    '</div></section>';
+}
 function mountUpgrades(view) {
   const tier = App.access.tier, P = CONFIG.pricing, ext = (href) => (/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : '');
   view.innerHTML = cmsBar() + pageHeadK('up.title', 'up.intro') +
@@ -10025,23 +10058,22 @@ function mountUpgrades(view) {
       rungHTML(2, 'rocket', 'The Accelerator', 'up.acceleratorText', 'up.acceleratorList', '<button type="button" class="btn btn-primary" data-scroll="up-bot">Is it right for me?</button>', false, 'Bridge') +
       rungHTML(3, 'chess-king', '1-on-1 Mentorship', 'up.mentorshipText', 'up.mentorshipList', '<p class="small muted">' + icon('user-group') + ' Maximum ' + esc(P.mentorship.cap) + ' players at a time' + (P.mentorship.seatsLeft != null ? ', ' + esc(P.mentorship.seatsLeft) + (P.mentorship.seatsLeft === 1 ? ' seat' : ' seats') + ' open right now' : '') + '.</p><button type="button" class="btn btn-gold" data-scroll="up-bot">Ask about a seat</button>', true, 'Private Jet') +
     '</div></section>' +
-    '<section class="section" id="up-bot"><div class="panel gateway"><div class="gateway-head"><h3>' + icon('comments') + ' ' + esc(T('up.botTitle')) + ed('up.botTitle') + '</h3><p>' + H('up.botText') + ed('up.botText') + '</p>' +
-      (AI.forBot('sales') ? '<p class="bot-status">' + icon('circle', 'ai-dot') + ' AI assistant online. Tap an answer, or ask anything.</p>' : '') +
-      (CONFIG.links.salesBot ? '<div><a class="btn btn-ghost btn-sm" href="' + esc(CONFIG.links.salesBot) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Open the full assistant</a></div>' : '') +
-      (Admin.editing() ? '<div><button type="button" class="cms-manage" data-cms-bots="sales">' + icon('robot') + ' Assistant instructions</button></div>' : '') + '</div>' +
-      '<div class="bot"><div class="chat" role="log" aria-live="polite"></div><div class="quick"></div><form class="chat-form" autocomplete="off"><input class="input" name="msg" maxlength="280" placeholder="Type a message…" aria-label="Message the assistant"><button class="btn btn-primary" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form></div></div></section>' +
+    upBotSection() +
     '<section class="section" id="up-access">' + sectionHeadK('up.accessTitle', 'up.accessText', Admin.editing() ? '<button type="button" class="cms-manage" data-cms-keys>' + icon('key') + ' Member keys</button>' : '') +
       '<div class="panel access-card">' + accessStatusHTML() + tokenFormHTML('upgrades') + (tier !== 'free' ? '<button type="button" class="btn btn-quiet btn-sm" data-signout style="justify-self:start">Remove membership from this device</button>' : '') + '</div></section>';
   bindTokenForms(view, () => setTimeout(rerender, 700));
   async function onClick(e) {
     const b = e.target.closest('[data-scroll]');
     if (b) { scrollToEl(qs('#' + b.getAttribute('data-scroll'), view)); return; }
+    if (e.target.closest('[data-cms-chat]') && Admin.active) { V5Admin.chat(); return; }
+    if (e.target.closest('[data-cms-popups]') && Admin.active) { V5Admin.popups(); return; }
     if (e.target.closest('[data-cms-keys]') && Admin.active) { CMS.keysSheet(); return; }
     if (e.target.closest('[data-signout]') && await confirmSheet('Remove membership?', 'This device goes back to free access. Your progress stays.', 'Remove')) { Access.signOut(); refreshChip(); rerender(); }
   }
   view.addEventListener('click', onClick);
-  const bot = SalesBot(qs('.bot', view));
-  return () => { view.removeEventListener('click', onClick); bot.destroy(); };
+  const bot = UpChat.on() ? UpChat.mount(qs('.bot', view)) : SalesBot(qs('.bot', view));
+  const visit = setTimeout(() => { if (routeFromHash() === 'upgrades') Popups.fire('upgrade.visit', { count: 1 }); }, 2500);
+  return () => { clearTimeout(visit); view.removeEventListener('click', onClick); bot.destroy(); };
 }
 
 /* The Upgrades gateway: "Talk to Kyenzo's assistant", the Private Jet and Bridge
@@ -14318,6 +14350,8 @@ const SRS = (() => {
     if (x) { x.m++; x.c = 0; x.t = now; x.due = now; x.san = p.san; x.id = cfg.id; x.s = cfg.section || x.s; if (cfg.title) x.title = cfg.title; if (lm) x.lm = lm; }
     else d.pos[k] = { fen: preFen, san: p.san, side: p.color, id: String(cfg.id).slice(0, 90), s: String(cfg.section || '').slice(0, 20), title: String(cfg.title || '').slice(0, 90), lm, m: 1, c: 0, t: now, due: now, f: now };
     trimPos(); save();
+    /* v5.2: a move missed AGAIN is queued for the popup engine; it fires after the next page change, never mid-line. */
+    if (x && x.m >= 2) { try { Popups.queue('mistake.repeat', { count: x.m, title: x.title || '' }); } catch (e) { /* the popup engine is optional */ } }
   }
   /* A clean first try in any line: a stored mistake at this position moves on. */
   function hit(cfg, p, preFen) {
@@ -14374,7 +14408,7 @@ const SRS = (() => {
     return { open: ps.length, dueNow: ps.filter((x) => x.due <= now).length, lines: dueLines(scope).length, fixed: get().fixed, learned: Object.keys(get().learned).length };
   }
   function clear() { db = { v: 1, lines: {}, pos: {}, fixed: 0, learned: {} }; save(true); }
-  return { on, miss, hit, posResult, done, learned, isNew, positions, dueLines, lineHasMistakes, forget, counts, clear, line: (id) => get().lines[id] || null, fixed: () => get().fixed };
+  return { on, miss, hit, posResult, done, learned, isNew, positions, dueLines, lineHasMistakes, forget, counts, clear, line: (id) => get().lines[id] || null, fixed: () => get().fixed, misses: (k) => (get().pos[k] || {}).m || 0 };
 })();
 
 /* ---------- the unlock rating and the ELO gates ----------
@@ -14828,7 +14862,7 @@ function srsPool() {
 }
 function mountSrs(view) {
   const ui = App.ui.srs || (App.ui.srs = { scope: 'all' });
-  let board = null, runner = null, session = null, pool = null;
+  let board = null, runner = null, session = null, pool = null, openFired = false;
   const P = () => pool || (pool = srsPool());
   const titleOf = (x) => { const p = P()[x.id]; return p ? (p.courseName ? p.courseName + ': ' : '') + p.title : x.title || SCOPE_LABEL[scopeOfSection(x.s, x.id)] || 'A line'; };
   const sectionOf = (id, p) => { const l = SRS.line(id); return (l && l.s) || (p && p.scope === 'openings' ? 'openings' : p && p.scope) || 'openings'; };
@@ -14849,6 +14883,12 @@ function mountSrs(view) {
           '<section class="section">' + sectionHead('Open mistakes', 'A mistake leaves this list after two clean tries in a row, here or in any trainer.') +
             (ps.length ? '<div class="rows">' + ps.slice(0, 80).map(row).join('') + '</div>' : '<div class="panel pad"><p class="muted">Nothing to fix' + (ui.scope === 'all' ? '' : ' here') + '. Miss a move in any trainer and it shows up in this list.</p><div class="btn-row" style="margin-top:12px"><a class="btn btn-ghost btn-sm" href="#openings">' + icon('chess-pawn') + ' Drill openings</a><a class="btn btn-ghost btn-sm" href="#peer">' + icon('user-group') + ' Peer puzzles</a></div></div>') +
           '</section>');
+    /* v5.2: the panel with pop-up buttons while the same moves keep coming back, and the My mistakes rule. */
+    if (on && ps.length) {
+      const top = ps.reduce((m, x) => Math.max(m, x.m), 0), pan = Popups.panelHTML({ count: top }), anchor = qs('.srs36-actions', view);
+      if (pan && anchor) anchor.insertAdjacentHTML('afterend', pan);
+      if (!openFired) { openFired = true; setTimeout(() => { if (routeFromHash() === 'srs') Popups.fire('mistake.open', { count: top }); }, 1500); }
+    }
   }
   function start(kind) {
     const items = kind === 'mistakes' ? SRS.positions(ui.scope).map((x) => ({ kind: 'pos', x }))
@@ -14871,7 +14911,7 @@ function mountSrs(view) {
     if (it.kind === 'pos') {
       const x = it.x;
       runner = LineRunner({ board, fen: x.fen, moves: [x.san], side: x.side, section: x.s || 'openings', lastMove: x.lm ? { from: x.lm[0], to: x.lm[1] } : null, onUpdate: (v) => render(v, it),
-        onFinish: (r) => { const clean = r.total > 0 && r.clean === r.total; it.res = SRS.posResult(x.key, clean); if (it.res === 'fixed') session.fixed++; if (clean) session.ok++; if (runner) render(runner.view(), it); } });
+        onFinish: (r) => { const clean = r.total > 0 && r.clean === r.total; it.res = SRS.posResult(x.key, clean); if (it.res === 'missed') Popups.afterMiss(x); if (it.res === 'fixed') session.fixed++; if (clean) session.ok++; if (runner) render(runner.view(), it); } });
     } else {
       const p = it.p;
       runner = LineRunner({ board, fen: p.fen, moves: p.moves, side: p.side, ann: p.ann, section: sectionOf(p.id, p), id: p.id, title: p.title, lastMove: p.lastMove || null, silent: isStatic(p),
@@ -14896,6 +14936,7 @@ function mountSrs(view) {
   function summary() {
     const panel = qs('#srs-panel', view), s = session;
     if (!panel || !s) return;
+    Popups.afterSession({ count: s.items.length - s.ok, total: s.items.length });
     panel.innerHTML = '<p class="st-kicker">Session done</p><h2 class="st-title">' + s.ok + ' of ' + s.items.length + ' right on the first try</h2>' +
       '<p class="st-brief">' + (s.kind === 'mistakes' ? (s.fixed ? s.fixed + (s.fixed === 1 ? ' mistake is' : ' mistakes are') + ' fixed for good. ' : '') + 'The rest come back tomorrow.' : 'Each line is scheduled again based on how clean it was.') + '</p>' +
       '<div class="st-actions"><button type="button" class="btn btn-primary" data-srs="close">Back to my list</button></div>';
@@ -17474,6 +17515,14 @@ const V5Doc = (() => {
       const fn = Funnel.clean(v.funnel);
       if (Object.keys(fn).length) o.funnel = fn;
     }
+    if (v.chat && typeof v.chat === 'object' && !Array.isArray(v.chat)) {   // v5.2: the Upgrade chat
+      const ch = UpChat.clean(v.chat);
+      if (Object.keys(ch).length) o.chat = ch;
+    }
+    if (v.popups && typeof v.popups === 'object' && !Array.isArray(v.popups)) {   // v5.2: popup triggers
+      const pp = Popups.clean(v.popups);
+      if (Object.keys(pp).length) o.popups = pp;
+    }
     return o;
   }
   function apply(v) {
@@ -17486,7 +17535,7 @@ const V5Doc = (() => {
     tags(k) { const t = cur.framework && cur.framework.tags && cur.framework.tags[k]; return (t && t.length ? t : TAGS0[k] || []).slice(); },
     faq(tier) { return (cur.faq || []).filter((x) => x.tier === 'all' || x.tier === tier); },
     layout: (k) => (cur.layout && cur.layout[k]) || 0,
-    tournament: () => cur.tournament || null, sales: () => cur.sales || {}, server: () => cur.server || {}, funnel: () => cur.funnel || {}
+    tournament: () => cur.tournament || null, sales: () => cur.sales || {}, server: () => cur.server || {}, funnel: () => cur.funnel || {}, chat: () => cur.chat || {}, popups: () => cur.popups || {}
   };
 })();
 
@@ -18863,7 +18912,9 @@ const Funnel = (() => {
     return { funnel: { option: 'B', title: c.b.title, price: c.b.price + c.b.per, leak: ctx.leakText, mspc_step: ctx.step, came_from: 'the Growth Path pop-up after a Trim session' }, prices: { accelerator: c.b.price + c.b.per } };
   }
 
-  return { D, WHEN, START, clean, merge, cfg, on, aiOn, shouldCheck, shown, declined, ctxFor, note, fill, isYes, isNo, strip, hasTag, fromMarker, freeBot, checkHTML, open, sample };
+  return { D, WHEN, START, clean, merge, cfg, on, aiOn, shouldCheck, shown, declined, ctxFor, note, fill, isYes, isNo, strip, hasTag, fromMarker, freeBot, checkHTML, open, sample,
+    /* v5.2: Option B straight from any button (the popup engine). */
+    openB(ctx, pv) { const c = cfg(); if (!c.b.on) { if (!pv) open(ctx); return; } openTier2(c, Object.assign({}, ctx || {}), !!pv); } };
 })();
 
 /* ---------- admin: the Pop-up & Funnel Manager (v5.1) ----------
@@ -18972,6 +19023,752 @@ V5Admin.funnel = function () {
           setTimeout(V5Admin.funnel, 240);
         }
       });
+    }
+  });
+};
+
+/* ==========================================================================
+   v5.2: THE UNIVERSAL POPUP ENGINE and THE UPGRADE CHAT
+   1. Popups: one registry of system pop-ups (Growth Path A/B/C, support
+      inquiry, improvement timeline question) that ANY element can open:
+        <button data-popup="support" data-popup-src="my-mistakes">…</button>
+      Rules (admin) fire them from app moments: a move missed again, a My
+      mistakes session that ends, the Upgrades page opening. Everything is
+      data: v5.popups in the data file (Admin menu > Popup triggers).
+   2. UpChat: the hardcoded, button-driven chat on the Upgrades page. Steps,
+      messages, replies and buttons are v5.chat in the data file (Admin menu
+      > Upgrade chat). No AI, no tokens, no prompt: what you write is what the
+      player reads. A button can go to a step, open a link or page, scroll to
+      a section, or open any pop-up from the registry.
+   ========================================================================== */
+const Popups = (() => {
+  const KEY = 'lc52-popups';
+  const TARGETS = {
+    growth: 'Growth Path pop-up (options A, B and C)',
+    growthB: 'Option B: the Accelerator conversation',
+    growthC: 'Option C: the Mentorship application',
+    support: 'Support inquiry',
+    timeline: 'Improvement timeline question'
+  };
+  const EVENTS = {
+    'mistake.repeat': ['A move in My mistakes is missed again', 'Count = how many times that exact move has been missed.'],
+    'mistake.open': ['My mistakes opens with open mistakes', 'Count = the highest miss count on the list.'],
+    'mistake.session': ['A My mistakes session ends', 'Count = moves missed in that session.'],
+    'upgrade.visit': ['The Upgrades page opens', 'Count is ignored.']
+  };
+  const D = {
+    support: {
+      title: 'Ask {coach} a question', intro: 'Stuck on something in the hub, your games or a membership? Send your question and {coach} answers it himself.',
+      topics: 'My games and my rating\nMemberships and prices\nSomething in the app\nSomething else', cta: 'Send my question',
+      thanks: 'Your question is on its way. {coach} reads every message himself.', webhook: ''
+    },
+    timeline: {
+      title: 'How fast do you want to improve?', question: 'How long do you want to give yourself to reach your next rating jump?',
+      options: 'Within 3 months\nWithin 6 months\nWithin a year\nNo rush, I just want to stop blundering',
+      thanks: 'Got it. A plan works backwards from that date.', then: 'growth', webhook: ''
+    },
+    panel: {
+      on: true, min: 2, text: 'You keep missing the same moves. Repetition alone fixes the move; a plan built around your leak fixes the habit behind it.',
+      buttons: [{ label: 'Show my growth paths', popup: 'growth' }, { label: 'Ask {coach}', popup: 'support' }]
+    },
+    rules: [
+      { id: 'r1', on: true, event: 'mistake.repeat', min: 3, popup: 'timeline', audience: 'free', cooldownHours: 72, maxShows: 3 },
+      { id: 'r2', on: false, event: 'mistake.session', min: 4, popup: 'growth', audience: 'free', cooldownHours: 48, maxShows: 2 }
+    ]
+  };
+  const after = (fn) => setTimeout(fn, 240);
+  const log = (x) => { try { Telemetry.log({ e: 'q', x }); } catch (e) { /* telemetry is optional */ } };
+  const str = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n) : null);
+  const multi = (v, n, len) => (typeof v === 'string' ? v.replace(/\r/g, '').split('\n').map((x) => str(x, len)).filter(Boolean).slice(0, n).join('\n') : null);
+  const plain = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+  const httpsOk = (u) => /^https:\/\/[^\s"'<>\\]{3,}$/i.test(u);
+  const hook = (v) => { const u = str(v, 600); return u === '' || (u && httpsOk(u)) ? u : null; };
+
+  /* ----- the data file: everything optional, everything checked ----- */
+  function clean(v) {
+    const o = {};
+    if (!plain(v)) return o;
+    if (plain(v.support)) {
+      const s = {}, t = str(v.support.title, 80), i = str(v.support.intro, 300), tp = multi(v.support.topics, 6, 50), c = str(v.support.cta, 40), th = str(v.support.thanks, 240), w = hook(v.support.webhook);
+      if (t) s.title = t; if (i) s.intro = i; if (tp) s.topics = tp; if (c) s.cta = c; if (th) s.thanks = th; if (w !== null) s.webhook = w;
+      if (Object.keys(s).length) o.support = s;
+    }
+    if (plain(v.timeline)) {
+      const s = {}, t = str(v.timeline.title, 80), q = str(v.timeline.question, 200), op = multi(v.timeline.options, 6, 60), th = str(v.timeline.thanks, 240), w = hook(v.timeline.webhook);
+      if (t) s.title = t; if (q) s.question = q; if (op) s.options = op; if (th) s.thanks = th; if (w !== null) s.webhook = w;
+      if (v.timeline.then === '' || hasOwn(TARGETS, v.timeline.then)) s.then = v.timeline.then;
+      if (Object.keys(s).length) o.timeline = s;
+    }
+    if (plain(v.panel)) {
+      const s = {}, t = str(v.panel.text, 240);
+      if (typeof v.panel.on === 'boolean') s.on = v.panel.on;
+      if (Number.isFinite(+v.panel.min) && +v.panel.min >= 1) s.min = clamp(Math.round(+v.panel.min), 1, 20);
+      if (t) s.text = t;
+      if (Array.isArray(v.panel.buttons)) s.buttons = v.panel.buttons.map((b) => { const l = plain(b) ? str(b.label, 40) : ''; return l && hasOwn(TARGETS, b.popup) ? { label: l, popup: b.popup } : null; }).filter(Boolean).slice(0, 3);
+      if (Object.keys(s).length) o.panel = s;
+    }
+    if (Array.isArray(v.rules)) {
+      const seen = {};
+      o.rules = v.rules.map((r) => {
+        if (!plain(r) || !hasOwn(EVENTS, r.event) || !hasOwn(TARGETS, r.popup)) return null;
+        let id = (typeof r.id === 'string' ? str(r.id, 12).replace(/[^A-Za-z0-9_-]/g, '') : '') || 'r' + Math.random().toString(36).slice(2, 6);
+        if (seen[id]) id += Math.random().toString(36).slice(2, 4);
+        seen[id] = 1;
+        return { id, on: r.on !== false, event: r.event, min: clamp(Math.round(+r.min || 1), 1, 50), popup: r.popup, audience: r.audience === 'all' ? 'all' : 'free', cooldownHours: clamp(Math.round(+r.cooldownHours || 0), 0, 720), maxShows: clamp(Math.round(+r.maxShows || 0), 0, 50) };
+      }).filter(Boolean).slice(0, 12);
+    }
+    return o;
+  }
+  function merge(f) {
+    const out = clone(D);
+    f = plain(f) ? f : {};
+    ['support', 'timeline', 'panel'].forEach((k) => { if (plain(f[k])) Object.assign(out[k], f[k]); });
+    if (Array.isArray(f.rules)) out.rules = clone(f.rules);
+    return out;
+  }
+  const cfg = () => merge(V5Doc.popups());
+
+  /* ----- this device: cooldowns, counters, the last answers ----- */
+  const st = () => { const x = Store.get(KEY, {}); return plain(x) ? x : {}; };
+  const put = (patch) => Store.set(KEY, Object.assign(st(), patch));
+  const answers = () => (st().answers || {});
+
+  function fill(t, ctx) {
+    ctx = ctx || {};
+    const map = { coach: CONFIG.coach, name: App.profile.name || 'you', rating: V34.myRating() || '', count: ctx.count || '', leak: ctx.leakText || 'the same mistakes' };
+    return String(t == null ? '' : t).replace(/\{(coach|name|rating|count|leak)\}/g, (m, k) => String(map[k]));
+  }
+  function fire(hookUrl, data) {
+    if (!hookUrl || !httpsOk(hookUrl)) return;
+    const body = JSON.stringify(data);
+    try {
+      if (navigator.sendBeacon && navigator.sendBeacon(hookUrl, new Blob([body], { type: 'text/plain' }))) return;
+      fetch(hookUrl, { method: 'POST', mode: 'no-cors', body, keepalive: true }).catch(() => {});
+    } catch (e) { /* the message still shows the direct link */ }
+  }
+  function base(ctx, event) {
+    return { event, at: new Date().toISOString(), app: 'lanckrietchess-hub', version: CONFIG.version, site: SiteURL.base(), source: (ctx && ctx.source) || 'app', player_id: (typeof V5Net !== 'undefined' && V5Net.pid()) || '',
+      player: { name: App.profile.name || '', rating: V34.myRating() || null, access: TIERS[App.access.tier].label, leak: LEAKS[App.profile.leak] || '' }, chat: (typeof UpChat !== 'undefined' && UpChat.lastAnswers()) || {} };
+  }
+
+  /* ----- the registry ----- */
+  function run(id, ctx, opt) {
+    ctx = Object.assign({}, ctx || {}); opt = opt || {};
+    const pv = !!opt.preview;
+    if (!hasOwn(TARGETS, id)) return false;
+    if (!pv) log('pp-' + id);
+    if (id === 'support') { openSupport(ctx, pv, opt.cfg); return true; }
+    if (id === 'timeline') { openTimeline(ctx, pv, opt.cfg); return true; }
+    if (!Funnel.on() && !pv) { location.hash = '#upgrades'; return true; }
+    if (id === 'growthB') Funnel.openB(ctx, pv);
+    else Funnel.open(ctx, { preview: pv, step: id === 'growthC' ? 'c' : '' });
+    return true;
+  }
+  /* The attribute form: any element, anywhere. */
+  const attr = (id, src) => (hasOwn(TARGETS, id) ? ' data-popup="' + esc(id) + '"' + (src ? ' data-popup-src="' + esc(src) + '"' : '') : '');
+
+  /* ----- rules ----- */
+  let pending = [];
+  function fireEvent(event, ctx) {
+    ctx = ctx || {};
+    if (!hasOwn(EVENTS, event) || qs('.sheet-wrap')) return false;
+    if (Admin.active && !Admin.preview()) return false;
+    const s = st(), now = Date.now(), rank = App.rank();
+    if (now - (+s.any || 0) < 90000) return false;
+    const rule = cfg().rules.filter((r) => r.on && r.event === event && (+ctx.count || 0) >= r.min && (r.audience === 'all' || rank < 2) &&
+      now - (+((s.last || {})[r.id]) || 0) >= r.cooldownHours * 36e5 && (!r.maxShows || (+((s.shown || {})[r.id]) || 0) < r.maxShows))[0];
+    if (!rule) return false;
+    const last = Object.assign({}, s.last), shown = Object.assign({}, s.shown);
+    last[rule.id] = now; shown[rule.id] = (+shown[rule.id] || 0) + 1;
+    put({ last, shown, any: now });
+    log('pp-rule-' + rule.event);
+    return run(rule.popup, Object.assign({ source: 'rule-' + rule.event }, ctx));
+  }
+  /* Events that happen in the middle of a line are queued and only fire after the
+     next page change, so nothing ever covers a board while the player calculates. */
+  function queue(event, ctx) { pending = pending.filter((p) => p.event !== event).concat([{ event, ctx }]).slice(-4); }
+  function flush() { const p = pending; pending = []; p.some((x) => fireEvent(x.event, x.ctx)); }
+  window.addEventListener('hashchange', () => { if (pending.length) setTimeout(flush, 1600); });
+  const afterMiss = (x) => setTimeout(() => fireEvent('mistake.repeat', { count: SRS.misses(x.key), title: x.title || '' }), 1400);
+  const afterSession = (r) => setTimeout(() => fireEvent('mistake.session', r), 1400);
+
+  /* The panel on My mistakes: buttons linked to pop-ups, shown while the same moves keep coming back. */
+  function panelHTML(ctx) {
+    const p = cfg().panel;
+    if (!p.on || App.rank() >= 2 || (+ctx.count || 0) < p.min || !p.buttons.length) return '';
+    return '<div class="pp-panel">' + icon('rotate') + '<div><p>' + esc(fill(p.text, ctx)) + '</p><div class="btn-row">' +
+      p.buttons.map((b, i) => '<button type="button" class="btn ' + (i ? 'btn-ghost' : 'btn-primary') + ' btn-sm"' + attr(b.popup, 'my-mistakes') + '>' + esc(fill(b.label, ctx)) + '</button>').join('') + '</div></div></div>';
+  }
+
+  /* ----- the support inquiry ----- */
+  function openSupport(ctx, pv, over) {
+    const c = (over || cfg()).support, topics = String(c.topics || '').split('\n').filter(Boolean), dm = CONFIG.links.instagramDM;
+    openSheet({
+      title: fill(c.title, ctx) + (pv ? ' (preview)' : ''), cls: 'pp-sheet', noFocus: true,
+      html: '<form class="stack pp-form" data-pp-form novalidate autocomplete="off"><p class="muted">' + esc(fill(c.intro, ctx)) + '</p>' +
+        '<label class="field"><span class="field-label">Your name</span><input class="input" name="name" maxlength="40" autocomplete="name" value="' + esc(App.profile.name || '') + '"></label>' +
+        '<label class="field"><span class="field-label">Email or Instagram <small>so ' + esc(CONFIG.coach) + ' can answer</small></span><input class="input" name="contact" maxlength="120" autocapitalize="off" spellcheck="false" placeholder="you@mail.com or @yourname" value="' + esc(st().contact || '') + '"></label>' +
+        (topics.length ? '<label class="field"><span class="field-label">About</span><select class="input" name="topic">' + topics.map((t) => '<option>' + esc(t) + '</option>').join('') + '</select></label>' : '') +
+        '<label class="field"><span class="field-label">Your question</span><textarea class="input" name="msg" rows="4" maxlength="500"></textarea></label>' +
+        '<p class="cms-err" data-pp-err aria-live="polite"></p>' +
+        '<div class="btn-row"><button type="submit" class="btn btn-primary">' + icon('paper-plane') + ' ' + esc(c.cta) + '</button><button type="button" class="btn btn-quiet" data-close>Cancel</button></div></form>',
+      onMount(sh) {
+        sh.el.addEventListener('submit', (e) => {
+          const f = e.target.closest('[data-pp-form]');
+          if (!f) return;
+          e.preventDefault();
+          const E = f.elements, err = qs('[data-pp-err]', f);
+          const name = cleanName(E.name.value), contact = String(E.contact.value || '').replace(/[\u0000-\u001f\u007f<>"'`\\]/g, '').trim().slice(0, 120), msg = String(E.msg.value || '').replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, ' ').trim().slice(0, 500);
+          if (!/^([^\s@]+@[^\s@]+\.[^\s@]{2,}|@?[A-Za-z0-9._]{2,40}|\+?[0-9 ()-]{7,20})$/.test(contact)) { err.textContent = 'Add an email address or an Instagram handle, for example @yourname.'; E.contact.focus(); return; }
+          if (msg.length < 5) { err.textContent = 'Write your question in a sentence or two.'; E.msg.focus(); return; }
+          const payload = Object.assign(base(ctx, 'support_inquiry'), { id: 'SQ-' + Array.from(crypto.getRandomValues(new Uint8Array(5)), (b) => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join(''), topic: E.topic ? E.topic.value : '', message: msg });
+          payload.player.name = name || payload.player.name; payload.player.contact = contact;
+          if (pv) { qs('.sheet-body', sh.el).innerHTML = '<p class="muted">Preview: nothing was sent. The hub would ' + (c.webhook ? 'post this JSON to your webhook:' : 'send nothing (no webhook set):') + '</p><pre>' + esc(JSON.stringify(payload, null, 2)) + '</pre><div class="btn-row"><button type="button" class="btn btn-quiet" data-close>Close</button></div>'; return; }
+          fire(c.webhook, payload);
+          if (name && !App.profile.name) { App.profile.name = name; App.save(); }
+          put({ contact }); log('pp-support-sent');
+          qs('.sheet-body', sh.el).innerHTML = '<div class="gp-done"><span class="gp-done-ico">' + icon('circle-check') + '</span><p>' + esc(c.webhook ? fill(c.thanks, ctx) : 'Copy your question and send it to ' + CONFIG.coach + ' directly; this hub has no inbox connected yet.') + '</p>' +
+            '<p class="small muted">Reference: <b>' + esc(payload.id) + '</b></p><div class="btn-row">' + (c.webhook ? '' : '<button type="button" class="btn btn-ghost" data-pp-copy>' + icon('copy') + ' Copy my question</button>') +
+            (dm ? '<a class="btn btn-ghost" href="' + esc(dm) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Message ' + esc(CONFIG.coach) + '</a>' : '') + '<button type="button" class="btn btn-quiet" data-close>Close</button></div></div>';
+          const cp = qs('[data-pp-copy]', sh.el);
+          if (cp) cp.addEventListener('click', () => { try { navigator.clipboard.writeText(msg).then(() => toast('Copied.', 'good')); } catch (x) { toast('Copy did not work here.'); } });
+        });
+      }
+    });
+  }
+
+  /* ----- the improvement timeline question ----- */
+  function openTimeline(ctx, pv, over) {
+    const c = (over || cfg()).timeline, opts = String(c.options || '').split('\n').filter(Boolean);
+    openSheet({
+      title: fill(c.title, ctx) + (pv ? ' (preview)' : ''), cls: 'pp-sheet', noFocus: true,
+      html: '<p class="muted">' + esc(fill(c.question, ctx)) + '</p><div class="quick pp-opts">' + opts.map((o, i) => '<button type="button" data-tl="' + i + '">' + esc(o) + '</button>').join('') + '</div><div class="btn-row"><button type="button" class="btn btn-quiet btn-sm" data-close>Not now</button></div>',
+      onMount(sh) {
+        sh.el.addEventListener('click', (e) => {
+          const b = e.target.closest('[data-tl]');
+          if (!b) return;
+          const i = +b.getAttribute('data-tl'), label = opts[i] || '';
+          const a = Object.assign({}, answers(), { timeline: { i, label, at: Date.now() } });
+          if (!pv) { put({ answers: a }); log('pp-tl-' + i); fire(c.webhook, Object.assign(base(ctx, 'timeline_answer'), { answer: label, index: i })); }
+          const next = c.then && hasOwn(TARGETS, c.then) ? c.then : '';
+          if (next) { sh.close(); toast(fill(c.thanks, ctx), 'good'); after(() => run(next, Object.assign({}, ctx, { timeline: label }), { preview: pv })); return; }
+          qs('.sheet-body', sh.el).innerHTML = '<div class="gp-done"><span class="gp-done-ico">' + icon('circle-check') + '</span><p>' + esc(fill(c.thanks, ctx)) + '</p><div class="btn-row"><button type="button" class="btn btn-quiet" data-close>Close</button></div></div>';
+        });
+      }
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-popup]');
+    if (!b) return;
+    const id = b.getAttribute('data-popup');
+    if (!hasOwn(TARGETS, id)) return;
+    e.preventDefault();
+    run(id, { source: b.getAttribute('data-popup-src') || 'button' });
+  });
+
+  return { TARGETS, EVENTS, D, clean, merge, cfg, run, attr, fire: fireEvent, queue, flush, afterMiss, afterSession, panelHTML, answers };
+})();
+
+const UpChat = (() => {
+  const KEY = 'lc52-chat';
+  const ID_RE = /^[a-z0-9_-]{1,24}$/;
+  const TYPES = { go: 'Go to another step', popup: 'Open a pop-up', link: 'Open a link or page', scroll: 'Scroll to a section', restart: 'Start over' };
+  const SHORT = { '@skool': 'The Skool community', '@accelerator': 'The Accelerator page', '@mentorship': 'The Mentorship page', '@instagram': 'Instagram DM with the coach', '@youtube': 'YouTube channel' };
+  const ANCHORS = { 'up-paths': 'The three paths', 'up-bot': 'This chat', 'up-access': 'Member access' };
+  const str = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n) : '');
+  const multi = (v, n, len) => (typeof v === 'string' ? v.replace(/\r/g, '').split('\n').map((x) => str(x, len)).filter(Boolean).slice(0, n).join('\n') : '');
+  const plain = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+  const b = (label, type, target, save) => Object.assign({ label, type, target: target || '' }, save ? { save } : {});
+  const D = {
+    on: true, input: true, typing: true, placeholder: 'Type a message…', start: 'welcome', fallback: 'fallback',
+    nodes: {
+      welcome: { say: 'Hey {name}! I’m {coach}’s assistant.\nA few quick questions and I’ll show you the fastest route to your next rating jump.', buttons: [b('Let’s go', 'go', 'rating'), b('Show me the prices', 'go', 'prices'), b('I have a question', 'popup', 'support')] },
+      rating: { say: 'What is your rating right now?', buttons: [b('Under 800', 'go', 'leak', 'rating=u800'), b('800–1200', 'go', 'leak', 'rating=800'), b('1200–1600', 'go', 'leak', 'rating=1200'), b('1600+', 'go', 'leak', 'rating=1600')] },
+      leak: { say: 'Be honest with me: what costs you the most games?', buttons: [b('Blunders and missed threats', 'go', 'stuck', 'leak=threats'), b('Lost after the opening', 'go', 'stuck', 'leak=opening'), b('No plan in the middlegame', 'go', 'stuck', 'leak=plan'), b('Can’t convert endgames', 'go', 'stuck', 'leak=endgame'), b('Time trouble and panic', 'go', 'stuck', 'leak=time')] },
+      stuck: { say: 'How long have you been stuck around this rating?', buttons: [b('Less than a month', 'go', 'goal', 'stuck=m1'), b('1–6 months', 'go', 'goal', 'stuck=m6'), b('More than 6 months', 'go', 'goal', 'stuck=m6p'), b('Years', 'go', 'goal', 'stuck=years')] },
+      goal: { say: 'Where do you want to be six months from now?', buttons: [b('+200', 'go', 'time', 'goal=p200'), b('+400', 'go', 'time', 'goal=p400'), b('+600 or more', 'go', 'time', 'goal=p600'), b('I just want to stop blundering', 'go', 'time', 'goal=stop')] },
+      time: { say: 'How much time can you realistically train per week?', buttons: [b('Under 2 hours', 'go', 'intent', 'time=t2'), b('2–5 hours', 'go', 'intent', 'time=t5'), b('5–10 hours', 'go', 'intent', 'time=t10'), b('More than 10 hours', 'go', 'intent', 'time=t10p')] },
+      intent: { say: '{pain}\nLast question: how do you want to get there?', buttons: [b('Start free', 'go', 'walk'), b('Show me the full system', 'go', 'bridge'), b('I want 1-on-1 with {coach}', 'go', 'budget')] },
+      budget: { say: 'The mentorship is {mentorship} and capped at {cap} players, because {coach} goes through every game himself. Is that realistic for you right now?', buttons: [b('Yes, let’s talk', 'go', 'jet'), b('Not right now', 'go', 'bridge')] },
+      walk: { say: 'Then start with the free community. You get the Blunder Bootcamp, the Anti-Blunder Bootcamp, the free MSPC course and the community key that unlocks those lessons in this app.', buttons: [b('Join free on Skool', 'link', '@skool'), b('Start a free drill', 'link', '#think'), b('When will I see results?', 'popup', 'timeline')] },
+      bridge: { say: 'Based on your answers, the Accelerator fits you best: the full system at your own speed, for {accelerator}.\n{focus}', buttons: [b('Show me the three paths', 'popup', 'growth'), b('Join the Accelerator', 'link', '@accelerator'), b('When will I see results?', 'popup', 'timeline'), b('I have a question', 'popup', 'support')] },
+      jet: { say: 'Perfect. Apply below and {coach} reads your application himself.', buttons: [b('Apply for a seat', 'popup', 'growthC'), b('Message {coach} on Instagram', 'link', '@instagram')] },
+      prices: { say: 'Free community: €0.\nThe Accelerator: {accelerator}.\n1-on-1 Mentorship: {mentorship}, maximum {cap} players.', buttons: [b('Find my path', 'go', 'rating'), b('Show me the three paths', 'popup', 'growth')] },
+      human: { say: '{coach} answers his DMs himself.', buttons: [b('Message {coach} on Instagram', 'link', '@instagram'), b('Send a question here', 'popup', 'support')] },
+      fallback: { say: 'I’m a simple assistant, so tap one of the answers below, or ask {coach} directly.', buttons: [b('Send {coach} a question', 'popup', 'support'), b('Start over', 'go', 'welcome')] }
+    },
+    replies: [
+      { keys: 'price, cost, how much, €, $, euro, dollar, pay, prijs, kost', say: '', go: 'prices' },
+      { keys: '1-on-1, 1 on 1, one on one, private, mentor, personal, coaching', say: '', go: 'budget' },
+      { keys: 'free, skool, community, bootcamp, gratis', say: '', go: 'walk' },
+      { keys: 'human, real person, talk to you, dm, instagram', say: '', go: 'human' }
+    ]
+  };
+
+  /* ----- the data file: everything optional, everything checked ----- */
+  function linkOk(t) { return hasOwn(SHORT, t) || /^#[A-Za-z0-9-]{1,30}$/.test(t) || /^https:\/\/[^\s"'<>\\]{3,}$/i.test(t); }
+  function cleanBtn(x) {
+    if (!plain(x) || !hasOwn(TYPES, x.type)) return null;
+    const label = str(x.label, 40);
+    if (!label) return null;
+    const o = { label, type: x.type, target: str(x.target, 300) };
+    if (x.type === 'go' && !ID_RE.test(o.target)) return null;
+    if (x.type === 'popup' && !hasOwn(Popups.TARGETS, o.target)) return null;
+    if (x.type === 'link' && !linkOk(o.target)) return null;
+    if (x.type === 'scroll' && !hasOwn(ANCHORS, o.target)) return null;
+    if (x.type === 'restart') o.target = '';
+    const m = /^([a-z0-9_]{1,16})=([A-Za-z0-9_+-]{1,20})$/.exec(str(x.save, 40));
+    if (m) o.save = m[1] + '=' + m[2];
+    return o;
+  }
+  function clean(v) {
+    const o = {};
+    if (!plain(v)) return o;
+    ['on', 'input', 'typing'].forEach((k) => { if (typeof v[k] === 'boolean') o[k] = v[k]; });
+    const ph = str(v.placeholder, 60);
+    if (ph) o.placeholder = ph;
+    if (typeof v.start === 'string' && ID_RE.test(v.start)) o.start = v.start;
+    if (typeof v.fallback === 'string' && ID_RE.test(v.fallback)) o.fallback = v.fallback;
+    if (plain(v.nodes)) {
+      const nodes = {};
+      Object.keys(v.nodes).slice(0, 40).forEach((id) => {
+        const n = v.nodes[id];
+        if (!ID_RE.test(id) || !plain(n)) return;
+        const say = multi(n.say, 6, 400), buttons = (Array.isArray(n.buttons) ? n.buttons : []).slice(0, 8).map(cleanBtn).filter(Boolean);
+        if (say || buttons.length) nodes[id] = { say, buttons };
+      });
+      if (Object.keys(nodes).length) o.nodes = nodes;
+    }
+    if (Array.isArray(v.replies)) {
+      o.replies = v.replies.map((r) => {
+        if (!plain(r)) return null;
+        const keys = str(r.keys, 160), say = multi(r.say, 3, 400), go = typeof r.go === 'string' && ID_RE.test(r.go) ? r.go : '';
+        return keys && (say || go) ? { keys, say, go } : null;
+      }).filter(Boolean).slice(0, 30);
+    }
+    return o;
+  }
+  function merge(f) {
+    const out = clone(D);
+    f = plain(f) ? f : {};
+    ['on', 'input', 'typing'].forEach((k) => { if (typeof f[k] === 'boolean') out[k] = f[k]; });
+    if (f.placeholder) out.placeholder = f.placeholder;
+    if (f.nodes) out.nodes = clone(f.nodes);
+    if (Array.isArray(f.replies)) out.replies = clone(f.replies);
+    if (f.start) out.start = f.start;
+    if (f.fallback) out.fallback = f.fallback;
+    if (!out.nodes[out.start]) out.start = hasOwn(out.nodes, D.start) ? D.start : Object.keys(out.nodes)[0];
+    if (!out.nodes[out.fallback]) out.fallback = out.start;
+    return out;
+  }
+  const cfg = () => merge(V5Doc.chat());
+  const on = () => cfg().on !== false;
+
+  /* ----- this device: what the player tapped (it travels with support questions and applications) ----- */
+  const lastAnswers = () => { const s = Store.get(KEY, {}); const a = plain(s) && plain(s.answers) ? s.answers : {}, out = {}; Object.keys(a).slice(0, 12).forEach((k) => { if (a[k] && typeof a[k].label === 'string') out[k] = a[k].label.slice(0, 60); }); return out; };
+  const LEAK_WORDS = { threats: 'missed threats', opening: 'losing the opening', plan: 'having no plan', endgame: 'throwing away won endgames', time: 'time trouble' };
+  const resolveLink = (t) => {
+    const L = CONFIG.links || {};
+    return { '@skool': L.skool, '@accelerator': L.accelerator, '@mentorship': L.mentorship || L.skool, '@instagram': L.instagramDM, '@youtube': L.youtube }[t] || (hasOwn(SHORT, t) ? '' : t);
+  };
+
+  function html() {
+    const c = cfg();
+    return '<div class="bot uc-bot"><div class="chat" role="log" aria-live="polite"></div><div class="quick"></div>' +
+      (c.input ? '<form class="chat-form" autocomplete="off"><input class="input" name="msg" maxlength="280" placeholder="' + esc(c.placeholder) + '" aria-label="Message the assistant"><button class="btn btn-primary" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form>' : '') + '</div>';
+  }
+
+  /* host: the .bot element. opts: { cfg, preview }. */
+  function mount(host, opts) {
+    opts = opts || {};
+    const c = opts.cfg || cfg(), pv = !!opts.preview;
+    const chat = qs('.chat', host), quick = qs('.quick', host), form = qs('form', host);
+    let cur = null, busy = false, alive = true, timers = [], A = {};
+    const log = (x) => { if (!pv) { try { Telemetry.log({ e: 'q', x }); } catch (e) { /* optional */ } } };
+    const lbl = (k) => (A[k] && A[k].label) || '';
+    const leakV = () => (A.leak && A.leak.v) || '', stuckV = () => (A.stuck && A.stuck.v) || '';
+    function pain() {
+      const leak = { threats: 'Losing games to threats you didn’t see', opening: 'Being lost straight out of the opening', plan: 'Reaching good positions without a plan', endgame: 'Throwing away won endgames', time: 'Panicking on the clock' }[leakV()] || 'Losing the same way over and over';
+      const stuck = { m1: ' for a few weeks', m6: ' for months', m6p: ' for more than half a year', years: ' for years' }[stuckV()] || '';
+      return leak + stuck + ' is not a talent problem. It’s a thinking-process problem, and that is exactly what MSPC was built to fix.';
+    }
+    function focus() {
+      return { threats: 'For missed threats, start with the full MSPC suite: it trains exactly the M in MSPC.', opening: 'Start with the full repertoire trainer: every line comes with its middlegame plan.', plan: 'Start with the structure plans: the Accelerator covers every structure your repertoire leads to.',
+        endgame: 'Start with the rook-endgame suite: Lucena and Philidor decide a huge share of rook endings.', time: 'Start with the timed MSPC drills: a fixed routine is what stops the panic.' }[leakV()] || 'Start with the MSPC trainer: the same four steps on every move.';
+    }
+    function tokens() {
+      const P = CONFIG.pricing, r = V34.myRating();
+      return { coach: CONFIG.coach, name: App.profile.name || 'there', rating: r || lbl('rating'), accelerator: P.accelerator.price + P.accelerator.per, mentorship: P.mentorship.price + P.mentorship.per, cap: P.mentorship.cap, seats: P.mentorship.seatsLeft == null ? '' : P.mentorship.seatsLeft, pain: pain(), focus: focus() };
+    }
+    const fill = (t) => { const tk = tokens(); return String(t == null ? '' : t).replace(/\{([a-z_]+(?:\.[a-z0-9_]+)?)\}/g, (m, k) => (k.indexOf('a.') === 0 ? lbl(k.slice(2)) : hasOwn(tk, k) ? String(tk[k]) : m)); };
+    const lines = (t) => String(t || '').split('\n').map(fill).filter(Boolean);
+    const scroll = () => { chat.scrollTop = chat.scrollHeight; };
+    function addMsg(text, who) {
+      const el = document.createElement('div');
+      el.className = 'msg ' + (who === 'me' ? 'msg-me' : 'msg-bot'); el.textContent = text;
+      chat.appendChild(el); scroll();
+    }
+    function say(list, then) {
+      busy = true; quick.innerHTML = '';
+      let i = 0;
+      (function next() {
+        if (!alive) return;
+        if (i >= list.length) { busy = false; if (then) then(); return; }
+        if (c.typing === false || pv) { addMsg(list[i++], 'bot'); next(); return; }
+        const t = document.createElement('div');
+        t.className = 'msg msg-bot typing'; t.innerHTML = '<i></i><i></i><i></i>';
+        chat.appendChild(t); scroll();
+        timers.push(setTimeout(() => { t.remove(); addMsg(list[i++], 'bot'); next(); }, 450 + Math.min(900, list[i].length * 8)));
+      })();
+    }
+    function buttons() {
+      if (!alive) return;
+      const n = cur && c.nodes[cur], list = n ? n.buttons : [];
+      quick.innerHTML = list.length ? list.map((x, i) => '<button type="button" data-i="' + i + '">' + esc(fill(x.label)) + '</button>').join('') : '<button type="button" data-restart>Start over</button>';
+    }
+    function show(id) {
+      const n = c.nodes[id];
+      if (!n) { show(c.nodes[c.fallback] ? c.fallback : c.start); return; }
+      cur = id; log('uc-' + id);
+      const l = lines(n.say);
+      if (l.length) say(l, buttons); else buttons();
+    }
+    function reset() { timers.forEach(clearTimeout); timers = []; busy = false; A = {}; chat.innerHTML = ''; quick.innerHTML = ''; show(c.start); }
+    function saveAnswer(b) {
+      const m = /^([a-z0-9_]+)=(.+)$/.exec(b.save || '');
+      if (!m) return;
+      A[m[1]] = { v: m[2], label: fill(b.label) };
+      if (!pv) {
+        Store.set(KEY, { answers: A, at: Date.now() });
+        if (m[1] === 'leak' && hasOwn(LEAKS, m[2]) && !App.profile.leak) { App.profile.leak = m[2]; App.save(); }
+      }
+    }
+    function act(b, idx) {
+      if (busy || !b) return;
+      addMsg(fill(b.label), 'me');
+      saveAnswer(b);
+      log('uc-' + cur + '-' + idx);
+      if (b.type === 'go') { show(b.target); return; }
+      if (b.type === 'restart') { reset(); return; }
+      if (b.type === 'popup') {
+        if (pv) toast('Preview: this button opens the “' + (Popups.TARGETS[b.target] || b.target) + '” pop-up.');
+        else Popups.run(b.target, { source: 'upgrade-chat', leakText: LEAK_WORDS[leakV()] || '', step: '', chat: lastAnswers() });
+      } else if (b.type === 'link') {
+        const u = resolveLink(b.target);
+        if (pv) toast('Preview: this button opens ' + (hasOwn(SHORT, b.target) ? SHORT[b.target] + (u ? '' : ' (no link set yet)') : b.target) + '.');
+        else if (/^https:\/\//i.test(u || '')) { const w = window.open(u, '_blank', 'noopener'); if (!w) location.href = u; }
+        else if (/^#/.test(u || '')) location.hash = u;
+        else toast('That link is not set yet.');
+      } else if (b.type === 'scroll') {
+        const el = qs('#' + b.target);
+        if (pv) toast('Preview: this button scrolls to “' + (ANCHORS[b.target] || b.target) + '”.');
+        else if (el) scrollToEl(el);
+      }
+      buttons();
+    }
+    function reply(text) {
+      const t = text.toLowerCase();
+      const r = (c.replies || []).filter((x) => String(x.keys).split(',').map((k) => k.trim().toLowerCase()).filter(Boolean).some((k) => t.indexOf(k) >= 0))[0];
+      if (!r) { show(c.fallback); return; }
+      const l = lines(r.say), go = () => { if (r.go && c.nodes[r.go]) show(r.go); else buttons(); };
+      if (l.length) say(l, go); else go();
+    }
+    function onQuick(e) {
+      if (e.target.closest('[data-restart]')) { if (!busy) reset(); return; }
+      const t = e.target.closest('[data-i]');
+      if (!t || busy) return;
+      const n = c.nodes[cur], i = +t.getAttribute('data-i');
+      if (n && n.buttons[i]) act(n.buttons[i], i);
+    }
+    function onSubmit(e) {
+      e.preventDefault();
+      const text = String(form.elements.msg.value || '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 280);
+      if (!text || busy) return;
+      form.elements.msg.value = '';
+      const n = c.nodes[cur], hit = n ? n.buttons.map((x, i) => [x, i]).filter((p) => fill(p[0].label).toLowerCase() === text.toLowerCase())[0] : null;
+      if (hit) { act(hit[0], hit[1]); return; }
+      addMsg(text, 'me');
+      reply(text);
+    }
+    quick.addEventListener('click', onQuick);
+    if (form) form.addEventListener('submit', onSubmit);
+    show(c.start);
+    return { reset, destroy() { alive = false; timers.forEach(clearTimeout); quick.removeEventListener('click', onQuick); if (form) form.removeEventListener('submit', onSubmit); } };
+  }
+  return { TYPES, SHORT, ANCHORS, D, ID_RE, clean, merge, cfg, on, html, mount, lastAnswers };
+})();
+
+/* ---------- admin: the Upgrade chat editor (v5.2) ----------
+   Every step, message, reply and button of the chat on the Upgrades page. Saved
+   in the draft (v5.chat, which lives in this browser's storage), live on this
+   device at once, and on every device after Publish. The JSON tab reads and
+   writes the same data directly, and exports or imports it as a file. */
+V5Admin.chat = function () {
+  if (!Admin.active) { toast('Sign in to admin mode first.'); return; }
+  let S = clone(UpChat.cfg()), tab = 'flow', host = null, sheet = null;
+  const T = UpChat.TYPES, nodeIds = () => Object.keys(S.nodes);
+  const opts = (map, cur) => Object.keys(map).map((k) => '<option value="' + esc(k) + '"' + (k === cur ? ' selected' : '') + '>' + esc(map[k]) + '</option>').join('');
+  const idOpts = (cur) => nodeIds().map((k) => '<option value="' + esc(k) + '"' + (k === cur ? ' selected' : '') + '>' + esc(k) + '</option>').join('');
+  const sw = (name, label, v) => '<label class="switch-row"><span>' + esc(label) + '</span><input type="checkbox" data-top="' + name + '"' + (v ? ' checked' : '') + '></label>';
+  function targetHTML(x, nid, i) {
+    const at = 'data-n="' + esc(nid) + '" data-b="' + i + '" data-f="target"';
+    if (x.type === 'go') return '<select class="input" ' + at + '>' + idOpts(x.target) + '</select>';
+    if (x.type === 'popup') return '<select class="input" ' + at + '>' + opts(Popups.TARGETS, x.target) + '</select>';
+    if (x.type === 'scroll') return '<select class="input" ' + at + '>' + opts(UpChat.ANCHORS, x.target) + '</select>';
+    if (x.type === 'restart') return '<input class="input" disabled value="Starts the chat again">';
+    return '<input class="input" ' + at + ' list="uc-links" maxlength="300" placeholder="@skool, #think or https://…" value="' + esc(x.target) + '">';
+  }
+  function btnHTML(x, nid, i, n) {
+    const at = (f) => 'data-n="' + esc(nid) + '" data-b="' + i + '" data-f="' + f + '"';
+    return '<div class="uc-btn"><div class="uc-btn-row"><input class="input" ' + at('label') + ' maxlength="40" placeholder="Button text" value="' + esc(x.label) + '"><select class="input" ' + at('type') + '>' + opts(T, x.type) + '</select></div>' +
+      '<div class="uc-btn-row">' + targetHTML(x, nid, i) + '<input class="input" ' + at('save') + ' maxlength="40" placeholder="remember: key=value (optional)" value="' + esc(x.save || '') + '"></div>' +
+      '<div class="uc-tools"><button type="button" class="btn btn-quiet btn-sm" data-act="mv" data-n="' + esc(nid) + '" data-b="' + i + '" data-d="-1"' + (i ? '' : ' disabled') + ' aria-label="Move up">' + icon('arrow-up') + '</button>' +
+      '<button type="button" class="btn btn-quiet btn-sm" data-act="mv" data-n="' + esc(nid) + '" data-b="' + i + '" data-d="1"' + (i < n.buttons.length - 1 ? '' : ' disabled') + ' aria-label="Move down">' + icon('arrow-down') + '</button>' +
+      '<button type="button" class="btn btn-quiet btn-sm" data-act="del-btn" data-n="' + esc(nid) + '" data-b="' + i + '">' + icon('trash') + ' Remove</button></div></div>';
+  }
+  function nodeHTML(id) {
+    const n = S.nodes[id];
+    return '<details class="fn5-opt"' + (id === S.start ? ' open' : '') + '><summary><span>' + esc(id) + (id === S.start ? ' (start)' : id === S.fallback ? ' (fallback)' : '') + '</span><span class="small muted">' + n.buttons.length + (n.buttons.length === 1 ? ' button' : ' buttons') + '</span></summary><div class="stack">' +
+      '<label class="field"><span class="field-label">What the assistant says <small>one message per line, up to 6</small></span><textarea class="input" data-n="' + esc(id) + '" data-f="say" rows="4" maxlength="2000">' + esc(n.say) + '</textarea></label>' +
+      '<div class="stack">' + n.buttons.map((x, i) => btnHTML(x, id, i, n)).join('') + '</div>' +
+      '<div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-act="add-btn" data-n="' + esc(id) + '"' + (n.buttons.length >= 8 ? ' disabled' : '') + '>' + icon('plus') + ' Add a button</button>' +
+      '<button type="button" class="btn btn-quiet btn-sm" data-act="del-node" data-n="' + esc(id) + '">' + icon('trash') + ' Delete this step</button></div></div></details>';
+  }
+  function paint() {
+    const flow = '<p class="small muted">A step is what the assistant says, plus the buttons the player can tap. Tokens: <code>{coach}</code> <code>{name}</code> <code>{rating}</code> <code>{accelerator}</code> <code>{mentorship}</code> <code>{cap}</code> <code>{seats}</code> <code>{pain}</code> <code>{focus}</code> <code>{a.leak}</code> (any remembered key).</p>' +
+      '<div class="fn5-two"><label class="field"><span class="field-label">Start step</span><select class="input" data-top="start">' + idOpts(S.start) + '</select></label><label class="field"><span class="field-label">Fallback step <small>typed text nobody matched</small></span><select class="input" data-top="fallback">' + idOpts(S.fallback) + '</select></label></div>' +
+      nodeIds().map(nodeHTML).join('') +
+      '<div class="fn5-two"><input class="input" data-new-node maxlength="24" placeholder="new step id, e.g. offer" autocapitalize="off" spellcheck="false"><button type="button" class="btn btn-ghost" data-act="add-node">' + icon('plus') + ' Add a step</button></div>';
+    const rep = '<p class="small muted">When the player types instead of tapping, the first reply with a matching keyword answers. No match: the fallback step.</p>' +
+      S.replies.map((r, i) => '<div class="uc-btn"><label class="field"><span class="field-label">Keywords <small>comma separated</small></span><input class="input" data-r="' + i + '" data-f="keys" maxlength="160" value="' + esc(r.keys) + '"></label>' +
+        '<label class="field"><span class="field-label">Answer <small>optional</small></span><textarea class="input" data-r="' + i + '" data-f="say" rows="2" maxlength="1200">' + esc(r.say) + '</textarea></label>' +
+        '<label class="field"><span class="field-label">Then go to</span><select class="input" data-r="' + i + '" data-f="go"><option value="">Stay on this step</option>' + idOpts(r.go) + '</select></label>' +
+        '<div class="uc-tools"><button type="button" class="btn btn-quiet btn-sm" data-act="del-reply" data-r="' + i + '">' + icon('trash') + ' Remove</button></div></div>').join('') +
+      '<div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-act="add-reply">' + icon('plus') + ' Add a reply</button></div>';
+    const json = '<p class="small muted">The exact data that is saved in your draft and published to GitHub as <code>v5.chat</code>. Edit it here, or export and import it as a file.</p>' +
+      '<textarea class="input uc-json" data-json spellcheck="false">' + esc(JSON.stringify(UpChat.clean(S), null, 2)) + '</textarea>' +
+      '<div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-act="json-apply">' + icon('check') + ' Apply this JSON</button><button type="button" class="btn btn-ghost btn-sm" data-act="json-export">' + icon('download') + ' Export</button><label class="btn btn-ghost btn-sm uc-file">' + icon('upload') + ' Import a file<input type="file" accept="application/json,.json" data-json-file hidden></label></div>';
+    host.innerHTML = '<datalist id="uc-links">' + Object.keys(UpChat.SHORT).map((k) => '<option value="' + esc(k) + '">' + esc(UpChat.SHORT[k]) + '</option>').join('') + '</datalist>' +
+      sw('on', 'Use this chat on the Upgrades page', S.on) + '<p class="small muted">Off: the Upgrades page goes back to the AI sales assistant.</p>' +
+      '<div class="fn5-two">' + sw('typing', 'Typing pauses', S.typing) + sw('input', 'Let players type', S.input) + '</div>' +
+      '<div class="uc-tabs seg" role="group">' + [['flow', 'Steps and buttons'], ['replies', 'Typed replies'], ['json', 'JSON']].map((t) => '<button type="button" class="' + (tab === t[0] ? 'is-on' : '') + '" data-act="tab" data-t="' + t[0] + '">' + esc(t[1]) + '</button>').join('') + '</div>' +
+      (tab === 'flow' ? flow : tab === 'replies' ? rep : json) +
+      '<p class="cms-err" data-uc-err aria-live="polite"></p>' +
+      '<div class="btn-row"><button type="button" class="btn btn-ghost" data-act="preview">' + icon('eye') + ' Preview the chat</button></div>' +
+      '<div class="btn-row"><button class="btn btn-primary" type="button" data-act="save">Save</button><button class="btn btn-ghost" type="button" data-act="publish">' + icon('cloud-arrow-up') + ' Save and publish</button><button class="btn btn-quiet" type="button" data-act="reset">Restore the defaults</button></div>';
+  }
+  /* The form into S (before anything that redraws or saves). */
+  function sync() {
+    if (!host) return;
+    qsa('[data-top]', host).forEach((el) => { const k = el.getAttribute('data-top'); S[k] = el.type === 'checkbox' ? el.checked : el.value; });
+    qsa('[data-f]', host).forEach((el) => {
+      const f = el.getAttribute('data-f'), n = el.getAttribute('data-n'), r = el.getAttribute('data-r');
+      if (r != null) { if (S.replies[+r]) S.replies[+r][f] = el.value; return; }
+      if (!n || !S.nodes[n]) return;
+      const bi = el.getAttribute('data-b');
+      if (bi == null) { if (f === 'say') S.nodes[n].say = el.value; return; }
+      const x = S.nodes[n].buttons[+bi];
+      if (x && !el.disabled) x[f] = el.value;
+    });
+  }
+  function problem() {
+    const ids = nodeIds(), bad = [];
+    if (!ids.length) return 'Add at least one step.';
+    if (!S.nodes[S.start]) return 'Pick a start step.';
+    if (!S.nodes[S.fallback]) return 'Pick a fallback step.';
+    for (const id of ids) {
+      const n = S.nodes[id];
+      if (!String(n.say || '').trim() && !n.buttons.length) return 'Step “' + id + '” is empty: add a message or a button.';
+      for (let i = 0; i < n.buttons.length; i++) {
+        const x = n.buttons[i], where = 'Step “' + id + '”, button ' + (i + 1) + ': ';
+        if (!String(x.label || '').trim()) return where + 'add the button text.';
+        if (!hasOwn(T, x.type)) return where + 'pick what it does.';
+        if (x.type === 'go' && !S.nodes[x.target]) return where + 'it goes to a step that does not exist.';
+        if (x.type === 'popup' && !hasOwn(Popups.TARGETS, x.target)) return where + 'pick a pop-up.';
+        if (x.type === 'scroll' && !hasOwn(UpChat.ANCHORS, x.target)) return where + 'pick a section.';
+        if (x.type === 'link' && !(hasOwn(UpChat.SHORT, x.target) || /^#[A-Za-z0-9-]{1,30}$/.test(x.target) || /^https:\/\/[^\s"'<>\\]{3,}$/i.test(x.target))) return where + 'a link is @skool, #page or a full https:// address.';
+        if (x.save && !/^[a-z0-9_]{1,16}=[A-Za-z0-9_+-]{1,20}$/.test(x.save)) return where + 'remember looks like key=value, for example leak=threats.';
+      }
+    }
+    for (let i = 0; i < S.replies.length; i++) {
+      const r = S.replies[i];
+      if (!String(r.keys || '').trim()) return 'Reply ' + (i + 1) + ': add at least one keyword.';
+      if (!String(r.say || '').trim() && !r.go) return 'Reply ' + (i + 1) + ': add an answer or a step to go to.';
+      if (r.go && !S.nodes[r.go]) return 'Reply ' + (i + 1) + ' goes to a step that does not exist.';
+    }
+    return bad.length ? bad[0] : '';
+  }
+  const err = (t) => { const e = qs('[data-uc-err]', host); if (e) e.textContent = t || ''; };
+  function store() {
+    sync();
+    const bad = problem();
+    err(bad);
+    if (bad) { const e = qs('[data-uc-err]', host); if (e) e.scrollIntoView({ block: 'center', behavior: 'smooth' }); return false; }
+    const d = Admin.ensureDraft(), v5 = Object.assign({}, d.v5 || {});
+    v5.chat = UpChat.clean(S);
+    d.v5 = V5Doc.clean(v5);
+    Admin.saveDraft(d);
+    return true;
+  }
+  const reopen = () => { sheet.close(); setTimeout(V5Admin.chat, 240); };
+  openSheet({
+    title: 'Upgrade chat', cls: 'uc-sheet', noFocus: true, html: '<div class="stack uc" data-uc autocomplete="off"></div>',
+    onMount(sh) {
+      sheet = sh; host = qs('[data-uc]', sh.el); paint();
+      host.addEventListener('change', (e) => {
+        const el = e.target;
+        if (el.matches('[data-json-file]')) {
+          const f = el.files && el.files[0];
+          if (!f || f.size > 400000) { err('That file is too big for a chat file.'); return; }
+          const rd = new FileReader();
+          rd.onload = () => { try { S = UpChat.merge(UpChat.clean(JSON.parse(String(rd.result)))); tab = 'json'; paint(); toast('Imported. Check it, then save.', 'good'); } catch (x) { err('That file is not valid JSON.'); } };
+          rd.readAsText(f);
+          return;
+        }
+        if (el.matches('[data-f="type"]')) {
+          sync();
+          const x = S.nodes[el.getAttribute('data-n')].buttons[+el.getAttribute('data-b')];
+          x.target = x.type === 'go' ? nodeIds()[0] : x.type === 'popup' ? 'support' : x.type === 'scroll' ? 'up-bot' : '';
+          paint();
+        }
+      });
+      host.addEventListener('click', async (e) => {
+        const a = e.target.closest('[data-act]');
+        if (!a) return;
+        const act = a.getAttribute('data-act'), n = a.getAttribute('data-n'), bi = +a.getAttribute('data-b'), ri = +a.getAttribute('data-r');
+        if (act === 'tab') { sync(); tab = a.getAttribute('data-t'); paint(); return; }
+        if (act === 'json-apply') {
+          try { S = UpChat.merge(UpChat.clean(JSON.parse(qs('[data-json]', host).value))); paint(); toast('JSON applied. Save to keep it.', 'good'); } catch (x) { err('That is not valid JSON: ' + (x && x.message ? x.message : 'check the commas and quotes') + '.'); }
+          return;
+        }
+        if (act === 'json-export') { sync(); download('lanckrietchess-upgrade-chat-' + dayKey(new Date()) + '.json', JSON.stringify(UpChat.clean(S), null, 2), 'application/json'); return; }
+        if (tab === 'json' && ['save', 'publish', 'preview', 'reset'].indexOf(act) < 0) return;
+        if (tab !== 'json') sync();
+        if (act === 'add-btn') { S.nodes[n].buttons.push({ label: 'New button', type: 'go', target: S.start }); paint(); return; }
+        if (act === 'del-btn') { S.nodes[n].buttons.splice(bi, 1); paint(); return; }
+        if (act === 'mv') { const l = S.nodes[n].buttons, j = bi + (+a.getAttribute('data-d')); if (l[j]) { const t = l[bi]; l[bi] = l[j]; l[j] = t; paint(); } return; }
+        if (act === 'add-node') {
+          const id = String(qs('[data-new-node]', host).value || '').trim().toLowerCase();
+          if (!UpChat.ID_RE.test(id)) { err('A step id is 1 to 24 letters, digits, - or _.'); return; }
+          if (S.nodes[id]) { err('There is already a step called “' + id + '”.'); return; }
+          if (nodeIds().length >= 40) { err('40 steps is the maximum.'); return; }
+          S.nodes[id] = { say: 'New message', buttons: [{ label: 'Back', type: 'go', target: S.start }] }; paint(); return;
+        }
+        if (act === 'del-node') {
+          if (nodeIds().length <= 1) { err('Keep at least one step.'); return; }
+          delete S.nodes[n];
+          nodeIds().forEach((id) => { S.nodes[id].buttons = S.nodes[id].buttons.filter((x) => !(x.type === 'go' && x.target === n)); });
+          S.replies.forEach((r) => { if (r.go === n) r.go = ''; });
+          if (S.start === n) S.start = nodeIds()[0];
+          if (S.fallback === n) S.fallback = S.start;
+          paint(); return;
+        }
+        if (act === 'add-reply') { S.replies.push({ keys: '', say: '', go: '' }); paint(); return; }
+        if (act === 'del-reply') { S.replies.splice(ri, 1); paint(); return; }
+        if (act === 'preview') {
+          const bad = problem(); err(bad);
+          if (bad) return;
+          const c = UpChat.merge(UpChat.clean(S)); let m = null;
+          openSheet({ title: 'Preview (nothing is saved or sent)', noFocus: true, cls: 'uc-prev', html: '<div class="panel">' + UpChat.html().replace('class="bot uc-bot"', 'class="bot uc-bot" data-prev') + '</div>', onMount(ps) { m = UpChat.mount(qs('[data-prev]', ps.el), { cfg: c, preview: true }); }, onClose() { if (m) m.destroy(); } });
+          return;
+        }
+        if (act === 'save') { if (store()) { toast('Saved on this device. Publish to make it live.', 'good'); sheet.close(); rerender(); } return; }
+        if (act === 'publish') { if (store()) { sheet.close(); setTimeout(() => CMS.publish(), 240); } return; }
+        if (act === 'reset') {
+          if (!(await confirmSheet('Restore the defaults?', 'Every step, reply and button of the chat goes back to the built-in version in your draft. Publish to make it live.', 'Restore'))) return;
+          const d = Admin.ensureDraft(), v5 = Object.assign({}, d.v5 || {});
+          delete v5.chat; d.v5 = V5Doc.clean(v5); Admin.saveDraft(d);
+          toast('Defaults restored in your draft.', 'good'); reopen();
+        }
+      });
+    }
+  });
+};
+
+/* ---------- admin: the Popup triggers (v5.2) ----------
+   The support inquiry, the timeline question, the panel on My mistakes and the
+   rules that open a pop-up from an app moment. Saved as v5.popups. */
+V5Admin.popups = function () {
+  if (!Admin.active) { toast('Sign in to admin mode first.'); return; }
+  let S = clone(Popups.cfg()), host = null, sheet = null;
+  const T = Popups.TARGETS, E = Popups.EVENTS;
+  const opts = (map, cur, label) => Object.keys(map).map((k) => '<option value="' + esc(k) + '"' + (k === cur ? ' selected' : '') + '>' + esc(label ? label(map[k]) : map[k]) + '</option>').join('');
+  const fld = (path, label, val, o) => {
+    o = o || {};
+    return '<label class="field"><span class="field-label">' + esc(label) + (o.hint ? ' <small>' + esc(o.hint) + '</small>' : '') + '</span>' + (o.rows ? '<textarea class="input" data-p="' + path + '" rows="' + o.rows + '" maxlength="' + (o.max || 300) + '">' + esc(val == null ? '' : val) + '</textarea>'
+      : '<input class="input" data-p="' + path + '"' + (o.type === 'number' ? ' type="number" inputmode="numeric" min="0"' : o.type === 'url' ? ' type="url" inputmode="url" autocapitalize="off" spellcheck="false"' : '') + ' maxlength="' + (o.max || 120) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + ' value="' + esc(val == null ? '' : val) + '">') + '</label>';
+  };
+  const test = (id) => '<button type="button" class="btn btn-quiet btn-sm" data-test="' + id + '">' + icon('eye') + ' Test it</button>';
+  function paint() {
+    const s = S.support, t = S.timeline, p = S.panel;
+    host.innerHTML = '<p class="small muted">Any button in the app can open a pop-up: add <code>data-popup="support"</code> to it (ids below). Rules open them by themselves at calm moments, never over a board while a line is being played.</p>' +
+      '<h3>The pop-ups you can link to</h3><ul class="small muted">' + Object.keys(T).map((k) => '<li><code>' + k + '</code> ' + esc(T[k]) + '</li>').join('') + '</ul>' +
+      '<h3>Rules</h3>' + S.rules.map((r, i) => '<div class="uc-btn"><label class="switch-row"><span>Rule ' + (i + 1) + ' is on</span><input type="checkbox" data-rule="' + i + '" data-f="on"' + (r.on ? ' checked' : '') + '></label>' +
+        '<label class="field"><span class="field-label">When</span><select class="input" data-rule="' + i + '" data-f="event">' + opts(E, r.event, (x) => x[0]) + '</select></label>' +
+        '<p class="small muted">' + esc(E[r.event] ? E[r.event][1] : '') + '</p>' +
+        '<div class="uc-btn-row"><label class="field"><span class="field-label">At least</span><input class="input" type="number" inputmode="numeric" min="1" max="50" data-rule="' + i + '" data-f="min" value="' + r.min + '"></label>' +
+        '<label class="field"><span class="field-label">Open</span><select class="input" data-rule="' + i + '" data-f="popup">' + opts(T, r.popup) + '</select></label></div>' +
+        '<div class="uc-btn-row"><label class="field"><span class="field-label">For</span><select class="input" data-rule="' + i + '" data-f="audience"><option value="free"' + (r.audience === 'free' ? ' selected' : '') + '>Players without the Accelerator</option><option value="all"' + (r.audience === 'all' ? ' selected' : '') + '>Everyone</option></select></label>' +
+        '<label class="field"><span class="field-label">Quiet hours after it shows</span><input class="input" type="number" inputmode="numeric" min="0" max="720" data-rule="' + i + '" data-f="cooldownHours" value="' + r.cooldownHours + '"></label></div>' +
+        '<label class="field"><span class="field-label">Max shows per device <small>0 = no limit</small></span><input class="input" type="number" inputmode="numeric" min="0" max="50" data-rule="' + i + '" data-f="maxShows" value="' + r.maxShows + '"></label>' +
+        '<div class="uc-tools"><button type="button" class="btn btn-quiet btn-sm" data-act="del-rule" data-i="' + i + '">' + icon('trash') + ' Remove rule</button></div></div>').join('') +
+      '<div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-act="add-rule"' + (S.rules.length >= 12 ? ' disabled' : '') + '>' + icon('plus') + ' Add a rule</button></div>' +
+      '<p class="small muted">Two pop-ups never fire within 90 seconds of each other, and a rule never fires while another sheet is open.</p>' +
+      '<h3>My mistakes panel</h3><label class="switch-row"><span>Show the panel on My mistakes</span><input type="checkbox" data-p="panel.on"' + (p.on ? ' checked' : '') + '></label>' +
+      fld('panel.min', 'Show it when a move was missed at least', p.min, { type: 'number', max: 2 }) + fld('panel.text', 'Text', p.text, { rows: 3, max: 240, hint: '{coach} and {count} fill in' }) +
+      [0, 1, 2].map((i) => { const x = p.buttons[i] || { label: '', popup: '' }; return '<div class="uc-btn-row"><input class="input" data-pb="' + i + '" data-f="label" maxlength="40" placeholder="Button ' + (i + 1) + ' text (empty = none)" value="' + esc(x.label) + '"><select class="input" data-pb="' + i + '" data-f="popup">' + opts(T, x.popup || 'growth') + '</select></div>'; }).join('') +
+      '<h3>Support inquiry</h3>' + fld('support.title', 'Title', s.title, { max: 80 }) + fld('support.intro', 'Intro', s.intro, { rows: 2, max: 300 }) + fld('support.topics', 'Topics', s.topics, { rows: 4, max: 400, hint: 'one per line, up to 6' }) +
+      '<div class="fn5-two">' + fld('support.cta', 'Button', s.cta, { max: 40 }) + fld('support.webhook', 'Webhook', s.webhook, { type: 'url', max: 600, ph: 'https://hook.eu1.make.com/…' }) + '</div>' + fld('support.thanks', 'Thank-you text', s.thanks, { rows: 2, max: 240 }) + test('support') +
+      '<h3>Improvement timeline question</h3>' + fld('timeline.title', 'Title', t.title, { max: 80 }) + fld('timeline.question', 'Question', t.question, { rows: 2, max: 200 }) + fld('timeline.options', 'Answers', t.options, { rows: 4, max: 400, hint: 'one per line, up to 6' }) +
+      '<label class="field"><span class="field-label">After an answer, open</span><select class="input" data-p="timeline.then"><option value="">Nothing, just say thanks</option>' + opts(T, t.then) + '</select></label>' +
+      fld('timeline.thanks', 'Thank-you text', t.thanks, { rows: 2, max: 240 }) + fld('timeline.webhook', 'Webhook', t.webhook, { type: 'url', max: 600, ph: 'https://hook.eu1.make.com/… (optional)' }) + test('timeline') +
+      '<p class="small muted">The Growth Path pop-up itself (options A, B and C, prices, texts) is edited in Pop-up &amp; Funnel Manager.</p>' +
+      '<p class="cms-err" data-pp-err aria-live="polite"></p><div class="btn-row"><button class="btn btn-primary" type="button" data-act="save">Save</button><button class="btn btn-ghost" type="button" data-act="publish">' + icon('cloud-arrow-up') + ' Save and publish</button><button class="btn btn-quiet" type="button" data-act="reset">Restore the defaults</button></div>';
+  }
+  function sync() {
+    qsa('[data-p]', host).forEach((el) => {
+      const path = el.getAttribute('data-p').split('.'), v = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Math.max(1, Math.round(+el.value || 1)) : el.value;
+      if (path[0] === 'panel' && path[1] === 'text' && !v) return;
+      S[path[0]][path[1]] = v;
+    });
+    qsa('[data-rule]', host).forEach((el) => { const r = S.rules[+el.getAttribute('data-rule')]; if (r) { const f = el.getAttribute('data-f'); r[f] = el.type === 'checkbox' ? el.checked : (f === 'min' || f === 'cooldownHours' || f === 'maxShows') ? Math.max(0, Math.round(+el.value || 0)) : el.value; } });
+    const btns = [];
+    [0, 1, 2].forEach((i) => { const l = qs('[data-pb="' + i + '"][data-f="label"]', host), p = qs('[data-pb="' + i + '"][data-f="popup"]', host); if (l && l.value.trim()) btns.push({ label: l.value, popup: p.value }); });
+    S.panel.buttons = btns;
+  }
+  function store() {
+    sync();
+    const bad = ['support', 'timeline'].map((k) => { const u = String(S[k].webhook || '').trim(); return u && !/^https:\/\/[^\s"'<>\\]{3,}$/i.test(u) ? 'The ' + k + ' webhook must start with https:// and contain no spaces.' : ''; }).filter(Boolean)[0] || '';
+    const e = qs('[data-pp-err]', host); e.textContent = bad;
+    if (bad) { e.scrollIntoView({ block: 'center', behavior: 'smooth' }); return false; }
+    const d = Admin.ensureDraft(), v5 = Object.assign({}, d.v5 || {});
+    v5.popups = Popups.clean(S);
+    d.v5 = V5Doc.clean(v5);
+    Admin.saveDraft(d);
+    return true;
+  }
+  openSheet({
+    title: 'Popup triggers', cls: 'uc-sheet', noFocus: true, html: '<div class="stack uc fn5" data-pp autocomplete="off"></div>',
+    onMount(sh) {
+      sheet = sh; host = qs('[data-pp]', sh.el); paint();
+      host.addEventListener('click', async (e) => {
+        const tb = e.target.closest('[data-test]'), a = e.target.closest('[data-act]');
+        if (tb) { sync(); Popups.run(tb.getAttribute('data-test'), { source: 'preview', count: 3 }, { preview: true, cfg: Popups.merge(Popups.clean(S)) }); return; }
+        if (!a) return;
+        const act = a.getAttribute('data-act'), i = +a.getAttribute('data-i');
+        if (act === 'add-rule') { sync(); S.rules.push({ id: 'r' + Math.random().toString(36).slice(2, 6), on: true, event: 'mistake.repeat', min: 2, popup: 'growth', audience: 'free', cooldownHours: 48, maxShows: 3 }); paint(); return; }
+        if (act === 'del-rule') { sync(); S.rules.splice(i, 1); paint(); return; }
+        if (act === 'save') { if (store()) { toast('Saved on this device. Publish to make it live.', 'good'); sheet.close(); rerender(); } return; }
+        if (act === 'publish') { if (store()) { sheet.close(); setTimeout(() => CMS.publish(), 240); } return; }
+        if (act === 'reset') {
+          if (!(await confirmSheet('Restore the defaults?', 'The pop-up texts, the panel and every rule go back to the built-in version in your draft. Publish to make it live.', 'Restore'))) return;
+          const d = Admin.ensureDraft(), v5 = Object.assign({}, d.v5 || {});
+          delete v5.popups; d.v5 = V5Doc.clean(v5); Admin.saveDraft(d);
+          toast('Defaults restored in your draft.', 'good'); sheet.close(); setTimeout(V5Admin.popups, 240);
+        }
+      });
+      host.addEventListener('change', (e) => { if (e.target.matches('[data-rule][data-f="event"]')) { sync(); paint(); } });
     }
   });
 };
