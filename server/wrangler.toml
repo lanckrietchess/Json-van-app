@@ -1,0 +1,28 @@
+name = "lanckriet-arena"
+main = "arena-worker.js"
+compatibility_date = "2025-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "lanckriet-arena"
+database_id = "FILLED-IN-BY-SETUP"
+
+[vars]
+# The address of your hub. Several: separate with commas. "*" allows any site.
+ALLOWED_ORIGINS = "https://lanckrietchess-app.vercel.app"
+# The published data file of the hub (the raw GitHub address it reads), for the tournament prizes.
+CONTENT_URL = "https://raw.githubusercontent.com/lanckrietchess/Json-van-app/main/content.json"
+# How many staged puzzles the ring buffer keeps.
+MAX_PUZZLES = "3000"
+# The AI coach (the ANTHROPIC_API_KEY secret turns it on).
+MODEL = "claude-haiku-4-5-20251001"
+MAX_TOKENS = "700"
+# Answers per member per day, and for all members together: your cost ceiling.
+AI_DAILY = "60"
+AI_DAILY_MENTOR = "150"
+AI_DAILY_TOTAL = "2000"
+# Devices per member key.
+MAX_DEVICES = "1"
+
+[triggers]
+crons = ["0 */6 * * *"]

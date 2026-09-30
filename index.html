@@ -1396,6 +1396,112 @@ a.cc-frame:hover{border-color:var(--accent)}
 .ti40-ch{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
 .ti40-ch li{display:flex;flex-direction:column;gap:2px}
 @media (min-width:640px){.ti40-row{grid-template-columns:1.2fr 1.3fr 1fr .8fr;align-items:center}}
+/* ---------- v5 ---------- */
+.theory-tabs.grid2x2{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (min-width:640px){.theory-tabs.grid2x2{gap:16px}}
+.board-host{aspect-ratio:1/1}
+.board-host:not(.is-ready){border-radius:6px;background:conic-gradient(rgba(148,163,184,.16) 25%,rgba(148,163,184,.07) 0 50%,rgba(148,163,184,.16) 0 75%,rgba(148,163,184,.07) 0) 0 0/25% 25%}
+.hero-cap{height:74px;min-height:0;overflow:hidden}
+.hero-cap>span:last-child{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.lrn5{max-width:580px;margin:12px auto 0;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--hair);display:grid;gap:8px}
+.lrn5[hidden]{display:none}
+.lrn5-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lrn5-name{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--fog)}
+.lrn5-name i{color:var(--accent)}
+.lrn5-row{display:flex;align-items:baseline;gap:10px}
+.lrn5-eval{font-size:24px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.lrn5-best{font-size:14.5px}
+.lrn5-pv{font-size:13px;color:#cbd5e1;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.lrn5-verdict{font-size:13.5px;font-weight:600}
+.lrn5-verdict.is-match{color:var(--good)}.lrn5-verdict.is-close{color:var(--accent)}.lrn5-verdict.is-diff{color:var(--warn)}
+.lrn5-wait{font-size:13.5px;color:var(--fog)}
+.lrn5-note{display:flex;gap:9px;align-items:flex-start;margin:2px 0 0;padding:10px 12px;border-radius:10px;background:var(--accent-soft);border:1px solid var(--accent-line);font-size:13px;line-height:1.45;color:var(--chalk)}
+.lrn5-note i{color:var(--accent);margin-top:3px}
+.lrn5-note[hidden]{display:none}
+.ca5{display:grid;gap:12px}
+.ca5-lead{font-size:13px;color:var(--fog)}
+.ca5-h{font-size:12.5px;font-weight:700;color:var(--fog);margin-bottom:6px}
+.ca5-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.ca5-btn{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 10px;border-radius:10px;border:1px solid var(--rule);background:transparent;color:var(--chalk);font-size:13.5px;font-weight:600;text-align:left;line-height:1.25}
+.ca5-btn:hover{border-color:var(--accent-line);background:var(--accent-soft)}
+.ca5-btn .k{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:800}
+.coach>*{min-width:0}
+.coach .btn-block{white-space:normal;line-height:1.25;padding-top:9px;padding-bottom:9px}
+.m5{display:grid;gap:10px;margin-top:10px}
+.m5-how{display:flex;gap:8px;align-items:flex-start;font-size:14px;color:var(--fog)}
+.m5-how i{color:var(--accent);margin-top:3px}
+.m5-seg{justify-self:start}
+.m5-tags{display:flex;flex-wrap:wrap;gap:6px}
+.m5-tag{min-height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);background:transparent;color:var(--fog);font-size:13px;font-weight:600}
+.m5-tag:hover{border-color:var(--accent-line);color:var(--chalk)}
+.m5-tag[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--chalk)}
+.m5-tag.is-yes{border-color:var(--good);color:var(--good)}
+.m5-tag.is-no{border-color:var(--miss);color:var(--miss);text-decoration:line-through}
+.m5-picked{font-size:13px;color:var(--chalk);min-height:19px;font-variant-numeric:tabular-nums}
+.mis5{display:grid;gap:8px;margin-top:8px}
+.mis5 p{font-size:13.5px;color:var(--fog)}
+.mis5-row{display:flex;flex-wrap:wrap;gap:6px}
+.trainer[data-split5],.an-grid[data-split5]{position:relative}
+.split5{position:absolute;top:0;bottom:0;width:12px;cursor:col-resize;z-index:3;display:flex;justify-content:center;touch-action:none}
+.split5[hidden]{display:none}
+.split5 span{width:2px;border-radius:2px;background:var(--hair);transition:background .15s}
+.split5:hover span,.split5.is-drag span,.split5:focus-visible span{background:var(--accent)}
+.split5:focus-visible{outline:none}
+body.is-resizing5,body.is-resizing5 *{cursor:col-resize!important;-webkit-user-select:none;user-select:none}
+.trainer[data-split5-on] .board-shell,.trainer[data-split5-on] .board-host{max-width:none}
+.arena5{display:grid;gap:16px;margin:0 0 22px}
+.ar5-grid{display:grid;gap:16px}
+@media (min-width:900px){.ar5-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}}
+.ar5-kicker{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.arena5 h2{font-size:20px;margin:4px 0 4px}
+.ar5-prize{display:inline-flex;align-items:center;gap:5px;color:#fbbf24;font-weight:700}
+.ar5-board{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px}
+.ar5-board li{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 12px;border-radius:12px;border:1px solid var(--hair);background:rgba(255,255,255,.02)}
+.ar5-board li.is-me{border-color:var(--accent-line);background:var(--accent-soft)}
+.ar5-rank{font-weight:800;color:var(--fog);font-variant-numeric:tabular-nums}
+.ar5-board li:first-child .ar5-rank{color:#fbbf24}
+.ar5-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.ar5-score{font-weight:800;font-variant-numeric:tabular-nums}
+.ar5-score small,.ar5-name small{font-weight:500;color:var(--fog)}
+.ar5-note{margin-top:10px}
+.ar5-cards{display:grid;gap:10px;margin-top:14px}
+@media (min-width:760px){.ar5-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ar5-card{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px;border-radius:14px;border:1px solid var(--hair);background:rgba(255,255,255,.02)}
+.ar5-me .ar5-card{margin:10px 0 12px}
+.ar5-av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:800;overflow:hidden}
+.ar5-av img{width:100%;height:100%;object-fit:cover}
+.ar5-body{min-width:0}
+.ar5-body p{margin:3px 0 0;font-size:13px;color:var(--fog)}
+.ar5-body p i{width:14px;color:var(--accent)}
+.ar5-elo b{color:var(--chalk);font-size:15px}
+.ar5-up{color:var(--good);font-weight:700}
+.ar5-down{color:var(--miss);font-weight:700}
+.ar5-acts{display:grid;gap:6px;justify-items:end}
+.ar5-add{display:grid;gap:8px;grid-template-columns:minmax(0,1fr) auto auto;margin-top:12px}
+@media (max-width:560px){.ar5-add{grid-template-columns:1fr auto}.ar5-add input{grid-column:1/-1}.ar5-card{grid-template-columns:40px minmax(0,1fr)}.ar5-acts{grid-column:1/-1;justify-items:start;grid-auto-flow:column;justify-content:start}}
+.ar5-solve{display:grid;gap:12px;scroll-margin-top:calc(var(--head) + 12px)}
+.ar5-solve[hidden]{display:none}
+.ar5-solve-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ar5-prizes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sp5{margin-top:18px}
+.sp5-list{display:grid;gap:8px;margin-top:12px}
+.sp5-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--hair);border-radius:12px}
+.sp5-row small{display:block}
+.sp5-route{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid var(--hair)}
+.sp5-route.is-admin{color:#fbbf24;border-color:rgba(251,191,36,.4)}
+.sp5-route.is-peer{color:var(--good);border-color:rgba(74,222,128,.4)}
+.iq5-end{display:grid;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hair)}
+.iq5-end h3{display:flex;align-items:center;gap:8px;font-size:15px;margin:4px 0 0}
+.iq5-end h3 i{color:var(--accent)}
+.iq5-list{margin:0;padding-left:18px;display:grid;gap:4px;font-size:14px}
+.iq5-end p{font-size:14px}
+.ar5-board li.is-gap{margin-top:10px;border-style:dashed}
+.ar5-board li.is-friend .ar5-name small{color:var(--accent)}
+.pool5{margin-top:18px}
+.pool5 .cl-list{margin-top:12px}
+.srv5-tabs{margin:10px 0 4px}
+.iq5-ai{margin-top:6px}
+.iq5-ai-text{font-size:14px;line-height:1.55;padding:10px 12px;border-radius:12px;border:1px solid var(--accent-line);background:var(--accent-soft)}
 </style>
 </head>
 <body>
@@ -1424,18 +1530,61 @@ a.cc-frame:hover{border-color:var(--accent)}
 <script>
 "use strict";
 /* ==========================================================================
-   LANCKRIETCHESS TRAINING HUB  v3.8.0
+   LANCKRIETCHESS TRAINING HUB  v5.0.0 (Lanckriet Chess App V5)
    One self-contained page: vanilla JS + Tailwind (CDN) + chess.js 0.10.3 +
    chessboard.js 1.0.0, with Stockfish loaded on demand in a Web Worker.
    Host it on any static host, install it as a PWA, wrap it for the Play
    Store (TWA) or embed it in the Skool classroom.
+
+   v5.0, first pass:
+   - Stockfish 19 (NNUE, lite net) in its own Web Worker, depth 20 and one
+     line by default, Stockfish 10 as the fallback (CONFIG.engine);
+   - live Stockfish in Learn mode: eval bar, first choice and the repertoire note;
+   - the four Theory sections in a symmetrical 2x2 grid;
+   - a steady homepage: every board keeps its square before it draws and the
+     spotlight caption has a fixed height, so nothing below it jumps;
+   - the free coach answers from buttons only, on the device, without the AI;
+     typing your own questions is the module gate coachChat (paid by default).
+   v5.0, second pass:
+   - no multiple choice left: every question is an interactive MSPC step on the
+     board (tap, tag, play the forcing moves), checked on the device against
+     the course's own answer and the position; the Blunder Clinic runs the same
+     steps; a Miscalculation button on every calculation step;
+   - the Trim interrogation takes taps on the board as answers;
+   - resizable panels (trainers and Trim), remembered for the session, with an
+     admin default for everyone;
+   - admin mode: MSPC framework and coach buttons (step names, tag buttons,
+     mistake tags, fixed coach answers per tier, panel sizes), published in
+     the v5 section of the data file.
+   v5.0, third pass:
+   - Arena (the Leaderboard tab): a weekly tournament on an admin-chosen metric
+     with a live board, prizes in tokens paid automatically at the Monday
+     reset; a friends list (friend codes, Chess.com and Lichess follows) with
+     rating, weekly progression, Hyper-Focus and "punish their blunder";
+   - Peer-Puzzle staging: every Trim review stages its blunders in a FIFO
+     buffer (staging_peer_puzzles); repertoire openings go to the admin
+     (Review Queue), other openings to the free peer pool (server hook);
+   - Trim pipeline: a macro reality check opens the interrogation (Phase A),
+     the summary adds working points, patterns across sessions and the
+     ManyChat sales bridge for a recurring leak (Phase D).
+   v5.0, fifth pass: the Arena server also runs the AI coach and the member
+   keys. An empty AI, verify or activation address falls back to it: members
+   unlock and activate there (one device per key), the Pro coach and the
+   Trim session conclusion ask Claude through it, the admin tests prompts
+   and runs the content and teacher bots with the admin token. The sales
+   assistant stays on its scripted answers (no freeform AI for free players).
+   v5.0, fourth pass: the Arena server (server/arena-worker.js, a Cloudflare
+   Worker with D1). Its address is set in admin mode and published with the
+   content. With it: one tournament board for every player, settled and paid
+   on the server; friend cards that stay fresh; every player's staged
+   blunders reach the admin, and free peer puzzles reach every player.
 
    1. CONFIG: the block you edit by hand. Almost everything else (texts,
       numbers, lessons, positions, member keys) can now be edited inside the
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '4.0.0',
+  version: '5.0.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -1489,7 +1638,7 @@ const CONFIG = {
   leaderboard: { minPuzzles: 10, weights: { accuracy: 0.6, speed: 0.25, gain: 0.15 } },
 
   /* The built-in coach and the older integrations.
-     freeAiPerGame: AI answers the free coach bot gives per loaded game.
+     freeAiPerGame: no longer used in v5: the free coach answers from its buttons, on the device, without the AI.
      gptFree / gptPro: links to external coach bots (ChatGPT, Gemini...).
      endpointFree / endpointPro: the v3.0 custom-server option, still supported. */
   coachBot: { gptFree: '', gptPro: '', endpointFree: '', endpointPro: '', timeoutMs: 15000, freeAnswersPerGame: 3, freeAiPerGame: 5 },
@@ -1589,7 +1738,24 @@ const CONFIG = {
      production address below, so a member never receives a link that expires. */
   site: { production: 'https://lanckrietchess-app.vercel.app/' },
 
-  engine: { base: 'https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/', liveDepth: 18, deeperStep: 6, lines: 3, reviewMs: 260 },
+  /* v5: Stockfish 19 (NNUE, lite net), single-threaded WebAssembly in its own
+     Web Worker, so the page never freezes while it thinks and nothing is sent
+     anywhere. The hub tries the builds in order: the copy on this site (upload
+     the engine folder next to index.html), the same files on jsDelivr, then
+     Stockfish 10 from cdnjs (base) as the last resort.
+     liveDepth: depth of every live evaluation (analysis board, Explore, Learn
+     mode; admin mode, Numbers and links). lines: engine lines shown by default
+     (MultiPV). hashMb: engine memory, capped at 16 on phones with little RAM.
+     The full-strength net is a 99 MB download, too heavy for phones; the lite
+     net is far above any human and loads in a second or two. */
+  engine: {
+    builds: [
+      { name: 'Stockfish 19', js: 'engine/stockfish-19-lite-single.js', wasm: 'engine/stockfish-19-lite-single.wasm', timeoutMs: 20000 },
+      { name: 'Stockfish 19', js: 'https://cdn.jsdelivr.net/npm/stockfish@19.0.0/bin/stockfish-19-lite-single.js', wasm: 'https://cdn.jsdelivr.net/npm/stockfish@19.0.0/bin/stockfish-19-lite-single.wasm', timeoutMs: 25000 }
+    ],
+    base: 'https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/',
+    liveDepth: 20, deeperStep: 6, lines: 1, reviewMs: 260, hashMb: 32
+  },
   limits: { freeCustomLines: 10 },
   /* v3.9: access follows the universal five levels (LEVELS, next to TIERS).
      Level 1 is free for everyone; levels 2 to 5 need the Accelerator
@@ -1806,7 +1972,8 @@ const GATES = {
   coachPaid: ['The Pro coach (the paid coach bot)', 'Trim', 'vault'],
   leaderboard: ['Joining the community leaderboard (everyone sees their own score)', 'Think', 'community'],
   vaultUnlimited: ['An unlimited Game Vault (free: 25 games and positions, 5 folders)', 'Trim', 'vault'],
-  interrogationFull: ['The full blunder interrogation (free: the first two mistakes of a game)', 'Trim', 'vault']
+  interrogationFull: ['The full blunder interrogation (free: the first two mistakes of a game)', 'Trim', 'vault'],
+  coachChat: ['Typing your own questions to the coach (without it: the coach’s question buttons, answered on the device)', 'Trim', 'vault']
 };
 const BOTS = {
   coachFree: ['Free coach bot', 'Trim page. Answers free players (Tier 1).'],
@@ -2426,6 +2593,7 @@ const App = {
   can(g) { return this.rank() >= (LOCK_RANK[gateLevel(g)] || 0); },
   stat(section) { return this.stats[section] || (this.stats[section] = { tries: 0, correct: 0, streak: 0, best: 0 }); },
   score(section, ok) {
+    try { Tourney.bump('score', section, ok); } catch (e) { /* the tournament is optional */ }
     const s = this.stat(section);
     s.tries++;
     if (ok) { s.correct++; s.streak++; s.best = Math.max(s.best, s.streak); this.touchDaily(); } else s.streak = 0;
@@ -2488,7 +2656,7 @@ const Access = (() => {
     App.save();
   }
   function post(body) {
-    return fetchWithTimeout(CONFIG.access.activationEndpoint, {
+    return fetchWithTimeout(CONFIG.access.activationEndpoint || arenaUrl(), {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(Object.assign({ device: deviceId(), app: 'lanckrietchess-hub', version: CONFIG.version }, body))
     }, CONFIG.access.timeoutMs).then((res) => res.json());
@@ -2502,9 +2670,9 @@ const Access = (() => {
       if (expired(e)) return { ok: false, reason: 'expired', exp: e.exp };
       return { ok: true, tier: e.tier, hash, entry: e };
     }
-    if (!CONFIG.access.verifyEndpoint) return { ok: false, reason: 'invalid' };
+    if (!(CONFIG.access.verifyEndpoint || arenaUrl())) return { ok: false, reason: 'invalid' };
     try {
-      const res = await fetchWithTimeout(CONFIG.access.verifyEndpoint, {
+      const res = await fetchWithTimeout(CONFIG.access.verifyEndpoint || arenaUrl(), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: key, app: 'lanckrietchess-hub', version: CONFIG.version })
       }, CONFIG.access.timeoutMs);
@@ -2557,7 +2725,7 @@ const Access = (() => {
     /* The key itself stays on this device: the hub worker needs it to confirm
        the membership before the Pro coach answers. */
     const extra = { key: tok.toUpperCase(), remote: !!v.remote, label: v.entry ? v.entry.label || '' : '', exp: v.entry ? v.entry.exp || '' : '' };
-    if (CONFIG.access.activationEndpoint && v.entry && !v.entry.demo) {
+    if ((CONFIG.access.activationEndpoint || arenaUrl()) && (v.remote || (v.entry && !v.entry.demo))) {   // v5: server-only keys are tied to a device too
       try {
         const r = await post({ action: 'activate', token: tok });
         if (!r || !r.ok) { fails.push(Date.now()); return { ok: false, message: MSG[r && r.reason] || MSG.invalid }; }
@@ -2584,7 +2752,7 @@ const Access = (() => {
   }
   async function recheckRemote() {
     const a = App.access;
-    if (!CONFIG.access.activationEndpoint || a.tier === 'free' || a.remote) return null;
+    if (!(CONFIG.access.activationEndpoint || arenaUrl()) || a.tier === 'free' || a.remote) return null;
     const e = entryFor(a.keyHash);
     if (!e || e.demo) return null;
     const due = a.pending || !a.checkedAt || Date.now() - new Date(a.checkedAt).getTime() > (CONFIG.access.recheckDays || 7) * 864e5;
@@ -2592,7 +2760,13 @@ const Access = (() => {
     try {
       const r = await post(a.pending ? { action: 'activate', token: a.pending } : { action: 'check', hash: a.keyHash });
       if (r && r.ok) { a.pending = ''; a.bound = true; a.checkedAt = new Date().toISOString(); App.save(); return null; }
-      if (r && /^(bound|unbound|revoked|expired)$/.test(r.reason || '')) { signOut(); return r.reason; }
+      if (r && r.reason === 'unbound') {                              // v5: unlocked before the server existed
+        const r2 = a.key ? await post({ action: 'activate', token: a.key }).catch(() => null) : null;   // the key is on this device: tie it quietly
+        if (r2 && r2.ok) { a.bound = true; a.checkedAt = new Date().toISOString(); App.save(); return null; }
+        if (r2 && r2.reason === 'bound') { signOut(); return 'bound'; }
+        a.checkedAt = new Date().toISOString(); App.save(); return 'connect';   // keep access; ask for the key once
+      }
+      if (r && /^(bound|revoked|expired)$/.test(r.reason || '')) { signOut(); return r.reason; }
     } catch (err) { /* offline: check again on the next launch */ }
     return null;
   }
@@ -3041,8 +3215,12 @@ function deviceId() {
    the model. The API key lives in the worker, never in this file. Without
    CONFIG.ai.endpoint nothing is sent: the built-in coach and the scripted
    assistant answer instead. */
+/* v5: an empty AI, verify or activation address falls back to the Arena
+   server set in admin mode, so one server runs everything. */
+function arenaUrl() { try { return V5Net.on() ? V5Net.url() : ''; } catch (e) { return ''; } }
 const AI = (() => {
-  const endpoint = () => String((CONFIG.ai && CONFIG.ai.endpoint) || '').trim();
+  const explicit = () => String((CONFIG.ai && CONFIG.ai.endpoint) || '').trim();
+  const endpoint = () => explicit() || arenaUrl();
   const on = () => /^https:\/\/\S+$/i.test(endpoint()) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/\S*)?$/i.test(endpoint());
   const clip = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').slice(0, n);
   const vars = () => ({ peak: clip(CONFIG.peakRating, 20), start: clip(CONFIG.startRating, 20), percentile: clip(CONFIG.percentile, 40), coach: clip(CONFIG.coach, 40), fasttrack: clip(CONFIG.fastTrack, 60) });
@@ -3084,7 +3262,11 @@ const AI = (() => {
     return { clean, found };
   }
   const host = () => { try { return new URL(endpoint()).host; } catch (e) { return ''; } };
-  return { on, chat, tags, endpoint, host, norm };
+  /* Your own AI address answers every bot; the Arena server answers the Pro
+     coach and the admin's tools, never the sales assistant (V5: no freeform
+     AI for free players). */
+  const forBot = (key) => on() && (!!explicit() || key !== 'sales');
+  return { on, chat, tags, endpoint, host, norm, forBot };
 })();
 function botPrompt(key) { return typeof BOT_OVR[key] === 'string' && BOT_OVR[key].trim() ? BOT_OVR[key] : DEFAULT_PROMPTS[key] || ''; }
 function gateLevel(g) { const v = GATE_OVR[g]; return hasOwn(LOCK_RANK, v) ? v : (GATES[g] ? GATES[g][2] : 'vault'); }
@@ -3887,7 +4069,9 @@ const Feed = (() => {
       if (!has(src, 'keys') && Array.isArray(prev.keys)) doc.keys = clone(prev.keys);
       if (!has(src, 'gates') && isObj(prev.gates)) doc.gates = clone(prev.gates);
       if (!has(src, 'folders') && Array.isArray(prev.folders)) doc.folders = clone(prev.folders);
+      if (!has(src, 'v5') && isObj(prev.v5) && Object.keys(prev.v5).length) doc.v5 = clone(prev.v5);   // v5: a data file without it keeps the admin settings
     }
+    if (!hubish && isObj(src.v5)) doc.v5 = V5Doc.clean(src.v5);   // v5: a hand-made data file can carry the admin settings too
     seed = imported && prev ? prev : null;
     try { if (feedish) applyFeed(doc, src, rep); } finally { seed = null; }
     const upd = str(src.updated, 40) || str(getPath(src, 'meta.last_updated'), 40) || str(getPath(src, 'meta.updated'), 40) || str(data.exported, 40);
@@ -4027,10 +4211,11 @@ const Site = (() => {
     ['pricing.mentorship.cap', 'Mentorship seats in total', 'num'], ['pricing.mentorship.seatsLeft', 'Mentorship seats open (empty hides it)', 'num'],
     ['community.endpoint', 'Leaderboard and stats worker URL (empty: the AI coach worker)', 'url'], ['leaderboard.minPuzzles', 'Leaderboard: puzzles needed to get ranked (default 10)', 'num'],
     ['leaderboard.weights.accuracy', 'Leaderboard weight: accuracy (default 0.6)', 'num'], ['leaderboard.weights.speed', 'Leaderboard weight: speed (default 0.25)', 'num'],
-    ['leaderboard.weights.gain', 'Leaderboard weight: rating gain (default 0.15)', 'num']
+    ['leaderboard.weights.gain', 'Leaderboard weight: rating gain (default 0.15)', 'num'],
+    ['engine.liveDepth', 'Stockfish depth for live analysis, 8 to 30 (default 20)', 'num'], ['engine.lines', 'Stockfish lines shown by default on the analysis board, 1 to 5 (default 1)', 'num']
   ];
   let defaults = null, published = null, keys = [], known = false, inflight = null, status = {}, adoptedAt = 0, watching = false;
-  const emptyDoc = () => ({ app: 'lanckrietchess-hub', schema: 1, updated: '', copy: {}, settings: {}, lists: {}, gates: {}, bots: {}, keys: [], folders: [], bank: [], trees: [] });
+  const emptyDoc = () => ({ app: 'lanckrietchess-hub', schema: 1, updated: '', copy: {}, settings: {}, lists: {}, gates: {}, bots: {}, keys: [], folders: [], bank: [], trees: [], v5: {} });
   /* v3.7: the rated puzzle bank (checked with chess.js in Feed.bankItem). */
   function cleanBank(list) {
     const UCI = /^[a-h][1-8][a-h][1-8][qrbn]?$/;
@@ -4079,6 +4264,7 @@ const Site = (() => {
     Object.keys(BOTS).forEach((b) => { if (typeof bots[b] === 'string' && bots[b].trim()) out.bots[b] = bots[b].slice(0, 12000); });
     out.folders = CoachFolders.clean(doc.folders);
     out.bank = cleanBank(doc.bank);
+    out.v5 = V5Doc.clean(doc.v5);                                  // v5: framework, coach answers, panel sizes
     out.trees = TreeData.clean(doc.trees);                         // v4.0: opening chapters as trees
     return out;
   }
@@ -4087,6 +4273,7 @@ const Site = (() => {
     SETTINGS.forEach((s) => setPath(CONFIG, s[0], clone(getPath(defaults.config, s[0]))));
     Object.keys(LISTS).forEach((n) => setPath(CONTENT, n, clone(getPath(defaults.content, n)) || []));
     COPY_OVR = {}; GATE_OVR = {}; BOT_OVR = {}; COACH_FOLDERS = []; PUZZLE_BANK = []; keys = []; Trees.load([]);
+    V5Doc.apply(null);
     const doc = (Admin.active && Admin.draft()) || published;
     if (!doc) return;
     Object.keys(doc.copy).forEach((k) => { COPY_OVR[k] = doc.copy[k]; });
@@ -4101,6 +4288,7 @@ const Site = (() => {
     COACH_FOLDERS = CoachFolders.clean(doc.folders);
     PUZZLE_BANK = (doc.bank && doc.bank.length ? doc.bank : (published && published.bank) || []).slice();
     keys = doc.keys.slice();
+    V5Doc.apply(doc.v5);
   }
   function init() {
     defaults = { content: clone(CONTENT), config: clone(CONFIG) };
@@ -4487,6 +4675,8 @@ const CMS = (() => {
         '<div class="menu-rows">' + row('queue', 'inbox', 'Review Queue', (() => { const c = Queue.counts(); return c.ready ? c.ready + (c.ready === 1 ? ' game' : ' games') + ' to review' + (c.new + c.trimming ? ', ' + (c.new + c.trimming) + ' trimming' : '') : c.new + c.trimming ? (c.new + c.trimming) + ' waiting for Stockfish' : 'Import games, approve blunders and featured games'; })()) +
           '</div>' +
         '<div class="menu-rows">' + row('gating', 'layer-group', 'Levels and gating', 'A level for every line, drill and lesson; a tier for every module' + (nGates ? ', ' + nGates + (nGates === 1 ? ' module' : ' modules') + ' changed' : '')) +
+          row('mspc5', 'brain', 'MSPC framework and coach buttons', 'Step names, tag buttons, mistake tags, fixed coach answers, panel sizes') +
+          row('arena5', 'trophy', 'Weekly tournament and sales bridge', 'Metric, prizes, players needed, ManyChat link') +
           row('bots', 'robot', 'AI assistants', 'Free coach, Pro coach and sales assistant' + (nBots ? ', ' + nBots + ' edited' : '')) +
           row('avatar', 'camera', 'Profile image', 'Your Chess.com picture on the About page') +
           row('editor', 'chess-board', 'Board editor', 'Build any position by hand, then save it as a drill') +
@@ -4521,6 +4711,8 @@ const CMS = (() => {
             else if (m === 'settings') settings();
             else if (m === 'gating') gating();
             else if (m === 'bots') botsSheet();
+            else if (m === 'mspc5') V5Admin.framework();
+            else if (m === 'arena5') V5Admin.arena();
             else if (m === 'avatar') avatarSheet();
             else if (m === 'keys') keysSheet();
             else if (m === 'publish') publish();
@@ -4822,7 +5014,7 @@ const CMS = (() => {
     return 'LC-' + ({ community: 'COMM', vault: 'ACC', mentor: 'MENTOR' })[tier] + '-' + x.slice(0, 4) + '-' + x.slice(4, 8) + '-' + x.slice(8);
   }
   function keysSheet(fresh) {
-    const keys = Site.keys(), book = Admin.keybook(), today = dayKey(new Date()), server = !!CONFIG.access.activationEndpoint;
+    const keys = Site.keys(), book = Admin.keybook(), today = dayKey(new Date()), server = !!(CONFIG.access.activationEndpoint || arenaUrl());
     const state = (k) => (k.revoked ? 'switched off' : k.exp && k.exp < today ? 'expired' : 'active');
     const kb = (act, i, ico, label) => '<button type="button" class="icon-btn" data-kk="' + act + '" data-i="' + i + '" aria-label="' + label + '" title="' + label + '">' + icon(ico) + '</button>';
     openSheet({
@@ -4865,10 +5057,10 @@ const CMS = (() => {
             if (await confirmSheet('Delete this key?', 'The key for ' + (k.label || 'this member') + ' stops working after you publish.', 'Delete')) { d.keys.splice(j, 1); Admin.saveDraft(d); const bk = Admin.keybook(); delete bk[k.sha256]; Admin.saveKeybook(bk); }
             later(() => keysSheet());
           } else if (act === 'reset') {
-            const secret = window.prompt('ADMIN_SECRET of your activation server:');
+            const secret = String(Store.get('lc5-admin-token', '') || '') || window.prompt('Admin token of your Arena server (or ADMIN_SECRET of your own activation server):');
             if (!secret) return;
             try {
-              const res = await fetchWithTimeout(CONFIG.access.activationEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reset', hash: k.sha256, secret }) }, CONFIG.access.timeoutMs);
+              const res = await fetchWithTimeout(CONFIG.access.activationEndpoint || arenaUrl(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reset', hash: k.sha256, secret }) }, CONFIG.access.timeoutMs);
               const r = await res.json();
               toast(r && r.ok ? 'Devices reset. The key now works on the next device that uses it.' : 'The server refused. Check the admin secret.', r && r.ok ? 'good' : 'bad');
             } catch (x) { toast('Could not reach the activation server.', 'bad'); }
@@ -5476,7 +5668,7 @@ const CMS = (() => {
       title: 'AI assistants', noFocus: true,
       html: backRow() +
         '<div class="access-status' + (AI.on() ? ' is-on' : '') + '"><span class="ico">' + icon(AI.on() ? 'plug-circle-check' : 'plug') + '</span><div><strong>' + (AI.on() ? 'Connected to ' + esc(AI.host()) : 'No AI server connected yet') + '</strong><span>' +
-          (AI.on() ? 'The bots answer through your hub worker with the published instructions below.' : 'Until you deploy hub-worker.js and set CONFIG.ai.endpoint, the built-in coach and the scripted assistant answer. You can already prepare the instructions.') + '</span></div></div>' +
+          (AI.on() ? 'The Pro coach answers members through your server (' + esc(AI.host()) + ') with the published instructions below. Test new instructions with your admin token.' : 'Until you set the Arena server address (Admin menu, Weekly tournament and sales bridge), the bots use their built-in answers on the device.') + '</span></div></div>' +
         '<div class="menu-rows">' + Object.keys(BOTS).map(row).join('') + '</div>' +
         '<p class="small muted">The instructions are published in content.json, where your hub worker reads them. Anyone can open content.json, so never put passwords or private notes in them.</p>',
       onMount(s) {
@@ -5533,8 +5725,9 @@ const CMS = (() => {
           if (!q) return;
           let secret = '';
           try { secret = sessionStorage.getItem('lc-hub-worker-secret') || ''; } catch (x) { secret = ''; }
+          if (!secret) secret = String(Store.get('lc5-admin-token', '') || '');   // v5: the Arena admin token
           if (!secret) {
-            secret = window.prompt('ADMIN_SECRET of your hub worker:') || '';
+            secret = window.prompt('Admin token of your Arena server:') || '';
             if (!secret) return;
             try { sessionStorage.setItem('lc-hub-worker-secret', secret); } catch (x) { /* ignore */ }
           }
@@ -5754,6 +5947,7 @@ function Board(host, opts) {
     if (o.sound && Sound[o.sound]) Sound[o.sound]();
   }
   let ro = null, rt = null;
+  host.classList.add('is-ready');                                   // v5: the placeholder square gives way to the board
   function resize() { if (destroyed) return; cb.resize(); paint(); drawArrows(); }
   if (window.ResizeObserver) { ro = new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(resize, 60); }); ro.observe(host); }
   else window.addEventListener('resize', resize);
@@ -5791,7 +5985,7 @@ function Board(host, opts) {
       One search at a time; a new request stops the running one.
    ========================================================================== */
 const Engine = (() => {
-  let worker = null, loading = null, status = 'idle', flavour = '';
+  let worker = null, loading = null, status = 'idle', flavour = '', name = '';
   let job = null, queued = null;
   const subs = new Set();
   const emit = () => subs.forEach((fn) => { try { fn(status); } catch (e) { /* ignore */ } });
@@ -5803,15 +5997,28 @@ const Engine = (() => {
       'importScripts(BASE+' + JSON.stringify(file) + ');';
     return new Worker(URL.createObjectURL(new Blob([src], { type: 'application/javascript' })));
   }
-  function boot(file, ms) {
+  /* v5: Stockfish 19 reads the address of its .wasm file from the worker's own
+     URL (#address). The worker is a tiny blob that imports the engine script,
+     so the same code runs the copy on this site and the CDN copy. */
+  function spawnModern(b) {
+    const js = new URL(b.js, location.href).href, wasmUrl = new URL(b.wasm, location.href).href;
+    const src = 'importScripts(' + JSON.stringify(js) + ');';
+    return new Worker(URL.createObjectURL(new Blob([src], { type: 'application/javascript' })) + '#' + encodeURIComponent(wasmUrl));
+  }
+  function bootWith(make, ms) {
     return new Promise((resolve, reject) => {
       let w;
-      try { w = spawn(file); } catch (e) { reject(e); return; }
+      try { w = make(); } catch (e) { reject(e); return; }
       const timer = setTimeout(() => { w.terminate(); reject(new Error('timeout')); }, ms);
       w.onerror = (e) => { clearTimeout(timer); w.terminate(); reject(e); };
       w.onmessage = (e) => { if (String(e.data).indexOf('uciok') === 0) { clearTimeout(timer); resolve(w); } };
       w.postMessage('uci');
     });
+  }
+  const boot = (file, ms) => bootWith(() => spawn(file), ms);
+  function hashMb() {
+    const want = clamp(Math.round(+CONFIG.engine.hashMb || 32), 8, 128), mem = +navigator.deviceMemory || 0;
+    return mem && mem <= 4 ? Math.min(want, 16) : want;
   }
   function load() {
     if (status === 'ready') return Promise.resolve(true);
@@ -5819,13 +6026,20 @@ const Engine = (() => {
     status = 'loading'; emit();
     const wasm = typeof WebAssembly === 'object' && typeof WebAssembly.validate === 'function' &&
       WebAssembly.validate(Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0));
-    const first = wasm ? boot('stockfish.wasm.js', 20000).then((w) => { flavour = 'wasm'; return w; }) : Promise.reject(new Error('no-wasm'));
-    loading = first.catch(() => boot('stockfish.js', 40000).then((w) => { flavour = 'asm.js'; return w; }))
+    const tries = [];
+    if (wasm) (CONFIG.engine.builds || []).forEach((b) => {
+      if (!b || typeof b.js !== 'string' || typeof b.wasm !== 'string') return;
+      if (!/^https?:$/.test(location.protocol) && !/^https:\/\//i.test(b.js)) return;   // the copy on this site needs a web server
+      tries.push(() => bootWith(() => spawnModern(b), clamp(+b.timeoutMs || 20000, 4000, 60000)).then((w) => { flavour = 'wasm'; name = b.name || 'Stockfish'; return w; }));
+    });
+    if (wasm) tries.push(() => boot('stockfish.wasm.js', 20000).then((w) => { flavour = 'wasm'; name = 'Stockfish 10'; return w; }));
+    tries.push(() => boot('stockfish.js', 40000).then((w) => { flavour = 'asm.js'; name = 'Stockfish 10'; return w; }));
+    loading = tries.reduce((p, t) => p.catch(t), Promise.reject(new Error('start')))
       .then((w) => {
         worker = w;
         worker.onmessage = (e) => onLine(String(e.data));
         worker.onerror = () => crash();
-        send('setoption name Hash value 16'); send('isready');
+        send('setoption name Hash value ' + hashMb()); send('isready');
         status = 'ready'; emit(); return true;
       })
       .catch(() => { status = 'failed'; loading = null; emit(); return false; });
@@ -5843,7 +6057,7 @@ const Engine = (() => {
     job = j;
     send('setoption name MultiPV value ' + (j.opts.multipv || 1));
     send('position fen ' + j.fen);
-    send('go ' + (j.opts.movetime ? 'movetime ' + j.opts.movetime : 'depth ' + (j.opts.depth || 16)));
+    send('go ' + (j.opts.movetime ? 'movetime ' + j.opts.movetime : 'depth ' + (j.opts.depth || 16)) + (j.opts.searchmoves ? ' searchmoves ' + j.opts.searchmoves : ''));   // v5: searchmoves goes last
   }
   function parseInfo(line) {
     const t = line.split(/\s+/), out = { depth: 0, multipv: 1, cp: null, mate: null, pv: [], bound: false };
@@ -5918,7 +6132,7 @@ const Engine = (() => {
   function pvText(fen, pv, max) {
     return pvMoves(fen, pv, max).map((m, i) => (m.color === 'w' ? m.num + '.' : i === 0 ? m.num + '...' : '') + m.san).join(' ');
   }
-  return { load, analyse, stop, status: () => status, flavour: () => flavour, on(fn) { subs.add(fn); return () => subs.delete(fn); }, toCp, fmt, winPct, uciToSan, pvMoves, pvText };
+  return { load, analyse, stop, status: () => status, flavour: () => flavour, name: () => name || 'Stockfish 19', depth: () => clamp(Math.round(+CONFIG.engine.liveDepth || 20), 8, 30), on(fn) { subs.add(fn); return () => subs.delete(fn); }, toCp, fmt, winPct, uciToSan, pvMoves, pvText };
 })();
 
 /* ==========================================================================
@@ -6358,7 +6572,7 @@ function StageRunner(cfg) {
   const lastMove = d.lastMove ? { from: d.lastMove[0], to: d.lastMove[1] } : null;
   const K = { M: 'Move', S: 'Specifics', P: 'Priorities', C: 'Calculation' };
   const hasDebrief = !!(d.debrief && d.debrief.length);
-  let opts, at, results, done, revealed, finished, line, wrongTaps, timers = [];
+  let opts, at, results, done, revealed, finished, line, wrongTaps, timers = [], step5 = null;
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
   const hard = !!cfg.hard, hid = hard ? 'hard:' + d.id : d.id, hkind = hard ? 'hard' : (section || 'think');
   let hardT = null, hardEnd = 0;
@@ -6377,7 +6591,7 @@ function StageRunner(cfg) {
   function renderStage() {
     const s = stages[at], el = part('stage');
     if (!s) { el.innerHTML = ''; return; }
-    if (s.type === 'mcq') el.innerHTML = promptHTML(s) + '<div class="opts">' + opts[at].map((o, i) => '<button type="button" class="opt" data-opt="' + i + '">' + esc(o.text) + '</button>').join('') + '</div>';
+    if (s.type === 'mcq') el.innerHTML = promptHTML(s) + '<div data-part="m5"></div>';          // v5: an interactive MSPC step, no multiple choice
     else if (s.type === 'tap') el.innerHTML = promptHTML(s) + '<p class="tap-hint">' + icon('hand-pointer') + ' Tap a square on the board.</p>';
     else if (s.type === 'line') el.innerHTML = promptHTML(s) + '<div data-part="line"></div>';
     else el.innerHTML = promptHTML(s) + '<p class="tap-hint">' + icon('chess-knight') + ' Play the move on the board.</p>';
@@ -6395,6 +6609,7 @@ function StageRunner(cfg) {
     else {
       if (done[at] && at < stages.length - 1) html += '<button type="button" class="btn btn-primary" data-act="advance">Next: ' + esc(K[stages[at + 1].k] || 'next step') + '</button>';
       if (!hard && s && (s.type === 'tap' || s.type === 'move') && !done[at]) html += '<button type="button" class="btn btn-ghost btn-sm" data-act="hint">' + icon('lightbulb') + ' Hint</button>';
+      if (s && (s.type === 'move' || s.type === 'line' || (s.type === 'mcq' && s.k === 'C')) && !done[at]) html += '<button type="button" class="btn btn-quiet btn-sm" data-act="miscalc">' + icon('triangle-exclamation') + ' Miscalculation? Tag it</button>';
       if (!(hard && !finished) && !revealed && hasDebrief) html += '<button type="button" class="btn btn-quiet btn-sm" data-act="reveal">' + icon('eye') + ' Reveal Kyenzo’s analysis</button>';
     }
     part('actions').innerHTML = html;
@@ -6409,11 +6624,21 @@ function StageRunner(cfg) {
   }
   function enter() {
     const s = stages[at];
+    if (step5) { step5.destroy(); step5 = null; }
     board.setTapMode(null); board.setInteractive(null); board.setOnMove(null); board.unmark('hl-good'); board.unmark('hl-bad');
     wrongTaps = 0; part('feedback').innerHTML = '';
     renderSteps(); renderStage(); renderActions();
     if (!s) return;
     if (s.type === 'tap') board.setTapMode(onTap);
+    if (s.type === 'mcq') {
+      const first = () => results[at] == null;
+      step5 = MSPCStep({ stage: s, fen: d.fen, board, host: qs('[data-part="m5"]', host), lastMove, baseArrows: Array.isArray(d.arrows) ? d.arrows : [],
+        onFeedback: (fb) => { part('feedback').innerHTML = feedbackHTML(fb); },
+        onCheck: (ok) => { if (first()) { App.score(section, ok); if (!ok) { results[at] = false; renderSteps(); } } },
+        onPass: () => { Sound.good(); complete(results[at] == null ? true : results[at]); },
+        onReveal: () => { if (first()) { App.score(section, false); results[at] = false; } complete(false); } });
+      step5.mount();
+    }
     if (s.type === 'move') { board.setInteractive(side); board.setOnMove(onStageMove); }
     if (s.type === 'line') {
       if (line) line.destroy();
@@ -6511,6 +6736,13 @@ function StageRunner(cfg) {
     const act = b.getAttribute('data-act');
     if (act === 'advance') { at++; enter(); }
     else if (act === 'hint') hint();
+    else if (act === 'miscalc') part('feedback').innerHTML = MSPC5UI.misHTML();
+    else if (act === 'mis') {
+      const t = b.getAttribute('data-tag') || '';
+      if (results[at] == null) { App.score(section, false); results[at] = false; renderSteps(); }
+      MSPC5UI.tag(t, d.id); enter();
+      part('feedback').innerHTML = feedbackHTML({ v: 'info', label: 'Tagged: ' + t, text: 'The position is back. Calculate it again, one forcing reply at a time.' });
+    }
     else if (act === 'reveal') { revealed = true; showDebrief(true); renderActions(); }
     else if (act === 'next' && cfg.onNext) cfg.onNext();
     else if (act === 'again') start();
@@ -6536,6 +6768,7 @@ function StageRunner(cfg) {
       if (Date.now() < hardEnd) { hardPaint(); return; }
       stages.forEach((x, i) => { if (results[i] == null) results[i] = false; done[i] = true; });
       if (line) { line.destroy(); line = null; }
+      if (step5) { step5.destroy(); step5 = null; }
       board.setInteractive(null); board.setTapMode(null);
       part('feedback').innerHTML = feedbackHTML({ v: 'bad', label: 'Time is up', text: 'Hard Mode gives you ' + HARD_SECONDS + ' seconds per step. The steps you didn’t finish count as misses.' });
       Sound.bad();
@@ -6545,19 +6778,20 @@ function StageRunner(cfg) {
   function start() {
     timers.forEach(clearTimeout); timers = [];
     if (line) { line.destroy(); line = null; }
+    if (step5) { step5.destroy(); step5 = null; }
     opts = stages.map((s) => (s.type === 'mcq' ? shuffle(s.options) : null));
     at = 0; results = stages.map(() => null); done = stages.map(() => false); revealed = false; finished = false; wrongTaps = 0;
     V33.begin(hid, { kind: hkind, moves: Math.max(1, stages.length) });
     startHard();
     part('debrief').hidden = true; part('debrief').innerHTML = '';
-    board.clearMarks(); board.setArrows([]);
+    board.clearMarks(); board.setArrows(Array.isArray(d.arrows) ? d.arrows : []);
     board.orientation((d.orientation || side) === 'b' ? 'black' : 'white');
     board.setPosition(d.fen, { animate: false, lastMove });
     enter();
   }
   return {
     start,
-    destroy() { stopHard(); timers.forEach(clearTimeout); if (line) line.destroy(); host.removeEventListener('click', onClick); board.setTapMode(null); board.setOnMove(null); board.setInteractive(null); }
+    destroy() { stopHard(); timers.forEach(clearTimeout); if (line) line.destroy(); if (step5) { step5.destroy(); step5 = null; } host.removeEventListener('click', onClick); board.setTapMode(null); board.setOnMove(null); board.setInteractive(null); }
   };
 }
 
@@ -6733,6 +6967,7 @@ function trainerShell(boardId, panelId, opts) {
     (opts.eval ? '<div class="evalbar" id="' + boardId + '-eval" hidden><div class="evalfill"></div></div>' : '') +
     '<div id="' + boardId + '" class="board-host"></div></div><div class="board-tools"><div class="hud36" data-hud36 hidden aria-live="off"></div>' + (opts.tools || '') +
     '<button type="button" class="icon-btn" data-flip="' + boardId + '" aria-label="Flip board" title="Flip board">' + icon('retweet') + '</button></div>' +
+    (opts.eval ? '<div class="lrn5" id="' + boardId + '-learn" hidden></div>' : '') +
     '<div class="board-tree-pane" id="' + boardId + '-tree" hidden></div></div>' +
     '<div class="trainer-panel panel" id="' + panelId + '"></div></div>';
 }
@@ -6987,7 +7222,7 @@ function mountThink(view) {
 function thinkTabs(active) {
   const due = V36.srsDueCount();
   const tabs = [['think', 'brain', 'MSPC trainer', 'Think every move through'], ['clinic', 'stethoscope', 'Blunder Clinic', 'Real blunders, explained with MSPC'], ['peer', 'user-group', 'Peer puzzles', 'Punish blunders from this hub'],
-    ['shuffle', 'shuffle', 'Shuffle Trainer', 'Arcade repetition, line after line'], ['srs', 'crosshairs', 'My mistakes', 'Spaced repetition of your misses'], ['leaderboard', 'ranking-star', 'Leaderboard', 'Scores, volume and top games']];
+    ['shuffle', 'shuffle', 'Shuffle Trainer', 'Arcade repetition, line after line'], ['srs', 'crosshairs', 'My mistakes', 'Spaced repetition of your misses'], ['leaderboard', 'trophy', 'Arena', 'Tournament, friends, leaderboard']];
   return '<nav class="theory-tabs six" aria-label="Think modes">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === active ? ' aria-current="page"' : '') + '>' + icon(t[1]) +
     '<b>' + t[2] + (t[0] === 'shuffle' && !App.can('shuffle') ? ' ' + lockIcon(gateLevel('shuffle')) : '') + (t[0] === 'srs' && due ? '<span class="tab-count" aria-label="' + due + ' due">' + due + '</span>' : '') + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>';
 }
@@ -7309,7 +7544,7 @@ function mountShuffle(root) {
 function theoryHead(show) { const h = qs('#theory-head'); if (h) h.hidden = !show; }
 function mountTheory(view, sub) {
   const tabs = [['openings', 'chess-pawn', 'Openings', 'Repertoires and drills'], ['middlegame', 'chess-knight', 'Middlegame', 'Plans and bootcamps'], ['endgame', 'chess-king', 'Endgame', 'Technique that converts'], ['puzzles', 'puzzle-piece', 'Puzzles', 'Rated tactics, live']];
-  view.innerHTML = cmsBar() + '<nav class="theory-tabs" aria-label="Theory sections">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === sub ? ' aria-current="page"' : '') + '>' + icon(t[1]) + '<b>' + t[2] + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' +
+  view.innerHTML = cmsBar() + '<nav class="theory-tabs grid2x2" aria-label="Theory sections">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === sub ? ' aria-current="page"' : '') + '>' + icon(t[1]) + '<b>' + t[2] + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' +
     '<div id="theory-head">' + pageHeadK('theory.' + sub + '.title', 'theory.' + sub + '.text') + '</div><div id="theory-root"></div>';
   const root = qs('#theory-root', view);
   return (sub === 'openings' ? mountOpenings : sub === 'middlegame' ? mountMiddlegame : sub === 'puzzles' ? mountPuzzles : mountEndgame)(root);
@@ -7867,6 +8102,7 @@ function trainScreen(body, group, go) {
   }
   function ungate() { gated = 0; veil.hide(); }
   function stopAll() {
+    LearnEngine.detach();
     if (runner) { runner.destroy(); runner = null; }
     if (explorer) { explorer.destroy(); explorer = null; }
     if (treePane) { treePane.destroy(); treePane = null; }
@@ -7883,6 +8119,7 @@ function trainScreen(body, group, go) {
     if (treePane) { treePane.destroy(); treePane = null; }
     evalbar.hidden = true;
     if (runner) runner.destroy();
+    if (learn) LearnEngine.attach({ board, evalbar, host: qs('#op-board-learn', body) }); else LearnEngine.detach();
     runner = LineRunner({ board, moves: l.moves, side: l.side, ann: l.ann, section: 'openings', id: l.id, title: group.name + ': ' + l.title, learn: !!learn, silent: isStatic(l), onUpdate: drillPanel });
     runner.start();
   }
@@ -7995,8 +8232,122 @@ function trainScreen(body, group, go) {
   else if (topic && ui.only) { set = [line]; startDrill(line, false); }
   else if (topic) selectLevel(sel);
   else startDrill(line, ui.mode === 'learn' || (!ui.only && V36.autoLearn(line)));
-  return () => { body.removeEventListener('click', onClick); stopKeys(); if (runner) runner.destroy(); if (explorer) explorer.destroy(); board.destroy(); };
+  return () => { LearnEngine.detach(); body.removeEventListener('click', onClick); stopKeys(); if (runner) runner.destroy(); if (explorer) explorer.destroy(); board.destroy(); };
 }
+/* ---------- v5: live Stockfish in Learn mode ----------
+   While a player learns a line (Learn mode, in both opening trainers),
+   Stockfish evaluates every position where it is the player's move, in its
+   own Web Worker: an eval bar next to the board and a card under it with the
+   evaluation, Stockfish's first choice and its main line, plus the course's
+   note on why the repertoire is not always the engine's move. How the course
+   move compares with Stockfish's choice goes into the Learn-mode feedback.
+   One switch: the card itself, or Settings > Live Stockfish in Learn mode. */
+const LEARN_NOTE = 'Note: Not every move played here is 100% Stockfish approved at deep engine evaluation; our repertoire is engineered for maximum practical psychological pressure and board clarity.';
+const LearnEngine = (() => {
+  let cur = null, tok = 0;
+  const on = () => App.settings.learnSf !== false;
+  const depth = () => clamp(Math.round(+CONFIG.engine.learnDepth || Engine.depth()), 8, 30);
+  const ev = (cp) => (Math.abs(cp) >= 9000 ? (cp > 0 ? 'a forced mate for you' : 'a forced mate against you') : (cp >= 0 ? '+' : '\u2212') + (Math.abs(cp) / 100).toFixed(1) + ' for you');
+  function frame() {
+    if (!cur || !cur.host) return null;
+    let body = qs('[data-lrn5-body]', cur.host);
+    if (!body) {
+      cur.host.innerHTML = '<div class="lrn5-top"><span class="lrn5-name">' + icon('microchip') + '<span data-lrn5-name></span></span><button type="button" class="btn btn-quiet btn-sm" data-lrn5="toggle"></button></div>' +
+        '<div class="lrn5-body" data-lrn5-body></div><p class="lrn5-note" data-lrn5-note>' + icon('circle-info') + '<span>' + esc(LEARN_NOTE) + '</span></p>';
+      body = qs('[data-lrn5-body]', cur.host);
+    }
+    qs('[data-lrn5-name]', cur.host).textContent = Engine.name() + (on() ? ', live in Learn mode' : '');
+    qs('[data-lrn5="toggle"]', cur.host).textContent = on() ? 'Turn off' : 'Turn on';
+    qs('[data-lrn5-note]', cur.host).hidden = !on();
+    return body;
+  }
+  function bar(l) {
+    const b = cur && cur.evalbar;
+    if (!b) return;
+    b.hidden = false;
+    b.classList.toggle('is-flipped', cur.board.orientation() === 'black');
+    const fill = qs('.evalfill', b);
+    if (fill) fill.style.height = (l ? Engine.winPct(Engine.toCp(l)) : 50).toFixed(1) + '%';
+  }
+  function verdictHTML() {
+    const v = cur && cur.verdict;
+    return v && v.fen === cur.fen ? '<p class="lrn5-verdict is-' + v.kind + '">' + icon(v.kind === 'diff' ? 'code-compare' : 'circle-check') + ' ' + esc(v.text) + '</p>' : '';
+  }
+  function paint(r) {
+    if (!cur || !r || !r.lines || !r.lines.length || r.fen !== cur.fen) return;
+    cur.r = r;
+    const l = r.lines[0], body = frame();
+    if (!body) return;
+    const uci = l.pv && l.pv[0], san = uci ? Engine.uciToSan(r.fen, uci) : '';
+    body.innerHTML = '<div class="lrn5-row"><span class="lrn5-eval">' + esc(Engine.fmt(l)) + '</span><span class="small dim">depth ' + (+l.depth || 0) + ' of ' + depth() + '</span></div>' +
+      (san ? '<p class="lrn5-best">Stockfish’s first choice: <b>' + esc(moveLabel(fullmove(r.fen), sideOf(r.fen), san)) + '</b></p>' : '') +
+      (l.pv && l.pv.length > 1 ? '<p class="lrn5-pv">' + esc(Engine.pvText(r.fen, l.pv, 8)) + '</p>' : '') + verdictHTML();
+    bar(l);
+  }
+  function wait(text) { const body = frame(); if (body && !qs('.lrn5-eval', body)) body.innerHTML = '<p class="lrn5-wait">' + esc(text) + '</p>'; }
+  function idle() {
+    const body = frame();
+    if (body) body.innerHTML = '<p class="lrn5-wait">Stockfish is off in Learn mode. Turn it on to see the evaluation and its first choice on every move.</p>';
+    if (cur && cur.evalbar) cur.evalbar.hidden = true;
+  }
+  async function compare(my, fen, p, r, cb) {
+    if (my !== tok || !cur || !r || !r.lines || !r.lines.length) return;
+    const top = r.lines[0], best = r.best || (top.pv && top.pv[0]);
+    if (!best) return;
+    const mv = new Chess(fen).move(p.san, { sloppy: true }), uci = mv ? mv.from + mv.to + (mv.promotion || '') : p.from + p.to;
+    const pov = sideOf(fen) === 'w' ? 1 : -1, cpOf = (l) => Engine.toCp(l) * pov, tc = cpOf(top);
+    const say = (kind, text, extra, arrows) => { cur.verdict = { fen, kind, text }; paint(cur.r && cur.r.fen === fen ? cur.r : r); cb(extra, arrows); };
+    if (best.slice(0, 4) === uci.slice(0, 4)) { say('match', p.san + ' is Stockfish’s first choice here.', 'Stockfish’s first choice too (' + ev(tc) + ').'); return; }
+    let mine = null;
+    try { mine = await Engine.analyse(fen, { depth: clamp(depth() - 6, 10, 18), multipv: 1, searchmoves: uci }); } catch (e) { mine = null; }
+    if (my !== tok || !cur) return;
+    const sf = Engine.uciToSan(fen, best) || best, mc = mine && mine.lines && mine.lines[0] ? cpOf(mine.lines[0]) : null;
+    if (mc != null && tc - mc <= 35) { say('close', p.san + ' is as good as Stockfish’s first choice, ' + sf + '.', 'Stockfish agrees: as good as its first choice ' + sf + ' (' + ev(mc) + ').'); return; }
+    say('diff', 'Stockfish prefers ' + sf + ' (' + ev(tc) + ')' + (mc != null ? '; the course move ' + p.san + ' scores ' + ev(mc) : '') + '.',
+      'Stockfish prefers ' + sf + ' (green arrow, ' + ev(tc) + '). The course plays ' + p.san + ' to stay in its plan: learn it, then compare the two in Explore.',
+      [{ from: p.from, to: p.to, kind: 'best' }, { from: best.slice(0, 2), to: best.slice(2, 4), kind: 'pv2', w: 0.7 }]);
+  }
+  function step(fen, p, cb) {
+    if (!cur) return false;
+    const my = ++tok;
+    cur.fen = fen; cur.p = p; cur.cb = cb; cur.verdict = null;
+    if (!on()) { idle(); return true; }
+    wait(Engine.status() === 'ready' ? 'Stockfish is thinking…' : 'Starting ' + Engine.name() + '…');
+    Engine.analyse(fen, { depth: depth(), multipv: 1 }, (r) => { if (my === tok) paint(r); })
+      .then((r) => compare(my, fen, p, r, cb))
+      .catch((e) => {
+        if (my !== tok || !cur || /superseded/.test(String(e && e.message))) return;
+        const body = frame();
+        if (body) body.innerHTML = '<p class="lrn5-wait">Stockfish could not start on this device. The line works without it.</p>';
+        if (cur.evalbar) cur.evalbar.hidden = true;
+      });
+    return true;
+  }
+  function onClick(e) {
+    const b = e.target.closest('[data-lrn5]');
+    if (!b || !cur) return;
+    App.settings.learnSf = !on(); App.save();
+    if (!on()) { tok++; Engine.stop(); idle(); return; }
+    if (cur.fen && cur.p) step(cur.fen, cur.p, cur.cb || (() => {}));
+    else { bar(null); wait('Stockfish starts on your next move.'); }
+  }
+  function attach(o) {
+    if (cur && cur.board === o.board && cur.host === o.host) { tok++; cur.fen = ''; cur.p = null; cur.verdict = null; return; }
+    detach();
+    cur = { board: o.board, evalbar: o.evalbar || null, host: o.host || null, fen: '', p: null, cb: null, r: null, verdict: null };
+    if (cur.host) { cur.host.hidden = false; cur.host.addEventListener('click', onClick); }
+    if (on()) { bar(null); wait('Starting ' + Engine.name() + '…'); Engine.load(); } else idle();
+  }
+  function detach() {
+    tok++;
+    if (!cur) return;
+    if (cur.host) { cur.host.removeEventListener('click', onClick); cur.host.hidden = true; cur.host.innerHTML = ''; }
+    if (cur.evalbar) cur.evalbar.hidden = true;
+    cur = null;
+    Engine.stop();
+  }
+  return { attach, detach, step, attachedTo: (board) => !!cur && cur.board === board, active: () => !!cur };
+})();
 function Explorer(cfg) {
   const board = cfg.board, panel = cfg.panel, group = cfg.group, evalbar = cfg.evalbar;
   const root = buildTree(group.lines);
@@ -8039,7 +8390,7 @@ function Explorer(cfg) {
     const my = ++token;
     if (!ui.engine) { evalbar.hidden = true; return; }
     if (new Chess(node.fen).game_over()) { qs('#ex-eng-out', panel).textContent = 'The game is over on the board.'; return; }
-    Engine.analyse(node.fen, { depth: CONFIG.engine.liveDepth, multipv: 1 }, (r) => { if (my === token && !destroyed) paint(r); })
+    Engine.analyse(node.fen, { depth: Engine.depth(), multipv: 1 }, (r) => { if (my === token && !destroyed) paint(r); })
       .catch((e) => { if (my === token && !destroyed && !/superseded/.test(e.message)) { const out = qs('#ex-eng-out', panel); if (out) out.textContent = 'The engine could not start. Check your connection and try again.'; } });
   }
   function onClick(e) {
@@ -8613,7 +8964,9 @@ function verdictText(cp) {
 const Coach = {
   async reply(q, ctx) {
     const t = q.toLowerCase();
-    const remote = App.can('coachPaid') ? (CONFIG.coachBot.endpointPro || CONFIG.coachBot.endpointFree) : CONFIG.coachBot.endpointFree;
+    const act = CoachActions.run(q, ctx);                          // v5: the MSPC buttons answer on the device, zero tokens
+    if (act) return act;
+    const remote = !App.can('coachChat') ? '' : App.can('coachPaid') ? (CONFIG.coachBot.endpointPro || CONFIG.coachBot.endpointFree) : CONFIG.coachBot.endpointFree;
     if (remote) { try { return await remoteReply(remote, q, ctx); } catch (e) { /* fall back to the built-in coach */ } }
     if (/\b(hi|hello|hey|yo|hallo)\b/.test(t) && t.length < 24) return { text: 'Hi' + (App.profile.name ? ' ' + App.profile.name : '') + '. Step to any position and ask me about it. I coach with MSPC: first I make you think, then I show you the answer.' };
     if (/leak|report|weak|improve|summary|why do i (keep )?los/.test(t)) return leakReply(ctx);
@@ -8733,6 +9086,70 @@ function openingReply(ctx) {
   }
   return { text: 'This game does not follow the hub’s repertoire. The Caro-Kann, the Colle and the Semi-Slav are all in the Openings trainer.', actions: [{ label: 'Open the Openings trainer', href: '#openings' }] };
 }
+/* ---------- v5: the free coach's question buttons ----------
+   Free players (module gate coachChat) don't type to the coach: they tap one
+   of these questions and the answer is built on this device from chess.js and
+   Stockfish, without the AI and without a token spent. The four MSPC buttons
+   walk the steps on the position that is on the board; the others use the
+   built-in coach below. */
+const COACH_ACTIONS = [
+  { g: 'mspc', k: 'M', q: 'M: what did their move change?', label: 'What did their move change?', run: mspcMReply },
+  { g: 'mspc', k: 'S', q: 'S: which pieces are loose?', label: 'Which pieces are loose?', run: mspcSReply },
+  { g: 'mspc', k: 'P', q: 'P: my checks and captures', label: 'Checks and captures', run: mspcPReply },
+  { g: 'mspc', k: 'C', q: 'C: how do I calculate this?', label: 'How do I calculate this?', run: mspcCReply },
+  { g: 'engine', q: 'Hint (MSPC)', label: 'MSPC hint' },
+  { g: 'engine', q: 'Best move', label: 'Best move' },
+  { g: 'engine', q: 'Why was that bad?', label: 'Why was that bad?' },
+  { g: 'review', q: 'What’s the plan?', label: 'What’s the plan?' },
+  { g: 'review', q: 'My leaks', label: 'My leaks' },
+  { g: 'review', q: 'Which opening is this?', label: 'Which opening is this?' }
+];
+const CoachActions = {
+  groups: [['mspc', 'Run MSPC on this position'], ['engine', 'Ask Stockfish'], ['review', 'Plans and review']],
+  faqHTML() { const f = V5Doc.faq('free'); return f.length ? '<div><p class="ca5-h">Coach answers</p><div class="ca5-row">' + f.map((x) => '<button type="button" class="ca5-btn" data-q="' + esc(x.q) + '"><span>' + esc(x.q) + '</span></button>').join('') + '</div></div>' : ''; },
+  html() {
+    return '<div class="ca5" role="group" aria-label="Questions for the free coach"><p class="ca5-lead">Tap a question. The free coach answers on this device, with Stockfish and the MSPC System.</p>' +
+      this.groups.map((gr) => '<div><p class="ca5-h">' + esc(gr[1]) + '</p><div class="ca5-row">' + COACH_ACTIONS.filter((a) => a.g === gr[0]).map((a) =>
+        '<button type="button" class="ca5-btn" data-q="' + esc(a.q) + '">' + (a.k ? '<b class="k">' + a.k + '</b>' : '') + '<span>' + esc(a.label) + '</span></button>').join('') + '</div></div>').join('') + CoachActions.faqHTML() + '</div>';
+  },
+  run(q, ctx) {
+    const f = V5Doc.faq(App.can('coachChat') ? 'paid' : 'free').filter((x) => x.q === q)[0];   // v5: Kyenzo's fixed answers
+    if (f) return { text: f.a };
+    const a = COACH_ACTIONS.filter((x) => x.run && x.q === q)[0];
+    if (!a || !ctx || !ctx.fen) return null;
+    try { return a.run(ctx); } catch (e) { return { text: 'I could not read this position. Step to a move of the game and try again.' }; }
+  }
+};
+const listOf = (a, n) => (a.length ? a.slice(0, n || 5).join(', ') + (a.length > (n || 5) ? ', …' : '') : 'none');
+function mspcMReply(ctx) {
+  const g = new Chess(ctx.fen), me = g.turn(), opp = me === 'w' ? 'b' : 'w', last = ctx.last;
+  if (g.game_over()) return { text: 'The game is over in this position. Step back to a move you want to understand.' };
+  const lead = 'M, Move: ' + (last ? colorName(last.color) + ' just played ' + moveLabel(last.num, last.color, last.san) + '. ' : 'no move has been played yet. ');
+  if (g.in_check()) return { text: lead + 'It gives check, so every candidate has to answer the check first: move the king, block, or take the checking piece.' };
+  const th = ccaList(ctx.fen, opp), hit = loosePieces(ctx.fen, me).filter((x) => x.attacked);
+  return { text: lead + 'If ' + colorName(opp) + ' could move again: checks ' + listOf(th.checks) + '; captures ' + listOf(th.captures) + '.\n' +
+    (hit.length ? colorName(me) + ' has attacked pieces without a defender: ' + hit.map((x) => PIECE_NAME[x.type] + ' on ' + x.sq).join(', ') + '. Deal with that first.'
+      : 'Nothing of ' + colorName(me) + ' is attacked and undefended, so the move is free for a plan.') };
+}
+function mspcSReply(ctx) {
+  const g = new Chess(ctx.fen), me = g.turn(), opp = me === 'w' ? 'b' : 'w', ph = phaseOf(ctx.fen, (ctx.moves || []).length);
+  const name = (x) => PIECE_NAME[x.type] + ' on ' + x.sq + (x.attacked ? ' (attacked)' : ''), mine = loosePieces(ctx.fen, me), theirs = loosePieces(ctx.fen, opp);
+  return { text: 'S, Specifics: ' + (ph === 'middlegame' ? 'a ' : 'an ') + ph + ' position, ' + colorName(me) + ' to move.\nLoose pieces of ' + colorName(me) + ': ' + (mine.map(name).join(', ') || 'none') + '.\nLoose pieces of ' + colorName(opp) + ': ' + (theirs.map(name).join(', ') || 'none') + '.' +
+    (theirs.length ? '\nA loose piece is a target: look for a move that attacks it and does something else at the same time.' : '') };
+}
+function mspcPReply(ctx) {
+  const g = new Chess(ctx.fen), me = g.turn();
+  if (g.game_over()) return { text: 'The game is over in this position.' };
+  const m = ccaList(ctx.fen, me);
+  return { text: 'P, Priorities for ' + colorName(me) + ':\nChecks: ' + listOf(m.checks, 8) + '.\nCaptures: ' + listOf(m.captures, 8) + '.\nAttacks on loose or bigger pieces: ' + listOf(m.attacks, 8) + '.\nCalculate them in that order: checks, captures, attacks.' };
+}
+function mspcCReply(ctx) {
+  const g = new Chess(ctx.fen), me = g.turn();
+  if (g.game_over()) return { text: 'The game is over in this position.' };
+  const m = ccaList(ctx.fen, me), cands = m.checks.concat(m.captures, m.attacks).filter((x, i, a) => a.indexOf(x) === i).slice(0, 3);
+  return { text: 'C, Calculation: ' + (cands.length ? 'take the forcing candidates of ' + colorName(me) + ' one at a time: ' + cands.join(', ') + '.' : 'no forcing moves here, so improve the worst piece and check the opponent’s checks and captures after your move.') +
+    '\nFor each candidate: list every check and capture the opponent has in reply, answer each one, and stop only when the position is quiet. Then compare the endings.\nPlay your candidate on the board and tap Best move to check it.' };
+}
 async function remoteReply(url, q, ctx) {
   const res = await fetchWithTimeout(url, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -8758,11 +9175,14 @@ const COACH_BOTS = {
 function CoachBot(kind) {
   const def = COACH_BOTS[kind];
   let history = [], used = 0, warned = false;
-  const limit = () => (kind === 'free' ? Math.max(0, Math.floor(+CONFIG.coachBot.freeAiPerGame || 0)) : Infinity);
+  const limit = () => (kind === 'free' ? 0 : Infinity);            // v5: the free coach never calls the AI (zero tokens)
   const NOTE = {
     limit: 'The AI coach is taking a short break: too many questions this hour. The built-in coach answers for now.',
     tier: 'The Pro coach could not confirm your membership on the server. Paste your member key once more on the Upgrades page; the built-in coach answers for now.',
-    offline: 'You are offline, so the built-in coach answers.'
+    offline: 'You are offline, so the built-in coach answers.',
+    unbound: 'To use the AI coach on this device, enter your member key once more on the Upgrades page (one device per key). The built-in coach answers for now.',
+    bound: 'Your member key is active on another device, so the AI coach answers there. The built-in coach answers here.',
+    busy: 'The AI coach is very busy right now. The built-in coach answers for now.'
   };
   return {
     kind, def, limit,
@@ -8772,6 +9192,8 @@ function CoachBot(kind) {
     canAi: () => AI.on() && used < limit(),
     spend() { used++; },
     async reply(q, ctx) {
+      const local = CoachActions.run(q, ctx);                        // v5: the buttons and coach answers never use the AI
+      if (local) return local;
       if (AI.on() && used < limit()) {
         try {
           const board = await ctx.board();
@@ -8801,9 +9223,9 @@ function CoachBot(kind) {
 
 /* ---------- the Analyse page ---------- */
 function mountTrim(view) {
-  const A = { start: START_FEN, headers: {}, moves: [], fens: [START_FEN], idx: 0, user: 'w', explore: null, review: null, reviewing: false, cancel: false, token: 0, freeAnswers: 0, focus: null, interro: false, iqArrows: [], vaultId: null, opening: null, engineOn: true, lines: [1, 3, 5].indexOf(+App.settings.lines) >= 0 ? +App.settings.lines : CONFIG.engine.lines, depth: CONFIG.engine.liveDepth, depthFen: '', lastR: null };
+  const A = { start: START_FEN, headers: {}, moves: [], fens: [START_FEN], idx: 0, user: 'w', explore: null, review: null, reviewing: false, cancel: false, token: 0, freeAnswers: 0, focus: null, interro: false, iqArrows: [], vaultId: null, opening: null, engineOn: true, lines: [1, 3, 5].indexOf(+App.settings.lines) >= 0 ? +App.settings.lines : clamp(Math.round(+CONFIG.engine.lines || 1), 1, 5), depth: Engine.depth(), depthFen: '', lastR: null };
   const navBtn = (act, ico, label) => '<button type="button" class="icon-btn" data-act="' + act + '" aria-label="' + label + '" title="' + label + '">' + icon(ico) + '</button>';
-  const pro = App.can('coachPaid'), bots = { free: CoachBot('free'), paid: CoachBot('paid') };
+  const pro = App.can('coachPaid'), canChat = App.can('coachChat'), bots = { free: CoachBot('free'), paid: CoachBot('paid') };
   view.innerHTML = cmsBar() + trimTabs('trim') + pageHeadK('trim.title', 'trim.intro') +
     '<div class="an-grid"><div class="an-main" style="min-width:0">' +
       '<details class="panel import" id="an-import" open><summary><span>' + icon('file-import') + ' Load a game (PGN)</span><span class="small muted" id="an-import-state"></span></summary><div class="import-body">' +
@@ -8815,7 +9237,7 @@ function mountTrim(view) {
       '<div class="nav-row">' + navBtn('first', 'backward-fast', 'First position') + navBtn('prev', 'chevron-left', 'Previous move') + navBtn('next', 'chevron-right', 'Next move') + navBtn('last', 'forward-fast', 'Last move') + navBtn('flip', 'retweet', 'Flip board') + navBtn('undo', 'rotate-left', 'Undo my move') +
         '<button type="button" class="icon-btn" data-act="engine" aria-pressed="true" aria-label="Engine on or off" title="Engine on or off">' + icon('microchip') + '</button></div>' +
       '<div id="an-interro"></div>' +
-      '<div class="cp"><div class="cp-head"><span class="cp-eval" id="cp-eval">–</span><span class="cp-meta" id="cp-meta">Stockfish 10</span><div class="cp-tools"><div class="seg" role="group" aria-label="Engine lines">' + [1, 3, 5].map((n) => '<button type="button" data-lines="' + n + '" aria-pressed="' + (A.lines === n) + '">' + n + (n === 1 ? ' line' : ' lines') + '</button>').join('') + '</div>' +
+      '<div class="cp"><div class="cp-head"><span class="cp-eval" id="cp-eval">–</span><span class="cp-meta" id="cp-meta">' + esc(Engine.name()) + '</span><div class="cp-tools"><div class="seg" role="group" aria-label="Engine lines">' + [1, 3, 5].map((n) => '<button type="button" data-lines="' + n + '" aria-pressed="' + (A.lines === n) + '">' + n + (n === 1 ? ' line' : ' lines') + '</button>').join('') + '</div>' +
         '<button type="button" class="icon-btn" data-act="deeper" aria-label="Search deeper" title="Search deeper">' + icon('magnifying-glass-plus') + '</button></div></div><ol class="cp-lines" id="an-engine"></ol></div><div id="an-var"></div>' +
       '<div class="panel pad" style="margin-top:14px"><div class="switch-row" style="flex-wrap:wrap"><h3 style="font-size:15px">Moves</h3><div class="seg" id="an-side" role="group" aria-label="Which side you played"><button type="button" data-side="w">I was White</button><button type="button" data-side="b">I was Black</button></div></div>' +
         '<div class="moves" id="an-moves" style="max-height:220px;overflow-y:auto"></div>' +
@@ -8823,15 +9245,17 @@ function mountTrim(view) {
         '<div class="review-bar" id="an-review-bar" hidden><span></span></div><p class="quota-note" id="an-quota" aria-live="polite"></p></div>' +
       '<div id="an-report"></div>' +
     '</div><aside class="panel coach" id="coach" aria-label="Coach">' +
-      '<div class="coach-head"><div><h2>Lanckrietchess Coach</h2><p class="small muted">' + (pro ? 'Pro coach' : 'Free coach') + (AI.on() ? ': a grandmaster AI with live Stockfish lines and the MSPC System' : ', powered by Stockfish and the MSPC System') + '</p>' +
+      '<div class="coach-head"><div><h2>Lanckrietchess Coach</h2><p class="small muted">' + (pro ? 'Pro coach' : 'Free coach') + (pro && AI.on() ? ': a grandmaster AI with live Stockfish lines and the MSPC System' : ', powered by Stockfish and the MSPC System') + '</p>' +
         '<p class="small dim coach-quota" id="coach-quota"></p>' + (Admin.editing() ? '<div style="margin-top:6px"><button type="button" class="cms-manage" data-cms-bots="' + (pro ? 'coachPaid' : 'coachFree') + '">' + icon('robot') + ' Bot instructions</button></div>' : '') + '</div>' +
         (pro ? '<span class="lock lock-vault">' + icon('crown') + ' Pro</span>' : '<span class="lock lock-community">Free</span>') + '</div>' +
       '<div class="coach-mini"><div id="coach-board" class="board-host board-xs"></div><div><p id="coach-line">When I show a line it plays out here, so the main board stays on your game.</p>' +
         '<div class="btn-row" style="margin-top:8px"><button type="button" class="icon-btn" data-c="back" aria-label="Previous move in the coach line">' + icon('chevron-left') + '</button><button type="button" class="icon-btn" data-c="fwd" aria-label="Next move in the coach line">' + icon('chevron-right') + '</button><button type="button" class="btn btn-ghost btn-sm" data-c="sync">Sync</button></div></div></div>' +
       '<div class="chat" id="coach-chat" role="log" aria-live="polite"></div>' +
-      '<div class="chips" id="coach-chips">' + ['Hint (MSPC)', 'Best move', 'Why was that bad?', 'What’s the plan?', 'My leaks'].map((c) => '<button type="button" class="chip" data-q="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>' +
-      '<form class="chat-form" id="coach-form"><input class="input" name="q" maxlength="400" autocomplete="off" placeholder="Ask about this position…" aria-label="Message the coach"><button class="btn btn-primary" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form>' +
-      '<button type="button" class="btn btn-ghost btn-block" data-c="gpt">' + icon('up-right-from-square') + ' Open the ' + (pro ? 'Pro' : 'full') + ' coach bot</button>' +
+      (canChat ? '<div class="chips" id="coach-chips">' + ['Hint (MSPC)', 'Best move', 'Why was that bad?', 'What’s the plan?', 'My leaks', 'Macro reality check'].concat(V5Doc.faq('paid').map((x) => x.q)).map((c) => '<button type="button" class="chip" data-q="' + esc(c) + '">' + esc(c) + '</button>').join('') + '</div>' +
+      '<form class="chat-form" id="coach-form"><input class="input" name="q" maxlength="400" autocomplete="off" placeholder="Ask about this position…" aria-label="Message the coach"><button class="btn btn-primary" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form>'
+        : CoachActions.html()) +
+      (canChat ? '<button type="button" class="btn btn-ghost btn-block" data-c="gpt">' + icon('up-right-from-square') + ' Open the ' + (pro ? 'Pro' : 'full') + ' coach bot</button>'
+        : '<button type="button" class="btn btn-ghost btn-block" data-c="chat-unlock">' + icon('lock') + ' Type your own questions with the Pro coach</button>') +
     '</aside></div>';
 
   const board = Board(qs('#an-board', view), {});
@@ -8947,7 +9371,7 @@ function mountTrim(view) {
     num.className = 'evalnum ' + (white !== black ? 'at-bottom' : 'at-top') + (white ? ' on-w' : ' on-b');
     qs('#cp-eval', view).textContent = l.over || Engine.fmt(l);
     if (l.over) { qs('#cp-meta', view).textContent = 'The game is over on the board.'; out.innerHTML = ''; board.setArrows([]); A.lastR = null; return; }
-    qs('#cp-meta', view).innerHTML = 'Stockfish 10, depth <b>' + l.depth + '</b> of ' + A.depth;
+    qs('#cp-meta', view).innerHTML = esc(Engine.name()) + ', depth <b>' + l.depth + '</b> of ' + A.depth;
     A.lastR = r;
     const rows = r.lines.slice(0, A.lines);
     if (out.children.length !== rows.length || !qs('.cp-line', out)) {
@@ -8976,7 +9400,7 @@ function mountTrim(view) {
   }
   function live() {
     const my = ++A.token, fen = cur(), out = qs('#an-engine', view);
-    if (fen !== A.depthFen) { A.depthFen = fen; A.depth = CONFIG.engine.liveDepth; }
+    if (fen !== A.depthFen) { A.depthFen = fen; A.depth = Engine.depth(); }
     const focusArrows = A.focus && A.idx === A.focus.i ? A.focus.arrows : [];
     if (A.interro) {                                            /* the interrogation hides Stockfish until the student answers */
       out.innerHTML = engMsg(icon('eye-slash') + ' Stockfish stays hidden until you have answered.'); qs('#cp-eval', view).textContent = '–';
@@ -9065,6 +9489,7 @@ function mountTrim(view) {
       }
       items.forEach(categorize);
       A.review = { items };
+      try { V5Peer.stage(A); } catch (err) { console.error(err); }   // v5: blunders go to Peer-Puzzle staging
       try { await findBrilliance(A, (t) => { status.textContent = t; }); } catch (err) { console.error(err); }
       fill.style.width = '100%'; status.textContent = 'Review complete.';
       setTimeout(() => { bar.hidden = true; }, 700);
@@ -9196,7 +9621,7 @@ function mountTrim(view) {
     const el = qs('#coach-quota', view);
     if (!el) return;
     const b = bots[App.can('coachPaid') ? 'paid' : 'free'];
-    el.textContent = !AI.on() ? '' : b.kind === 'paid' ? 'Unlimited AI answers.' : b.limit() ? b.left() + ' of ' + b.limit() + ' AI answers left in this game.' : '';
+    el.textContent = b.kind === 'paid' ? (AI.on() ? 'AI answers included.' : '') : '';
   }
   let asking = false;
   async function ask(q) {
@@ -9246,6 +9671,7 @@ function mountTrim(view) {
       else if (c === 'fwd' && CL.at < CL.moves.length) { CL.at++; cbPaint(); }
       else if (c === 'sync') { CL.moves = []; CL.at = 0; qs('#coach-line', view).textContent = 'Showing the position from the main board.'; cboard.setPosition(cur(), { animate: false, lastMove: curLast() }); }
       else if (c === 'gpt') openGpt();
+      else if (c === 'chat-unlock') openUnlock(gateLevel('coachChat'), 'Typing your own questions to the Pro coach');
       return;
     }
     if (a.hasAttribute('data-side')) { A.user = a.getAttribute('data-side'); renderSide(); renderReport(); return; }
@@ -9283,7 +9709,7 @@ function mountTrim(view) {
   }
   view.addEventListener('click', onClick);
   document.addEventListener('keydown', onKey);
-  qs('#coach-form', view).addEventListener('submit', (e) => { e.preventDefault(); const inp = e.target.elements.q; ask(inp.value); inp.value = ''; });
+  if (qs('#coach-form', view)) qs('#coach-form', view).addEventListener('submit', (e) => { e.preventDefault(); const inp = e.target.elements.q; ask(inp.value); inp.value = ''; });
   V33.greet(T);
   renderMoves(); renderSide(); show(false); quota();
   V33.trimLoad(T);
@@ -9323,7 +9749,7 @@ function mountUpgrades(view) {
       rungHTML(3, 'chess-king', '1-on-1 Mentorship', 'up.mentorshipText', 'up.mentorshipList', '<p class="small muted">' + icon('user-group') + ' Maximum ' + esc(P.mentorship.cap) + ' players at a time' + (P.mentorship.seatsLeft != null ? ', ' + esc(P.mentorship.seatsLeft) + (P.mentorship.seatsLeft === 1 ? ' seat' : ' seats') + ' open right now' : '') + '.</p><button type="button" class="btn btn-gold" data-scroll="up-bot">Ask about a seat</button>', true, 'Private Jet') +
     '</div></section>' +
     '<section class="section" id="up-bot"><div class="panel gateway"><div class="gateway-head"><h3>' + icon('comments') + ' ' + esc(T('up.botTitle')) + ed('up.botTitle') + '</h3><p>' + H('up.botText') + ed('up.botText') + '</p>' +
-      (AI.on() ? '<p class="bot-status">' + icon('circle', 'ai-dot') + ' AI assistant online. Tap an answer, or ask anything.</p>' : '') +
+      (AI.forBot('sales') ? '<p class="bot-status">' + icon('circle', 'ai-dot') + ' AI assistant online. Tap an answer, or ask anything.</p>' : '') +
       (CONFIG.links.salesBot ? '<div><a class="btn btn-ghost btn-sm" href="' + esc(CONFIG.links.salesBot) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Open the full assistant</a></div>' : '') +
       (Admin.editing() ? '<div><button type="button" class="cms-manage" data-cms-bots="sales">' + icon('robot') + ' Assistant instructions</button></div>' : '') + '</div>' +
       '<div class="bot"><div class="chat" role="log" aria-live="polite"></div><div class="quick"></div><form class="chat-form" autocomplete="off"><input class="input" name="msg" maxlength="280" placeholder="Type a message…" aria-label="Message the assistant"><button class="btn btn-primary" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form></div></div></section>' +
@@ -9483,7 +9909,7 @@ function SalesBot(host, opts) {
     }
     else if (/(human|real person|talk to you|\bdm\b)/.test(t) || t.indexOf(String(coach).toLowerCase()) >= 0) say([coach + ' answers his DMs himself.'], dm);
     else if (/(free|skool|community|bootcamp|gratis)/.test(t)) say(['The free community is the best place to start: the bootcamps are free and you get the community key for this app.'], () => { addLinks([['Join free on Skool', CONFIG.links.skool]]); resume(); });
-    else say([AI.on() ? 'I couldn’t reach the assistant just now. Tap one of the answers below, or message ' + coach + ' directly.' : 'I’m a simple assistant, so tap one of the answers below, or message ' + coach + ' directly.'], dm);
+    else say([AI.forBot('sales') ? 'I couldn’t reach the assistant just now. Tap one of the answers below, or message ' + coach + ' directly.' : 'I’m a simple assistant, so tap one of the answers below, or message ' + coach + ' directly.'], dm);
   }
   function matchOption(s, text) {
     const t = text.toLowerCase();
@@ -9512,7 +9938,7 @@ function SalesBot(host, opts) {
     const opt = step ? matchOption(FLOW[step], text) : null;
     if (opt) { answer(opt[0], text); return; }
     addMsg(text, 'me');
-    if (AI.on()) aiReply(text); else fallback(text, '');
+    if (AI.forBot('sales')) aiReply(text); else fallback(text, '');
   }
   function reset() { timers.forEach(clearTimeout); timers = []; busy = false; A = {}; history = []; lastRoute = ''; chat.innerHTML = ''; ask('start'); }
   quick.addEventListener('click', onQuick);
@@ -9901,7 +10327,7 @@ function adminSecret() {
   let s = '';
   try { s = sessionStorage.getItem('lc-hub-worker-secret') || ''; } catch (e) { s = ''; }
   if (!s) {
-    s = String(window.prompt('ADMIN_SECRET of your hub worker:') || '').trim();
+    s = String(window.prompt('Admin token of your Arena server:') || '').trim();
     if (s) { try { sessionStorage.setItem('lc-hub-worker-secret', s); } catch (e) { /* ignore */ } }
   }
   return s;
@@ -11192,7 +11618,7 @@ function TrimInterrogation(T) {
       : f.last ? 'Your opponent just played ' + moveLabel(f.last.num, f.last.color, f.last.san) + '. What does it attack, what did it stop defending, and what is the threat?' : 'What is your opponent threatening here?'),
     S: () => 'What makes this position unique? Which of your pieces are loose (no defender)? Name them with their squares.',
     P: () => 'Priorities: list your checks and captures. Which forcing moves do you have here?',
-    C: (it) => 'You played ' + it.san + ' in the game. Find a better move: play it on the board or type it here, for example Nf5. Calculate it to the end first.'
+    C: (it) => 'Find the better move. You played ' + it.san + ' in the game: play something stronger on the board or type it here, for example Nf5. Calculate it to the end first.'
   };
   const PLACEHOLDER = { M: 'What does their move threaten?', S: 'Which of your pieces are loose?', P: 'Your checks and captures, e.g. Bxf7+, Nxe5', C: 'Type a move, e.g. Nf5, or play it on the board', V: 'Type next, or ask about this mistake' };
   const PIECES = { p: /\b(pawns?|pion(nen)?)\b/, n: /\b(knights?|horses?|paard(en)?|ridder)\b/, b: /\b(bishops?|lopers?)\b/, r: /\b(rooks?|torens?|castle)\b/, q: /\b(queen|dame|koningin)\b/, k: /\b(king|koning)\b/ };
@@ -11205,6 +11631,15 @@ function TrimInterrogation(T) {
   const coachBot = () => T.bots[App.can('coachPaid') ? 'paid' : 'free'];
   const ok = (t) => ({ pass: true, reply: t }), no = (t) => ({ pass: false, reply: t });
 
+  /* v5: point at the board to answer. During M, S and P a tap on a square
+     adds it to the answer box; the judge below reads squares already. */
+  function iqTap(sq) {
+    if (!Q || Q.done || Q.busy || ['M', 'S', 'P'].indexOf(STEPS[Q.s]) < 0) return;
+    const inp = qs('.iq-ai input', host());
+    if (!inp) return;
+    inp.value = (inp.value.trim() ? inp.value.trim() + ', ' : '') + sq;
+    board.mark(sq, 'hl-key'); setTimeout(() => board.unmark('hl-key'), 700);
+  }
   function start(at) {
     if (!A.review) { toast('Run the review first.'); return; }
     const list = mistakes();
@@ -11233,10 +11668,12 @@ function TrimInterrogation(T) {
     A.idx = it.i; A.iqArrows = [];
     T.show(false);
     board.setInteractive(null); board.setArrows([]); board.clearMarks();
+    board.setTapMode(iqTap);
     V34.saveTrimSoon(T);
     if (n >= limit()) { renderLocked(); return; }
     Q.facts = facts(it);
     Engine.analyse(A.fens[it.i], { depth: 14, multipv: 2 }).then((r) => { if (Q && Q.token === tok && !Q.pre) Q.pre = r; }).catch(() => {});
+    if (n === 0 && A.review) Q.log.push({ w: 'fact', t: V5Trim.macro(A) });   // v5, Phase A: the macro reality check
     Q.log.push({ w: 'bot', k: 'M', t: QUESTIONS.M(Q.facts) });
     render(true);
   }
@@ -11262,7 +11699,7 @@ function TrimInterrogation(T) {
      on its own. */
   const QUICK = { M: ['Fork', 'Pin', 'Hanging piece', 'Discovered attack', 'No threat'], S: ['Open Center', 'Closed Center', 'Bishop Pair', 'Weak Squares', 'Pawn Structure'], P: ['No forcing moves'] };
   function quickHTML(k) {
-    const list = QUICK[k];
+    const list = k === 'M' || k === 'S' ? V5Doc.tags(k) : QUICK[k];   // v5: the admin's tag buttons
     if (!list || !list.length || Q.busy) return '';
     return '<div class="iq-quick" role="group" aria-label="Quick phrases">' + list.map((t) => '<button type="button" class="btn btn-quiet btn-sm" data-iq-tpl="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>';
   }
@@ -11486,7 +11923,7 @@ function TrimInterrogation(T) {
     const it = Q.list[Q.at];
     board.clearMarks(); arrows([]);
     board.setPosition(A.fens[it.i], { animate: false, lastMove: it.i > 0 ? { from: A.moves[it.i - 1].from, to: A.moves[it.i - 1].to } : null });
-    board.setInteractive(it.color);
+    board.setTapMode(null); board.setInteractive(it.color);
   }
   async function pre(fen) {
     if (Q.pre) return Q.pre;
@@ -11655,10 +12092,11 @@ function TrimInterrogation(T) {
       '<button type="button" class="btn btn-ghost btn-sm" data-iq="close">Back to the game</button></div></section>';
     if (n >= 2 && found === n) Celebrate.perfect('You found every better move.');
     V34.saveTrimSoon(T);
+    V5Trim.conclude(Q, h, A);                                       // v5, Phase D: the session conclusion
   }
   function close() {
     commit();
-    Q = null; A.interro = false; A.iqArrows = [];
+    Q = null; A.interro = false; A.iqArrows = []; board.setTapMode(null);
     const h = host();
     if (h) h.innerHTML = '';
     board.clearMarks(); board.setArrows([]);
@@ -11710,7 +12148,7 @@ function TrimInterrogation(T) {
   return {
     start, onMove, active: () => !!Q,
     state: () => (Q && !Q.done ? { at: Q.at } : null),
-    stop(quiet) { if (!Q) return; if (quiet) { Q = null; A.interro = false; A.iqArrows = []; const h = host(); if (h) h.innerHTML = ''; } else close(); },
+    stop(quiet) { if (!Q) return; board.setTapMode(null); if (quiet) { Q = null; A.interro = false; A.iqArrows = []; const h = host(); if (h) h.innerHTML = ''; } else close(); },
     destroy() { Q = null; A.interro = false; view.removeEventListener('click', onClick); view.removeEventListener('submit', onSubmit); }
   };
 }
@@ -12873,73 +13311,42 @@ function mountClinic(view) {
       '<p class="muted">No cases yet.</p>') + '</div>' + trainerShell('cl-board', 'cl-panel');
   const board = Board(qs('#cl-board', view), {}), panel = qs('#cl-panel', view);
   qs('[data-flip="cl-board"]', view).addEventListener('click', () => board.flip());
-  let C = null, timers = [];
+  /* v5: a case runs as interactive MSPC steps (tap, tag, play the forcing
+     moves), then the better move; Kyenzo's written steps are the reveals. */
+  let runner = null;
+  function drillOf(it) {
+    const side = new Chess(it.fen).turn(), played = it.played ? new Chess(it.fen).move(it.played, { sloppy: true }) : null;
+    const steps = (it.steps || []).filter((s) => s && typeof s.t === 'string' && s.t.trim()), byK = {};
+    steps.forEach((s) => { if (/^[MSPC]$/.test(s.k || '') && !byK[s.k]) byK[s.k] = tok(s.t); });
+    const ASK = { M: 'Before you look at the blunder: what did the last move change?', S: 'What is this position about? Find the loose pieces and the key squares.', P: 'Which forcing moves are on the board, for both sides?' };
+    const stages = ['M', 'S', 'P'].filter((k) => byK[k]).map((k) => ({ k, type: 'mcq', prompt: ASK[k], options: [{ text: byK[k], correct: true, why: '' }] }));
+    const accept = {}, bad = {};
+    if (it.best) accept[it.best] = byK.C || 'That is the move the position asked for.';
+    if (it.played) bad[it.played] = 'That is the blunder from the game. Look for the move that answers the problem.';
+    stages.push({ k: 'C', type: 'move', prompt: 'Now play the better move.', accept, alt: {}, bad });
+    return { id: 'clinic:' + it.id, stages, title: it.title, tag: src(it) + (it.level ? ', ' + it.level + ' ELO' : ''), fen: it.fen, orientation: side,
+      brief: (played ? colorName(side) + ' played ' + it.played + ' here (the red arrow). ' : '') + 'Run MSPC on the board before you read the answer.' + (it.lesson ? ' Taught in: ' + it.lesson + '.' : ''),
+      arrows: played ? [{ from: played.from, to: played.to, kind: 'bad' }] : [], debrief: steps.map((s) => ({ k: s.k || '', t: tok(s.t) })) };
+  }
   function open(it) {
     if (!it) { panel.innerHTML = '<p class="muted">Pick a case above.</p>'; return; }
     if (!App.unlocked(it)) { openLocked(it); return; }
     ui.id = it.id;
-    qsa('[data-cl]', view).forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-cl') === it.id)));
-    timers.forEach(clearTimeout); timers = [];
-    const g = new Chess(it.fen), side = g.turn(), played = it.played ? new Chess(it.fen).move(it.played, { sloppy: true }) : null;
-    C = { it, side, shown: 0, done: false, tries: 0, played };
-    board.clearMarks(); board.orientation(side === 'b' ? 'black' : 'white');
-    board.setPosition(it.fen, { animate: false, lastMove: null });
-    board.setArrows(played ? [{ from: played.from, to: played.to, kind: 'bad' }] : []);
-    board.setInteractive(null);
-    V33.begin('clinic:' + it.id, { kind: 'clinic', moves: 1 });
-    render();
-  }
-  function render(fb) {
-    const it = C.it, strict = V36.mspcSteps(it.steps), steps = strict || (it.steps || []).filter((s) => s && s.t), all = C.shown >= steps.length;
-    panel.innerHTML = '<p class="st-kicker">' + esc(src(it)) + (it.level ? ', ' + esc(it.level) + ' ELO' : '') + '</p><h2 class="st-title">' + esc(it.title) + '</h2>' +
-      '<p class="st-brief">' + (it.played ? colorName(C.side) + ' played <b>' + esc(it.played) + '</b> here (the red arrow). ' : '') + 'Before you read on, run MSPC yourself: what was wrong with it?</p>' +
-      (strict ? V36.mspcList(strict, C.shown) : '<ol class="cl-steps">' + steps.slice(0, C.shown).map((s) => '<li><b>' + esc(s.k || '•') + '</b><span>' + esc(tok(s.t)) + '</span></li>').join('') + '</ol>') +
-      '<div class="st-feedback" aria-live="polite">' + (fb ? feedbackHTML(fb) : '') + '</div><div class="st-actions">' +
-      (!all ? '<button type="button" class="btn btn-primary btn-sm" data-clx="step">' + icon('eye') + ' Show ' + esc(steps[C.shown].k ? steps[C.shown].k + ', ' + (MSPC_NAME[steps[C.shown].k] || 'next step') : 'the next step') + '</button>' : '') +
-      (all && !C.done ? '<p class="tap-hint">' + icon('chess-knight') + ' Now play the better move on the board.</p><button type="button" class="btn btn-quiet btn-sm" data-clx="show">Show the move</button>' : '') +
-      (C.done ? '<button type="button" class="btn btn-primary btn-sm" data-clx="next">Next case</button>' : '') + '</div>' +
-      (it.lesson ? '<p class="small muted" style="margin-top:10px">' + icon('graduation-cap') + ' Taught in: ' + esc(it.lesson) + '</p>' : '');
-    if (all && !C.done) { board.setInteractive(C.side); board.setOnMove(onMove); }
-  }
-  function onMove(m) {
-    if (!C || C.done) return;
-    const it = C.it, g = new Chess(it.fen), mv = g.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
-    if (!mv) { board.setPosition(it.fen, { animate: false }); return; }
-    C.tries++;
-    board.setPosition(g.fen(), { lastMove: { from: mv.from, to: mv.to }, sound: mv.captured ? 'capture' : 'move' });
-    if (cleanSan(mv.san) === cleanSan(it.best)) {
-      C.done = true; board.setInteractive(null); board.setArrows([]); board.mark(mv.to, 'hl-good'); Sound.good();
-      const before = (App.progress['clinic:' + it.id] || {}).best || 0;
-      App.finish('clinic:' + it.id, C.tries === 1 ? 1 : 0);
-      V33.afterFinish('clinic:' + it.id, C.tries === 1 ? 1 : 0, { kind: 'clinic', moves: 1 }, before);
-      if (C.tries === 1) Celebrate.great(mv.san + ': found on the first try.');
-      render({ v: 'good', label: C.tries === 1 ? 'That’s the move' : 'Found it', san: mv.san, text: 'Now you know why ' + (it.played || 'the game move') + ' failed and what the position asked for.' });
-      return;
-    }
-    board.setInteractive(null); board.shake(); Sound.bad();
-    render({ v: 'off', label: cleanSan(mv.san) === cleanSan(it.played || '') ? 'That’s the blunder' : 'Not that one', san: mv.san, text: 'Read step C again and look for the move that answers the problem.' });
-    timers.push(setTimeout(() => { if (C && !C.done) { board.setPosition(it.fen, { animate: false }); board.setInteractive(C.side); } }, 1200));
+    qsa('[data-cl]', view).forEach((x) => x.setAttribute('aria-pressed', String(x.getAttribute('data-cl') === it.id)));
+    if (runner) runner.destroy();
+    runner = StageRunner({ drill: drillOf(it), board, host: panel, section: 'clinic', mspc: true, debriefTitle: 'Kyenzo’s MSPC breakdown', nextLabel: 'Next case',
+      onNext: () => { const avail = list.filter((x) => App.unlocked(x)), i = avail.findIndex((x) => x.id === it.id); open(avail[(i + 1) % Math.max(1, avail.length)]); scrollToEl(qs('.trainer', view)); } });
+    runner.start();
   }
   function onClick(e) {
     const op = e.target.closest('[data-cl-op]');
     if (op) { ui.op = op.getAttribute('data-cl-op'); rerender(); return; }
     const c = e.target.closest('[data-cl]');
-    if (c) { open(list.filter((x) => x.id === c.getAttribute('data-cl'))[0]); scrollToEl(qs('.trainer', view)); return; }
-    const b = e.target.closest('[data-clx]');
-    if (!b || !C) return;
-    const a = b.getAttribute('data-clx');
-    if (a === 'step') { C.shown++; render(); }
-    else if (a === 'show') {
-      const mv = new Chess(C.it.fen).move(C.it.best, { sloppy: true });
-      if (mv) board.setArrows([{ from: mv.from, to: mv.to, kind: 'good' }]);
-      C.tries = 9;
-      render({ v: 'hint', label: 'The move', text: 'Play ' + C.it.best + ' on the board.' });
-    }
-    else if (a === 'next') { const avail = list.filter((x) => App.unlocked(x)), i = avail.findIndex((x) => x.id === C.it.id); open(avail[(i + 1) % Math.max(1, avail.length)]); }
+    if (c) { open(list.filter((x) => x.id === c.getAttribute('data-cl'))[0]); scrollToEl(qs('.trainer', view)); }
   }
   view.addEventListener('click', onClick);
   open(list.filter((x) => x.id === ui.id)[0] || list.filter((x) => App.unlocked(x))[0]);
-  return () => { timers.forEach(clearTimeout); view.removeEventListener('click', onClick); board.destroy(); };
+  return () => { if (runner) runner.destroy(); view.removeEventListener('click', onClick); board.destroy(); };
 }
 
 /* ---------- the MSPC Repertoire Trainer (Think, paid) ----------
@@ -14294,7 +14701,7 @@ function mountQueue(view) {
       title: kind === 'content' ? 'Content Bot: video script' : 'Teacher Bot: coaching message', noFocus: true,
       html: '<p class="small muted">' + esc(who(x)) + (x.opening ? ', ' + esc(x.opening) : '') + '</p><p class="small muted" id="tb-status">Writing…</p><div class="msg msg-bot" id="tb-out" hidden></div><p class="cms-err" id="tb-err"></p>',
       onMount(s) {
-        AI.chat(kind, [{ role: 'user', content: kind === 'content' ? 'Write the video script for this session.' : 'Draft the coaching message for this student.' }], trimBotContext(x), { secret })
+        AI.chat(kind, [{ role: 'user', content: kind === 'content' ? 'Write the video script for this session.' : 'Draft the coaching message for this student.' }], trimBotContext(x), { secret, instructions: botPrompt(kind) })
           .then((r) => {
             out = r.text;
             const st = qs('#tb-status', s.el), box = qs('#tb-out', s.el);
@@ -14584,6 +14991,10 @@ const V36 = {
     const token = ++V36._lt, base = 'Play the arrow: ' + moveLabel(p.num, p.color, p.san) + '.' + (n && n.note ? ' ' + n.note : '');
     board.setArrows([{ from: p.from, to: p.to, kind: 'best' }]);
     update({ v: 'hint', label: 'Learn mode', text: base });
+    if (LearnEngine.attachedTo(board)) {                              // v5: the live engine card under the board
+      LearnEngine.step(fen, p, (extra, arrows) => { if (token !== V36._lt) return; if (arrows) board.setArrows(arrows); update({ v: 'hint', label: 'Learn mode', text: base + ' ' + extra }); });
+      return;
+    }
     if (App.settings.learnSf === false) return;
     Engine.analyse(fen, { movetime: 650, multipv: 3 }).then((r) => {
       const lines = (r && r.lines) || [], top = lines[0];
@@ -14627,7 +15038,7 @@ const V36 = {
     const sw = (k, label, note) => '<label class="switch-row"><span>' + esc(label) + '<small class="sw36-note">' + esc(note) + '</small></span><input type="checkbox" data-p36="' + k + '"' + (App.settings[k] !== false ? ' checked' : '') + '></label>';
     return sw('popups', 'Show achievement pop-ups', 'Off: nothing covers the board while you calculate. Badges, streaks and rating milestones still count, and a dot on your profile chip in the top bar says something new is waiting.') +
       sw('learnArrows', 'Learn mode on new opening lines', 'The first time you play a line, arrows show every move.') +
-      sw('learnSf', 'Stockfish check in Learn mode', 'Says whether Stockfish agrees with each move. Loads the engine.') +
+      sw('learnSf', 'Live Stockfish in Learn mode', 'An eval bar and Stockfish’s first choice on every move while you learn a line. Runs on this device.') +
       sw('srs', 'Spaced repetition', 'Missed moves come back in My mistakes until you play them right twice.');
   },
   bindSettings(s) {
@@ -16169,6 +16580,7 @@ function treeTrainScreen(body, group, go, line0) {
   }
   function draw(v) { if (!L) return; panel.innerHTML = panelHTML(v); renderNav(v); }
   function stopAll() {
+    LearnEngine.detach();
     if (runner) { runner.destroy(); runner = null; }
     if (explorer) { explorer.destroy(); explorer = null; }
     if (treePane) { treePane.destroy(); treePane = null; }
@@ -16182,6 +16594,7 @@ function treeTrainScreen(body, group, go, line0) {
     syncSeg(); renderLevels(); remember();
     if (mode === 'explore') { startExplore(); return; }
     const learn = mode === 'learn';
+    if (learn) LearnEngine.attach({ board, evalbar, host: qs('#op-board-learn', body) });
     runner = TreeRunner({ T, L, board, scope: learn ? 'line' : scope, leaf: li, learn,
       onUpdate: draw,
       onPivot: (i) => { li = i; remember(); },
@@ -16627,6 +17040,1225 @@ const TreeEditor = (() => {
 /* ==========================================================================
    12. SHELL, ROUTER AND BOOT
    ========================================================================== */
+/* ==========================================================================
+   v5 (second pass): the MSPC framework settings, the interactive MSPC step,
+   resizable panels and the admin sheet for them
+   ========================================================================== */
+/* The v5 section of the data file. Everything in it is optional; an empty
+   section means the defaults below. */
+const V5Doc = (() => {
+  const TAGS0 = {
+    M: ['Check', 'Capture threat', 'Fork', 'Pin or skewer', 'Mate threat', 'Hanging piece', 'Weak square', 'No threat'],
+    S: ['Loose piece', 'King safety', 'Pawn structure', 'Open file', 'Weak square', 'Outpost', 'Bishop pair', 'Space', 'Nothing loose'],
+    C: ['I missed their reply', 'I stopped calculating too early', 'I misjudged the final position', 'I missed a check or capture']
+  };
+  const LETTERS0 = MSPC.map((m) => ({ k: m.k, name: m.name, text: m.text }));
+  let cur = {};
+  const str = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n) : '');
+  const strN = (v, n) => (typeof v === 'string' ? v.replace(/\r/g, '').replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, ' ').trim().slice(0, n) : '');
+  const list = (v, n, len) => (Array.isArray(v) ? v.map((x) => str(x, len)).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, n) : null);
+  function clean(v) {
+    const o = {};
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return o;
+    const f = v.framework;
+    if (f && typeof f === 'object' && !Array.isArray(f)) {
+      const fr = {};
+      if (f.letters && typeof f.letters === 'object') {
+        const L = {};
+        ['M', 'S', 'P', 'C'].forEach((k) => { const x = f.letters[k]; if (x && typeof x === 'object') { const name = str(x.name, 24), text = str(x.text, 400); if (name || text) L[k] = { name, text }; } });
+        if (Object.keys(L).length) fr.letters = L;
+      }
+      if (f.tags && typeof f.tags === 'object') {
+        const T = {};
+        ['M', 'S', 'C'].forEach((k) => { const l = list(f.tags[k], 14, 40); if (l && l.length) T[k] = l; });
+        if (Object.keys(T).length) fr.tags = T;
+      }
+      if (Object.keys(fr).length) o.framework = fr;
+    }
+    if (Array.isArray(v.faq)) {
+      const fq = v.faq.map((x) => (x && typeof x === 'object' ? { q: str(x.q, 90), a: strN(x.a, 1500), tier: x.tier === 'paid' || x.tier === 'free' ? x.tier : 'all' } : null)).filter((x) => x && x.q && x.a).slice(0, 24);
+      if (fq.length) o.faq = fq;
+    }
+    if (v.tournament && typeof v.tournament === 'object' && !Array.isArray(v.tournament)) {
+      const t = v.tournament, T = { on: t.on !== false };
+      if (t.metric === 'mspc' || t.metric === 'trim' || t.metric === 'all') T.metric = t.metric;
+      const title = str(t.title, 60);
+      if (title) T.title = title;
+      if (Array.isArray(t.prizes)) T.prizes = [0, 1, 2].map((i) => clamp(Math.round(+t.prizes[i] || 0), 0, 50));
+      if (Number.isFinite(+t.minPlayers) && +t.minPlayers > 0) T.minPlayers = clamp(Math.round(+t.minPlayers), 1, 20);
+      o.tournament = T;
+    }
+    if (v.server && typeof v.server === 'object' && !Array.isArray(v.server)) {
+      const u = str(v.server.url, 200).replace(/\/+$/, '');
+      if (/^https:\/\/[A-Za-z0-9.-]+(:\d+)?(\/\S*)?$/.test(u) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/\S*)?$/.test(u)) o.server = { url: u };
+    }
+    if (v.sales && typeof v.sales === 'object' && !Array.isArray(v.sales)) {
+      const S = {}, mc = str(v.sales.manychat, 300), wh = str(v.sales.webhook, 300), kw = str(v.sales.keyword, 30).replace(/[^A-Za-z0-9_]/g, '');
+      if (/^https:\/\/\S+$/.test(mc)) S.manychat = mc;
+      if (/^https:\/\/\S+$/.test(wh)) S.webhook = wh;
+      if (kw) S.keyword = kw;
+      if (Object.keys(S).length) o.sales = S;
+    }
+    if (v.layout && typeof v.layout === 'object') {
+      const L = {};
+      ['trainer', 'trim'].forEach((k) => { const r = +v.layout[k]; if (Number.isFinite(r) && r >= 0.15 && r <= 0.85) L[k] = Math.round(r * 1000) / 1000; });
+      if (Object.keys(L).length) o.layout = L;
+    }
+    return o;
+  }
+  function apply(v) {
+    cur = clean(v);
+    const L = (cur.framework && cur.framework.letters) || {};
+    MSPC.forEach((m, i) => { const d = LETTERS0[i], x = L[m.k] || {}; m.name = x.name || d.name; m.text = x.text || d.text; MSPC_NAME[m.k] = m.name; });
+  }
+  return {
+    clean, apply, TAGS0, LETTERS0, get: () => cur,
+    tags(k) { const t = cur.framework && cur.framework.tags && cur.framework.tags[k]; return (t && t.length ? t : TAGS0[k] || []).slice(); },
+    faq(tier) { return (cur.faq || []).filter((x) => x.tier === 'all' || x.tier === tier); },
+    layout: (k) => (cur.layout && cur.layout[k]) || 0,
+    tournament: () => cur.tournament || null, sales: () => cur.sales || {}, server: () => cur.server || {}
+  };
+})();
+
+/* What the opponent could do if it were their move again: checks, captures
+   that win something, mates. The squares involved are the answer to M. */
+function threatsOf(fen, side) {
+  const opp = side === 'w' ? 'b' : 'w', out = { checks: [], wins: [], mates: [], squares: [] }, g0 = new Chess(fen);
+  if (g0.in_check()) {
+    const ksq = ALL_SQUARES.filter((q) => { const p = g0.get(q); return p && p.type === 'k' && p.color === side; })[0];
+    return { checks: ['check'], wins: [], mates: [], squares: ksq ? [ksq].concat(attackersOf(fen, ksq, opp).map((a) => a.from)) : [], inCheck: true };
+  }
+  const g = new Chess();
+  if (!g.load(sideTo(fen, opp))) return out;
+  g.moves({ verbose: true }).forEach((m) => {
+    if (/[+#]/.test(m.san)) { out.checks.push(m.san); out.squares.push(m.to, m.from); if (/#/.test(m.san)) out.mates.push(m.san); }
+    if (m.captured && m.captured !== 'k' && (PVAL[m.captured] > PVAL[m.piece] || !attackersOf(fen, m.to, side).length)) { out.wins.push(m.san); out.squares.push(m.to, m.from); }
+  });
+  out.squares = out.squares.filter((x, i, a) => a.indexOf(x) === i);
+  return out;
+}
+
+/* ---------- the interactive MSPC step ----------
+   Every multiple-choice question in the trainers (the MSPC trainer, the random
+   repertoire drills, the Blunder Clinic) runs as this step. The player works
+   on the board: taps the squares that matter (M, S), tags what they see with
+   the admin's buttons, plays the forcing moves of both sides (P) or the
+   candidate (C). It is judged on the device, at once, against the course's
+   own answer (the squares and moves its text names) and against the position
+   (threats, loose pieces, checks and captures from chess.js). The course's
+   explanation is the reveal; the data file itself is not changed. */
+const M5_HOW = {
+  M: 'Tap the squares that tell the story of the last move, then tag what it does.',
+  S: 'Pick the phase, tap the pieces or squares that matter, and tag what defines the position.',
+  P: 'Play every forcing move you see, for both sides: checks, captures, attacks. Each one snaps back and stays as an arrow.',
+  C: 'Play your candidate move on the board.'
+};
+function MSPCStep(cfg) {
+  const s = cfg.stage, fen = cfg.fen, board = cfg.board, host = cfg.host;
+  const k = /^[MSPC]$/.test(s.k || '') ? s.k : 'M', side = sideOf(fen), opp = side === 'w' ? 'b' : 'w', theirFen = sideTo(fen, opp);
+  const uniq = (a) => a.filter((x, i) => a.indexOf(x) === i);
+  const opts = (s.options || []).filter((o) => o && typeof o.text === 'string'), right = opts.filter((o) => o.correct), wrong = opts.filter((o) => !o.correct);
+  const sqIn = (t) => uniq(String(t || '').match(/\b[a-h][1-8]\b/g) || []);
+  function sanIn(t) {
+    t = String(t || '');
+    const out = (t.match(/(?:O-O-O|O-O|[KQRBN][a-h]?[1-8]?x?[a-h][1-8]|[a-h]x[a-h][1-8])(?:=[QRBN])?/g) || []).slice(), re = /\d+\.(?:\.\.)?\s*([a-h][1-8](?:=[QRBN])?)/g;
+    let m;
+    while ((m = re.exec(t))) out.push(m[1]);
+    const lead = t.match(/^\s*([a-h][1-8])\b/);
+    if (lead) out.push(lead[1]);
+    return uniq(out.map(cleanSan));
+  }
+  function legal(san) {
+    for (const f of [fen, theirFen]) {
+      const g = new Chess();
+      if (!g.load(f)) continue;
+      const mv = g.move(san, { sloppy: true });
+      if (mv) return { san: cleanSan(mv.san), full: mv.san, from: mv.from, to: mv.to, color: mv.color };
+    }
+    return null;
+  }
+  const keySq = uniq([].concat.apply([], right.map((o) => sqIn(o.text))));
+  const keyAll = uniq([].concat.apply([], right.map((o) => sanIn(o.text)))).map(legal).filter(Boolean);
+  const keyForcing = keyAll.filter((m) => /[+#x]/.test(m.full));
+  const keyMv = k === 'P' && keyForcing.length ? keyForcing : keyAll;
+  const wrongInfo = wrong.map((o) => ({ o, sq: sqIn(o.text), mv: sanIn(o.text).map(legal).filter(Boolean).map((x) => x.san) }));
+  const TH = threatsOf(fen, side);
+  const loose = k === 'S' ? loosePieces(fen, side).concat(loosePieces(fen, opp)) : [];
+  const phase = phaseOf(fen, (fullmove(fen) - 1) * 2 + (side === 'b' ? 1 : 0));
+  const cca = ccaList(fen, side), forcing = uniq(cca.checks.concat(cca.captures).map(cleanSan));
+  const tags = k === 'M' || k === 'S' ? V5Doc.tags(k) : k === 'P' ? ['No forcing moves'] : [];
+  const accept = uniq(keySq.concat(k === 'M' ? TH.squares : k === 'S' ? loose.map((x) => x.sq) : []));
+  const sel = new Set(), on = new Set(), found = new Map();
+  let phaseSel = '', mode = 'mine', misses = 0, hints = 0, done = false;
+  const isNone = (t) => /^(no |nothing|none)/i.test(String(t || ''));
+  const bishops = (c) => (fen.split(' ')[0].match(c === 'w' ? /B/g : /b/g) || []).length;
+  function tagTruth(t) {
+    if (k === 'M') {
+      if (isNone(t)) return !TH.checks.length && !TH.wins.length;
+      if (/mate/i.test(t)) return TH.mates.length > 0;
+      if (/check/i.test(t)) return TH.checks.length > 0;
+      if (/captur|win/i.test(t)) return TH.wins.length > 0;
+      if (/hang|loose/i.test(t)) return loosePieces(fen, side).some((x) => x.attacked);
+      return null;
+    }
+    if (k === 'S') {
+      if (/loose|hang/i.test(t)) return isNone(t) ? !loose.length : loose.length > 0;
+      if (/bishop pair/i.test(t)) return (bishops('w') >= 2) !== (bishops('b') >= 2);
+    }
+    return null;
+  }
+  function html() {
+    const seg = (attr, items, cur) => '<div class="seg m5-seg" role="group">' + items.map((x) => '<button type="button" ' + attr + '="' + x[0] + '" aria-pressed="' + (x[0] === cur) + '">' + esc(x[1]) + '</button>').join('') + '</div>';
+    return '<div class="m5"><p class="m5-how">' + icon(k === 'P' || k === 'C' ? 'chess-knight' : 'hand-pointer') + '<span>' + esc(M5_HOW[k]) + '</span></p>' +
+      (k === 'P' ? seg('data-m5-side', [['mine', colorName(side) + ', to move'], ['theirs', colorName(opp)]], mode) : '') +
+      (k === 'S' ? seg('data-m5-phase', [['opening', 'Opening'], ['middlegame', 'Middlegame'], ['endgame', 'Endgame']], phaseSel) : '') +
+      (tags.length ? '<div class="m5-tags" role="group" aria-label="Tags">' + tags.map((t, i) => '<button type="button" class="m5-tag" data-m5-tag="' + i + '" aria-pressed="false">' + esc(t) + '</button>').join('') + '</div>' : '') +
+      '<p class="m5-picked" data-m5-picked aria-live="polite"></p>' +
+      '<div class="btn-row">' + (k !== 'C' ? '<button type="button" class="btn btn-primary btn-sm" data-m5="check">' + icon('circle-check') + ' Check</button>' : '') +
+      '<button type="button" class="btn btn-ghost btn-sm" data-m5="hint">' + icon('lightbulb') + ' Hint</button>' +
+      (k !== 'C' ? '<button type="button" class="btn btn-quiet btn-sm" data-m5="clear">Clear</button>' : '') +
+      '<button type="button" class="btn btn-quiet btn-sm" data-m5="show" hidden>' + icon('eye') + ' Show me</button></div></div>';
+  }
+  function paintPicked() {
+    const el = qs('[data-m5-picked]', host);
+    if (!el) return;
+    if (k === 'M' || k === 'S') el.textContent = sel.size ? 'Tapped: ' + [...sel].join(', ') : 'Nothing tapped yet.';
+    else if (k === 'P') { const f = [...found.values()]; el.textContent = f.length ? 'Played: ' + f.map((x) => x.san + ' (' + (x.kind || 'quiet') + ')').join(', ') : 'No moves played yet.'; }
+    else el.textContent = '';
+  }
+  const showBtn = () => { const b = qs('[data-m5="show"]', host); if (b) b.hidden = false; };
+  function markTags() {
+    qsa('[data-m5-tag]', host).forEach((b) => { const i = +b.getAttribute('data-m5-tag'), v = on.has(i) ? tagTruth(tags[i]) : null; b.classList.toggle('is-yes', v === true); b.classList.toggle('is-no', v === false); });
+  }
+  function drawFound() { board.setArrows((cfg.baseArrows || []).concat([...found.values()].map((x) => ({ from: x.from, to: x.to, kind: x.kind ? 'good' : 'bad', w: 0.8 })))); }
+  function wrongFor(picked, sans) {
+    const w = wrongInfo.filter((x) => x.sq.some((q) => picked.indexOf(q) >= 0 && accept.indexOf(q) < 0) || x.mv.some((m) => sans.indexOf(m) >= 0))[0];
+    return w && w.o.why ? { v: 'off', label: 'Not quite', text: w.o.why } : null;
+  }
+  function setMode(m) {
+    mode = m === 'theirs' ? 'theirs' : 'mine';
+    const f = mode === 'theirs' ? theirFen : fen;
+    board.setTapMode(null); board.setPosition(f, { animate: false, lastMove: cfg.lastMove || null });
+    board.setInteractive(sideOf(f)); board.setOnMove(onMove);
+    qsa('[data-m5-side]', host).forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-m5-side') === mode)));
+  }
+  function onTap(sq) {
+    if (done) return;
+    if (sel.has(sq)) sel.delete(sq); else sel.add(sq);
+    board.unmark('hl-key'); sel.forEach((q) => board.mark(q, 'hl-key'));
+    paintPicked();
+  }
+  function judgeMove(mv) {
+    const san = cleanSan(mv.san), pass = keyMv.some((m) => m.san === san) || (!keyMv.length && keySq.indexOf(mv.to) >= 0);
+    cfg.onCheck(pass);
+    if (pass) { finish(true); return; }
+    misses++; if (misses >= 2) showBtn();
+    board.mark(mv.to, 'hl-bad'); setTimeout(() => board.unmark('hl-bad'), 700);
+    cfg.onFeedback(wrongFor([], [san]) || { v: 'off', label: 'Not the move', san: mv.san, text: 'Calculate again: what does your opponent answer to that?' });
+  }
+  function onMove(m) {
+    if (done) return;
+    const f = mode === 'theirs' ? theirFen : fen, g = new Chess(f), mv = g.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
+    board.setPosition(f, { animate: false, lastMove: cfg.lastMove || null });
+    if (!mv) return;
+    if (k === 'C') { judgeMove(mv); return; }
+    const san = cleanSan(mv.san), c = ccaList(f, sideOf(f)), kind = /[+#]/.test(mv.san) ? 'check' : mv.captured ? 'capture' : c.attacks.map(cleanSan).indexOf(san) >= 0 ? 'attack' : '';
+    found.set((mode === 'theirs' ? 't:' : 'm:') + san, { san: mv.san, kind, from: mv.from, to: mv.to, theirs: mode === 'theirs' });
+    drawFound(); paintPicked();
+    cfg.onFeedback(kind ? { v: 'good', label: 'Forcing: ' + kind, san: mv.san, text: '' } : { v: 'off', label: 'Quiet move', san: mv.san, text: 'No check, no capture and no attack on a loose or bigger piece.' });
+  }
+  function check() {
+    let pass = false, fb = null;
+    const picked = [...sel], chosen = [...on].map((i) => tags[i]), none = chosen.some(isNone);
+    if (k === 'P' ? !found.size && !on.size : !sel.size && !on.size && !phaseSel) {   // an empty answer is not an attempt
+      cfg.onFeedback({ v: 'off', label: k === 'P' ? 'Play a move first' : 'Tap the board first', text: k === 'M' ? 'Start from the last move: what does the piece that moved attack now, and what did it stop guarding?' : k === 'S' ? 'Pick the phase, then tap the pieces or squares that matter.' : 'Play the checks and captures you see, for both sides. Tap No forcing moves when there are none.' });
+      return;
+    }
+    if (k === 'M' || k === 'S') {
+      const hit = picked.some((q) => accept.indexOf(q) >= 0), phaseOk = k !== 'S' || phaseSel === phase;
+      const noneWrong = none && k === 'M' && TH.squares.length > 0 && !keySq.length;
+      pass = phaseOk && !noneWrong && (accept.length ? hit : none);
+      markTags();
+      if (!pass) {
+        if (k === 'S' && !phaseSel) fb = { v: 'off', label: 'Pick the phase', text: 'Opening, middlegame or endgame? Count what is left on the board.' };
+        else if (k === 'S' && !phaseOk) fb = { v: 'off', label: 'Not that phase', text: 'Count the material again: this is ' + (phase === 'middlegame' ? 'a ' : 'an ') + phase + ' position.' };
+        else if (noneWrong) fb = { v: 'off', label: 'There is a threat', text: 'Look again: ' + colorName(opp) + ' has a check or a capture that wins something next move.' };
+        else fb = wrongFor(picked, []) || { v: 'off', label: picked.length ? 'Not those squares' : 'Tap the board first', text: k === 'M' ? 'Start from the last move: what does the piece that moved attack now, and what did it stop guarding?' : 'Look for pieces without a defender and the squares the position turns around.' };
+      }
+    } else if (k === 'P') {
+      const got = [...found.values()], sans = got.map((x) => cleanSan(x.san));
+      if (keyMv.length) {
+        pass = keyMv.some((m) => sans.indexOf(m.san) >= 0);
+        if (!pass) fb = wrongFor([], sans) || { v: 'off', label: 'Keep looking', text: 'Which check or capture changes everything here? Try the moves of both sides.' };
+      } else if (forcing.length) {
+        const need = Math.min(forcing.length, 4), n = got.filter((x) => !x.theirs && forcing.indexOf(cleanSan(x.san)) >= 0).length;
+        pass = n >= need;
+        if (!pass) fb = { v: 'off', label: none ? 'There are forcing moves' : 'Keep going', text: colorName(side) + ' has ' + forcing.length + (forcing.length === 1 ? ' check or capture' : ' checks and captures') + ' here. You found ' + n + (need < forcing.length ? ', and ' + need + ' is enough' : '') + '.' };
+      } else {
+        pass = none;
+        if (!pass) fb = { v: 'off', label: 'Look again', text: 'Nothing here is a check or a capture. Tap No forcing moves when there are none.' };
+      }
+    }
+    cfg.onCheck(pass);
+    if (pass) { finish(true); return; }
+    misses++;
+    if (misses >= 2) showBtn();
+    cfg.onFeedback(fb);
+  }
+  function hint() {
+    hints++;
+    cfg.onCheck(false);                                               // a hint spends the first try, as in the other stages
+    let text = '';
+    if (k === 'M') {
+      const lm = cfg.lastMove;
+      if (hints === 1 && lm) { board.mark(lm.to, 'hl-hint'); text = 'Start from the piece that just moved, on ' + lm.to + '. What does it attack now, and what did it stop guarding?'; }
+      else { const q = keySq[0] || accept[0]; if (q) board.mark(q, 'hl-hint'); text = q ? 'Look at ' + q + '. Why does that square matter now?' : 'Nothing is really attacked. Is there any threat at all?'; }
+    } else if (k === 'S') {
+      if (hints === 1) text = 'Pick the phase first, then count the defenders of every piece. A piece without a defender is loose.';
+      else { const q = keySq[0] || accept[0]; if (q) board.mark(q, 'hl-hint'); text = q ? 'Look at ' + q + '.' : 'Nothing is loose here: say so with the tag.'; }
+    } else {
+      const mv = keyMv[0] || (k === 'P' && forcing.length ? legal(forcing[0]) : null);
+      if (!mv) text = k === 'P' ? 'Try every check and every capture, for both sides. There may be none.' : 'Look at your forcing moves first.';
+      else if (hints === 1) text = 'The move you need is a ' + (/[+#]/.test(mv.full) ? 'check' : /x/.test(mv.full) ? 'capture' : 'move') + ' for ' + colorName(mv.color) + (mv.color !== side ? ': switch to their moves' : '') + '.';
+      else { board.mark(mv.from, 'hl-hint'); text = 'It starts on ' + mv.from + '.'; }
+    }
+    if (hints >= 2) showBtn();
+    cfg.onFeedback({ v: 'hint', label: 'Hint', text });
+  }
+  function clear() {
+    sel.clear(); on.clear(); found.clear(); phaseSel = '';
+    board.unmark('hl-key'); board.unmark('hl-hint'); board.setArrows(cfg.baseArrows || []);
+    qsa('[data-m5-tag]', host).forEach((b) => { b.setAttribute('aria-pressed', 'false'); b.classList.remove('is-yes', 'is-no'); });
+    qsa('[data-m5-phase]', host).forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    if (k === 'P') setMode('mine');
+    paintPicked(); cfg.onFeedback(null);
+  }
+  function finish(pass) {
+    done = true;
+    board.setTapMode(null); board.setInteractive(null); board.setOnMove(null);
+    board.setPosition(fen, { animate: false, lastMove: cfg.lastMove || null });
+    board.unmark('hl-hint'); board.unmark('hl-key');
+    if (keyMv.length && (k === 'P' || k === 'C')) board.setArrows((cfg.baseArrows || []).concat(keyMv.slice(0, 2).map((m) => ({ from: m.from, to: m.to, kind: 'best' }))));
+    if (k === 'M' || k === 'S') (keySq.length ? keySq : accept).slice(0, 4).forEach((q) => board.mark(q, pass ? 'hl-good' : 'hl-key'));
+    qsa('button', host).forEach((b) => { b.disabled = true; });
+    const o = right[0], txt = o ? o.text + (o.why ? ' ' + o.why : '') : '';
+    cfg.onFeedback({ v: pass ? 'good' : 'info', label: pass ? (misses || hints ? 'That’s it' : 'Correct') : 'The answer', text: txt });
+    try { Telemetry.log({ e: 'q', x: 'mspc5-' + k + (pass ? '-ok' : '-shown') }); } catch (e) { /* telemetry is optional */ }
+    if (pass) cfg.onPass(); else cfg.onReveal();
+  }
+  function onClick(e) {
+    const b = e.target.closest('button');
+    if (!b || !host.contains(b) || b.disabled || done) return;
+    if (b.hasAttribute('data-m5-tag')) { const i = +b.getAttribute('data-m5-tag'); if (on.has(i)) on.delete(i); else on.add(i); b.setAttribute('aria-pressed', String(on.has(i))); b.classList.remove('is-yes', 'is-no'); return; }
+    if (b.hasAttribute('data-m5-phase')) { phaseSel = b.getAttribute('data-m5-phase'); qsa('[data-m5-phase]', host).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); return; }
+    if (b.hasAttribute('data-m5-side')) { setMode(b.getAttribute('data-m5-side')); return; }
+    const a = b.getAttribute('data-m5');
+    if (a === 'check') check(); else if (a === 'hint') hint(); else if (a === 'clear') clear(); else if (a === 'show') { cfg.onCheck(false); finish(false); }
+  }
+  function mount() {
+    if (!host) return;
+    host.innerHTML = html(); host.addEventListener('click', onClick);
+    if (k === 'M' || k === 'S') { board.setInteractive(null); board.setTapMode(onTap); } else setMode('mine');
+    paintPicked();
+  }
+  function destroy() {
+    done = true;
+    if (host) host.removeEventListener('click', onClick);
+    board.setTapMode(null); board.setOnMove(null); board.setInteractive(null); board.unmark('hl-key'); board.unmark('hl-hint');
+    board.setArrows(cfg.baseArrows || []); board.setPosition(fen, { animate: false, lastMove: cfg.lastMove || null });
+  }
+  return { mount, destroy };
+}
+/* The Miscalculation button on calculation steps: tag what went wrong, the
+   position comes back, and the tag lands on the profile (struggles) and in a
+   short local history the session summary can read. */
+const MSPC5UI = {
+  misHTML() {
+    return '<div class="mis5"><p>What went wrong in your calculation? Tag it, and the position comes back.</p><div class="mis5-row">' +
+      V5Doc.tags('C').map((t) => '<button type="button" class="m5-tag" data-act="mis" data-tag="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div></div>';
+  },
+  tag(t, id) {
+    const sk = /check|capture|forcing/i.test(t) ? 'forcing' : 'calc';
+    if (App.profile.struggles.indexOf(sk) < 0) { App.profile.struggles = App.profile.struggles.concat([sk]).slice(-8); App.save(); }
+    const log = (Store.get('lc5-miscalc', []) || []).filter((x) => x && x.t).slice(-59);
+    log.push({ t: String(t).slice(0, 60), id: String(id || '').slice(0, 90), at: Date.now() });
+    Store.set('lc5-miscalc', log);
+    try { Telemetry.log({ e: 'q', q: scrub(String(t)), x: 'miscalc' }); } catch (e) { /* telemetry is optional */ }
+  }
+};
+
+/* ---------- resizable panels ----------
+   A handle between the board and the panel (every trainer) and between the
+   game and the coach (Trim), on screens wide enough for two columns. The
+   split is remembered for the session (sessionStorage); admin mode can save
+   the current split as the default for every player. Double-click resets. */
+const Layout5 = (() => {
+  const KEY = 'lc5-split', KINDS = { trainer: { sel: '.trainer', mq: '(min-width: 960px)', min: 300 }, trim: { sel: '.an-grid', mq: '(min-width: 1040px)', min: 330 } };
+  const read = () => { try { const o = JSON.parse(sessionStorage.getItem(KEY) || '{}'); return o && typeof o === 'object' ? o : {}; } catch (e) { return {}; } };
+  const write = (o) => { try { sessionStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* private mode: the split lasts until the page changes */ } };
+  const widths = new WeakMap(), live = new Set();
+  let ro = null;
+  const gapOf = (el) => parseFloat(getComputedStyle(el).columnGap) || 0;
+  function place(el) {
+    const h = el.querySelector(':scope > .split5'), first = el.children[0];
+    if (!h || !first || first === h || !matchMedia(KINDS[el.getAttribute('data-split5')].mq).matches) { if (h) h.hidden = true; return; }
+    const r = first.getBoundingClientRect(), c = el.getBoundingClientRect();
+    h.hidden = false; h.style.left = Math.round(r.right - c.left + gapOf(el) / 2 - 6) + 'px';
+  }
+  function apply(el) {
+    const kind = el.getAttribute('data-split5'), K = KINDS[kind];
+    if (!matchMedia(K.mq).matches) { el.style.gridTemplateColumns = ''; el.removeAttribute('data-split5-on'); place(el); return; }
+    const r = read()[kind] || V5Doc.layout(kind), W = el.clientWidth, gap = gapOf(el);
+    if (r && W > K.min * 2 + gap) {
+      const first = clamp(Math.round(W * r), K.min, W - K.min - gap);
+      el.style.gridTemplateColumns = first + 'px minmax(0,1fr)'; el.setAttribute('data-split5-on', '');
+    } else { el.style.gridTemplateColumns = ''; el.removeAttribute('data-split5-on'); }
+    place(el);
+  }
+  function setRatio(el, r) {
+    const kind = el.getAttribute('data-split5'), K = KINDS[kind], W = el.clientWidth || 1, gap = gapOf(el);
+    const o = read(); o[kind] = Math.round(clamp(r, K.min / W, (W - K.min - gap) / W) * 1000) / 1000; write(o);
+    apply(el);
+  }
+  function enhance(el, kind) {
+    el.setAttribute('data-split5', kind);
+    const h = document.createElement('div');
+    h.className = 'split5'; h.hidden = true; h.tabIndex = 0; h.title = 'Drag to resize. Double-click to reset.';
+    h.setAttribute('role', 'separator'); h.setAttribute('aria-orientation', 'vertical'); h.setAttribute('aria-label', 'Resize the panels. Arrow keys move it, double-click resets.');
+    h.innerHTML = '<span></span>';
+    el.appendChild(h);
+    let drag = false;
+    h.addEventListener('pointerdown', (e) => { if (e.button !== 0) return; e.preventDefault(); drag = true; try { h.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ } h.classList.add('is-drag'); document.body.classList.add('is-resizing5'); });
+    h.addEventListener('pointermove', (e) => { if (!drag) return; const c = el.getBoundingClientRect(); setRatio(el, (e.clientX - c.left - gapOf(el) / 2) / c.width); });
+    const end = () => { if (!drag) return; drag = false; h.classList.remove('is-drag'); document.body.classList.remove('is-resizing5'); };
+    h.addEventListener('pointerup', end); h.addEventListener('pointercancel', end); h.addEventListener('lostpointercapture', end);
+    h.addEventListener('dblclick', () => { const o = read(); delete o[kind]; write(o); apply(el); });
+    h.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      const c = el.getBoundingClientRect(), f = el.children[0].getBoundingClientRect();
+      setRatio(el, (f.width + (e.key === 'ArrowLeft' ? -24 : 24)) / c.width);
+    });
+    live.add(el);
+    if (ro) ro.observe(el);
+    apply(el);
+  }
+  function scan() {
+    const view = document.getElementById('view');
+    if (!view) return;
+    Object.keys(KINDS).forEach((kind) => qsa(KINDS[kind].sel + ':not([data-split5])', view).forEach((el) => enhance(el, kind)));
+    live.forEach((el) => { if (!el.isConnected) { live.delete(el); if (ro) ro.unobserve(el); } });
+  }
+  function init() {
+    const view = document.getElementById('view');
+    if (!view) return;
+    if (window.ResizeObserver) ro = new ResizeObserver((list) => list.forEach((en) => {
+      const el = en.target, w = Math.round(en.contentRect.width);
+      if (!el.isConnected) return;
+      if (widths.get(el) !== w) { widths.set(el, w); apply(el); } else place(el);
+    }));
+    let raf = 0;
+    new MutationObserver(() => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; scan(); }); }).observe(view, { childList: true, subtree: true });
+    window.addEventListener('resize', () => live.forEach((el) => apply(el)));
+    scan();
+  }
+  return { init, scan, current: () => { const o = read(); return { trainer: +o.trainer || 0, trim: +o.trim || 0 }; } };
+})();
+
+/* ---------- admin: MSPC framework and coach buttons ---------- */
+const V5Admin = {
+  faqText(list, tier) { return (list || []).filter((x) => x.tier === tier).map((x) => x.q + '\n' + x.a).join('\n\n'); },
+  faqParse(text, tier) {
+    return String(text || '').replace(/\r/g, '').split(/\n\s*\n/).map((b) => { const L = b.trim().split('\n'); return { q: (L[0] || '').trim(), a: L.slice(1).join('\n').trim(), tier }; }).filter((x) => x.q && x.a);
+  },
+  framework() {
+    if (!Admin.active) { toast('Sign in to admin mode first.'); return; }
+    const cur = V5Doc.clean(Admin.ensureDraft().v5), fr = cur.framework || {}, L = fr.letters || {}, TG = fr.tags || {}, faq = cur.faq || [], lay = Layout5.current();
+    const pct = (r) => (r ? Math.round(r * 100) + '%' : 'the default');
+    const letter = (m) => { const x = L[m.k] || {}; return '<fieldset class="field"><legend class="field-label">' + m.k + '</legend><input class="input" name="name-' + m.k + '" maxlength="24" value="' + esc(x.name || m.name) + '" aria-label="Name of step ' + m.k + '">' +
+      '<textarea class="input" name="text-' + m.k + '" rows="2" maxlength="400" aria-label="What step ' + m.k + ' asks" style="margin-top:6px">' + esc(x.text || m.text) + '</textarea></fieldset>'; };
+    const tagArea = (k, title) => '<label class="field"><span class="field-label">' + esc(title) + ' <small>one per line</small></span><textarea class="input" name="tags-' + k + '" rows="4">' + esc((TG[k] || V5Doc.TAGS0[k]).join('\n')) + '</textarea></label>';
+    const faqArea = (tier, title) => '<label class="field"><span class="field-label">' + esc(title) + '</span><textarea class="input" name="faq-' + tier + '" rows="4" placeholder="How do I join the community?&#10;Tap Upgrades, then Join Skool. It is free.">' + esc(V5Admin.faqText(faq, tier)) + '</textarea></label>';
+    openSheet({
+      title: 'MSPC framework and coach buttons', noFocus: true,
+      html: '<p class="small muted">All of this runs on the players’ devices, without the AI and without tokens. Save, then publish to make it live.</p>' +
+        '<form class="stack" data-v5fw autocomplete="off">' +
+        '<h3>The four steps</h3>' + V5Doc.LETTERS0.map(letter).join('') +
+        '<h3>Tag buttons</h3><p class="small muted">Shown in every interactive MSPC step and in the Trim interrogation. A tag that starts with No, Nothing or None means there is nothing to find.</p>' +
+        tagArea('M', 'M: what the last move does') + tagArea('S', 'S: what defines the position') + tagArea('C', 'Miscalculation tags') +
+        '<h3>Coach answers</h3><p class="small muted">A question button with your own fixed answer. One block per question: the question on the first line, the answer below it, an empty line between blocks.</p>' +
+        faqArea('free', 'For free players') + faqArea('paid', 'For paid members') + faqArea('all', 'For everyone') +
+        '<h3>Panel sizes</h3><p class="small muted">Drag the handle between the board and the panel, or between the game and the coach in Trim, then save. Your split right now: trainers ' + pct(lay.trainer) + ', Trim ' + pct(lay.trim) + '.</p>' +
+        '<label class="switch-row"><span>Make my current split the default for every player</span><input type="checkbox" name="layout"' + (cur.layout ? ' checked' : '') + '></label>' +
+        '<div class="btn-row"><button class="btn btn-primary" type="submit">Save</button><button class="btn btn-quiet" type="button" data-v5fw-reset>Back to the defaults</button></div></form>',
+      onMount(s) {
+        const f = qs('[data-v5fw]', s.el);
+        const store = (v5) => { const d = Admin.ensureDraft(); d.v5 = V5Doc.clean(v5); Admin.saveDraft(d); toast('Saved on this device. Publish to make it live.', 'good'); s.close(); rerender(); };
+        f.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const letters = {}, tagsOut = {};
+          V5Doc.LETTERS0.forEach((m) => { const n = f.elements['name-' + m.k].value.trim(), t = f.elements['text-' + m.k].value.trim(); if ((n && n !== m.name) || (t && t !== m.text)) letters[m.k] = { name: n || m.name, text: t || m.text }; });
+          ['M', 'S', 'C'].forEach((k) => { const l = f.elements['tags-' + k].value.split('\n').map((x) => x.trim()).filter(Boolean); if (l.length && l.join('|') !== V5Doc.TAGS0[k].join('|')) tagsOut[k] = l; });
+          const v5 = Object.assign({}, Admin.ensureDraft().v5 || {}, { framework: { letters, tags: tagsOut }, faq: ['free', 'paid', 'all'].reduce((a, t) => a.concat(V5Admin.faqParse(f.elements['faq-' + t].value, t)), []) });
+          const now = Layout5.current();
+          if (!f.elements.layout.checked) delete v5.layout;
+          else if (now.trainer || now.trim) v5.layout = Object.assign({}, v5.layout || {}, now.trainer ? { trainer: now.trainer } : {}, now.trim ? { trim: now.trim } : {});
+          store(v5);
+        });
+        s.el.addEventListener('click', (e) => { if (!e.target.closest('[data-v5fw-reset]')) return; const v5 = Object.assign({}, Admin.ensureDraft().v5 || {}); delete v5.framework; delete v5.faq; delete v5.layout; store(v5); });
+      }
+    });
+  }
+};
+
+/* ==========================================================================
+   v5 (third pass): weekly tournament, friends, Peer-Puzzle staging and the
+   Trim macro check and session conclusion
+   ========================================================================== */
+const isoWeek = (d) => {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())), day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y = t.getUTCFullYear();
+  return y + '-W' + String(Math.ceil(((t - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7)).padStart(2, '0');
+};
+const h5 = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); };
+const moveTag5 = (n, c, san) => (c === 'w' ? n + '.' : n + '...') + san;
+
+/* ---------- the weekly tournament ----------
+   One metric per week (set by the admin; a change applies from the next
+   Monday), counted on the device. The board is the player plus the friends
+   whose card (friend code) is from the same week and metric. At the Monday
+   reset the finished week is settled once: with enough players, the top
+   places get their tokens through Credits.grant. A community server (Ranks
+   endpoint) can take over the board and the payout later: see the hooks. */
+const Tourney = (() => {
+  const KEY = 'lc5-tourney', MSPC_SECTIONS = /think|clinic|mspc|peer|srs|shuffle|drill/i;
+  const METRICS = { mspc: ['MSPC steps solved', 'solved'], trim: ['Clean Trim reviews (every better move found)', 'clean reviews'], all: ['Correct answers anywhere in the hub', 'correct'] };
+  const DEF = { on: true, metric: 'mspc', title: 'Weekly MSPC Sprint', prizes: [3, 0, 0], minPlayers: 3 };
+  let st = null;
+  const cfg = () => Object.assign({}, DEF, V5Doc.tournament() || {});
+  const state = () => st || (st = Object.assign({ wk: '', metric: '', score: 0, base: null, history: [], paid: {} }, Store.get(KEY, {}) || {}));
+  const save = () => Store.set(KEY, state());
+  const myRating = () => { try { return V34.myRating() || EloGate.rating().value || null; } catch (e) { return null; } };
+  function nextReset() { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + (8 - (d.getDay() || 7))); return d.getTime(); }
+  function board(wk, metric, score) {
+    if (srv && srv.wk === wk && srv.metric === metric && V5Net.on()) {   // the server's board: every player this week
+      const rows = srv.rows.map((r) => ({ name: r.name || 'Player', score: r.me ? Math.max(r.score || 0, score || 0) : r.score || 0, rank: r.rank || 0, me: !!r.me, friend: !!r.friend }));
+      if (!rows.some((r) => r.me) && srv.rank) rows.push({ name: App.profile.name || 'You', score: score || 0, rank: srv.rank, me: true, gap: true });
+      return rows;
+    }
+    const rows = [{ name: App.profile.name || 'You', score: score || 0, me: true }]
+      .concat(Friends.list().filter((f) => f.t && f.t.w === wk && f.t.m === metric).map((f) => ({ name: f.name, score: f.t.s || 0, me: false })));
+    rows.sort((a, b) => b.score - a.score || (b.me - a.me));
+    rows.forEach((r) => { r.rank = 1 + rows.filter((x) => x.score > r.score).length; });
+    return rows;
+  }
+  function settle(wk, metric, score) {
+    const c = cfg(), s = state(), rows = board(wk, metric, score), me = rows.filter((r) => r.me)[0];
+    const players = rows.filter((r) => r.score > 0).length, rank = score > 0 ? me.rank : 0;
+    const prize = c.on && players >= c.minPlayers && rank > 0 && rank <= 3 ? (c.prizes[rank - 1] || 0) : 0;
+    s.paid[wk] = true;
+    s.history = (s.history || []).concat([{ wk, metric, score, rank, players, prize }]).slice(-12);
+    if (prize) Credits.grant(prize);
+    save();
+    return { wk, metric, score, rank, players, prize };
+  }
+  /* Starts a new week when the calendar says so, settling the last one once. */
+  function roll() {
+    const s = state(), wk = isoWeek(new Date());
+    if (s.wk === wk) { if (s.base == null && myRating()) { s.base = myRating(); save(); } return null; }
+    let res = null;
+    if (s.wk && !s.paid[s.wk]) {
+      if (V5Net.on()) {                                               // the server settles and pays: remember to claim it
+        push(s.wk, s.metric || cfg().metric, s.score || 0);
+        s.paid[s.wk] = true; s.pending = (s.pending || []).filter((w) => w !== s.wk).concat([s.wk]).slice(-6);
+      } else res = settle(s.wk, s.metric || cfg().metric, s.score || 0);
+    }
+    Object.assign(s, { wk, metric: cfg().metric, score: 0, base: myRating() });
+    save();
+    return res;
+  }
+  function bump(kind, section, ok) {
+    if (!ok || !cfg().on) return;
+    const r = roll();
+    if (r && r.prize) toast('Last week’s tournament: #' + r.rank + ' of ' + r.players + '. +' + r.prize + ' tokens.', 'good');
+    const s = state(), m = s.metric || cfg().metric;
+    const hit = m === 'all' || (m === 'mspc' && kind === 'score' && MSPC_SECTIONS.test(String(section || ''))) || (m === 'trim' && kind === 'trim');
+    if (!hit) return;
+    s.score = (s.score || 0) + 1; save();
+    Arena.refresh();
+    queueSync();
+  }
+  /* ----- with the Arena server ----- */
+  let srv = null, syncT = 0;
+  const friendPids = () => Friends.list().filter((x) => x.pid).map((x) => x.pid).slice(0, 100);
+  function push(wk, metric, score) {
+    if (!V5Net.on() || !wk) return;
+    V5Net.post('t5_sync', { name: App.profile.name || '', wk, metric, score, friends: friendPids() }).catch(() => {});
+  }
+  function queueSync(ms) { if (!V5Net.on()) return; clearTimeout(syncT); syncT = setTimeout(() => { pull(); }, ms == null ? 2500 : ms); }
+  async function pull() {
+    const s = state();
+    if (!V5Net.on() || !s.wk) return null;
+    try {
+      const r = await V5Net.post('t5_sync', { name: App.profile.name || '', wk: s.wk, metric: s.metric || cfg().metric, score: s.score || 0, friends: friendPids() });
+      srv = { wk: r.wk, metric: r.metric, rows: Array.isArray(r.board) ? r.board : [], rank: r.rank || 0, players: r.players || 0, at: Date.now() };
+      if (typeof r.score === 'number' && r.score < (s.score || 0) && r.wk === s.wk) { s.score = r.score; save(); }   // the server capped an impossible jump
+      Arena.refresh();
+      return srv;
+    } catch (e) { return null; }
+  }
+  /* Finished weeks the server settles: the first answer carries the prize. */
+  async function claim() {
+    const s = state();
+    if (!V5Net.on() || !(s.pending || []).length) return null;
+    for (const wk of s.pending.slice()) {
+      try {
+        const r = await V5Net.post('t5_result', { wk });
+        if (!r.settled) continue;
+        s.pending = s.pending.filter((w) => w !== wk);
+        s.history = (s.history || []).concat([{ wk, metric: r.metric || '', score: r.score || 0, rank: r.rank || 0, players: r.players || 0, prize: r.prize || 0, server: true }]).slice(-12);
+        if (r.prize && r.first) { Credits.grant(r.prize); toast('Last week’s tournament: #' + r.rank + ' of ' + r.players + '. +' + r.prize + ' tokens.', 'good'); }
+        save();
+      } catch (e) { break; }
+    }
+    Arena.refresh();
+    return true;
+  }
+  return { METRICS, cfg, state, board, roll, bump, settle, nextReset, myRating, pull, claim, server: () => srv };
+})();
+
+/* ---------- friends (phase 1: a scoreboard, no chat) ----------
+   Stored under lanckriet_friends_list. Two kinds: a friend code (the card
+   another player shares: name, rating, weekly progression, Hyper-Focus,
+   tournament score, latest blunder) and a Chess.com or Lichess follow (the
+   public rating, refreshed hourly; the weekly progression is measured from
+   the first rating seen this week). Friend codes are untrusted text: every
+   field is checked and escaped. */
+const Friends = (() => {
+  const KEY = 'lanckriet_friends_list', MAX = 60;
+  const txt = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, n) : '');
+  const int = (v, lo, hi) => (v !== null && v !== '' && Number.isFinite(+v) ? clamp(Math.round(+v), lo, hi) : null);
+  const list = () => { const l = Store.get(KEY, []); return Array.isArray(l) ? l.filter((x) => x && typeof x.id === 'string' && x.name) : []; };
+  const save = (l) => Store.set(KEY, l.slice(0, MAX));
+  const b64e = (s) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const b64d = (s) => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/'))));
+  function blunderOk(b) {
+    if (!b || typeof b !== 'object' || !fenOk(b.f)) return null;
+    const p = new Chess(b.f).move(String(b.p || ''), { sloppy: true }), q = new Chess(b.f).move(String(b.b || ''), { sloppy: true });
+    if (!p || !q || p.san === q.san) return null;
+    return { f: b.f, p: p.san, b: q.san, o: txt(b.o, 40), n: int(b.n, 1, 999) || 1, c: sideOf(b.f) };
+  }
+  function myCard() {
+    const s = Tourney.state(), r = Tourney.myRating(), f = App.profile.focus, lb = V5Peer.last();
+    return { v: 1, p: V5Net.pid() || undefined, u: txt(App.profile.name, 30) || 'Player', e: r || null, d: r && s.base ? r - s.base : 0, f: f ? txt(Focus.name(f), 40) : '', fd: f ? Focus.day() : 0,
+      t: { w: s.wk || isoWeek(new Date()), m: s.metric || Tourney.cfg().metric, s: s.score || 0 }, b: lb ? { f: lb.f, p: lb.p, b: lb.b, o: lb.o, n: lb.n } : null, at: Date.now() };
+  }
+  const code = () => 'LCF1.' + b64e(JSON.stringify(myCard()));
+  const link = () => location.origin + location.pathname + '?friend=' + encodeURIComponent(code()) + '#leaderboard';
+  function codeIn(q) {
+    q = String(q || '').trim();
+    const m = q.match(/[?&]friend=([^&#\s]+)/);
+    if (m) { try { return decodeURIComponent(m[1]); } catch (e) { return m[1]; } }
+    return /^LCF1\.[A-Za-z0-9_-]{10,}$/.test(q) ? q : '';
+  }
+  function decode(c) {
+    try {
+      const m = /^LCF1\.([A-Za-z0-9_-]{10,1600})$/.exec(String(c || '').trim());
+      if (!m) return null;
+      const o = JSON.parse(b64d(m[1]));
+      if (!o || o.v !== 1 || !txt(o.u, 30)) return null;
+      const t = o.t && /^\d{4}-W\d{2}$/.test(o.t.w || '') && Tourney.METRICS[o.t.m] ? { w: o.t.w, m: o.t.m, s: int(o.t.s, 0, 100000) || 0 } : null;
+      return { pid: /^[a-z0-9]{8,24}$/.test(o.p || '') ? o.p : '', name: txt(o.u, 30), rating: +o.e >= 100 && +o.e <= 3500 ? Math.round(+o.e) : null, d: int(o.d, -800, 800) || 0, focus: txt(o.f, 40), fd: int(o.fd, 0, 999) || 0, t, b: blunderOk(o.b), at: int(o.at, 0, 4e12) || Date.now() };
+    } catch (e) { return null; }
+  }
+  function upsert(x) { const l = list(), i = l.findIndex((f) => f.id === x.id); if (i >= 0) l[i] = Object.assign(l[i], x); else l.unshift(x); save(l); return x; }
+  function addCode(c, pidHint) {
+    const d = decode(c);
+    if (!d) return { ok: false };
+    if (!d.pid && /^[a-z0-9]{8,24}$/.test(pidHint || '')) d.pid = pidHint;
+    if (d.pid && d.pid === V5Net.pid()) return { ok: false, self: true };
+    const id = d.pid ? 'pid:' + d.pid : 'lc:' + d.name.toLowerCase();
+    if (d.pid) save(list().filter((f) => f.id !== 'lc:' + d.name.toLowerCase()));   // the same friend, now with a server id
+    upsert(Object.assign({ id, site: '' }, d));
+    return { ok: true, name: d.name };
+  }
+  async function addUser(site, user) {
+    user = String(user || '').trim();
+    if (!Elo.SITES[site] || !/^[A-Za-z0-9_-]{2,30}$/.test(user)) return { ok: false };
+    const p = await Elo.fetchProfile(site, user).catch(() => null);
+    if (!p || !p.user) return { ok: false };
+    const r = p.rapid || p.blitz || p.bullet || null;
+    upsert({ id: site + ':' + String(p.user).toLowerCase(), name: txt(p.user, 30), site, user: txt(p.user, 30), avatar: p.avatar || '', rating: r, base: r, wk: isoWeek(new Date()), fetched: Date.now(), at: Date.now() });
+    return { ok: true, name: p.user };
+  }
+  /* Chess.com and Lichess follows: at most once an hour per friend. */
+  async function refresh() {
+    const l = list(), now = Date.now(), wk = isoWeek(new Date());
+    let changed = false;
+    for (const f of l.filter((x) => x.site && now - (x.fetched || 0) > 36e5).slice(0, 8)) {
+      const p = await Elo.fetchProfile(f.site, f.user).catch(() => null);
+      if (!p) continue;
+      const r = p.rapid || p.blitz || p.bullet || null;
+      if (f.wk !== wk) { f.wk = wk; f.base = r; }
+      f.rating = r; f.avatar = p.avatar || f.avatar || ''; f.fetched = now; changed = true;
+    }
+    if (changed) save(l);
+    return changed;
+  }
+  function remove(id) { save(list().filter((x) => x.id !== id)); }
+  /* With the Arena server: upload this player's card and fetch the latest
+     cards of friends added by code (they carry a public id). Chess.com's
+     public API has no friends list, so the graph lives on the hub's server.
+     Without a server this does nothing. */
+  async function syncGraph() {
+    if (!V5Net.on()) return null;
+    try {
+      const r = await V5Net.post('f5_sync', { name: App.profile.name || '', card: code(), friends: list().filter((x) => x.pid).map((x) => x.pid).slice(0, 100) });
+      let changed = false;
+      (r && Array.isArray(r.cards) ? r.cards : []).forEach((c) => { if (c && typeof c.card === 'string' && addCode(c.card, c.pid).ok) changed = true; });
+      return changed;
+    } catch (e) { return null; }
+  }
+  return { list, myCard, code, link, codeIn, decode, addCode, addUser, refresh, remove, syncGraph };
+})();
+
+/* ---------- Peer-Puzzle staging ----------
+   Every Trim review stages the player's blunders and mistakes in a FIFO ring
+   buffer (staging_peer_puzzles, the oldest drop out). Routing: a game in one
+   of the hub's repertoire openings goes to the admin (it touches paid
+   content: Kyenzo sends it to the Review Queue and publishes it with his
+   usual tools); any other opening is free peer material, sent to the
+   community server's peer endpoint when one is connected. The latest blunder
+   also travels in the player's friend code. */
+const V5Peer = (() => {
+  const KEY = 'staging_peer_puzzles', LAST = 'lc5-last-blunder', MAX = 60;
+  const all = () => { const l = Store.get(KEY, []); return Array.isArray(l) ? l.filter((x) => x && x.id && fenOk(x.fen)) : []; };
+  const last = () => { const l = Store.get(LAST, null); return l && fenOk(l.f) ? l : null; };
+  function stage(A) {
+    const mine = ((A.review && A.review.items) || []).filter((it) => it.color === A.user && (it.cls === 'blunder' || it.cls === 'mistake') && A.fens[it.i]);
+    if (!mine.length) return [];
+    const sans = A.moves.map((m) => m.san), op = A.opening || detectOpening(sans, A.headers || {}), rep = !!(op && op.name);
+    const name = App.profile.name || '', elo = Tourney.myRating(), have = all(), fresh = [];
+    mine.forEach((it) => {
+      const fen = A.fens[it.i], best = it.bestSan || (it.best ? Engine.uciToSan(fen, it.best) : '');
+      if (!best || cleanSan(best) === cleanSan(it.san)) return;
+      const id = 'sp' + h5(fen + '|' + it.san);
+      if (have.some((x) => x.id === id) || fresh.some((x) => x.id === id)) return;
+      const x = { id, route: rep ? 'admin' : 'peer', fen, played: it.san, best, cls: it.cls, num: it.num, color: it.color, phase: it.phase || '', k: it.k || '', opening: (op && op.name) || '', name, elo, at: Date.now() };
+      if (rep) Object.assign(x, { start: A.start, sans: sans.slice(0, 300), side: A.user });
+      fresh.push(x);
+    });
+    if (!fresh.length) return [];
+    Store.set(KEY, have.concat(fresh).slice(-MAX));
+    const worst = fresh.filter((x) => x.cls === 'blunder')[0] || fresh[0];
+    Store.set(LAST, { f: worst.fen, p: worst.played, b: worst.best, o: worst.opening, n: worst.num, c: worst.color, at: Date.now() });
+    if (V5Net.on()) {
+      V5Net.post('p5_stage', { name, items: fresh.map((x) => ({ route: x.route, fen: x.fen, played: x.played, best: x.best, opening: x.opening, elo: x.elo, num: x.num,
+        game: x.sans ? { start: x.start || new Chess().fen(), sans: x.sans, side: x.side } : null })) }).catch(() => {});
+    }
+    return fresh;
+  }
+  function remove(id) { Store.set(KEY, all().filter((x) => x.id !== id)); }
+  function pgnOf(x) {
+    const g = x.start ? new Chess(x.start) : new Chess();
+    (x.sans || []).forEach((s) => g.move(s, { sloppy: true }));
+    g.header('Event', 'Staged from a Trim review', 'White', x.side === 'w' ? (x.name || 'Player') : '?', 'Black', x.side === 'b' ? (x.name || 'Player') : '?');
+    return g.pgn();
+  }
+  /* A friend's blunder as a two-step drill: the danger (M), then the better move (C). */
+  function drill(b, who) {
+    const side = sideOf(b.f), pm = new Chess(b.f).move(b.p, { sloppy: true }), th = threatsOf(b.f, side);
+    const mText = th.inCheck ? 'You were in check: that comes first.' : th.mates.length ? 'The threat was ' + th.mates[0] + ', mate.' : th.checks.length ? 'The checks to see first: ' + th.checks.slice(0, 3).join(', ') + '.'
+      : th.wins.length ? 'The captures that won material: ' + th.wins.slice(0, 3).join(', ') + '.' : 'No direct threat: nothing was hanging and no check was coming.';
+    const accept = {}, bad = {};
+    accept[b.b] = 'That is the move Stockfish wanted here.';
+    bad[b.p] = 'That is what ' + who + ' played. Look for the move that answers the problem.';
+    return { id: 'friend:' + h5(b.f + b.p), title: who + '’s blunder', tag: b.o || 'From a friend', fen: b.f, orientation: side,
+      brief: who + ' played ' + b.p + ' here (the red arrow). Run MSPC, then find what they should have played.',
+      arrows: pm ? [{ from: pm.from, to: pm.to, kind: 'bad' }] : [],
+      stages: [{ k: 'M', type: 'mcq', prompt: 'What was the danger in this position?', options: [{ text: mText, correct: true, why: '' }] },
+        { k: 'C', type: 'move', prompt: 'Find the better move.', accept, alt: {}, bad }] };
+  }
+  /* Admin mode: the staged puzzles on this device, under the Review Queue. */
+  function mountAdmin(view) {
+    if (!Admin.active) return;
+    const sec = document.createElement('section');
+    sec.className = 'panel pad sp5';
+    view.appendChild(sec);
+    const paint = () => {
+      const l = all().slice().reverse();
+      sec.innerHTML = '<span class="ar5-kicker">' + icon('inbox') + ' Peer-Puzzle staging</span><h2>Blunders staged by Trim reviews</h2>' +
+        '<p class="muted">Repertoire openings wait for you: send the game to the Review Queue and publish the puzzle with your usual tools. Other openings are free peer material; they go to the peer pool as soon as a community server is connected.</p>' +
+        (l.length ? '<div class="sp5-list">' + l.map((x) => '<div class="sp5-row"><span class="sp5-route is-' + x.route + '">' + (x.route === 'admin' ? 'Repertoire' : 'Free') + '</span>' +
+          '<div><b>' + esc(moveTag5(x.num, x.color, x.played)) + ' <small class="muted">better: ' + esc(x.best) + '</small></b><small class="muted">' + esc([x.opening || 'Unknown opening', x.name, x.elo].filter(Boolean).join(', ')) + '</small></div>' +
+          '<span class="btn-row">' + (x.route === 'admin' && x.sans ? '<button type="button" class="btn btn-ghost btn-sm" data-sp="queue" data-id="' + esc(x.id) + '">' + icon('inbox') + ' Send to the Review Queue</button>' : '') +
+          '<button type="button" class="icon-btn" data-sp="del" data-id="' + esc(x.id) + '" aria-label="Remove" title="Remove">' + icon('xmark') + '</button></span></div>').join('') + '</div>'
+          : '<p class="small muted">Nothing staged yet. Every Trim review stages its blunders here.</p>');
+    };
+    paint();
+    sec.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-sp]');
+      if (!b) return;
+      const id = b.getAttribute('data-id'), x = all().filter((y) => y.id === id)[0];
+      if (!x) return;
+      if (b.getAttribute('data-sp') === 'del') { remove(id); paint(); return; }
+      const r = typeof Queue.add === 'function' ? Queue.add(pgnOf(x), { name: x.name, elo: x.elo, side: x.side, source: 'staging' }) : null;
+      toast(r && r.added ? 'Sent to the Review Queue.' : r && r.dupes ? 'That game is already in the Review Queue.' : 'That game could not be added.', r && r.added ? 'good' : '');
+      if (r && (r.added || r.dupes)) { remove(id); paint(); }
+    });
+  }
+  return { all, last, stage, remove, pgnOf, drill, mountAdmin };
+})();
+
+/* ---------- the Trim pipeline, phases A and D ----------
+   Phase A: a macro reality check as the first message of the interrogation
+   (a template, free for everyone; paid members also get a "Macro reality
+   check" chip that asks the AI coach for the long version). Phase D: the
+   summary gains working points, patterns across sessions (verdicts and
+   miscalculation tags) and, for a leak that keeps coming back, the ManyChat
+   sales bridge the admin configured. */
+const V5Trim = {
+  TIPS: { M: 'Before every move, ask what the last move changed.', S: 'Name the phase and count the defenders of every piece.', P: 'List every check, capture and attack for both sides before any quiet move.', C: 'Calculate to the end, including their best reply.', time: 'Spend your clock on the critical moments, not the obvious ones.' },
+  leakName: (v) => (v === 'time' ? 'the clock' : v + ', ' + (MSPC_NAME[v] || '')),
+  macro(A) {
+    const mine = ((A.review && A.review.items) || []).filter((it) => it.color === A.user && (it.cls === 'blunder' || it.cls === 'mistake'));
+    if (!mine.length) return 'Macro reality check: no blunders and no mistakes from you in this game.';
+    const bl = mine.filter((it) => it.cls === 'blunder').length, mi = mine.length - bl, ph = {}, ks = {};
+    mine.forEach((it) => { if (it.phase) ph[it.phase] = (ph[it.phase] || 0) + 1; if (it.k) ks[it.k] = (ks[it.k] || 0) + 1; });
+    const topK = Object.keys(ks).sort((a, b) => ks[b] - ks[a])[0], first = mine[0];
+    return 'Macro reality check: ' + bl + ' blunder' + (bl === 1 ? '' : 's') + ' and ' + mi + ' mistake' + (mi === 1 ? '' : 's') + '. The first one: ' + moveTag5(first.num, first.color, first.san) +
+      (first.phase ? ', in the ' + first.phase : '') + '.' + (Object.keys(ph).length > 1 ? ' By phase: ' + Object.keys(ph).map((p) => ph[p] + ' in the ' + p).join(', ') + '.' : '') +
+      (topK ? ' Stockfish’s read: most of it broke at ' + topK + ', ' + MSPC_NAME[topK] + '.' : '') + ' Now one mistake at a time.';
+  },
+  conclude(Q, h, A) {
+    if (!Q || !h || !(Q.verdicts || []).length) return;
+    const panel = h.querySelector('.iq-done') || h;
+    if (Q.v5end) { panel.insertAdjacentHTML('beforeend', Q.v5end); V5Trim.bind(panel, Q); return; }
+    const vs = Q.verdicts, n = vs.length, found = vs.filter((x) => x.found).length, by = {};
+    vs.forEach((x) => { by[x.v] = (by[x.v] || 0) + 1; });
+    const hist = (Store.get('lc5-iq-history', []) || []).filter((x) => x && x.by).slice(-29);
+    hist.push({ at: Date.now(), n, found, by, op: ((A && A.opening) || {}).name || '' });
+    Store.set('lc5-iq-history', hist);
+    if (found === n) Tourney.bump('trim', 'trim', true);
+    const top = Object.keys(by).sort((a, b) => by[b] - by[a]), agg = {};
+    hist.forEach((x) => Object.keys(x.by).forEach((v) => { agg[v] = (agg[v] || 0) + x.by[v]; }));
+    const aggTop = Object.keys(agg).sort((a, b) => agg[b] - agg[a] || (b === top[0]) - (a === top[0]))[0], inSessions = hist.filter((x) => x.by[aggTop]).length;
+    const mc = {}, mis = (Store.get('lc5-miscalc', []) || []).filter((x) => x && x.t).slice(-40);
+    mis.forEach((x) => { mc[x.t] = (mc[x.t] || 0) + 1; });
+    const misTop = Object.keys(mc).sort((a, b) => mc[b] - mc[a])[0];
+    const recurring = hist.length >= 2 && inSessions >= 2 && top[0] === aggTop;
+    const S = V5Doc.sales(), pro = typeof App.isPro === 'function' ? App.isPro() : App.can('coachChat'), showMc = recurring && !!S.manychat && !pro;
+    Q.v5end = '<div class="iq5-end"><h3>' + icon('list-check') + ' Working points</h3><ul class="iq5-list">' +
+      top.slice(0, 2).map((v) => '<li><b>' + esc(V5Trim.leakName(v)) + '</b> (' + by[v] + (by[v] === 1 ? ' time' : ' times') + '): ' + esc(V5Trim.TIPS[v] || '') + '</li>').join('') + '</ul>' +
+      (hist.length >= 2 ? '<h3>' + icon('chart-line') + ' Your patterns</h3><p>Across your last ' + hist.length + ' interrogations, <b>' + esc(V5Trim.leakName(aggTop)) + '</b> broke ' + agg[aggTop] + ' times, in ' + inSessions + ' of them.' +
+        (misTop ? ' Your most tagged miscalculation: “' + esc(misTop) + '” (' + mc[misTop] + '×).' : '') + '</p>' : '<p class="small muted">A few more interrogations and your patterns across games show up here.</p>') +
+      (showMc ? '<div class="iq-bridge bridge iq5-mc">' + icon('comments') + '<p><b>' + esc(V5Trim.leakName(aggTop)) + '</b> keeps coming back. ' + esc(CONFIG.coach) + ' has a plan for exactly this leak.</p>' +
+        '<div class="btn-row"><a class="btn btn-gold btn-sm" data-iq5="mc" href="' + esc(V5Trim.mcUrl(S, aggTop)) + '" target="_blank" rel="noopener">' + icon('paper-plane') + ' Get the plan</a></div></div>' : '') +
+      (App.can('coachChat') && AI.on() ? '<div class="iq5-ai" data-iq5-ai><button type="button" class="btn btn-ghost btn-sm" data-iq5="ai">' + icon('wand-magic-sparkles') + ' Ask the AI coach for my session conclusion</button></div>' : '') + '</div>';
+    Q.v5data = { opening: ((A && A.opening) || {}).name || '', mistakes: vs.map((x) => ({ move: x.san, verdict: x.v, engine_step: x.eng || '', found_better: !!x.found })), this_session: by, all_sessions: agg, sessions: hist.length, top_miscalculation: misTop || '' };
+    panel.insertAdjacentHTML('beforeend', Q.v5end);
+    V5Trim.bind(panel, Q);
+    const a = panel.querySelector('[data-iq5="mc"]');
+    if (a) a.addEventListener('click', () => V5Trim.fire(S, { leak: aggTop, name: App.profile.name || '', rating: Tourney.myRating(), sessions: hist.length }));
+    try { Telemetry.log({ e: 'q', x: 'iq5-end' + (showMc ? '-mc' : '') }); } catch (e) { /* telemetry is optional */ }
+  },
+  /* Members with the AI coach: one tap for a written session conclusion. */
+  bind(panel, Q) {
+    const b = panel.querySelector('[data-iq5="ai"]');
+    if (!b || b.dataset.bound) return;
+    b.dataset.bound = '1';
+    b.addEventListener('click', async () => {
+      const box = b.closest('[data-iq5-ai]');
+      b.disabled = true; b.textContent = 'The coach is writing…';
+      try {
+        const r = await AI.chat('coachPaid', [{ role: 'user', content: 'Write my session conclusion for this Trim review: what went wrong in my thinking, the pattern across my sessions, and one concrete training task for this week. Five sentences at most.' }], { trim_session: Q.v5data || {} });
+        box.innerHTML = '<p class="iq5-ai-text">' + esc(AI.tags(r.text).clean).replace(/\n/g, '<br>') + '</p>';
+      } catch (e) { box.innerHTML = '<p class="small muted">The AI coach is not available right now. The working points above still hold.</p>'; }
+    });
+  },
+  mcUrl(S, key) {
+    try { const u = new URL(S.manychat); u.searchParams.set('ref', (S.keyword || 'trim') + '_' + String(key || '').replace(/[^A-Za-z]/g, '')); return u.href; } catch (e) { return S.manychat; }
+  },
+  /* The optional webhook (Make, Zapier or ManyChat's own): fire and forget. */
+  fire(S, data) {
+    if (!S.webhook) return;
+    const body = JSON.stringify(Object.assign({ event: 'trim_recurring_leak', at: new Date().toISOString(), device: deviceId() }, data));
+    try {
+      if (navigator.sendBeacon) navigator.sendBeacon(S.webhook, new Blob([body], { type: 'text/plain' }));
+      else fetch(S.webhook, { method: 'POST', mode: 'no-cors', body });
+    } catch (e) { /* the link still opens */ }
+  }
+};
+
+/* ---------- Arena: the tournament and friends, on the Leaderboard page ---------- */
+const Arena = (() => {
+  let cur = null;
+  const initials = (n) => String(n || '?').split(/\s+/).map((w) => w.charAt(0)).join('').slice(0, 2).toUpperCase() || '?';
+  const signed = (d) => (d > 0 ? '+' + d : String(d));
+  const ago = (t) => { const m = Math.max(1, Math.round((Date.now() - t) / 6e4)); return m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + 'h ago' : Math.round(m / 1440) + 'd ago'; };
+  function resetIn() { const ms = Tourney.nextReset() - Date.now(), d = Math.floor(ms / 864e5), h = Math.floor((ms % 864e5) / 36e5); return d > 0 ? d + 'd ' + h + 'h' : h > 0 ? h + 'h' : Math.max(1, Math.round(ms / 6e4)) + ' min'; }
+  function cupHTML() {
+    const c = Tourney.cfg(), s = Tourney.state(), metric = s.metric || c.metric, M = Tourney.METRICS[metric] || Tourney.METRICS.mspc;
+    if (!c.on) return '<article class="panel pad ar5-cup"><span class="ar5-kicker">' + icon('trophy') + ' Weekly tournament</span><h2>No tournament this week</h2><p class="muted">The leaderboard below still counts every answer.</p></article>';
+    const rows = Tourney.board(s.wk, metric, s.score), sv = Tourney.server(), live = !!(sv && sv.wk === s.wk && V5Net.on()), players = live ? sv.players : rows.filter((r) => r.score > 0).length, last = (s.history || []).slice(-1)[0];
+    const prizes = c.prizes.map((p, i) => (p ? ['1st', '2nd', '3rd'][i] + ' +' + p : '')).filter(Boolean);
+    return '<article class="panel pad ar5-cup"><span class="ar5-kicker">' + icon('trophy') + ' Weekly tournament</span><h2>' + esc(c.title) + '</h2>' +
+      '<p class="muted">' + esc(M[0]) + '. ' + (prizes.length ? '<span class="ar5-prize">' + icon('coins') + ' ' + esc(prizes.join(', ')) + ' tokens</span> ' : '') + 'Resets in ' + resetIn() + '.</p>' +
+      '<ol class="ar5-board">' + rows.slice(0, 11).map((r) => '<li class="' + (r.me ? 'is-me' : '') + (r.friend ? ' is-friend' : '') + (r.gap ? ' is-gap' : '') + '"><span class="ar5-rank">' + r.rank + '</span><span class="ar5-name">' + esc(r.name) + (r.me ? ' <small>(you)</small>' : r.friend ? ' <small>(friend)</small>' : '') + '</span>' +
+        '<span class="ar5-score">' + r.score + ' <small>' + esc(M[1]) + '</small></span></li>').join('') + '</ol>' +
+      '<p class="small muted ar5-note">' + (live ? icon('globe') + ' Every player in the hub, live: ' + players + (players === 1 ? ' player' : ' players') + ' this week.' : icon('user-group') + ' You and your friends.') + '</p>' +
+      (players < c.minPlayers ? '<p class="small muted ar5-note">Prizes need at least ' + c.minPlayers + ' players with a score. Add friends below and share your code.</p>' : '') +
+      (last ? '<p class="small muted ar5-note">Last week: ' + (last.rank ? '#' + last.rank + ' of ' + last.players : 'no score') + (last.prize ? ', +' + last.prize + ' tokens' : '') + '.</p>' : '') + '</article>';
+  }
+  function meHTML() {
+    const c = Friends.myCard(), f = App.profile.focus, lb = V5Peer.last();
+    return '<article class="panel pad ar5-me"><span class="ar5-kicker">' + icon('id-card') + ' Your card</span>' +
+      '<div class="ar5-card is-me"><div class="ar5-av">' + esc(initials(c.u)) + '</div><div class="ar5-body"><b>' + esc(c.u) + '</b>' +
+      '<p class="ar5-elo">' + (c.e ? '<b>' + c.e + '</b>' + (c.d ? ' <span class="' + (c.d > 0 ? 'ar5-up' : 'ar5-down') + '">' + signed(c.d) + ' this week</span>' : '') : 'No rating yet: link Chess.com or Lichess on your profile.') + '</p>' +
+      '<p>' + icon('bullseye') + ' ' + (f ? 'Hyper-Focus: ' + esc(Focus.name(f)) + ', day ' + Focus.day() : 'No Hyper-Focus yet') + '</p>' +
+      (lb ? '<p>' + icon('bolt') + ' Latest blunder: ' + esc(moveTag5(lb.n, lb.c, lb.p)) + (lb.o ? ', ' + esc(lb.o) : '') + '. <a href="#games">Game Vault</a></p>' : '') + '</div></div>' +
+      '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-ar="copy">' + icon('copy') + ' Copy my friend code</button><button type="button" class="btn btn-ghost btn-sm" data-ar="share">' + icon('share-nodes') + ' Share link</button></div>' +
+      '<p class="small muted">Your code carries this card, your tournament score and your latest blunder, so friends can try to punish it. Share a fresh code when your card changes.</p></article>';
+  }
+  function friendsHTML() {
+    const wk = isoWeek(new Date());
+    const card = (x) => {
+      const d = x.site ? (x.rating && x.base ? x.rating - x.base : 0) : x.d || 0, t = x.t && x.t.w === wk ? x.t : null;
+      return '<div class="ar5-card"><div class="ar5-av">' + (x.avatar && /^https:\/\//.test(x.avatar) ? '<img src="' + esc(x.avatar) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : esc(initials(x.name))) + '</div>' +
+        '<div class="ar5-body"><b>' + esc(x.name) + '</b> <small class="muted">' + esc(x.site ? Elo.SITES[x.site] : 'friend code') + '</small>' +
+        '<p class="ar5-elo">' + (x.rating ? '<b>' + x.rating + '</b>' + (d ? ' <span class="' + (d > 0 ? 'ar5-up' : 'ar5-down') + '">' + signed(d) + ' this week</span>' : '') : 'No rating shared') + '</p>' +
+        (x.focus ? '<p>' + icon('bullseye') + ' Hyper-Focus: ' + esc(x.focus) + (x.fd ? ', day ' + x.fd : '') + '</p>' : '') +
+        (t ? '<p>' + icon('trophy') + ' ' + t.s + ' ' + esc((Tourney.METRICS[t.m] || Tourney.METRICS.mspc)[1]) + ' this week</p>' : '') +
+        (!x.site && x.at ? '<p class="small muted">Card from ' + ago(x.at) + '</p>' : '') + '</div>' +
+        '<div class="ar5-acts">' + (x.b ? '<button type="button" class="btn btn-gold btn-sm" data-ar="solve" data-id="' + esc(x.id) + '">' + icon('crosshairs') + ' Punish their blunder</button>' : '') +
+        '<button type="button" class="icon-btn" data-ar="remove" data-id="' + esc(x.id) + '" aria-label="Remove ' + esc(x.name) + '" title="Remove">' + icon('xmark') + '</button></div></div>';
+    };
+    const list = Friends.list();
+    return '<article class="panel pad ar5-friends"><span class="ar5-kicker">' + icon('user-group') + ' Friends</span><h2>Train next to your friends</h2>' +
+      '<p class="muted">Paste a friend code, or follow a Chess.com or Lichess player and watch their rating move week by week. No chat, just the scoreboard.</p>' +
+      '<form class="ar5-add" data-ar-add autocomplete="off"><input class="input" name="q" maxlength="1800" placeholder="Friend code, link or username" aria-label="Friend code, link or username" required>' +
+      '<select class="input" name="site" aria-label="What you pasted"><option value="code">Friend code</option><option value="chesscom">Chess.com</option><option value="lichess">Lichess</option></select>' +
+      '<button class="btn btn-primary" type="submit">' + icon('user-plus') + ' Add</button></form>' +
+      '<div class="ar5-cards">' + (list.map(card).join('') || '<p class="small muted">No friends yet. Share your code and ask for theirs.</p>') + '</div></article>';
+  }
+  function paint() {
+    if (!cur) return;
+    const main = qs('[data-ar5-main]', cur.sec);
+    if (main) main.innerHTML = '<div class="ar5-grid">' + cupHTML() + meHTML() + '</div>' + friendsHTML();
+  }
+  function refresh() {
+    if (!cur || !cur.sec.isConnected) return;
+    const el = qs('.ar5-cup', cur.sec);
+    if (el) el.outerHTML = cupHTML();
+  }
+  async function copy(text, msg) {
+    try { await navigator.clipboard.writeText(text); toast(msg, 'good'); } catch (e) { window.prompt('Copy this:', text); }
+  }
+  async function share() {
+    const url = Friends.link();
+    if (navigator.share) {
+      try { await navigator.share({ title: 'My chess card', text: 'Add me as a friend in the ' + CONFIG.coach + ' Training Hub.', url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    copy(url, 'Link copied. Whoever opens it adds you as a friend.');
+  }
+  function closeSolve() {
+    if (!cur) return;
+    if (cur.runner) { cur.runner.destroy(); cur.runner = null; }
+    if (cur.board) { cur.board.destroy(); cur.board = null; }
+    const box = qs('[data-ar5-solve]', cur.sec);
+    if (box) { box.hidden = true; box.innerHTML = ''; }
+  }
+  function solve(id) {
+    const x = Friends.list().filter((f) => f.id === id)[0];
+    if (!x || !x.b || !cur) return;
+    closeSolve();
+    const box = qs('[data-ar5-solve]', cur.sec);
+    box.hidden = false;
+    box.innerHTML = '<div class="ar5-solve-head"><h2>Punish ' + esc(x.name) + '’s blunder</h2><button type="button" class="btn btn-quiet btn-sm" data-ar="close-solve">' + icon('xmark') + ' Close</button></div>' + trainerShell('ar-board', 'ar-panel');
+    cur.board = Board(qs('#ar-board', box), {});
+    const fl = qs('[data-flip="ar-board"]', box);
+    if (fl) fl.addEventListener('click', () => cur.board.flip());
+    cur.runner = StageRunner({ drill: V5Peer.drill(x.b, x.name), board: cur.board, host: qs('#ar-panel', box), section: 'peer', mspc: true, nextLabel: 'Back to friends', onNext: () => { closeSolve(); scrollToEl(cur.sec); } });
+    cur.runner.start();
+    scrollToEl(box);
+  }
+  function onClick(e) {
+    const b = e.target.closest('[data-ar]');
+    if (!b || !cur) return;
+    const a = b.getAttribute('data-ar');
+    if (a === 'copy') copy(Friends.code(), 'Friend code copied. Send it to a friend.');
+    else if (a === 'share') share();
+    else if (a === 'remove') { Friends.remove(b.getAttribute('data-id')); paint(); }
+    else if (a === 'solve') solve(b.getAttribute('data-id'));
+    else if (a === 'close-solve') closeSolve();
+  }
+  async function onSubmit(e) {
+    const f = e.target.closest('[data-ar-add]');
+    if (!f) return;
+    e.preventDefault();
+    const q = f.elements.q.value.trim(), site = f.elements.site.value, btn = qs('button[type="submit"]', f), code = Friends.codeIn(q);
+    if (!q) return;
+    if (code || site === 'code') {
+      const r = Friends.addCode(code || q);
+      toast(r.ok ? 'Added ' + r.name + '.' : 'That friend code is not valid.', r.ok ? 'good' : '');
+      if (r.ok) paint();
+      return;
+    }
+    btn.disabled = true;
+    const r = await Friends.addUser(site, q);
+    btn.disabled = false;
+    toast(r.ok ? 'Now following ' + r.name + '.' : 'No ' + Elo.SITES[site] + ' player found with that name.', r.ok ? 'good' : '');
+    if (r.ok) paint();
+  }
+  function mount(view) {
+    const res = Tourney.roll();
+    if (res && res.prize) toast('Last week’s tournament: #' + res.rank + ' of ' + res.players + '. +' + res.prize + ' tokens.', 'good');
+    const sec = document.createElement('section'), head = qs('.page-head', view);
+    sec.className = 'arena5'; sec.id = 'arena5'; sec.setAttribute('aria-label', 'Weekly tournament and friends');
+    sec.innerHTML = '<div data-ar5-main></div><div class="ar5-solve" data-ar5-solve hidden></div>';
+    if (head) head.insertAdjacentElement('afterend', sec); else view.prepend(sec);
+    cur = { sec, runner: null, board: null };
+    paint();
+    sec.addEventListener('click', onClick);
+    sec.addEventListener('submit', onSubmit);
+    const me = cur;
+    Friends.refresh().then((changed) => { if (changed && cur === me) paint(); }).catch(() => {});
+    Friends.syncGraph().then((r) => { if (r && cur === me) paint(); }).catch(() => {});
+    Tourney.claim().catch(() => {});
+    Tourney.pull().catch(() => {});
+    return () => { if (cur === me) { closeSolve(); cur = null; } };
+  }
+  /* At start-up: settle last week once, and add a friend from a shared link. */
+  function boot() {
+    try { const r = Tourney.roll(); if (r && r.prize) setTimeout(() => toast('Last week’s tournament: #' + r.rank + ' of ' + r.players + '. +' + r.prize + ' tokens.', 'good'), 1500); } catch (e) { console.error(e); }
+    setTimeout(() => { Tourney.claim().catch(() => {}); }, 4000);   // after the content (and the server address) has loaded
+    try {
+      const sp = new URLSearchParams(location.search), c = sp.get('friend');
+      if (!c) return;
+      const r = Friends.addCode(c);
+      sp.delete('friend');
+      history.replaceState(null, '', location.pathname + (sp.toString() ? '?' + sp.toString() : '') + location.hash);
+      setTimeout(() => toast(r.ok ? 'Added ' + r.name + ' to your friends.' : 'That friend link is not valid.', r.ok ? 'good' : ''), 1200);
+    } catch (e) { console.error(e); }
+  }
+  return { mount, refresh, boot, paint };
+})();
+
+/* ---------- admin: the weekly tournament and the sales bridge ---------- */
+V5Admin.arena = function () {
+  if (!Admin.active) { toast('Sign in to admin mode first.'); return; }
+  const cur = V5Doc.clean(Admin.ensureDraft().v5), t = Object.assign({}, Tourney.cfg(), cur.tournament || {}), s = cur.sales || {};
+  openSheet({
+    title: 'Weekly tournament and sales bridge', noFocus: true,
+    html: '<form class="stack" data-v5ar autocomplete="off"><h3>Weekly tournament</h3>' +
+      '<label class="switch-row"><span>Run the weekly tournament</span><input type="checkbox" name="on"' + (t.on ? ' checked' : '') + '></label>' +
+      '<label class="field"><span class="field-label">Name</span><input class="input" name="title" maxlength="60" value="' + esc(t.title) + '"></label>' +
+      '<label class="field"><span class="field-label">What counts</span><select class="input" name="metric">' + Object.keys(Tourney.METRICS).map((k) => '<option value="' + k + '"' + (t.metric === k ? ' selected' : '') + '>' + esc(Tourney.METRICS[k][0]) + '</option>').join('') + '</select></label>' +
+      '<div class="ar5-prizes">' + ['1st', '2nd', '3rd'].map((p, i) => '<label class="field"><span class="field-label">' + p + ' place, tokens</span><input class="input" type="number" min="0" max="50" name="p' + i + '" value="' + (t.prizes[i] || 0) + '"></label>').join('') + '</div>' +
+      '<label class="field"><span class="field-label">Players with a score needed for prizes</span><input class="input" type="number" min="1" max="20" name="min" value="' + t.minPlayers + '"></label>' +
+      '<p class="small muted">A running week keeps its metric; a change applies from next Monday. Without a server, the board is the player plus the friend codes they added, and the prize is paid on the device at the Monday reset.</p>' +
+      '<h3>Sales bridge (ManyChat)</h3><p class="small muted">When a Trim session shows the same leak coming back, free players see a button that opens this link, with ?ref= set to your keyword and the leak letter, for example MSPC_P. The webhook, if you add one, gets the leak, name and rating.</p>' +
+      '<label class="field"><span class="field-label">ManyChat link</span><input class="input" name="mc" type="url" placeholder="https://ig.me/m/lanckrietchess" value="' + esc(s.manychat || '') + '"></label>' +
+      '<label class="field"><span class="field-label">Ref keyword <small>letters, digits, _</small></span><input class="input" name="kw" maxlength="30" placeholder="MSPC" value="' + esc(s.keyword || '') + '"></label>' +
+      '<label class="field"><span class="field-label">Webhook <small>optional</small></span><input class="input" name="wh" type="url" placeholder="https://hook.eu1.make.com/…" value="' + esc(s.webhook || '') + '"></label>' +
+      '<h3>Arena server</h3><p class="small muted">The Cloudflare Worker in the server folder (README). With it, the tournament board covers every player, friend cards stay fresh, staged blunders from every player reach you, free peer puzzles reach everyone, and it runs the AI coach for members (their keys are checked and tied to one device there). The address is published with your content; the admin token stays on this device.</p>' +
+      '<label class="field"><span class="field-label">Server address</span><input class="input" name="srv" type="url" placeholder="https://lanckriet-arena.yourname.workers.dev" value="' + esc((cur.server || {}).url || '') + '"></label>' +
+      '<label class="field"><span class="field-label">Admin token <small>this device only</small></span><input class="input" name="tok" type="password" autocomplete="off" value="' + esc(String(Store.get('lc5-admin-token', '') || '')) + '"></label>' +
+      '<div class="btn-row"><button class="btn btn-ghost btn-sm" type="button" data-v5ar-test>' + icon('plug') + ' Test the connection</button><span class="small muted" data-v5ar-out aria-live="polite"></span></div>' +
+      '<h3>Building content.json yourself?</h3><p class="small muted">Publishing from admin mode puts all of these settings in content.json for you. If you make content.json another way, save here first, then copy the v5 section (and your member keys, as hashes) and paste them at the top level of your file.</p>' +
+      '<div class="btn-row"><button class="btn btn-ghost btn-sm" type="button" data-v5ar-copy>' + icon('copy') + ' Copy the v5 section and member keys</button></div>' +
+      '<div class="btn-row"><button class="btn btn-primary" type="submit">Save</button></div></form>',
+    onMount(sh) {
+      const f = qs('[data-v5ar]', sh.el);
+      f.addEventListener('click', (e) => {
+        if (!e.target.closest('[data-v5ar-copy]')) return;
+        const d = Admin.ensureDraft(), keys = Array.isArray(d.keys) ? d.keys : [];
+        const t = '"v5": ' + JSON.stringify(V5Doc.clean(d.v5), null, 2) + ',' + (keys.length ? '\n"keys": ' + JSON.stringify(keys, null, 2) + ',' : '');   // member keys are hashes only
+        const done = (ok) => toast(ok ? 'The v5 section is copied. Paste it in content.json right after the first {.' : 'Copy failed.', ok ? 'good' : '');
+        if (typeof copyText === 'function') copyText(t).then(done); else navigator.clipboard.writeText(t).then(() => done(true), () => done(false));
+      });
+      f.addEventListener('click', async (e) => {
+        if (!e.target.closest('[data-v5ar-test]')) return;
+        const out = qs('[data-v5ar-out]', f), url = f.elements.srv.value.trim().replace(/\/+$/, '');
+        out.textContent = 'Testing…';
+        try {
+          const r = await fetchWithTimeout(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'a5_check', device: deviceId(), token: f.elements.tok.value.trim() }) }, 9000).then((x) => x.json());
+          out.textContent = r && r.ok ? (r.admin ? 'Connected. The admin token works.' : 'Connected, but the admin token is not accepted.') : 'The server answered with an error: ' + ((r && r.reason) || 'unknown') + '.';
+        } catch (x) { out.textContent = 'No answer from that address.'; }
+      });
+      f.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const d = Admin.ensureDraft(), v5 = Object.assign({}, d.v5 || {});
+        v5.tournament = { on: f.elements.on.checked, title: f.elements.title.value, metric: f.elements.metric.value, prizes: [0, 1, 2].map((i) => +f.elements['p' + i].value || 0), minPlayers: +f.elements.min.value || 1 };
+        v5.sales = { manychat: f.elements.mc.value.trim(), keyword: f.elements.kw.value.trim(), webhook: f.elements.wh.value.trim() };
+        v5.server = { url: f.elements.srv.value.trim() };
+        Store.set('lc5-admin-token', f.elements.tok.value.trim());
+        d.v5 = V5Doc.clean(v5);
+        Admin.saveDraft(d);
+        toast('Saved on this device. Publish to make it live.', 'good');
+        sh.close(); rerender();
+      });
+    }
+  });
+};
+
+/* ---------- v5 (fourth pass): the Arena server connection ----------
+   One address (admin mode, published in v5.server). Every request carries
+   this device's id; the server answers with the player's public id (pid),
+   which goes into the friend code so friends can fetch the latest card. */
+const V5Net = (() => {
+  const url = () => String((V5Doc.server() || {}).url || '').trim();
+  const on = () => /^https:\/\/\S+$/i.test(url()) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/\S*)?$/i.test(url());
+  const pid = () => { const p = Store.get('lc5-pid', ''); return typeof p === 'string' && /^[a-z0-9]{8,24}$/.test(p) ? p : ''; };
+  async function post(action, body) {
+    if (!on()) throw Object.assign(new Error('off'), { reason: 'off' });
+    let data = null;
+    try {
+      const res = await fetchWithTimeout(url(), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({ action, app: 'lanckrietchess-hub', version: CONFIG.version, device: deviceId() }, body || {})) }, 9000);
+      data = await res.json();
+    } catch (e) { throw Object.assign(new Error('network'), { reason: 'network' }); }
+    if (!data || data.ok !== true) throw Object.assign(new Error('server'), { reason: (data && typeof data.reason === 'string' && data.reason.slice(0, 30)) || 'server' });
+    if (typeof data.pid === 'string' && /^[a-z0-9]{8,24}$/.test(data.pid) && data.pid !== pid()) Store.set('lc5-pid', data.pid);
+    return data;
+  }
+  return { on, post, url, pid };
+})();
+
+/* ---------- free peer puzzles from the community, on the Peer puzzles page ---------- */
+const V5Pool = (() => {
+  let cur = null;
+  const okItem = (x) => {
+    if (!x || typeof x.id !== 'string' || !fenOk(x.fen)) return false;
+    const p = new Chess(x.fen).move(String(x.played || ''), { sloppy: true }), b = new Chess(x.fen).move(String(x.best || ''), { sloppy: true });
+    return !!(p && b && p.san !== b.san);
+  };
+  function paint() {
+    const box = cur && qs('[data-pool5]', cur.sec);
+    if (!box) return;
+    box.innerHTML = cur.items.length ? '<div class="cl-list">' + cur.items.map((x) => '<button type="button" class="cl-card" data-pool5-id="' + esc(x.id) + '" aria-pressed="' + (x.id === cur.open) + '"><span class="cl-src">' + esc(x.opening || 'Unknown opening') + '</span>' +
+      '<b>' + esc((x.name || 'A hub player') + ' played ' + moveTag5(x.num || 1, sideOf(x.fen), x.played)) + '</b><small>' + esc(x.elo ? x.elo + ' ELO' : 'Rating unknown') + '</small></button>').join('') + '</div>'
+      : '<p class="small muted">No community puzzles yet. They appear as players review their games in Trim.</p>';
+  }
+  function close() {
+    if (!cur) return;
+    if (cur.runner) { cur.runner.destroy(); cur.runner = null; }
+    if (cur.board) { cur.board.destroy(); cur.board = null; }
+    cur.open = '';
+    const box = qs('[data-pool5-solve]', cur.sec);
+    if (box) { box.hidden = true; box.innerHTML = ''; }
+  }
+  function solve(id) {
+    const x = cur.items.filter((i) => i.id === id)[0];
+    if (!x) return;
+    close(); cur.open = id; paint();
+    const box = qs('[data-pool5-solve]', cur.sec), who = x.name || 'A hub player';
+    box.hidden = false;
+    box.innerHTML = '<div class="ar5-solve-head"><h2>' + esc(who + '’s blunder') + '</h2><button type="button" class="btn btn-quiet btn-sm" data-pool5-close>' + icon('xmark') + ' Close</button></div>' + trainerShell('pool-board', 'pool-panel');
+    cur.board = Board(qs('#pool-board', box), {});
+    const fl = qs('[data-flip="pool-board"]', box);
+    if (fl) fl.addEventListener('click', () => cur.board.flip());
+    cur.runner = StageRunner({ drill: V5Peer.drill({ f: x.fen, p: x.played, b: x.best, o: x.opening }, who), board: cur.board, host: qs('#pool-panel', box), section: 'peer', mspc: true, nextLabel: 'Next puzzle',
+      onNext: () => { const i = cur.items.findIndex((y) => y.id === id), nx = cur.items[(i + 1) % cur.items.length]; if (nx && nx.id !== id) solve(nx.id); else close(); } });
+    cur.runner.start();
+    scrollToEl(box);
+  }
+  async function load(me) {
+    try {
+      const r = await V5Net.post('p5_pool', { limit: 24, elo: Tourney.myRating() || 0 });
+      if (cur !== me) return;
+      me.items = (Array.isArray(r.items) ? r.items : []).filter(okItem);
+      paint();
+    } catch (e) { if (cur === me) qs('[data-pool5]', me.sec).innerHTML = '<p class="small muted">The community puzzles could not load right now.</p>'; }
+  }
+  function mount(view) {
+    if (!V5Net.on()) return () => {};
+    const sec = document.createElement('section');
+    sec.className = 'panel pad pool5';
+    sec.innerHTML = '<span class="ar5-kicker">' + icon('users') + ' From the community</span><h2>Blunders from hub players</h2>' +
+      '<p class="muted">Real games from players in this hub, outside the repertoire courses. Run MSPC, then find what they should have played. Free for everyone.</p>' +
+      '<div data-pool5><p class="small muted">Loading…</p></div><div class="ar5-solve" data-pool5-solve hidden></div>';
+    view.appendChild(sec);
+    const me = { sec, items: [], open: '', runner: null, board: null };
+    cur = me;
+    sec.addEventListener('click', (e) => {
+      if (e.target.closest('[data-pool5-close]')) { close(); paint(); return; }
+      const c = e.target.closest('[data-pool5-id]');
+      if (c) solve(c.getAttribute('data-pool5-id'));
+    });
+    load(me);
+    return () => { if (cur === me) { close(); cur = null; } };
+  }
+  return { mount };
+})();
+
+/* ---------- admin mode: the Arena server console, under the Review Queue ---------- */
+const V5Srv = (() => {
+  const tok = () => { const t = Store.get('lc5-admin-token', ''); return typeof t === 'string' ? t : ''; };
+  function mountAdmin(view) {
+    if (!Admin.active || !V5Net.on() || !tok()) return;
+    const sec = document.createElement('section');
+    sec.className = 'panel pad sp5 srv5';
+    view.appendChild(sec);
+    let tab = 'queued', rows = [], board = [], members = null;
+    const head = () => '<span class="ar5-kicker">' + icon('server') + ' Arena server</span><h2>From every player</h2>' +
+      '<div class="seg srv5-tabs" role="group" aria-label="View">' + [['queued', 'Repertoire queue'], ['live', 'Free peer puzzles'], ['board', 'This week’s board'], ['members', 'Members and AI']].map((t) => '<button type="button" data-srv5-tab="' + t[0] + '" aria-pressed="' + (tab === t[0]) + '">' + t[1] + '</button>').join('') + '</div>';
+    function paint() {
+      if (tab === 'members') {
+        const m = members || { members: [], today: {} }, k = (n) => (n >= 1000 ? Math.round(n / 1000) + 'k' : String(n || 0));
+        sec.innerHTML = head() + '<p class="small muted">' + icon('robot') + ' ' + (m.ai ? 'AI coach on, model ' + esc(m.model) + '. Today: ' + (m.today.n || 0) + ((m.today.n || 0) === 1 ? ' answer, ' : ' answers, ') + k(m.today.input) + ' tokens in, ' + k(m.today.output) + ' out.' : 'AI coach off: add the ANTHROPIC_API_KEY secret to the server (node setup.mjs).') + '</p>' +
+          (m.members.length ? '<div class="sp5-list">' + m.members.map((x) => '<div class="sp5-row"><span class="sp5-route ' + (x.revoked ? 'is-admin' : 'is-peer') + '">' + esc(TIERS[x.tier] ? TIERS[x.tier].label : x.tier) + '</span>' +
+            '<div><b>' + esc(x.label || x.sha256.slice(0, 12)) + '</b><small class="muted">' + esc([x.devices ? x.devices + (x.devices === 1 ? ' device' : ' devices') + (x.last ? ', last seen ' + new Date(x.last).toLocaleDateString() : '') : 'not activated yet', x.today ? x.today + (x.today === 1 ? ' AI answer today' : ' AI answers today') : '', x.exp ? 'until ' + x.exp : '', x.revoked ? 'switched off' : ''].filter(Boolean).join(', ')) + '</small></div>' +
+            '<span class="btn-row">' + (x.devices ? '<button type="button" class="btn btn-ghost btn-sm" data-srv5="unbind" data-id="' + esc(x.sha256) + '">Reset device</button>' : '') + '</span></div>').join('') + '</div>'
+            : '<p class="small muted">No member keys yet. Publish them from admin mode (member keys), or put them in the server’s MEMBER_KEYS secret.</p>');
+        return;
+      }
+      if (tab === 'board') {
+        sec.innerHTML = head() + (board.length ? '<div class="sp5-list">' + board.map((r) => '<div class="sp5-row"><span class="sp5-route ' + (r.banned ? 'is-admin' : 'is-peer') + '">' + (r.banned ? 'Banned' : esc(r.metric)) + '</span>' +
+          '<div><b>' + esc(r.name || 'Player') + ' <small class="muted">' + (+r.score || 0) + '</small></b></div><span class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-srv5="' + (r.banned ? 'unban' : 'ban') + '" data-id="' + esc(r.pid) + '">' + (r.banned ? 'Unban' : 'Ban') + '</button></span></div>').join('') + '</div>'
+          : '<p class="small muted">Nobody has a score this week yet.</p>');
+        return;
+      }
+      sec.innerHTML = head() + (rows.length ? '<div class="sp5-list">' + rows.map((x) => '<div class="sp5-row"><span class="sp5-route is-' + (x.route === 'admin' ? 'admin' : 'peer') + '">' + (x.route === 'admin' ? 'Repertoire' : 'Free') + '</span>' +
+        '<div><b>' + esc(moveTag5(x.num || 1, fenOk(x.fen) ? sideOf(x.fen) : 'w', x.played)) + ' <small class="muted">better: ' + esc(x.best) + '</small></b><small class="muted">' + esc([x.opening || 'Unknown opening', x.name, x.elo].filter(Boolean).join(', ')) + '</small></div>' +
+        '<span class="btn-row">' + (tab === 'queued' && x.game ? '<button type="button" class="btn btn-ghost btn-sm" data-srv5="queue" data-id="' + esc(x.id) + '">' + icon('inbox') + ' Send to the Review Queue</button>' : '') +
+        '<button type="button" class="btn btn-quiet btn-sm" data-srv5="reject" data-id="' + esc(x.id) + '">' + (tab === 'live' ? 'Remove' : 'Reject') + '</button></span></div>').join('') + '</div>'
+        : '<p class="small muted">' + (tab === 'queued' ? 'Nothing waiting. Blunders in your repertoire openings land here from every player’s Trim reviews.' : 'No free peer puzzles yet.') + '</p>');
+    }
+    async function load() {
+      sec.innerHTML = head() + '<p class="small muted">Loading…</p>';
+      try {
+        if (tab === 'members') members = await V5Net.post('a5_members', { token: tok() });
+        else if (tab === 'board') board = (await V5Net.post('a5_board', { token: tok() })).rows || [];
+        else rows = (await V5Net.post('a5_list', { token: tok(), status: tab, limit: 60 })).items || [];
+        paint();
+      } catch (e) { sec.innerHTML = head() + '<p class="small muted">The Arena server said no (' + esc(e.reason || 'error') + '). Check the address and the admin token under Admin menu, Weekly tournament and sales bridge.</p>'; }
+    }
+    sec.addEventListener('click', async (e) => {
+      const t = e.target.closest('[data-srv5-tab]');
+      if (t) { tab = t.getAttribute('data-srv5-tab'); load(); return; }
+      const b = e.target.closest('[data-srv5]');
+      if (!b) return;
+      const act = b.getAttribute('data-srv5'), id = b.getAttribute('data-id');
+      b.disabled = true;
+      try {
+        if (act === 'queue') {
+          const x = rows.filter((r) => r.id === id)[0], g = x && x.game;
+          const r = g && typeof Queue.add === 'function' ? Queue.add(V5Peer.pgnOf({ start: g.start, sans: g.sans, side: g.side, name: x.name }), { name: x.name, elo: x.elo, side: g.side, source: 'arena' }) : null;
+          if (!(r && (r.added || r.dupes))) throw Object.assign(new Error('queue'), { reason: 'the game could not be added' });
+          await V5Net.post('a5_set', { token: tok(), id, status: 'done' });
+          toast(r.added ? 'Sent to the Review Queue.' : 'Already in the Review Queue.', 'good');
+        } else if (act === 'reject') await V5Net.post('a5_set', { token: tok(), id, status: 'rejected' });
+        else if (act === 'ban' || act === 'unban') await V5Net.post('a5_ban', { token: tok(), pid: id, banned: act === 'ban' });
+        else if (act === 'unbind') { await V5Net.post('a5_unbind', { token: tok(), hash: id }); toast('Devices reset. The key works on the next device that uses it.', 'good'); }
+        load();
+      } catch (x) { b.disabled = false; toast('That did not work: ' + (x.reason || 'error') + '.'); }
+    });
+    load();
+  }
+  return { mountAdmin };
+})();
+
 const TABS = [
   { id: 'home', label: 'Home', icon: 'house', routes: ['home'] },
   { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'shuffle', 'leaderboard', 'peer', 'srs'] },
@@ -16638,15 +18270,16 @@ const TABS = [
 const ROUTE_TITLES = { puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue' };
 const DOC_TITLES = { puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue' };
 const ALIASES = { arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
+  arena: 'leaderboard', friends: 'leaderboard', tournament: 'leaderboard', tournaments: 'leaderboard',
   ranking: 'leaderboard', rankings: 'leaderboard', ranks: 'leaderboard', 'game-vault': 'games', gamevault: 'games', 'my-games': 'games', folders: 'games', stats: 'insights', brilliants: 'brilliant', brilliancies: 'brilliant', mistakes: 'vault-browser', 'mistake-browser': 'vault-browser', 'blunder-clinic': 'clinic', 'repertoire-trainer': 'mspc-rep',
   'peer-puzzles': 'peer', 'community-puzzles': 'peer', puzzle: 'puzzles', tactics: 'puzzles', 'lichess-puzzles': 'puzzles', 'rated-puzzles': 'puzzles', 'my-mistakes': 'srs', 'spaced-repetition': 'srs', repetition: 'srs', trophy: 'trophies', badges: 'trophies', achievements: 'trophies', queue: 'review-queue', 'admin-queue': 'review-queue' };
 const MOUNT = {
   home: mountHome, think: mountThink, shuffle: mountShufflePage,
   openings: (v) => mountTheory(v, 'openings'), middlegame: (v) => mountTheory(v, 'middlegame'), endgame: (v) => mountTheory(v, 'endgame'), puzzles: (v) => mountTheory(v, 'puzzles'),
   trim: mountTrim, upgrades: mountUpgrades, about: mountAbout,
-  leaderboard: mountLeaderboard, games: mountVault, insights: mountInsights,
+  leaderboard: (v) => { const d = mountLeaderboard(v), a = Arena.mount(v); return () => { a(); if (typeof d === 'function') d(); }; }, games: mountVault, insights: mountInsights,
   clinic: mountClinic, 'mspc-rep': mountMspcRep, brilliant: mountBrilliant, 'vault-browser': mountVaultBrowser,
-  peer: mountPeer, srs: mountSrs, trophies: mountTrophies, 'review-queue': mountQueue
+  peer: (v) => { const d = mountPeer(v), p = V5Pool.mount(v); return () => { p(); if (typeof d === 'function') d(); }; }, srs: mountSrs, trophies: mountTrophies, 'review-queue': (v) => { const d = mountQueue(v); V5Peer.mountAdmin(v); V5Srv.mountAdmin(v); return d; }
 };
 let current = { route: null, dispose: null };
 let installPrompt = null;
@@ -16720,7 +18353,10 @@ function boot() {
   firstSync.then(afterSync).catch(() => {});
   Site.watch(afterSync);
   SiteURL.tagHead();
-  Access.recheckRemote().then((why) => { if (why) lost(why); });
+  Access.recheckRemote().then((why) => {
+    if (why === 'connect') toast('Enter your member key once more on the Upgrades page to connect this device to your membership and the AI coach. Your access stays as it is.');
+    else if (why) lost(why);
+  });
   let linkToken = null;
   try {
     const params = new URLSearchParams(location.search);
@@ -16745,6 +18381,8 @@ function boot() {
   V34.boot();
   V36.boot();
   V37.boot();
+  Layout5.init();                                                  // v5: resizable panels
+  Arena.boot();                                                    // v5: the weekly payout and friend links
   window.LC = { version: CONFIG.version, hashKey: Access.hashKey, profileToken: Access.encodeProfile, ai: AI.on(), site: SiteURL.base(), deployment: SiteURL.kind(), data: () => Site.status() };
 }
 boot();
