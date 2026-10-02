@@ -1582,6 +1582,18 @@ body.is-resizing5,body.is-resizing5 *{cursor:col-resize!important;-webkit-user-s
 .uc h3{font-size:16px;margin-top:10px}
 .uc-file{cursor:pointer}
 @media (max-width:520px){.uc-btn-row{grid-template-columns:minmax(0,1fr)}}
+/* v5.3: the privacy page */
+.priv{max-width:820px}
+.priv-date{margin:-8px 0 16px}
+.priv-toc{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.priv-sec{margin-top:14px;scroll-margin-top:calc(var(--head) + 16px)}
+.priv-sec h2{font-size:clamp(18px,3.8vw,22px);margin-bottom:10px}
+.priv-body p{color:#cbd5e1;font-size:15.5px;line-height:1.65;max-width:72ch}
+.priv-body p+p,.priv-body p+ul,.priv-body ul+p{margin-top:12px}
+.priv-body ul{padding-left:20px;display:grid;gap:8px;color:#cbd5e1;font-size:15.5px;line-height:1.6;max-width:72ch}
+.priv-body li::marker{color:var(--accent)}
+.priv-body strong{color:var(--chalk)}
+.priv-contact{border-color:var(--accent-line)}
 </style>
 </head>
 <body>
@@ -2034,7 +2046,35 @@ const COPY = {
   'about.journeyText': ['Story intro', 'About', 'The Hero’s Journey behind the hub, chapter by chapter and rating by rating: from chaos and structural blunders to a system that works.'],
   'about.proofTitle': ['Proof title', 'About', 'Proof it works'],
   'about.proofText': ['Proof intro', 'About', 'Real results with the same system, before this hub existed.'],
-  'about.quote': ['Quote', 'About', 'Learn from your mistakes. If you want a different output, change the input. Analyse the position correctly with the right knowledge, and you will always find a good human move.']
+  'about.quote': ['Quote', 'About', 'Learn from your mistakes. If you want a different output, change the input. Analyse the position correctly with the right knowledge, and you will always find a good human move.'],
+  "privacy.title": ["Page title", "Privacy", "Privacy policy"],
+  "privacy.intro": ["Intro", "Privacy", "This policy explains, in plain English, what the lanckrietchess Training Hub (the “hub”) does with your data. The short version: the hub is built to keep your training on your own device, and it only sends something to a server when a feature needs it or when you choose to share it."],
+  "privacy.updated": ["Last updated line", "Privacy", "Last updated: 2 October 2026"],
+  "privacy.s1.title": ["Section 1 title", "Privacy", "At a glance"],
+  "privacy.s1.text": ["Section 1 text (a line starting with - is a bullet)", "Privacy", "- **No ads and no tracking.** The hub has no advertising, no analytics service and no tracking cookies, and it never sells your data.\n- **Your training stays on your device.** Progress, streaks, games, mistakes and repertoires live in your own browser unless you switch on a feature that shares part of it.\n- **Sharing is your choice.** The leaderboards, friends, the community ELO board and anonymous training stats are opt-in, and you can switch them off again.\n- **What you type is used for what you asked.** A support question or an application goes to {coach} and nowhere else.\n- **You stay in control.** You can reset your progress, leave the boards, disconnect your chess accounts and ask for your data to be deleted."],
+  "privacy.s2.title": ["Section 2 title", "Privacy", "Who is responsible"],
+  "privacy.s2.text": ["Section 2 text (a line starting with - is a bullet)", "Privacy", "The controller of your data is Kyenzo Lanckriet (lanckrietchess), based in Middelkerke, Belgium. The hub is a progressive web app: you open it in your browser, install it on your phone, or open it inside the Skool classroom.\n\nBecause the controller is based in Belgium, the EU General Data Protection Regulation (GDPR) and Belgian data protection law apply. You can reach {coach} through the contact options at the bottom of this page."],
+  "privacy.s3.title": ["Section 3 title", "Privacy", "What stays on your device"],
+  "privacy.s3.text": ["Section 3 text (a line starting with - is a bullet)", "Privacy", "The hub stores the following in your browser’s local storage, on your own device. None of it is sent anywhere unless a section below says so:\n- Your profile: the name or username you choose, your rating, main leak, goal, Hyper-Focus and check-ins, your struggles and your repertoire choices.\n- Your progress: accuracy, streaks, finished drills, badges, mistakes saved for spaced repetition, your Puzzle ELO and your credits.\n- Your games and positions: reviewed games, the Game Vault, brilliant moves, your own repertoires and your last Trim session.\n- Your membership: the member key you entered and a random device ID that identifies this browser to the hub.\n- Your settings, your friends list and the answers you gave in the Upgrades chat.\n\nThe hub does not use cookies for this. The profile token and the coach briefing in your profile are created on your device; if you copy them into another service, that service receives what they contain. Stockfish, the chess engine, also runs on your device and sends nothing anywhere.\n\nReset my progress in your profile removes your progress. Clearing the site data in your browser removes everything, and that cannot be undone."],
+  "privacy.s4.title": ["Section 4 title", "Privacy", "What is sent to the hub’s server"],
+  "privacy.s4.text": ["Section 4 text (a line starting with - is a bullet)", "Privacy", "The hub can connect to a server run for lanckrietchess (the “Arena server”, hosted on Cloudflare with a database). It is only used when {coach} has switched it on, and only for the features below:\n- **Leaderboards and tournament.** If you join, your chosen username, your rating bracket, your puzzle results and your scores are stored and shown to other players. Without a username you are not shown.\n- **Puzzle ELO and Trim boards.** Your username, bracket, Puzzle ELO and peak, your rated puzzle results, and counts of games reviewed and blunders solved.\n- **Community ELO board.** If you connect Chess.com or Lichess, the server checks a one-time code in your profile and reads your public username, avatar and ratings from that site, then shows them on the board.\n- **Friends.** Your friend card (name, rating, weekly progress, Hyper-Focus, tournament score and your latest blunder) when you share your friend code. With the server on, friends who have your code can fetch your latest card.\n- **Peer puzzles.** When you review a game in Trim, your blunders and mistakes can be staged as puzzles: the position, the move you played, the better move, the opening, your name and rating. Positions from the hub’s own repertoire courses go to {coach} for review, including the moves of that game. Other positions can be offered to other players as free peer puzzles.\n- **Anonymous training stats.** Only if you agree: which drills you miss, where your games leak, what you ask the coach (with emails, links and phone numbers removed) and Trim results. They are stored under a random ID that is not linked to your name, member key or leaderboard entry. Reviewed games and positions can be included without names.\n- **Membership.** When you enter a member key, the server checks it and ties it to one device, using your random device ID."],
+  "privacy.s5.title": ["Section 5 title", "Privacy", "The AI coach"],
+  "privacy.s5.text": ["Section 5 text (a line starting with - is a bullet)", "Privacy", "The Pro coach, a paid-member feature, answers through an AI model. The same goes for the Growth Path assistants, but only if {coach} has switched them on. When you type a question, the hub sends your message and the recent conversation, the position on the board and the moves of the game you are looking at, Stockfish’s lines, the review of the move you are on, and a short profile (name or username, rating, main leak, goal, Hyper-Focus, struggles and repertoire) to the Arena server. The server forwards this to the AI provider, Anthropic (Claude), and your member key is sent so the server can confirm your membership.\n\nThe free coach does not use AI: its question buttons are answered on your device.\n\nPlease do not type anything into the coach that you would not want processed by an AI provider, such as contact details or health information. Anthropic processes the request to produce an answer, under its own terms and privacy policy."],
+  "privacy.s6.title": ["Section 6 title", "Privacy", "Messages, questions and applications"],
+  "privacy.s6.text": ["Section 6 text (a line starting with - is a bullet)", "Privacy", "Some features send what you type to {coach}, or to tools he uses to receive and organise requests:\n- **Support questions and timeline answers.** Your name, your email or Instagram handle, your message or answer, your rating, the answers you gave in the Upgrades chat and your membership level.\n- **Mentorship application.** Your name, contact, a one-line reason, your rating and where it comes from, your Chess.com and Lichess usernames, your goal, your Trim leak and how often it came back, your Hyper-Focus and a short application note. It is only sent after you tick the consent box, and you see what will be sent first.\n- **Links to Instagram, Skool or an application form** open in a new tab. What happens there is covered by that service’s own privacy policy.\n\nThese messages may pass through automation tools such as Make, Zapier or ManyChat. They are used only to answer you, to handle your application and to keep a record of it."],
+  "privacy.s7.title": ["Section 7 title", "Privacy", "Other services you connect to"],
+  "privacy.s7.text": ["Section 7 text (a line starting with - is a bullet)", "Privacy", "Opening the hub makes your browser contact a few services. They can see your IP address and basic technical data such as your browser, device and the time of the request:\n- **Vercel** hosts the hub.\n- **GitHub** serves the course data file and its version information.\n- **Content delivery networks** (cdnjs, jsDelivr, Google Fonts, Tailwind CSS and Font Awesome) deliver code, fonts and icons.\n- **Lichess** supplies rated puzzles, and **Chess.com** and Lichess supply public profile data when you connect or follow an account. The hub never asks for a password for either.\n- **Skool** hosts the community, the classroom and the memberships. It has its own privacy policy.\n\nWe do not control the logs of these services. The hub never asks for or stores payment card details: memberships are paid on Skool."],
+  "privacy.s8.title": ["Section 8 title", "Privacy", "Legal basis and how long data is kept"],
+  "privacy.s8.text": ["Section 8 text (a line starting with - is a bullet)", "Privacy", "Under the GDPR we process data on these grounds:\n- **Consent** (Article 6(1)(a)) for the leaderboards, friends and community ELO features, anonymous training stats, support questions, applications and the questions you choose to send to the AI coach. You can withdraw consent at any time; this does not affect what happened before.\n- **Performance of a contract** (Article 6(1)(b)) for member keys: checking your key and tying it to your device so you get the membership you have.\n- **Legitimate interest** (Article 6(1)(f)) for keeping the hub secure and fair, for example limiting requests, checking that scores are plausible and hiding abusive usernames.\n\nHow long we keep it:\n- Data on your device stays until you erase it.\n- Leaderboard, tournament, friend and rating-board data on the server stays while you take part. It is deleted when you leave the board or switch the feature off, or when you ask.\n- Anonymous training stats are deleted from the server when you switch sharing off.\n- Support questions and applications are kept for as long as needed to answer them and to keep a record of your application. They are deleted on request.\n- The services in the previous section follow their own retention periods."],
+  "privacy.s9.title": ["Section 9 title", "Privacy", "Your choices in the app"],
+  "privacy.s9.text": ["Section 9 text (a line starting with - is a bullet)", "Privacy", "Where to find the controls:\n- **Profile, community leaderboard.** Join or leave the boards. Leaving removes you from the server board.\n- **Profile, anonymous training stats.** Switch it off and what was shared is deleted.\n- **Profile, chess accounts.** Connect or disconnect Chess.com and Lichess. Disconnecting removes you from the community ELO board.\n- **Profile, membership.** Remove your member key from this device.\n- **Profile, reset my progress,** and the delete options in your Game Vault and My repertoire.\n- **Friends.** Remove any friend. Your own friend code only contains what you see on your card.\n- **Settings.** Achievement pop-ups and spaced repetition can be switched off in your profile.\n- **Your browser.** Clearing the site data removes everything the hub stores on your device."],
+  "privacy.s10.title": ["Section 10 title", "Privacy", "Your rights"],
+  "privacy.s10.text": ["Section 10 text (a line starting with - is a bullet)", "Privacy", "You have the right to:\n- ask for access to the data we hold about you,\n- have inaccurate data corrected,\n- have your data erased,\n- restrict or object to the processing,\n- receive your data in a portable form,\n- withdraw your consent at any time,\n- not be subject to a decision based only on automated processing. The hub’s scores, ratings and recommendations only steer your training and never decide anything legal about you.\n\nTo use a right, contact {coach} through the options at the bottom of this page. To find your entries on the server, give your username, and your friend code if you have one. If we cannot identify you from the request, we may ask for proof that the data is yours. We answer within one month.\n\nYou can also lodge a complaint with the Belgian Data Protection Authority (Gegevensbeschermingsautoriteit / Autorité de protection des données, www.dataprotectionauthority.be) or with the supervisory authority in your own EU country."],
+  "privacy.s11.title": ["Section 11 title", "Privacy", "Security and international transfers"],
+  "privacy.s11.text": ["Section 11 text (a line starting with - is a bullet)", "Privacy", "Connections to the hub and its servers use HTTPS. Member keys are published only as one-way hashes, and a key is tied to a single device. The key for the AI provider is kept on the server, never in the app. No system is perfectly secure, and anything stored in your browser can be read by someone with access to your device, so please use a screen lock.\n\nSome of the services above operate from outside the European Economic Area, for example in the United States. Where that happens they rely on safeguards such as the EU–US Data Privacy Framework or Standard Contractual Clauses."],
+  "privacy.s12.title": ["Section 12 title", "Privacy", "Children and changes"],
+  "privacy.s12.text": ["Section 12 text (a line starting with - is a bullet)", "Privacy", "The hub is not meant for children under 13, and we do not knowingly collect data from them. If you are below the age of digital consent in your country (13 in Belgium, up to 16 elsewhere in the EU), ask a parent or guardian before you share anything beyond your own device, such as joining a leaderboard or sending a message.\n\nWe may update this policy when the hub changes, for example when a feature that uses data is added. The date at the top shows the last update, and a change that affects your choices will be made visible in the hub."],
+  "privacy.contact": ["Contact text", "Privacy", "Questions about your data, or a request to see, correct or delete it? Message {coach} directly. He answers himself. Please mention your username in the hub so he can find your entries."]
 };
 
 
@@ -10445,6 +10485,43 @@ function mountAbout(view) {
   return null;
 }
 
+/* ---------- v5.3: the privacy policy page (#privacy) ----------
+   The text is data: privacy.* in COPY above (defaults) and in app_settings.copy of the data file
+   on GitHub, which wins. A line that starts with "- " is a bullet; a blank line starts a new paragraph. */
+function privBlocks(text) {
+  const out = [];
+  let list = [], para = [];
+  const flushP = () => { if (para.length) { out.push('<p>' + rich(para.join('\n')) + '</p>'); para = []; } };
+  const flushL = () => { if (list.length) { out.push('<ul>' + list.map((x) => '<li>' + rich(x) + '</li>').join('') + '</ul>'); list = []; } };
+  String(text || '').replace(/\r/g, '').split('\n').forEach((line) => {
+    const t = line.trim();
+    if (!t) { flushP(); flushL(); return; }
+    if (/^[-\u2022]\s+/.test(t)) { flushP(); list.push(t.replace(/^[-\u2022]\s+/, '')); } else { flushL(); para.push(t); }
+  });
+  flushP(); flushL();
+  return out.join('');
+}
+function mountPrivacy(view) {
+  const L = CONFIG.links || {}, ids = [];
+  for (let i = 1; i <= 12; i++) if (T('privacy.s' + i + '.title').trim() || T('privacy.s' + i + '.text').trim()) ids.push(i);
+  view.innerHTML = cmsBar() + '<div class="priv">' + pageHeadK('privacy.title', 'privacy.intro') +
+    '<p class="small dim priv-date">' + esc(T('privacy.updated')) + ed('privacy.updated') + '</p>' +
+    '<nav class="priv-toc" aria-label="On this page">' + ids.map((i, n) => '<button type="button" class="chip" data-priv-go="priv-s' + i + '">' + (n + 1) + '. ' + esc(T('privacy.s' + i + '.title')) + '</button>').join('') + '</nav>' +
+    ids.map((i, n) => '<section class="panel pad priv-sec" id="priv-s' + i + '"><h2>' + (n + 1) + '. ' + esc(T('privacy.s' + i + '.title')) + ed('privacy.s' + i + '.title') + '</h2>' +
+      '<div class="priv-body">' + privBlocks(T('privacy.s' + i + '.text')) + ed('privacy.s' + i + '.text') + '</div></section>').join('') +
+    '<section class="panel pad priv-sec priv-contact" id="priv-contact"><h2>Contact</h2><div class="priv-body">' + privBlocks(T('privacy.contact')) + ed('privacy.contact') + '</div>' +
+      '<div class="btn-row" style="margin-top:14px">' + (L.instagramDM ? '<a class="btn btn-primary" href="' + esc(L.instagramDM) + '" target="_blank" rel="noopener">' + icon('paper-plane') + ' Message ' + esc(CONFIG.coach) + ' on Instagram</a>' : '') +
+      (L.skool ? '<a class="btn btn-ghost" href="' + esc(L.skool) + '" target="_blank" rel="noopener">' + icon('users') + ' Skool community</a>' : '') +
+      '<button type="button" class="btn btn-ghost"' + Popups.attr('support', 'privacy') + '>' + icon('envelope') + ' Send a question</button></div></section>' +
+    '<div class="btn-row" style="margin-top:22px"><a class="btn btn-quiet btn-sm" href="#home">' + icon('chevron-left') + ' Back to the hub</a></div></div>';
+  function onClick(e) {
+    const b = e.target.closest('[data-priv-go]');
+    if (b) scrollToEl(qs('#' + b.getAttribute('data-priv-go'), view));
+  }
+  view.addEventListener('click', onClick);
+  return () => view.removeEventListener('click', onClick);
+}
+
 /* ---------- profile chip, profile sheet, onboarding ---------- */
 function refreshChip() {
   const chip = qs('#profile-chip');
@@ -10891,7 +10968,7 @@ function askConsent(force) {
   openSheet({
     title: 'Help shape the next lessons', noFocus: true,
     html: '<p>' + esc(CONFIG.coach) + ' builds new lessons and videos from what players actually struggle with. Share anonymous training stats from this hub: which drills you miss, where your games leak (the positions and moves, never names) and what you ask the coach.</p>' +
-      '<p class="small muted">No name, no email, no member key: just a random number for this device. Switch it off in your profile at any time, and what was shared is deleted.</p>' +
+      '<p class="small muted">No name, no email, no member key: just a random number for this device. Switch it off in your profile at any time, and what was shared is deleted. <a href="#privacy" target="_blank" rel="noopener">Read the privacy policy</a>.</p>' +
       '<div class="btn-row"><button class="btn btn-primary" type="button" data-share="1">Share anonymous stats</button><button class="btn btn-quiet" type="button" data-share="0">No thanks</button></div>',
     onMount(s) {
       s.el.addEventListener('click', (e) => {
@@ -19937,19 +20014,21 @@ const TABS = [
   { id: 'upgrades', label: 'Upgrades', icon: 'crown', routes: ['upgrades'] },
   { id: 'about', label: 'About', icon: 'user', routes: ['about'] }
 ];
-const ROUTE_TITLES = { puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue' };
-const DOC_TITLES = { puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue' };
+const ROUTE_TITLES = { puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
+const DOC_TITLES = { puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
 const ALIASES = { arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
   arena: 'leaderboard', friends: 'leaderboard', tournament: 'leaderboard', tournaments: 'leaderboard',
   ranking: 'leaderboard', rankings: 'leaderboard', ranks: 'leaderboard', 'game-vault': 'games', gamevault: 'games', 'my-games': 'games', folders: 'games', stats: 'insights', brilliants: 'brilliant', brilliancies: 'brilliant', mistakes: 'vault-browser', 'mistake-browser': 'vault-browser', 'blunder-clinic': 'clinic', 'repertoire-trainer': 'mspc-rep',
-  'peer-puzzles': 'peer', 'community-puzzles': 'peer', puzzle: 'puzzles', tactics: 'puzzles', 'lichess-puzzles': 'puzzles', 'rated-puzzles': 'puzzles', 'my-mistakes': 'srs', 'spaced-repetition': 'srs', repetition: 'srs', trophy: 'trophies', badges: 'trophies', achievements: 'trophies', queue: 'review-queue', 'admin-queue': 'review-queue' };
+  'peer-puzzles': 'peer', 'community-puzzles': 'peer', puzzle: 'puzzles', tactics: 'puzzles', 'lichess-puzzles': 'puzzles', 'rated-puzzles': 'puzzles', 'my-mistakes': 'srs', 'spaced-repetition': 'srs', repetition: 'srs', trophy: 'trophies', badges: 'trophies', achievements: 'trophies', queue: 'review-queue', 'admin-queue': 'review-queue',
+  'privacy-policy': 'privacy', 'privacy-statement': 'privacy', privacybeleid: 'privacy', gdpr: 'privacy' };
 const MOUNT = {
   home: mountHome, think: mountThink, shuffle: mountShufflePage,
   openings: (v) => mountTheory(v, 'openings'), middlegame: (v) => mountTheory(v, 'middlegame'), endgame: (v) => mountTheory(v, 'endgame'), puzzles: (v) => mountTheory(v, 'puzzles'),
   trim: mountTrim, upgrades: mountUpgrades, about: mountAbout,
   leaderboard: (v) => { const d = mountLeaderboard(v), a = Arena.mount(v); return () => { a(); if (typeof d === 'function') d(); }; }, games: mountVault, insights: mountInsights,
   clinic: mountClinic, 'mspc-rep': mountMspcRep, brilliant: mountBrilliant, 'vault-browser': mountVaultBrowser,
-  peer: (v) => { const d = mountPeer(v), p = V5Pool.mount(v); return () => { p(); if (typeof d === 'function') d(); }; }, srs: mountSrs, trophies: mountTrophies, 'review-queue': (v) => { const d = mountQueue(v); V5Peer.mountAdmin(v); V5Srv.mountAdmin(v); return d; }
+  peer: (v) => { const d = mountPeer(v), p = V5Pool.mount(v); return () => { p(); if (typeof d === 'function') d(); }; }, srs: mountSrs, trophies: mountTrophies, 'review-queue': (v) => { const d = mountQueue(v); V5Peer.mountAdmin(v); V5Srv.mountAdmin(v); return d; },
+  privacy: mountPrivacy
 };
 let current = { route: null, dispose: null };
 let installPrompt = null;
@@ -19964,7 +20043,7 @@ function renderTabs(route) {
 }
 function renderFoot() {
   qs('#foot').innerHTML = '<span>© ' + new Date().getFullYear() + ' Kyenzo Lanckriet, lanckrietchess</span><span style="display:flex;gap:14px;flex-wrap:wrap">' +
-    '<a href="' + esc(CONFIG.links.youtube) + '" target="_blank" rel="noopener">YouTube</a><a href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">Skool</a><a href="#upgrades">Upgrades</a><a href="#about">About</a><span>v' + CONFIG.version + '</span></span>';
+    '<a href="' + esc(CONFIG.links.youtube) + '" target="_blank" rel="noopener">YouTube</a><a href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">Skool</a><a href="#upgrades">Upgrades</a><a href="#about">About</a><a href="#privacy">Privacy</a><span>v' + CONFIG.version + '</span></span>';
 }
 function render() {
   Levels.fromHash();                                               // v3.9: #chapter/<id>/<level> and #topic/<id>/<level>
