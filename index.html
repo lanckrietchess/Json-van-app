@@ -1594,6 +1594,127 @@ body.is-resizing5,body.is-resizing5 *{cursor:col-resize!important;-webkit-user-s
 .priv-body li::marker{color:var(--accent)}
 .priv-body strong{color:var(--chalk)}
 .priv-contact{border-color:var(--accent-line)}
+/* ===== v6 Executive layer: ranks, XP strip, Skill Matrix, Boss Fights, community ===== */
+.v6-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 10px;padding:8px 12px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-hint{flex:none}
+.v6-hint:disabled{opacity:.5;cursor:default}
+.v6-xp{display:flex;align-items:center;gap:10px;flex:1 1 180px;min-width:150px}
+.v6-xp b{font-variant-numeric:tabular-nums;font-size:13px;font-weight:700;white-space:nowrap;color:var(--chalk)}
+.v6-xp-bar{position:relative;flex:1;height:6px;border-radius:6px;background:rgba(148,163,184,.18);overflow:hidden}
+.v6-xp-fill{position:absolute;inset:0 auto 0 0;width:100%;border-radius:6px;background:var(--accent);transition:width .25s ease}
+.v6-flow{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--fog);font-variant-numeric:tabular-nums;white-space:nowrap}
+.v6-flow i{color:var(--accent)}
+.v6-hg{display:inline-flex}
+.v6-hg-btn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 10px;border:1px solid var(--rule);border-radius:8px;background:transparent;color:var(--fog);font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.v6-hg-btn[aria-pressed="true"]{border-color:var(--accent-line);color:var(--chalk);background:var(--accent-soft)}
+.v6-pawn{width:18px;height:18px;display:block}
+.v6-pawn-out{fill:none;stroke:currentColor;stroke-width:1.1;opacity:.7}
+.v6-pawn-fill{fill:var(--accent);opacity:0}
+.v6-hg-btn[aria-pressed="true"] .v6-pawn-fill{opacity:.9}
+.v6-note{flex:1 1 100%;margin:0;padding:8px 10px;border-radius:8px;background:var(--accent-soft);color:var(--chalk);line-height:1.45}
+.v6-has-strip [data-act="hint"]{display:none!important}
+.v6-frozen{pointer-events:none;opacity:.55;filter:grayscale(.4)}
+/* Executive Focus Mode: visuals off, economy untouched */
+body.lc-focus .v6-viz{display:none!important}
+body.lc-focus .hud36,body.lc-focus #sh-hud .hud-combo,body.lc-focus .profile-chip .chip-streak[title="Days in a row"]{display:none!important}
+/* profile */
+.v6-page{max-width:980px;margin:0 auto;padding:6px 0 40px}
+.v6-head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin:6px 0 16px}
+.v6-head>div:nth-child(2),.v6-head>div:first-child:not(.v6-avatar){flex:1 1 220px;min-width:0}
+.v6-head h1{font-size:24px;margin:0 0 4px}
+.v6-focus{max-width:340px;flex:1 1 260px}
+.v6-avatar{position:relative;width:64px;height:64px;border-radius:50%;border:3px solid var(--ring,var(--rule));display:grid;place-items:center;background:var(--ink-2);flex:none}
+.v6-avatar span{font:800 24px var(--ui);color:var(--chalk)}
+.v6-avatar-badge{position:absolute;right:-10px;bottom:-4px;font:800 10px var(--ui);font-style:normal;letter-spacing:.04em;padding:2px 6px;border-radius:6px;background:var(--accent);color:var(--accent-ink)}
+.v6-chip{display:inline-grid;place-items:center;min-width:30px;height:22px;padding:0 6px;border-radius:999px;border:2px solid var(--ring,var(--rule));font:800 10px var(--ui);letter-spacing:.04em;color:var(--chalk)}
+.v6-tabs{margin-bottom:16px;flex-wrap:wrap}
+.v6-body h3,.v6-page>h3{margin:22px 0 10px;font-size:15px;color:var(--fog);font-weight:700;letter-spacing:.01em}
+.v6-lead{max-width:68ch;margin-bottom:10px}
+.v6-rank3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.v6-stat,.v6-kpis>div,.v6-bench{padding:14px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2);display:grid;gap:3px;align-content:start}
+.v6-stat small,.v6-kpis small,.v6-bench small,.v6-mod small,.v6-chap small,.v6-bounty small,.v6-event small{color:var(--dim);font-size:12px}
+.v6-stat b{font-size:20px}
+.v6-stat span,.v6-kpis span,.v6-bench span{font-size:12.5px;color:var(--fog)}
+.v6-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+.v6-kpis b{font-size:22px;font-variant-numeric:tabular-nums}
+.v6-mods{display:grid;gap:8px}
+.v6-mod{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(80px,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-mod>div:first-child{display:grid;gap:1px}
+.v6-mod span{font-size:12.5px;color:var(--fog)}
+.v6-mod em{font-style:normal;font-size:11.5px;font-weight:700}
+.v6-boost{color:var(--good)}.v6-brake{color:var(--warn)}
+.v6-bar{position:relative;height:6px;border-radius:6px;background:rgba(148,163,184,.18);overflow:hidden}
+.v6-bar>span{position:absolute;inset:0 auto 0 0;border-radius:6px;background:var(--accent)}
+.v6-bar-ticks{overflow:visible;margin:8px 0 4px}
+.v6-bar-ticks i{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--fog);opacity:.6}
+.v6-log{list-style:none;padding:0;display:grid;gap:4px}
+.v6-log li{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:6px 10px;border-bottom:1px solid var(--hair);font-size:13.5px;font-variant-numeric:tabular-nums}
+.v6-log small{color:var(--dim)}
+/* Skill Matrix */
+.v6-group{margin:0 0 22px}
+.v6-group-head{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.v6-group-head h3{margin:0;color:var(--chalk);font-size:17px}
+.v6-chaps{display:grid;gap:8px;margin-top:12px}
+.v6-chap{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-chap.is-locked{opacity:.62}
+.v6-chap-main{display:grid;gap:5px;flex:1 1 260px;min-width:0}
+.v6-chap-act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.v6-pill{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;border:1px solid var(--rule);color:var(--fog)}
+.v6-pill.is-good{color:var(--good);border-color:rgba(74,222,128,.4)}
+.v6-pill.is-strict{color:var(--accent);border-color:var(--accent-line)}
+/* Boss Fight */
+.v6-boss-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.v6-boss-hud{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:10px}
+.v6-boss-hud>div{padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2);display:grid;gap:2px}
+.v6-boss-hud b{font-size:18px;font-variant-numeric:tabular-nums}
+.v6-boss-hud span{font-size:12px;color:var(--dim)}
+.v6-boss-hud .is-hot b{color:var(--miss)}
+.v6-second{display:grid;gap:10px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--accent-line);border-radius:var(--r);background:var(--accent-soft)}
+.v6-second[hidden]{display:none}
+.v6-boss-end{padding:18px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2);display:grid;gap:10px}
+.v6-boss-end[hidden]{display:none}
+.v6-mspc{padding:10px 12px;margin:8px 0;border-left:3px solid var(--accent);background:var(--ink-2);border-radius:0 8px 8px 0;font-size:14px;line-height:1.5}
+/* bounties, community, events */
+.v6-bounties,.v6-events,.v6-friends{display:grid;gap:8px}
+.v6-bounty,.v6-event,.v6-friend{display:grid;gap:6px;padding:12px 14px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-bounty>div,.v6-event>div:first-child{display:grid;gap:2px}
+.v6-bounty.is-done{border-color:rgba(74,222,128,.35)}
+.v6-event{grid-template-columns:minmax(0,1fr);}
+.v6-ev-ch{display:grid;gap:4px}
+.v6-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.v6-bench b{font-size:26px;font-variant-numeric:tabular-nums}
+.v6-buff{margin-top:12px;padding:10px 12px;border-radius:var(--r);background:var(--ink-2);border:1px solid var(--hair);max-width:70ch}
+.v6-note-box{padding:10px 12px;margin:8px 0 14px;border-radius:var(--r);background:var(--warn-soft);border:1px solid rgba(251,191,36,.3);font-size:14px}
+.v6-trophies{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.v6-trophies li{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center;padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-trophies li small{grid-column:2;color:var(--dim)}
+.v6-tro{grid-row:span 2;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--rule);color:var(--fog)}
+.v6-tro-event{color:var(--accent);border-color:var(--accent-line)}.v6-tro-strict{color:var(--good);border-color:rgba(74,222,128,.4)}
+.v6-fline{font-size:13px;color:var(--fog);margin-top:2px}
+.v6-fline i{color:var(--accent)}
+.v6-admin{margin-top:26px}
+.v6-evform{display:grid;gap:12px;max-width:760px}
+.v6-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.v6-goals{margin-top:8px;align-items:end}
+/* Shuffle filters */
+.v6-chips{display:flex;flex-wrap:wrap;gap:8px}
+.v6-chip-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border:1px solid var(--rule);border-radius:999px;background:transparent;color:var(--fog);font-size:13px;font-weight:600}
+.v6-chip-btn small{color:var(--dim);font-variant-numeric:tabular-nums}
+.v6-chip-btn[aria-pressed="true"]{border-color:var(--accent-line);background:var(--accent-soft);color:var(--chalk)}
+.v6-chip-btn:disabled{opacity:.45;cursor:default}
+/* review icons */
+.mv .t.v6-k,.moment .v6-k{font-weight:800;margin-left:2px}
+.v6-k-brilliant{color:#38bdf8}.v6-k-great{color:#4ade80}.v6-k-best{color:#a3e635}.v6-k-good{color:#94a3b8}
+.v6-k-inaccuracy{color:var(--warn)}.v6-k-mistake{color:#fb923c}.v6-k-blunder{color:var(--miss)}.v6-k-missed{color:#c084fc}
+.v6-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;padding-top:10px;border-top:1px solid var(--hair);font-size:12.5px;color:var(--fog)}
+.v6-legend .t{margin-right:2px}
+@media (max-width:640px){
+  .v6-mod{grid-template-columns:1fr}
+  .v6-strip{gap:8px 10px}
+  .v6-chap-act{width:100%}
+}
+@media (prefers-reduced-motion:reduce){.v6-xp-fill{transition:none}}
+.v6-thinklink{margin:-14px 0 20px;color:var(--fog)}
 </style>
 </head>
 <body>
@@ -1622,7 +1743,7 @@ body.is-resizing5,body.is-resizing5 *{cursor:col-resize!important;-webkit-user-s
 <script>
 "use strict";
 /* ==========================================================================
-   LANCKRIETCHESS TRAINING HUB  v5.1.0 (Lanckriet Chess App V5)
+   LANCKRIETCHESS TRAINING HUB  v6.0.0 (Lanckriet Chess App V6, Executive layer)
    One self-contained page: vanilla JS + Tailwind (CDN) + chess.js 0.10.3 +
    chessboard.js 1.0.0, with Stockfish loaded on demand in a Web Worker.
    Host it on any static host, install it as a PWA, wrap it for the Play
@@ -1686,7 +1807,7 @@ body.is-resizing5,body.is-resizing5 *{cursor:col-resize!important;-webkit-user-s
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '5.2.0',
+  version: '6.0.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -3005,7 +3126,7 @@ const Credits = (() => {
     App.credits.purchased += n;
     App.save();
   }
-  return { resetIfNeeded, balance, has, costOf, unlock, grant };
+  return { resetIfNeeded, balance, has, costOf, unlock, grant, spend };
 })();
 
 function coachBriefing(extra) {
@@ -7459,7 +7580,7 @@ function thinkTabs(active) {
   const tabs = [['think', 'brain', 'MSPC trainer', 'Think every move through'], ['clinic', 'stethoscope', 'Blunder Clinic', 'Real blunders, explained with MSPC'], ['peer', 'user-group', 'Peer puzzles', 'Punish blunders from this hub'],
     ['shuffle', 'shuffle', 'Shuffle Trainer', 'Arcade repetition, line after line'], ['srs', 'crosshairs', 'My mistakes', 'Spaced repetition of your misses'], ['leaderboard', 'trophy', 'Arena', 'Tournament, friends, leaderboard']];
   return '<nav class="theory-tabs six" aria-label="Think modes">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === active ? ' aria-current="page"' : '') + '>' + icon(t[1]) +
-    '<b>' + t[2] + (t[0] === 'shuffle' && !App.can('shuffle') ? ' ' + lockIcon(gateLevel('shuffle')) : '') + (t[0] === 'srs' && due ? '<span class="tab-count" aria-label="' + due + ' due">' + due + '</span>' : '') + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>';
+    '<b>' + t[2] + (t[0] === 'shuffle' && !App.can('shuffle') ? ' ' + lockIcon(gateLevel('shuffle')) : '') + (t[0] === 'srs' && due ? '<span class="tab-count" aria-label="' + due + ' due">' + due + '</span>' : '') + '</b><small>' + t[3] + '</small></a>').join('') + '</nav><p class="v6-thinklink small"><a href="#profile">Ranks, Skill Matrix and bounties</a></p>';
 }
 function mountShufflePage(view) {
   view.innerHTML = cmsBar() + thinkTabs('shuffle') + '<div id="shuffle-root"></div>' + gateNote('shuffle') + gateNote('shuffleAll');
@@ -7570,6 +7691,8 @@ function mountShuffle(root) {
     return { inScope, open: inScope.filter((x) => App.unlocked(x)), locked: inScope.filter((x) => !App.unlocked(x)) };
   }
   function narrowed(open) {
+    const v6 = V6.narrow(cfg.filter, open);
+    if (v6) return v6;
     if (cfg.filter.indexOf('course:') === 0) return open.filter((x) => x.course === cfg.filter.slice(7));
     if (cfg.filter.indexOf('line:') === 0) return open.filter((x) => x.id === cfg.filter.slice(5));
     return open;
@@ -7602,8 +7725,8 @@ function mountShuffle(root) {
           '<small>' + esc(s[3]) + '</small><small>' + (gated ? 'Locked' : n + (n === 1 ? ' line' : ' lines')) + '</small></button>';
       }).join('') + '</div></div>' +
       '<div class="sh-group"><span class="sh-label">You play</span><div class="seg" role="group" aria-label="Your side">' + sideBtn('w', 'White') + sideBtn('b', 'Black') + sideBtn('both', 'Both') + '</div></div>' +
-      '<label class="field"><span class="field-label">Lines</span><select class="input" id="sh-filter"' + (av.open.length ? '' : ' disabled') + '>' +
-        '<option value="">Mix every line (' + av.open.length + ')</option>' +
+      V6.filterBar(cfg.filter, av.open) + '<label class="field"><span class="field-label">Lines</span><select class="input" id="sh-filter"' + (av.open.length ? '' : ' disabled') + '>' +
+        '<option value="">Mix every line (' + av.open.length + ')</option>' + V6.filterOptions(cfg.filter, av.open) +
         (order.length > 1 ? '<optgroup label="One course">' + order.map((k) => '<option value="course:' + esc(k) + '"' + (cfg.filter === 'course:' + k ? ' selected' : '') + '>' + esc(courses[k].name) + ' (' + courses[k].n + ')</option>').join('') + '</optgroup>' : '') +
         (av.open.length > 1 ? '<optgroup label="One line">' + av.open.map((x) => '<option value="line:' + esc(x.id) + '"' + (cfg.filter === 'line:' + x.id ? ' selected' : '') + '>' + esc(x.courseName + ': ' + x.title) + '</option>').join('') + '</optgroup>' : '') +
       '</select></label>' +
@@ -7630,6 +7753,7 @@ function mountShuffle(root) {
     clearTimers(); hideFlash();
     if (!S || !S.pool.length) { summary(); return; }
     item = pickShuffle(S.pool, S.recent, S.missed);
+    V6.ctx({ module: item.scope });
     S.recent.push(item.id); if (S.recent.length > 6) S.recent.shift();
     done = false; held = false; lastView = null;
     if (runner) runner.destroy();
@@ -9678,8 +9802,8 @@ function mountTrim(view) {
     let html = '<button type="button" class="mv' + (A.idx === 0 && !A.explore ? ' is-now' : '') + '" data-i="0">Start</button>';
     A.moves.forEach((m, i) => {
       if (m.color === 'w') html += '<span class="mv-n">' + m.num + '.</span>'; else if (i === 0) html += '<span class="mv-n">' + m.num + '...</span>';
-      const it = items && items[i], tag = it ? (it.brill ? (it.brill === 'brilliant' ? '!!' : '!') : CLS_TAG[it.cls]) : '';
-      html += '<button type="button" class="mv' + (A.idx === i + 1 && !A.explore ? ' is-now' : '') + '" data-i="' + (i + 1) + '">' + esc(m.san) + (tag ? '<span class="t tag-' + it.cls + '">' + tag + '</span>' : '') + '</button>';
+      const it = items && items[i], tag = it ? V6.tagHTML(it, items[i - 1]) : '';
+      html += '<button type="button" class="mv' + (A.idx === i + 1 && !A.explore ? ' is-now' : '') + '" data-i="' + (i + 1) + '">' + esc(m.san) + tag + '</button>';
     });
     el.innerHTML = html;
     const now = qs('.mv.is-now', el);
@@ -9867,7 +9991,7 @@ function mountTrim(view) {
       '<div><h3>Leaks by game phase</h3><div class="bars">' + ['opening', 'middlegame', 'endgame'].map((ph) => barHTML(ph.charAt(0).toUpperCase() + ph.slice(1), byPhase[ph], maxP)).join('') + '</div></div>' +
       (moments.length ? '<div><h3>Key moments</h3><ol class="moments" style="margin-top:8px">' + moments.slice(0, isPro ? moments.length : freeN).map(momentHTML).join('') + '</ol>' +
         (!isPro && moments.length > freeN ? '<div class="locked-wrap" style="margin-top:8px"><ol class="moments">' + moments.slice(freeN, freeN + 2).map(momentHTML).join('') + '</ol><div class="locked-over"><div><p><strong>' + (moments.length - freeN) + ' more key ' + (moments.length - freeN === 1 ? 'moment' : 'moments') + '</strong> in the full report.</p><button type="button" class="btn btn-gold btn-sm" data-act="unlock-report">' + icon('crown') + ' Unlock the full Trim report</button></div></div></div>' : '') + '</div>' : '') +
-      V34.reportExtra(T) + V33.reportActions(T) + '<div class="btn-row">' + (isPro ? '<button type="button" class="btn btn-ghost btn-sm" data-act="export">' + icon('download') + ' Export annotated PGN</button>' : '') + '<button type="button" class="btn btn-ghost btn-sm" data-act="ask-leaks">' + icon('comments') + ' Ask the coach about this game</button></div></section>';
+      V6.legend() + V34.reportExtra(T) + V33.reportActions(T) + '<div class="btn-row">' + (isPro ? '<button type="button" class="btn btn-ghost btn-sm" data-act="export">' + icon('download') + ' Export annotated PGN</button>' : '') + '<button type="button" class="btn btn-ghost btn-sm" data-act="ask-leaks">' + icon('comments') + ' Ask the coach about this game</button></div></section>';
   }
   function annotatedPgn() {
     const h = Object.assign({}, A.headers, { Annotator: 'lanckrietchess Trim review' });
@@ -10523,13 +10647,14 @@ function mountPrivacy(view) {
 }
 
 /* ---------- profile chip, profile sheet, onboarding ---------- */
+function v6chip() { try { return V6.chip(); } catch (e) { return ''; } }
 function refreshChip() {
   const chip = qs('#profile-chip');
   if (!chip) return;
   const days = App.streakDays(), tier = Admin.preview() || App.access.tier;
   const initials = App.profile.name ? App.profile.name.split(' ').map((w) => w.charAt(0)).join('').slice(0, 2).toUpperCase() : '';
   const credBal = Credits.balance();
-  chip.innerHTML = '<span class="chip-streak' + (days ? ' is-on' : '') + '" title="Days in a row">' + icon('fire') + '<span>' + days + '</span></span>' + V36.chipTrophy() +
+  chip.innerHTML = '<span class="chip-streak' + (days ? ' is-on' : '') + '" title="Days in a row">' + icon('fire') + '<span>' + days + '</span></span>' + v6chip() + V36.chipTrophy() +
     ((tier === 'free' || tier === 'community') && !Admin.active ? '<span class="chip-streak" title="Credits: unlock one level without a membership">' + icon('coins') + '<span>' + credBal + '</span></span>' : '') +
     '<span class="chip-tier tier-' + tier + '">' + esc(TIERS[tier].label) + '</span><span class="chip-avatar">' + (initials ? esc(initials) : icon('user')) + '</span>';
   chip.setAttribute('aria-label', 'Your profile: ' + TIERS[tier].label + ' access, ' + days + '-day streak' + V36.chipLabel());
@@ -10549,7 +10674,7 @@ function openProfile() {
         tokenFormHTML('profile') + (tier !== 'free' ? '<button type="button" class="btn btn-quiet btn-sm" data-p="signout" style="justify-self:start">Remove membership from this device</button>' : '') + '</section>' +
       ((tier === 'free' || tier === 'community') && !Admin.active ? '<div class="divider"></div><section class="stack"><h3>Credits</h3><p class="small">' + Credits.balance() + ' credit' + (Credits.balance() === 1 ? '' : 's') + ' on this device' + (App.unlocks.length ? ', ' + App.unlocks.length + ' level' + (App.unlocks.length === 1 ? '' : 's') + ' unlocked with them' : '') + '. ' + CONFIG.credits.daily + ' free every day; unlock a locked level from its Level gate any time.</p>' +
         '<button type="button" class="btn btn-ghost btn-sm" data-p="buy-credits" style="justify-self:start">' + icon('coins') + ' Get more credits</button></section>' : '') +
-      '<div class="divider"></div><section class="stack"><h3>Settings</h3><label class="switch-row"><span>Sounds</span><input type="checkbox" data-p="sound"' + (App.settings.sound ? ' checked' : '') + '></label>' + V36.settingsHTML() +
+      '<div class="divider"></div><section class="stack"><h3>Settings</h3><label class="switch-row"><span>Sounds</span><input type="checkbox" data-p="sound"' + (App.settings.sound ? ' checked' : '') + '></label>' + V36.settingsHTML() + V6.settingsHTML() +
         (installPrompt ? '<button type="button" class="btn btn-ghost btn-sm" data-p="install" style="justify-self:start">' + icon('download') + ' Install the app</button>' : '') +
         '<button type="button" class="btn btn-quiet btn-sm" data-p="reset" style="justify-self:start">' + icon('rotate') + ' Reset my progress</button></section>' +
       V33.profileSections() + '<p class="small dim">Version ' + CONFIG.version + '. ' + esc(V33.storageNote()) + '</p>',
@@ -13119,13 +13244,13 @@ const Brill = (() => {
    Already-decided positions, forced replies and recaptures don't count. */
 async function findBrilliance(A, say) {
   const h = A.headers || {}, op = detectOpening(A.moves.map((m) => m.san), h), sig = gameSig(A), found = [];
-  const cands = A.review.items.filter((it) => it.color === A.user && it.i >= 4 && (it.cls === 'best' || it.loss < 1.5)).map((it) => {
+  const cands = A.review.items.filter((it) => it.i >= 4 && (it.cls === 'best' || it.loss < 1.5)).map((it) => {
     const pov = it.color === 'w' ? 1 : -1, pm = String(it.san).match(/=([QRBN])/), uci = it.from + it.to + (pm ? pm[1].toLowerCase() : '');
     return { it, pov, uci, win: Engine.winPct((+it.before || 0) * pov), sac: isSacrifice(A.fens[it.i], uci) };
   }).filter((c) => {
     const g = new Chess(A.fens[c.it.i]);
     return c.win > 8 && c.win < 93 && g.moves().length > (g.in_check() ? 3 : 1);
-  }).sort((a, b) => (b.sac - a.sac) || (a.it.i - b.it.i)).slice(0, 14);
+  }).sort((a, b) => (b.sac - a.sac) || (a.it.i - b.it.i)).filter(V6.budget(14, 10, A.user));
   for (let n = 0; n < cands.length; n++) {
     if (A.cancel) break;
     const c = cands[n], it = c.it, fen = A.fens[it.i];
@@ -13143,7 +13268,7 @@ async function findBrilliance(A, say) {
     if (!kind) continue;
     it.brill = kind;
     found.push(it);
-    Brill.add({ id: sig + '|' + it.i, kind, fen, san: it.san, uci: c.uci, num: it.num, color: it.color, ply: it.i, title: gameTitle(h), opening: String(op.name || '').slice(0, 60),
+    if (it.color === A.user) Brill.add({ id: sig + '|' + it.i, kind, fen, san: it.san, uci: c.uci, num: it.num, color: it.color, ply: it.i, title: gameTitle(h), opening: String(op.name || '').slice(0, 60),
       date: String(h.Date || '').replace(/\./g, '-').slice(0, 10), pgn: pgnOf(A).slice(0, 30000), user: A.user, pv: Engine.pvText(fen, l1.pv, 8), cp: Engine.toCp(l1), t: Date.now() });
   }
   return found;
@@ -13456,7 +13581,7 @@ const V34 = {
   },
   onStep(T, i) {
     const A = T.A, it = !A.explore && A.review && i > 0 ? A.review.items[i - 1] : null;
-    if (it && it.brill) { if (it.brill === 'brilliant') Sound.brilliant(); else Sound.good(); }
+    if (it && it.brill && it.color === A.user) { if (it.brill === 'brilliant') Sound.brilliant(); else Sound.good(); }
     V34.saveTrimSoon(T);
   },
   afterReview(T) {
@@ -18148,7 +18273,7 @@ const Friends = (() => {
   function myCard() {
     const s = Tourney.state(), r = Tourney.myRating(), f = App.profile.focus, lb = V5Peer.last();
     return { v: 1, p: V5Net.pid() || undefined, u: txt(App.profile.name, 30) || 'Player', e: r || null, d: r && s.base ? r - s.base : 0, f: f ? txt(Focus.name(f), 40) : '', fd: f ? Focus.day() : 0,
-      t: { w: s.wk || isoWeek(new Date()), m: s.metric || Tourney.cfg().metric, s: s.score || 0 }, b: lb ? { f: lb.f, p: lb.p, b: lb.b, o: lb.o, n: lb.n } : null, at: Date.now() };
+      t: { w: s.wk || isoWeek(new Date()), m: s.metric || Tourney.cfg().metric, s: s.score || 0 }, b: lb ? { f: lb.f, p: lb.p, b: lb.b, o: lb.o, n: lb.n } : null, x: V6.card(), at: Date.now() };
   }
   const code = () => 'LCF1.' + b64e(JSON.stringify(myCard()));
   const link = () => location.origin + location.pathname + '?friend=' + encodeURIComponent(code()) + '#leaderboard';
@@ -18160,12 +18285,12 @@ const Friends = (() => {
   }
   function decode(c) {
     try {
-      const m = /^LCF1\.([A-Za-z0-9_-]{10,1600})$/.exec(String(c || '').trim());
+      const m = /^LCF1\.([A-Za-z0-9_-]{10,2400})$/.exec(String(c || '').trim());
       if (!m) return null;
       const o = JSON.parse(b64d(m[1]));
       if (!o || o.v !== 1 || !txt(o.u, 30)) return null;
       const t = o.t && /^\d{4}-W\d{2}$/.test(o.t.w || '') && Tourney.METRICS[o.t.m] ? { w: o.t.w, m: o.t.m, s: int(o.t.s, 0, 100000) || 0 } : null;
-      return { pid: /^[a-z0-9]{8,24}$/.test(o.p || '') ? o.p : '', name: txt(o.u, 30), rating: +o.e >= 100 && +o.e <= 3500 ? Math.round(+o.e) : null, d: int(o.d, -800, 800) || 0, focus: txt(o.f, 40), fd: int(o.fd, 0, 999) || 0, t, b: blunderOk(o.b), at: int(o.at, 0, 4e12) || Date.now() };
+      return { pid: /^[a-z0-9]{8,24}$/.test(o.p || '') ? o.p : '', name: txt(o.u, 30), rating: +o.e >= 100 && +o.e <= 3500 ? Math.round(+o.e) : null, d: int(o.d, -800, 800) || 0, focus: txt(o.f, 40), fd: int(o.fd, 0, 999) || 0, t, b: blunderOk(o.b), x: V6.cleanCard(o.x), at: int(o.at, 0, 4e12) || Date.now() };
     } catch (e) { return null; }
   }
   function upsert(x) { const l = list(), i = l.findIndex((f) => f.id === x.id); if (i >= 0) l[i] = Object.assign(l[i], x); else l.unshift(x); save(l); return x; }
@@ -18414,7 +18539,7 @@ const Arena = (() => {
     return '<article class="panel pad ar5-me"><span class="ar5-kicker">' + icon('id-card') + ' Your card</span>' +
       '<div class="ar5-card is-me"><div class="ar5-av">' + esc(initials(c.u)) + '</div><div class="ar5-body"><b>' + esc(c.u) + '</b>' +
       '<p class="ar5-elo">' + (c.e ? '<b>' + c.e + '</b>' + (c.d ? ' <span class="' + (c.d > 0 ? 'ar5-up' : 'ar5-down') + '">' + signed(c.d) + ' this week</span>' : '') : 'No rating yet: link Chess.com or Lichess on your profile.') + '</p>' +
-      '<p>' + icon('bullseye') + ' ' + (f ? 'Hyper-Focus: ' + esc(Focus.name(f)) + ', day ' + Focus.day() : 'No Hyper-Focus yet') + '</p>' +
+      V6.friendLine({ x: V6.card() }) + '<p>' + icon('bullseye') + ' ' + (f ? 'Hyper-Focus: ' + esc(Focus.name(f)) + ', day ' + Focus.day() : 'No Hyper-Focus yet') + '</p>' +
       (lb ? '<p>' + icon('bolt') + ' Latest blunder: ' + esc(moveTag5(lb.n, lb.c, lb.p)) + (lb.o ? ', ' + esc(lb.o) : '') + '. <a href="#games">Game Vault</a></p>' : '') + '</div></div>' +
       '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-ar="copy">' + icon('copy') + ' Copy my friend code</button><button type="button" class="btn btn-ghost btn-sm" data-ar="share">' + icon('share-nodes') + ' Share link</button></div>' +
       '<p class="small muted">Your code carries this card, your tournament score and your latest blunder, so friends can try to punish it. Share a fresh code when your card changes.</p></article>';
@@ -18426,7 +18551,7 @@ const Arena = (() => {
       return '<div class="ar5-card"><div class="ar5-av">' + (x.avatar && /^https:\/\//.test(x.avatar) ? '<img src="' + esc(x.avatar) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : esc(initials(x.name))) + '</div>' +
         '<div class="ar5-body"><b>' + esc(x.name) + '</b> <small class="muted">' + esc(x.site ? Elo.SITES[x.site] : 'friend code') + '</small>' +
         '<p class="ar5-elo">' + (x.rating ? '<b>' + x.rating + '</b>' + (d ? ' <span class="' + (d > 0 ? 'ar5-up' : 'ar5-down') + '">' + signed(d) + ' this week</span>' : '') : 'No rating shared') + '</p>' +
-        (x.focus ? '<p>' + icon('bullseye') + ' Hyper-Focus: ' + esc(x.focus) + (x.fd ? ', day ' + x.fd : '') + '</p>' : '') +
+        V6.friendLine(x) + (x.focus ? '<p>' + icon('bullseye') + ' Hyper-Focus: ' + esc(x.focus) + (x.fd ? ', day ' + x.fd : '') + '</p>' : '') +
         (t ? '<p>' + icon('trophy') + ' ' + t.s + ' ' + esc((Tourney.METRICS[t.m] || Tourney.METRICS.mspc)[1]) + ' this week</p>' : '') +
         (!x.site && x.at ? '<p class="small muted">Card from ' + ago(x.at) + '</p>' : '') + '</div>' +
         '<div class="ar5-acts">' + (x.b ? '<button type="button" class="btn btn-gold btn-sm" data-ar="solve" data-id="' + esc(x.id) + '">' + icon('crosshairs') + ' Punish their blunder</button>' : '') +
@@ -18435,7 +18560,7 @@ const Arena = (() => {
     const list = Friends.list();
     return '<article class="panel pad ar5-friends"><span class="ar5-kicker">' + icon('user-group') + ' Friends</span><h2>Train next to your friends</h2>' +
       '<p class="muted">Paste a friend code, or follow a Chess.com or Lichess player and watch their rating move week by week. No chat, just the scoreboard.</p>' +
-      '<form class="ar5-add" data-ar-add autocomplete="off"><input class="input" name="q" maxlength="1800" placeholder="Friend code, link or username" aria-label="Friend code, link or username" required>' +
+      '<form class="ar5-add" data-ar-add autocomplete="off"><input class="input" name="q" maxlength="2600" placeholder="Friend code, link or username" aria-label="Friend code, link or username" required>' +
       '<select class="input" name="site" aria-label="What you pasted"><option value="code">Friend code</option><option value="chesscom">Chess.com</option><option value="lichess">Lichess</option></select>' +
       '<button class="btn btn-primary" type="submit">' + icon('user-plus') + ' Add</button></form>' +
       '<div class="ar5-cards">' + (list.map(card).join('') || '<p class="small muted">No friends yet. Share your code and ask for theirs.</p>') + '</div></article>';
@@ -20006,17 +20131,1162 @@ const V5Srv = (() => {
   return { mountAdmin };
 })();
 
+/* ==========================================================================
+   v6.0.0: THE EXECUTIVE LAYER (engine, then screens). Search "const V6Core" and "const V6 = ".
+   ========================================================================== */
+/* ==========================================================================
+   v6 EXECUTIVE LAYER, part 1: the engine.
+   Pure functions, no DOM, no storage: everything here is a rule or a
+   formula, so it can be tested on its own. Part 2 (the screens and the
+   hooks into the trainers) calls it.
+   Tuning knobs: V6Core.CFG.
+   ========================================================================== */
+const V6Core = (() => {
+  const clampN = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
+  const num = (v, d) => (v !== null && v !== undefined && v !== '' && Number.isFinite(+v) ? +v : d);
+  const r2 = (x) => Math.round(x * 100) / 100;
+
+  const CFG = {
+    modules: ['openings', 'middlegame', 'endgame', 'puzzles', 'think'],
+    labels: { openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgames', puzzles: 'Puzzles', think: 'MSPC thinking' },
+    /* the Student Rank is the weighted mean of the module ranks */
+    weights: { openings: 1, middlegame: 1.2, endgame: 0.8, puzzles: 1, think: 1.2 },
+    /* XP for one correct first-try answer, before multipliers */
+    base: { openings: 8, middlegame: 12, endgame: 12, think: 12 },
+    puzzleBase: { min: 8, max: 34, perRating: 14, ref: 1200 },
+    ranks: [['Foundation', 0], ['Developing', 300], ['Competent', 1200], ['Proficient', 3500], ['Advanced', 8000], ['Expert', 16000], ['Master', 30000], ['Grandmaster', 60000]],
+    /* Arena: rating from live tournaments. Ring colour on the avatar, global XP multiplier. */
+    arena: [['Entry', 0, '#475569', 1], ['Silver', 1150, '#94a3b8', 1.03], ['Gold', 1300, '#eab308', 1.06], ['Platinum', 1500, '#38bdf8', 1.1], ['Diamond', 1750, '#a78bfa', 1.15], ['Elite', 2000, '#e2e8f0', 1.2]],
+    arenaRating: { start: 1100, floor: 1000, cap: 3000, maxWeek: 60 },
+    balancer: { max: 1.2, min: 0.8, deadZone: 0.25, perRank: 0.1, minTrained: 2 },
+    /* flow: first-try answers in a row -> multiplier */
+    flow: [[0, 1], [3, 1.05], [5, 1.1], [8, 1.2], [12, 1.35], [18, 1.55], [25, 1.8], [35, 2.1], [50, 2.5]],
+    flowNames: [[0, 'Warming up'], [3, 'Flow'], [12, 'Deep flow'], [25, 'Elite flow'], [50, 'Grandmaster Flow']],
+    redeem: { windowMs: 120000, minCount: 3, need: 3 },       // Anti-Ragequit: 2 minutes, 3 in a row restore the chain
+    /* day streak -> XP boost; a day counts once there is one correct answer */
+    days: [[7, 1.05], [14, 1.08], [30, 1.12], [60, 1.16], [100, 1.2], [180, 1.25], [365, 1.3]],
+    maxMult: 6,                                               // all multipliers except the admin event
+    hourglass: {
+      limit: { openings: 8, middlegame: 25, endgame: 30, puzzles: 60, think: 40 },       // seconds per answer in hard mode
+      mult: { openings: 1.5, middlegame: 1.35, endgame: 1.35, puzzles: 1.3, think: 1.3 },
+      reactive: 0.5, grace: 800
+    },
+    hint: { penalty: [0, 0.1, 0.35, 0.85], rank: [0, 0, 0, 0.5] },   // tier 0..3: share of the XP lost, share of the base taken off the module
+    second: { free: 5, paid: 50, tokenCost: 1 },
+    boss: { min: 12, max: 60, hardcoreShare: 0.1, hardcoreMin: 2, hardcoreMax: 6, xp: 40, strictXp: 120 },
+    decayDays: 21,
+    missOpp: { prevLoss: 15, myLoss: 6, minWin: 60 },
+    bench: { phases: [[0.4, 1.1], [0.7, 1.15], [1, 1.2]], minContribution: 100, goals: { xp: 250000, correct: 20000, puzzles: 3000, boss: 400 } }
+  };
+
+  /* ---------- ranks ---------- */
+  function rankOf(xp, ladder) {
+    const L = ladder || CFG.ranks, v = Math.max(0, num(xp, 0));
+    let i = 0;
+    while (i + 1 < L.length && v >= L[i + 1][1]) i++;
+    const lo = L[i][1], hi = i + 1 < L.length ? L[i + 1][1] : null;
+    return { i, name: L[i][0], next: hi == null ? '' : L[i + 1][0], pct: hi == null ? 1 : (v - lo) / (hi - lo), xp: v, toNext: hi == null ? 0 : hi - v, exact: i + (hi == null ? 0 : (v - lo) / (hi - lo)) };
+  }
+  function moduleRanks(xpMap) {
+    const out = {};
+    CFG.modules.forEach((m) => { const r = rankOf((xpMap || {})[m]); out[m] = Object.assign(r, { index: r.exact }); });
+    return out;
+  }
+  function studentRank(mr) {
+    let sw = 0, s = 0, trained = 0;
+    CFG.modules.forEach((m) => { const w = CFG.weights[m] || 1; sw += w; s += w * ((mr[m] && mr[m].exact) || 0); if (mr[m] && mr[m].xp > 0) trained++; });
+    const exact = sw ? s / sw : 0, i = clampN(Math.floor(exact), 0, CFG.ranks.length - 1);
+    return { exact, i, name: CFG.ranks[i][0], trained };
+  }
+  function arenaRank(rating) {
+    const r = num(rating, 0);
+    if (!(r > 0)) return { i: 0, name: 'Unranked', rating: 0, color: CFG.arena[0][2], mult: 1 };
+    let i = 0;
+    CFG.arena.forEach((a, k) => { if (r >= a[1]) i = k; });
+    const a = CFG.arena[i];
+    return { i, name: a[0], rating: Math.round(r), color: a[2], mult: a[3] };
+  }
+  /* the Overall rank: 70% student, 30% arena (scaled to the same ladder), student only until the first tournament */
+  function overallRank(student, arena) {
+    const top = CFG.ranks.length - 1, a = arena && arena.rating > 0 ? arena.i / (CFG.arena.length - 1) * top : null;
+    const exact = a == null ? student.exact : student.exact * 0.7 + a * 0.3, i = clampN(Math.round(exact - 0.001), 0, top);
+    return { exact, i, name: CFG.ranks[i][0] };
+  }
+  /* ---------- weak-spot balancer: boost the weak modules, brake the strong ones ---------- */
+  function balancer(modExact, studentExact, trained) {
+    const B = CFG.balancer;
+    if (num(trained, 0) < B.minTrained) return 1;
+    const gap = studentExact - modExact;
+    if (Math.abs(gap) < B.deadZone) return 1;
+    return r2(clampN(1 + gap * B.perRank, B.min, B.max));
+  }
+  /* ---------- flow multipliers and the Anti-Ragequit window ---------- */
+  function flowMult(count) { let m = 1; CFG.flow.forEach((f) => { if (count >= f[0]) m = f[1]; }); return m; }
+  function flowName(count) { let n = ''; CFG.flowNames.forEach((f) => { if (count >= f[0]) n = f[1]; }); return n; }
+  const flowNew = () => ({ count: 0, best: 0, saved: 0, protect: null });
+  function flowHit(f, now) {
+    now = num(now, Date.now());
+    const s = Object.assign(flowNew(), f), R = CFG.redeem;
+    let redeemed = false;
+    if (s.protect && now > s.protect.until) s.protect = null;
+    if (s.protect) {
+      s.protect = Object.assign({}, s.protect, { got: (s.protect.got || 0) + 1 });
+      if (s.protect.got >= R.need) { s.count = s.protect.count + s.protect.got; s.saved++; s.protect = null; redeemed = true; }
+      else s.count++;
+    } else s.count++;
+    s.best = Math.max(s.best, s.count);
+    return { flow: s, redeemed };
+  }
+  function flowMiss(f, now) {
+    now = num(now, Date.now());
+    const s = Object.assign(flowNew(), f), R = CFG.redeem;
+    const had = s.count;
+    s.protect = !s.protect && had >= R.minCount ? { count: had, got: 0, until: now + R.windowMs } : null;   // a second miss inside the window cancels it
+    s.count = 0;
+    return { flow: s, lost: had, protectedUntil: s.protect ? s.protect.until : 0 };
+  }
+  /* ---------- day streak ---------- */
+  function dayBoost(days) { let m = 1; CFG.days.forEach((d) => { if (num(days, 0) >= d[0]) m = d[1]; }); return m; }
+  function nextDayBoost(days) { const d = CFG.days.filter((x) => x[0] > num(days, 0))[0]; return d ? { at: d[0], mult: d[1] } : null; }
+  /* ---------- the hourglass ---------- */
+  const hgLimit = (module) => CFG.hourglass.limit[module] || 30;
+  function hgMult(module, mode, elapsedMs) {
+    const H = CFG.hourglass, full = H.mult[module] || 1.3, lim = hgLimit(module) * 1000 + H.grace, t = num(elapsedMs, Infinity);
+    if (mode === 'hard') return t <= lim ? full : 1;                        // pre-commitment: the full multiplier, only inside the limit
+    return t <= lim * H.reactive ? r2(1 + (full - 1) / 2) : 1;                // reactive: half the bonus for lightning intuition
+  }
+  /* ---------- hints ---------- */
+  const hintPenalty = (tier) => CFG.hint.penalty[clampN(Math.round(num(tier, 0)), 0, 3)];
+  const hintRank = (tier) => CFG.hint.rank[clampN(Math.round(num(tier, 0)), 0, 3)];
+  /* ---------- XP for one answer ---------- */
+  function puzzleBase(rating) {
+    const P = CFG.puzzleBase, r = num(rating, 0) > 0 ? rating : P.ref;
+    return clampN(Math.round(P.perRating * clampN(r / P.ref, 0.6, 2.4)), P.min, P.max);
+  }
+  const baseFor = (module, puzzleRating) => (module === 'puzzles' ? puzzleBase(puzzleRating) : CFG.base[module] || 8);
+  function xp(o) {
+    const base = o.base != null ? num(o.base, 0) : baseFor(o.module, o.puzzleRating);
+    const parts = {
+      balancer: num(o.balancer, 1), flow: num(o.flow, 1), streak: num(o.streak, 1), arena: num(o.arena, 1),
+      bench: num(o.bench, 1), hourglass: num(o.hourglass, 1), boss: num(o.boss, 1)
+    };
+    let mult = 1;
+    Object.keys(parts).forEach((k) => { mult *= parts[k]; });
+    mult = Math.min(mult, CFG.maxMult);
+    const ev = num(o.event, 1), pen = hintPenalty(o.hintTier);
+    const total = base * mult * ev * (1 - pen);
+    return { base, parts, mult: r2(mult), event: ev, hintPenalty: pen, xp: Math.max(0, Math.round(total)), potential: Math.round(base * mult * ev), rankPenalty: Math.round(base * hintRank(o.hintTier)) };
+  }
+  /* ---------- the second chance ---------- */
+  const secondLimit = (paid) => (paid ? CFG.second.paid : CFG.second.free);
+  const secondLeft = (state, paid, day) => Math.max(0, secondLimit(paid) - (state && state.day === day ? num(state.used, 0) : 0));
+  /* ---------- Skill Matrix and Boss Fights ---------- */
+  /* chapters in order; a chapter opens when the Boss Fight of the one before it is cleared. */
+  function chapterStatuses(chapters, completed) {
+    const done = completed || {};
+    let prevOk = true;
+    return chapters.map((c, i) => {
+      const cleared = !!done[c.boss], strict = !!done[c.boss + ':strict'];
+      const open = i === 0 || prevOk, st = { id: c.id, i, open, cleared: open && cleared, strict: open && strict, locked: !open };
+      prevOk = open && cleared;
+      return st;
+    });
+  }
+  /* A Boss Fight is a shuffle of the chapter's open lines: 12 to 60 of your own correct moves. */
+  function bossPlan(lines, rnd) {
+    const B = CFG.boss, r = rnd || Math.random, pool = lines.filter((l) => l && l.userMoves > 0);
+    if (!pool.length) return { lines: [], size: 0 };
+    const order = pool.map((l) => ({ l, k: r() })).sort((a, b) => a.k - b.k).map((x) => x.l);
+    const out = [];
+    let size = 0, guard = 0;
+    while (size < B.min && guard++ < 400) { const l = order[out.length % order.length]; out.push(l); size += l.userMoves; }   // short chapters repeat their lines
+    if (size < B.min) return { lines: [], size: 0 };
+    for (let k = 0; k < order.length && size < B.max; k++) {                                                                  // long chapters bring the rest, up to the cap
+      const l = order[k];
+      if (out.indexOf(l) >= 0) continue;
+      if (size + l.userMoves > B.max) continue;
+      out.push(l); size += l.userMoves;
+    }
+    while (size > B.max && out.length > 1) { size -= out.pop().userMoves; }
+    return { lines: out, size };
+  }
+  function mistakeLimit(size, mode) {
+    if (mode === 'strict') return 0;
+    const B = CFG.boss;
+    return clampN(Math.ceil(num(size, 0) * B.hardcoreShare), B.hardcoreMin, B.hardcoreMax);
+  }
+  /* ---------- bounties ---------- */
+  function hashStr(s) { let h = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  /* weakest modules first; ties go to the module the player has trained least */
+  function weakest(mr, studentExact) {
+    return CFG.modules.slice().sort((a, b) => ((mr[a] ? mr[a].exact : 0) - (mr[b] ? mr[b].exact : 0)) || (CFG.modules.indexOf(a) - CFG.modules.indexOf(b)));
+  }
+  function rollBounties(kind, key, order) {
+    const weak = order && order.length ? order : CFG.modules.slice(), pick = weak[hashStr(kind + key) % Math.min(2, weak.length)], L = CFG.labels;
+    const mk = (id, metric, module, target, label, reward) => ({ id: kind + ':' + id, metric, module: module || '', target, label, reward, progress: 0, done: false });
+    if (kind === 'weekly') return [
+      mk('mod', 'correct', pick, 60, 'Answer ' + 60 + ' correctly in ' + L[pick], { xp: 150, tokens: 1 }),
+      mk('boss', 'boss', '', 1, 'Clear a Boss Fight', { xp: 200, tokens: 2 }),
+      mk('xp', 'xp', '', 1500, 'Earn 1,500 XP', { xp: 300, tokens: 3 })
+    ];
+    return [
+      mk('mod', 'correct', pick, 10, 'Answer 10 correctly in ' + L[pick], { xp: 40, tokens: 0 }),
+      mk('flow', 'flow', '', 6, 'Reach a flow of 6', { xp: 40, tokens: 0 }),
+      mk('xp', 'xp', '', 150, 'Earn 150 XP', { xp: 0, tokens: 1 })
+    ];
+  }
+  /* ev: { type: 'correct'|'xp'|'boss', module, n, flow } -> the list of bounties that just completed */
+  function bountyBump(items, ev) {
+    const fin = [];
+    (items || []).forEach((b) => {
+      if (b.done) return;
+      if (b.metric === 'correct' && ev.type === 'correct' && (!b.module || b.module === ev.module)) b.progress += 1;
+      else if (b.metric === 'xp' && ev.type === 'xp') b.progress += num(ev.n, 0);
+      else if (b.metric === 'boss' && ev.type === 'boss') b.progress += 1;
+      else if (b.metric === 'flow' && ev.type === 'correct') b.progress = Math.max(b.progress, num(ev.flow, 0));
+      if (b.progress >= b.target) { b.progress = b.target; b.done = true; fin.push(b); }
+    });
+    return fin;
+  }
+  /* ---------- community benchmarks ---------- */
+  function benchPhase(total, goal) {
+    const g = Math.max(1, num(goal, 1)), p = Math.max(0, num(total, 0)) / g;
+    let phase = -1, mult = 1;
+    CFG.bench.phases.forEach((ph, i) => { if (p >= ph[0]) { phase = i; mult = ph[1]; } });
+    return { pct: Math.min(1, p), phase, mult };
+  }
+  const benchBuff = (phase, mine, min) => (phase && phase.mult > 1 && num(mine, 0) >= num(min, CFG.bench.minContribution) ? phase.mult : 1);
+  /* ---------- Arena rating after a settled week ---------- */
+  function arenaUpdate(rating, rank, players) {
+    const A = CFG.arenaRating, r = num(rating, A.start), n = Math.max(1, Math.round(num(players, 1))), k = clampN(Math.round(num(rank, n)), 1, n);
+    const p = n > 1 ? 1 - (k - 1) / (n - 1) : 0.5, weight = clampN(n / 8, 0.25, 1);
+    return clampN(Math.round(r + (p - 0.5) * 2 * A.maxWeek * weight), A.floor, A.cap);
+  }
+  /* ---------- events from the Master Event Engine ---------- */
+  function eventActive(e, now) { return !!e && e.on !== false && num(e.start, 0) <= now && (!num(e.end, 0) || now < e.end); }
+  function activeEvents(list, now) { return (Array.isArray(list) ? list : []).filter((e) => eventActive(e, num(now, Date.now()))); }
+  const eventMult = (list, now) => activeEvents(list, now).reduce((m, e) => m * clampN(num(e.xpMult, 1), 0.5, 5), 1);
+  /* ---------- Shuffle Trainer filters ---------- */
+  /* ctx: { progress, now, decay (days), mistakes(id), leak: { M: {id: 1}, ... } } */
+  function filterLines(pool, mode, ctx) {
+    const c = ctx || {}, now = num(c.now, Date.now()), decay = (num(c.decay, CFG.decayDays)) * 864e5, P = c.progress || {};
+    if (mode === 'notseen') return pool.filter((x) => !P[x.id]);
+    if (mode === 'frontline') return pool.filter((x) => { const p = P[x.id]; return p && num(p.last, 0) > 0 && now - p.last >= decay; });
+    if (mode === 'mistakes') return pool.filter((x) => typeof c.mistakes === 'function' && c.mistakes(x.id));
+    if (/^leak:[MSPC]$/.test(mode)) { const set = (c.leak || {})[mode.slice(5)] || {}; return pool.filter((x) => set[x.id]); }
+    return pool;
+  }
+  /* The ideal mix: first what is fading or went wrong, then what you have never seen, then the weakest rest. */
+  function smartMix(pool, ctx, n, rnd) {
+    const r = rnd || Math.random, size = Math.max(1, Math.min(pool.length, num(n, 30))), P = (ctx || {}).progress || {};
+    const take = (list, k, used) => { const out = []; for (const x of list) { if (out.length >= k) break; if (!used[x.id]) { used[x.id] = 1; out.push(x); } } return out; };
+    const used = {};
+    const urgent = filterLines(pool, 'mistakes', ctx).concat(filterLines(pool, 'frontline', ctx)).sort((a, b) => ((P[a.id] ? P[a.id].best : 0) - (P[b.id] ? P[b.id].best : 0)) || r() - 0.5);
+    const fresh = filterLines(pool, 'notseen', ctx).sort(() => r() - 0.5);
+    const rest = pool.filter((x) => P[x.id]).sort((a, b) => (P[a.id].best - P[b.id].best) || r() - 0.5);
+    const out = take(urgent, Math.ceil(size * 0.4), used).concat(take(fresh, Math.ceil(size * 0.3), used));
+    out.push.apply(out, take(rest, size - out.length, used));
+    if (out.length < size) out.push.apply(out, take(pool.slice().sort(() => r() - 0.5), size - out.length, used));
+    return out;
+  }
+  /* ---------- game review icons ---------- */
+  const ICONS = {
+    brilliant: ['!!', 'Brilliant', 'A sacrifice that Stockfish confirms wins more.'],
+    great: ['!', 'Great', 'The only move that kept the position.'],
+    best: ['★', 'Best', 'The engine’s first choice.'],
+    good: ['✔', 'Good', 'Keeps the evaluation.'],
+    inaccuracy: ['?!', 'Inaccuracy', 'Gives up a little.'],
+    mistake: ['?', 'Mistake', 'Gives up a lot.'],
+    blunder: ['??', 'Blunder', 'Throws the game away.'],
+    missed: ['⟳', 'Missed chance', 'The opponent slipped; this move did not take it.']
+  };
+  /* it/prev: review items ({ cls, loss, before, color, brill }); win: cp (white's view) -> win percent for the side to move */
+  function missedOpportunity(it, prev, win) {
+    const M = CFG.missOpp;
+    if (!it || !prev || prev.color === it.color) return false;
+    if (it.cls !== 'good' && it.cls !== 'inaccuracy') return false;
+    if (it.brill) return false;
+    const pov = it.color === 'w' ? 1 : -1;
+    return num(prev.loss, 0) >= M.prevLoss && num(it.loss, 0) >= M.myLoss && win(num(it.before, 0) * pov) >= M.minWin;
+  }
+  function reviewIcon(it, prev, win) {
+    if (!it) return null;
+    let k = '';
+    if (it.brill === 'brilliant') k = 'brilliant';
+    else if (it.brill === 'great') k = 'great';
+    else if (it.cls === 'blunder' || it.cls === 'mistake' || it.cls === 'inaccuracy') k = it.cls;
+    else if (missedOpportunity(it, prev, win)) k = 'missed';
+    else if (it.cls === 'best') k = 'best';
+    else if (it.cls === 'good') k = 'good';
+    return k ? { k, glyph: ICONS[k][0], name: ICONS[k][1], text: ICONS[k][2] } : null;
+  }
+  /* ---------- the standing line of a player, for the friend card ---------- */
+  function cardLine(o) {
+    return { r: String(o.student || '').slice(0, 14), a: String(o.arena || '').slice(0, 10), x: Math.max(0, Math.round(num(o.xp, 0))), t: (Array.isArray(o.trophies) ? o.trophies : []).slice(-3).map((t) => String(t).slice(0, 24)) };
+  }
+  const winPct = (cp) => 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * clampN(cp, -3000, 3000))) - 1);
+
+  return { CFG, rankOf, moduleRanks, studentRank, arenaRank, overallRank, balancer, flowMult, flowName, flowNew, flowHit, flowMiss, dayBoost, nextDayBoost, hgLimit, hgMult,
+    hintPenalty, hintRank, puzzleBase, baseFor, xp, secondLimit, secondLeft, chapterStatuses, bossPlan, mistakeLimit, hashStr, weakest, rollBounties, bountyBump,
+    benchPhase, benchBuff, arenaUpdate, eventActive, activeEvents, eventMult, filterLines, smartMix, ICONS, missedOpportunity, reviewIcon, cardLine, winPct, clampN, num };
+})();
+
+/* ==========================================================================
+   v6 EXECUTIVE LAYER, part 2: state, hooks and screens.
+   It listens (App.score, PuzzleElo.record) instead of rewriting the trainers,
+   so every drill keeps working as before and the XP economy runs on top.
+   Executive Focus Mode only hides the visuals; the economy keeps running.
+   Routes: #profile (rank, Skill Matrix, bounties, community, trophies) and
+   #events (admin: the Master Event Engine).
+   ========================================================================== */
+const V6 = (() => {
+  const C = V6Core, KEY = 'lc6-state-v1';
+  const MOD_OF = { openings: 'openings', middlegame: 'middlegame', endgame: 'endgame', puzzles: 'puzzles', think: 'think', clinic: 'think', peer: 'think', srs: 'think', 'mspc-rep': 'think' };
+  const ROUTE_MOD = { openings: 'openings', middlegame: 'middlegame', endgame: 'endgame', puzzles: 'puzzles', think: 'think', clinic: 'think', peer: 'think', srs: 'think', 'mspc-rep': 'think', shuffle: 'shuffle', leaderboard: 'think' };
+  const num = (v, d) => (Number.isFinite(+v) && v !== null && v !== '' ? +v : d);
+  const today = () => dayKey(new Date());
+  const weekKey = () => isoWeek(new Date());
+  const tokenOf = () => { const t = Store.get('lc5-admin-token', ''); return typeof t === 'string' ? t : ''; };
+  let adminOverride = null;                                         // test hook only
+  const isAdmin = () => { if (adminOverride !== null) return adminOverride; try { return !!Admin.active && !!tokenOf() && V5Net.on(); } catch (e) { return false; } };
+  const net = () => { try { return V5Net.on(); } catch (e) { return false; } };
+  const paidNow = () => { try { return Admin.active || App.isPro(); } catch (e) { return false; } };
+
+  /* ---------- state (this device) ---------- */
+  function blank() {
+    return { v: 1, xp: C.CFG.modules.reduce((o, m) => { o[m] = 0; return o; }, {}), total: 0, flow: C.flowNew(), completed: {}, trophies: [], second: { day: '', used: 0 }, focus: false, hard: {},
+      bounty: { daily: { key: '', items: [] }, weekly: { key: '', items: [] } }, bench: { period: '', xp: 0, correct: 0, puzzles: 0, boss: 0 },
+      cache: { at: 0, events: [], bench: null, arena: null }, ev: {}, seenEvents: [], log: [], outbox: { xp: 0, correct: 0, puzzles: 0, boss: 0 }, ranks: {} };
+  }
+  let S = null;
+  function load() {
+    const b = blank(), r = Store.get(KEY, null);
+    if (!r || typeof r !== 'object') return b;
+    C.CFG.modules.forEach((m) => { b.xp[m] = Math.max(0, Math.round(num((r.xp || {})[m], 0))); });
+    b.total = Math.max(0, Math.round(num(r.total, 0)));
+    const f = r.flow && typeof r.flow === 'object' ? r.flow : {};
+    b.flow = { count: Math.max(0, num(f.count, 0) | 0), best: Math.max(0, num(f.best, 0) | 0), saved: Math.max(0, num(f.saved, 0) | 0),
+      protect: f.protect && num(f.protect.until, 0) > Date.now() ? { count: num(f.protect.count, 0) | 0, got: num(f.protect.got, 0) | 0, until: num(f.protect.until, 0) } : null };
+    b.completed = r.completed && typeof r.completed === 'object' ? Object.keys(r.completed).slice(0, 600).reduce((o, k) => { if (/^[\w:.\-|]{1,120}$/.test(k)) o[k] = num(r.completed[k], 1); return o; }, {}) : {};
+    b.trophies = (Array.isArray(r.trophies) ? r.trophies : []).slice(-200).filter((t) => t && typeof t.id === 'string').map((t) => ({ id: String(t.id).slice(0, 80), name: String(t.name || '').slice(0, 60), kind: String(t.kind || '').slice(0, 12), t: num(t.t, 0) }));
+    b.second = { day: String((r.second || {}).day || '').slice(0, 10), used: Math.max(0, num((r.second || {}).used, 0) | 0) };
+    b.focus = !!r.focus;
+    Object.keys(r.hard || {}).forEach((k) => { if (C.CFG.modules.indexOf(k) >= 0 && r.hard[k] === 'hard') b.hard[k] = 'hard'; });
+    ['daily', 'weekly'].forEach((k) => {
+      const x = (r.bounty || {})[k];
+      if (x && typeof x.key === 'string' && Array.isArray(x.items)) b.bounty[k] = { key: x.key.slice(0, 12), items: x.items.slice(0, 5).filter((i) => i && typeof i.id === 'string').map((i) => ({ id: String(i.id).slice(0, 30), metric: String(i.metric || ''), module: String(i.module || ''), target: Math.max(1, num(i.target, 1)), label: String(i.label || '').slice(0, 80), reward: { xp: Math.max(0, num((i.reward || {}).xp, 0)), tokens: Math.max(0, num((i.reward || {}).tokens, 0)) }, progress: Math.max(0, num(i.progress, 0)), done: !!i.done })) };
+    });
+    const bn = r.bench || {};
+    b.bench = { period: String(bn.period || '').slice(0, 10), xp: Math.max(0, num(bn.xp, 0)), correct: Math.max(0, num(bn.correct, 0)), puzzles: Math.max(0, num(bn.puzzles, 0)), boss: Math.max(0, num(bn.boss, 0)) };
+    const c = r.cache || {};
+    b.cache = { at: num(c.at, 0), events: Array.isArray(c.events) ? c.events.slice(0, 20).map(cleanEvent).filter(Boolean) : [], bench: c.bench && typeof c.bench === 'object' ? c.bench : null, arena: c.arena && typeof c.arena === 'object' ? c.arena : null };
+    b.ev = r.ev && typeof r.ev === 'object' ? Object.keys(r.ev).slice(0, 60).reduce((o, k) => { const e = r.ev[k] || {}; o[k] = { p: Math.max(0, num(e.p, 0)), done: !!e.done }; return o; }, {}) : {};
+    b.seenEvents = (Array.isArray(r.seenEvents) ? r.seenEvents : []).slice(-60).map((x) => String(x).slice(0, 40));
+    b.log = (Array.isArray(r.log) ? r.log : []).slice(-30).filter((x) => x && typeof x === 'object');
+    const o = r.outbox || {};
+    b.outbox = { xp: Math.max(0, num(o.xp, 0)), correct: Math.max(0, num(o.correct, 0)), puzzles: Math.max(0, num(o.puzzles, 0)), boss: Math.max(0, num(o.boss, 0)) };
+    b.ranks = r.ranks && typeof r.ranks === 'object' ? r.ranks : {};
+    return b;
+  }
+  const st = () => S || (S = load());
+  let saveT = 0;
+  function save(now) {
+    clearTimeout(saveT);
+    const w = () => { try { Store.set(KEY, st()); } catch (e) { /* storage off */ } };
+    if (now) w(); else saveT = setTimeout(w, 250);
+  }
+  window.addEventListener('pagehide', () => save(true));
+
+  /* ---------- events from the Master Event Engine ---------- */
+  function cleanEvent(e) {
+    if (!e || typeof e !== 'object' || !/^[\w-]{2,40}$/.test(String(e.id || ''))) return null;
+    const t = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, n), col = (v) => (/^#[0-9a-fA-F]{6}$/.test(String(v || '')) ? String(v) : '');
+    const ch = e.challenge && typeof e.challenge === 'object' ? e.challenge : null, th = e.theme && typeof e.theme === 'object' ? e.theme : null, w = e.welcome && typeof e.welcome === 'object' ? e.welcome : null;
+    return {
+      id: String(e.id), title: t(e.title, 60) || 'Event', on: e.on !== false, start: Math.max(0, num(e.start, 0)), end: Math.max(0, num(e.end, 0)),
+      xpMult: C.clampN(num(e.xpMult, 1), 0.5, 5), tokenCost: C.clampN(Math.round(num(e.tokenCost, C.CFG.second.tokenCost)), 0, 10),
+      mspcFree: C.clampN(Math.round(num(e.mspcFree, 0)), 0, 100), mspcPaid: C.clampN(Math.round(num(e.mspcPaid, 0)), 0, 500),
+      theme: th ? { accent: col(th.accent), accentInk: col(th.accentInk) } : null,
+      welcome: w && (t(w.title, 60) || t(w.text, 400)) ? { title: t(w.title, 60), text: t(w.text, 400) } : null,
+      challenge: ch && t(ch.title, 60) && ['xp', 'correct', 'puzzles', 'boss'].indexOf(ch.metric) >= 0 && num(ch.target, 0) > 0
+        ? { title: t(ch.title, 60), metric: ch.metric, target: C.clampN(Math.round(num(ch.target, 1)), 1, 1000000), reward: { tokens: C.clampN(Math.round(num((ch.reward || {}).tokens, 0)), 0, 50), xp: C.clampN(Math.round(num((ch.reward || {}).xp, 0)), 0, 100000) },
+          badge: ch.badge && t(ch.badge.name, 40) ? { id: String(ch.badge.id || e.id).replace(/[^\w-]/g, '').slice(0, 30) || String(e.id), name: t(ch.badge.name, 40) } : null } : null
+    };
+  }
+  const events = () => C.activeEvents(st().cache.events, Date.now());
+  const eventMultNow = () => C.eventMult(events(), Date.now());
+  function applyTheme() {
+    let el = document.getElementById('v6-theme');
+    const ev = events().filter((e) => e.theme && e.theme.accent)[0];
+    if (!ev) { if (el) el.remove(); return; }
+    if (!el) { el = document.createElement('style'); el.id = 'v6-theme'; document.head.appendChild(el); }
+    const a = ev.theme.accent, ink = ev.theme.accentInk || '#0b1222', rgb = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16)).join(',');
+    el.textContent = ':root{--accent:' + a + ';--accent-ink:' + ink + ';--accent-soft:rgba(' + rgb + ',.13);--accent-line:rgba(' + rgb + ',.45)}';
+  }
+
+  /* ---------- context: which module a score belongs to ---------- */
+  const ctx = { shuffle: '', puzzleRating: 0 };
+  let hintCtx = null;
+  let boss = null;                                  // set by the Boss Fight screen (part B)
+  const modOf = (section) => (section === 'shuffle' ? ctx.shuffle || 'openings' : MOD_OF[section] || '');
+  const routeNow = () => { try { return current.route; } catch (e) { return ''; } };
+  function stripModule() { const r = ROUTE_MOD[routeNow()] || (boss ? 'openings' : ''); return r === 'shuffle' ? ctx.shuffle || 'openings' : r; }
+
+  /* ---------- ranks, multipliers ---------- */
+  function ranks() {
+    const mr = C.moduleRanks(st().xp), student = C.studentRank(mr), arena = C.arenaRank(arenaRating()), overall = C.overallRank(student, arena);
+    return { mr, student, arena, overall, trained: student.trained };
+  }
+  function arenaRating() {
+    const c = st().cache.arena;
+    if (c && num(c.rating, 0) > 0) return Math.round(c.rating);
+    let r = 0;
+    try { ((Tourney.state().history) || []).forEach((h) => { if (h && h.players >= 2 && h.rank > 0) r = C.arenaUpdate(r || C.CFG.arenaRating.start, h.rank, h.players); }); } catch (e) { r = 0; }
+    return r;
+  }
+  function benchNow() {
+    const b = st().cache.bench, mine = st().bench;
+    if (!b || !b.totals) return { phase: { pct: 0, phase: -1, mult: 1 }, buff: 1, min: C.CFG.bench.minContribution, mine: mine.xp, goal: C.CFG.bench.goals.xp };
+    const goal = num((b.goals || {}).xp, C.CFG.bench.goals.xp), min = num(b.min, C.CFG.bench.minContribution), phase = C.benchPhase(num(b.totals.xp, 0), goal);
+    return { phase, buff: C.benchBuff(phase, mine.period === b.period ? mine.xp : 0, min), min, mine: mine.xp, goal };
+  }
+  /* the position being answered: hint tier, clock, booked assisted XP */
+  let pos = { tier: 0, booked: 0, sealed: false, t0: Date.now(), broke: false, rankPen: 0 };
+  const resetPos = () => { pos = { tier: 0, booked: 0, sealed: false, t0: Date.now(), broke: false, rankPen: 0 }; try { renderStrips(); } catch (e) { /* no strip yet */ } };
+  const hgMode = (module) => (st().hard[module] === 'hard' ? 'hard' : 'off');
+  function payout(module, o) {
+    o = o || {};
+    const R = ranks(), m = R.mr[module], s = st(), flowCount = s.flow.count, b = benchNow();
+    return C.xp({
+      module, puzzleRating: module === 'puzzles' ? ctx.puzzleRating : 0,
+      balancer: m ? C.balancer(m.exact, R.student.exact, R.trained) : 1, flow: o.noFlow ? 1 : C.flowMult(flowCount), streak: C.dayBoost(App.streakDays()), arena: R.arena.mult,
+      bench: b.buff, hourglass: o.noClock ? 1 : C.hgMult(module, hgMode(module), Date.now() - pos.t0), event: eventMultNow(), hintTier: o.hintTier != null ? o.hintTier : pos.tier
+    });
+  }
+  function addXp(module, n, opts) {
+    opts = opts || {};
+    const s = st(), before = ranks();
+    s.xp[module] = Math.max(0, (s.xp[module] || 0) + n); s.total = Math.max(0, s.total + n);
+    if (n > 0 && !opts.noBench) {
+      const b = s.cache.bench, per = b && b.period ? b.period : weekKey();
+      if (s.bench.period !== per) s.bench = { period: per, xp: 0, correct: 0, puzzles: 0, boss: 0 };
+      s.bench.xp += n; s.outbox.xp += n;
+    }
+    const after = ranks();
+    if (after.mr[module].i > before.mr[module].i) { toast(C.CFG.labels[module] + ': rank ' + after.mr[module].name + '.', 'good'); trophy('rank:' + module + ':' + after.mr[module].name, C.CFG.labels[module] + ' ' + after.mr[module].name, 'rank'); }
+    if (after.student.i > before.student.i) toast('Student rank: ' + after.student.name + '.', 'good');
+    save(); queueSync();
+  }
+  function trophy(id, name, kind) {
+    const s = st();
+    if (s.trophies.some((t) => t.id === id)) return false;
+    s.trophies.push({ id, name, kind: kind || 'milestone', t: Date.now() });
+    if (s.trophies.length > 200) s.trophies = s.trophies.slice(-200);
+    save(); return true;
+  }
+  function ensureBounties() {
+    const s = st(), R = ranks(), order = C.weakest(R.mr);
+    [['daily', today()], ['weekly', weekKey()]].forEach((p) => {
+      if (s.bounty[p[0]].key !== p[1]) { s.bounty[p[0]] = { key: p[1], items: C.rollBounties(p[0], p[1], order) }; save(); }
+    });
+  }
+  function bountyEvent(ev) {
+    ensureBounties();
+    const s = st(), fin = [];
+    ['daily', 'weekly'].forEach((k) => { C.bountyBump(s.bounty[k].items, ev).forEach((b) => fin.push(b)); });
+    fin.forEach((b) => {
+      if (b.reward.tokens) { try { Credits.grant(b.reward.tokens); } catch (e) { /* tokens are optional */ } }
+      if (b.reward.xp) addXp(C.weakest(ranks().mr)[0], b.reward.xp, { noBench: true });
+      toast('Bounty complete: ' + b.label + (b.reward.tokens ? ' (+' + b.reward.tokens + (b.reward.tokens === 1 ? ' token)' : ' tokens)') : '') + '.', 'good');
+    });
+    if (fin.length) save();
+  }
+  function eventProgress(metric, n) {
+    const s = st();
+    events().forEach((e) => {
+      const ch = e.challenge;
+      if (!ch || ch.metric !== metric) return;
+      const x = s.ev[e.id] || (s.ev[e.id] = { p: 0, done: false });
+      if (x.done) return;
+      x.p += n;
+      if (x.p >= ch.target) {
+        x.p = ch.target; x.done = true;
+        if (ch.reward.tokens) { try { Credits.grant(ch.reward.tokens); } catch (err) { /* optional */ } }
+        if (ch.reward.xp) addXp(C.weakest(ranks().mr)[0], ch.reward.xp, { noBench: true });
+        if (ch.badge) trophy('event:' + ch.badge.id, ch.badge.name, 'event');
+        toast('Event challenge complete: ' + ch.title + (ch.reward.tokens ? ' (+' + ch.reward.tokens + ' tokens)' : '') + '.', 'good');
+      }
+    });
+    save();
+  }
+
+  /* ---------- the scoring hook ---------- */
+  function onScore(section, ok) {
+    const module = modOf(section);
+    if (!module) return;
+    if (hintCtx && module !== 'puzzles') return;                    // a hint owns its own bookkeeping
+    const s = st(), now = Date.now();
+    if (pos.sealed) resetPos();
+    if (ok) {
+      const q = payout(module);
+      const hit = C.flowHit(s.flow, now);
+      s.flow = hit.flow;
+      if (hit.redeemed) toast('Flow restored. Anti-Ragequit saved your chain of ' + s.flow.count + '.', 'good');
+      s.log.push({ t: now, m: module, xp: q.xp, x: q.mult, h: pos.tier }); if (s.log.length > 30) s.log.shift();
+      const per = s.cache.bench && s.cache.bench.period ? s.cache.bench.period : weekKey();
+      if (s.bench.period !== per) s.bench = { period: per, xp: 0, correct: 0, puzzles: 0, boss: 0 };
+      s.bench.correct++; s.outbox.correct++;
+      if (module === 'puzzles') { s.bench.puzzles++; s.outbox.puzzles++; }
+      addXp(module, q.xp);
+      if (q.rankPenalty) addXp(module, -q.rankPenalty, { noBench: true });
+      bountyEvent({ type: 'correct', module, flow: s.flow.count });
+      bountyEvent({ type: 'xp', n: q.xp });
+      eventProgress('xp', q.xp); eventProgress('correct', 1); if (module === 'puzzles') eventProgress('puzzles', 1);
+      if (boss) boss.onCorrect(q);
+    } else {
+      const miss = C.flowMiss(s.flow, now);
+      s.flow = miss.flow;
+      if (miss.protectedUntil) toast('Flow reset. Three right answers within two minutes restore it.');
+      if (boss) boss.onMistake({ hint: false });
+    }
+    resetPos();
+    save(); renderStrips();
+  }
+  /* the Puzzle ELO calls first, then App.score: remember the puzzle's rating for the XP */
+  const _record = PuzzleElo.record;
+  PuzzleElo.record = function (p, win) { const r = _record.call(PuzzleElo, p, win); if (r && p) ctx.puzzleRating = num(p.rating, 0); return r; };
+  const _score = App.score;
+  App.score = function (section, ok) { _score.call(App, section, ok); try { onScore(section, ok); } catch (e) { console.error(e); } };
+  const _good = Sound.good;
+  Sound.good = function () { _good.apply(Sound, arguments); try { if ((pos.sealed || pos.tier) && stripModule() !== 'puzzles') resetPos(); } catch (e) { /* the sound is optional */ } };
+  /* every board the hub makes is remembered by its host element, so the strip can read the position */
+  const boards = new WeakMap();
+  const _Board = Board;
+  Board = function (host, opts) {
+    const b = _Board(host, opts), so = b.setOnMove;
+    b.setOnMove = function (fn) { if (fn) resetPos(); return so.apply(b, arguments); };   // a runner that starts takes the clock with it
+    try { boards.set(host, b); } catch (e) { /* ignore */ }
+    return b;
+  };
+  const boardIn = (trainer) => { const h = trainer && qs('.board-host', trainer); return h ? boards.get(h) || null : null; };
+
+  /* ---------- hints: three tiers, the XP bar shrinks at once ---------- */
+  const HINT_LABEL = ['Hint: position status', 'Hint: the piece', 'Hint: the solution'];
+  function statusText(fen) {
+    try {
+      const g = new Chess(fen), me = g.turn(), opp = me === 'w' ? 'b' : 'w', cca = ccaList(fen, me), hit = loosePieces(fen, me).filter((x) => x.attacked), th = ccaList(fen, opp);
+      return colorName(me) + ' to move in a ' + phaseOf(fen, Math.max(0, (fullmove(fen) - 1) * 2)) + ' position. ' + (g.in_check() ? 'You are in check. ' : '') +
+        'Forcing moves for you: ' + cca.checks.length + ' check' + (cca.checks.length === 1 ? '' : 's') + ', ' + cca.captures.length + ' capture' + (cca.captures.length === 1 ? '' : 's') + '. ' +
+        (hit.length ? 'Your ' + hit.map((x) => PIECE_NAME[x.type] + ' on ' + x.sq).join(' and ') + ' can be taken for free. ' : '') + (th.checks.length ? 'Your opponent has ' + th.checks.length + ' check' + (th.checks.length === 1 ? '' : 's') + ' ready.' : '');
+    } catch (e) { return 'Run MSPC: Move, Specifics, Priorities, Calculation.'; }
+  }
+  function hintPress(strip) {
+    const trainer = strip.nextElementSibling, module = stripModule();
+    if (!module || !trainer) return;
+    if (boss && boss.mode === 'strict') { toast('Strict Mode has no hints.'); return; }
+    if (pos.tier >= 3) return;
+    if (pos.tier === 0) {                                             // tier 1: the status of the position, no help with the move itself
+      const b = boardIn(trainer);
+      pos.tier = 1;
+      const note = qs('[data-v6-note]', strip);
+      if (note) { note.hidden = false; note.textContent = b ? statusText(b.fen()) : 'Run MSPC: Move, Specifics, Priorities, Calculation.'; }
+      renderStrips(); return;
+    }
+    const native = qs('[data-act="hint"]', trainer);
+    if (!native || native.disabled) { toast('No further hint here.'); return; }
+    const tier = pos.tier + 1;
+    if (module !== 'puzzles' && !boss) {                              // assisted XP is booked now: the drills do not score a move played after a hint
+      const q = payout(module, { hintTier: tier, noFlow: true, noClock: true });
+      const delta = q.xp - pos.booked;
+      pos.booked = q.xp;
+      addXp(module, delta, { noBench: delta < 0 });
+      if (q.rankPenalty && !pos.rankPen) { pos.rankPen = q.rankPenalty; addXp(module, -q.rankPenalty, { noBench: true }); toast('Full solution: ' + q.rankPenalty + ' rank XP deducted.'); }
+      if (!pos.broke) { pos.broke = true; const m = C.flowMiss(st().flow, Date.now()); st().flow = m.flow; }
+      pos.sealed = true;
+    }
+    pos.tier = tier;
+    hintCtx = { tier };
+    try { native.click(); } finally { hintCtx = null; }
+    if (boss && tier >= 2) boss.onMistake({ hint: true });
+    save(); renderStrips();
+  }
+
+  /* ---------- the strip above every trainer ---------- */
+  const PAWN = 'M12 4a3.2 3.2 0 1 1 0 6.4A3.2 3.2 0 0 1 12 4Z M10.2 10.2h3.6c0 1.4.3 2.2 1.1 3.2.9 1.1 1.4 2.5 1.4 4.6H7.7c0-2.1.5-3.5 1.4-4.6.8-1 1.1-1.8 1.1-3.2Z M6.8 18.5h10.4v2.4H6.8Z';
+  let stripSeq = 0;
+  function stripHTML(id) {
+    return '<button type="button" class="btn btn-ghost btn-sm v6-hint" data-v6="hint">' + icon('lightbulb') + '<span data-v6-hl>Hint</span></button>' +
+      '<div class="v6-xp" role="img" aria-label="Possible XP for this answer"><span class="v6-xp-bar"><span class="v6-xp-fill" data-v6-fill></span></span><b data-v6-xp>+0 XP</b></div>' +
+      '<span class="v6-viz v6-flow" data-v6-flow title="First-try answers in a row"></span>' +
+      '<span class="v6-viz v6-hg"><button type="button" class="v6-hg-btn" data-v6="hourglass" aria-pressed="false" title="Hard mode: answer before the glass empties for a bigger XP multiplier"><svg viewBox="0 0 24 24" class="v6-pawn" aria-hidden="true"><defs><clipPath id="v6c' + id + '"><rect data-v6-clip x="0" y="0" width="24" height="24"></rect></clipPath></defs><path class="v6-pawn-out" d="' + PAWN + '"></path><path class="v6-pawn-fill" d="' + PAWN + '" clip-path="url(#v6c' + id + ')"></path></svg><span data-v6-hgl>Hard mode</span></button></span>' +
+      '<p class="v6-note small" data-v6-note hidden></p>';
+  }
+  function scan() {
+    qsa('.trainer').forEach((tr) => {
+      if (tr.getAttribute('data-v6')) return;
+      if (!stripModule()) return;
+      tr.setAttribute('data-v6', '1');
+      const el = document.createElement('div');
+      el.className = 'v6-strip'; el.setAttribute('data-v6-strip', ''); el.innerHTML = stripHTML(++stripSeq);
+      tr.parentNode.insertBefore(el, tr);
+      tr.classList.add('v6-has-strip');
+      resetPos(); renderStrips();
+    });
+  }
+  const fmtClock = (ms) => { const t = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+  function renderStrips() {
+    const strips = qsa('[data-v6-strip]');
+    if (!strips.length) return;
+    const module = stripModule(), s = st();
+    if (!module) return;
+    const hard = hgMode(module) === 'hard', q = payout(module, { hintTier: 0, noClock: !hard }), pen = C.hintPenalty(pos.tier), now = Date.now();
+    const lim = C.hgLimit(module) * 1000, rem = Math.max(0, 1 - (now - pos.t0) / lim), strict = boss && boss.mode === 'strict';
+    const pr = s.flow.protect && s.flow.protect.until > now ? s.flow.protect : null;
+    strips.forEach((el) => {
+      if (!el.isConnected) return;
+      if (!el.nextElementSibling || !el.nextElementSibling.classList.contains('trainer')) { el.remove(); return; }
+      const fill = qs('[data-v6-fill]', el), xpEl = qs('[data-v6-xp]', el), hb = qs('[data-v6-hl]', el), btn = qs('.v6-hint', el);
+      const live = Math.round(q.potential * (1 - pen));
+      if (fill) fill.style.width = Math.round((1 - pen) * 100) + '%';
+      if (xpEl) xpEl.textContent = '+' + live + ' XP' + (pen ? ' (−' + Math.round(pen * 100) + '%)' : '');
+      if (hb) hb.textContent = strict ? 'No hints' : pos.tier >= 3 ? 'No more hints' : pos.tier === 0 ? 'Hint: status (−10%)' : pos.tier === 1 ? 'Hint: the piece (−35%)' : 'Hint: the solution (−85%)';
+      if (btn) btn.disabled = !!strict || pos.tier >= 3;
+      const fl = qs('[data-v6-flow]', el);
+      if (fl) fl.innerHTML = pr ? icon('shield-halved') + ' Redeem ' + (pr.got || 0) + '/' + C.CFG.redeem.need + ' · ' + fmtClock(pr.until - now) : s.flow.count >= 3 ? icon('bolt') + ' ' + C.flowName(s.flow.count) + ' ×' + C.flowMult(s.flow.count).toFixed(2) + ' · ' + s.flow.count : icon('bolt') + ' Flow ' + s.flow.count;
+      const hbtn = qs('[data-v6="hourglass"]', el), clip = qs('[data-v6-clip]', el), hl = qs('[data-v6-hgl]', el);
+      if (hbtn) hbtn.setAttribute('aria-pressed', String(hard));
+      if (clip) { const h = hard ? 24 * rem : 24; clip.setAttribute('y', String(24 - h)); clip.setAttribute('height', String(h)); }
+      if (hl) hl.textContent = hard ? (rem > 0 ? fmtClock(rem * lim) : 'Time up') + ' · ×' + C.CFG.hourglass.mult[module].toFixed(2) : 'Hard mode';
+      if (!pos.tier) { const nt = qs('[data-v6-note]', el); if (nt) nt.hidden = true; }
+    });
+  }
+  setInterval(() => { if (document.visibilityState === 'visible' && qs('[data-v6-strip]') && !st().focus) renderStrips(); }, 500);
+  let scanT = 0;
+  const kick = () => { if (!scanT) scanT = requestAnimationFrame(() => { scanT = 0; try { scan(); } catch (e) { console.error(e); } }); };
+
+  /* ---------- Executive Focus Mode ---------- */
+  function applyFocus() { document.body.classList.toggle('lc-focus', !!st().focus); }
+  function setFocus(on) { st().focus = !!on; save(); applyFocus(); renderStrips(); }
+
+  /* ---------- the Arena server: events, community benchmarks, arena rating ---------- */
+  let syncT = 0, syncing = false;
+  function queueSync(ms) { if (!net()) return; clearTimeout(syncT); syncT = setTimeout(sync, ms == null ? 5000 : ms); }
+  async function sync() {
+    if (!net() || syncing) return null;
+    syncing = true;
+    const s = st(), add = Object.assign({}, s.outbox);
+    try {
+      const r = await V5Net.post('v6_state', { name: App.profile.name || '', add, period: weekKey() });
+      s.outbox = { xp: Math.max(0, s.outbox.xp - add.xp), correct: Math.max(0, s.outbox.correct - add.correct), puzzles: Math.max(0, s.outbox.puzzles - add.puzzles), boss: Math.max(0, s.outbox.boss - add.boss) };
+      s.cache = { at: Date.now(), events: (Array.isArray(r.events) ? r.events : []).map(cleanEvent).filter(Boolean), bench: r.bench && typeof r.bench === 'object' ? r.bench : null, arena: r.arena && typeof r.arena === 'object' ? r.arena : null };
+      if (r.mine && s.cache.bench && r.mine.period === s.cache.bench.period) s.bench = Object.assign({ period: r.mine.period }, { xp: num(r.mine.xp, 0), correct: num(r.mine.correct, 0), puzzles: num(r.mine.puzzles, 0), boss: num(r.mine.boss, 0) });
+      save(); applyTheme(); welcome(); refreshChip();
+      return r;
+    } catch (e) { return null; } finally { syncing = false; }
+  }
+  function welcome() {
+    const s = st();
+    events().filter((e) => e.welcome && s.seenEvents.indexOf(e.id) < 0).slice(0, 1).forEach((e) => {
+      s.seenEvents.push(e.id); save();
+      if (qs('.sheet-wrap') || App.settings.popups === false) { try { Quiet.push('badge', e.welcome.title || e.title, e.welcome.text); } catch (err) { /* optional */ } toast(e.title + ' is live.'); return; }
+      openSheet({ title: e.welcome.title || e.title, noFocus: true, html: '<p>' + esc(e.welcome.text) + '</p>' + (e.xpMult !== 1 ? '<p class="small muted">XP ×' + e.xpMult + ' while this event runs.</p>' : '') + (e.challenge ? '<p class="small">' + icon('flag-checkered') + ' Challenge: ' + esc(e.challenge.title) + '.</p>' : '') + '<div class="btn-row"><button type="button" class="btn btn-primary" data-close>Continue</button><a class="btn btn-ghost" href="#profile" data-close>Open my profile</a></div>' });
+    });
+  }
+  /* ---------- second chances ---------- */
+  function secondLeft() {
+    const s = st(), evs = events(), paid = paidNow();
+    let limit = C.secondLimit(paid);
+    evs.forEach((e) => { const v = paid ? e.mspcPaid : e.mspcFree; if (v > limit) limit = v; });
+    return Math.max(0, limit - (s.second.day === today() ? s.second.used : 0));
+  }
+  const tokenCost = () => (events().length ? Math.min.apply(null, events().map((e) => e.tokenCost).concat([C.CFG.second.tokenCost])) : C.CFG.second.tokenCost);
+  function useSecond() { const s = st(); if (s.second.day !== today()) s.second = { day: today(), used: 0 }; s.second.used++; save(); }
+  function spendTokens(n) { try { if (Admin.active) return true; if (Credits.balance() < n) return false; Credits.spend(n); return true; } catch (e) { return false; } }
+
+  /* ---------- Skill Matrix: chapters in order, Boss Fights as the gates ---------- */
+  const umCache = {};
+  function userMoves(x) {
+    if (umCache[x.id] != null) return umCache[x.id];
+    let n = 0;
+    try { n = buildDrillPlies(x.fen, x.moves, isStatic(x), x.side).filter((p) => p.color === x.side).length; } catch (e) { n = 0; }
+    return (umCache[x.id] = n);
+  }
+  function matrix() {
+    const byId = {};
+    shufflePool().forEach((x) => { if (x.scope === 'openings' && x.kind === 'line') byId[x.id] = x; });
+    const names = (CONTENT.groups || []).map((g) => g && g.name).filter(Boolean);
+    (CONTENT.openings || []).forEach((o) => { if (o && o.group && names.indexOf(o.group) < 0) names.push(o.group); });
+    return names.map((name) => {
+      const lines = (CONTENT.openings || []).filter((o) => o && o.group === name);
+      const chs = chaptersOf(lines).map((c, i) => {
+        const items = c.lines.map((l) => byId[l.id]).filter(Boolean), open = items.filter((x) => App.unlocked(x));
+        const mastery = items.length ? items.reduce((a, x) => a + ((App.progress[x.id] || {}).best || 0), 0) / items.length : 0;
+        return { id: c.id, title: chapterName(c, i), items, playable: open, mastery, boss: 'boss:' + c.id };
+      });
+      const stat = C.chapterStatuses(chs, st().completed), g = (CONTENT.groups || []).filter((x) => x && x.name === name)[0] || {};
+      return { name, side: g.side || '', chapters: chs.map((c, i) => Object.assign({}, c, stat[i])) };
+    }).filter((g) => g.chapters.length);
+  }
+
+  /* ---------- Boss Fights: Hardcore (a mistake limit) and Strict (no mistakes) ---------- */
+  const tokensOk = () => { try { return Admin.active || Credits.balance() >= tokenCost(); } catch (e) { return false; } };
+  const balText = () => { try { const b = Credits.balance(); return b === Infinity ? '∞' : String(b); } catch (e) { return '0'; } };
+  function makeBoss(ch, mode, root, exit) {
+    const plan = C.bossPlan(ch.playable.map((x) => Object.assign({}, x, { userMoves: userMoves(x) })));
+    if (!plan.lines.length) return null;
+    const b = { mode, ch, plan, i: 0, mistakes: 0, limit: C.mistakeLimit(plan.size, mode), correct: 0, size: plan.size, runner: null, board: null, attempt: null, over: '', frozen: false, seq: 0, view: null, alive: true, forgiven: 0, why: '' };
+    const q = (sel) => qs(sel, root);
+    const label = mode === 'strict' ? 'Strict Mode' : 'Hardcore';
+    root.innerHTML = '<section class="v6-boss"><div class="v6-boss-head"><button type="button" class="btn btn-quiet btn-sm" data-v6b="exit">' + icon('arrow-left') + ' Skill Matrix</button>' +
+      '<div><p class="st-kicker">Boss Fight · ' + esc(label) + '</p><h2>' + esc(ch.title) + '</h2></div></div>' +
+      '<div class="v6-boss-hud" data-v6-hud></div><div class="v6-second" data-v6-second hidden></div>' + trainerShell('boss-board', 'boss-panel') + '<div class="v6-boss-end" data-v6-end hidden></div></section>';
+    b.board = Board(q('#boss-board'), {});
+    const set0 = b.board.setOnMove;
+    b.board.setOnMove = (fn) => { b.boardMove = fn ? (m) => { b.attempt = { fen: b.board.fen(), from: m.from, to: m.to, promotion: m.promotion || '' }; fn(m); } : null; set0(b.boardMove); };
+    const hud = () => {
+      const el = q('[data-v6-hud]');
+      if (!el) return;
+      const mm = mode === 'strict' ? '0 allowed' : b.mistakes + ' / ' + b.limit;
+      el.innerHTML = '<div><b>' + Math.min(b.correct, b.size) + ' / ' + b.size + '</b><span>Correct moves</span></div><div class="' + (b.mistakes > 0 && mode !== 'strict' && b.mistakes >= b.limit ? 'is-hot' : '') + '"><b>' + esc(mm) + '</b><span>Mistakes</span></div>' +
+        (mode === 'strict' ? '' : '<div><b>' + secondLeft() + '</b><span>Second chances today</span></div><div><b>' + esc(balText()) + '</b><span>Tokens</span></div>') + '<div>' + bar(b.size ? b.correct / b.size : 0) + '<span>Line ' + Math.min(b.i + 1, plan.lines.length) + ' of ' + plan.lines.length + '</span></div>';
+    };
+    const panel = (v) => {
+      b.view = v;
+      const p = q('#boss-panel'), x = plan.lines[b.i];
+      if (!p || !x || b.over) return;
+      const mine = (v.played || []).filter((m) => m.color === x.side).length;
+      p.innerHTML = '<p class="st-kicker">' + esc('You play ' + colorName(x.side)) + '</p><h2 class="st-title"><span class="sh-title-hidden">' + icon('eye-slash') + ' Hidden line</span></h2>' +
+        '<p class="st-brief">Play the line from memory. The computer plays the other side.</p>' + turnHTML(v, 'Your move as ' + colorName(x.side)) + '<span class="dim small" style="margin-left:auto">' + Math.min(mine, v.userPlies) + ' / ' + v.userPlies + '</span></div>' +
+        '<div class="st-feedback">' + feedbackHTML(v.feedback) + '</div>' + playedHTML(v.played || []) +
+        '<div class="st-actions"><button type="button" data-act="hint" data-v6b="bhint" hidden aria-hidden="true" tabindex="-1"></button>' + (mode === 'strict' ? '' : '<button type="button" class="btn btn-quiet btn-sm" data-v6b="show">Show move (counts as a mistake)</button>') + '<button type="button" class="btn btn-quiet btn-sm" data-v6b="giveup">Give up</button></div>';
+    };
+    const stop = () => { if (b.runner) { b.runner.destroy(); b.runner = null; } };
+    function run() {
+      stop();
+      const x = plan.lines[b.i];
+      if (!x) { clear(); return; }
+      b.runner = LineRunner({ board: b.board, id: x.id, kind: 'line', section: 'openings', fen: x.fen, moves: x.moves, side: x.side, ann: x.ann, lastMove: x.lastMove || null, silent: isStatic(x), delay: 320, onUpdate: panel, onFinish: () => { setTimeout(() => { if (b.alive && !b.over) { b.i++; run(); } }, 900); } });
+      resetPos(); b.runner.start(); hud();
+    }
+    function secondPanel(show) {
+      const el = q('[data-v6-second]');
+      if (!el) return;
+      el.hidden = !show;
+      if (!show) { el.innerHTML = ''; return; }
+      const left = secondLeft(), cost = tokenCost(), tok = tokensOk();
+      el.innerHTML = '<div><b>' + (b.frozen ? 'Mistake limit reached.' : 'Mistake ' + b.mistakes + ' of ' + b.limit + '.') + '</b> <span class="small muted" data-v6-verdict>' + esc(b.verdict || 'Checking the move with Stockfish…') + '</span></div>' +
+        '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-v6b="sc"' + (left ? '' : ' disabled') + '>' + icon('life-ring') + ' MSPC Second Chance (' + left + ' left today)</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-v6b="tok"' + (tok ? '' : ' disabled') + '>' + icon('coins') + ' Use ' + cost + (cost === 1 ? ' token' : ' tokens') + '</button>' +
+        (b.frozen ? '<button type="button" class="btn btn-quiet btn-sm" data-v6b="giveup">End the run</button>' : '<button type="button" class="btn btn-quiet btn-sm" data-v6b="dismiss">Continue</button>') + '</div>';
+    }
+    function freeze(on) { b.frozen = on; const sh = q('.board-shell'); if (sh) sh.classList.toggle('v6-frozen', on); }
+    async function verdict(att, id) {
+      if (!att || !b.alive) { b.verdict = 'No engine check for this one.'; if (b.seq === id) secondPanel(true); return; }
+      try {
+        const before = await Engine.analyse(att.fen, { movetime: 260, multipv: 1 });
+        const g = new Chess(att.fen), mv = g.move({ from: att.from, to: att.to, promotion: att.promotion || 'q' });
+        if (!mv || !before.lines[0]) throw new Error('no line');
+        const pov = mv.color === 'w' ? 1 : -1, cb = Engine.toCp(before.lines[0]);
+        const after = g.game_over() ? null : await Engine.analyse(g.fen(), { movetime: 260, multipv: 1 });
+        const ca = after && after.lines[0] ? Engine.toCp(after.lines[0]) : (g.in_checkmate() ? 10000 * pov : 0);
+        const loss = Math.max(0, Engine.winPct(cb * pov) - Engine.winPct(ca * pov));
+        if (!b.alive || b.seq !== id || b.over) return;
+        if (loss < 15 && mode !== 'strict') {                       // the engine says it is playable: forgiven, and it costs nothing
+          b.mistakes = Math.max(0, b.mistakes - 1); b.forgiven++;
+          b.verdict = 'Stockfish: ' + mv.san + ' is playable (−' + Math.round(loss) + '%). Not counted.';
+          freeze(false); secondPanel(false); hud(); toast('Playable move: not counted as a mistake.', 'good'); return;
+        }
+        b.verdict = 'Stockfish: ' + mv.san + ' loses ' + Math.round(loss) + '% win chance.';
+      } catch (e) { b.verdict = 'Engine not available: counted as a mistake.'; }
+      if (b.alive && b.seq === id && !b.over) secondPanel(true);
+    }
+    b.mode = mode;
+    b.onCorrect = () => { b.correct++; hud(); };
+    b.onMistake = (o) => {
+      if (!b.alive || b.over) return;
+      b.mistakes++; const att = o && o.hint ? null : b.attempt; b.attempt = null; b.last = att; b.verdict = '';
+      hud();
+      if (mode === 'strict') { fail('Strict Mode allows no mistakes.'); return; }
+      const rescue = secondLeft() > 0 || tokensOk();
+      if (b.mistakes > b.limit) { if (!rescue) { fail('Mistake limit reached (' + b.limit + ').'); return; } freeze(true); }
+      const id = ++b.seq;
+      secondPanel(true); verdict(att || null, id);
+    };
+    function rescued(how) {
+      b.mistakes = Math.max(0, b.mistakes - 1); b.forgiven++; b.verdict = how; freeze(false); secondPanel(false); hud();
+      toast(how, 'good');
+    }
+    b.rescue = (kind) => {
+      if (kind === 'tok') {
+        if (!spendTokens(tokenCost())) { toast('Not enough tokens.'); return; }
+        rescued('Mistake forgiven with a token.'); return;
+      }
+      if (secondLeft() < 1) { toast('No second chances left today.'); return; }
+      const fen = (b.last && b.last.fen) || b.board.fen(), mk = { fen, last: null, moves: [] };
+      let m = 'M', s2 = 'S', p = 'P';
+      try { m = mspcMReply(mk).text; s2 = mspcSReply(mk).text; p = mspcPReply(mk).text; } catch (e) { /* fall back to the labels */ }
+      openSheet({ title: 'MSPC Second Chance', noFocus: true,
+        html: '<p class="muted small">Run the framework on the position before your move. Then you get the mistake back.</p>' +
+          [['M', m], ['S', s2], ['P', p]].map((x) => '<div class="v6-mspc"><p>' + esc(x[1]).replace(/\n/g, '<br>') + '</p></div>').join('') +
+          '<div class="v6-mspc"><p><b>C, Calculation:</b> the position is still on the board. Play the right move now, and check the opponent’s best reply first.</p></div>' +
+          '<label class="switch-row"><span>I ran M, S and P on this position</span><input type="checkbox" data-v6-ok></label>' +
+          '<div class="btn-row"><button type="button" class="btn btn-primary" data-v6-done disabled>Use the second chance</button><button type="button" class="btn btn-ghost" data-close>Cancel</button></div>',
+        onMount(sh) {
+          const ok = qs('[data-v6-ok]', sh.el), go = qs('[data-v6-done]', sh.el);
+          ok.addEventListener('change', () => { go.disabled = !ok.checked; });
+          go.addEventListener('click', () => { if (secondLeft() < 1) { sh.close(); return; } useSecond(); sh.close(); rescued('Second chance used. The mistake is not counted.'); });
+        } });
+    };
+    function fail(why) {
+      if (b.over) return;
+      b.over = 'fail'; b.why = why; stop(); freeze(false); secondPanel(false);
+      const e = q('[data-v6-end]'), p = q('.v6-boss .trainer');
+      if (p) p.hidden = true;
+      if (e) { e.hidden = false; e.innerHTML = '<h3>Boss Fight failed</h3><p class="muted">' + esc(why) + ' ' + b.correct + ' of ' + b.size + ' moves were right.</p><div class="btn-row"><button type="button" class="btn btn-primary" data-v6b="again">' + icon('rotate-right') + ' Try again</button><button type="button" class="btn btn-ghost" data-v6b="exit">Back to the Skill Matrix</button></div>'; }
+      Sound.bad();
+    }
+    function clear() {
+      if (b.over) return;
+      b.over = 'clear'; stop(); freeze(false); secondPanel(false);
+      const s = st(), key = ch.boss + (mode === 'strict' ? ':strict' : ''), first = !s.completed[key];
+      s.completed[key] = Date.now();
+      if (mode === 'strict' && !s.completed[ch.boss]) s.completed[ch.boss] = Date.now();
+      const bonus = first ? (mode === 'strict' ? C.CFG.boss.strictXp : C.CFG.boss.xp) : 10;
+      addXp('openings', bonus);
+      const per = s.cache.bench && s.cache.bench.period ? s.cache.bench.period : weekKey();
+      if (s.bench.period !== per) s.bench = { period: per, xp: 0, correct: 0, puzzles: 0, boss: 0 };
+      s.bench.boss++; s.outbox.boss++;
+      bountyEvent({ type: 'boss' }); eventProgress('boss', 1);
+      trophy('boss:' + ch.id, 'Boss Fight: ' + ch.title, 'boss');
+      if (mode === 'strict') trophy('strict:' + ch.id, 'Strict clear: ' + ch.title, 'strict');
+      save(true); queueSync(1500);
+      const e = q('[data-v6-end]'), p = q('.v6-boss .trainer');
+      if (p) p.hidden = true;
+      if (e) { e.hidden = false; e.innerHTML = '<h3>' + (mode === 'strict' ? 'Strict clear. No mistakes.' : 'Boss Fight cleared.') + '</h3><p class="muted">' + b.size + ' moves, ' + b.mistakes + ' mistake' + (b.mistakes === 1 ? '' : 's') + (b.forgiven ? ', ' + b.forgiven + ' forgiven' : '') + '. +' + bonus + ' XP.' + (first ? ' The next chapter is open.' : '') + '</p><div class="btn-row"><button type="button" class="btn btn-primary" data-v6b="exit">Back to the Skill Matrix</button>' + (mode !== 'strict' ? '<button type="button" class="btn btn-ghost" data-v6b="again-strict">' + icon('crosshairs') + ' Try Strict Mode</button>' : '') + '</div>'; }
+      Sound.fanfare(); toast(mode === 'strict' ? 'Strict clear: ' + ch.title + '.' : 'Boss Fight cleared: ' + ch.title + '.', 'good');
+    }
+    b.start = () => { hud(); run(); };
+    b.click = (a) => {
+      if (a === 'exit') exit();
+      else if (a === 'again') exit(ch.id, mode);
+      else if (a === 'again-strict') exit(ch.id, 'strict');
+      else if (a === 'sc' || a === 'tok') b.rescue(a);
+      else if (a === 'dismiss') secondPanel(false);
+      else if (a === 'giveup') fail('You ended the run.');
+      else if (a === 'show' && b.runner && b.runner.showMove) b.runner.showMove();
+      else if (a === 'bhint' && b.runner) b.runner.hint();
+    };
+    b.destroy = () => { b.alive = false; stop(); if (b.board) { b.board.destroy(); b.board = null; } if (boss === b) boss = null; };
+    boss = b;
+    return b;
+  }
+
+  /* ---------- screens ---------- */
+  const bar = (p, cls) => '<div class="v6-bar ' + (cls || '') + '"><span style="width:' + Math.round(C.clampN(p, 0, 1) * 100) + '%"></span></div>';
+  const fmt = (n) => Math.round(num(n, 0)).toLocaleString('en');
+  const dateText = (ms) => (ms ? new Date(ms).toLocaleDateString('en', { day: 'numeric', month: 'short' }) : '');
+  function avatar(R) {
+    const name = App.profile.name || 'Player', ini = esc(name.trim().slice(0, 1).toUpperCase() || 'P');
+    return '<div class="v6-avatar" style="--ring:' + R.arena.color + '" title="Arena rank: ' + esc(R.arena.name) + '"><span>' + ini + '</span><i class="v6-avatar-badge">' + esc(R.student.name.slice(0, 3).toUpperCase()) + '</i></div>';
+  }
+  function multNow() {
+    const R = ranks(), b = benchNow();
+    return { streak: C.dayBoost(App.streakDays()), arena: R.arena.mult, bench: b.buff, event: eventMultNow() };
+  }
+  function tabOverview(R) {
+    const s = st(), mm = multNow(), nd = C.nextDayBoost(App.streakDays());
+    const bal = (m) => C.balancer(R.mr[m].exact, R.student.exact, R.trained);
+    const tag = (m) => { if (R.trained < 2) return ''; const v = bal(m); return v > 1 ? '<em class="v6-boost">Boost ×' + v.toFixed(2) + '</em>' : v < 1 ? '<em class="v6-brake">Brake ×' + v.toFixed(2) + '</em>' : ''; };
+    return '<div class="v6-rank3">' + [
+      ['Student Rank', R.student.name, 'Weighted mean of your module ranks'],
+      ['Arena Rank', R.arena.name + (R.arena.rating ? ' · ' + R.arena.rating : ''), R.arena.mult > 1 ? 'XP ×' + R.arena.mult.toFixed(2) + ' from live tournaments' : 'Play a live tournament to place'],
+      ['Overall', R.overall.name, 'Used on leaderboards and profiles']
+    ].map((x) => '<div class="v6-stat"><small>' + x[0] + '</small><b>' + esc(x[1]) + '</b><span>' + esc(x[2]) + '</span></div>').join('') + '</div>' +
+      '<div class="v6-kpis"><div><small>Total XP</small><b>' + fmt(s.total) + '</b></div><div class="v6-viz"><small>Day streak</small><b>' + App.streakDays() + '</b><span>' + (nd ? 'Next boost at ' + nd.at + ' days' : 'Top boost reached') + '</span></div><div class="v6-viz"><small>Best flow</small><b>' + s.flow.best + '</b></div>' +
+      '<div><small>XP multipliers now</small><b>×' + (mm.streak * mm.arena * mm.bench * mm.event).toFixed(2) + '</b><span>Streak ×' + mm.streak.toFixed(2) + ', arena ×' + mm.arena.toFixed(2) + ', community ×' + mm.bench.toFixed(2) + ', event ×' + mm.event.toFixed(2) + '</span></div></div>' +
+      '<h3>Modules</h3><div class="v6-mods">' + C.CFG.modules.map((m) => { const x = R.mr[m]; return '<div class="v6-mod"><div><b>' + esc(C.CFG.labels[m]) + '</b><span>' + esc(x.name) + (x.next ? ' → ' + esc(x.next) : '') + '</span>' + tag(m) + '</div>' + bar(x.pct) + '<small>' + fmt(x.xp) + ' XP</small></div>'; }).join('') + '</div>' +
+      '<h3>Recent XP</h3>' + (s.log.length ? '<ul class="v6-log">' + s.log.slice().reverse().slice(0, 8).map((x) => '<li><span>' + esc(C.CFG.labels[x.m] || x.m) + '</span><b>+' + x.xp + '</b><small>×' + num(x.x, 1).toFixed(2) + (x.h ? ', hint ' + x.h : '') + '</small></li>').join('') + '</ul>' : '<p class="muted small">No XP yet. Answer one drill correctly.</p>');
+  }
+  function tabMatrix() {
+    const groups = matrix(), s = st();
+    if (!groups.length) return '<p class="muted">No repertoire chapters yet. They appear here as soon as the hub’s data file has them.</p>';
+    return '<p class="muted small v6-lead">Chapters open in order. Clear a chapter’s Boss Fight to open the next one. Strict Mode (no mistakes) appears after you clear the standard Boss Fight.</p>' + groups.map((g) => {
+      const done = g.chapters.filter((c) => c.cleared).length;
+      return '<section class="v6-group"><div class="v6-group-head"><h3>' + esc(g.name) + '</h3><span class="small muted">' + (g.side ? esc(g.side) + ', ' : '') + done + ' of ' + g.chapters.length + ' chapters cleared</span></div>' + bar(g.chapters.length ? done / g.chapters.length : 0) +
+        '<div class="v6-chaps">' + g.chapters.map((c, i) => {
+          const prev = g.chapters[i - 1], noTier = !c.playable.length;
+          const act = c.locked ? '<small class="muted">Clear the Boss Fight of ' + esc(prev ? prev.title : 'the chapter before') + ' first.</small>'
+            : noTier ? '<a class="btn btn-gold btn-sm" href="#upgrades">' + icon('crown') + ' Needs a higher level</a>'
+              : '<button type="button" class="btn ' + (c.cleared ? 'btn-ghost' : 'btn-primary') + ' btn-sm" data-v6b="boss" data-ch="' + esc(c.id) + '" data-mode="hardcore">' + icon('skull-crossbones') + ' Boss Fight</button>' +
+                (c.cleared ? '<button type="button" class="btn btn-ghost btn-sm" data-v6b="boss" data-ch="' + esc(c.id) + '" data-mode="strict">' + icon('crosshairs') + ' Strict Mode</button>' : '');
+          return '<div class="v6-chap' + (c.locked ? ' is-locked' : '') + '"><div class="v6-chap-main"><b>' + esc(c.title) + '</b><small>' + c.items.length + (c.items.length === 1 ? ' line' : ' lines') + ', mastery ' + Math.round(c.mastery * 100) + '%' + (c.playable.length < c.items.length ? ', ' + c.playable.length + ' open on your plan' : '') + '</small>' + bar(c.mastery) + '</div>' +
+            '<div class="v6-chap-act">' + (c.cleared ? '<span class="v6-pill is-good">Boss cleared</span>' : '') + (c.strict ? '<span class="v6-pill is-strict">Strict clear</span>' : '') + act + '</div></div>';
+        }).join('') + '</div></section>';
+    }).join('');
+  }
+  function tabBounties(R) {
+    ensureBounties();
+    const s = st(), weak = C.weakest(R.mr)[0];
+    const list = (k, title) => '<h3>' + title + '</h3><div class="v6-bounties">' + s.bounty[k].items.map((b) => '<div class="v6-bounty' + (b.done ? ' is-done' : '') + '"><div><b>' + esc(b.label) + '</b><small>' + (b.done ? 'Complete' : b.progress + ' / ' + b.target) + (b.reward.xp ? ', +' + b.reward.xp + ' XP' : '') + (b.reward.tokens ? ', +' + b.reward.tokens + (b.reward.tokens === 1 ? ' token' : ' tokens') : '') + '</small></div>' + bar(b.progress / b.target) + '</div>').join('') + '</div>';
+    return '<p class="muted small v6-lead">Missions are picked from your weakest modules, so they pull your training toward the gaps. Your weakest module right now: ' + esc(C.CFG.labels[weak]) + '.</p>' + list('daily', 'Today') + list('weekly', 'This week');
+  }
+  function tabCommunity() {
+    const s = st(), b = s.cache.bench, B = benchNow(), evs = events();
+    const goals = (b && b.goals) || C.CFG.bench.goals, totals = (b && b.totals) || {};
+    const M = [['xp', 'XP earned'], ['correct', 'Correct answers'], ['puzzles', 'Puzzles solved'], ['boss', 'Boss Fights cleared']];
+    const ticks = C.CFG.bench.phases.map((p) => '<i style="left:' + Math.round(p[0] * 100) + '%" title="×' + p[1].toFixed(2) + ' at ' + Math.round(p[0] * 100) + '%"></i>').join('');
+    const mineKey = (k) => (s.bench.period === (b && b.period) || !b ? s.bench[k] : 0);
+    const grid = '<div class="v6-grid">' + M.map((m) => { const g = Math.max(1, num(goals[m[0]], 1)), t = num(totals[m[0]], 0); return '<div class="v6-bench"><small>' + m[1] + '</small><b>' + Math.min(100, Math.round(t / g * 100)) + '%</b><span>' + fmt(t) + ' of ' + fmt(g) + '</span><div class="v6-bar v6-bar-ticks"><span style="width:' + Math.round(C.clampN(t / g, 0, 1) * 100) + '%"></span>' + (m[0] === 'xp' ? ticks : '') + '</div><small>You: ' + fmt(mineKey(m[0])) + '</small></div>'; }).join('') + '</div>';
+    const buff = B.phase.phase < 0 ? 'No server-wide buff yet. The first phase starts at ' + Math.round(C.CFG.bench.phases[0][0] * 100) + '% of the XP goal.' : 'Phase ' + (B.phase.phase + 1) + ' of ' + C.CFG.bench.phases.length + ': XP ×' + B.phase.mult.toFixed(2) + ' for everyone who contributed at least ' + fmt(B.min) + ' XP. ' + (B.buff > 1 ? 'Active for you.' : 'You have ' + fmt(B.mine) + ' so far.');
+    return (net() ? '' : '<p class="v6-note-box">The community benchmarks and events need the Arena server. Add its address under Admin menu, Weekly tournament and sales bridge.</p>') +
+      '<h3>Global Benchmark Grid</h3>' + (b ? '<p class="small muted">Week ' + esc(b.period || '') + ', ' + (b.players || 0) + ' player' + (b.players === 1 ? '' : 's') + ' contributing.</p>' : '') + grid + '<p class="v6-buff small">' + esc(buff) + '</p>' +
+      '<h3>Events</h3>' + (evs.length ? '<div class="v6-events">' + evs.map((e) => { const x = s.ev[e.id] || { p: 0, done: false }, ch = e.challenge; return '<div class="v6-event"><div><b>' + esc(e.title) + '</b><small>' + (e.end ? 'Until ' + esc(dateText(e.end)) : 'Open-ended') + (e.xpMult !== 1 ? ', XP ×' + e.xpMult : '') + '</small></div>' + (ch ? '<div class="v6-ev-ch"><span>' + esc(ch.title) + '</span>' + bar(x.p / ch.target) + '<small>' + (x.done ? 'Complete' : fmt(x.p) + ' / ' + fmt(ch.target)) + (ch.reward.tokens ? ', +' + ch.reward.tokens + ' tokens' : '') + '</small></div>' : '') + '</div>'; }).join('') + '</div>' : '<p class="muted small">No event is running.</p>');
+  }
+  function tabTrophies() {
+    const s = st(), by = { boss: 'Boss Fights', strict: 'Strict clears', event: 'Event badges', rank: 'Ranks' }, fr = (() => { try { return Friends.list(); } catch (e) { return []; } })();
+    const groups = Object.keys(by).map((k) => ({ k, items: s.trophies.filter((t) => t.kind === k) })).filter((g) => g.items.length);
+    let hub = 0; try { hub = Badges.count(); } catch (e) { hub = 0; }
+    return '<p class="muted small v6-lead">Milestones stay in your cabinet for good. Friends see your last three on your friend card.' + (hub ? ' The hub’s own badges (' + hub + ') are in the <a href="#trophies">trophy room</a>.' : '') + '</p>' +
+      (groups.length ? groups.map((g) => '<h3>' + by[g.k] + '</h3><ul class="v6-trophies">' + g.items.slice().reverse().map((t) => '<li><span class="v6-tro v6-tro-' + esc(t.kind) + '">' + icon(t.kind === 'event' ? 'ribbon' : t.kind === 'strict' ? 'crosshairs' : t.kind === 'rank' ? 'ranking-star' : 'skull-crossbones') + '</span><b>' + esc(t.name) + '</b><small>' + esc(dateText(t.t)) + '</small></li>').join('') + '</ul>').join('') : '<p class="muted">Nothing here yet. Clear a Boss Fight or finish an event challenge.</p>') +
+      '<h3>Friends</h3>' + (fr.length ? '<div class="v6-friends">' + fr.slice(0, 12).map((f) => '<div class="v6-friend"><b>' + esc(f.name) + '</b>' + friendLine(f) + '</div>').join('') + '</div>' : '<p class="muted small">Add friends on the <a href="#leaderboard">leaderboard</a> to compare ranks and trophies.</p>');
+  }
+  function mountProfile(view) {
+    const ui = { tab: 'overview' };
+    const R0 = () => ranks();
+    view.innerHTML = '<div class="v6-page" id="v6-page"></div>';
+    const root = qs('#v6-page', view);
+    function head(R) {
+      const s = st();
+      return '<header class="v6-head">' + avatar(R) + '<div><h1>' + esc(App.profile.name || 'Your profile') + '</h1><p class="muted">Overall ' + esc(R.overall.name) + ' · Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + ' · ' + fmt(s.total) + ' XP</p></div>' +
+        '<label class="switch-row v6-focus"><span>Focus Mode: ' + (s.focus ? 'ON' : 'OFF') + '<small class="field-hint" style="display:block">Hides timers, streak widgets and the flow chip. XP and multipliers keep running.</small></span><input type="checkbox" data-v6-focus' + (s.focus ? ' checked' : '') + '></label></header>' +
+        '<nav class="seg v6-tabs" role="tablist" aria-label="Profile sections">' + [['overview', 'Overview'], ['matrix', 'Skill Matrix'], ['bounties', 'Bounties'], ['community', 'Community'], ['trophies', 'Trophies']].map((t) => '<button type="button" role="tab" data-v6t="' + t[0] + '" aria-pressed="' + (ui.tab === t[0]) + '">' + t[1] + '</button>').join('') + '</nav>';
+    }
+    function paint() {
+      if (boss) { boss.destroy(); }
+      const R = R0();
+      root.innerHTML = head(R) + '<div class="v6-body" id="v6-body">' + (ui.tab === 'matrix' ? tabMatrix() : ui.tab === 'bounties' ? tabBounties(R) : ui.tab === 'community' ? tabCommunity() : ui.tab === 'trophies' ? tabTrophies() : tabOverview(R)) + '</div>' + (isAdmin() ? '<p class="small muted v6-admin"><a href="#events">Open the Master Event Engine</a></p>' : '');
+    }
+    function startBoss(chId, mode) {
+      let ch = null;
+      matrix().forEach((g) => g.chapters.forEach((c) => { if (c.id === chId) ch = c; }));
+      if (!ch || ch.locked || !ch.playable.length) { toast('That chapter is not open yet.'); return; }
+      if (mode === 'strict' && !ch.cleared) { toast('Clear the standard Boss Fight first.'); return; }
+      if (boss) boss.destroy();
+      const b = makeBoss(ch, mode, root, (again, m) => { if (boss) boss.destroy(); if (again) startBoss(again, m); else paint(); });
+      if (!b) { toast('This chapter has no line to fight with yet.'); return; }
+      b.start(); scrollToEl(root);
+    }
+    paint();
+    sync().then((r) => { if (r && root.isConnected && !boss && (ui.tab === 'community' || ui.tab === 'overview')) { const y = window.scrollY; paint(); window.scrollTo(0, y); } });
+    const onClick = (e) => {
+      const t = e.target.closest('[data-v6t]');
+      if (t) { ui.tab = t.getAttribute('data-v6t'); paint(); return; }
+      const b = e.target.closest('[data-v6b]');
+      if (!b || !root.contains(b)) return;
+      const a = b.getAttribute('data-v6b');
+      if (a === 'boss') startBoss(b.getAttribute('data-ch'), b.getAttribute('data-mode') === 'strict' ? 'strict' : 'hardcore');
+      else if (boss) boss.click(a);
+    };
+    root.addEventListener('click', onClick);
+    const tick = setInterval(() => { if (!root.isConnected) { clearInterval(tick); return; } }, 5000);
+    return () => { root.removeEventListener('click', onClick); clearInterval(tick); if (boss) boss.destroy(); };
+  }
+
+  /* ---------- the Master Event Engine (admin) ---------- */
+  const localInput = (ms) => { if (!ms) return ''; const d = new Date(ms), p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+  const fromInput = (v) => { const t = v ? new Date(v).getTime() : 0; return Number.isFinite(t) ? t : 0; };
+  function mountEvents(view) {
+    view.innerHTML = '<div class="v6-page" id="v6-ev"></div>';
+    const root = qs('#v6-ev', view);
+    if (!isAdmin()) { root.innerHTML = '<header class="v6-head"><div><h1>Master Event Engine</h1><p class="muted">This page is for the admin. Sign in to admin mode and add the Arena server address and admin token under Admin menu, Weekly tournament and sales bridge.</p></div></header>'; return null; }
+    let list = [], goals = null, edit = null, msg = '', alive = true;
+    const blankEv = () => ({ id: 'ev-' + Date.now().toString(36), title: '', on: true, start: Date.now(), end: Date.now() + 7 * 864e5, xpMult: 1.5, tokenCost: 1, mspcFree: 0, mspcPaid: 0, theme: { accent: '', accentInk: '' }, welcome: { title: '', text: '' }, challenge: { title: '', metric: 'xp', target: 500, reward: { tokens: 1, xp: 0 }, badge: { id: '', name: '' } } });
+    const field = (label, html, hint) => '<label class="field"><span class="field-label">' + label + '</span>' + html + (hint ? '<small class="field-hint">' + hint + '</small>' : '') + '</label>';
+    const inp = (name, v, type, extra) => '<input class="input" name="' + name + '" type="' + (type || 'text') + '" value="' + esc(v == null ? '' : v) + '" ' + (extra || '') + '>';
+    function form() {
+      const e = edit, ch = e.challenge || {}, w = e.welcome || {}, th = e.theme || {};
+      return '<form class="v6-evform" data-v6ev-form><div class="v6-two">' + field('Title', inp('title', e.title, 'text', 'maxlength="60" required')) + field('Event id', inp('id', e.id, 'text', 'maxlength="40" pattern="[\\w-]{2,40}" required'), 'Letters, numbers and dashes.') + '</div>' +
+        '<div class="v6-two">' + field('Starts', inp('start', localInput(e.start), 'datetime-local')) + field('Ends', inp('end', localInput(e.end), 'datetime-local'), 'Empty = no end.') + '</div>' +
+        '<div class="v6-two">' + field('XP multiplier', inp('xpMult', e.xpMult, 'number', 'step="0.05" min="0.5" max="5"')) + field('Token cost of a rescue', inp('tokenCost', e.tokenCost, 'number', 'min="0" max="10"')) + '</div>' +
+        '<div class="v6-two">' + field('Second chances a day, free', inp('mspcFree', e.mspcFree || '', 'number', 'min="0" max="100"'), 'Empty = the normal 5.') + field('Second chances a day, paid', inp('mspcPaid', e.mspcPaid || '', 'number', 'min="0" max="500"'), 'Empty = the normal 50.') + '</div>' +
+        '<div class="v6-two">' + field('Accent colour', inp('accent', th.accent || '#38bdf8', 'color')) + field('Text on the accent', inp('accentInk', th.accentInk || '#082f49', 'color')) + '</div>' +
+        '<label class="switch-row"><span>Use the colour theme</span><input type="checkbox" name="useTheme"' + (th.accent ? ' checked' : '') + '></label>' +
+        field('Welcome pop-up title', inp('wTitle', w.title, 'text', 'maxlength="60"')) + field('Welcome pop-up text', '<textarea class="input" name="wText" rows="3" maxlength="400">' + esc(w.text || '') + '</textarea>') +
+        '<h3>Exclusive challenge</h3><div class="v6-two">' + field('Challenge title', inp('cTitle', ch.title, 'text', 'maxlength="60"'), 'Empty = no challenge.') +
+        field('Counts', '<select class="input" name="cMetric">' + [['xp', 'XP earned'], ['correct', 'Correct answers'], ['puzzles', 'Puzzles solved'], ['boss', 'Boss Fights cleared']].map((m) => '<option value="' + m[0] + '"' + (ch.metric === m[0] ? ' selected' : '') + '>' + m[1] + '</option>').join('') + '</select>') + '</div>' +
+        '<div class="v6-two">' + field('Target', inp('cTarget', ch.target || '', 'number', 'min="1"')) + field('Reward: tokens', inp('cTokens', (ch.reward || {}).tokens || '', 'number', 'min="0" max="50"')) + '</div>' +
+        '<div class="v6-two">' + field('Reward: XP', inp('cXp', (ch.reward || {}).xp || '', 'number', 'min="0"')) + field('Exclusive badge name', inp('cBadge', (ch.badge || {}).name, 'text', 'maxlength="40"')) + '</div>' +
+        '<label class="switch-row"><span>Event is switched on</span><input type="checkbox" name="on"' + (e.on !== false ? ' checked' : '') + '></label>' +
+        '<div class="btn-row"><button type="submit" class="btn btn-primary">Save event</button><button type="button" class="btn btn-ghost" data-v6ev="cancel">Cancel</button></div></form>';
+    }
+    function paint() {
+      const now = Date.now();
+      root.innerHTML = '<header class="v6-head"><div><h1>Master Event Engine</h1><p class="muted">Dates, multipliers, token costs, second-chance limits, colour themes, welcome pop-ups and challenges. Players pick changes up within a few minutes.</p></div><a class="btn btn-ghost btn-sm" href="#profile">Profile</a></header>' +
+        (msg ? '<p class="v6-note-box">' + esc(msg) + '</p>' : '') +
+        (edit ? form() : '<div class="btn-row"><button type="button" class="btn btn-primary" data-v6ev="new">' + icon('plus') + ' New event</button></div><div class="v6-events">' + (list.length ? list.map((e) => '<div class="v6-event"><div><b>' + esc(e.title) + '</b><small>' + (C.eventActive(e, now) ? 'Live' : e.on === false ? 'Off' : e.start > now ? 'Scheduled' : 'Ended') + ', ' + esc(dateText(e.start)) + (e.end ? ' to ' + esc(dateText(e.end)) : '') + ', XP ×' + e.xpMult + '</small></div><div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-v6ev="edit" data-id="' + esc(e.id) + '">Edit</button><button type="button" class="btn btn-quiet btn-sm" data-v6ev="del" data-id="' + esc(e.id) + '">Delete</button></div></div>').join('') : '<p class="muted small">No events yet.</p>') + '</div>' +
+          (goals ? '<h3>Community goals this week</h3><form class="v6-two v6-goals" data-v6ev-goals>' + [['xp', 'XP goal'], ['correct', 'Correct answers'], ['puzzles', 'Puzzles solved'], ['boss', 'Boss Fights']].map((g) => field(g[1], inp('g_' + g[0], goals.goals[g[0]], 'number', 'min="1"'))).join('') + field('Minimum XP to share the buff', inp('g_min', goals.min, 'number', 'min="0"')) + '<div class="btn-row"><button type="submit" class="btn btn-ghost btn-sm">Save goals</button></div></form>' : ''));
+    }
+    async function load() {
+      try {
+        const r = await V5Net.post('v6_event_list', { token: tokenOf() });
+        list = (Array.isArray(r.events) ? r.events : []).map((e) => Object.assign({ on: e.on !== false }, cleanEvent(e) || {})).filter((e) => e.id);
+        goals = r.goals && r.goals.goals ? r.goals : null; msg = '';
+      } catch (e) { msg = 'The Arena server said no (' + esc(e.reason || 'error') + '). Check the address and the admin token.'; }
+      if (alive) paint();
+    }
+    const val = (f, n) => (f.elements[n] ? f.elements[n].value : '');
+    async function onSubmit(ev) {
+      const f = ev.target.closest('[data-v6ev-form]');
+      if (f) {
+        ev.preventDefault();
+        const o = { id: val(f, 'id'), title: val(f, 'title'), on: f.elements.on.checked, start: fromInput(val(f, 'start')), end: fromInput(val(f, 'end')), xpMult: num(val(f, 'xpMult'), 1), tokenCost: num(val(f, 'tokenCost'), 1), mspcFree: num(val(f, 'mspcFree'), 0), mspcPaid: num(val(f, 'mspcPaid'), 0),
+          theme: f.elements.useTheme.checked ? { accent: val(f, 'accent'), accentInk: val(f, 'accentInk') } : null, welcome: { title: val(f, 'wTitle'), text: val(f, 'wText') },
+          challenge: val(f, 'cTitle') ? { title: val(f, 'cTitle'), metric: val(f, 'cMetric'), target: num(val(f, 'cTarget'), 1), reward: { tokens: num(val(f, 'cTokens'), 0), xp: num(val(f, 'cXp'), 0) }, badge: val(f, 'cBadge') ? { id: val(f, 'id'), name: val(f, 'cBadge') } : null } : null };
+        try { await V5Net.post('v6_event_save', { token: tokenOf(), event: o }); edit = null; toast('Event saved.', 'good'); sync(); } catch (e) { msg = 'Could not save (' + esc(e.reason || 'error') + ').'; }
+        load(); return;
+      }
+      const g = ev.target.closest('[data-v6ev-goals]');
+      if (g) {
+        ev.preventDefault();
+        try { await V5Net.post('v6_goals_save', { token: tokenOf(), goals: { xp: num(val(g, 'g_xp'), 1), correct: num(val(g, 'g_correct'), 1), puzzles: num(val(g, 'g_puzzles'), 1), boss: num(val(g, 'g_boss'), 1) }, min: num(val(g, 'g_min'), 0) }); toast('Goals saved.', 'good'); } catch (e) { msg = 'Could not save (' + esc(e.reason || 'error') + ').'; }
+        load();
+      }
+    }
+    async function onClick(ev) {
+      const b = ev.target.closest('[data-v6ev]');
+      if (!b) return;
+      const a = b.getAttribute('data-v6ev'), id = b.getAttribute('data-id');
+      if (a === 'new') { edit = blankEv(); paint(); }
+      else if (a === 'cancel') { edit = null; paint(); }
+      else if (a === 'edit') { edit = JSON.parse(JSON.stringify(list.filter((e) => e.id === id)[0] || blankEv())); paint(); }
+      else if (a === 'del') {
+        if (!(await confirmSheet('Delete this event?', 'Players stop seeing it, and its multiplier ends.', 'Delete'))) return;
+        try { await V5Net.post('v6_event_delete', { token: tokenOf(), id }); toast('Event deleted.', 'good'); sync(); } catch (e) { msg = 'Could not delete (' + esc(e.reason || 'error') + ').'; }
+        load();
+      }
+    }
+    root.addEventListener('submit', onSubmit); root.addEventListener('click', onClick);
+    paint(); load();
+    return () => { alive = false; root.removeEventListener('submit', onSubmit); root.removeEventListener('click', onClick); };
+  }
+
+  /* ---------- Shuffle Trainer: the filter bar and the Smart Mix ---------- */
+  const slug6 = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  function leakSets() {
+    const out = { M: {}, S: {}, P: {}, C: {} };
+    let log = [];
+    try { log = MistakeLog.all() || []; } catch (e) { log = []; }
+    const groups = {};
+    (CONTENT.openings || []).forEach((o) => { if (o && o.group) (groups[o.group] = groups[o.group] || []).push(o.id); });
+    log.forEach((x) => {
+      if (!x || !out[x.k]) return;
+      const hay = slug6(x.opening) + ' ' + (Array.isArray(x.tags) ? x.tags.join(' ') : String(x.tags || '')).toLowerCase();
+      Object.keys(groups).forEach((g) => {
+        const gs = slug6(g), first = gs.split('-')[0];
+        if (hay.indexOf(gs) >= 0 || (first.length >= 4 && hay.indexOf(first) >= 0)) groups[g].forEach((id) => { out[x.k][id] = 1; });
+      });
+    });
+    return out;
+  }
+  function shuffleCtx() {
+    return { progress: App.progress, now: Date.now(), decay: C.CFG.decayDays, leak: leakSets(), mistakes: (id) => { try { return !!SRS.lineHasMistakes(id); } catch (e) { return false; } } };
+  }
+  const SH_FILTERS = [['mix', 'Smart Mix'], ['notseen', 'Not seen yet'], ['frontline', 'Active Frontline'], ['mistakes', 'My Mistakes'], ['leak:M', 'Leak: Move'], ['leak:S', 'Leak: Specifics'], ['leak:P', 'Leak: Priorities'], ['leak:C', 'Leak: Calculation']];
+  function narrow(filter, open) {
+    if (typeof filter !== 'string' || filter.indexOf('v6:') !== 0) return null;
+    const mode = filter.slice(3), c = shuffleCtx();
+    return mode === 'mix' ? C.smartMix(open, c, 30) : C.filterLines(open, mode, c);
+  }
+  function counts(open) { const c = shuffleCtx(), o = {}; SH_FILTERS.forEach((f) => { o[f[0]] = f[0] === 'mix' ? Math.min(open.length, 30) : C.filterLines(open, f[0], c).length; }); return o; }
+  function filterOptions(current, open) {
+    const n = counts(open);
+    return '<optgroup label="Training filters">' + SH_FILTERS.map((f) => '<option value="v6:' + f[0] + '"' + (current === 'v6:' + f[0] ? ' selected' : '') + '>' + esc(f[1]) + ' (' + n[f[0]] + ')</option>').join('') + '</optgroup>';
+  }
+  function filterBar(current, open) {
+    const n = counts(open);
+    return '<div class="sh-group v6-filters"><span class="sh-label">Quick filters</span><div class="v6-chips">' +
+      '<button type="button" class="btn ' + (current === 'v6:mix' ? 'btn-primary' : 'btn-ghost') + ' btn-sm v6-auto" data-v6-f="v6:mix"' + (open.length ? '' : ' disabled') + ' aria-pressed="' + (current === 'v6:mix') + '">' + icon('wand-magic-sparkles') + ' Smart Mix: Auto-Pilot</button>' +
+      SH_FILTERS.slice(1).map((f) => '<button type="button" class="v6-chip-btn" data-v6-f="v6:' + f[0] + '" aria-pressed="' + (current === 'v6:' + f[0]) + '"' + (n[f[0]] ? '' : ' disabled title="Nothing matches yet"') + '>' + esc(f[1]) + ' <small>' + n[f[0]] + '</small></button>').join('') + '</div></div>';
+  }
+
+  /* ---------- Trim review: the eight icons, for both players ---------- */
+  function tagHTML(it, prev) {
+    const ic = C.reviewIcon(it, prev, (cp) => Engine.winPct(cp));
+    return ic ? '<span class="t v6-k v6-k-' + ic.k + '" title="' + esc(ic.name + ': ' + ic.text) + '">' + esc(ic.glyph) + '</span>' : '';
+  }
+  const budget = (mine, opp, user) => { let a = 0, b = 0; return (c) => (c.it.color === user ? a++ < mine : b++ < opp); };
+  function legend() {
+    return '<div class="v6-legend" aria-label="Move icons">' + Object.keys(C.ICONS).map((k) => '<span><span class="t v6-k v6-k-' + k + '">' + esc(C.ICONS[k][0]) + '</span> ' + esc(C.ICONS[k][1]) + '</span>').join('') + '</div>';
+  }
+
+  /* ---------- friend cards, top-bar chip, settings ---------- */
+  const cleanTxt = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, n);
+  function card() { const R = ranks(); return C.cardLine({ student: R.student.name, arena: R.arena.name, xp: st().total, trophies: st().trophies.slice(-3).map((t) => t.name) }); }
+  function cleanCard(x) {
+    if (!x || typeof x !== 'object' || !cleanTxt(x.r, 14)) return null;
+    return { r: cleanTxt(x.r, 14), a: cleanTxt(x.a, 10), x: C.clampN(Math.round(num(x.x, 0)), 0, 99999999), t: (Array.isArray(x.t) ? x.t : []).slice(0, 3).map((t) => cleanTxt(t, 24)).filter(Boolean) };
+  }
+  function friendLine(f) {
+    const x = f && f.x;
+    if (!x || !x.r) return '';
+    return '<p class="v6-fline">' + icon('ranking-star') + ' ' + esc(x.r) + (x.a && x.a !== 'Unranked' ? ', Arena ' + esc(x.a) : '') + ', ' + fmt(x.x) + ' XP' + (x.t && x.t.length ? '. ' + x.t.map(esc).join(', ') : '') + '</p>';
+  }
+  function chip() { const R = ranks(); return '<span class="v6-chip" style="--ring:' + R.arena.color + '" title="Overall rank: ' + esc(R.overall.name) + '">' + esc(R.overall.name.slice(0, 3).toUpperCase()) + '</span>'; }
+  function settingsHTML() {
+    return '<label class="switch-row"><span>Executive Focus Mode<small class="field-hint" style="display:block">Hides timers, streak widgets and the flow chip. XP and multipliers keep running.</small></span><input type="checkbox" data-v6-focus' + (st().focus ? ' checked' : '') + '></label>' +
+      '<a class="btn btn-ghost btn-sm" href="#profile" data-close style="justify-self:start">' + icon('ranking-star') + ' Open my executive profile</a>';
+  }
+  /* ---------- wiring ---------- */
+  function onDocClick(e) {
+    const h = e.target.closest('[data-v6="hint"]');
+    if (h) { hintPress(h.closest('[data-v6-strip]')); return; }
+    const g = e.target.closest('[data-v6="hourglass"]');
+    if (g) {
+      const m = stripModule(), s = st();
+      if (!m) return;
+      if (s.hard[m] === 'hard') delete s.hard[m]; else s.hard[m] = 'hard';
+      pos.t0 = Date.now(); save(); renderStrips(); return;
+    }
+    const f = e.target.closest('[data-v6-f]');
+    if (f && !f.disabled) {
+      const sel = qs('#sh-filter');
+      if (!sel) return;
+      const v = f.getAttribute('data-v6-f');
+      sel.value = sel.value === v ? '' : v;
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+  function onDocChange(e) { const t = e.target; if (t && t.matches && t.matches('[data-v6-focus]')) { setFocus(t.checked); qsa('[data-v6-focus]').forEach((x) => { x.checked = t.checked; }); const lab = qs('.v6-focus > span'); if (lab && lab.firstChild) lab.firstChild.textContent = 'Focus Mode: ' + (t.checked ? 'ON' : 'OFF'); } }
+  function boot() {
+    S = load(); applyFocus(); applyTheme(); ensureBounties();
+    const view = qs('#view');
+    if (view) new MutationObserver(kick).observe(view, { childList: true, subtree: true });
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('change', onDocChange);
+    window.addEventListener('hashchange', () => { resetPos(); kick(); });
+    kick(); sync();
+    setInterval(() => { if (document.visibilityState === 'visible') sync(); }, 300000);
+  }
+  return {
+    boot, mountProfile, mountEvents, narrow, filterOptions, filterBar, tagHTML, budget, legend, card, cleanCard, friendLine, chip, settingsHTML,
+    ctx(o) { if (o && o.module) { ctx.shuffle = o.module; resetPos(); } },
+    state: st, ranks, sync, events, payout, matrix,
+    _t: { forceAdmin(v) { adminOverride = v; }, tokenOf, onScore, hintPress, makeBoss, resetPos, get pos() { return pos; }, get boss() { return boss; }, secondLeft, addXp, bountyEvent, eventProgress, trophy, benchNow, leakSets, shuffleCtx, setState(s) { S = s; }, ctxo: ctx }
+  };
+})();
+
+
 const TABS = [
   { id: 'home', label: 'Home', icon: 'house', routes: ['home'] },
-  { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'shuffle', 'leaderboard', 'peer', 'srs'] },
+  { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'shuffle', 'leaderboard', 'peer', 'srs', 'profile', 'events'] },
   { id: 'theory', label: 'Theory', icon: 'book-open', routes: ['openings', 'middlegame', 'endgame', 'puzzles'], href: '#openings' },
   { id: 'trim', label: 'Trim', icon: 'scissors', routes: ['trim', 'games', 'brilliant'] },
   { id: 'upgrades', label: 'Upgrades', icon: 'crown', routes: ['upgrades'] },
   { id: 'about', label: 'About', icon: 'user', routes: ['about'] }
 ];
-const ROUTE_TITLES = { puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
-const DOC_TITLES = { puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
-const ALIASES = { arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
+const ROUTE_TITLES = { profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
+const DOC_TITLES = { profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
+const ALIASES = { executive: 'profile', 'skill-matrix': 'profile', matrix: 'profile', bosses: 'profile', 'boss-fight': 'profile', bounties: 'profile', community: 'profile', 'event-engine': 'events', 'master-events': 'events', arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
   arena: 'leaderboard', friends: 'leaderboard', tournament: 'leaderboard', tournaments: 'leaderboard',
   ranking: 'leaderboard', rankings: 'leaderboard', ranks: 'leaderboard', 'game-vault': 'games', gamevault: 'games', 'my-games': 'games', folders: 'games', stats: 'insights', brilliants: 'brilliant', brilliancies: 'brilliant', mistakes: 'vault-browser', 'mistake-browser': 'vault-browser', 'blunder-clinic': 'clinic', 'repertoire-trainer': 'mspc-rep',
   'peer-puzzles': 'peer', 'community-puzzles': 'peer', puzzle: 'puzzles', tactics: 'puzzles', 'lichess-puzzles': 'puzzles', 'rated-puzzles': 'puzzles', 'my-mistakes': 'srs', 'spaced-repetition': 'srs', repetition: 'srs', trophy: 'trophies', badges: 'trophies', achievements: 'trophies', queue: 'review-queue', 'admin-queue': 'review-queue',
@@ -20028,7 +21298,8 @@ const MOUNT = {
   leaderboard: (v) => { const d = mountLeaderboard(v), a = Arena.mount(v); return () => { a(); if (typeof d === 'function') d(); }; }, games: mountVault, insights: mountInsights,
   clinic: mountClinic, 'mspc-rep': mountMspcRep, brilliant: mountBrilliant, 'vault-browser': mountVaultBrowser,
   peer: (v) => { const d = mountPeer(v), p = V5Pool.mount(v); return () => { p(); if (typeof d === 'function') d(); }; }, srs: mountSrs, trophies: mountTrophies, 'review-queue': (v) => { const d = mountQueue(v); V5Peer.mountAdmin(v); V5Srv.mountAdmin(v); return d; },
-  privacy: mountPrivacy
+  privacy: mountPrivacy,
+  profile: (v) => V6.mountProfile(v), events: (v) => V6.mountEvents(v)
 };
 let current = { route: null, dispose: null };
 let installPrompt = null;
@@ -20130,6 +21401,7 @@ function boot() {
   V34.boot();
   V36.boot();
   V37.boot();
+  V6.boot();                                                       // v6: ranks, XP engine, Skill Matrix, events
   Layout5.init();                                                  // v5: resizable panels
   Arena.boot();                                                    // v5: the weekly payout and friend links
   window.LC = { version: CONFIG.version, hashKey: Access.hashKey, profileToken: Access.encodeProfile, ai: AI.on(), site: SiteURL.base(), deployment: SiteURL.kind(), data: () => Site.status() };
