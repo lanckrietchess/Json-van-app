@@ -1,0 +1,121 @@
+/* ===== v6 Executive layer: ranks, XP strip, Skill Matrix, Boss Fights, community ===== */
+.v6-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 10px;padding:8px 12px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-hint{flex:none}
+.v6-hint:disabled{opacity:.5;cursor:default}
+.v6-xp{display:flex;align-items:center;gap:10px;flex:1 1 180px;min-width:150px}
+.v6-xp b{font-variant-numeric:tabular-nums;font-size:13px;font-weight:700;white-space:nowrap;color:var(--chalk)}
+.v6-xp-bar{position:relative;flex:1;height:6px;border-radius:6px;background:rgba(148,163,184,.18);overflow:hidden}
+.v6-xp-fill{position:absolute;inset:0 auto 0 0;width:100%;border-radius:6px;background:var(--accent);transition:width .25s ease}
+.v6-flow{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--fog);font-variant-numeric:tabular-nums;white-space:nowrap}
+.v6-flow i{color:var(--accent)}
+.v6-hg{display:inline-flex}
+.v6-hg-btn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 10px;border:1px solid var(--rule);border-radius:8px;background:transparent;color:var(--fog);font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.v6-hg-btn[aria-pressed="true"]{border-color:var(--accent-line);color:var(--chalk);background:var(--accent-soft)}
+.v6-pawn{width:18px;height:18px;display:block}
+.v6-pawn-out{fill:none;stroke:currentColor;stroke-width:1.1;opacity:.7}
+.v6-pawn-fill{fill:var(--accent);opacity:0}
+.v6-hg-btn[aria-pressed="true"] .v6-pawn-fill{opacity:.9}
+.v6-note{flex:1 1 100%;margin:0;padding:8px 10px;border-radius:8px;background:var(--accent-soft);color:var(--chalk);line-height:1.45}
+.v6-has-strip [data-act="hint"]{display:none!important}
+.v6-frozen{pointer-events:none;opacity:.55;filter:grayscale(.4)}
+/* Executive Focus Mode: visuals off, economy untouched */
+body.lc-focus .v6-viz{display:none!important}
+body.lc-focus .hud36,body.lc-focus #sh-hud .hud-combo,body.lc-focus .profile-chip .chip-streak[title="Days in a row"]{display:none!important}
+/* profile */
+.v6-page{max-width:980px;margin:0 auto;padding:6px 0 40px}
+.v6-head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin:6px 0 16px}
+.v6-head>div:nth-child(2),.v6-head>div:first-child:not(.v6-avatar){flex:1 1 220px;min-width:0}
+.v6-head h1{font-size:24px;margin:0 0 4px}
+.v6-focus{max-width:340px;flex:1 1 260px}
+.v6-avatar{position:relative;width:64px;height:64px;border-radius:50%;border:3px solid var(--ring,var(--rule));display:grid;place-items:center;background:var(--ink-2);flex:none}
+.v6-avatar span{font:800 24px var(--ui);color:var(--chalk)}
+.v6-avatar-badge{position:absolute;right:-10px;bottom:-4px;font:800 10px var(--ui);font-style:normal;letter-spacing:.04em;padding:2px 6px;border-radius:6px;background:var(--accent);color:var(--accent-ink)}
+.v6-chip{display:inline-grid;place-items:center;min-width:30px;height:22px;padding:0 6px;border-radius:999px;border:2px solid var(--ring,var(--rule));font:800 10px var(--ui);letter-spacing:.04em;color:var(--chalk)}
+.v6-tabs{margin-bottom:16px;flex-wrap:wrap}
+.v6-body h3,.v6-page>h3{margin:22px 0 10px;font-size:15px;color:var(--fog);font-weight:700;letter-spacing:.01em}
+.v6-lead{max-width:68ch;margin-bottom:10px}
+.v6-rank3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.v6-stat,.v6-kpis>div,.v6-bench{padding:14px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2);display:grid;gap:3px;align-content:start}
+.v6-stat small,.v6-kpis small,.v6-bench small,.v6-mod small,.v6-chap small,.v6-bounty small,.v6-event small{color:var(--dim);font-size:12px}
+.v6-stat b{font-size:20px}
+.v6-stat span,.v6-kpis span,.v6-bench span{font-size:12.5px;color:var(--fog)}
+.v6-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+.v6-kpis b{font-size:22px;font-variant-numeric:tabular-nums}
+.v6-mods{display:grid;gap:8px}
+.v6-mod{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(80px,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-mod>div:first-child{display:grid;gap:1px}
+.v6-mod span{font-size:12.5px;color:var(--fog)}
+.v6-mod em{font-style:normal;font-size:11.5px;font-weight:700}
+.v6-boost{color:var(--good)}.v6-brake{color:var(--warn)}
+.v6-bar{position:relative;height:6px;border-radius:6px;background:rgba(148,163,184,.18);overflow:hidden}
+.v6-bar>span{position:absolute;inset:0 auto 0 0;border-radius:6px;background:var(--accent)}
+.v6-bar-ticks{overflow:visible;margin:8px 0 4px}
+.v6-bar-ticks i{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--fog);opacity:.6}
+.v6-log{list-style:none;padding:0;display:grid;gap:4px}
+.v6-log li{display:grid;grid-template-columns:1fr auto auto;gap:12px;padding:6px 10px;border-bottom:1px solid var(--hair);font-size:13.5px;font-variant-numeric:tabular-nums}
+.v6-log small{color:var(--dim)}
+/* Skill Matrix */
+.v6-group{margin:0 0 22px}
+.v6-group-head{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.v6-group-head h3{margin:0;color:var(--chalk);font-size:17px}
+.v6-chaps{display:grid;gap:8px;margin-top:12px}
+.v6-chap{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-chap.is-locked{opacity:.62}
+.v6-chap-main{display:grid;gap:5px;flex:1 1 260px;min-width:0}
+.v6-chap-act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.v6-pill{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;border:1px solid var(--rule);color:var(--fog)}
+.v6-pill.is-good{color:var(--good);border-color:rgba(74,222,128,.4)}
+.v6-pill.is-strict{color:var(--accent);border-color:var(--accent-line)}
+/* Boss Fight */
+.v6-boss-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px}
+.v6-boss-hud{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:10px}
+.v6-boss-hud>div{padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2);display:grid;gap:2px}
+.v6-boss-hud b{font-size:18px;font-variant-numeric:tabular-nums}
+.v6-boss-hud span{font-size:12px;color:var(--dim)}
+.v6-boss-hud .is-hot b{color:var(--miss)}
+.v6-second{display:grid;gap:10px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--accent-line);border-radius:var(--r);background:var(--accent-soft)}
+.v6-second[hidden]{display:none}
+.v6-boss-end{padding:18px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2);display:grid;gap:10px}
+.v6-boss-end[hidden]{display:none}
+.v6-mspc{padding:10px 12px;margin:8px 0;border-left:3px solid var(--accent);background:var(--ink-2);border-radius:0 8px 8px 0;font-size:14px;line-height:1.5}
+/* bounties, community, events */
+.v6-bounties,.v6-events,.v6-friends{display:grid;gap:8px}
+.v6-bounty,.v6-event,.v6-friend{display:grid;gap:6px;padding:12px 14px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-bounty>div,.v6-event>div:first-child{display:grid;gap:2px}
+.v6-bounty.is-done{border-color:rgba(74,222,128,.35)}
+.v6-event{grid-template-columns:minmax(0,1fr);}
+.v6-ev-ch{display:grid;gap:4px}
+.v6-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.v6-bench b{font-size:26px;font-variant-numeric:tabular-nums}
+.v6-buff{margin-top:12px;padding:10px 12px;border-radius:var(--r);background:var(--ink-2);border:1px solid var(--hair);max-width:70ch}
+.v6-note-box{padding:10px 12px;margin:8px 0 14px;border-radius:var(--r);background:var(--warn-soft);border:1px solid rgba(251,191,36,.3);font-size:14px}
+.v6-trophies{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.v6-trophies li{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center;padding:10px 12px;border:1px solid var(--hair);border-radius:var(--r);background:var(--ink-2)}
+.v6-trophies li small{grid-column:2;color:var(--dim)}
+.v6-tro{grid-row:span 2;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--rule);color:var(--fog)}
+.v6-tro-event{color:var(--accent);border-color:var(--accent-line)}.v6-tro-strict{color:var(--good);border-color:rgba(74,222,128,.4)}
+.v6-fline{font-size:13px;color:var(--fog);margin-top:2px}
+.v6-fline i{color:var(--accent)}
+.v6-admin{margin-top:26px}
+.v6-evform{display:grid;gap:12px;max-width:760px}
+.v6-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.v6-goals{margin-top:8px;align-items:end}
+/* Shuffle filters */
+.v6-chips{display:flex;flex-wrap:wrap;gap:8px}
+.v6-chip-btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 11px;border:1px solid var(--rule);border-radius:999px;background:transparent;color:var(--fog);font-size:13px;font-weight:600}
+.v6-chip-btn small{color:var(--dim);font-variant-numeric:tabular-nums}
+.v6-chip-btn[aria-pressed="true"]{border-color:var(--accent-line);background:var(--accent-soft);color:var(--chalk)}
+.v6-chip-btn:disabled{opacity:.45;cursor:default}
+/* review icons */
+.mv .t.v6-k,.moment .v6-k{font-weight:800;margin-left:2px}
+.v6-k-brilliant{color:#38bdf8}.v6-k-great{color:#4ade80}.v6-k-best{color:#a3e635}.v6-k-good{color:#94a3b8}
+.v6-k-inaccuracy{color:var(--warn)}.v6-k-mistake{color:#fb923c}.v6-k-blunder{color:var(--miss)}.v6-k-missed{color:#c084fc}
+.v6-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;padding-top:10px;border-top:1px solid var(--hair);font-size:12.5px;color:var(--fog)}
+.v6-legend .t{margin-right:2px}
+@media (max-width:640px){
+  .v6-mod{grid-template-columns:1fr}
+  .v6-strip{gap:8px 10px}
+  .v6-chap-act{width:100%}
+}
+@media (prefers-reduced-motion:reduce){.v6-xp-fill{transition:none}}
+.v6-thinklink{margin:-14px 0 20px;color:var(--fog)}
