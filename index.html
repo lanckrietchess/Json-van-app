@@ -13,6 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="Training Hub">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2045%2045%22%3E%3Crect%20width%3D%2245%22%20height%3D%2245%22%20rx%3D%2210%22%20fill%3D%22%2338bdf8%22/%3E%3Cg%20transform%3D%22translate%284.5%204%29%20scale%28.8%29%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M%2022%2C10%20C%2032.5%2C11%2038.5%2C18%2038%2C39%20L%2015%2C39%20C%2015%2C30%2025%2C32.5%2023%2C18%22%20style%3D%22fill%3A%23000000%3B%20stroke%3A%23000000%3B%22/%3E%3Cpath%20d%3D%22M%2024%2C18%20C%2024.38%2C20.91%2018.45%2C25.37%2016%2C27%20C%2013%2C29%2013.18%2C31.34%2011%2C31%20C%209.958%2C30.06%2012.41%2C27.96%2011%2C28%20C%2010%2C28%2011.19%2C29.23%2010%2C30%20C%209%2C30%205.997%2C31%206%2C26%20C%206%2C24%2012%2C14%2012%2C14%20C%2012%2C14%2013.89%2C12.1%2014%2C10.5%20C%2013.27%2C9.506%2013.5%2C8.5%2013.5%2C7.5%20C%2014.5%2C6.5%2016.5%2C10%2016.5%2C10%20L%2018.5%2C10%20C%2018.5%2C10%2019.28%2C8.008%2021%2C7%20C%2022%2C7%2022%2C10%2022%2C10%22%20style%3D%22fill%3A%23000000%3B%20stroke%3A%23000000%3B%22/%3E%3Cpath%20d%3D%22M%209.5%2025.5%20A%200.5%200.5%200%201%201%208.5%2C25.5%20A%200.5%200.5%200%201%201%209.5%2025.5%20z%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3A%23ececec%3B%22/%3E%3Cpath%20d%3D%22M%2015%2015.5%20A%200.5%201.5%200%201%201%2014%2C15.5%20A%200.5%201.5%200%201%201%2015%2015.5%20z%22%20transform%3D%22matrix%280.866%2C0.5%2C-0.5%2C0.866%2C9.693%2C-5.173%29%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3A%23ececec%3B%22/%3E%3Cpath%20d%3D%22M%2024.55%2C10.4%20L%2024.1%2C11.85%20L%2024.6%2C12%20C%2027.75%2C13%2030.25%2C14.49%2032.5%2C18.75%20C%2034.75%2C23.01%2035.75%2C29.06%2035.25%2C39%20L%2035.2%2C39.5%20L%2037.45%2C39.5%20L%2037.5%2C39%20C%2038%2C28.94%2036.62%2C22.15%2034.25%2C17.66%20C%2031.88%2C13.17%2028.46%2C11.02%2025.06%2C10.5%20L%2024.55%2C10.4%20z%20%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3Anone%3B%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="canonical" href="https://lanckrietchess-app.vercel.app/">
@@ -1715,16 +1716,86 @@ body.lc-focus .hud36,body.lc-focus #sh-hud .hud-combo,body.lc-focus .profile-chi
 }
 @media (prefers-reduced-motion:reduce){.v6-xp-fill{transition:none}}
 .v6-thinklink{margin:-14px 0 20px;color:var(--fog)}
+/* ===== v6.1: nav with eight tabs, logo menu, level chip, rank pills, Account, tiered leaderboard ===== */
+.tabs{grid-template-columns:repeat(8,minmax(0,1fr))}
+@media (max-width:520px){.tab{font-size:9.5px}.tab i{font-size:15px}}
+@media (min-width:900px){.tabs{max-width:860px}}
+@media (min-width:900px) and (max-width:1279px){.tab{flex-direction:column;gap:2px;font-size:11px}.tab i{font-size:15px}}
+.topbar-inner{position:relative}
+.topbar::after{content:"";position:absolute;left:0;bottom:-1px;height:2px;width:calc(var(--lvl,0)*100%);background:var(--accent);transition:width .3s ease;pointer-events:none}
+button.brand{background:none;border:0;padding:0;cursor:pointer;font-family:inherit;text-align:left}
+.brand-caret{font-size:11px;color:var(--fog);margin-left:2px}
+.brand[aria-expanded="true"] .brand-caret{transform:rotate(180deg)}
+.brand-menu{position:absolute;left:12px;top:calc(100% + 6px);z-index:60;width:min(340px,calc(100vw - 24px));max-height:calc(100vh - 140px);overflow:auto;background:var(--surface);border:1px solid var(--rule);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.5);padding:8px}
+.brand-menu[hidden]{display:none}
+.bm-head{padding:8px 10px 10px;display:grid;gap:2px}.bm-head b{font-size:15px}.bm-head small{color:var(--fog);font-size:12.5px}
+.bm-list{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.bm-row{display:flex;align-items:center;gap:4px}
+.bm-item{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:10px;color:var(--chalk);text-decoration:none;font-weight:600;font-size:14.5px}
+.bm-item:hover,.bm-item:focus-visible{background:var(--raised)}
+.bm-item>i:first-child{width:20px;text-align:center;color:var(--accent)}
+.bm-item span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bm-ext{font-size:11px;color:var(--dim)}
+.bm-edit{display:flex;gap:2px;flex:none}.bm-edit .icon-btn{width:30px;height:30px}
+.bm-admin{display:flex;gap:6px;margin:10px 4px 4px}.bm-admin .input{flex:1;min-width:0;font-size:13px}
+.bm-admin-row{display:flex;align-items:center;gap:10px;margin:6px 4px 2px}
+.v6-chip.v6-lvl{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;min-width:0}
+.v6-lvl b{font:800 11px var(--ui);color:var(--accent);letter-spacing:.02em}
+.v6-lvl i{font-style:normal;font:700 10px var(--ui);letter-spacing:.06em;color:var(--chalk)}
+.v6-lvl .full{display:none}
+@media (min-width:1280px){.v6-lvl .ab{display:none}.v6-lvl .full{display:inline;text-transform:uppercase}}
+.rk-pill{font-style:normal;font-size:11px;font-weight:700;letter-spacing:.01em;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);vertical-align:2px;white-space:nowrap}
+.theory-tab[aria-current="page"] .rk-pill{background:rgba(8,47,73,.18);color:var(--accent-ink);border-color:transparent}
+.metrics.m4{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:640px){.metrics.m4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.sh-bar4{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:-10px 0 20px;padding:12px 16px;border:1px solid var(--rule);border-radius:14px;background:var(--surface)}
+.sh-bar4 div{display:grid;gap:2px;min-width:0}.sh-bar4 b{font-size:15px}.sh-bar4 small{color:var(--fog);font-size:13px}
+.sh-back{margin:0 0 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.v6-hero3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.v6-tile{padding:14px 16px;border:1px solid var(--rule);border-radius:16px;background:var(--surface);display:grid;gap:4px}
+.v6-tile small{color:var(--fog);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.v6-tile b{font-size:30px;line-height:1.05;letter-spacing:-.02em}
+.v6-tile.lvl b{color:var(--accent)}.v6-tile span{color:var(--fog);font-size:13px}
+.v6-tile .v6-bar{margin:4px 0 2px}
+.v6-ext{display:grid;gap:14px}
+.rt4{display:grid;gap:14px}.rt4-card h3{font-size:17px;margin:0}
+.rt4-scroll{overflow-x:auto}.rt4-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.rt4-table th,.rt4-table td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--hair);font-size:14px}
+.rt4-table th:first-child{text-align:left;font-weight:600}.rt4-table thead th{color:var(--fog);font-size:12px;font-weight:600}
+.rt4-proof{border-color:var(--accent-line);background:linear-gradient(135deg,var(--accent-soft),transparent)}
+.pq-row{display:grid;gap:8px;padding:12px;border:1px solid var(--rule);border-radius:12px;background:var(--ink-2)}
+.pq-row.is-off{opacity:.55}.pq-nums{margin:4px 0 0}.pq-card{width:100%;max-width:360px;border-radius:12px;border:1px solid var(--rule);justify-self:center}
+.pq-watch{list-style:none;margin:0;padding:0;display:grid;gap:6px}.pq-watch li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border:1px solid var(--hair);border-radius:10px}
+.pq-badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:var(--miss);color:#fff;font-size:11px}
+.lb4{display:grid;gap:14px;padding:16px}
+.lb4-top{display:flex;gap:6px;flex-wrap:wrap}.lb4-top button{flex:1 1 90px}
+.lb4-nav{display:flex;align-items:center;gap:12px;min-height:34px;flex-wrap:wrap}
+.lb4-back{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);background:transparent;color:var(--chalk);font-weight:600;font-size:13px;cursor:pointer}
+.lb4-back:hover{border-color:var(--accent-line)}
+.lb4-crumbs{font-size:13.5px;color:var(--fog);font-weight:600}.lb4-crumbs i{font-size:10px;margin:0 4px}
+.lb4-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.lb4-opt{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;padding:14px 16px;border-radius:14px;border:1px solid var(--rule);background:var(--ink-2);color:var(--chalk);cursor:pointer;font-family:inherit}
+.lb4-opt:hover{border-color:var(--accent-line)}
+.lb4-opt>i{grid-row:span 2;font-size:22px;color:var(--accent);width:28px;text-align:center}
+.lb4-opt b{font-size:16px}.lb4-opt small{color:var(--fog);font-size:12.5px;line-height:1.3}
+.lb4-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.lb4-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--ink-2);border:1px solid var(--hair)}
+.lb4-row.is-you{border-color:var(--accent-line);background:var(--accent-soft)}
+.lb4-row .n{font-weight:800;color:var(--fog);font-variant-numeric:tabular-nums}.lb4-row b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb4-row .r{font-weight:700;color:var(--accent);white-space:nowrap}.lb4-sub{grid-column:2 / 4}
+.data-banner{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:70;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-radius:14px;background:#3b1220;border:1px solid var(--miss);color:var(--chalk);box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.data-banner div{display:grid;gap:2px;min-width:0}.data-banner small{color:var(--fog);overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
 <header class="topbar" id="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="#home" aria-label="lanckrietchess Training Hub, home">
+    <button class="brand" id="brand-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="brand-menu" aria-label="lanckrietchess: links and socials">
       <span class="brand-mark"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2045%2045%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M%2022%2C10%20C%2032.5%2C11%2038.5%2C18%2038%2C39%20L%2015%2C39%20C%2015%2C30%2025%2C32.5%2023%2C18%22%20style%3D%22fill%3A%23000000%3B%20stroke%3A%23000000%3B%22/%3E%3Cpath%20d%3D%22M%2024%2C18%20C%2024.38%2C20.91%2018.45%2C25.37%2016%2C27%20C%2013%2C29%2013.18%2C31.34%2011%2C31%20C%209.958%2C30.06%2012.41%2C27.96%2011%2C28%20C%2010%2C28%2011.19%2C29.23%2010%2C30%20C%209%2C30%205.997%2C31%206%2C26%20C%206%2C24%2012%2C14%2012%2C14%20C%2012%2C14%2013.89%2C12.1%2014%2C10.5%20C%2013.27%2C9.506%2013.5%2C8.5%2013.5%2C7.5%20C%2014.5%2C6.5%2016.5%2C10%2016.5%2C10%20L%2018.5%2C10%20C%2018.5%2C10%2019.28%2C8.008%2021%2C7%20C%2022%2C7%2022%2C10%2022%2C10%22%20style%3D%22fill%3A%23000000%3B%20stroke%3A%23000000%3B%22/%3E%3Cpath%20d%3D%22M%209.5%2025.5%20A%200.5%200.5%200%201%201%208.5%2C25.5%20A%200.5%200.5%200%201%201%209.5%2025.5%20z%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3A%23ececec%3B%22/%3E%3Cpath%20d%3D%22M%2015%2015.5%20A%200.5%201.5%200%201%201%2014%2C15.5%20A%200.5%201.5%200%201%201%2015%2015.5%20z%22%20transform%3D%22matrix%280.866%2C0.5%2C-0.5%2C0.866%2C9.693%2C-5.173%29%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3A%23ececec%3B%22/%3E%3Cpath%20d%3D%22M%2024.55%2C10.4%20L%2024.1%2C11.85%20L%2024.6%2C12%20C%2027.75%2C13%2030.25%2C14.49%2032.5%2C18.75%20C%2034.75%2C23.01%2035.75%2C29.06%2035.25%2C39%20L%2035.2%2C39.5%20L%2037.45%2C39.5%20L%2037.5%2C39%20C%2038%2C28.94%2036.62%2C22.15%2034.25%2C17.66%20C%2031.88%2C13.17%2028.46%2C11.02%2025.06%2C10.5%20L%2024.55%2C10.4%20z%20%22%20style%3D%22fill%3A%23ececec%3B%20stroke%3Anone%3B%22/%3E%3C/g%3E%3C/svg%3E" alt="" width="24" height="24"></span>
-      <span class="brand-name">lanckrietchess</span>
-    </a>
+      <span class="brand-name">lanckrietchess</span><i class="fa-solid fa-chevron-down brand-caret" aria-hidden="true"></i>
+    </button>
+    <div class="brand-menu" id="brand-menu" hidden></div>
     <nav class="tabs" id="tabs" aria-label="Sections"></nav>
     <div class="topbar-right"><span id="admin-slot"></span><button class="profile-chip" id="profile-chip" type="button" aria-haspopup="dialog">Profile</button></div>
   </div>
@@ -1807,7 +1878,7 @@ body.lc-focus .hud36,body.lc-focus #sh-hud .hud-combo,body.lc-focus .profile-chi
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '6.0.0',
+  version: '6.1.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -1949,8 +2020,10 @@ const CONFIG = {
     repo: 'Json-van-app',
     branch: 'main',
     path: 'json',                        // the database file inside the repository
-    mirrors: ['json', 'content.json'],   // the same file on this site, tried when GitHub can't be reached
-    timeoutMs: 6000,
+    mirrors: ['content.json', 'json'],   // v6.1: the same file on this site, read FIRST (same origin: no CORS, no GitHub rate limit)
+    paths: ['json', 'content.json'],     // v6.1: file names tried inside the GitHub repository
+    siteTimeoutMs: 30000,                // v6.1: content.json is ~3 MB; a phone on 4G needs time
+    timeoutMs: 15000,
     refreshMinutes: 10,                  // look for a newer file while the hub stays open
     pinCommit: true                      // v3.7: read the file at the newest commit (never stale)
   },
@@ -1980,6 +2053,8 @@ const CONFIG = {
     liveDepth: 20, deeperStep: 6, lines: 1, reviewMs: 260, hashMb: 32
   },
   limits: { freeCustomLines: 10 },
+  /* v6.1: the Potential Proof Queue: a rating climb of minGain or more within windowDays. */
+  proof: { minGain: 200, windowDays: 60 },
   /* v3.9: access follows the universal five levels (LEVELS, next to TIERS).
      Level 1 is free for everyone; levels 2 to 5 need the Accelerator
      (requiredTier 2) or the Mentorship (requiredTier 3). The ELO gates and the
@@ -2044,6 +2119,7 @@ const CONTENT = {
   endgame: [],
   courses: { middlegame: [], antiblunder: [], endgame: [] },
   spotlights: [],
+  logoLinks: [],
   clinic: [],
   peer: [],
   games: [],
@@ -3259,11 +3335,11 @@ function metric(value, label, ico, key) {
   return '<div class="metric"' + (key ? ' data-metric="' + key + '"' : '') + '><span class="metric-icon">' + icon(ico) + '</span><span class="metric-value">' + esc(value) + '</span><span class="metric-label">' + esc(label) + '</span></div>';
 }
 function metricsHTML(section) {
-  const s = App.stat(section);
-  return '<div class="metrics" role="group" aria-label="Your stats">' +
+  const s = App.stat(section), rk = moduleRankMetric(section);
+  return '<div class="metrics' + (rk ? ' m4' : '') + '" role="group" aria-label="Your stats">' +
     metric(s.tries ? pct(s.correct / s.tries) : '–', 'Accuracy', 'bullseye') +
     metric(s.streak, 'Current streak', 'fire', 'streak') +
-    metric(s.best, 'Best streak', 'trophy') + '</div>';
+    metric(s.best, 'Best streak', 'trophy') + rk + '</div>';
 }
 function refreshMetrics(section, ok) {
   const host = qs('#metrics-' + section);
@@ -3602,6 +3678,7 @@ function checkItem(name, it) {
   if (it.fen != null && !fenOk(it.fen)) return 'The FEN is not a legal position.';
   try {
     if (name === 'openings' || name === 'spotlights') return lineOk(START_FEN, it.pgn, isStatic(it));
+    if (name === 'logoLinks') return it.label && /^(https:\/\/\S{3,}|#[\w\/-]+)$/i.test(String(it.url || '')) ? '' : 'A link needs a name and an https:// address.';
     if (name === 'groups') return it.name ? '' : 'A repertoire needs a name.';
     if (name === 'think' || name === 'middlegame') {
       if (!Array.isArray(it.stages) || !it.stages.length) return 'Add at least one stage.';
@@ -4465,10 +4542,10 @@ const Feed = (() => {
     };
   }
 
-  function rawUrl(ref) {
-    const r = CONFIG.remote || {};
-    if (!r.owner || !r.repo || !r.path) return '';
-    return 'https://raw.githubusercontent.com/' + encodeURIComponent(r.owner) + '/' + encodeURIComponent(r.repo) + '/' + String(ref || r.branch || 'main').split('/').map(encodeURIComponent).join('/') + '/' + String(r.path).replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
+  function rawUrl(ref, pathOverride) {
+    const r = CONFIG.remote || {}, fp = pathOverride || r.path;
+    if (!r.owner || !r.repo || !fp) return '';
+    return 'https://raw.githubusercontent.com/' + encodeURIComponent(r.owner) + '/' + encodeURIComponent(r.repo) + '/' + String(ref || r.branch || 'main').split('/').map(encodeURIComponent).join('/') + '/' + String(fp).replace(/^\/+/, '').split('/').map(encodeURIComponent).join('/');
   }
   /* v3.7: the API address that names the newest commit on the branch. */
   function commitUrl() {
@@ -4507,7 +4584,8 @@ const Site = (() => {
     'courses.endgame': ['Endgame Bootcamp lessons', 'Theory'],
     story: ['About: ELO chapters', 'About'],
     proofs: ['Proof numbers', 'About'],
-    credentials: ['Credentials', 'About']
+    credentials: ['Credentials', 'About'],
+    logoLinks: ['Logo menu links', 'Header']
   };
   const SETTINGS = [
     ['peakRating', 'Peak rating', 'num'], ['percentile', 'Peak percentile, e.g. Top 0.1%', 'text'], ['startRating', 'Lowest rating', 'num'],
@@ -4521,6 +4599,7 @@ const Site = (() => {
     ['community.endpoint', 'Leaderboard and stats worker URL (empty: the AI coach worker)', 'url'], ['leaderboard.minPuzzles', 'Leaderboard: puzzles needed to get ranked (default 10)', 'num'],
     ['leaderboard.weights.accuracy', 'Leaderboard weight: accuracy (default 0.6)', 'num'], ['leaderboard.weights.speed', 'Leaderboard weight: speed (default 0.25)', 'num'],
     ['leaderboard.weights.gain', 'Leaderboard weight: rating gain (default 0.15)', 'num'],
+    ['proof.minGain', 'Proof Queue: rating gain that makes a candidate (default 200)', 'num'], ['proof.windowDays', 'Proof Queue: within how many days (default 60)', 'num'],
     ['engine.liveDepth', 'Stockfish depth for live analysis, 8 to 30 (default 20)', 'num'], ['engine.lines', 'Stockfish lines shown by default on the analysis board, 1 to 5 (default 1)', 'num']
   ];
   let defaults = null, published = null, keys = [], known = false, inflight = null, status = {}, adoptedAt = 0, watching = false;
@@ -4610,16 +4689,19 @@ const Site = (() => {
   }
   /* Where to look, in order: GitHub at the newest commit (v3.7), GitHub raw on
      the branch, then the same file on this site. */
-  function sources(sha) {
+  function sources(sha, kind) {
     const r = CONFIG.remote || {}, out = [], seen = {};
-    const add = (kind, label, url, commit) => { if (url && !seen[url]) { seen[url] = 1; out.push({ kind, label, url, commit: commit || '' }); } };
-    if (sha) add('github', 'GitHub, commit ' + sha.slice(0, 7), Feed.rawUrl(sha), sha);
-    add('github', 'GitHub', Feed.rawUrl());
-    if (/^https?:$/.test(location.protocol)) {
+    const add = (k, label, url, commit) => { if (url && !seen[url]) { seen[url] = 1; out.push({ kind: k, label, url, commit: commit || '' }); } };
+    if (kind !== 'github' && /^https?:$/.test(location.protocol)) {
       (Array.isArray(r.mirrors) ? r.mirrors : []).forEach((m) => {
         if (typeof m !== 'string' || !m.trim()) return;
         try { add('site', 'this site (' + m.trim() + ')', new URL(m.trim(), SiteURL.here()).href); } catch (e) { /* not a usable path */ }
       });
+    }
+    if (kind !== 'site') {
+      const paths = (Array.isArray(r.paths) && r.paths.length ? r.paths : [r.path]).filter(Boolean), many = paths.length > 1;
+      if (sha) paths.forEach((p) => add('github', 'GitHub, commit ' + sha.slice(0, 7) + (many ? ' (' + p + ')' : ''), Feed.rawUrl(sha, p), sha));
+      paths.forEach((p) => add('github', 'GitHub' + (many ? ' (' + p + ')' : ''), Feed.rawUrl(null, p)));
     }
     return out;
   }
@@ -4656,44 +4738,73 @@ const Site = (() => {
       return sha;
     } catch (e) { shaMemo.off = Date.now() + 2 * 60000; return ''; }
   }
+  /* v6.1: the order is this site first (same origin, so no CORS and no GitHub rate limit; the 3 MB file gets 30 seconds and one retry),
+     then GitHub in the background to pick up a newer commit. When the site has no copy, GitHub answers first. If every source fails the
+     last good copy on this device keeps working, and without one a visible banner offers a retry. */
+  let bgBusy = false;
+  async function tryFetch(src, ms, tried) {
+    let text;
+    try {
+      const res = await fetchWithTimeout(bust(src.url), { cache: 'no-store', credentials: 'omit' }, ms);
+      if (!res.ok) { tried.push(src.label + ': ' + (res.status === 404 ? 'file not found (404)' : 'HTTP ' + res.status)); return { err: res.status === 404 ? '404' : 'http' }; }
+      text = await res.text();
+    } catch (e) {
+      tried.push(src.label + ': ' + (e && e.name === 'AbortError' ? 'no answer within ' + Math.round(ms / 1000) + ' seconds' : navigator.onLine === false ? 'offline' : 'not reachable'));
+      return { err: 'net' };
+    }
+    const parsed = parseLax(text);
+    if (parsed.error) { tried.push(src.label + ': ' + parsed.error); return { err: 'bad' }; }
+    let out;
+    try { out = Feed.toDoc(parsed.data, { prev: published }); }
+    catch (e) { tried.push(src.label + ': the file could not be read (' + String((e && e.message) || e).slice(0, 80) + ')'); return { err: 'bad' }; }
+    if (!out.doc) { tried.push(src.label + ': the file holds no hub content'); return { err: 'bad' }; }
+    if (parsed.repaired) out.report.notes.unshift('The file had comments or trailing commas; the hub ignored them.');
+    return { src, out };
+  }
+  function take(x, tried) {
+    const src = x.src, out = x.out, doc = out.doc;
+    /* Right after a publish from this device, GitHub's cache can still serve the older file for a few minutes: keep the newer copy. */
+    if (published && Date.now() - adoptedAt < HOLD_MS && doc.updated && published.updated && doc.updated < published.updated) {
+      tried.push(src.label + ': still serves the copy from before your publish (GitHub caches for about five minutes)');
+      saveStatus({ source: 'cache', ok: true, at: status.at, tried, report: status.report });
+      return { changed: false, held: true };
+    }
+    const changed = JSON.stringify(doc) !== JSON.stringify(published);
+    published = doc; known = true; Store.set(LS_PUB, doc);
+    saveStatus({ source: src.kind, label: src.label, url: src.url, commit: src.commit, ok: true, at: Date.now(), tried, report: out.report });
+    if (changed) apply();
+    return { changed };
+  }
+  async function githubPass(afterSite, ms, tried) {
+    tried = tried || [];
+    if (afterSite) { if (bgBusy) return false; bgBusy = true; }
+    try {
+      const sha = await latestCommit(ms);
+      for (const src of sources(sha, 'github')) {
+        const x = await tryFetch(src, ms, tried);
+        if (!x.src) continue;
+        const d = x.out.doc;
+        if (afterSite && published && published.updated && d.updated && d.updated < published.updated) return false;   // the site copy is newer
+        const t = take(x, tried);
+        if (afterSite && t.changed) { try { window.dispatchEvent(new Event('lc-data-updated')); } catch (e) { /* no event support */ } }
+        return t.changed;
+      }
+      if (!afterSite) saveStatus({ source: published ? 'cache' : 'none', ok: false, at: status.at || 0, commit: status.commit, tried, report: status.report });
+      return false;
+    } finally { if (afterSite) bgBusy = false; }
+  }
   function fetchPublished(force) {
     if (inflight && !force) return inflight;
     const run = (async () => {
-      const tried = [], ms = clamp(+((CONFIG.remote || {}).timeoutMs) || 6000, 1500, 30000);
-      const sha = await latestCommit(ms);
-      for (const src of sources(sha)) {
-        let text;
-        try {
-          const res = await fetchWithTimeout(bust(src.url), { cache: 'no-store', credentials: 'omit' }, ms);
-          if (!res.ok) { tried.push(src.label + ': ' + (res.status === 404 ? 'file not found (404)' : 'HTTP ' + res.status)); continue; }
-          text = await res.text();
-        } catch (e) {
-          tried.push(src.label + ': ' + (e && e.name === 'AbortError' ? 'no answer within ' + Math.round(ms / 1000) + ' seconds' : navigator.onLine === false ? 'offline' : 'not reachable'));
-          continue;
+      const r = CONFIG.remote || {}, tried = [], ms = clamp(+r.timeoutMs || 15000, 1500, 60000), sms = clamp(+r.siteTimeoutMs || 30000, 5000, 90000);
+      for (const src of sources('', 'site')) {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          const x = await tryFetch(src, sms, tried);
+          if (x.src) { const t = take(x, tried); if (!t.held) githubPass(true, ms).catch(() => {}); return t.changed; }
+          if (x.err !== 'net') break;      // a 404 or a broken file will not improve on a second try
         }
-        const parsed = parseLax(text);
-        if (parsed.error) { tried.push(src.label + ': ' + parsed.error); continue; }
-        let out;
-        try { out = Feed.toDoc(parsed.data, { prev: published }); }
-        catch (e) { tried.push(src.label + ': the file could not be read (' + String((e && e.message) || e).slice(0, 80) + ')'); continue; }
-        if (!out.doc) { tried.push(src.label + ': the file holds no hub content'); continue; }
-        if (parsed.repaired) out.report.notes.unshift('The file had comments or trailing commas; the hub ignored them.');
-        const doc = out.doc;
-        /* Right after a publish from this device, GitHub's cache can still
-           serve the older file for a few minutes: keep the newer copy. */
-        if (published && Date.now() - adoptedAt < HOLD_MS && doc.updated && published.updated && doc.updated < published.updated) {
-          tried.push(src.label + ': still serves the copy from before your publish (GitHub caches for about five minutes)');
-          saveStatus({ source: 'cache', ok: true, at: status.at, tried, report: status.report });
-          return false;
-        }
-        const changed = JSON.stringify(doc) !== JSON.stringify(published);
-        published = doc; known = true; Store.set(LS_PUB, doc);
-        saveStatus({ source: src.kind, label: src.label, url: src.url, commit: src.commit, ok: true, at: Date.now(), tried, report: out.report });
-        if (changed) apply();
-        return changed;
       }
-      saveStatus({ source: published ? 'cache' : 'none', ok: false, at: status.at || 0, commit: status.commit, tried, report: status.report });
-      return false;
+      return githubPass(false, ms, tried);
     })();
     inflight = run;
     run.then(() => { if (inflight === run) inflight = null; }, () => { if (inflight === run) inflight = null; });
@@ -4997,7 +5108,7 @@ const CMS = (() => {
         '<div class="menu-rows">' + row('copy', 'font', 'Texts', 'Headlines and paragraphs on every page') + row('settings', 'sliders', 'Numbers and links', 'Peak rating, percentile, fast track, Skool, socials') + '</div>' +
         '<div class="menu-rows">' + Object.keys(Site.LISTS).map((n) => row('list:' + n, 'list', Site.LISTS[n][0], Site.LISTS[n][1] + ', ' + (getPath(CONTENT, n) || []).length + ' items')).join('') + '</div>' +
         '<div class="menu-rows">' + row('keys', 'key', 'Member keys', Site.keys().length + (Site.keys().length === 1 ? ' key' : ' keys')) + row('sync', 'rotate', 'Live data (GitHub)', syncSub()) + row('publish', 'cloud-arrow-up', 'Publish', dirty ? 'Send your draft to GitHub' : 'Up to date') + row('data', 'database', 'Data management & backups', 'Export or import the whole database as JSON') + '</div>' +
-        '<div class="menu-rows">' + row('insights', 'chart-column', 'Insights', 'What your players miss, ask and struggle with') + row('vaultbrowser', 'magnifying-glass-chart', 'Vault & Mistake Browser', 'Games, mistakes and brilliant moves by chapter') + row('course', 'graduation-cap', 'Course index', 'The curriculum the coach points to') + row('lb', 'ranking-star', 'Leaderboard', 'Hide or show players, ranking numbers') + '</div>' +
+        '<div class="menu-rows">' + row('proofq', 'ranking-star', 'Potential Proof Queue', Proof.summary()) + row('insights', 'chart-column', 'Insights', 'What your players miss, ask and struggle with') + row('vaultbrowser', 'magnifying-glass-chart', 'Vault & Mistake Browser', 'Games, mistakes and brilliant moves by chapter') + row('course', 'graduation-cap', 'Course index', 'The curriculum the coach points to') + row('lb', 'ranking-star', 'Leaderboard', 'Hide or show players, ranking numbers') + '</div>' +
         '<div class="btn-row"><button type="button" class="btn btn-quiet btn-sm" data-m="signout">' + icon('right-from-bracket') + ' Sign out of admin</button></div>',
       onMount(s) {
         s.el.addEventListener('change', (e) => {
@@ -5025,6 +5136,7 @@ const CMS = (() => {
             else if (m === 'bots') botsSheet();
             else if (m === 'mspc5') V5Admin.framework();
             else if (m === 'arena5') V5Admin.arena();
+            else if (m === 'proofq') ProofUI.open();
             else if (m === 'funnel51') V5Admin.funnel();
             else if (m === 'chat52') V5Admin.chat();
             else if (m === 'popups52') V5Admin.popups();
@@ -5233,6 +5345,7 @@ const CMS = (() => {
       clinic: { id: '', title: 'New clinic case', source: 'student', player: '', elo: 0, opening: '', level: '800-1200', fen: START_FEN, played: '', best: '', steps: [{ k: 'M', t: '' }, { k: 'S', t: '' }, { k: 'P', t: '' }, { k: 'C', t: '' }], lesson: '' },
       peer: { id: '', title: 'Punish the blunder', player: '', elo: 0, opening: '', level: '', played: '', lastMove: [], fen: START_FEN, pgn: '', note: '' },
       games: { id: '', date: '', title: '', player: '', elo: 0, opponent: '', opening: '', color: 'w', result: '1-0', accuracy: 0, pgn: '', tags: '', mspc: { M: '', S: '', P: '', C: '' } },
+      logoLinks: { id: '', label: '', url: 'https://', icon: 'link' },
       story: { date: '', elo: '', title: '', text: '', focus: '', mindset: '', mspc: '' }, proofs: { value: '', text: '' }, credentials: { icon: 'check', text: '' }, groups: { name: '', side: 'w', intro: '' }
     }[n];
     const out = clone(T0 || blank(list[0] || {}));
@@ -7414,10 +7527,10 @@ function mountHome(view) {
       (spot ? '<p class="st-kicker">' + esc(member ? 'From your repertoire: ' + (spot.group || 'today’s line') : 'Signature trap from the ' + (spot.group || 'Colle-Koltanowski') + ' course') + '</p>' : '') +
       '<div id="hero-board" class="board-host board-sm"></div><figcaption class="hero-cap" id="hero-cap" aria-live="polite"></figcaption>' +
       '<div class="btn-row hero-actions"><button class="btn btn-quiet btn-sm" id="hero-replay" type="button">' + icon('rotate-left') + ' Replay</button>' + cta + manageBtn('spotlights', 'Spotlights') + '</div>' +
-    '</figure></section>' + V33.homeLoop() + V36.homeStrip() + V34.homeBoard() +
+    '</figure></section>' + V33.homeLoop() + V36.homeStrip() + LB4.html() +
     (t.tries ? '<section class="section">' + sectionHead('Your training') + '<div class="metrics">' + metric(t.accuracy + '%', 'First-try accuracy', 'bullseye') + metric(App.streakDays(), 'Day streak', 'fire', 'streak') + metric(t.drills, 'Drills completed', 'flag-checkered') + '</div></section>' : '') +
     '<section class="section">' + sectionHeadK('home.methodTitle', 'home.methodText') + '<div class="method">' +
-      methodCard('Think', T('home.think'), [['#think', 'MSPC trainer'], ['#shuffle', 'Shuffle Trainer']], 'home.think') +
+      methodCard('Think', T('home.think'), [['#think', 'MSPC trainer'], ['#clinic', 'Blunder Clinic'], ['#leaderboard', 'Arena']], 'home.think') +
       methodCard('Theory', T('home.theory'), [['#openings', 'Openings'], ['#middlegame', 'Middlegame'], ['#endgame', 'Endgame'], ['#puzzles', 'Puzzles']], 'home.theory') +
       methodCard('Trim', T('home.trim'), [['#trim', 'Trim a game']], 'home.trim') +
     '</div></section>' +
@@ -7439,7 +7552,7 @@ function mountHome(view) {
   }
   view.addEventListener('click', onClick);
   player.replay();
-  const unbindLoop = V33.bindHome(view), unbindElo = V34.bindHomeBoard(view);
+  const unbindLoop = V33.bindHome(view), unbindElo = LB4.bind(view);
   return () => { player.stop(); view.removeEventListener('click', onClick); board.destroy(); unbindLoop(); unbindElo(); };
 }
 
@@ -7576,14 +7689,16 @@ function mountThink(view) {
 
 /* ---------- THINK: two modes, the MSPC trainer and the Shuffle Trainer ---------- */
 function thinkTabs(active) {
+  /* v6.1: Arena moved to the main bar and the Shuffle Trainer to each module: four modes are left, in a 2x2 matrix like Theory. */
+  if (active === 'leaderboard' || active === 'shuffle') return '';
   const due = V36.srsDueCount();
-  const tabs = [['think', 'brain', 'MSPC trainer', 'Think every move through'], ['clinic', 'stethoscope', 'Blunder Clinic', 'Real blunders, explained with MSPC'], ['peer', 'user-group', 'Peer puzzles', 'Punish blunders from this hub'],
-    ['shuffle', 'shuffle', 'Shuffle Trainer', 'Arcade repetition, line after line'], ['srs', 'crosshairs', 'My mistakes', 'Spaced repetition of your misses'], ['leaderboard', 'trophy', 'Arena', 'Tournament, friends, leaderboard']];
-  return '<nav class="theory-tabs six" aria-label="Think modes">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === active ? ' aria-current="page"' : '') + '>' + icon(t[1]) +
-    '<b>' + t[2] + (t[0] === 'shuffle' && !App.can('shuffle') ? ' ' + lockIcon(gateLevel('shuffle')) : '') + (t[0] === 'srs' && due ? '<span class="tab-count" aria-label="' + due + ' due">' + due + '</span>' : '') + '</b><small>' + t[3] + '</small></a>').join('') + '</nav><p class="v6-thinklink small"><a href="#profile">Ranks, Skill Matrix and bounties</a></p>';
+  const tabs = [['think', 'brain', 'MSPC trainer', 'Think every move through'], ['clinic', 'stethoscope', 'Blunder Clinic', 'Real blunders, explained with MSPC'], ['peer', 'user-group', 'Peer puzzles', 'Punish blunders from this hub'], ['srs', 'crosshairs', 'My mistakes', 'Spaced repetition of your misses']];
+  return '<nav class="theory-tabs grid2x2" aria-label="Think modes">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === active ? ' aria-current="page"' : '') + '>' + icon(t[1]) +
+    '<b>' + t[2] + (t[0] === 'srs' && due ? '<span class="tab-count" aria-label="' + due + ' due">' + due + '</span>' : '') + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' +
+    (active === 'think' ? shuffleBar('think') : '') + '<p class="v6-thinklink small"><a href="#account">Level, ranks, Skill Matrix and bounties</a></p>';
 }
 function mountShufflePage(view) {
-  view.innerHTML = cmsBar() + thinkTabs('shuffle') + '<div id="shuffle-root"></div>' + gateNote('shuffle') + gateNote('shuffleAll');
+  view.innerHTML = cmsBar() + shuffleBack() + '<div id="shuffle-root"></div>' + gateNote('shuffle') + gateNote('shuffleAll');
   const root = qs('#shuffle-root', view);
   if (App.can('shuffle')) return mountShuffle(root);
   const lv = gateLevel('shuffle');
@@ -7903,7 +8018,7 @@ function mountShuffle(root) {
 function theoryHead(show) { const h = qs('#theory-head'); if (h) h.hidden = !show; }
 function mountTheory(view, sub) {
   const tabs = [['openings', 'chess-pawn', 'Openings', 'Repertoires and drills'], ['middlegame', 'chess-knight', 'Middlegame', 'Plans and bootcamps'], ['endgame', 'chess-king', 'Endgame', 'Technique that converts'], ['puzzles', 'puzzle-piece', 'Puzzles', 'Rated tactics, live']];
-  view.innerHTML = cmsBar() + '<nav class="theory-tabs grid2x2" aria-label="Theory sections">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === sub ? ' aria-current="page"' : '') + '>' + icon(t[1]) + '<b>' + t[2] + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' +
+  view.innerHTML = cmsBar() + '<nav class="theory-tabs grid2x2" aria-label="Theory sections">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === sub ? ' aria-current="page"' : '') + '>' + icon(t[1]) + '<b>' + t[2] + rankPill(t[0]) + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' + shuffleBar(sub) +
     '<div id="theory-head">' + pageHeadK('theory.' + sub + '.title', 'theory.' + sub + '.text') + '</div><div id="theory-root"></div>';
   const root = qs('#theory-root', view);
   return (sub === 'openings' ? mountOpenings : sub === 'middlegame' ? mountMiddlegame : sub === 'puzzles' ? mountPuzzles : mountEndgame)(root);
@@ -10597,7 +10712,7 @@ function mountAbout(view) {
       '<div class="panel proof">' + (CONTENT.proofs || []).map((p) => '<div><div class="proof-n">' + esc(tok(p.value)) + '</div><p>' + esc(tok(p.text)) + '</p></div>').join('') + '</div></section>' +
     '<section class="section"><blockquote class="quote">' + esc(T('about.quote')) + ed('about.quote') + '</blockquote></section>' +
     '<section class="section">' + sectionHeadK('home.methodTitle', '') + '<div class="method">' +
-      methodCard('Think', T('home.think'), [['#think', 'MSPC trainer'], ['#shuffle', 'Shuffle Trainer']]) + methodCard('Theory', T('home.theory'), [['#openings', 'Openings'], ['#middlegame', 'Middlegame'], ['#endgame', 'Endgame'], ['#puzzles', 'Puzzles']]) + methodCard('Trim', T('home.trim'), [['#trim', 'Trim a game']]) + '</div></section>' +
+      methodCard('Think', T('home.think'), [['#think', 'MSPC trainer'], ['#clinic', 'Blunder Clinic'], ['#leaderboard', 'Arena']]) + methodCard('Theory', T('home.theory'), [['#openings', 'Openings'], ['#middlegame', 'Middlegame'], ['#endgame', 'Endgame'], ['#puzzles', 'Puzzles']]) + methodCard('Trim', T('home.trim'), [['#trim', 'Trim a game']]) + '</div></section>' +
     '<section class="section">' + sectionHead('Follow the journey') + '<div class="links">' +
       link(CONFIG.links.youtube, brand('youtube'), 'YouTube', '@lanckrietchess') + link(CONFIG.links.tiktok, brand('tiktok'), 'TikTok', 'Short lessons') +
       link(CONFIG.links.instagram, brand('instagram'), 'Instagram', 'Reels and DMs') + link(CONFIG.links.facebook, brand('facebook'), 'Facebook', 'Reels') +
@@ -10659,7 +10774,8 @@ function refreshChip() {
     '<span class="chip-tier tier-' + tier + '">' + esc(TIERS[tier].label) + '</span><span class="chip-avatar">' + (initials ? esc(initials) : icon('user')) + '</span>';
   chip.setAttribute('aria-label', 'Your profile: ' + TIERS[tier].label + ' access, ' + days + '-day streak' + V36.chipLabel());
   const slot = qs('#admin-slot');
-  if (slot) slot.innerHTML = Admin.active ? '<button type="button" class="admin-chip" id="admin-chip" aria-label="Open the admin menu">' + icon('pen-ruler') + '<span>' + (Admin.preview() ? 'Preview' : 'Admin') + '</span></button>' : '';
+  if (slot) slot.innerHTML = Admin.active ? '<button type="button" class="admin-chip" id="admin-chip" aria-label="Open the admin menu">' + icon('pen-ruler') + '<span>' + (Admin.preview() ? 'Preview' : 'Admin') + '</span>' + proofBadge() + '</button>' : '';
+  try { const L = V6.level(), tb = qs('#topbar'); if (tb) tb.style.setProperty('--lvl', L.pct.toFixed(3)); } catch (e) { /* ranks load a moment later */ }
 }
 function openProfile() {
   const p = App.profile, t = App.totals(), b = bracketOf(p.elo), tier = App.access.tier, token = Access.encodeProfile();
@@ -12760,7 +12876,7 @@ function mountLeaderboard(view) {
   if (App.ui.lbMode === 'games') return mountGamesBoard(view);
   if (App.ui.lbMode === 'puzzles') return mountPuzzleBoard(view);
   if ((App.ui.lbMode || 'score') !== 'score') return mountBoards(view);
-  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + V34.lbModes('score') + pageHead('Leaderboard', esc('Ranked on accuracy, not on hours. Solve at least ' + Ranks.min() + ' different puzzles in a period to get on the board.')) +
+  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + V34.lbModes('score') + pageHead('Arena · Leaderboard', esc('Ranked on accuracy, not on hours. Solve at least ' + Ranks.min() + ' different puzzles in a period to get on the board.')) +
     '<div class="seg lb-seg" role="group" aria-label="Period">' + [['week', 'This week'], ['month', 'This month'], ['all', 'All time']].map((x) => '<button type="button" data-lp="' + x[0] + '" aria-pressed="' + (ui.p === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
     '<div class="lb-grid"><section class="panel lb-me" id="lb-me" aria-label="Your score"></section><section class="panel lb-board" id="lb-board" aria-label="Community board"></section></div>' +
     '<details class="panel pad lb-rules"><summary>How the ranking works</summary><p>Only your first attempt at each puzzle in a period counts: repeating a drill you already know trains you, but it doesn’t rank you. A hint or a shown move counts as a miss. Accuracy is weighted by difficulty and pulled towards 50% until you have solved enough puzzles, so ten easy puzzles at 100% can’t beat thirty hard ones at 90%. Attempts solved faster than a human can move are ignored.</p>' +
@@ -13414,7 +13530,7 @@ const Elo = (() => {
       try {
         const r = await Ranks.post({ action: 'elo_verify', device: deviceId(), site, user: a.user, code: a.code, name: App.profile.name || '' });
         Object.assign(a, { verified: true, user: r.user || a.user, avatar: r.avatar || '', rapid: num(r.rapid), blitz: num(r.blitz), bullet: num(r.bullet), at: Date.now(), community: true });
-        save(); cache = {};
+        stamp(a); save(); cache = {};
         return { ok: true, community: true };
       } catch (e) {
         if (e.reason === 'code' || e.reason === 'not-found' || e.reason === 'limit') return { ok: false, reason: e.reason };
@@ -13424,15 +13540,38 @@ const Elo = (() => {
     if (!p) return { ok: false, reason: 'not-found' };
     if (p.text.toUpperCase().indexOf(a.code) < 0) return { ok: false, reason: 'code' };
     Object.assign(a, { verified: true, user: p.user, avatar: p.avatar, rapid: p.rapid, blitz: p.blitz, bullet: p.bullet, at: Date.now(), community: false });
-    save();
+    stamp(a); save();
     return { ok: true, community: false };
+  }
+  /* v6.1: the baseline is the first verified rating (baseline_rating = the main mode); one snapshot a day builds the growth curve. */
+  function stamp(a) {
+    const now = Date.now(), r = { rapid: a.rapid || null, blitz: a.blitz || null, bullet: a.bullet || null };
+    if (!a.baseline) { a.baseline = Object.assign({ at: now }, r); const m = MODES.map((x) => x[0]).filter((k) => r[k])[0]; a.baseline_rating = m ? r[m] : null; a.baseline_mode = m || ''; }
+    a.hist = Array.isArray(a.hist) ? a.hist : [];
+    const last = a.hist[a.hist.length - 1], snap = Object.assign({ t: now }, r);
+    if (last && Math.floor(last.t / 864e5) === Math.floor(now / 864e5)) a.hist[a.hist.length - 1] = snap; else a.hist.push(snap);
+    if (a.hist.length > 400) a.hist = a.hist.slice(-400);
+  }
+  function series(a, mode) {
+    const pts = [];
+    if (a && a.baseline && a.baseline[mode]) pts.push({ t: a.baseline.at, r: a.baseline[mode] });
+    ((a && a.hist) || []).forEach((h) => { if (h && h[mode]) pts.push({ t: h.t, r: h[mode] }); });
+    pts.sort((x, y) => x.t - y.t);
+    const cur = a && a[mode], last = pts[pts.length - 1];
+    if (cur && (!last || last.r !== cur)) pts.push({ t: Math.max((a && a.at) || Date.now(), last ? last.t : 0), r: cur });   // the newest rating always ends the curve
+    return pts;
+  }
+  function growth(site, mode) {
+    const a = acct(site);
+    if (!a || !a.verified || !a[mode] || !a.baseline || !a.baseline[mode]) return null;
+    return { baseline: a.baseline[mode], current: a[mode], net: a[mode] - a.baseline[mode], since: a.baseline.at };
   }
   async function refresh(force) {
     for (const site of Object.keys(SITES)) {
       const a = acct(site);
-      if (!a || !a.verified || (!force && Date.now() - (a.at || 0) < 6 * 36e5)) continue;
+      if (!a || !a.verified || (!force && a.baseline && Date.now() - (a.at || 0) < 6 * 36e5)) continue;
       const p = await fetchProfile(site, a.user);
-      if (p) { Object.assign(a, { avatar: p.avatar || a.avatar, rapid: p.rapid, blitz: p.blitz, bullet: p.bullet, at: Date.now() }); save(); }
+      if (p) { Object.assign(a, { avatar: p.avatar || a.avatar, rapid: p.rapid, blitz: p.blitz, bullet: p.bullet, at: Date.now() }); stamp(a); save(); }
     }
   }
   function forget(site) {
@@ -13452,7 +13591,7 @@ const Elo = (() => {
     cache[k] = { at: Date.now(), data };
     return data;
   }
-  return { SITES, MODES, acct, start, verify, refresh, forget, best, top, fetchProfile };
+  return { SITES, MODES, acct, start, verify, refresh, forget, best, top, fetchProfile, growth, series, stamp };
 })();
 
 /* ---------- volume and accuracy per category (shared idea with the worker) ----------
@@ -14090,7 +14229,7 @@ function mountBoards(view) {
   const mode = App.ui.lbMode === 'trim' ? 'trim' : 'volume';
   const ui = App.ui.vol || (App.ui.vol = { p: 'week', cat: 'all', sort: 'solved', tsort: 'reviewed' });
   const intro = mode === 'volume' ? 'How much you train and how accurately, per category. Solve at least ' + VOL_MIN + ' puzzles in a period to get ranked.' : 'Games you review, blunders you solve, and how fast your blunder rate drops.';
-  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Leaderboard', esc(intro)) + V34.lbModes(mode) +
+  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Arena · Leaderboard', esc(intro)) + V34.lbModes(mode) +
     '<div class="seg lb-seg" role="group" aria-label="Period">' + segHTML('vp', [['week', 'This week'], ['month', 'This month'], ['all', 'All time']], ui.p) + '</div>' +
     (mode === 'volume' ? '<div class="seg vb-cats" role="group" aria-label="Category">' + segHTML('vc', VOL_CATS, ui.cat) + '</div><div class="seg lb-seg" role="group" aria-label="Sort">' + segHTML('vs', [['solved', 'Most puzzles solved'], ['accuracy', 'Highest accuracy'], ['hard', 'Best MSPC Hard Mode']], ui.sort) + '</div>'
       : '<div class="seg lb-seg" role="group" aria-label="Sort">' + segHTML('ts', [['reviewed', 'Most games reviewed'], ['solved', 'Most blunders solved'], ['reduction', 'Blunder reduction (weekly)']], ui.tsort) + '</div>') +
@@ -15182,7 +15321,7 @@ const RESULT_WORD = { win: 'Won', loss: 'Lost', draw: 'Draw' };
 function mountGamesBoard(view) {
   const ui = App.ui.gb || (App.ui.gb = { b: '', sel: '' });
   const all = gamesAll().slice().sort((a, b) => (+b.accuracy || 0) - (+a.accuracy || 0)), gotd = gameOfDay();
-  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Leaderboard', esc('The Game of the Day and the most accurate games played by members of this hub, checked by ' + CONFIG.coach + ' and broken down with MSPC.') + ' ' + manageBtn('games', 'Games')) + V34.lbModes('games') +
+  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Arena · Leaderboard', esc('The Game of the Day and the most accurate games played by members of this hub, checked by ' + CONFIG.coach + ' and broken down with MSPC.') + ' ' + manageBtn('games', 'Games')) + V34.lbModes('games') +
     (!all.length ? '<div class="panel pad empty36"><h2>No featured games yet</h2><p class="muted">Played a clean game? Send the PGN to ' + esc(CONFIG.coach) + ' in the Skool community. The best games are featured here with an MSPC breakdown, and one of them becomes the Game of the Day.</p><div class="btn-row">' +
         (Admin.active ? '<a class="btn btn-primary btn-sm" href="#review-queue">' + icon('inbox') + ' Open the Review Queue</a>' : '<a class="btn btn-primary btn-sm" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">' + icon('paper-plane') + ' Send a game on Skool</a>') + '</div></div>'
       : '<section class="panel gm36" id="gm36" aria-live="polite"></section>' +
@@ -16178,7 +16317,7 @@ const PuzzleBoard = (() => {
 })();
 
 function mountPuzzleBoard(view) {
-  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Leaderboard', esc('The highest Puzzle ELOs in this hub. Every rated puzzle on Theory > Puzzles moves your rating: up for a clean solve, down for a wrong move.')) + V34.lbModes('puzzles') +
+  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Arena · Leaderboard', esc('The highest Puzzle ELOs in this hub. Every rated puzzle on Theory > Puzzles moves your rating: up for a clean solve, down for a wrong move.')) + V34.lbModes('puzzles') +
     '<div class="lb-grid"><section class="panel lb-me" id="pzb-me" aria-label="Your Puzzle ELO"></section><section class="panel lb-board" id="pzb-board" aria-label="Community board"></section></div>' +
     '<details class="panel pad lb-rules"><summary>How this board works</summary><p>Your Puzzle ELO starts where you put it and moves like a chess rating: solving a puzzle rated above you earns more, missing one rated below you costs more, and the first 30 puzzles move it faster. Each puzzle counts once; retries and puzzles you have seen before are unrated. A free hint doesn’t cost anything; showing the move or the solution counts as a miss.</p>' +
       '<p>You appear on the board after 5 rated puzzles. It ranks the current rating, with the peak next to it. The top three get the gold, silver and bronze trophy; everyone else shows the trophy their badges earned.</p></details>';
@@ -18276,7 +18415,7 @@ const Friends = (() => {
       t: { w: s.wk || isoWeek(new Date()), m: s.metric || Tourney.cfg().metric, s: s.score || 0 }, b: lb ? { f: lb.f, p: lb.p, b: lb.b, o: lb.o, n: lb.n } : null, x: V6.card(), at: Date.now() };
   }
   const code = () => 'LCF1.' + b64e(JSON.stringify(myCard()));
-  const link = () => location.origin + location.pathname + '?friend=' + encodeURIComponent(code()) + '#leaderboard';
+  const link = () => location.origin + location.pathname + '?friend=' + encodeURIComponent(code()) + '#friends';
   function codeIn(q) {
     q = String(q || '').trim();
     const m = q.match(/[?&]friend=([^&#\s]+)/);
@@ -18568,7 +18707,8 @@ const Arena = (() => {
   function paint() {
     if (!cur) return;
     const main = qs('[data-ar5-main]', cur.sec);
-    if (main) main.innerHTML = '<div class="ar5-grid">' + cupHTML() + meHTML() + '</div>' + friendsHTML();
+    if (main) main.innerHTML = cur.mode === 'friends' ? '<div class="ar5-grid">' + meHTML() + '</div>' + friendsHTML()
+      : '<div class="ar5-grid">' + cupHTML() + '</div><p class="small muted ar5-note">' + icon('user-group') + ' Friends and your friend code now live in your <a href="#friends">Account</a>.</p>';
   }
   function refresh() {
     if (!cur || !cur.sec.isConnected) return;
@@ -18634,14 +18774,14 @@ const Arena = (() => {
     toast(r.ok ? 'Now following ' + r.name + '.' : 'No ' + Elo.SITES[site] + ' player found with that name.', r.ok ? 'good' : '');
     if (r.ok) paint();
   }
-  function mount(view) {
+  function mount(view, mode) {
     const res = Tourney.roll();
     if (res && res.prize) toast('Last week’s tournament: #' + res.rank + ' of ' + res.players + '. +' + res.prize + ' tokens.', 'good');
     const sec = document.createElement('section'), head = qs('.page-head', view);
     sec.className = 'arena5'; sec.id = 'arena5'; sec.setAttribute('aria-label', 'Weekly tournament and friends');
     sec.innerHTML = '<div data-ar5-main></div><div class="ar5-solve" data-ar5-solve hidden></div>';
-    if (head) head.insertAdjacentElement('afterend', sec); else view.prepend(sec);
-    cur = { sec, runner: null, board: null };
+    if (mode === 'friends') view.appendChild(sec); else if (head) head.insertAdjacentElement('afterend', sec); else view.prepend(sec);
+    cur = { sec, runner: null, board: null, mode: mode || 'arena' };
     paint();
     sec.addEventListener('click', onClick);
     sec.addEventListener('submit', onSubmit);
@@ -20212,6 +20352,11 @@ const V6Core = (() => {
     const exact = a == null ? student.exact : student.exact * 0.7 + a * 0.3, i = clampN(Math.round(exact - 0.001), 0, top);
     return { exact, i, name: CFG.ranks[i][0] };
   }
+  /* v6.1: the XP Level. Level 1 at 0 XP; level n starts at 60 * (n - 1)^2 XP (Level 2 at 60, Level 5 at 960, Level 11 at 6000). */
+  function levelOf(xp) {
+    const v = Math.max(0, num(xp, 0)), lv = 1 + Math.floor(Math.sqrt(v / 60)), lo = 60 * (lv - 1) * (lv - 1), hi = 60 * lv * lv;
+    return { level: lv, xp: v, lo, hi, pct: clampN((v - lo) / (hi - lo), 0, 1), toNext: Math.max(0, Math.ceil(hi - v)) };
+  }
   /* ---------- weak-spot balancer: boost the weak modules, brake the strong ones ---------- */
   function balancer(modExact, studentExact, trained) {
     const B = CFG.balancer;
@@ -20422,11 +20567,12 @@ const V6Core = (() => {
   }
   /* ---------- the standing line of a player, for the friend card ---------- */
   function cardLine(o) {
-    return { r: String(o.student || '').slice(0, 14), a: String(o.arena || '').slice(0, 10), x: Math.max(0, Math.round(num(o.xp, 0))), t: (Array.isArray(o.trophies) ? o.trophies : []).slice(-3).map((t) => String(t).slice(0, 24)) };
+    return { r: String(o.student || '').slice(0, 14), a: String(o.arena || '').slice(0, 10), x: Math.max(0, Math.round(num(o.xp, 0))), t: (Array.isArray(o.trophies) ? o.trophies : []).slice(-3).map((t) => String(t).slice(0, 24)),
+      m: Array.isArray(o.modules) ? o.modules.slice(0, 5).map((v) => Math.round(clampN(num(v, 0), 0, 8) * 100) / 100) : undefined, ov: o.overall != null ? Math.round(clampN(num(o.overall, 0), 0, 8) * 100) / 100 : undefined };
   }
   const winPct = (cp) => 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * clampN(cp, -3000, 3000))) - 1);
 
-  return { CFG, rankOf, moduleRanks, studentRank, arenaRank, overallRank, balancer, flowMult, flowName, flowNew, flowHit, flowMiss, dayBoost, nextDayBoost, hgLimit, hgMult,
+  return { CFG, rankOf, moduleRanks, studentRank, arenaRank, overallRank, levelOf, balancer, flowMult, flowName, flowNew, flowHit, flowMiss, dayBoost, nextDayBoost, hgLimit, hgMult,
     hintPenalty, hintRank, puzzleBase, baseFor, xp, secondLimit, secondLeft, chapterStatuses, bossPlan, mistakeLimit, hashStr, weakest, rollBounties, bountyBump,
     benchPhase, benchBuff, arenaUpdate, eventActive, activeEvents, eventMult, filterLines, smartMix, ICONS, missedOpportunity, reviewIcon, cardLine, winPct, clampN, num };
 })();
@@ -20575,7 +20721,8 @@ const V6 = (() => {
     const after = ranks();
     if (after.mr[module].i > before.mr[module].i) { toast(C.CFG.labels[module] + ': rank ' + after.mr[module].name + '.', 'good'); trophy('rank:' + module + ':' + after.mr[module].name, C.CFG.labels[module] + ' ' + after.mr[module].name, 'rank'); }
     if (after.student.i > before.student.i) toast('Student rank: ' + after.student.name + '.', 'good');
-    save(); queueSync();
+    if (C.levelOf(s.total).level > C.levelOf(s.total - n).level && n > 0) toast('Level ' + C.levelOf(s.total).level + ' reached.', 'good');
+    save(); queueSync(); try { refreshChip(); } catch (e) { /* the chip is optional */ }
   }
   function trophy(id, name, kind) {
     const s = st();
@@ -21050,21 +21197,33 @@ const V6 = (() => {
       (groups.length ? groups.map((g) => '<h3>' + by[g.k] + '</h3><ul class="v6-trophies">' + g.items.slice().reverse().map((t) => '<li><span class="v6-tro v6-tro-' + esc(t.kind) + '">' + icon(t.kind === 'event' ? 'ribbon' : t.kind === 'strict' ? 'crosshairs' : t.kind === 'rank' ? 'ranking-star' : 'skull-crossbones') + '</span><b>' + esc(t.name) + '</b><small>' + esc(dateText(t.t)) + '</small></li>').join('') + '</ul>').join('') : '<p class="muted">Nothing here yet. Clear a Boss Fight or finish an event challenge.</p>') +
       '<h3>Friends</h3>' + (fr.length ? '<div class="v6-friends">' + fr.slice(0, 12).map((f) => '<div class="v6-friend"><b>' + esc(f.name) + '</b>' + friendLine(f) + '</div>').join('') + '</div>' : '<p class="muted small">Add friends on the <a href="#leaderboard">leaderboard</a> to compare ranks and trophies.</p>');
   }
+  /* v6.1: the Account page: extra tabs (Friends, Ratings) are registered by addTab, the level and overall rank sit on top. */
+  const EXT = [];
+  const profileTabs = () => [['overview', 'Overview']].concat(EXT.map((e) => [e.id, e.label]), [['matrix', 'Skill Matrix'], ['bounties', 'Bounties'], ['community', 'Community'], ['trophies', 'Trophies']]);
+  function hero(R) {
+    const L = C.levelOf(st().total);
+    return '<div class="v6-hero3"><div class="v6-tile lvl"><small>Level</small><b>' + L.level + '</b>' + bar(L.pct) + '<span>' + fmt(L.toNext) + ' XP to Level ' + (L.level + 1) + ' · ' + fmt(st().total) + ' XP</span></div>' +
+      '<div class="v6-tile"><small>Overall rank</small><b>' + esc(R.overall.name) + '</b><span>Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + '</span></div></div>';
+  }
   function mountProfile(view) {
-    const ui = { tab: 'overview' };
+    const t0 = App.ui.accTab || ''; App.ui.accTab = '';
+    const ui = { tab: profileTabs().some((t) => t[0] === t0) ? t0 : 'overview' };
+    let extDispose = null;
     const R0 = () => ranks();
     view.innerHTML = '<div class="v6-page" id="v6-page"></div>';
     const root = qs('#v6-page', view);
     function head(R) {
       const s = st();
-      return '<header class="v6-head">' + avatar(R) + '<div><h1>' + esc(App.profile.name || 'Your profile') + '</h1><p class="muted">Overall ' + esc(R.overall.name) + ' · Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + ' · ' + fmt(s.total) + ' XP</p></div>' +
-        '<label class="switch-row v6-focus"><span>Focus Mode: ' + (s.focus ? 'ON' : 'OFF') + '<small class="field-hint" style="display:block">Hides timers, streak widgets and the flow chip. XP and multipliers keep running.</small></span><input type="checkbox" data-v6-focus' + (s.focus ? ' checked' : '') + '></label></header>' +
-        '<nav class="seg v6-tabs" role="tablist" aria-label="Profile sections">' + [['overview', 'Overview'], ['matrix', 'Skill Matrix'], ['bounties', 'Bounties'], ['community', 'Community'], ['trophies', 'Trophies']].map((t) => '<button type="button" role="tab" data-v6t="' + t[0] + '" aria-pressed="' + (ui.tab === t[0]) + '">' + t[1] + '</button>').join('') + '</nav>';
+      return '<header class="v6-head">' + avatar(R) + '<div><h1>' + esc(App.profile.name || 'Your account') + '</h1><p class="muted">Overall ' + esc(R.overall.name) + ' · Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + ' · ' + fmt(s.total) + ' XP</p></div>' +
+        '<label class="switch-row v6-focus"><span>Focus Mode: ' + (s.focus ? 'ON' : 'OFF') + '<small class="field-hint" style="display:block">Hides timers, streak widgets and the flow chip. XP and multipliers keep running.</small></span><input type="checkbox" data-v6-focus' + (s.focus ? ' checked' : '') + '></label></header>' + hero(R) +
+        '<nav class="seg v6-tabs" role="tablist" aria-label="Account sections">' + profileTabs().map((t) => '<button type="button" role="tab" data-v6t="' + t[0] + '" aria-pressed="' + (ui.tab === t[0]) + '">' + t[1] + '</button>').join('') + '</nav>';
     }
     function paint() {
       if (boss) { boss.destroy(); }
-      const R = R0();
-      root.innerHTML = head(R) + '<div class="v6-body" id="v6-body">' + (ui.tab === 'matrix' ? tabMatrix() : ui.tab === 'bounties' ? tabBounties(R) : ui.tab === 'community' ? tabCommunity() : ui.tab === 'trophies' ? tabTrophies() : tabOverview(R)) + '</div>' + (isAdmin() ? '<p class="small muted v6-admin"><a href="#events">Open the Master Event Engine</a></p>' : '');
+      if (extDispose) { try { extDispose(); } catch (e) { /* gone */ } extDispose = null; }
+      const R = R0(), ext = EXT.filter((e) => e.id === ui.tab)[0];
+      root.innerHTML = head(R) + '<div class="v6-body" id="v6-body">' + (ext ? '<div class="v6-ext" id="v6-ext"></div>' : ui.tab === 'matrix' ? tabMatrix() : ui.tab === 'bounties' ? tabBounties(R) : ui.tab === 'community' ? tabCommunity() : ui.tab === 'trophies' ? tabTrophies() : tabOverview(R)) + '</div>' + (isAdmin() ? '<p class="small muted v6-admin"><a href="#events">Open the Master Event Engine</a></p>' : '');
+      if (ext) { try { extDispose = ext.mount(qs('#v6-ext', root)) || null; } catch (e) { console.error(e); } }
     }
     function startBoss(chId, mode) {
       let ch = null;
@@ -21089,7 +21248,7 @@ const V6 = (() => {
     };
     root.addEventListener('click', onClick);
     const tick = setInterval(() => { if (!root.isConnected) { clearInterval(tick); return; } }, 5000);
-    return () => { root.removeEventListener('click', onClick); clearInterval(tick); if (boss) boss.destroy(); };
+    return () => { root.removeEventListener('click', onClick); clearInterval(tick); if (extDispose) { try { extDispose(); } catch (e) { /* gone */ } extDispose = null; } if (boss) boss.destroy(); };
   }
 
   /* ---------- the Master Event Engine (admin) ---------- */
@@ -21221,17 +21380,21 @@ const V6 = (() => {
 
   /* ---------- friend cards, top-bar chip, settings ---------- */
   const cleanTxt = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, n);
-  function card() { const R = ranks(); return C.cardLine({ student: R.student.name, arena: R.arena.name, xp: st().total, trophies: st().trophies.slice(-3).map((t) => t.name) }); }
+  function card() { const R = ranks(); return C.cardLine({ student: R.student.name, arena: R.arena.name, xp: st().total, trophies: st().trophies.slice(-3).map((t) => t.name), modules: C.CFG.modules.map((m) => R.mr[m].exact), overall: R.overall.exact }); }
   function cleanCard(x) {
     if (!x || typeof x !== 'object' || !cleanTxt(x.r, 14)) return null;
-    return { r: cleanTxt(x.r, 14), a: cleanTxt(x.a, 10), x: C.clampN(Math.round(num(x.x, 0)), 0, 99999999), t: (Array.isArray(x.t) ? x.t : []).slice(0, 3).map((t) => cleanTxt(t, 24)).filter(Boolean) };
+    const mm = Array.isArray(x.m) && x.m.length === 5 ? x.m.map((v) => Math.round(C.clampN(num(v, 0), 0, 8) * 100) / 100) : undefined;
+    return { r: cleanTxt(x.r, 14), a: cleanTxt(x.a, 10), x: C.clampN(Math.round(num(x.x, 0)), 0, 99999999), t: (Array.isArray(x.t) ? x.t : []).slice(0, 3).map((t) => cleanTxt(t, 24)).filter(Boolean), m: mm, ov: x.ov != null ? Math.round(C.clampN(num(x.ov, 0), 0, 8) * 100) / 100 : undefined };
   }
   function friendLine(f) {
     const x = f && f.x;
     if (!x || !x.r) return '';
     return '<p class="v6-fline">' + icon('ranking-star') + ' ' + esc(x.r) + (x.a && x.a !== 'Unranked' ? ', Arena ' + esc(x.a) : '') + ', ' + fmt(x.x) + ' XP' + (x.t && x.t.length ? '. ' + x.t.map(esc).join(', ') : '') + '</p>';
   }
-  function chip() { const R = ranks(); return '<span class="v6-chip" style="--ring:' + R.arena.color + '" title="Overall rank: ' + esc(R.overall.name) + '">' + esc(R.overall.name.slice(0, 3).toUpperCase()) + '</span>'; }
+  function chip() {
+    const R = ranks(), L = C.levelOf(st().total), ab = esc(R.overall.name.slice(0, 3).toUpperCase());
+    return '<span class="v6-chip v6-lvl" style="--ring:' + R.arena.color + '" title="Level ' + L.level + ', overall rank ' + esc(R.overall.name) + '"><b>Lv ' + L.level + '</b><i class="ab">' + ab + '</i><i class="full">' + esc(R.overall.name) + '</i></span>';
+  }
   function settingsHTML() {
     return '<label class="switch-row"><span>Executive Focus Mode<small class="field-hint" style="display:block">Hides timers, streak widgets and the flow chip. XP and multipliers keep running.</small></span><input type="checkbox" data-v6-focus' + (st().focus ? ' checked' : '') + '></label>' +
       '<a class="btn btn-ghost btn-sm" href="#profile" data-close style="justify-self:start">' + icon('ranking-star') + ' Open my executive profile</a>';
@@ -21270,22 +21433,633 @@ const V6 = (() => {
   return {
     boot, mountProfile, mountEvents, narrow, filterOptions, filterBar, tagHTML, budget, legend, card, cleanCard, friendLine, chip, settingsHTML,
     ctx(o) { if (o && o.module) { ctx.shuffle = o.module; resetPos(); } },
-    state: st, ranks, sync, events, payout, matrix,
+    state: st, ranks, level: () => C.levelOf(st().total), addTab: (t) => { if (t && t.id && !EXT.some((e) => e.id === t.id)) EXT.push(t); }, sync, events, payout, matrix,
     _t: { forceAdmin(v) { adminOverride = v; }, tokenOf, onScore, hintPress, makeBoss, resetPos, get pos() { return pos; }, get boss() { return boss; }, secondLeft, addXp, bountyEvent, eventProgress, trophy, benchNow, leakSets, shuffleCtx, setState(s) { S = s; }, ctxo: ctx }
   };
 })();
 
 
+/* ==========================================================================
+   v6.1: logo menu, module rank pills, contextual Shuffle buttons, Account
+   tabs (Friends, Ratings), rating proof tracking, tiered home leaderboard.
+   Search "const LogoMenu", "const Proof", "const RatingsTab", "const LB4".
+   ========================================================================== */
+const ico = (name) => (/^b:[a-z0-9-]{2,40}$/.test(String(name || '')) ? '<i class="fa-brands fa-' + String(name).slice(2) + '" aria-hidden="true"></i>' : icon(/^[a-z0-9-]{2,40}$/.test(String(name || '')) ? name : 'link'));
+const fmtDay = (t) => new Date(t).toLocaleDateString('en', { day: 'numeric', month: 'short' });
+
+/* ---------- the logo dropdown (links and socials), editable in admin mode ---------- */
+const LogoMenu = (() => {
+  const safeUrl = (u) => { u = String(u == null ? '' : u).trim(); return /^(https:\/\/[^\s<>"']{3,500}|#[\w\/-]{1,60})$/i.test(u) ? u : ''; };
+  const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  const cleanIcon = (v) => (/^(b:)?[a-z0-9-]{2,40}$/.test(String(v || '')) ? String(v) : 'link');
+  const cleanLabel = (v) => String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, 50);
+  let isOpen = false;
+  function guessIcon(url) {
+    const h = (/^https:\/\/([^/]+)/i.exec(url) || [])[1] || '';
+    return /youtube|youtu\.be/.test(h) ? 'b:youtube' : /instagram|ig\.me/.test(h) ? 'b:instagram' : /tiktok/.test(h) ? 'b:tiktok' : /facebook|fb\.com/.test(h) ? 'b:facebook' :
+      /(^|\.)x\.com|twitter/.test(h) ? 'b:x-twitter' : /discord/.test(h) ? 'b:discord' : /chess\.com/.test(h) ? 'chess-knight' : /lichess/.test(h) ? 'chess' : /skool/.test(h) ? 'graduation-cap' : 'link';
+  }
+  function derived() {
+    const L = CONFIG.links || {}, A = CONFIG.about || {};
+    return [
+      { id: 'home', label: 'Training Hub home', url: '#home', icon: 'house' },
+      { id: 'youtube', label: 'YouTube: lanckrietchess', url: L.youtube, icon: 'b:youtube' },
+      { id: 'instagram', label: 'Instagram', url: L.instagram, icon: 'b:instagram' },
+      { id: 'tiktok', label: 'TikTok', url: L.tiktok, icon: 'b:tiktok' },
+      { id: 'facebook', label: 'Facebook', url: L.facebook, icon: 'b:facebook' },
+      { id: 'chesscom', label: 'Chess.com', url: A.chesscomUsername ? 'https://www.chess.com/member/' + encodeURIComponent(A.chesscomUsername) : '', icon: 'chess-knight' },
+      { id: 'skool', label: 'Skool community', url: L.skool, icon: 'graduation-cap' },
+      { id: 'mspc', label: 'Free MSPC course', url: L.mspcCourse, icon: 'brain' },
+      { id: 'dm', label: 'Coaching: send a DM', url: L.instagramDM, icon: 'comment-dots' }
+    ].filter((x) => safeUrl(x.url));
+  }
+  function items() {
+    const own = (Array.isArray(CONTENT.logoLinks) ? CONTENT.logoLinks : []).filter((x) => x && typeof x === 'object' && cleanLabel(x.label) && safeUrl(x.url))
+      .map((x) => ({ id: slug(x.id || x.label) || 'link', label: cleanLabel(x.label), url: safeUrl(x.url), icon: cleanIcon(x.icon) }));
+    return own.length ? own : derived();
+  }
+  const seed = () => items().map((x) => ({ id: x.id, label: x.label, url: x.url, icon: x.icon }));
+  const find = (list, key) => { key = String(key || '').trim().toLowerCase(); return list.findIndex((x) => x.id === key || x.label.toLowerCase() === key); };
+  function uniqueId(list, base) { let id = base || 'link', n = 2; while (list.some((x) => x.id === id)) id = (base || 'link') + '-' + n++; return id; }
+  function commit(list) {
+    const d = Admin.ensureDraft();
+    d.lists.logoLinks = list.slice(0, 40).map((x) => ({ id: x.id, label: x.label, url: x.url, icon: cleanIcon(x.icon) }));
+    Admin.saveDraft(d); render();
+  }
+  /* admin commands: add Name | https://..., edit Name | New name | https://..., del Name, up Name, down Name */
+  function run(text) {
+    const m = /^\s*(add|del|delete|remove|edit|rename|up|down)\s+(.+)$/i.exec(String(text || ''));
+    if (!m) return { ok: false, msg: 'Try: add Name | https://link, edit Name | New name | https://link, del Name, up Name, down Name.' };
+    const cmd = m[1].toLowerCase(), parts = m[2].split('|').map((s) => s.trim()), list = seed();
+    if (cmd === 'add') {
+      const label = cleanLabel(parts[0]), url = safeUrl(parts[1]);
+      if (!label || !url) return { ok: false, msg: 'add needs a name and an https:// link: add YouTube | https://…' };
+      if (find(list, label) >= 0) return { ok: false, msg: label + ' is already in the menu. Use edit.' };
+      list.push({ id: uniqueId(list, slug(label)), label, url, icon: parts[2] ? cleanIcon(parts[2]) : guessIcon(url) });
+    } else {
+      const i = find(list, parts[0]);
+      if (i < 0) return { ok: false, msg: 'No link called “' + parts[0] + '”.' };
+      if (cmd === 'del' || cmd === 'delete' || cmd === 'remove') list.splice(i, 1);
+      else if (cmd === 'up') { if (i > 0) list.splice(i - 1, 0, list.splice(i, 1)[0]); }
+      else if (cmd === 'down') { if (i < list.length - 1) list.splice(i + 1, 0, list.splice(i, 1)[0]); }
+      else {
+        const onlyUrl = parts.length === 2 && safeUrl(parts[1]);
+        const label = onlyUrl ? list[i].label : cleanLabel(parts[1] || list[i].label), url = onlyUrl ? safeUrl(parts[1]) : (parts[2] ? safeUrl(parts[2]) : list[i].url);
+        if (!label || !url) return { ok: false, msg: 'That link is not valid. Use https://…' };
+        list[i] = Object.assign({}, list[i], { label, url });
+      }
+    }
+    commit(list);
+    return { ok: true, msg: 'Done. Publish from the Admin menu to send it to everyone.' };
+  }
+  function editSheet(i) {
+    const list = seed(), cur = i >= 0 ? list[i] : { id: '', label: '', url: 'https://', icon: 'link' };
+    if (i >= 0 && !cur) return;
+    openSheet({
+      title: i >= 0 ? 'Edit link' : 'Add a link', noFocus: true,
+      html: '<form class="stack" data-lm-form><label class="field"><span class="field-label">Name</span><input class="input" name="label" maxlength="50" required value="' + esc(cur.label) + '"></label>' +
+        '<label class="field"><span class="field-label">Address <small>https://… or #page</small></span><input class="input" name="url" required inputmode="url" value="' + esc(cur.url) + '"></label>' +
+        '<label class="field"><span class="field-label">Icon <small>a Font Awesome name like link, or b:youtube for brands</small></span><input class="input" name="icon" maxlength="40" value="' + esc(cur.icon) + '"></label>' +
+        '<p class="form-msg is-bad" data-lm-err aria-live="polite"></p><div class="btn-row"><button class="btn btn-primary" type="submit">Save</button><button class="btn btn-ghost" type="button" data-close>Cancel</button></div></form>',
+      onMount(s) {
+        qs('[data-lm-form]', s.el).addEventListener('submit', (e) => {
+          e.preventDefault();
+          const f = e.target, label = cleanLabel(f.elements.label.value), url = safeUrl(f.elements.url.value), err = qs('[data-lm-err]', s.el);
+          if (!label || !url) { err.textContent = 'Give it a name and an https:// address.'; return; }
+          const next = seed(), item = { id: i >= 0 ? cur.id : uniqueId(next, slug(label)), label, url, icon: cleanIcon(f.elements.icon.value || guessIcon(url)) };
+          if (i >= 0) next[i] = item; else next.push(item);
+          commit(next); s.close();
+        });
+      }
+    });
+  }
+  function render() {
+    const host = qs('#brand-menu');
+    if (!host) return;
+    const edit = Admin.editing(), list = items();
+    const acts = (i) => '<span class="bm-edit">' + [['up', 'arrow-up', 'Move up'], ['down', 'arrow-down', 'Move down'], ['edit', 'pen', 'Edit'], ['del', 'trash', 'Remove']]
+      .map((a) => '<button type="button" class="icon-btn" data-lm="' + a[0] + '" data-i="' + i + '" aria-label="' + a[2] + '" title="' + a[2] + '">' + icon(a[1]) + '</button>').join('') + '</span>';
+    host.innerHTML = '<div class="bm-head"><b>lanckrietchess</b><small>Follow, watch and train with ' + esc(CONFIG.coach || 'Kyenzo') + '</small></div><ul class="bm-list" role="menu">' +
+      list.map((x, i) => { const ext = /^https:/i.test(x.url); return '<li role="none" class="bm-row"><a role="menuitem" class="bm-item" href="' + esc(x.url) + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + ico(x.icon) + '<span>' + esc(x.label) + '</span>' + icon(ext ? 'arrow-up-right-from-square' : 'chevron-right', 'bm-ext') + '</a>' + (edit ? acts(i) : '') + '</li>'; }).join('') + '</ul>' +
+      (edit ? '<form class="bm-admin" data-lm-cmd autocomplete="off"><input class="input" name="c" maxlength="400" placeholder="add Name | https://…   ·   del Name   ·   edit Name | New | https://…" aria-label="Link command"><button class="btn btn-primary btn-sm" type="submit">Run</button></form>' +
+        '<div class="bm-admin-row"><button type="button" class="btn btn-ghost btn-sm" data-lm="add" data-i="-1">' + icon('plus') + ' Add link</button><span class="small muted" data-lm-msg aria-live="polite"></span></div>' : '');
+  }
+  function bind() {
+    const btn = qs('#brand-btn'), menu = qs('#brand-menu');
+    if (!btn || !menu) return;
+    const set = (v) => { isOpen = v; menu.hidden = !v; btn.setAttribute('aria-expanded', String(v)); if (v) render(); };
+    btn.addEventListener('click', (e) => { e.preventDefault(); set(!isOpen); });
+    document.addEventListener('click', (e) => { if (isOpen && !menu.contains(e.target) && !btn.contains(e.target) && !e.target.closest('.sheet-wrap')) set(false); });
+    document.addEventListener('keydown', (e) => { if (isOpen && e.key === 'Escape') { set(false); try { btn.focus(); } catch (x) { /* ignore */ } } });
+    window.addEventListener('hashchange', () => { if (isOpen) set(false); });
+    menu.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-lm]');
+      if (b) {
+        e.preventDefault();
+        const a = b.getAttribute('data-lm'), i = +b.getAttribute('data-i'), list = seed();
+        if (a === 'add') editSheet(-1);
+        else if (a === 'edit') editSheet(i);
+        else if (a === 'del') { list.splice(i, 1); commit(list); }
+        else if (a === 'up' && i > 0) { list.splice(i - 1, 0, list.splice(i, 1)[0]); commit(list); }
+        else if (a === 'down' && i < list.length - 1) { list.splice(i + 1, 0, list.splice(i, 1)[0]); commit(list); }
+        return;
+      }
+      if (e.target.closest('a.bm-item')) set(false);
+    });
+    menu.addEventListener('submit', (e) => {
+      const f = e.target.closest('[data-lm-cmd]');
+      if (!f) return;
+      e.preventDefault();
+      const r = run(f.elements.c.value);
+      const box = qs('[data-lm-msg]', menu);
+      if (r.ok) { f.reset(); }
+      if (box) box.textContent = r.msg; else toast(r.msg, r.ok ? 'good' : 'bad');
+      if (r.ok) { const again = qs('[data-lm-msg]', menu); if (again) again.textContent = r.msg; }
+    });
+  }
+  return { bind, items, run, render, safeUrl };
+})();
+
+/* ---------- module rank pills and the contextual Shuffle Trainer buttons ---------- */
+const SH_MOD = { think: ['MSPC', 'MSPC positions'], openings: ['Openings', 'repertoire lines'], middlegame: ['Middlegame', 'plans, bootcamps and structures'], endgame: ['Endgame', 'technique and king and pawn'] };
+function rankPill(mod) {
+  try { const x = V6.ranks().mr[mod]; return x ? '<em class="rk-pill" title="' + esc(V6Core.CFG.labels[mod]) + ' rank">' + esc(x.name) + '</em>' : ''; } catch (e) { return ''; }
+}
+function moduleRankMetric(section) {
+  const mod = { think: 'think', openings: 'openings', mg: 'middlegame', middlegame: 'middlegame', endgame: 'endgame', eg: 'endgame', puzzles: 'puzzles' }[section];
+  if (!mod) return '';
+  try { const x = V6.ranks().mr[mod]; return metric(x.name, V6Core.CFG.labels[mod] + ' rank', 'ranking-star'); } catch (e) { return ''; }
+}
+function shuffleBar(mod) {
+  const m = SH_MOD[mod];
+  if (!m) return '';
+  const lock = App.can('shuffle') ? '' : ' ' + lockIcon(gateLevel('shuffle'));
+  return '<div class="sh-bar4"><div><b>' + icon('shuffle') + ' ' + esc(m[0]) + ' Shuffle Trainer</b><small>Random ' + esc(m[1]) + ', line after line, to build speed and muscle memory.</small></div>' +
+    '<a class="btn btn-primary btn-sm" href="#shuffle" data-shuffle-mod="' + mod + '">' + icon('shuffle') + ' Shuffle ' + esc(m[0]) + lock + '</a></div>';
+}
+function shuffleBack() {
+  const mod = App.ui.shuffleMod || 'openings', m = SH_MOD[mod] || SH_MOD.openings;
+  return '<p class="sh-back"><a class="btn btn-quiet btn-sm" href="#' + (mod === 'think' ? 'think' : mod) + '">' + icon('chevron-left') + ' Back to ' + esc(m[0]) + '</a> <span class="small muted">' + esc(m[0]) + ' Shuffle Trainer</span></p>';
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('[data-shuffle-mod]');
+  if (!b) return;
+  const mod = b.getAttribute('data-shuffle-mod'), s = Object.assign({}, App.settings.shuffle || {});
+  if (mod === 'think') { s.scope = 'middlegame'; s.filter = 'course:c:mspc'; } else { s.scope = mod; s.filter = ''; }
+  App.settings.shuffle = s; App.ui.shuffleMod = mod; App.ui.shuffleFrom = mod === 'think' ? 'think' : 'theory'; App.save();
+}, true);
+
+/* ---------- Proof: rating growth, the auto-trigger and the admin queue ---------- */
+const Proof = (() => {
+  const KEY = 'lc-hub-proof-v1', DAY = 864e5;
+  const cfg = () => Object.assign({ minGain: 200, windowDays: 60 }, CONFIG.proof || {});
+  const get = () => { const s = Store.get(KEY, null); return Object.assign({ queue: [], watch: [], seen: {}, told: {}, notified: '' }, s && typeof s === 'object' && !Array.isArray(s) ? s : {}); };
+  const put = (s) => Store.set(KEY, s);
+  const txt = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, n);
+  /* the biggest climb inside the window: from the lowest rating in it (or the last point before it) to the newest */
+  function climb(pts, windowDays) {
+    if (!Array.isArray(pts) || pts.length < 2) return null;
+    const end = pts[pts.length - 1], from = end.t - windowDays * DAY;
+    let before = null; const cand = [];
+    /* the last point just before the window counts as the rating at its start, but only when it is at most a quarter of the window older */
+    pts.forEach((p, i) => { if (i === pts.length - 1) return; if (p.t < from) { if (p.t >= from - 0.25 * windowDays * DAY) before = p; } else cand.push(p); });
+    if (before) cand.unshift(before);
+    if (!cand.length) return null;
+    const start = cand.reduce((m, p) => (p.r < m.r ? p : m), cand[0]);
+    const gain = end.r - start.r;
+    if (!(gain > 0)) return null;
+    return { start: start.r, startAt: start.t, end: end.r, endAt: end.t, gain, days: Math.max(1, Math.round((end.t - start.t) / DAY)) };
+  }
+  function candidates() {
+    const c = cfg(), st = get(), out = [];
+    const add = (id, base, pts) => { const k = climb(pts, c.windowDays); if (k && k.gain >= c.minGain) out.push(Object.assign({ id, status: st.seen[id] || 'new' }, base, k)); };
+    Object.keys(Elo.SITES).forEach((site) => { const a = Elo.acct(site); if (a && a.verified) Elo.MODES.forEach((m) => add('self:' + site + ':' + m[0], { site, mode: m[0], user: a.user, source: 'this device' }, Elo.series(a, m[0]))); });
+    st.watch.forEach((w) => Elo.MODES.forEach((m) => add('w:' + w.site + ':' + String(w.user).toLowerCase() + ':' + m[0], { site: w.site, mode: m[0], user: w.user, source: 'watchlist' }, (w.hist && w.hist[m[0]]) || [])));
+    st.queue.forEach((q) => out.push(Object.assign({ status: st.seen[q.id] || 'new' }, q)));
+    return out.sort((a, b) => b.gain - a.gain);
+  }
+  const mine = () => candidates().filter((x) => /^self:/.test(x.id));
+  const fresh = () => candidates().filter((x) => x.status === 'new');
+  const mark = (id, v) => { const st = get(); st.seen[id] = v; put(st); };
+  function snap(w, p) {
+    w.hist = w.hist || {};
+    const now = Date.now();
+    Elo.MODES.forEach((m) => {
+      const r = p[m[0]]; if (!r) return;
+      const a = w.hist[m[0]] = w.hist[m[0]] || [], last = a[a.length - 1];
+      if (last && Math.floor(last.t / DAY) === Math.floor(now / DAY)) last.r = r; else a.push({ t: now, r });
+      if (a.length > 500) a.splice(0, a.length - 500);
+    });
+  }
+  async function lichessHistory(user) {
+    try {
+      const res = await fetchWithTimeout('https://lichess.org/api/user/' + encodeURIComponent(user) + '/rating-history', { headers: { Accept: 'application/json' } }, 10000);
+      if (!res.ok) return null;
+      const j = await res.json(), out = {};
+      (Array.isArray(j) ? j : []).forEach((e) => {
+        const k = { Rapid: 'rapid', Blitz: 'blitz', Bullet: 'bullet' }[e && e.name];
+        if (!k || !Array.isArray(e.points)) return;
+        out[k] = e.points.slice(-400).map((p) => ({ t: Date.UTC(+p[0], +p[1], +p[2]), r: +p[3] })).filter((p) => p.r > 0 && Number.isFinite(p.t));
+      });
+      return out;
+    } catch (e) { return null; }
+  }
+  async function addWatch(site, user) {
+    user = txt(user, 30);
+    if (!Elo.SITES[site] || !/^[A-Za-z0-9_-]{2,30}$/.test(user)) return { ok: false, reason: 'name' };
+    const st = get();
+    if (st.watch.some((w) => w.site === site && w.user.toLowerCase() === user.toLowerCase())) return { ok: false, reason: 'dup' };
+    if (st.watch.length >= 60) return { ok: false, reason: 'full' };
+    const p = await Elo.fetchProfile(site, user).catch(() => null);
+    if (!p) return { ok: false, reason: 'not-found' };
+    const w = { site, user: p.user, added: Date.now(), fetched: Date.now(), hist: {} };
+    if (site === 'lichess') { const h = await lichessHistory(p.user); if (h) w.hist = h; }
+    snap(w, p);
+    const st2 = get(); st2.watch.push(w); put(st2);
+    return { ok: true, name: p.user, history: site === 'lichess' };
+  }
+  function removeWatch(i) { const st = get(); st.watch.splice(i, 1); put(st); }
+  async function pollWatch() {
+    const st = get(); let changed = false;
+    for (const w of st.watch.slice(0, 40)) {
+      if (Date.now() - (w.fetched || 0) < 6 * 36e5) continue;
+      const p = await Elo.fetchProfile(w.site, w.user).catch(() => null);
+      if (!p) continue;
+      snap(w, p); w.fetched = Date.now(); changed = true;
+    }
+    if (changed) put(st);
+  }
+  const b64e = (s) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const b64d = (s) => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/'))));
+  const codeOf = (e) => 'LCP1.' + b64e(JSON.stringify({ v: 1, n: txt(App.profile.name, 30), s: e.site, u: txt(e.user, 30), m: e.mode, a: e.start, b: e.end, t0: e.startAt, t1: e.endAt, g: e.gain, d: e.days }));
+  function parseCode(raw) {
+    const m = /LCP1\.([A-Za-z0-9_-]{10,1200})/.exec(String(raw || ''));
+    if (!m) return null;
+    try {
+      const o = JSON.parse(b64d(m[1])), ok = (v) => Number.isFinite(+v) && +v >= 100 && +v <= 3500;
+      if (!o || o.v !== 1 || !Elo.SITES[o.s] || !Elo.MODES.some((x) => x[0] === o.m) || !ok(o.a) || !ok(o.b) || !(+o.t0 > 0) || !(+o.t1 > 0)) return null;
+      const id = 'code:' + o.s + ':' + txt(o.u, 30).toLowerCase() + ':' + o.m + ':' + Math.round(+o.t1 / DAY);
+      return { id, site: o.s, mode: o.m, user: txt(o.u, 30), name: txt(o.n, 30), start: Math.round(+o.a), end: Math.round(+o.b), startAt: +o.t0, endAt: +o.t1, gain: Math.round(+o.b - +o.a), days: Math.max(1, Math.round(+o.d) || 1), source: 'student code' };
+    } catch (e) { return null; }
+  }
+  function importCode(raw) {
+    const q = parseCode(raw);
+    if (!q) return { ok: false };
+    const st = get();
+    if (st.queue.some((x) => x.id === q.id)) return { ok: false, dup: true };
+    st.queue.unshift(q); st.queue = st.queue.slice(0, 200); put(st);
+    return { ok: true, entry: q };
+  }
+  /* the student presses Share: the proof code is copied, and sent to the Arena server when it supports it */
+  async function submit(e) {
+    const code = codeOf(e);
+    let sent = false;
+    if (typeof Ranks !== 'undefined' && Ranks.on()) { try { await Ranks.post({ action: 'elo_proof', device: deviceId(), code }); sent = true; } catch (er) { sent = false; } }
+    try { await copyText(code); } catch (er) { /* the code is also shown by the caller */ }
+    return { sent, code };
+  }
+  async function pullServer() {
+    if (!Ranks.on()) return { ok: false, reason: 'off' };
+    const secret = (typeof adminSecret === 'function') ? adminSecret() : '';
+    if (!secret) return { ok: false, reason: 'secret' };
+    try {
+      const r = await Ranks.post({ action: 'elo_proof_list', secret });
+      let n = 0;
+      (Array.isArray(r.rows) ? r.rows : []).forEach((x) => { const res = importCode(x.code || x); if (res.ok) n++; });
+      return { ok: true, added: n };
+    } catch (e) { return { ok: false, reason: e.reason || 'network' }; }
+  }
+  /* the card: a PNG for content and community */
+  function drawCard(e, o) {
+    o = o || {};
+    try {
+      const W = 1080, H = o.story ? 1920 : 1350, cv = document.createElement('canvas');
+      cv.width = W; cv.height = H;
+      const g = cv.getContext('2d');
+      if (!g) return '';
+      g.fillStyle = '#0f172a'; g.fillRect(0, 0, W, H);
+      const grad = g.createLinearGradient(0, 0, W, H); grad.addColorStop(0, 'rgba(56,189,248,.20)'); grad.addColorStop(1, 'rgba(56,189,248,0)');
+      g.fillStyle = grad; g.fillRect(0, 0, W, H);
+      g.fillStyle = '#1e293b'; const px = 72, top = o.story ? 420 : 210, ph = o.story ? 1000 : 860;
+      g.fillRect(px, top, W - px * 2, ph);
+      g.strokeStyle = '#334155'; g.lineWidth = 2; g.strokeRect(px, top, W - px * 2, ph);
+      g.textAlign = 'center';
+      g.fillStyle = '#94a3b8'; g.font = '600 38px system-ui, sans-serif'; g.fillText('RATING PROOF', W / 2, top + 100);
+      g.fillStyle = '#38bdf8'; g.font = '800 250px system-ui, sans-serif'; g.fillText('+' + e.gain, W / 2, top + 400);
+      g.fillStyle = '#e2e8f0'; g.font = '700 84px system-ui, sans-serif'; g.fillText(e.start + '  →  ' + e.end, W / 2, top + 540);
+      g.fillStyle = '#94a3b8'; g.font = '500 42px system-ui, sans-serif';
+      g.fillText('in ' + e.days + (e.days === 1 ? ' day' : ' days') + ' · ' + fmtDay(e.startAt) + ' to ' + fmtDay(e.endAt), W / 2, top + 630);
+      g.fillText((Elo.SITES[e.site] || '') + ' ' + (e.mode || '').replace(/^./, (c) => c.toUpperCase()), W / 2, top + 700);
+      g.fillStyle = '#e2e8f0'; g.font = '700 54px system-ui, sans-serif';
+      g.fillText(o.name ? '@' + o.name : 'A lanckrietchess student', W / 2, top + 810);
+      g.fillStyle = '#38bdf8'; g.font = '800 46px system-ui, sans-serif'; g.fillText('lanckrietchess', W / 2, H - 150);
+      g.fillStyle = '#94a3b8'; g.font = '500 32px system-ui, sans-serif'; g.fillText('Train the MSPC way: Think, Theory, Trim', W / 2, H - 98);
+      return cv.toDataURL('image/png');
+    } catch (er) { return ''; }
+  }
+  const caption = (e, name) => '+' + e.gain + ' rating points in ' + e.days + ' days' + (name ? ' (' + name + ')' : '') + ': ' + e.start + ' → ' + e.end + ' on ' + (Elo.SITES[e.site] || '') + ' ' + e.mode + '. Built on the MSPC system: Think, Theory, Trim. #chess #chessimprovement #lanckrietchess';
+  async function scan() {
+    try { await pollWatch(); } catch (e) { /* optional */ }
+    const st = get();
+    try {
+      if (Admin.active) {
+        const ids = fresh().map((x) => x.id).sort().join('|');
+        if (ids && ids !== st.notified) { const n = fresh().length; st.notified = ids; put(st); toast(n + (n === 1 ? ' new potential proof' : ' new potential proofs') + ' in the Proof Queue (Admin menu).', 'good'); }
+        refreshChip();
+      } else {
+        const got = mine().filter((x) => !st.told[x.id + ':' + Math.floor(x.gain / 50)]);
+        if (got.length) { const x = got[0]; st.told[x.id + ':' + Math.floor(x.gain / 50)] = 1; put(st); toast('You are up +' + x.gain + ' in ' + x.days + ' days. Share it from Account, Ratings.', 'good'); }
+      }
+    } catch (e) { console.error(e); }
+  }
+  function boot() {
+    setTimeout(() => { Elo.refresh().then(scan).catch(() => scan()); }, 9000);
+    setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine !== false) Elo.refresh().then(scan).catch(() => {}); }, 60 * 60000);
+  }
+  const summary = () => { try { const n = fresh().length, w = get().watch.length; return n + (n === 1 ? ' new candidate' : ' new candidates') + ', ' + w + (w === 1 ? ' player' : ' players') + ' on the watchlist'; } catch (e) { return ''; } };
+  return { cfg, climb, candidates, mine, fresh, mark, addWatch, removeWatch, watch: () => get().watch, importCode, parseCode, submit, pullServer, drawCard, caption, scan, boot, summary, codeOf };
+})();
+function proofBadge() { try { if (!Admin.active) return ''; const n = Proof.fresh().length; return n ? '<b class="pq-badge" title="Potential proofs in the queue">' + n + '</b>' : ''; } catch (e) { return ''; } }
+
+/* admin sheet: the Potential Proof Queue */
+const ProofUI = {
+  open() {
+    if (!Admin.active) { toast('Sign in to admin mode first.'); return; }
+    openSheet({
+      title: 'Potential Proof Queue', noFocus: true, html: '<div id="pq-body" class="stack"></div>',
+      onMount(s) {
+        const body = qs('#pq-body', s.el);
+        let view = 'list', card = null, showName = false, msg = '';
+        const up = (n) => '<span class="' + (n > 0 ? 'ar5-up' : 'ar5-down') + '">' + (n > 0 ? '+' : '') + n + '</span>';
+        function rowHTML(x) {
+          return '<div class="pq-row' + (x.status === 'dismissed' ? ' is-off' : '') + '"><div><b>@' + esc(x.user) + '</b> <small class="muted">' + esc(Elo.SITES[x.site]) + ' ' + esc(x.mode) + ', ' + esc(x.source) + (x.status === 'saved' ? ', kept' : '') + '</small>' +
+            '<p class="pq-nums"><b class="num">' + x.start + ' → ' + x.end + '</b> ' + up(x.gain) + ' in ' + x.days + ' days <small class="muted">(' + esc(fmtDay(x.startAt)) + ' to ' + esc(fmtDay(x.endAt)) + ')</small></p></div>' +
+            '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-pq="card" data-id="' + esc(x.id) + '">' + icon('image') + ' Export card</button>' +
+            (x.status === 'saved' ? '' : '<button type="button" class="btn btn-ghost btn-sm" data-pq="keep" data-id="' + esc(x.id) + '">Keep</button>') +
+            (x.status === 'dismissed' ? '' : '<button type="button" class="btn btn-quiet btn-sm" data-pq="dismiss" data-id="' + esc(x.id) + '">Dismiss</button>') + '</div></div>';
+        }
+        function paintList() {
+          const c = Proof.cfg(), all = Proof.candidates(), live = all.filter((x) => x.status !== 'dismissed'), gone = all.filter((x) => x.status === 'dismissed'), watch = Proof.watch();
+          body.innerHTML = '<p class="small muted">A player lands here when a rating climbs <b>' + c.minGain + ' or more within ' + c.windowDays + ' days</b>. Candidates come from this device, your watchlist (public Chess.com and Lichess ratings, polled when the hub opens and every hour) and codes students send you.</p>' +
+            (msg ? '<p class="form-msg is-good" aria-live="polite">' + esc(msg) + '</p>' : '') +
+            '<h3>Candidates <small class="muted">' + live.length + '</small></h3>' + (live.length ? live.map(rowHTML).join('') : '<p class="muted small">Nobody has crossed the threshold yet.</p>') +
+            (gone.length ? '<details><summary class="small muted">Dismissed (' + gone.length + ')</summary>' + gone.map(rowHTML).join('') + '</details>' : '') +
+            '<div class="divider"></div><h3>Watchlist</h3><p class="small muted">Add a student’s public username. Lichess history is read straight away; Chess.com tracking starts today.</p>' +
+            (watch.length ? '<ul class="pq-watch">' + watch.map((w, i) => '<li><span><b>' + esc(w.user) + '</b> <small class="muted">' + esc(Elo.SITES[w.site]) + ', since ' + esc(fmtDay(w.added)) + '</small></span><button type="button" class="icon-btn" data-pq="unwatch" data-i="' + i + '" aria-label="Remove ' + esc(w.user) + '">' + icon('xmark') + '</button></li>').join('') + '</ul>' : '') +
+            '<form class="ar5-add" data-pq-watch autocomplete="off"><input class="input" name="u" maxlength="30" placeholder="Username" aria-label="Username" required><select class="input" name="site" aria-label="Site"><option value="chesscom">Chess.com</option><option value="lichess">Lichess</option></select><button class="btn btn-primary" type="submit">' + icon('plus') + ' Track</button></form>' +
+            '<div class="divider"></div><h3>Student codes</h3><form class="stack" data-pq-code><textarea class="input" name="c" rows="2" placeholder="Paste a proof code (LCP1.…)" aria-label="Proof code"></textarea><div class="btn-row"><button class="btn btn-ghost btn-sm" type="submit">Import code</button>' +
+            (Ranks.on() ? '<button type="button" class="btn btn-ghost btn-sm" data-pq="pull">' + icon('cloud-arrow-down') + ' Fetch from the Arena server</button>' : '') + '</div></form>';
+        }
+        function paintCard() {
+          const x = card, url = Proof.drawCard(x, { name: showName ? x.user : '' });
+          body.innerHTML = '<button type="button" class="btn btn-quiet btn-sm" data-pq="back" style="justify-self:start">' + icon('chevron-left') + ' Back</button>' +
+            (url ? '<img class="pq-card" alt="Rating proof card" src="' + url + '">' : '<p class="muted">This browser can’t draw the card. Use the caption below.</p>') +
+            '<label class="switch-row"><span>Show the username on the card<small class="field-hint" style="display:block">Off by default. Only turn it on with the student’s permission.</small></span><input type="checkbox" data-pq-name' + (showName ? ' checked' : '') + '></label>' +
+            '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-pq="dl45">' + icon('download') + ' Download 4:5</button><button type="button" class="btn btn-ghost btn-sm" data-pq="dl916">' + icon('download') + ' Download 9:16 story</button><button type="button" class="btn btn-ghost btn-sm" data-pq="cap">' + icon('copy') + ' Copy caption</button></div>' +
+            '<p class="small muted">' + esc(Proof.caption(x, showName ? x.user : '')) + '</p>';
+        }
+        const paint = () => { if (view === 'card' && card) paintCard(); else paintList(); };
+        function download(story) {
+          const url = Proof.drawCard(card, { name: showName ? card.user : '', story });
+          if (!url) { toast('This browser can’t draw the card.', 'bad'); return; }
+          const a = document.createElement('a'); a.href = url; a.download = 'lanckrietchess-proof-' + card.gain + (story ? '-story' : '') + '.png'; document.body.appendChild(a); a.click(); a.remove();
+        }
+        s.el.addEventListener('click', async (e) => {
+          const b = e.target.closest('[data-pq]');
+          if (!b) return;
+          const a = b.getAttribute('data-pq'), id = b.getAttribute('data-id');
+          if (a === 'card') { card = Proof.candidates().filter((x) => x.id === id)[0] || null; if (card) { view = 'card'; paint(); } }
+          else if (a === 'back') { view = 'list'; msg = ''; paint(); }
+          else if (a === 'keep') { Proof.mark(id, 'saved'); refreshChip(); paint(); }
+          else if (a === 'dismiss') { Proof.mark(id, 'dismissed'); refreshChip(); paint(); }
+          else if (a === 'unwatch') { Proof.removeWatch(+b.getAttribute('data-i')); paint(); }
+          else if (a === 'dl45') download(false);
+          else if (a === 'dl916') download(true);
+          else if (a === 'cap') copyText(Proof.caption(card, showName ? card.user : '')).then((ok) => toast(ok ? 'Caption copied.' : 'Copy failed.', ok ? 'good' : 'bad'));
+          else if (a === 'pull') { b.disabled = true; const r = await Proof.pullServer(); b.disabled = false; msg = r.ok ? r.added + ' new from the server.' : 'The server did not answer with proofs (' + (r.reason || 'error') + ').'; refreshChip(); paint(); }
+        });
+        s.el.addEventListener('change', (e) => { if (e.target.matches('[data-pq-name]')) { showName = e.target.checked; paint(); } });
+        s.el.addEventListener('submit', async (e) => {
+          const w = e.target.closest('[data-pq-watch]'), c = e.target.closest('[data-pq-code]');
+          if (w) {
+            e.preventDefault();
+            const btn = qs('button[type="submit"]', w); btn.disabled = true;
+            const r = await Proof.addWatch(w.elements.site.value, w.elements.u.value);
+            msg = r.ok ? 'Tracking ' + r.name + (r.history ? ' with their Lichess history.' : ' from today.') : r.reason === 'dup' ? 'Already on the watchlist.' : r.reason === 'not-found' ? 'No player found with that name.' : r.reason === 'full' ? 'The watchlist is full (60).' : 'That is not a valid username.';
+            refreshChip(); paint();
+          } else if (c) {
+            e.preventDefault();
+            const r = Proof.importCode(c.elements.c.value);
+            msg = r.ok ? 'Imported the proof of ' + (r.entry.name || r.entry.user) + '.' : r.dup ? 'That code is already in the queue.' : 'That is not a valid proof code.';
+            refreshChip(); paint();
+          }
+        });
+        paint();
+      }
+    });
+  }
+};
+
+/* ---------- Account tab: Ratings (baseline, growth, share) ---------- */
+const RatingsTab = {
+  mount(host) {
+    let alive = true, iv = null;
+    const sign = (n) => (n > 0 ? '+' + n : String(n));
+    function card(site) {
+      const a = Elo.acct(site), name = Elo.SITES[site];
+      if (!a || !a.verified) return '<section class="panel pad rt4-card"><h3>' + esc(name) + '</h3><p class="muted small">' + (a ? 'Finish verifying @' + esc(a.user) + ' to start tracking.' : 'Connect your ' + esc(name) + ' account. Your first verified rating becomes your baseline, and your growth is measured from there.') + '</p><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-rt="manage">' + icon('link') + ' ' + (a ? 'Verify my account' : 'Connect ' + esc(name)) + '</button></div></section>';
+      const rows = Elo.MODES.map((m) => {
+        const g = Elo.growth(site, m[0]);
+        return '<tr><th scope="row">' + m[1] + '</th><td>' + (a[m[0]] || '–') + '</td><td>' + (g ? g.baseline : '–') + '</td><td class="' + (g && g.net > 0 ? 'ar5-up' : g && g.net < 0 ? 'ar5-down' : '') + '"><b>' + (g ? sign(g.net) : '–') + '</b></td></tr>';
+      }).join('');
+      return '<section class="panel pad rt4-card"><div class="switch-row"><h3>' + esc(name) + ': @' + esc(a.user) + ' <span class="verified">' + icon('circle-check') + ' verified</span></h3><button type="button" class="btn btn-ghost btn-sm" data-rt="manage">Manage</button></div>' +
+        '<div class="rt4-scroll"><table class="rt4-table"><thead><tr><th></th><th scope="col">Now</th><th scope="col">Baseline</th><th scope="col">Growth</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+        '<p class="small muted">Baseline = your first verified rating' + (a.baseline && a.baseline.at ? ' (' + esc(fmtDay(a.baseline.at)) + ')' : '') + '. Growth = now minus baseline. Last sync ' + (a.at ? esc(fmtDay(a.at)) : 'never') + '.</p></section>';
+    }
+    function paint() {
+      if (!alive) return;
+      const hits = Proof.mine(), c = Proof.cfg();
+      host.innerHTML = '<div class="rt4"><p class="muted small">Your Chess.com and Lichess ratings are read from their public APIs when the hub opens and every few hours. Nothing leaves your device unless you share it.</p>' +
+        Object.keys(Elo.SITES).map(card).join('') +
+        (hits.length ? hits.map((x) => '<section class="panel pad rt4-proof"><span class="ar5-kicker">' + icon('trophy') + ' Proof of progress</span><h3>+' + x.gain + ' in ' + x.days + ' days</h3><p>' + esc(Elo.SITES[x.site]) + ' ' + esc(x.mode) + ': <b class="num">' + x.start + ' → ' + x.end + '</b>. ' + esc(CONFIG.coach) + ' features results like this. Want him to see yours? Pressing the button sends your username and these ratings, nothing else.</p><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-rt="share" data-id="' + esc(x.id) + '">' + icon('paper-plane') + ' Share with ' + esc(CONFIG.coach) + '</button></div></section>').join('')
+          : '<p class="small muted">Climb ' + c.minGain + ' or more within ' + c.windowDays + ' days and the hub will offer to share your progress.</p>') +
+        '<div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-rt="refresh">' + icon('rotate') + ' Sync now</button></div></div>';
+    }
+    async function onClick(e) {
+      const b = e.target.closest('[data-rt]');
+      if (!b || !host.contains(b)) return;
+      const a = b.getAttribute('data-rt');
+      if (a === 'manage') { openAccounts(); clearInterval(iv); iv = setInterval(() => { if (!alive) { clearInterval(iv); return; } if (!qs('.sheet-wrap')) { clearInterval(iv); Elo.refresh().then(paint).catch(paint); paint(); } }, 700); }
+      else if (a === 'refresh') { b.disabled = true; await Elo.refresh(true); paint(); toast('Ratings synced.', 'good'); Proof.scan(); }
+      else if (a === 'share') {
+        const x = Proof.mine().filter((q) => q.id === b.getAttribute('data-id'))[0];
+        if (!x) return;
+        b.disabled = true;
+        const r = await Proof.submit(x);
+        toast(r.sent ? 'Sent to ' + CONFIG.coach + '.' : 'Proof code copied. Send it to ' + CONFIG.coach + ' in a DM.', 'good');
+        if (!r.sent && CONFIG.links && LogoMenu.safeUrl(CONFIG.links.instagramDM)) window.open(CONFIG.links.instagramDM, '_blank', 'noopener');
+        b.disabled = false;
+      }
+    }
+    host.addEventListener('click', onClick);
+    paint();
+    Elo.refresh().then(() => { if (alive) paint(); }).catch(() => {});
+    return () => { alive = false; clearInterval(iv); host.removeEventListener('click', onClick); };
+  }
+};
+V6.addTab({ id: 'friends', label: 'Friends', mount: (host) => Arena.mount(host, 'friends') });
+V6.addTab({ id: 'ratings', label: 'Ratings', mount: (host) => RatingsTab.mount(host) });
+
+/* ---------- the tiered home leaderboard: Elo, Rank, Level ---------- */
+const LB4 = (() => {
+  const TOP = [['elo', 'Elo', 'chess-board'], ['rank', 'Rank', 'ranking-star'], ['level', 'Level', 'arrow-up-right-dots']];
+  const MODS = [['think', 'Think (MSPC drills)', 'brain'], ['openings', 'Openings', 'chess-pawn'], ['middlegame', 'Middlegames', 'chess-knight'], ['endgame', 'Endgames', 'chess-king'], ['puzzles', 'Puzzles', 'puzzle-piece']];
+  const ST = () => App.ui.hlb || (App.ui.hlb = { top: 'elo', path: [] });
+  let seq = 0, unbindLeaf = null;
+  const modeName = (k) => (Elo.MODES.filter((m) => m[0] === k)[0] || [])[1] || k;
+  /* what the current path shows: a set of options, or a leaf board */
+  function node() {
+    const s = ST(), p = s.path;
+    if (s.top === 'elo') {
+      if (p.length === 0) return { opts: Object.keys(Elo.SITES).map((k) => [k, Elo.SITES[k], k === 'chesscom' ? 'chess-knight' : 'chess', 'Verified ratings']), crumbs: [] };
+      if (p.length === 1) return { opts: Elo.MODES.map((m) => [m[0], m[1], m[0] === 'rapid' ? 'clock' : m[0] === 'blitz' ? 'bolt' : 'rocket', Elo.SITES[p[0]]]), crumbs: [Elo.SITES[p[0]]] };
+      return { leaf: 'elo', crumbs: [Elo.SITES[p[0]], modeName(p[1])] };
+    }
+    if (s.top === 'rank') {
+      if (p.length === 0) return { opts: [['module', 'Module Rank', 'layer-group', 'Think, Openings, Middlegames, Endgames, Puzzles'], ['arena', 'Arena Rank', 'trophy', 'Live tournaments'], ['overall', 'Overall Rank', 'ranking-star', 'Student Rank and Arena together']], crumbs: [] };
+      if (p[0] === 'module' && p.length === 1) return { opts: MODS.map((m) => [m[0], m[1], m[2], 'Module rank']), crumbs: ['Module Rank'] };
+      if (p[0] === 'module') return { leaf: 'rank', kind: 'module', mod: p[1], crumbs: ['Module Rank', (MODS.filter((m) => m[0] === p[1])[0] || [])[1] || p[1]] };
+      return { leaf: 'rank', kind: p[0], crumbs: [p[0] === 'arena' ? 'Arena Rank' : 'Overall Rank'] };
+    }
+    return { leaf: 'rank', kind: 'level', crumbs: [] };
+  }
+  function html() {
+    const s = ST();
+    return '<section class="section" id="lb4">' + sectionHead('Leaderboard', 'Elo ratings, skill ranks and XP levels of the players training in this hub.') +
+      '<div class="panel lb4"><div class="seg lb4-top" role="tablist" aria-label="Leaderboard type">' + TOP.map((t) => '<button type="button" role="tab" data-lb4-top="' + t[0] + '" aria-pressed="' + (s.top === t[0]) + '">' + icon(t[2]) + ' ' + t[1] + '</button>').join('') + '</div>' +
+      '<div class="lb4-nav" id="lb4-nav"></div><div class="lb4-body" id="lb4-body"></div></div></section>';
+  }
+  const fmtN = (n) => Math.round(+n || 0).toLocaleString('en');
+  const rankLabel = (v) => { const L = V6Core.CFG.ranks, i = Math.max(0, Math.min(L.length - 1, Math.floor(+v || 0))); return L[i][0]; };
+  /* you and your friends: used when the Arena server has no rank boards (yet) */
+  function local(kind, mod) {
+    const C = V6Core, R = V6.ranks(), s = V6.state(), mi = C.CFG.modules.indexOf(mod), me = App.profile.name || 'You';
+    const lv = (xp) => C.levelOf(xp).level;
+    const rows = [];
+    const add = (name, you, v, label, sub) => { if (v == null || !Number.isFinite(v)) return; rows.push({ name, you, v, label, sub: sub || '' }); };
+    if (kind === 'module') add(me, true, R.mr[mod].exact, R.mr[mod].name, fmtN(R.mr[mod].xp) + ' XP');
+    else if (kind === 'arena') add(me, true, R.arena.rating ? R.arena.i + R.arena.rating / 10000 : null, R.arena.name + (R.arena.rating ? ' · ' + R.arena.rating : ''), '');
+    else if (kind === 'overall') add(me, true, R.overall.exact, R.overall.name, 'Student ' + R.student.name);
+    else add(me, true, s.total, 'Level ' + lv(s.total), fmtN(s.total) + ' XP');
+    let skipped = 0;
+    try {
+      Friends.list().forEach((f) => {
+        const x = f.x;
+        if (!x) { skipped++; return; }
+        if (kind === 'module') { if (Array.isArray(x.m) && x.m.length === 5) add(f.name, false, x.m[mi], rankLabel(x.m[mi]), ''); else skipped++; }
+        else if (kind === 'arena') { const i = C.CFG.arena.findIndex((a) => a[0] === x.a); if (i > 0) add(f.name, false, i, x.a, ''); }
+        else if (kind === 'overall') { if (x.ov != null) add(f.name, false, x.ov, rankLabel(x.ov), 'Student ' + x.r); else skipped++; }
+        else add(f.name, false, x.x, 'Level ' + lv(x.x), fmtN(x.x) + ' XP');
+      });
+    } catch (e) { /* no friends yet */ }
+    rows.sort((a, b) => b.v - a.v);
+    rows.forEach((r, i) => { r.rank = i + 1; });
+    return { rows, skipped };
+  }
+  function pushMine() {
+    if (!Ranks.on() || !App.settings.board || !App.profile.name) return;
+    const k = 'lc-hub-rk-push';
+    if (Date.now() - (+Store.get(k, 0) || 0) < 30 * 60000) return;
+    Store.set(k, Date.now());
+    try {
+      const R = V6.ranks(), s = V6.state(), mods = {};
+      V6Core.CFG.modules.forEach((m) => { mods[m] = { xp: s.xp[m] || 0, rank: +R.mr[m].exact.toFixed(2) }; });
+      Ranks.post({ action: 'rk_sync', device: deviceId(), name: App.profile.name, xp: s.total, level: V6Core.levelOf(s.total).level, student: +R.student.exact.toFixed(2), arena: R.arena.rating || 0, overall: +R.overall.exact.toFixed(2), modules: mods }).catch(() => {});
+    } catch (e) { /* optional */ }
+  }
+  async function paintRank(host, n) {
+    const my = ++seq;
+    host.innerHTML = '<p class="small muted">Loading…</p>';
+    pushMine();
+    let rows = null, total = 0, you = null;
+    if (Ranks.on()) {
+      try {
+        const d = await Ranks.post({ action: 'rk_top', kind: n.kind === 'module' ? 'module:' + n.mod : n.kind, device: deviceId() });
+        if (Array.isArray(d.rows)) { rows = d.rows.slice(0, 50).map((r, i) => ({ rank: +r.rank || i + 1, name: String(r.name || r.user || '?'), label: String(r.label || ''), sub: String(r.sub || ''), you: !!r.you })); total = +d.total || rows.length; you = d.you || null; }
+      } catch (e) { rows = null; }
+    }
+    if (my !== seq || !host.isConnected) return;
+    let note = '';
+    if (!rows) {
+      const l = local(n.kind, n.mod);
+      rows = l.rows;
+      note = '<p class="small muted">' + icon('user-group') + ' You and your friends. ' + (Ranks.on() ? 'The all-player board is not available on the Arena server yet.' : 'The all-player board goes live when ' + esc(CONFIG.coach) + ' switches the community server on.') + (l.skipped ? ' ' + l.skipped + (l.skipped === 1 ? ' friend needs' : ' friends need') + ' to share a fresh friend code to appear.' : '') + ' <a href="#friends">Add friends</a></p>';
+    } else note = '<p class="small dim">' + total + ' ranked ' + (total === 1 ? 'player' : 'players') + '.</p>' + (you && you.rank && !rows.some((r) => r.you) ? '<p class="lb-you">You: #' + you.rank + ' of ' + total + '.</p>' : '');
+    host.innerHTML = '<ol class="lb4-list">' + rows.map((r) => '<li class="lb4-row' + (r.you ? ' is-you' : '') + '"><span class="n">' + r.rank + '</span><b>' + esc(r.name) + (r.you ? ' <small class="muted">you</small>' : '') + '</b><span class="r">' + esc(r.label) + '</span>' + (r.sub ? '<small class="muted lb4-sub">' + esc(r.sub) + '</small>' : '') + '</li>').join('') + '</ol>' + note;
+  }
+  function paint(view) {
+    const s = ST(), nav = qs('#lb4-nav', view), body = qs('#lb4-body', view);
+    if (!nav || !body) return;
+    if (unbindLeaf) { try { unbindLeaf(); } catch (e) { /* gone */ } unbindLeaf = null; }
+    seq++;
+    qsa('[data-lb4-top]', view).forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-lb4-top') === s.top)));
+    const n = node(), topName = (TOP.filter((t) => t[0] === s.top)[0] || [])[1];
+    nav.innerHTML = s.path.length ? '<button type="button" class="lb4-back" data-lb4="back" aria-label="Back">' + icon('arrow-left') + ' Back</button><span class="lb4-crumbs">' + [topName].concat(n.crumbs).map(esc).join(' <i class="fa-solid fa-chevron-right" aria-hidden="true"></i> ') + '</span>' :
+      (n.crumbs.length || s.top !== 'level' ? '<span class="lb4-crumbs">' + esc(topName) + (s.top === 'level' ? '' : ' <small class="muted">· choose below</small>') + '</span>' : '<span class="lb4-crumbs">' + esc(topName) + '</span>');
+    if (n.opts) {
+      body.innerHTML = '<div class="lb4-opts">' + n.opts.map((o) => '<button type="button" class="lb4-opt" data-lb4-go="' + esc(o[0]) + '">' + icon(o[2]) + '<b>' + esc(o[1]) + '</b><small>' + esc(o[3] || '') + '</small></button>').join('') + '</div>';
+    } else if (n.leaf === 'elo') {
+      App.ui.elo = { site: s.path[0], mode: s.path[1] };
+      body.innerHTML = '<div id="elo-body"><p class="small muted">Loading…</p></div>';
+      unbindLeaf = V34.bindHomeBoard(body);
+    } else paintRank(body, n);
+  }
+  function bind(view) {
+    const root = qs('#lb4', view);
+    if (!root) return () => {};
+    const onClick = (e) => {
+      const t = e.target.closest('[data-lb4-top],[data-lb4-go],[data-lb4]');
+      if (!t || !root.contains(t)) return;
+      const s = ST();
+      if (t.hasAttribute('data-lb4-top')) { s.top = t.getAttribute('data-lb4-top'); s.path = []; }
+      else if (t.hasAttribute('data-lb4-go')) { s.path = s.path.concat(t.getAttribute('data-lb4-go')); }
+      else if (t.getAttribute('data-lb4') === 'back') s.path = s.path.slice(0, -1);
+      paint(view);
+    };
+    root.addEventListener('click', onClick);
+    paint(view);
+    return () => { seq++; root.removeEventListener('click', onClick); if (unbindLeaf) { try { unbindLeaf(); } catch (e) { /* gone */ } unbindLeaf = null; } };
+  }
+  return { html, bind, local, node, ST };
+})();
+
+/* the course data could not be loaded: say so, with a retry */
+function dataBanner() {
+  const st = Site.status() || {}, el0 = qs('#data-banner');
+  if (Site.known() || Site.loading() || !(st.checked || (st.tried && st.tried.length))) { if (el0) el0.remove(); return; }
+  const el = el0 || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'data-banner', className: 'data-banner' }));
+  el.setAttribute('role', 'alert');
+  el.innerHTML = '<div><b>The course data did not load.</b> <small>' + esc((st.tried || []).slice(0, 3).join(' · ') || 'No source answered.') + '</small></div><button type="button" class="btn btn-primary btn-sm" data-dbr>Try again</button>';
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('[data-dbr]');
+  if (!b) return;
+  b.disabled = true;
+  Site.fetchPublished(true).then(() => { dataBanner(); rerender(); }).catch(() => { b.disabled = false; });
+});
+
 const TABS = [
   { id: 'home', label: 'Home', icon: 'house', routes: ['home'] },
-  { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'shuffle', 'leaderboard', 'peer', 'srs', 'profile', 'events'] },
+  { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'peer', 'srs'] },
   { id: 'theory', label: 'Theory', icon: 'book-open', routes: ['openings', 'middlegame', 'endgame', 'puzzles'], href: '#openings' },
   { id: 'trim', label: 'Trim', icon: 'scissors', routes: ['trim', 'games', 'brilliant'] },
+  { id: 'arena', label: 'Arena', icon: 'trophy', routes: ['leaderboard'] },
   { id: 'upgrades', label: 'Upgrades', icon: 'crown', routes: ['upgrades'] },
+  { id: 'account', label: 'Account', icon: 'circle-user', routes: ['account', 'profile', 'events', 'trophies'] },
   { id: 'about', label: 'About', icon: 'user', routes: ['about'] }
 ];
-const ROUTE_TITLES = { profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
-const DOC_TITLES = { profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
+const ROUTE_TITLES = { account: 'your Account', profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
+const DOC_TITLES = { account: 'Account', profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
 const ALIASES = { executive: 'profile', 'skill-matrix': 'profile', matrix: 'profile', bosses: 'profile', 'boss-fight': 'profile', bounties: 'profile', community: 'profile', 'event-engine': 'events', 'master-events': 'events', arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
   arena: 'leaderboard', friends: 'leaderboard', tournament: 'leaderboard', tournaments: 'leaderboard',
   ranking: 'leaderboard', rankings: 'leaderboard', ranks: 'leaderboard', 'game-vault': 'games', gamevault: 'games', 'my-games': 'games', folders: 'games', stats: 'insights', brilliants: 'brilliant', brilliancies: 'brilliant', mistakes: 'vault-browser', 'mistake-browser': 'vault-browser', 'blunder-clinic': 'clinic', 'repertoire-trainer': 'mspc-rep',
@@ -21299,18 +22073,22 @@ const MOUNT = {
   clinic: mountClinic, 'mspc-rep': mountMspcRep, brilliant: mountBrilliant, 'vault-browser': mountVaultBrowser,
   peer: (v) => { const d = mountPeer(v), p = V5Pool.mount(v); return () => { p(); if (typeof d === 'function') d(); }; }, srs: mountSrs, trophies: mountTrophies, 'review-queue': (v) => { const d = mountQueue(v); V5Peer.mountAdmin(v); V5Srv.mountAdmin(v); return d; },
   privacy: mountPrivacy,
-  profile: (v) => V6.mountProfile(v), events: (v) => V6.mountEvents(v)
+  profile: (v) => V6.mountProfile(v), account: (v) => V6.mountProfile(v), events: (v) => V6.mountEvents(v)
 };
 let current = { route: null, dispose: null };
 let installPrompt = null;
-function routeFromHash() {
+function routeFromHash(setTab) {
   let h = '';
   try { h = decodeURIComponent((location.hash || '').replace(/^#/, '')).toLowerCase(); } catch (e) { h = ''; }
+  /* v6.1: Friends and Ratings are tabs of the Account page. */
+  if (h === 'friends' || h === 'ratings') { if (setTab) App.ui.accTab = h; h = 'account'; }
   h = ALIASES[h] || h;
+  if (h === 'profile') h = 'account';
   return MOUNT[h] ? h : 'home';
 }
 function renderTabs(route) {
-  qs('#tabs').innerHTML = TABS.map((t) => '<a class="tab" href="' + (t.href || '#' + t.id) + '"' + (t.routes.indexOf(route) >= 0 ? ' aria-current="page"' : '') + '>' + icon(t.icon) + '<span>' + t.label + '</span></a>').join('');
+  const at = route === 'shuffle' ? (App.ui.shuffleFrom === 'think' ? 'think' : 'openings') : route;
+  qs('#tabs').innerHTML = TABS.map((t) => '<a class="tab" href="' + (t.href || '#' + t.id) + '"' + (t.routes.indexOf(at) >= 0 ? ' aria-current="page"' : '') + '>' + icon(t.icon) + '<span>' + t.label + '</span></a>').join('');
 }
 function renderFoot() {
   qs('#foot').innerHTML = '<span>© ' + new Date().getFullYear() + ' Kyenzo Lanckriet, lanckrietchess</span><span style="display:flex;gap:14px;flex-wrap:wrap">' +
@@ -21318,7 +22096,7 @@ function renderFoot() {
 }
 function render() {
   Levels.fromHash();                                               // v3.9: #chapter/<id>/<level> and #topic/<id>/<level>
-  const route = routeFromHash();
+  const route = routeFromHash(true);
   if (current.dispose) { try { current.dispose(); } catch (e) { console.error(e); } }
   current = { route, dispose: null };
   const view = qs('#view');
@@ -21363,6 +22141,7 @@ function boot() {
      on this device (v3.7: nothing is built in); a newer file is applied quietly
      and only redraws pages where that can't interrupt a drill. */
   const afterSync = (changed) => {
+    dataBanner();
     const gone = Access.recheck();
     if (gone) { lost(gone); return; }
     refreshChip();
@@ -21372,6 +22151,8 @@ function boot() {
   };
   firstSync.then(afterSync).catch(() => {});
   Site.watch(afterSync);
+  window.addEventListener('lc-data-updated', () => afterSync(true));   // v6.1: the GitHub pass found a newer file
+  LogoMenu.bind();
   SiteURL.tagHead();
   Access.recheckRemote().then((why) => {
     if (why === 'connect') toast('Enter your member key once more on the Upgrades page to connect this device to your membership and the AI coach. Your access stays as it is.');
@@ -21404,6 +22185,7 @@ function boot() {
   V6.boot();                                                       // v6: ranks, XP engine, Skill Matrix, events
   Layout5.init();                                                  // v5: resizable panels
   Arena.boot();                                                    // v5: the weekly payout and friend links
+  Proof.boot();                                                    // v6.1: rating sync and the proof trigger
   window.LC = { version: CONFIG.version, hashKey: Access.hashKey, profileToken: Access.encodeProfile, ai: AI.on(), site: SiteURL.base(), deployment: SiteURL.kind(), data: () => Site.status() };
 }
 boot();
