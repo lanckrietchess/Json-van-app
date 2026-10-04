@@ -554,6 +554,7 @@ textarea.input{resize:vertical;min-height:120px;line-height:1.45;font-size:14px}
 .topbar-right{grid-area:chip;display:flex;align-items:center;gap:8px;justify-self:end;min-width:0}
 .admin-chip{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border-radius:999px;border:1px dashed var(--accent-line);background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:800}
 .admin-chip:hover{border-style:solid}
+.admin-chip.is-paused{border-style:solid;border-color:#f59e0b;background:rgba(245,158,11,.12);color:#fbbf24}
 @media (max-width:420px){.admin-chip span{display:none}.admin-chip{width:36px;padding:0;justify-content:center}}
 .cms-edit{display:inline-grid;place-items:center;width:28px;height:28px;margin-left:8px;border-radius:8px;border:1px dashed var(--accent-line);background:var(--accent-soft);color:var(--accent);font-size:12px;vertical-align:middle;flex:none;line-height:1;letter-spacing:0}
 .cms-edit:hover{border-style:solid}
@@ -4647,6 +4648,28 @@ const Feed = (() => {
   return { toDoc, local, reps, detect, sans, lockOf, rawUrl, commitUrl, pageUrl, bankItem };
 })();
 
+/* ---------- SyncLock: the admin "Sync Kill-Switch" ----------
+   One flag in localStorage, `admin_sync_paused`. While it is true this device
+   never asks GitHub (or this site's mirror) for the data file, and a request
+   that was already on its way is thrown away when it lands (Site.take). The
+   copy on this device, plus the admin draft, is then the only source, so a
+   background sync can no longer replace local edits such as deleted branches
+   in the opening tree explorer. Read live from storage on every call, so a
+   second tab sees the switch at once. */
+const SyncLock = (() => {
+  const KEY = 'admin_sync_paused';
+  const subs = new Set();
+  const paused = () => Store.get(KEY, false) === true;
+  function set(v) {
+    v = !!v;
+    if (v === paused()) return v;
+    if (v) Store.set(KEY, true); else Store.del(KEY);
+    subs.forEach((fn) => { try { fn(v); } catch (e) { /* a listener failed */ } });
+    return v;
+  }
+  return { KEY, paused, set, on(fn) { subs.add(fn); return () => subs.delete(fn); } };
+})();
+
 /* ---------- Site: defaults + published data (+ admin draft) ----------
    v3.5: the published data comes from CONFIG.remote (GitHub raw), with the
    same file on this site as a mirror and the last good copy on this device
@@ -4849,6 +4872,8 @@ const Site = (() => {
   }
   function take(x, tried) {
     const src = x.src, out = x.out, doc = out.doc;
+    /* Kill-switch: a request that was already on its way when sync was paused must not land. */
+    if (SyncLock.paused()) { tried.push(src.label + ': ignored, sync is paused (admin kill-switch)'); return { changed: false, held: true }; }
     /* Right after a publish from this device, GitHub's cache can still serve the older file for a few minutes: keep the newer copy. */
     if (published && Date.now() - adoptedAt < HOLD_MS && doc.updated && published.updated && doc.updated < published.updated) {
       tried.push(src.label + ': still serves the copy from before your publish (GitHub caches for about five minutes)');
@@ -4863,6 +4888,7 @@ const Site = (() => {
   }
   async function githubPass(afterSite, ms, tried) {
     tried = tried || [];
+    if (SyncLock.paused()) return false;   // kill-switch: no GitHub request at all
     if (afterSite) { if (bgBusy) return false; bgBusy = true; }
     try {
       const sha = await latestCommit(ms);
@@ -4880,6 +4906,9 @@ const Site = (() => {
     } finally { if (afterSite) bgBusy = false; }
   }
   function fetchPublished(force) {
+    /* Kill-switch (admin_sync_paused): no request leaves this device and nothing is applied,
+       whoever asks (first load, the 10-minute watcher, the retry banner, Sync now). */
+    if (SyncLock.paused()) return Promise.resolve(false);
     if (inflight && !force) return inflight;
     const run = (async () => {
       const r = CONFIG.remote || {}, tried = [], ms = clamp(+r.timeoutMs || 15000, 1500, 60000), sms = clamp(+r.siteTimeoutMs || 30000, 5000, 90000);
@@ -4904,7 +4933,7 @@ const Site = (() => {
     const every = clamp(+((CONFIG.remote || {}).refreshMinutes) || 10, 2, 240) * 60000;
     let last = Date.now();
     const tick = () => {
-      if (document.visibilityState === 'hidden' || navigator.onLine === false || Date.now() - last < every - 5000) return;
+      if (SyncLock.paused() || document.visibilityState === 'hidden' || navigator.onLine === false || Date.now() - last < every - 5000) return;
       last = Date.now();
       fetchPublished().then((changed) => { if (cb) cb(changed); }).catch(() => {});
     };
@@ -5116,6 +5145,7 @@ const CMS = (() => {
   }
   function syncLine() {
     const st = Site.status() || {}, r = CONFIG.remote || {};
+    if (SyncLock.paused()) return 'Sync is paused (kill-switch). Nothing is fetched from GitHub; this device keeps its own copy and your local edits.';
     if (st.source === 'github' && st.at) return 'Live data from GitHub (' + r.owner + '/' + r.repo + ', file ' + r.path + (st.commit ? ', commit ' + st.commit.slice(0, 7) : '') + '), synced ' + ago(st.at) + '.';
     if (st.source === 'site' && st.at) return 'GitHub did not answer, so the hub used the copy on this site, synced ' + ago(st.at) + '.';
     if (Site.published()) return 'GitHub did not answer; players keep the copy on their device' + (st.at ? ' from ' + ago(st.at) : '') + '.';
@@ -5123,7 +5153,50 @@ const CMS = (() => {
   }
   function syncSub() {
     const st = Site.status() || {}, r = st.report || {}, n = (r.skipped || []).length;
+    if (SyncLock.paused()) return 'Paused (kill-switch): nothing is fetched';
     return (st.at ? 'Synced ' + ago(st.at) : 'Not synced yet') + (n ? ', ' + plural(n, 'item') + ' skipped' : '') + (st.ok ? '' : ', last check failed');
+  }
+  /* ----- Sync Kill-Switch and master export ----- */
+  function pauseRow() {
+    const on = SyncLock.paused();
+    return '<label class="switch-row"><span>Pause GitHub sync (kill-switch)<span class="small muted" style="display:block">' +
+      (on ? 'On: nothing is fetched, so local edits cannot be overwritten. Export the master JSON when you are done.' : 'Off: the hub keeps checking GitHub and can replace the copy on this device.') +
+      '</span></span><input type="checkbox" data-m-sync-pause' + (on ? ' checked' : '') + '></label>';
+  }
+  function togglePause(on) {
+    if (!on) {
+      /* Resuming: put unsaved tree edits into the admin draft first, because the draft is what stays on top of a refreshed file. */
+      const n = flushTreeEdits();
+      if (n) toast(n + (n === 1 ? ' chapter with unsaved edits was' : ' chapters with unsaved edits were') + ' saved to your draft before sync resumed.', 'good');
+    }
+    SyncLock.set(on);
+    refreshChip();
+    toast(on ? 'Sync paused. Nothing is fetched until you switch it back on.' : 'Sync resumed. The next check can load newer data.', on ? 'good' : '');
+  }
+  /* Edits in the live tree pane live in memory until exported. This copies them into the admin draft. */
+  function flushTreeEdits() {
+    const pend = TreeEditor.pending();
+    if (!pend.length) return 0;
+    const d = Admin.ensureDraft();
+    d.trees = Array.isArray(d.trees) ? d.trees : [];
+    const done = [];
+    pend.forEach((p) => { const e = d.trees.filter((x) => x.id === p.id)[0]; if (e) { e.tree = p.tree; done.push(p.id); } });
+    if (!done.length) return 0;
+    Admin.saveDraft(d);
+    TreeEditor.markSaved(done);
+    return done.length;
+  }
+  /* The whole local state (admin draft, else the copy on this device) as one clean JSON file, same shape and
+     indentation as Publish, so it can replace the master content.json as it is. */
+  function exportMaster() {
+    if (!Admin.draft() && !Site.published()) { toast('Nothing to export: this device has no saved copy of the data yet.', 'bad'); return; }
+    const merged = flushTreeEdits();
+    const doc = Admin.draft() || Site.published();
+    const out = Object.assign({}, doc, { updated: new Date().toISOString() });
+    const json = JSON.stringify(out, null, 1);
+    download('content.json', json, 'application/json');
+    const trees = Array.isArray(out.trees) ? out.trees.length : 0;
+    toast('content.json downloaded: ' + trees + (trees === 1 ? ' tree chapter, ' : ' tree chapters, ') + (json.length / 1048576).toFixed(1) + ' MB' + (merged ? ', with your unsaved tree edits' : '') + '. Replace the master file with it.', 'good');
   }
   function syncSheet(note) {
     const st = Site.status() || {}, r = st.report || {}, src = Site.sources();
@@ -5139,7 +5212,7 @@ const CMS = (() => {
       html: backRow() +
         '<div class="access-status' + (good ? '' : ' is-on') + '"><span class="ico">' + icon(good ? 'circle-check' : 'triangle-exclamation') + '</span><div><strong>' + esc(syncLine()) + '</strong>' +
           (fmt ? '<span>The file is in ' + esc(fmt) + '. The hub reads all three formats.</span>' : '') + '</div></div>' +
-        '<p class="small muted">Order: ' + ((CONFIG.remote || {}).pinCommit === false ? '' : '0. the newest commit on ' + esc((CONFIG.remote || {}).branch || 'main') + ' (never stale), ') + esc(src.map((x, i) => (i + 1) + '. ' + x.label).join(', ')) + (src.length ? ', then ' : '') + 'the last good copy on each device. Nothing is built in: the file is the only source of course content. Every request carries a fresh ?v= and skips every cache. The hub checks again every ' + esc(String((CONFIG.remote || {}).refreshMinutes || 10)) + ' minutes while it is open.</p>' +
+        pauseRow() + '<p class="small muted">Order: ' + ((CONFIG.remote || {}).pinCommit === false ? '' : '0. the newest commit on ' + esc((CONFIG.remote || {}).branch || 'main') + ' (never stale), ') + esc(src.map((x, i) => (i + 1) + '. ' + x.label).join(', ')) + (src.length ? ', then ' : '') + 'the last good copy on each device. Nothing is built in: the file is the only source of course content. Every request carries a fresh ?v= and skips every cache. The hub checks again every ' + esc(String((CONFIG.remote || {}).refreshMinutes || 10)) + ' minutes while it is open.</p>' +
         list('What players see per repertoire', (r.repertoires || []).map((x) => x.name + ': ' + x.chapters + (x.chapters === 1 ? ' chapter, ' : ' chapters, ') + x.lines + (x.lines === 1 ? ' line' : ' lines'))) +
         list('Five-level chapters and topics (v3.9)', r.levels) +
         list('What the last sync loaded', secs) +
@@ -5148,14 +5221,18 @@ const CMS = (() => {
         list('In the file, not used by the hub', r.unused) +
         list('Sources that were skipped', st.tried) +
         '<p class="form-msg' + (note ? ' is-good' : '') + '" id="sync-msg" aria-live="polite">' + esc(note || '') + '</p>' +
-        '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-sync="now">' + icon('rotate') + ' Sync now</button>' +
+        '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-sync="now"' + (SyncLock.paused() ? ' disabled' : '') + '>' + icon('rotate') + ' Sync now</button><button type="button" class="btn btn-ghost btn-sm" data-sync="export">' + icon('file-export') + ' Export master JSON</button>' +
           (Feed.pageUrl() ? '<a class="btn btn-ghost btn-sm" href="' + esc(Feed.pageUrl()) + '" target="_blank" rel="noopener">' + icon('code-branch') + ' Open the file on GitHub</a>' : '') + '</div>' +
         (Admin.draft() ? '<p class="small dim">Admin mode shows your draft. Players see the live data.</p>' : ''),
       onMount(s) {
         onBack(s);
+        s.el.addEventListener('change', (e) => {
+          if (e.target.matches('[data-m-sync-pause]')) { togglePause(e.target.checked); s.close(); later(() => syncSheet()); }
+        });
         s.el.addEventListener('click', async (e) => {
           const b = e.target.closest('[data-sync]');
           if (!b) return;
+          if (b.getAttribute('data-sync') === 'export') { exportMaster(); return; }
           b.disabled = true;
           qs('#sync-msg', s.el).textContent = 'Checking\u2026';
           const changed = await Site.fetchPublished(true).catch(() => false);
@@ -5177,6 +5254,7 @@ const CMS = (() => {
         '<div class="access-status' + (dirty ? ' is-on' : '') + '"><span class="ico">' + icon(dirty ? 'pen-ruler' : 'circle-check') + '</span><div><strong>' + (dirty ? 'You have unpublished changes' : 'Everything is published') + '</strong><span>' +
           esc(syncLine()) + '</span></div></div>' +
         '<label class="switch-row"><span>Show edit buttons on the pages</span><input type="checkbox" data-m-edit' + (Admin.prefs().edit !== false ? ' checked' : '') + '></label>' +
+        pauseRow() +
         '<label class="field"><span class="field-label">Preview the hub as</span><select class="input" data-m-preview>' + opt('', 'My own access') + opt('free', 'A free player') + opt('community', 'A free Skool member') + opt('vault', 'An Accelerator member') + opt('mentor', 'A Mentorship member') + '</select></label>' +
         '<div class="menu-rows">' + row('queue', 'inbox', 'Review Queue', (() => { const c = Queue.counts(); return c.ready ? c.ready + (c.ready === 1 ? ' game' : ' games') + ' to review' + (c.new + c.trimming ? ', ' + (c.new + c.trimming) + ' trimming' : '') : c.new + c.trimming ? (c.new + c.trimming) + ' waiting for Stockfish' : 'Import games, approve blunders and featured games'; })()) +
           '</div>' +
@@ -5193,12 +5271,13 @@ const CMS = (() => {
           row('treeedit', 'sitemap', 'Opening Tree Editor', 'Opens live under the board in Explore mode — pick a chapter to jump there') + '</div>' +
         '<div class="menu-rows">' + row('copy', 'font', 'Texts', 'Headlines and paragraphs on every page') + row('settings', 'sliders', 'Numbers and links', 'Peak rating, percentile, fast track, Skool, socials') + '</div>' +
         '<div class="menu-rows">' + Object.keys(Site.LISTS).map((n) => row('list:' + n, 'list', Site.LISTS[n][0], Site.LISTS[n][1] + ', ' + (getPath(CONTENT, n) || []).length + ' items')).join('') + '</div>' +
-        '<div class="menu-rows">' + row('keys', 'key', 'Member keys', Site.keys().length + (Site.keys().length === 1 ? ' key' : ' keys')) + row('sync', 'rotate', 'Live data (GitHub)', syncSub()) + row('publish', 'cloud-arrow-up', 'Publish', dirty ? 'Send your draft to GitHub' : 'Up to date') + row('data', 'database', 'Data management & backups', 'Export or import the whole database as JSON') + '</div>' +
+        '<div class="menu-rows">' + row('keys', 'key', 'Member keys', Site.keys().length + (Site.keys().length === 1 ? ' key' : ' keys')) + row('sync', 'rotate', 'Live data (GitHub)', syncSub()) + row('publish', 'cloud-arrow-up', 'Publish', dirty ? 'Send your draft to GitHub' : 'Up to date') + row('masterexport', 'file-export', 'Export master JSON', 'Download everything on this device, tree edits included, as content.json') + row('data', 'database', 'Data management & backups', 'Export or import the whole database as JSON') + '</div>' +
         '<div class="menu-rows">' + row('proofq', 'ranking-star', 'Potential Proof Queue', Proof.summary()) + row('insights', 'chart-column', 'Insights', 'What your players miss, ask and struggle with') + row('vaultbrowser', 'magnifying-glass-chart', 'Vault & Mistake Browser', 'Games, mistakes and brilliant moves by chapter') + row('course', 'graduation-cap', 'Course index', 'The curriculum the coach points to') + row('lb', 'ranking-star', 'Leaderboard', 'Hide or show players, ranking numbers') + '</div>' +
         '<div class="btn-row"><button type="button" class="btn btn-quiet btn-sm" data-m="signout">' + icon('right-from-bracket') + ' Sign out of admin</button></div>',
       onMount(s) {
         s.el.addEventListener('change', (e) => {
           if (e.target.matches('[data-m-edit]')) { Admin.setPref('edit', e.target.checked); rerender(); }
+          if (e.target.matches('[data-m-sync-pause]')) { togglePause(e.target.checked); s.close(); later(manager); }
           if (e.target.matches('[data-m-preview]')) { Admin.setPref('preview', e.target.value); refreshChip(); rerender(); }
         });
         s.el.addEventListener('click', (e) => {
@@ -5230,6 +5309,7 @@ const CMS = (() => {
             else if (m === 'keys') keysSheet();
             else if (m === 'publish') publish();
             else if (m === 'sync') syncSheet();
+            else if (m === 'masterexport') exportMaster();
             else if (m === 'data') dataSheet();
             else if (m === 'vaultbrowser') { if (routeFromHash() === 'vault-browser') rerender(); else location.hash = '#vault-browser'; }
             else if (m === 'course') openCourseSheet();
@@ -6336,7 +6416,7 @@ const CMS = (() => {
     else if (b.hasAttribute('data-cms-gating')) gating();
     else settings();
   }
-  return { gate, manager, onClick, editCopy, listSheet, keysSheet, publish, settings, gating, tierPick, botsSheet, botEditor, avatarSheet, boardEditor, dataSheet, itemEditor };
+  return { exportMaster, gate, manager, onClick, editCopy, listSheet, keysSheet, publish, settings, gating, tierPick, botsSheet, botEditor, avatarSheet, boardEditor, dataSheet, itemEditor };
 })();
 /* ==========================================================================
    4. BOARD: chessboard.js wrapper with tap-to-move, drag, highlights,
@@ -10861,7 +10941,7 @@ function refreshChip() {
     '<span class="chip-tier tier-' + tier + '">' + esc(TIERS[tier].label) + '</span><span class="chip-avatar">' + (initials ? esc(initials) : icon('user')) + '</span>';
   chip.setAttribute('aria-label', 'Your profile: ' + TIERS[tier].label + ' access, ' + days + '-day streak' + V36.chipLabel());
   const slot = qs('#admin-slot');
-  if (slot) slot.innerHTML = Admin.active ? '<button type="button" class="admin-chip" id="admin-chip" aria-label="Open the admin menu">' + icon('pen-ruler') + '<span>' + (Admin.preview() ? 'Preview' : 'Admin') + '</span>' + proofBadge() + '</button>' : '';
+  if (slot) slot.innerHTML = Admin.active ? '<button type="button" class="admin-chip' + (SyncLock.paused() ? ' is-paused' : '') + '" id="admin-chip" aria-label="Open the admin menu' + (SyncLock.paused() ? ' (sync is paused)' : '') + '">' + icon('pen-ruler') + '<span>' + (Admin.preview() ? 'Preview' : 'Admin') + (SyncLock.paused() ? ' · sync off' : '') + '</span>' + proofBadge() + '</button>' : '';
   try { const L = V6.level(), tb = qs('#topbar'); if (tb) tb.style.setProperty('--lvl', L.pct.toFixed(3)); } catch (e) { /* ranks load a moment later */ }
 }
 function openProfile() {
@@ -17701,6 +17781,11 @@ const TreeImport = (() => {
    backup", not "hope Publish wasn't clicked yet".
    ========================================================================== */
 const TreeEditor = (() => {
+  /* Every mounted pane, so Export master JSON (and resuming sync) can include edits that are still only in memory. */
+  const live = new Set();
+  const stripPaths = (nodes) => (nodes || []).map((n) => { const o = Object.assign({}, n); delete o._path; if (o.c) o.c = stripPaths(o.c); return o; });
+  function pending() { return Array.from(live).filter((h) => h.dirty()).map((h) => ({ id: h.id, tree: stripPaths(clone(h.tree())) })); }
+  function markSaved(ids) { live.forEach((h) => { if (h.dirty() && (!ids || ids.indexOf(h.id) >= 0)) h.saved(); }); }
   function countNodes(list) { return (list || []).reduce((n, o) => n + 1 + countNodes(o.c), 0); }
   function countLeaves(list) { return (list || []).reduce((n, o) => n + (o.c && o.c.length ? countLeaves(o.c) : 1), 0); }
   function nodeAt(tree, path) {
@@ -17773,6 +17858,8 @@ const TreeEditor = (() => {
   function mount(host, t, onJump) {
     const original = clone(t.tree);
     let tree = clone(t.tree), dirty = false, curPath = '';
+    const handle = { id: t.id, tree: () => tree, dirty: () => dirty, saved() { dirty = false; render(); } };
+    live.add(handle);
     function fenAt(path) {
       const g = new Chess();
       (path ? sansAlongPath(tree, path) : []).forEach((san) => g.move(san, { sloppy: true }));
@@ -17789,9 +17876,9 @@ const TreeEditor = (() => {
     function render() {
       annotateIndexPaths(tree, '');
       host.hidden = false;
-      host.innerHTML = '<p class="small muted" id="te-meta">' + icon('sitemap') + ' <b>' + esc(t.title) + '</b> — ' + countNodes(tree) + ' moves, ' + countLeaves(tree) + ' lines' + (dirty ? ', unsaved changes' : '') + '. Click a move to see it on the board; right-click, or ' + icon('ellipsis-vertical') + ', to edit.</p>' +
+      host.innerHTML = '<p class="small muted" id="te-meta">' + icon('sitemap') + ' <b>' + esc(t.title) + '</b> — ' + countNodes(tree) + ' moves, ' + countLeaves(tree) + ' lines' + (dirty ? ', unsaved changes' : '') + '. Click a move to see it on the board; right-click, or ' + icon('ellipsis-vertical') + ', to edit.' + (SyncLock.paused() ? ' <b>Sync is paused: nothing on GitHub can overwrite this.</b>' : '') + '</p>' +
         chainTreeHTML(tree, (n) => n.c || [], renderMove) +
-        '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-te="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-te="root">' + icon('house') + ' Start position</button><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button></div>';
+        '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-te="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-te="root">' + icon('house') + ' Start position</button><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button><button type="button" class="btn btn-ghost btn-sm" data-te="master">' + icon('file-export') + ' Export master JSON</button></div>';
     }
     function jump(path) { curPath = path; onJump(fenAt(path)); render(); }
     function doDelete(path) {
@@ -17844,6 +17931,7 @@ const TreeEditor = (() => {
       if (menuBtn) { const r = menuBtn.getBoundingClientRect(); menuFor(menuBtn.getAttribute('data-te-menu'), r.left, r.bottom + 4); return; }
       if (e.target.closest('[data-te="add-root"]')) { doAdd(''); return; }
       if (e.target.closest('[data-te="root"]')) { jump(''); return; }
+      if (e.target.closest('[data-te="master"]')) { CMS.exportMaster(); return; }
       if (e.target.closest('[data-te="export"]')) {
         confirmSheet('Export and save to your draft?', 'This downloads a safety backup of the chapter as it was before this session, then the edited chapter, then saves your changes into the admin draft. Nothing on GitHub changes until you Publish.', 'Export').then((ok) => {
           if (!ok) return;
@@ -17867,9 +17955,9 @@ const TreeEditor = (() => {
     host.addEventListener('click', onClick);
     host.addEventListener('contextmenu', onCtx);
     render();
-    return { destroy() { host.removeEventListener('click', onClick); host.removeEventListener('contextmenu', onCtx); host.hidden = true; host.innerHTML = ''; } };
+    return { destroy() { live.delete(handle); host.removeEventListener('click', onClick); host.removeEventListener('contextmenu', onCtx); host.hidden = true; host.innerHTML = ''; } };
   }
-  return { pick, mount };
+  return { pick, mount, pending, markSaved };
 })();
 
 /* ==========================================================================
@@ -22533,15 +22621,19 @@ const LB4 = (() => {
 /* the course data could not be loaded: say so, with a retry */
 function dataBanner() {
   const st = Site.status() || {}, el0 = qs('#data-banner');
-  if (Site.known() || Site.loading() || !(st.checked || (st.tried && st.tried.length))) { if (el0) el0.remove(); return; }
+  const paused = SyncLock.paused();
+  if (Site.known() || Site.loading() || (!paused && !(st.checked || (st.tried && st.tried.length)))) { if (el0) el0.remove(); return; }
   const el = el0 || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'data-banner', className: 'data-banner' }));
   el.setAttribute('role', 'alert');
-  el.innerHTML = '<div><b>The course data did not load.</b> <small>' + esc((st.tried || []).slice(0, 3).join(' · ') || 'No source answered.') + '</small></div><button type="button" class="btn btn-primary btn-sm" data-dbr>Try again</button>';
+  el.innerHTML = paused
+    ? '<div><b>Sync is paused and this device has no saved copy.</b> <small>Admin kill-switch is on, so nothing was fetched.</small></div><button type="button" class="btn btn-primary btn-sm" data-dbr>Resume sync</button>'
+    : '<div><b>The course data did not load.</b> <small>' + esc((st.tried || []).slice(0, 3).join(' · ') || 'No source answered.') + '</small></div><button type="button" class="btn btn-primary btn-sm" data-dbr>Try again</button>';
 }
 document.addEventListener('click', (e) => {
   const b = e.target.closest && e.target.closest('[data-dbr]');
   if (!b) return;
   b.disabled = true;
+  if (SyncLock.paused()) SyncLock.set(false);   // the banner's button is the way out of a paused, empty device
   Site.fetchPublished(true).then(() => { dataBanner(); rerender(); }).catch(() => { b.disabled = false; });
 });
 
