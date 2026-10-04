@@ -1818,6 +1818,15 @@ button.brand{background:none;border:0;padding:0;cursor:pointer;font-family:inher
   .tab i{font-size:14px}
 }
 </style>
+<style id="v8-css">
+/* ---------- v8: formula ranks: the five level pills under a module rank ---------- */
+.v8-lv{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.v8-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dim);background:var(--ink);border:1px solid var(--hair)}
+.v8-pill.is-open{color:var(--chalk);border-color:var(--accent-line);background:var(--accent-soft)}
+.v8-pill.is-clear{color:var(--good);border-color:rgba(74,222,128,.4)}
+.v8-pill svg,.v8-pill i{font-size:11px}
+.v6-mod>small{display:block;margin-top:6px;color:var(--dim);line-height:1.45}
+</style>
 <style id="v7-css">
 /* ---------- v7: Rank Points, Redemption Desk, Streak Rescue Clock, piece hourglass, event countdowns ---------- */
 .v7-top{display:grid;gap:10px;margin:0 0 14px}
@@ -7710,6 +7719,7 @@ function mountThink(view) {
   function stop() { if (runner) { runner.destroy(); runner = null; } board.setOnMove(null); board.setInteractive(null); board.clearMarks(); board.setArrows([]); }
   function run(d) {
     stop(); veil.hide();
+    V6.ctx({ level: Levels.of(d) });                              // v8: the Level of this drill, for the rank
     runner = StageRunner({ drill: d, board, host: panel, section: 'think', mspc: true, hard: !!App.settings.hardMode, onNext: next, nextLabel: d.dynamic ? 'Another random position' : 'Next position' });
     runner.start();
   }
@@ -7945,7 +7955,7 @@ function mountShuffle(root) {
     clearTimers(); hideFlash();
     if (!S || !S.pool.length) { summary(); return; }
     item = pickShuffle(S.pool, S.recent, S.missed);
-    V6.ctx({ module: item.scope });
+    V6.ctx({ module: item.course === 'c:mspc' ? 'think' : item.scope, level: Levels.of(item) });   // v8: the MSPC positions are the 'think' module; every line carries its Level
     S.recent.push(item.id); if (S.recent.length > 6) S.recent.shift();
     done = false; held = false; lastView = null;
     if (runner) runner.destroy();
@@ -20371,24 +20381,31 @@ const V6Core = (() => {
     /* XP for one correct first-try answer, before multipliers */
     base: { openings: 8, middlegame: 12, endgame: 12, think: 12 },
     puzzleBase: { min: 8, max: 34, perRating: 14, ref: 1200 },
-    ranks: [['Foundation', 0], ['Developing', 300], ['Competent', 1200], ['Proficient', 3500], ['Advanced', 8000], ['Expert', 16000], ['Master', 30000], ['Grandmaster', 60000]],
+    /* v8: the rank ladder is the five tiers of the universal levels (Starter = Level 1 ... Master = Level 5); XP has no ranks, it has an XP Level (levelOf). */
+    ranks: [['Unranked', 0], ['Starter', 1], ['Beginner', 2], ['Intermediate', 3], ['Advanced', 4], ['Master', 5]],
     /* Arena: rating from live tournaments. Ring colour on the avatar, global XP multiplier. */
     arena: [['Entry', 0, '#475569', 1], ['Silver', 1150, '#94a3b8', 1.03], ['Gold', 1300, '#eab308', 1.06], ['Platinum', 1500, '#38bdf8', 1.1], ['Diamond', 1750, '#a78bfa', 1.15], ['Elite', 2000, '#e2e8f0', 1.2]],
     arenaRating: { start: 1100, floor: 1000, cap: 3000, maxWeek: 60 },
-    balancer: { max: 1.2, min: 0.8, deadZone: 0.25, perRank: 0.1, minTrained: 2 },
+    balancer: { max: 1.2, min: 0.8, deadZone: 0.25, perRank: 0.2, minTrained: 2 },
     /* flow: first-try answers in a row -> multiplier */
     /* v7: exponential flow. Between two anchors the multiplier grows geometrically; the Grandmaster tier is x50 and keeps rising slowly after it. */
-    flow: [[0, 1], [3, 1.05], [5, 1.1], [8, 1.2], [12, 1.35], [18, 1.55], [25, 1.8], [35, 2.1], [50, 2.5], [75, 4], [100, 7], [150, 14], [200, 26], [250, 50]],
+    flow: [[0, 1], [3, 1.05], [5, 1.12], [7, 1.2], [10, 1.35], [18, 1.55], [25, 1.8], [35, 2.1], [50, 2.5], [75, 4], [100, 7], [150, 14], [200, 26], [250, 50]],
     flowTail: { step: 0.004, cap: 100 },
     flowNames: [[0, 'Warming up'], [3, 'Flow'], [12, 'Deep flow'], [25, 'Elite flow'], [50, 'Master Flow'], [100, 'Titan Flow'], [250, 'Grandmaster Flow']],
-    /* v7: Rank Points. XP only ever goes up; ranks come from RP, which move with Shuffle Trainer and puzzle results. */
-    rpRanks: [['Foundation', 0], ['Developing', 200], ['Competent', 800], ['Proficient', 2000], ['Advanced', 4500], ['Expert', 9000], ['Master', 16000], ['Grandmaster', 28000]],
-    rp: { missShare: 0.6, tierGain: [1, 0.9, 0.5, 0], sections: ['shuffle', 'puzzles', 'think', 'clinic', 'peer'] },
+    /* v8: formula ranks. XP only ever goes up and never decides a rank.
+       Module Rank = Level (1-5) x Accuracy; Puzzle Rank = current Puzzle ELO x Accuracy.
+       Accuracy is read from the last `window` answers on that level (so a rank can go down as well as up).
+       A level is CLEARED at clearPct over at least clearMin answers (rank up: the next level opens for ranking and its decay window applies);
+       it stays cleared until accuracy sinks under holdPct. sequential: a level only counts once the one before it is cleared.
+       hintCredit: share of an answer that counts at hint tier 0..3 (a full solution is a miss). decayDays: per level, a line not seen for that long is "fading". */
+    rank: { window: 50, minAnswers: 10, clearMin: 20, clearPct: 0.85, holdPct: 0.75, sequential: true, hintCredit: [1, 0.9, 0.5, 0],
+      decayDays: [30, 21, 14, 10, 7], puzzleBands: [[0, 0], [800, 1], [1200, 2], [1600, 3], [1800, 4], [2200, 5]], sections: ['shuffle', 'puzzles', 'think'] },
     /* v7: Streak Rescue Clock (day streak) and the Stockfish blunder filter */
-    rescue: { minStreak: 3, perTokenDays: 7, maxCost: 5 },
+    rescue: { minStreak: 3, price: 2 },                                   // v8: a fixed token price, whatever the streak
     filter: { playableLoss: 15, minChars: 12 },
     pieces: [[50, 'king'], [35, 'queen'], [28, 'rook'], [18, 'bishop'], [10, 'knight'], [0, 'pawn']],
-    redeem: { windowMs: 120000, minCount: 3, need: 3 },       // Anti-Ragequit: 2 minutes, 3 in a row restore the chain
+    /* Anti-Ragequit: 2 minutes, 3 right answers restore the chain. v8 soft landing: inside the window you keep `keep` (20%) of the bonus you had, so x1.5 falls to x1.1, not to x1. */
+    redeem: { windowMs: 120000, minCount: 3, need: 3, keep: 0.2 },       // Anti-Ragequit: 2 minutes, 3 in a row restore the chain
     /* day streak -> XP boost; a day counts once there is one correct answer */
     days: [[7, 1.05], [14, 1.08], [30, 1.12], [60, 1.16], [100, 1.2], [180, 1.25], [365, 1.3]],
     maxMult: 6,                                               // all multipliers except the admin event
@@ -20401,6 +20418,8 @@ const V6Core = (() => {
     second: { free: 5, paid: 50, tokenCost: 1 },
     boss: { min: 12, max: 60, hardcoreShare: 0.1, hardcoreMin: 2, hardcoreMax: 6, xp: 40, strictXp: 120 },
     decayDays: 21,
+    /* v8: account age and loyalty badges (days since the account was made) */
+    loyalty: [[30, 'Month One'], [90, 'Quarter Club'], [180, 'Half-Year Member'], [365, 'One-Year Veteran'], [730, 'Two-Year Legend']],
     missOpp: { prevLoss: 15, myLoss: 6, minWin: 60 },
     bench: { phases: [[0.4, 1.1], [0.7, 1.15], [1, 1.2]], minContribution: 100, goals: { xp: 250000, correct: 20000, puzzles: 3000, boss: 400 } }
   };
@@ -20413,16 +20432,67 @@ const V6Core = (() => {
     const lo = L[i][1], hi = i + 1 < L.length ? L[i + 1][1] : null;
     return { i, name: L[i][0], next: hi == null ? '' : L[i + 1][0], pct: hi == null ? 1 : (v - lo) / (hi - lo), xp: v, toNext: hi == null ? 0 : hi - v, exact: i + (hi == null ? 0 : (v - lo) / (hi - lo)) };
   }
-  function moduleRanks(xpMap) {
-    const out = {};
-    CFG.modules.forEach((m) => { const r = rankOf((xpMap || {})[m], CFG.rpRanks); out[m] = Object.assign(r, { index: r.exact }); });   // v7: the map holds Rank Points
+  /* ---------- v8: formula ranks ---------- */
+  const tierName = (i) => CFG.ranks[clampN(Math.round(num(i, 0)), 0, CFG.ranks.length - 1)][0];
+  const hintCredit = (tier) => CFG.rank.hintCredit[clampN(Math.round(num(tier, 0)), 0, 3)];
+  /* one answer is stored as a digit 0-9: its credit (9 = clean first try, less with hints, 0 = a miss) */
+  const creditChar = (credit) => String(clampN(Math.round(clampN(num(credit, 0), 0, 1) * 9), 0, 9));
+  const pushAnswer = (bits, credit) => (String(bits || '').replace(/[^0-9]/g, '') + creditChar(credit)).slice(-CFG.rank.window);
+  /* a forgiven miss (redemption) leaves no trace: the last answer is dropped if it was a miss */
+  const dropMiss = (bits) => { const b = String(bits || ''); return b.slice(-1) === '0' ? b.slice(0, -1) : b; };
+  function accOf(bits) {
+    const b = String(bits || '').replace(/[^0-9]/g, '');
+    let sum = 0;
+    for (let i = 0; i < b.length; i++) sum += +b[i];
+    return { n: b.length, acc: b.length ? sum / (9 * b.length) : 0 };
+  }
+  /* cleared at clearPct over clearMin answers; stays cleared until accuracy sinks under holdPct */
+  function clearStep(bits, was) {
+    const R = CFG.rank, a = accOf(bits);
+    if (a.n < R.clearMin) return !!was;
+    return was ? a.acc >= R.holdPct : a.acc >= R.clearPct;
+  }
+  /* decay window (days) of a line on level k: the higher the level, the faster it fades */
+  const decayFor = (lvl) => { const D = CFG.rank.decayDays; return D[clampN(Math.round(num(lvl, 1)), 1, D.length) - 1] || CFG.decayDays; };
+  /* Module rank: levels = { 1: 'digits', ... 5: 'digits' }, cleared = { 1: true, ... } */
+  function moduleRank(levels, cleared) {
+    const R = CFG.rank, lv = levels || {}, cl = cleared || {};
+    let c = 0;
+    for (let k = 1; k <= 5; k++) { if (cl[k]) c = k; else if (R.sequential) break; }
+    const active = Math.min(5, c + 1), top = R.sequential ? active : 5;
+    const per = [];
+    let best = null, answers = 0;
+    for (let k = 1; k <= 5; k++) {
+      const a = accOf(lv[k]), counts = k <= top && a.n >= R.minAnswers, score = counts ? k * a.acc : 0;
+      answers += a.n;
+      per.push({ k, n: a.n, acc: a.acc, score, open: k <= top, cleared: R.sequential ? k <= c : !!cl[k], decay: decayFor(k) });
+      if (counts && (!best || score > best.score)) best = { k, acc: a.acc, score, n: a.n };
+    }
+    const exact = best ? best.score : 0, i = clampN(Math.max(Math.ceil(exact - 1e-9), c), 0, 5);
+    return { kind: 'module', i, name: tierName(i), next: i < 5 ? tierName(i + 1) : '', exact, index: exact, c, active, level: best ? best.k : active, acc: best ? best.acc : 0, bn: best ? best.n : 0, answers, trained: answers > 0, per, decay: decayFor(active) };
+  }
+  /* Puzzle rank = current Puzzle ELO x accuracy over the last answers; the tier comes from the same bands as the level ELO labels */
+  function puzzleRank(elo, bits) {
+    const R = CFG.rank, a = accOf(bits), e = Math.max(0, num(elo, 0)), B = R.puzzleBands;
+    const base = { kind: 'puzzle', elo: Math.round(e), acc: a.acc, bn: a.n, answers: a.n, trained: a.n > 0, decay: decayFor(1) };
+    if (!(e > 0) || a.n < R.minAnswers) return Object.assign(base, { i: 0, name: tierName(0), next: tierName(1), exact: 0, index: 0, value: 0, c: 0, active: 1, level: 1 });
+    const value = Math.round(e * a.acc);
+    let exact = B[B.length - 1][1];
+    for (let k = 0; k + 1 < B.length; k++) { if (value < B[k + 1][0]) { exact = B[k][1] + (value - B[k][0]) / (B[k + 1][0] - B[k][0]); break; } }
+    const i = clampN(Math.ceil(exact - 1e-9), 1, 5);
+    return Object.assign(base, { i, name: tierName(i), next: i < 5 ? tierName(i + 1) : '', exact, index: exact, value, c: i, active: Math.min(5, i + 1), level: Math.min(5, i + 1) });
+  }
+  /* rs = { lv: { module: { 1..5: digits } }, cl: { module: { 1..5: true } }, pz: digits }, elo = the current Puzzle ELO */
+  function moduleRanks(rs, elo) {
+    const out = {}, r = rs || {};
+    CFG.modules.forEach((m) => { out[m] = m === 'puzzles' ? puzzleRank(elo, r.pz) : moduleRank((r.lv || {})[m], (r.cl || {})[m]); });
     return out;
   }
   function studentRank(mr) {
     let sw = 0, s = 0, trained = 0;
-    CFG.modules.forEach((m) => { const w = CFG.weights[m] || 1; sw += w; s += w * ((mr[m] && mr[m].exact) || 0); if (mr[m] && mr[m].xp > 0) trained++; });
-    const exact = sw ? s / sw : 0, i = clampN(Math.floor(exact), 0, CFG.ranks.length - 1);
-    return { exact, i, name: CFG.ranks[i][0], trained };
+    CFG.modules.forEach((m) => { const w = CFG.weights[m] || 1; sw += w; s += w * ((mr[m] && mr[m].exact) || 0); if (mr[m] && mr[m].trained) trained++; });
+    const exact = sw ? s / sw : 0, i = clampN(Math.ceil(exact - 1e-9), 0, CFG.ranks.length - 1);
+    return { exact, i, name: tierName(i), trained };
   }
   function arenaRank(rating) {
     const r = num(rating, 0);
@@ -20435,8 +20505,8 @@ const V6Core = (() => {
   /* the Overall rank: 70% student, 30% arena (scaled to the same ladder), student only until the first tournament */
   function overallRank(student, arena) {
     const top = CFG.ranks.length - 1, a = arena && arena.rating > 0 ? arena.i / (CFG.arena.length - 1) * top : null;
-    const exact = a == null ? student.exact : student.exact * 0.7 + a * 0.3, i = clampN(Math.round(exact - 0.001), 0, top);
-    return { exact, i, name: CFG.ranks[i][0] };
+    const exact = a == null ? student.exact : student.exact * 0.7 + a * 0.3, i = clampN(Math.ceil(exact - 1e-9), 0, top);
+    return { exact, i, name: tierName(i) };
   }
   /* v6.1: the XP Level. Level 1 at 0 XP; level n starts at 60 * (n - 1)^2 XP (Level 2 at 60, Level 5 at 960, Level 11 at 6000). */
   function levelOf(xp) {
@@ -20462,6 +20532,12 @@ const V6Core = (() => {
   }
   function flowName(count) { let n = ''; CFG.flowNames.forEach((f) => { if (count >= f[0]) n = f[1]; }); return n; }
   const flowNew = () => ({ count: 0, best: 0, saved: 0, protect: null });
+  /* the multiplier that counts right now: the live chain, or inside the Anti-Ragequit window the kept share of the chain that was lost, whichever is higher */
+  function flowNow(f, now) {
+    const s = f || {}, live = flowMult(s.count), p = s.protect;
+    if (!p || num(now, Date.now()) > num(p.until, 0)) return live;
+    return Math.max(live, r2(1 + (flowMult(p.count) - 1) * CFG.redeem.keep));
+  }
   function flowHit(f, now) {
     now = num(now, Date.now());
     const s = Object.assign(flowNew(), f), R = CFG.redeem;
@@ -20515,22 +20591,17 @@ const V6Core = (() => {
     const total = base * mult * ev * (1 - pen);
     return { base, parts, mult: r2(mult), event: ev, hintPenalty: pen, xp: Math.max(0, Math.round(total)), potential: Math.round(base * mult * ev), rankPenalty: Math.round(base * hintRank(o.hintTier)) };
   }
-  /* ---------- v7: Rank Points ---------- */
-  /* One answer in a Shuffle Trainer or puzzle: + on a first-try hit (less with hints), - on a miss. Floors at 0 in the store. */
-  function rpDelta(module, ok, o) {
-    o = o || {};
-    const base = baseFor(module, o.puzzleRating), tier = clampN(Math.round(num(o.hintTier, 0)), 0, 3);
-    if (ok) return Math.round(base * CFG.rp.tierGain[tier]) - Math.round(base * hintRank(tier));
-    return -Math.round(base * CFG.rp.missShare);
+  /* ---------- v8: account age and loyalty ---------- */
+  function accountAge(created, now) {
+    const t = Date.parse(String(created || '').slice(0, 10) + 'T00:00:00');
+    return Number.isFinite(t) ? Math.max(0, Math.floor((num(now, Date.now()) - t) / 864e5)) : 0;
   }
-  const rpEligible = (section) => CFG.rp.sections.indexOf(section) >= 0;
-  /* the old XP-based rank, carried over to the RP ladder with the same rank and the same progress inside it */
-  function rpFromXp(xp) {
-    const r = rankOf(xp, CFG.ranks), L = CFG.rpRanks, lo = L[r.i][1], top = r.i + 1 >= L.length;
-    return Math.round(top ? lo + Math.max(0, num(xp, 0) - CFG.ranks[r.i][1]) * 0.5 : lo + r.pct * (L[r.i + 1][1] - lo));
-  }
+  const loyaltyEarned = (days) => CFG.loyalty.filter((l) => num(days, 0) >= l[0]);
+  const loyaltyNext = (days) => CFG.loyalty.filter((l) => l[0] > num(days, 0))[0] || null;
+  /* ---------- v8: which scores can move a rank ---------- */
+  const rankEligible = (section) => CFG.rank.sections.indexOf(section) >= 0;
   /* ---------- v7: Streak Rescue Clock and the blunder filter ---------- */
-  const rescueCost = (count) => clampN(Math.ceil(num(count, 0) / CFG.rescue.perTokenDays), 1, CFG.rescue.maxCost);
+  const rescueCost = () => CFG.rescue.price;
   function hgPiece(module) {
     const lim = hgLimit(module);
     let k = 'pawn';
@@ -20640,9 +20711,10 @@ const V6Core = (() => {
   /* ---------- Shuffle Trainer filters ---------- */
   /* ctx: { progress, now, decay (days), mistakes(id), leak: { M: {id: 1}, ... } } */
   function filterLines(pool, mode, ctx) {
-    const c = ctx || {}, now = num(c.now, Date.now()), decay = (num(c.decay, CFG.decayDays)) * 864e5, P = c.progress || {};
+    const c = ctx || {}, now = num(c.now, Date.now()), P = c.progress || {};
+    const decayOf = (x) => (c.decay != null && c.decay !== '' ? num(c.decay, CFG.decayDays) : decayFor(x && x.lvl)) * 864e5;   // v8: the window follows the level of the line
     if (mode === 'notseen') return pool.filter((x) => !P[x.id]);
-    if (mode === 'frontline') return pool.filter((x) => { const p = P[x.id]; return p && num(p.last, 0) > 0 && now - p.last >= decay; });
+    if (mode === 'frontline') return pool.filter((x) => { const p = P[x.id]; return p && num(p.last, 0) > 0 && now - p.last >= decayOf(x); });
     if (mode === 'mistakes') return pool.filter((x) => typeof c.mistakes === 'function' && c.mistakes(x.id));
     if (/^leak:[MSPC]$/.test(mode)) { const set = (c.leak || {})[mode.slice(5)] || {}; return pool.filter((x) => set[x.id]); }
     return pool;
@@ -20698,8 +20770,8 @@ const V6Core = (() => {
   }
   const winPct = (cp) => 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * clampN(cp, -3000, 3000))) - 1);
 
-  return { CFG, rankOf, moduleRanks, studentRank, arenaRank, overallRank, levelOf, balancer, flowMult, flowName, flowNew, flowHit, flowMiss, dayBoost, nextDayBoost, hgLimit, hgMult,
-    hintPenalty, hintRank, puzzleBase, baseFor, xp, rpDelta, rpEligible, rpFromXp, rescueCost, hgPiece, mspcFormOk, filterStep, secondLimit, secondLeft, chapterStatuses, bossPlan, mistakeLimit, hashStr, weakest, rollBounties, bountyBump,
+  return { CFG, rankOf, moduleRanks, moduleRank, puzzleRank, studentRank, arenaRank, overallRank, tierName, hintCredit, pushAnswer, dropMiss, accOf, clearStep, decayFor, levelOf, balancer, flowMult, flowName, flowNew, flowHit, flowMiss, dayBoost, nextDayBoost, hgLimit, hgMult,
+    hintPenalty, hintRank, puzzleBase, baseFor, xp, rankEligible, flowNow, accountAge, loyaltyEarned, loyaltyNext, rescueCost, hgPiece, mspcFormOk, filterStep, secondLimit, secondLeft, chapterStatuses, bossPlan, mistakeLimit, hashStr, weakest, rollBounties, bountyBump,
     benchPhase, benchBuff, arenaUpdate, eventActive, activeEvents, eventMult, filterLines, smartMix, ICONS, missedOpportunity, reviewIcon, cardLine, winPct, clampN, num };
 })();
 
@@ -20726,7 +20798,7 @@ const V6 = (() => {
 
   /* ---------- state (this device) ---------- */
   function blank() {
-    return { v: 1, xp: C.CFG.modules.reduce((o, m) => { o[m] = 0; return o; }, {}), total: 0, rp: C.CFG.modules.reduce((o, m) => { o[m] = 0; return o; }, {}), rescue: null, photo: '', flow: C.flowNew(), completed: {}, trophies: [], second: { day: '', used: 0 }, focus: false, hard: {},
+    return { v: 1, xp: C.CFG.modules.reduce((o, m) => { o[m] = 0; return o; }, {}), total: 0, lv: C.CFG.modules.reduce((o, m) => { o[m] = {}; return o; }, {}), cl: C.CFG.modules.reduce((o, m) => { o[m] = {}; return o; }, {}), pz: '', rescue: null, photo: '', flow: C.flowNew(), completed: {}, trophies: [], second: { day: '', used: 0 }, focus: false, hard: {},
       bounty: { daily: { key: '', items: [] }, weekly: { key: '', items: [] } }, bench: { period: '', xp: 0, correct: 0, puzzles: 0, boss: 0 },
       cache: { at: 0, events: [], bench: null, arena: null }, ev: {}, seenEvents: [], log: [], outbox: { xp: 0, correct: 0, puzzles: 0, boss: 0 }, ranks: {} };
   }
@@ -20736,9 +20808,15 @@ const V6 = (() => {
     if (!r || typeof r !== 'object') return b;
     C.CFG.modules.forEach((m) => { b.xp[m] = Math.max(0, Math.round(num((r.xp || {})[m], 0))); });
     b.total = Math.max(0, Math.round(num(r.total, 0)));
-    /* v7: Rank Points. A state from before v7 has none: carry the old XP rank over once, same rank, same progress inside it. */
-    if (r.rp && typeof r.rp === 'object') C.CFG.modules.forEach((m) => { b.rp[m] = Math.max(0, Math.round(num(r.rp[m], 0))); });
-    else C.CFG.modules.forEach((m) => { b.rp[m] = C.rpFromXp(b.xp[m]); });
+    /* v8: ranks come from answers per level, never from XP. A state from before v8 had Rank Points: they are dropped, ranks start from the first answers. */
+    C.CFG.modules.forEach((m) => {
+      const lv = ((r.lv || {})[m]) || {}, cl = ((r.cl || {})[m]) || {};
+      for (let k = 1; k <= 5; k++) {
+        if (typeof lv[k] === 'string') b.lv[m][k] = lv[k].replace(/[^0-9]/g, '').slice(-C.CFG.rank.window);
+        if (cl[k] === true) b.cl[m][k] = true;
+      }
+    });
+    b.pz = typeof r.pz === 'string' ? r.pz.replace(/[^0-9]/g, '').slice(-C.CFG.rank.window) : '';
     const rs = r.rescue;
     b.rescue = rs && typeof rs === 'object' && num(rs.until, 0) > Date.now() && num(rs.count, 0) > 0 ? { count: num(rs.count, 0) | 0, day: String(rs.day || '').slice(0, 10), until: num(rs.until, 0) } : null;
     b.photo = typeof r.photo === 'string' && r.photo.length < 90000 && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(r.photo) ? r.photo : '';
@@ -20803,7 +20881,7 @@ const V6 = (() => {
   }
 
   /* ---------- context: which module a score belongs to ---------- */
-  const ctx = { shuffle: '', puzzleRating: 0 };
+  const ctx = { shuffle: '', puzzleRating: 0, level: 1 };       // v8: level = the Level (1-5) of the line or drill being answered
   let hintCtx = null;
   let boss = null;                                  // set by the Boss Fight screen (part B)
   const modOf = (section) => (section === 'shuffle' ? ctx.shuffle || 'openings' : MOD_OF[section] || '');
@@ -20812,9 +20890,11 @@ const V6 = (() => {
 
   /* ---------- ranks, multipliers ---------- */
   function ranks() {
-    const mr = C.moduleRanks(st().rp), student = C.studentRank(mr), arena = C.arenaRank(arenaRating()), overall = C.overallRank(student, arena);
+    const mr = C.moduleRanks({ lv: st().lv, cl: st().cl, pz: st().pz }, puzzleElo()), student = C.studentRank(mr), arena = C.arenaRank(arenaRating()), overall = C.overallRank(student, arena);
     return { mr, student, arena, overall, trained: student.trained };
   }
+  /* the current Puzzle ELO (0 until the player has started it); Puzzle Rank = this x accuracy */
+  function puzzleElo() { try { return PuzzleElo.get().rating || 0; } catch (e) { return 0; } }
   function arenaRating() {
     const c = st().cache.arena;
     if (c && num(c.rating, 0) > 0) return Math.round(c.rating);
@@ -20837,10 +20917,7 @@ const V6 = (() => {
     o.done = true;
     const q = payout(o.module, { hintTier: o.tier, noFlow: true, noClock: true });
     if (q.xp) addXp(o.module, q.xp);
-    if (C.rpEligible(o.section)) {
-      const d = C.rpDelta(o.module, true, { hintTier: o.tier });
-      if (d) { addRp(o.module, d); if (d < 0) toast('Full solution: ' + (-d) + ' Rank Points deducted.'); }
-    }
+    if (C.rankEligible(o.section)) recordAnswer(o.module, ctx.level, C.hintCredit(o.tier));   // v8: a full solution counts as a miss, tiers 1-2 as partial credit
   }
   const resetPos = () => { try { finalizePos(); } catch (e) { console.error(e); } pos = { tier: 0, booked: 0, sealed: false, t0: Date.now(), broke: false, rankPen: 0, module: '', section: '', done: false }; try { renderStrips(); } catch (e) { /* no strip yet */ } };
   const hgMode = (module) => (st().hard[module] === 'hard' ? 'hard' : 'off');
@@ -20849,13 +20926,13 @@ const V6 = (() => {
     const R = ranks(), m = R.mr[module], s = st(), flowCount = s.flow.count, b = benchNow();
     return C.xp({
       module, puzzleRating: module === 'puzzles' ? ctx.puzzleRating : 0,
-      balancer: m ? C.balancer(m.exact, R.student.exact, R.trained) : 1, flow: o.noFlow ? 1 : C.flowMult(flowCount), streak: C.dayBoost(App.streakDays()), arena: R.arena.mult,
+      balancer: m ? C.balancer(m.exact, R.student.exact, R.trained) : 1, flow: o.noFlow ? 1 : C.flowNow(s.flow, Date.now()), streak: C.dayBoost(App.streakDays()), arena: R.arena.mult,
       bench: b.buff, hourglass: o.noClock ? 1 : C.hgMult(module, hgMode(module), Date.now() - pos.t0), event: eventMultNow(), hintTier: o.hintTier != null ? o.hintTier : pos.tier
     });
   }
   function addXp(module, n, opts) {
     opts = opts || {};
-    n = Math.max(0, Math.round(num(n, 0)));                          // v7: XP never goes down. Penalties act on the answer, or on Rank Points.
+    n = Math.max(0, Math.round(num(n, 0)));                          // v8: XP never goes down. Penalties act on the answer's XP, or on its accuracy credit (rank).
     if (!n) return;
     const s = st(), lvBefore = C.levelOf(s.total).level;
     s.xp[module] = (s.xp[module] || 0) + n; s.total += n;
@@ -20864,21 +20941,50 @@ const V6 = (() => {
       if (s.bench.period !== per) s.bench = { period: per, xp: 0, correct: 0, puzzles: 0, boss: 0 };
       s.bench.xp += n; s.outbox.xp += n;
     }
-    if (C.levelOf(s.total).level > lvBefore) toast('Level ' + C.levelOf(s.total).level + ' reached.', 'good');
+    if (C.levelOf(s.total).level > lvBefore) toast('XP Level ' + C.levelOf(s.total).level + ' reached.', 'good');
     save(); queueSync(); try { refreshChip(); } catch (e) { /* the chip is optional */ }
   }
-  /* v7: Rank Points. Earned and lost in the Shuffle Trainers and in puzzles; every rank is read from here. */
-  function addRp(module, n) {
-    n = Math.round(num(n, 0));
-    if (!n) return;
-    const s = st(), before = ranks();
-    s.rp[module] = Math.max(0, (s.rp[module] || 0) + n);
-    const after = ranks();
-    if (after.mr[module].i > before.mr[module].i) { toast(C.CFG.labels[module] + ': rank ' + after.mr[module].name + '.', 'good'); trophy('rank:' + module + ':' + after.mr[module].name, C.CFG.labels[module] + ' ' + after.mr[module].name, 'rank'); }
-    else if (after.mr[module].i < before.mr[module].i) toast(C.CFG.labels[module] + ': back to ' + after.mr[module].name + '.');
+  /* v8: formula ranks. One scored answer goes into the rolling window of its level (or of the puzzles); the cleared flag of that level
+     is re-checked and the player hears about every rank change. Module Rank = Level x Accuracy, Puzzle Rank = Puzzle ELO x Accuracy. */
+  const clampLv = (k) => Math.min(5, Math.max(1, Math.round(num(k, 1))));
+  function announce(before, after, module, level) {
+    const L = C.CFG.labels[module], b = before.mr[module], a = after.mr[module];
+    if (module !== 'puzzles') {
+      if (a.c > b.c) toast(L + ': Level ' + a.c + ' cleared. Level ' + a.active + ' now counts toward your rank' + (a.c < 5 ? ', and its decay window is ' + a.decay + ' days.' : '.'), 'good');
+      else if (a.c < b.c) toast(L + ': Level ' + b.c + ' is open again. Get your accuracy back over ' + Math.round(C.CFG.rank.holdPct * 100) + '% to keep it.');
+    }
+    if (a.i > b.i) { toast(L + ': rank ' + a.name + '.', 'good'); trophy('rank:' + module + ':' + a.name, L + ' ' + a.name, 'rank'); }
+    else if (a.i < b.i) toast(L + ': back to ' + a.name + '.');
     if (after.student.i > before.student.i) toast('Student rank: ' + after.student.name + '.', 'good');
     else if (after.student.i < before.student.i) toast('Student rank: ' + after.student.name + '.');
+  }
+  function recordAnswer(module, level, credit) {
+    if (!module || C.CFG.modules.indexOf(module) < 0) return;
+    const s = st(), before = ranks(), k = clampLv(level);
+    if (module === 'puzzles') s.pz = C.pushAnswer(s.pz, credit);
+    else {
+      const lv = s.lv[module] || (s.lv[module] = {}), cl = s.cl[module] || (s.cl[module] = {});
+      lv[k] = C.pushAnswer(lv[k], credit);
+      if (C.clearStep(lv[k], !!cl[k])) cl[k] = true; else delete cl[k];
+    }
+    announce(before, ranks(), module, k);
     save(); try { refreshChip(); } catch (e) { /* the chip is optional */ }
+  }
+  /* a miss that is forgiven (Stockfish says playable, MSPC redemption, token) leaves no trace in the accuracy */
+  function undoMiss(module, level) {
+    const s = st();
+    if (module === 'puzzles') s.pz = C.dropMiss(s.pz);
+    else {
+      const k = clampLv(level), lv = s.lv[module] || (s.lv[module] = {}), cl = s.cl[module] || (s.cl[module] = {});
+      lv[k] = C.dropMiss(lv[k]);
+      if (C.clearStep(lv[k], !!cl[k])) cl[k] = true; else delete cl[k];
+    }
+    save(); try { refreshChip(); } catch (e) { /* the chip is optional */ }
+  }
+  /* v8: account age -> loyalty badges in the trophy cabinet */
+  function awardLoyalty() {
+    const days = C.accountAge(App.profile && App.profile.created, Date.now());
+    C.loyaltyEarned(days).forEach((l) => { if (trophy('loyalty:' + l[0], l[1], 'loyalty')) toast('Loyalty badge: ' + l[1] + '. ' + l[0] + ' days with Lanckriet Chess.', 'good'); });
   }
   function trophy(id, name, kind) {
     const s = st();
@@ -20942,7 +21048,7 @@ const V6 = (() => {
       s.bench.correct++; s.outbox.correct++;
       if (module === 'puzzles') { s.bench.puzzles++; s.outbox.puzzles++; }
       addXp(module, q.xp);
-      if (C.rpEligible(section)) addRp(module, C.rpDelta(module, true, { puzzleRating: ctx.puzzleRating, hintTier: pos.tier }));   // v7: ranks move on Rank Points only
+      if (C.rankEligible(section)) recordAnswer(module, ctx.level, C.hintCredit(pos.tier));   // v8: ranks move on accuracy per level only, XP never decides a rank
       bountyEvent({ type: 'correct', module, flow: s.flow.count });
       bountyEvent({ type: 'xp', n: q.xp });
       eventProgress('xp', q.xp); eventProgress('correct', 1); if (module === 'puzzles') eventProgress('puzzles', 1);
@@ -20950,11 +21056,11 @@ const V6 = (() => {
     } else {
       const before = Object.assign({}, s.flow), miss = C.flowMiss(s.flow, now);
       s.flow = miss.flow;
-      const loss = C.rpEligible(section) ? C.rpDelta(module, false, { puzzleRating: ctx.puzzleRating }) : 0;
-      if (loss) addRp(module, loss);
+      const ranked = C.rankEligible(section);
+      if (ranked) recordAnswer(module, ctx.level, 0);
       if (miss.protectedUntil) toast('Flow reset. Three right answers within two minutes restore it.');
       if (boss) boss.onMistake({ hint: false });
-      else offerDesk({ section, module, flowBefore: before, rp: loss, lost: miss.lost });
+      else offerDesk({ section, module, flowBefore: before, rank: ranked ? { module, level: ctx.level } : null, lost: miss.lost });
     }
     resetPos();
     save(); renderStrips();
@@ -20986,11 +21092,11 @@ const V6 = (() => {
 
   /* ==========================================================================
      v7: the Stockfish Blunder-Filter and the MSPC Redemption Protocol.
-     A miss costs flow and Rank Points at once. The desk then runs three steps on that move:
+     A miss costs flow and accuracy (rank) at once. The desk then runs three steps on that move:
        1. Stockfish, in this browser: a move that loses under 15% win chance is playable and is forgiven for free.
        2. The MSPC form: Move, Specifics, Priorities and Calculation, filled in. Free, limited per day.
        3. Tokens: forgive it at once.
-     Forgiving gives back the flow chain and the Rank Points. The Anti-Ragequit buff (three right answers inside
+     Forgiving gives back the flow chain and the accuracy. The Anti-Ragequit buff (three right answers inside
      two minutes) keeps running for anyone who skips the desk. XP is never touched: it only goes up.
      ========================================================================== */
   const FORM = [
@@ -21039,7 +21145,7 @@ const V6 = (() => {
     if (!d.alive) return;
     const s = st();
     s.flow = Object.assign(C.flowNew(), d.flowBefore);
-    if (d.rp) addRp(d.module, -d.rp);
+    if (d.rank) undoMiss(d.rank.module, d.rank.level);
     save(); renderStrips();
     d.done = how; paintDesk(d); toast(how, 'good');
     setTimeout(() => { if (deskCur === d) closeDesk(); }, 4500);
@@ -21056,7 +21162,7 @@ const V6 = (() => {
           '<button type="button" class="btn btn-ghost btn-sm" data-v7d="tok"' + (tok ? '' : ' disabled') + '>' + icon('coins') + ' Step 3: use ' + cost + (cost === 1 ? ' token' : ' tokens') + '</button>' +
           '<button type="button" class="btn btn-quiet btn-sm" data-v7d="keep">Keep the penalty</button></div>');
     d.el.innerHTML = h;
-    if (d.form && !d.done) formBind(d.el, () => { if (secondLeft() < 1) { toast('No free redemptions left today.'); return; } useSecond(); forgive(d, 'MSPC redemption done: flow and Rank Points restored.'); });
+    if (d.form && !d.done) formBind(d.el, () => { if (secondLeft() < 1) { toast('No free redemptions left today.'); return; } useSecond(); forgive(d, 'MSPC redemption done: flow and accuracy restored.'); });
   }
   async function runFilter(d) {
     d.step = 1; paintDesk(d);
@@ -21064,7 +21170,7 @@ const V6 = (() => {
     try {
       const r = await moveLoss(d.att);
       if (!d.alive || d.step >= 2) return;
-      if (C.filterStep(r.loss) === 1) { d.verdict = 'Stockfish: ' + r.san + ' is playable (−' + Math.round(r.loss) + '%).'; forgive(d, 'Playable move: flow and Rank Points restored.'); return; }
+      if (C.filterStep(r.loss) === 1) { d.verdict = 'Stockfish: ' + r.san + ' is playable (−' + Math.round(r.loss) + '%).'; forgive(d, 'Playable move: flow and accuracy restored.'); return; }
       d.verdict = 'Stockfish: ' + r.san + ' loses ' + Math.round(r.loss) + '% win chance.';
     } catch (e) { if (!d.alive || d.step >= 2) return; d.verdict = 'The engine is not available.'; }
     d.step = 2; paintDesk(d);
@@ -21129,7 +21235,7 @@ const V6 = (() => {
     if (!r) return '';
     if (r.kind === 'risk') return '<section class="v7-clock is-risk" role="status" data-v7-rescue>' + icon('fire') + '<div><b>Your ' + r.count + '-day streak ends in <span data-v7-t="' + r.until + '">' + fmtHMS(r.until - Date.now()) + '</span></b><small>Answer one drill correctly before midnight and it keeps going.</small></div></section>';
     return '<section class="v7-clock is-lost" role="status" data-v7-rescue>' + icon('hourglass-half') + '<div><b>Streak lost. Buy it back within <span data-v7-t="' + r.until + '">' + fmtHMS(r.until - Date.now()) + '</span></b>' +
-      '<small>Your ' + r.count + '-day streak comes back for ' + r.cost + (r.cost === 1 ? ' token' : ' tokens') + ' (you have ' + esc(balText()) + '). The price is one token per ' + C.CFG.rescue.perTokenDays + ' days of streak, at most ' + C.CFG.rescue.maxCost + '.</small></div>' +
+      '<small>Your ' + r.count + '-day streak comes back for ' + r.cost + (r.cost === 1 ? ' token' : ' tokens') + ' (you have ' + esc(balText()) + '). The price is fixed: ' + C.CFG.rescue.price + ' tokens, whatever the length of the streak.</small></div>' +
       '<button type="button" class="btn btn-gold btn-sm" data-v7r="buy">' + icon('coins') + ' Rescue for ' + r.cost + '</button></section>';
   }
   function eventsHTML() {
@@ -21514,18 +21620,31 @@ const V6 = (() => {
     const R = ranks(), b = benchNow();
     return { streak: C.dayBoost(App.streakDays()), arena: R.arena.mult, bench: b.buff, event: eventMultNow() };
   }
+  /* v8: one module row: rank name and number, the formula behind it, and the five levels with their accuracy */
+  function modRow(m, R, tag) {
+    const x = R.mr[m], K = C.CFG.rank, pct = (v) => Math.round(v * 100) + '%';
+    const bandPct = x.i >= 1 ? C.clampN(x.exact - (x.i - 1), 0, 1) : C.clampN(x.exact, 0, 1);
+    let formula, steps = '';
+    if (m === 'puzzles') {
+      formula = x.value ? 'Puzzle ELO ' + x.elo + ' × ' + pct(x.acc) + ' = ' + x.value : x.elo ? x.bn + ' of ' + K.minAnswers + ' puzzles answered to place your rank' : 'Start your Puzzle ELO to get a puzzle rank';
+    } else {
+      formula = x.bn ? 'Level ' + x.level + ' × ' + pct(x.acc) + ' = ' + x.exact.toFixed(2) : 'Answer ' + K.minAnswers + ' Level ' + x.active + ' positions in a Shuffle Trainer to place your rank';
+      steps = '<div class="v8-lv">' + x.per.map((p) => '<span class="v8-pill' + (p.cleared ? ' is-clear' : p.open ? ' is-open' : '') + '" title="Level ' + p.k + ': ' + (p.cleared ? 'cleared' : p.open ? 'counts toward your rank' : 'opens when Level ' + (p.k - 1) + ' is cleared') + '. ' + p.n + ' answers' + (p.n ? ', ' + pct(p.acc) : '') + '. Lines fade after ' + p.decay + ' days.">' + (p.cleared ? icon('check') + ' ' : '') + 'L' + p.k + (p.n ? ' ' + pct(p.acc) : '') + '</span>').join('') + '</div>';
+    }
+    return '<div class="v6-mod"><div><b>' + esc(C.CFG.labels[m]) + '</b><span>' + esc(x.name) + (x.exact ? ' · ' + (m === 'puzzles' ? x.value : x.exact.toFixed(2)) : '') + (x.next ? ' → ' + esc(x.next) : '') + '</span>' + tag(m) + '</div>' + bar(bandPct) + '<small>' + esc(formula) + (m === 'puzzles' ? '' : '. Decay window ' + x.decay + ' days') + '</small>' + steps + '</div>';
+  }
   function tabOverview(R) {
-    const s = st(), mm = multNow(), nd = C.nextDayBoost(App.streakDays());
+    const s = st(), mm = multNow(), nd = C.nextDayBoost(App.streakDays()), XL = C.levelOf(s.total), AGE = C.accountAge(App.profile && App.profile.created, Date.now()), NL = C.loyaltyNext(AGE);
     const bal = (m) => C.balancer(R.mr[m].exact, R.student.exact, R.trained);
     const tag = (m) => { if (R.trained < 2) return ''; const v = bal(m); return v > 1 ? '<em class="v6-boost">Boost ×' + v.toFixed(2) + '</em>' : v < 1 ? '<em class="v6-brake">Brake ×' + v.toFixed(2) + '</em>' : ''; };
     return '<div class="v6-rank3">' + [
-      ['Student Rank', R.student.name, 'Weighted mean of your module ranks'],
+      ['Student Rank', R.student.name + (R.student.exact ? ' · ' + R.student.exact.toFixed(2) : ''), 'Weighted mean of your module ranks (Level × accuracy)'],
       ['Arena Rank', R.arena.name + (R.arena.rating ? ' · ' + R.arena.rating : ''), R.arena.mult > 1 ? 'XP ×' + R.arena.mult.toFixed(2) + ' from live tournaments' : 'Play a live tournament to place'],
       ['Overall', R.overall.name, 'Used on leaderboards and profiles']
     ].map((x) => '<div class="v6-stat"><small>' + x[0] + '</small><b>' + esc(x[1]) + '</b><span>' + esc(x[2]) + '</span></div>').join('') + '</div>' +
-      '<div class="v6-kpis"><div><small>Total XP</small><b>' + fmt(s.total) + '</b></div><div class="v6-viz"><small>Day streak</small><b>' + App.streakDays() + '</b><span>' + (nd ? 'Next boost at ' + nd.at + ' days' : 'Top boost reached') + '</span></div><div class="v6-viz"><small>Best flow</small><b>' + s.flow.best + '</b></div>' +
+      '<div class="v6-kpis"><div class="v6-viz"><small>XP Level</small><b>Lv ' + XL.level + '</b><span>' + fmt(s.total) + ' XP total, ' + fmt(XL.toNext) + ' to Lv ' + (XL.level + 1) + '. XP never goes down.</span></div><div class="v6-viz"><small>Account age</small><b>' + AGE + ' days</b><span>' + (NL ? 'Next loyalty badge: ' + esc(NL[1]) + ' at ' + NL[0] + ' days' : 'Every loyalty badge earned') + '</span></div><div class="v6-viz"><small>Day streak</small><b>' + App.streakDays() + '</b><span>' + (nd ? 'Next boost at ' + nd.at + ' days' : 'Top boost reached') + '</span></div><div class="v6-viz"><small>Best flow</small><b>' + s.flow.best + '</b></div>' +
       '<div><small>XP multipliers now</small><b>×' + (mm.streak * mm.arena * mm.bench * mm.event).toFixed(2) + '</b><span>Streak ×' + mm.streak.toFixed(2) + ', arena ×' + mm.arena.toFixed(2) + ', community ×' + mm.bench.toFixed(2) + ', event ×' + mm.event.toFixed(2) + '</span></div></div>' +
-      '<h3>Modules</h3><p class="muted small">Ranks run on Rank Points (RP). You earn them in the Shuffle Trainers and in puzzles and lose some on a miss. XP is separate and never goes down.</p><div class="v6-mods">' + C.CFG.modules.map((m) => { const x = R.mr[m]; return '<div class="v6-mod"><div><b>' + esc(C.CFG.labels[m]) + '</b><span>' + esc(x.name) + (x.next ? ' → ' + esc(x.next) : '') + '</span>' + tag(m) + '</div>' + bar(x.pct) + '<small>' + fmt(x.xp) + ' RP</small></div>'; }).join('') + '</div>' +
+      '<h3>Module ranks</h3><p class="muted small">Your rank moves with your accuracy, never with XP. A module rank is the Level × your accuracy on it (Puzzle Rank is your Puzzle ELO × accuracy), read from your last ' + C.CFG.rank.window + ' answers in the Shuffle Trainers, MSPC drills and puzzles. Clear a level at ' + Math.round(C.CFG.rank.clearPct * 100) + '% over ' + C.CFG.rank.clearMin + ' answers to rank up: the next level opens for ranking and its lines fade faster.</p><div class="v6-mods">' + C.CFG.modules.map((m) => modRow(m, R, tag)).join('') + '</div>' +
       '<h3>Recent XP</h3>' + (s.log.length ? '<ul class="v6-log">' + s.log.slice().reverse().slice(0, 8).map((x) => '<li><span>' + esc(C.CFG.labels[x.m] || x.m) + '</span><b>+' + x.xp + '</b><small>×' + num(x.x, 1).toFixed(2) + (x.h ? ', hint ' + x.h : '') + '</small></li>').join('') + '</ul>' : '<p class="muted small">No XP yet. Answer one drill correctly.</p>');
   }
   function tabMatrix() {
@@ -21564,11 +21683,11 @@ const V6 = (() => {
       '<h3>Events</h3>' + (evs.length ? '<div class="v6-events">' + evs.map((e) => { const x = s.ev[e.id] || { p: 0, done: false }, ch = e.challenge; return '<div class="v6-event"><div><b>' + esc(e.title) + '</b><small>' + (e.end ? 'Until ' + esc(dateText(e.end)) : 'Open-ended') + (e.xpMult !== 1 ? ', XP ×' + e.xpMult : '') + '</small></div>' + (ch ? '<div class="v6-ev-ch"><span>' + esc(ch.title) + '</span>' + bar(x.p / ch.target) + '<small>' + (x.done ? 'Complete' : fmt(x.p) + ' / ' + fmt(ch.target)) + (ch.reward.tokens ? ', +' + ch.reward.tokens + ' tokens' : '') + '</small></div>' : '') + '</div>'; }).join('') + '</div>' : '<p class="muted small">No event is running.</p>');
   }
   function tabTrophies() {
-    const s = st(), by = { boss: 'Boss Fights', strict: 'Strict clears', event: 'Event badges', rank: 'Ranks' }, fr = (() => { try { return Friends.list(); } catch (e) { return []; } })();
+    const s = st(), by = { boss: 'Boss Fights', strict: 'Strict clears', event: 'Event badges', rank: 'Ranks', loyalty: 'Loyalty' }, fr = (() => { try { return Friends.list(); } catch (e) { return []; } })();
     const groups = Object.keys(by).map((k) => ({ k, items: s.trophies.filter((t) => t.kind === k) })).filter((g) => g.items.length);
     let hub = 0; try { hub = Badges.count(); } catch (e) { hub = 0; }
     return '<p class="muted small v6-lead">Milestones stay in your cabinet for good. Friends see your last three on your friend card.' + (hub ? ' The hub’s own badges (' + hub + ') are in the <a href="#trophies">trophy room</a>.' : '') + '</p>' +
-      (groups.length ? groups.map((g) => '<h3>' + by[g.k] + '</h3><ul class="v6-trophies">' + g.items.slice().reverse().map((t) => '<li><span class="v6-tro v6-tro-' + esc(t.kind) + '">' + icon(t.kind === 'event' ? 'ribbon' : t.kind === 'strict' ? 'crosshairs' : t.kind === 'rank' ? 'ranking-star' : 'skull-crossbones') + '</span><b>' + esc(t.name) + '</b><small>' + esc(dateText(t.t)) + '</small></li>').join('') + '</ul>').join('') : '<p class="muted">Nothing here yet. Clear a Boss Fight or finish an event challenge.</p>') +
+      (groups.length ? groups.map((g) => '<h3>' + by[g.k] + '</h3><ul class="v6-trophies">' + g.items.slice().reverse().map((t) => '<li><span class="v6-tro v6-tro-' + esc(t.kind) + '">' + icon(t.kind === 'event' ? 'ribbon' : t.kind === 'strict' ? 'crosshairs' : t.kind === 'rank' ? 'ranking-star' : t.kind === 'loyalty' ? 'medal' : 'skull-crossbones') + '</span><b>' + esc(t.name) + '</b><small>' + esc(dateText(t.t)) + '</small></li>').join('') + '</ul>').join('') : '<p class="muted">Nothing here yet. Clear a Boss Fight or finish an event challenge.</p>') +
       '<h3>Friends</h3>' + (fr.length ? '<div class="v6-friends">' + fr.slice(0, 12).map((f) => '<div class="v6-friend"><b>' + esc(f.name) + '</b>' + friendLine(f) + '</div>').join('') + '</div>' : '<p class="muted small">Add friends on the <a href="#leaderboard">leaderboard</a> to compare ranks and trophies.</p>');
   }
   /* v6.1: the Account page: extra tabs (Friends, Ratings) are registered by addTab, the level and overall rank sit on top. */
@@ -21576,8 +21695,8 @@ const V6 = (() => {
   const profileTabs = () => [['overview', 'Overview']].concat(EXT.map((e) => [e.id, e.label]), [['matrix', 'Skill Matrix'], ['bounties', 'Bounties'], ['community', 'Community'], ['trophies', 'Trophies']]);
   function hero(R) {
     const L = C.levelOf(st().total);
-    return '<div class="v6-hero3"><div class="v6-tile lvl"><small>Level</small><b>' + L.level + '</b>' + bar(L.pct) + '<span>' + fmt(L.toNext) + ' XP to Level ' + (L.level + 1) + ' · ' + fmt(st().total) + ' XP</span></div>' +
-      '<div class="v6-tile"><small>Overall rank</small><b>' + esc(R.overall.name) + '</b><span>Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + '</span></div></div>';
+    return '<div class="v6-hero3"><div class="v6-tile lvl"><small>XP Level</small><b>' + L.level + '</b>' + bar(L.pct) + '<span>' + fmt(L.toNext) + ' XP to XP Level ' + (L.level + 1) + ' · ' + fmt(st().total) + ' XP. Never goes down.</span></div>' +
+      '<div class="v6-tile"><small>Overall rank</small><b>' + esc(R.overall.name) + '</b><span>Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + '. Moves with your accuracy.</span></div></div>';
   }
   function mountProfile(view) {
     const t0 = App.ui.accTab || ''; App.ui.accTab = '';
@@ -21722,7 +21841,7 @@ const V6 = (() => {
     return out;
   }
   function shuffleCtx() {
-    return { progress: App.progress, now: Date.now(), decay: C.CFG.decayDays, leak: leakSets(), mistakes: (id) => { try { return !!SRS.lineHasMistakes(id); } catch (e) { return false; } } };
+    return { progress: App.progress, now: Date.now(), leak: leakSets(),   /* v8: no fixed decay here: every line fades by the window of its own Level (CFG.rank.decayDays) */ mistakes: (id) => { try { return !!SRS.lineHasMistakes(id); } catch (e) { return false; } } };
   }
   const SH_FILTERS = [['mix', 'Smart Mix'], ['notseen', 'Not seen yet'], ['frontline', 'Active Frontline'], ['mistakes', 'My Mistakes'], ['leak:M', 'Leak: Move'], ['leak:S', 'Leak: Specifics'], ['leak:P', 'Leak: Priorities'], ['leak:C', 'Leak: Calculation']];
   function narrow(filter, open) {
@@ -21767,7 +21886,7 @@ const V6 = (() => {
   }
   function chip() {
     const R = ranks(), L = C.levelOf(st().total), ab = esc(R.overall.name.slice(0, 3).toUpperCase());
-    return '<span class="v6-chip v6-lvl" style="--ring:' + R.arena.color + '" title="Level ' + L.level + ', overall rank ' + esc(R.overall.name) + '"><b>Lv ' + L.level + '</b><i class="ab">' + ab + '</i><i class="full">' + esc(R.overall.name) + '</i></span>';
+    return '<span class="v6-chip v6-lvl" style="--ring:' + R.arena.color + '" title="XP Level ' + L.level + ', overall rank ' + esc(R.overall.name) + '"><b>Lv ' + L.level + '</b><i class="ab">' + ab + '</i><i class="full">' + esc(R.overall.name) + '</i></span>';
   }
   function settingsHTML() {
     return '<label class="switch-row"><span>Executive Focus Mode<small class="field-hint" style="display:block">Hides timers, streak widgets and the flow chip. XP and multipliers keep running.</small></span><input type="checkbox" data-v6-focus' + (st().focus ? ' checked' : '') + '></label>' +
@@ -21799,7 +21918,7 @@ const V6 = (() => {
   }
   function onDocChange(e) { const t = e.target; if (t && t.matches && t.matches('[data-v7-photo]')) { setPhoto(t.files && t.files[0]); t.value = ''; return; } if (t && t.matches && t.matches('[data-v6-focus]')) { setFocus(t.checked); qsa('[data-v6-focus]').forEach((x) => { x.checked = t.checked; }); const lab = qs('.v6-focus > span'); if (lab && lab.firstChild) lab.firstChild.textContent = 'Focus Mode: ' + (t.checked ? 'ON' : 'OFF'); } }
   function boot() {
-    S = load(); applyFocus(); applyTheme(); ensureBounties(); try { rescueState(); } catch (e) { /* optional */ }
+    S = load(); applyFocus(); applyTheme(); ensureBounties(); try { rescueState(); } catch (e) { /* optional */ } try { awardLoyalty(); } catch (e) { /* optional */ }
     const view = qs('#view');
     if (view) new MutationObserver(kick).observe(view, { childList: true, subtree: true });
     document.addEventListener('click', onDocClick);
@@ -21810,9 +21929,9 @@ const V6 = (() => {
   }
   return {
     boot, mountProfile, mountEvents, narrow, filterOptions, filterBar, tagHTML, budget, legend, card, cleanCard, friendLine, chip, settingsHTML,
-    ctx(o) { if (o && o.module) { ctx.shuffle = o.module; resetPos(); } },
-    state: st, ranks, level: () => C.levelOf(st().total), addTab: (t) => { if (t && t.id && !EXT.some((e) => e.id === t.id)) EXT.push(t); }, sync, events, payout, matrix, addRp, addXp, rescueState, buyRescue, Redeem: { offer: offerDesk, close: closeDesk },
-    _t: { forceAdmin(v) { adminOverride = v; }, tokenOf, onScore, hintPress, makeBoss, resetPos, get pos() { return pos; }, get boss() { return boss; }, secondLeft, addXp, bountyEvent, eventProgress, trophy, benchNow, leakSets, shuffleCtx, setState(s) { S = s; }, ctxo: ctx }
+    ctx(o) { if (o && (o.module || o.level)) { resetPos(); if (o.module) ctx.shuffle = o.module; if (o.level) ctx.level = Math.min(5, Math.max(1, Math.round(+o.level) || 1)); } },   // v8: resetPos first, so a booked hint lands on the old level
+    state: st, ranks, level: () => C.levelOf(st().total), addTab: (t) => { if (t && t.id && !EXT.some((e) => e.id === t.id)) EXT.push(t); }, sync, events, payout, matrix, recordAnswer, undoMiss, puzzleElo, addXp, rescueState, buyRescue, Redeem: { offer: offerDesk, close: closeDesk },
+    _t: { forceAdmin(v) { adminOverride = v; }, awardLoyalty, tokenOf, onScore, hintPress, makeBoss, resetPos, get pos() { return pos; }, get boss() { return boss; }, secondLeft, addXp, bountyEvent, eventProgress, trophy, benchNow, leakSets, shuffleCtx, setState(s) { S = s; }, ctxo: ctx }
   };
 })();
 
@@ -22318,17 +22437,17 @@ const LB4 = (() => {
       '<div class="lb4-nav" id="lb4-nav"></div><div class="lb4-body" id="lb4-body"></div></div></section>';
   }
   const fmtN = (n) => Math.round(+n || 0).toLocaleString('en');
-  const rankLabel = (v) => { const L = V6Core.CFG.ranks, i = Math.max(0, Math.min(L.length - 1, Math.floor(+v || 0))); return L[i][0]; };
+  const rankLabel = (v) => V6Core.tierName(Math.ceil((+v || 0) - 1e-9));                 // v8: a rank number is Level × accuracy; its band is the tier it sits in
   /* you and your friends: used when the Arena server has no rank boards (yet) */
   function local(kind, mod) {
     const C = V6Core, R = V6.ranks(), s = V6.state(), mi = C.CFG.modules.indexOf(mod), me = App.profile.name || 'You';
     const lv = (xp) => C.levelOf(xp).level;
     const rows = [];
     const add = (name, you, v, label, sub) => { if (v == null || !Number.isFinite(v)) return; rows.push({ name, you, v, label, sub: sub || '' }); };
-    if (kind === 'module') add(me, true, R.mr[mod].exact, R.mr[mod].name, fmtN(R.mr[mod].xp) + ' RP');
+    if (kind === 'module') { const x = R.mr[mod]; add(me, true, x.exact, x.name, !x.trained ? '' : mod === 'puzzles' ? (x.value ? 'ELO ' + x.elo + ' × ' + Math.round(x.acc * 100) + '%' : '') : (x.bn ? 'Level ' + x.level + ' × ' + Math.round(x.acc * 100) + '%' : '')); }
     else if (kind === 'arena') add(me, true, R.arena.rating ? R.arena.i + R.arena.rating / 10000 : null, R.arena.name + (R.arena.rating ? ' · ' + R.arena.rating : ''), '');
     else if (kind === 'overall') add(me, true, R.overall.exact, R.overall.name, 'Student ' + R.student.name);
-    else add(me, true, s.total, 'Level ' + lv(s.total), fmtN(s.total) + ' XP');
+    else add(me, true, s.total, 'XP Level ' + lv(s.total), fmtN(s.total) + ' XP');
     let skipped = 0;
     try {
       Friends.list().forEach((f) => {
@@ -22337,7 +22456,7 @@ const LB4 = (() => {
         if (kind === 'module') { if (Array.isArray(x.m) && x.m.length === 5) add(f.name, false, x.m[mi], rankLabel(x.m[mi]), ''); else skipped++; }
         else if (kind === 'arena') { const i = C.CFG.arena.findIndex((a) => a[0] === x.a); if (i > 0) add(f.name, false, i, x.a, ''); }
         else if (kind === 'overall') { if (x.ov != null) add(f.name, false, x.ov, rankLabel(x.ov), 'Student ' + x.r); else skipped++; }
-        else add(f.name, false, x.x, 'Level ' + lv(x.x), fmtN(x.x) + ' XP');
+        else add(f.name, false, x.x, 'XP Level ' + lv(x.x), fmtN(x.x) + ' XP');
       });
     } catch (e) { /* no friends yet */ }
     rows.sort((a, b) => b.v - a.v);
