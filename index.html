@@ -1818,6 +1818,49 @@ button.brand{background:none;border:0;padding:0;cursor:pointer;font-family:inher
   .tab i{font-size:14px}
 }
 </style>
+<style id="v7-css">
+/* ---------- v7: Rank Points, Redemption Desk, Streak Rescue Clock, piece hourglass, event countdowns ---------- */
+.v7-top{display:grid;gap:10px;margin:0 0 14px}
+.v7-top:empty{display:none}
+.v7-clock{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 16px;border:1px solid var(--accent-line);border-radius:var(--r);background:var(--ink-2)}
+.v7-clock>i,.v7-clock>svg{font-size:20px;flex:none}
+.v7-clock>div{flex:1 1 240px;min-width:0}
+.v7-clock b{display:block;font-variant-numeric:tabular-nums;color:var(--chalk)}
+.v7-clock small{display:block;color:var(--dim);margin-top:2px;line-height:1.45}
+.v7-clock.is-risk{border-color:rgba(251,191,36,.5)}
+.v7-clock.is-risk>i,.v7-clock.is-risk>svg{color:var(--warn)}
+.v7-clock.is-lost{border-color:rgba(251,113,133,.55);background:linear-gradient(0deg,rgba(251,113,133,.06),rgba(251,113,133,.06)),var(--ink-2)}
+.v7-clock.is-lost>i,.v7-clock.is-lost>svg{color:var(--miss);animation:v7tick 1s steps(2,end) infinite}
+.v7-ev{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--ev,var(--accent-line));border-radius:var(--r);background:var(--ink-2)}
+.v7-ev>i,.v7-ev>svg{color:var(--ev,var(--accent));flex:none}
+.v7-ev>div{flex:1;min-width:0}
+.v7-ev b{display:block;color:var(--chalk)}
+.v7-ev small{display:block;color:var(--dim)}
+.v7-cd{font-size:12.5px;color:var(--fog);white-space:nowrap;font-variant-numeric:tabular-nums}
+.v7-cd b{display:inline;color:var(--chalk)}
+.v7-ev.is-soon{opacity:.85;border-style:dashed}
+.v7-desk{margin:0 0 10px;padding:12px 14px;border:1px solid var(--accent-line);border-radius:var(--r);background:var(--ink-2);display:grid;gap:8px}
+.v7-desk-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.v7-desk-h>i,.v7-desk-h>svg{color:var(--accent)}
+.v7-form{display:grid;gap:8px}
+.v7-f{display:grid;gap:4px;font-size:13px}
+.v7-f>span b{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-size:11px;margin-right:4px}
+.v7-f textarea{resize:vertical;min-height:52px;font-size:14px}
+.v7-form-err{color:var(--miss);margin:0}
+.v6-pawn{width:22px;height:22px}
+.v6-pawn-out{stroke-linejoin:round}
+.v7-wave{animation:v7wave 1.4s linear infinite}
+.v6-avatar{overflow:visible;box-shadow:0 0 var(--glow,0px) var(--ring,transparent)}
+.v6-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+.v6-avatar[data-arena="Elite"]{animation:v7glow 2.4s ease-in-out infinite}
+.v7-photo{position:absolute;left:-6px;top:-6px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--ink);border:1px solid var(--rule);color:var(--fog);font-size:11px;cursor:pointer}
+.v7-photo:hover,.v7-photo:focus-within{color:var(--chalk);border-color:var(--accent-line)}
+@keyframes v7wave{to{transform:translateX(12px)}}
+@keyframes v7tick{50%{opacity:.45}}
+@keyframes v7glow{50%{box-shadow:0 0 calc(var(--glow,0px) + 8px) var(--ring)}}
+@media (prefers-reduced-motion:reduce){.v7-wave,.v6-avatar[data-arena="Elite"],.v7-clock.is-lost>i,.v7-clock.is-lost>svg{animation:none}}
+body.lc-focus .v7-clock.is-risk{display:none}
+</style>
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
@@ -20334,8 +20377,17 @@ const V6Core = (() => {
     arenaRating: { start: 1100, floor: 1000, cap: 3000, maxWeek: 60 },
     balancer: { max: 1.2, min: 0.8, deadZone: 0.25, perRank: 0.1, minTrained: 2 },
     /* flow: first-try answers in a row -> multiplier */
-    flow: [[0, 1], [3, 1.05], [5, 1.1], [8, 1.2], [12, 1.35], [18, 1.55], [25, 1.8], [35, 2.1], [50, 2.5]],
-    flowNames: [[0, 'Warming up'], [3, 'Flow'], [12, 'Deep flow'], [25, 'Elite flow'], [50, 'Grandmaster Flow']],
+    /* v7: exponential flow. Between two anchors the multiplier grows geometrically; the Grandmaster tier is x50 and keeps rising slowly after it. */
+    flow: [[0, 1], [3, 1.05], [5, 1.1], [8, 1.2], [12, 1.35], [18, 1.55], [25, 1.8], [35, 2.1], [50, 2.5], [75, 4], [100, 7], [150, 14], [200, 26], [250, 50]],
+    flowTail: { step: 0.004, cap: 100 },
+    flowNames: [[0, 'Warming up'], [3, 'Flow'], [12, 'Deep flow'], [25, 'Elite flow'], [50, 'Master Flow'], [100, 'Titan Flow'], [250, 'Grandmaster Flow']],
+    /* v7: Rank Points. XP only ever goes up; ranks come from RP, which move with Shuffle Trainer and puzzle results. */
+    rpRanks: [['Foundation', 0], ['Developing', 200], ['Competent', 800], ['Proficient', 2000], ['Advanced', 4500], ['Expert', 9000], ['Master', 16000], ['Grandmaster', 28000]],
+    rp: { missShare: 0.6, tierGain: [1, 0.9, 0.5, 0], sections: ['shuffle', 'puzzles', 'think', 'clinic', 'peer'] },
+    /* v7: Streak Rescue Clock (day streak) and the Stockfish blunder filter */
+    rescue: { minStreak: 3, perTokenDays: 7, maxCost: 5 },
+    filter: { playableLoss: 15, minChars: 12 },
+    pieces: [[50, 'king'], [35, 'queen'], [28, 'rook'], [18, 'bishop'], [10, 'knight'], [0, 'pawn']],
     redeem: { windowMs: 120000, minCount: 3, need: 3 },       // Anti-Ragequit: 2 minutes, 3 in a row restore the chain
     /* day streak -> XP boost; a day counts once there is one correct answer */
     days: [[7, 1.05], [14, 1.08], [30, 1.12], [60, 1.16], [100, 1.2], [180, 1.25], [365, 1.3]],
@@ -20363,7 +20415,7 @@ const V6Core = (() => {
   }
   function moduleRanks(xpMap) {
     const out = {};
-    CFG.modules.forEach((m) => { const r = rankOf((xpMap || {})[m]); out[m] = Object.assign(r, { index: r.exact }); });
+    CFG.modules.forEach((m) => { const r = rankOf((xpMap || {})[m], CFG.rpRanks); out[m] = Object.assign(r, { index: r.exact }); });   // v7: the map holds Rank Points
     return out;
   }
   function studentRank(mr) {
@@ -20400,7 +20452,14 @@ const V6Core = (() => {
     return r2(clampN(1 + gap * B.perRank, B.min, B.max));
   }
   /* ---------- flow multipliers and the Anti-Ragequit window ---------- */
-  function flowMult(count) { let m = 1; CFG.flow.forEach((f) => { if (count >= f[0]) m = f[1]; }); return m; }
+  function flowMult(count) {
+    const n = Math.max(0, num(count, 0)), F = CFG.flow, last = F[F.length - 1];
+    if (n >= last[0]) return r2(Math.min(CFG.flowTail.cap, last[1] * (1 + CFG.flowTail.step * (n - last[0]))));
+    let i = 0;
+    while (i + 1 < F.length && n >= F[i + 1][0]) i++;
+    const a = F[i], b = F[i + 1];
+    return r2(a[1] * Math.pow(b[1] / a[1], (n - a[0]) / (b[0] - a[0])));
+  }
   function flowName(count) { let n = ''; CFG.flowNames.forEach((f) => { if (count >= f[0]) n = f[1]; }); return n; }
   const flowNew = () => ({ count: 0, best: 0, saved: 0, protect: null });
   function flowHit(f, now) {
@@ -20449,13 +20508,46 @@ const V6Core = (() => {
       balancer: num(o.balancer, 1), flow: num(o.flow, 1), streak: num(o.streak, 1), arena: num(o.arena, 1),
       bench: num(o.bench, 1), hourglass: num(o.hourglass, 1), boss: num(o.boss, 1)
     };
-    let mult = 1;
-    Object.keys(parts).forEach((k) => { mult *= parts[k]; });
-    mult = Math.min(mult, CFG.maxMult);
+    let others = 1;
+    Object.keys(parts).forEach((k) => { if (k !== 'flow') others *= parts[k]; });
+    const mult = Math.min(others, CFG.maxMult) * parts.flow;                 // v7: the cap holds for everything but the flow
     const ev = num(o.event, 1), pen = hintPenalty(o.hintTier);
     const total = base * mult * ev * (1 - pen);
     return { base, parts, mult: r2(mult), event: ev, hintPenalty: pen, xp: Math.max(0, Math.round(total)), potential: Math.round(base * mult * ev), rankPenalty: Math.round(base * hintRank(o.hintTier)) };
   }
+  /* ---------- v7: Rank Points ---------- */
+  /* One answer in a Shuffle Trainer or puzzle: + on a first-try hit (less with hints), - on a miss. Floors at 0 in the store. */
+  function rpDelta(module, ok, o) {
+    o = o || {};
+    const base = baseFor(module, o.puzzleRating), tier = clampN(Math.round(num(o.hintTier, 0)), 0, 3);
+    if (ok) return Math.round(base * CFG.rp.tierGain[tier]) - Math.round(base * hintRank(tier));
+    return -Math.round(base * CFG.rp.missShare);
+  }
+  const rpEligible = (section) => CFG.rp.sections.indexOf(section) >= 0;
+  /* the old XP-based rank, carried over to the RP ladder with the same rank and the same progress inside it */
+  function rpFromXp(xp) {
+    const r = rankOf(xp, CFG.ranks), L = CFG.rpRanks, lo = L[r.i][1], top = r.i + 1 >= L.length;
+    return Math.round(top ? lo + Math.max(0, num(xp, 0) - CFG.ranks[r.i][1]) * 0.5 : lo + r.pct * (L[r.i + 1][1] - lo));
+  }
+  /* ---------- v7: Streak Rescue Clock and the blunder filter ---------- */
+  const rescueCost = (count) => clampN(Math.ceil(num(count, 0) / CFG.rescue.perTokenDays), 1, CFG.rescue.maxCost);
+  function hgPiece(module) {
+    const lim = hgLimit(module);
+    let k = 'pawn';
+    for (let i = 0; i < CFG.pieces.length; i++) { if (lim >= CFG.pieces[i][0]) { k = CFG.pieces[i][1]; break; } }
+    return k;
+  }
+  /* the MSPC form: four filled fields, and a move in the Calculation field */
+  const MOVE_RE = /(?:^|[^A-Za-z0-9])(?:[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?|O-O(?:-O)?|0-0(?:-0)?)(?![A-Za-z0-9])/;
+  function mspcFormOk(f) {
+    const need = ['M', 'S', 'P', 'C'], miss = [];
+    need.forEach((k) => { if (String((f || {})[k] || '').trim().length < CFG.filter.minChars) miss.push(k); });
+    if (!miss.length && !MOVE_RE.test(String(f.C))) miss.push('C');
+    return { ok: !miss.length, missing: miss };
+  }
+  /* win-percent lost by a move -> the filter step it lands in */
+  const filterStep = (loss) => (num(loss, 100) < CFG.filter.playableLoss ? 1 : 2);
+
   /* ---------- the second chance ---------- */
   const secondLimit = (paid) => (paid ? CFG.second.paid : CFG.second.free);
   const secondLeft = (state, paid, day) => Math.max(0, secondLimit(paid) - (state && state.day === day ? num(state.used, 0) : 0));
@@ -20607,7 +20699,7 @@ const V6Core = (() => {
   const winPct = (cp) => 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * clampN(cp, -3000, 3000))) - 1);
 
   return { CFG, rankOf, moduleRanks, studentRank, arenaRank, overallRank, levelOf, balancer, flowMult, flowName, flowNew, flowHit, flowMiss, dayBoost, nextDayBoost, hgLimit, hgMult,
-    hintPenalty, hintRank, puzzleBase, baseFor, xp, secondLimit, secondLeft, chapterStatuses, bossPlan, mistakeLimit, hashStr, weakest, rollBounties, bountyBump,
+    hintPenalty, hintRank, puzzleBase, baseFor, xp, rpDelta, rpEligible, rpFromXp, rescueCost, hgPiece, mspcFormOk, filterStep, secondLimit, secondLeft, chapterStatuses, bossPlan, mistakeLimit, hashStr, weakest, rollBounties, bountyBump,
     benchPhase, benchBuff, arenaUpdate, eventActive, activeEvents, eventMult, filterLines, smartMix, ICONS, missedOpportunity, reviewIcon, cardLine, winPct, clampN, num };
 })();
 
@@ -20634,7 +20726,7 @@ const V6 = (() => {
 
   /* ---------- state (this device) ---------- */
   function blank() {
-    return { v: 1, xp: C.CFG.modules.reduce((o, m) => { o[m] = 0; return o; }, {}), total: 0, flow: C.flowNew(), completed: {}, trophies: [], second: { day: '', used: 0 }, focus: false, hard: {},
+    return { v: 1, xp: C.CFG.modules.reduce((o, m) => { o[m] = 0; return o; }, {}), total: 0, rp: C.CFG.modules.reduce((o, m) => { o[m] = 0; return o; }, {}), rescue: null, photo: '', flow: C.flowNew(), completed: {}, trophies: [], second: { day: '', used: 0 }, focus: false, hard: {},
       bounty: { daily: { key: '', items: [] }, weekly: { key: '', items: [] } }, bench: { period: '', xp: 0, correct: 0, puzzles: 0, boss: 0 },
       cache: { at: 0, events: [], bench: null, arena: null }, ev: {}, seenEvents: [], log: [], outbox: { xp: 0, correct: 0, puzzles: 0, boss: 0 }, ranks: {} };
   }
@@ -20644,6 +20736,12 @@ const V6 = (() => {
     if (!r || typeof r !== 'object') return b;
     C.CFG.modules.forEach((m) => { b.xp[m] = Math.max(0, Math.round(num((r.xp || {})[m], 0))); });
     b.total = Math.max(0, Math.round(num(r.total, 0)));
+    /* v7: Rank Points. A state from before v7 has none: carry the old XP rank over once, same rank, same progress inside it. */
+    if (r.rp && typeof r.rp === 'object') C.CFG.modules.forEach((m) => { b.rp[m] = Math.max(0, Math.round(num(r.rp[m], 0))); });
+    else C.CFG.modules.forEach((m) => { b.rp[m] = C.rpFromXp(b.xp[m]); });
+    const rs = r.rescue;
+    b.rescue = rs && typeof rs === 'object' && num(rs.until, 0) > Date.now() && num(rs.count, 0) > 0 ? { count: num(rs.count, 0) | 0, day: String(rs.day || '').slice(0, 10), until: num(rs.until, 0) } : null;
+    b.photo = typeof r.photo === 'string' && r.photo.length < 90000 && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(r.photo) ? r.photo : '';
     const f = r.flow && typeof r.flow === 'object' ? r.flow : {};
     b.flow = { count: Math.max(0, num(f.count, 0) | 0), best: Math.max(0, num(f.best, 0) | 0), saved: Math.max(0, num(f.saved, 0) | 0),
       protect: f.protect && num(f.protect.until, 0) > Date.now() ? { count: num(f.protect.count, 0) | 0, got: num(f.protect.got, 0) | 0, until: num(f.protect.until, 0) } : null };
@@ -20714,7 +20812,7 @@ const V6 = (() => {
 
   /* ---------- ranks, multipliers ---------- */
   function ranks() {
-    const mr = C.moduleRanks(st().xp), student = C.studentRank(mr), arena = C.arenaRank(arenaRating()), overall = C.overallRank(student, arena);
+    const mr = C.moduleRanks(st().rp), student = C.studentRank(mr), arena = C.arenaRank(arenaRating()), overall = C.overallRank(student, arena);
     return { mr, student, arena, overall, trained: student.trained };
   }
   function arenaRating() {
@@ -20731,8 +20829,20 @@ const V6 = (() => {
     return { phase, buff: C.benchBuff(phase, mine.period === b.period ? mine.xp : 0, min), min, mine: mine.xp, goal };
   }
   /* the position being answered: hint tier, clock, booked assisted XP */
-  let pos = { tier: 0, booked: 0, sealed: false, t0: Date.now(), broke: false, rankPen: 0 };
-  const resetPos = () => { pos = { tier: 0, booked: 0, sealed: false, t0: Date.now(), broke: false, rankPen: 0 }; try { renderStrips(); } catch (e) { /* no strip yet */ } };
+  let pos = { tier: 0, booked: 0, sealed: false, t0: Date.now(), broke: false, rankPen: 0, module: '', section: '', done: false };
+  /* v7: a position answered with a hint is booked when it ends, so XP only ever grows */
+  function finalizePos() {
+    const o = pos;
+    if (!o || o.done || !o.sealed || !o.module || boss) return;
+    o.done = true;
+    const q = payout(o.module, { hintTier: o.tier, noFlow: true, noClock: true });
+    if (q.xp) addXp(o.module, q.xp);
+    if (C.rpEligible(o.section)) {
+      const d = C.rpDelta(o.module, true, { hintTier: o.tier });
+      if (d) { addRp(o.module, d); if (d < 0) toast('Full solution: ' + (-d) + ' Rank Points deducted.'); }
+    }
+  }
+  const resetPos = () => { try { finalizePos(); } catch (e) { console.error(e); } pos = { tier: 0, booked: 0, sealed: false, t0: Date.now(), broke: false, rankPen: 0, module: '', section: '', done: false }; try { renderStrips(); } catch (e) { /* no strip yet */ } };
   const hgMode = (module) => (st().hard[module] === 'hard' ? 'hard' : 'off');
   function payout(module, o) {
     o = o || {};
@@ -20745,18 +20855,30 @@ const V6 = (() => {
   }
   function addXp(module, n, opts) {
     opts = opts || {};
-    const s = st(), before = ranks();
-    s.xp[module] = Math.max(0, (s.xp[module] || 0) + n); s.total = Math.max(0, s.total + n);
-    if (n > 0 && !opts.noBench) {
+    n = Math.max(0, Math.round(num(n, 0)));                          // v7: XP never goes down. Penalties act on the answer, or on Rank Points.
+    if (!n) return;
+    const s = st(), lvBefore = C.levelOf(s.total).level;
+    s.xp[module] = (s.xp[module] || 0) + n; s.total += n;
+    if (!opts.noBench) {
       const b = s.cache.bench, per = b && b.period ? b.period : weekKey();
       if (s.bench.period !== per) s.bench = { period: per, xp: 0, correct: 0, puzzles: 0, boss: 0 };
       s.bench.xp += n; s.outbox.xp += n;
     }
+    if (C.levelOf(s.total).level > lvBefore) toast('Level ' + C.levelOf(s.total).level + ' reached.', 'good');
+    save(); queueSync(); try { refreshChip(); } catch (e) { /* the chip is optional */ }
+  }
+  /* v7: Rank Points. Earned and lost in the Shuffle Trainers and in puzzles; every rank is read from here. */
+  function addRp(module, n) {
+    n = Math.round(num(n, 0));
+    if (!n) return;
+    const s = st(), before = ranks();
+    s.rp[module] = Math.max(0, (s.rp[module] || 0) + n);
     const after = ranks();
     if (after.mr[module].i > before.mr[module].i) { toast(C.CFG.labels[module] + ': rank ' + after.mr[module].name + '.', 'good'); trophy('rank:' + module + ':' + after.mr[module].name, C.CFG.labels[module] + ' ' + after.mr[module].name, 'rank'); }
+    else if (after.mr[module].i < before.mr[module].i) toast(C.CFG.labels[module] + ': back to ' + after.mr[module].name + '.');
     if (after.student.i > before.student.i) toast('Student rank: ' + after.student.name + '.', 'good');
-    if (C.levelOf(s.total).level > C.levelOf(s.total - n).level && n > 0) toast('Level ' + C.levelOf(s.total).level + ' reached.', 'good');
-    save(); queueSync(); try { refreshChip(); } catch (e) { /* the chip is optional */ }
+    else if (after.student.i < before.student.i) toast('Student rank: ' + after.student.name + '.');
+    save(); try { refreshChip(); } catch (e) { /* the chip is optional */ }
   }
   function trophy(id, name, kind) {
     const s = st();
@@ -20807,6 +20929,7 @@ const V6 = (() => {
     if (!module) return;
     if (hintCtx && module !== 'puzzles') return;                    // a hint owns its own bookkeeping
     const s = st(), now = Date.now();
+    closeDesk();
     if (pos.sealed) resetPos();
     if (ok) {
       const q = payout(module);
@@ -20819,16 +20942,19 @@ const V6 = (() => {
       s.bench.correct++; s.outbox.correct++;
       if (module === 'puzzles') { s.bench.puzzles++; s.outbox.puzzles++; }
       addXp(module, q.xp);
-      if (q.rankPenalty) addXp(module, -q.rankPenalty, { noBench: true });
+      if (C.rpEligible(section)) addRp(module, C.rpDelta(module, true, { puzzleRating: ctx.puzzleRating, hintTier: pos.tier }));   // v7: ranks move on Rank Points only
       bountyEvent({ type: 'correct', module, flow: s.flow.count });
       bountyEvent({ type: 'xp', n: q.xp });
       eventProgress('xp', q.xp); eventProgress('correct', 1); if (module === 'puzzles') eventProgress('puzzles', 1);
       if (boss) boss.onCorrect(q);
     } else {
-      const miss = C.flowMiss(s.flow, now);
+      const before = Object.assign({}, s.flow), miss = C.flowMiss(s.flow, now);
       s.flow = miss.flow;
+      const loss = C.rpEligible(section) ? C.rpDelta(module, false, { puzzleRating: ctx.puzzleRating }) : 0;
+      if (loss) addRp(module, loss);
       if (miss.protectedUntil) toast('Flow reset. Three right answers within two minutes restore it.');
       if (boss) boss.onMistake({ hint: false });
+      else offerDesk({ section, module, flowBefore: before, rp: loss, lost: miss.lost });
     }
     resetPos();
     save(); renderStrips();
@@ -20836,20 +20962,233 @@ const V6 = (() => {
   /* the Puzzle ELO calls first, then App.score: remember the puzzle's rating for the XP */
   const _record = PuzzleElo.record;
   PuzzleElo.record = function (p, win) { const r = _record.call(PuzzleElo, p, win); if (r && p) ctx.puzzleRating = num(p.rating, 0); return r; };
+  const _touch = App.touchDaily;                                  // v7: remember a streak that is about to break, so it can be rescued
+  App.touchDaily = function () { try { rescueState(); } catch (e) { /* optional */ } return _touch.apply(App, arguments); };
   const _score = App.score;
   App.score = function (section, ok) { _score.call(App, section, ok); try { onScore(section, ok); } catch (e) { console.error(e); } };
   const _good = Sound.good;
   Sound.good = function () { _good.apply(Sound, arguments); try { if ((pos.sealed || pos.tier) && stripModule() !== 'puzzles') resetPos(); } catch (e) { /* the sound is optional */ } };
   /* every board the hub makes is remembered by its host element, so the strip can read the position */
   const boards = new WeakMap();
+  const attempts = new WeakMap();                  // v7: the last move tried on each board, for the Stockfish filter
   const _Board = Board;
   Board = function (host, opts) {
     const b = _Board(host, opts), so = b.setOnMove;
-    b.setOnMove = function (fn) { if (fn) resetPos(); return so.apply(b, arguments); };   // a runner that starts takes the clock with it
+    b.setOnMove = function (fn) {                                                         // a runner that starts takes the clock with it
+      if (fn) resetPos();
+      const wrapped = fn ? function (m) { try { attempts.set(b, { fen: b.fen(), from: m.from, to: m.to, promotion: m.promotion || '' }); } catch (e) { /* no attempt kept */ } return fn.apply(this, arguments); } : fn;
+      return so.apply(b, [wrapped].concat([].slice.call(arguments, 1)));
+    };
     try { boards.set(host, b); } catch (e) { /* ignore */ }
     return b;
   };
   const boardIn = (trainer) => { const h = trainer && qs('.board-host', trainer); return h ? boards.get(h) || null : null; };
+
+  /* ==========================================================================
+     v7: the Stockfish Blunder-Filter and the MSPC Redemption Protocol.
+     A miss costs flow and Rank Points at once. The desk then runs three steps on that move:
+       1. Stockfish, in this browser: a move that loses under 15% win chance is playable and is forgiven for free.
+       2. The MSPC form: Move, Specifics, Priorities and Calculation, filled in. Free, limited per day.
+       3. Tokens: forgive it at once.
+     Forgiving gives back the flow chain and the Rank Points. The Anti-Ragequit buff (three right answers inside
+     two minutes) keeps running for anyone who skips the desk. XP is never touched: it only goes up.
+     ========================================================================== */
+  const FORM = [
+    ['M', 'Move', 'What did the last move change? Name the threat or plan and the new weakness.'],
+    ['S', 'Specifics', 'Which features of this position and phase decide the plan?'],
+    ['P', 'Priorities', 'List the checks, captures and attacks for both sides.'],
+    ['C', 'Calculation', 'Write the line you play (for example Nf3) and the best reply you checked.']
+  ];
+  let deskSeq = 0, deskCur = null;
+  function formHTML() {
+    return '<form class="v7-form" data-v7-form novalidate>' + FORM.map((f) => '<label class="v7-f"><span><b>' + f[0] + '</b> ' + f[1] + '</span><textarea class="input" rows="2" name="' + f[0] + '" maxlength="400" placeholder="' + esc(f[2]) + '"></textarea></label>').join('') +
+      '<p class="small v7-form-err" data-v7-err role="alert" hidden></p><div class="btn-row"><button type="submit" class="btn btn-primary btn-sm">' + icon('life-ring') + ' Redeem the mistake</button></div></form>';
+  }
+  function formBind(root, onOk) {
+    const f = qs('[data-v7-form]', root);
+    if (!f) return;
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const v = {};
+      FORM.forEach((x) => { v[x[0]] = f.elements[x[0]].value; });
+      const r = C.mspcFormOk(v), err = qs('[data-v7-err]', f);
+      if (!r.ok) {
+        if (err) { err.hidden = false; err.textContent = 'Fill in ' + r.missing.join(', ') + ': at least ' + C.CFG.filter.minChars + ' characters each' + (r.missing.indexOf('C') >= 0 ? ', and name your move in C' : '') + '.'; }
+        return;
+      }
+      onOk(v);
+    });
+  }
+  /* win percent lost by the move that was tried, from two short Stockfish looks */
+  async function moveLoss(att) {
+    const before = await Engine.analyse(att.fen, { movetime: 260, multipv: 1 });
+    const g = new Chess(att.fen), mv = g.move({ from: att.from, to: att.to, promotion: att.promotion || 'q' });
+    if (!mv || !before.lines[0]) throw new Error('no line');
+    const pov = mv.color === 'w' ? 1 : -1, cb = Engine.toCp(before.lines[0]);
+    const after = g.game_over() ? null : await Engine.analyse(g.fen(), { movetime: 260, multipv: 1 });
+    const ca = after && after.lines[0] ? Engine.toCp(after.lines[0]) : (g.in_checkmate() ? 10000 * pov : 0);
+    return { loss: Math.max(0, Engine.winPct(cb * pov) - Engine.winPct(ca * pov)), san: mv.san };
+  }
+  function closeDesk() {
+    if (!deskCur) return;
+    deskCur.alive = false;
+    if (deskCur.el && deskCur.el.parentNode) deskCur.el.remove();
+    deskCur = null;
+  }
+  function forgive(d, how) {
+    if (!d.alive) return;
+    const s = st();
+    s.flow = Object.assign(C.flowNew(), d.flowBefore);
+    if (d.rp) addRp(d.module, -d.rp);
+    save(); renderStrips();
+    d.done = how; paintDesk(d); toast(how, 'good');
+    setTimeout(() => { if (deskCur === d) closeDesk(); }, 4500);
+  }
+  function paintDesk(d) {
+    if (!d || !d.el || !d.alive) return;
+    const left = secondLeft(), cost = tokenCost(), tok = tokensOk(), at = d.lost >= 3 ? ' Your flow of ' + d.lost + ' is on the line.' : '';
+    let h;
+    if (d.done) h = '<div class="v7-desk-h">' + icon('shield-heart') + ' <b>' + esc(d.done) + '</b></div>' + (d.verdict ? '<p class="small muted">' + esc(d.verdict) + '</p>' : '');
+    else if (d.step < 2) h = '<div class="v7-desk-h">' + icon('microchip') + ' <b>Step 1 of 3: Stockfish checks your move</b></div><p class="small muted">It runs in your browser. A playable move costs nothing.' + esc(at) + '</p><div class="btn-row"><button type="button" class="btn btn-quiet btn-sm" data-v7d="skip">Skip the check</button></div>';
+    else h = '<div class="v7-desk-h">' + icon('life-ring') + ' <b>Redeem this mistake?</b> <span class="small muted">' + esc(d.verdict) + esc(at) + '</span></div>' +
+      (d.form ? '<p class="small muted">Step 2 of 3: run MSPC on the position before your move. ' + left + ' free redemption' + (left === 1 ? '' : 's') + ' left today.</p>' + formHTML()
+        : '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-v7d="form"' + (left ? '' : ' disabled') + '>' + icon('pen-to-square') + ' MSPC form (free, ' + left + ' left today)</button>' +
+          '<button type="button" class="btn btn-ghost btn-sm" data-v7d="tok"' + (tok ? '' : ' disabled') + '>' + icon('coins') + ' Step 3: use ' + cost + (cost === 1 ? ' token' : ' tokens') + '</button>' +
+          '<button type="button" class="btn btn-quiet btn-sm" data-v7d="keep">Keep the penalty</button></div>');
+    d.el.innerHTML = h;
+    if (d.form && !d.done) formBind(d.el, () => { if (secondLeft() < 1) { toast('No free redemptions left today.'); return; } useSecond(); forgive(d, 'MSPC redemption done: flow and Rank Points restored.'); });
+  }
+  async function runFilter(d) {
+    d.step = 1; paintDesk(d);
+    if (!d.att) { d.verdict = 'No move to check.'; d.step = 2; paintDesk(d); return; }
+    try {
+      const r = await moveLoss(d.att);
+      if (!d.alive || d.step >= 2) return;
+      if (C.filterStep(r.loss) === 1) { d.verdict = 'Stockfish: ' + r.san + ' is playable (−' + Math.round(r.loss) + '%).'; forgive(d, 'Playable move: flow and Rank Points restored.'); return; }
+      d.verdict = 'Stockfish: ' + r.san + ' loses ' + Math.round(r.loss) + '% win chance.';
+    } catch (e) { if (!d.alive || d.step >= 2) return; d.verdict = 'The engine is not available.'; }
+    d.step = 2; paintDesk(d);
+  }
+  function offerDesk(o) {
+    closeDesk();
+    const strip = qsa('[data-v6-strip]').filter((x) => x.isConnected)[0];
+    if (!strip) return;
+    const trainer = strip.nextElementSibling, b = trainer ? boardIn(trainer) : null, att = b ? attempts.get(b) || null : null;
+    if (b) attempts.delete(b);
+    const el = document.createElement('section');
+    el.className = 'v7-desk'; el.setAttribute('data-v7-desk', ''); el.setAttribute('aria-live', 'polite');
+    strip.parentNode.insertBefore(el, strip);                       // before the strip: the strip must stay right above its trainer
+    const d = Object.assign({ el, id: ++deskSeq, att, alive: true, step: 0, verdict: '', done: '', form: false }, o);
+    deskCur = d;
+    runFilter(d);
+  }
+  function deskClick(a) {
+    const d = deskCur;
+    if (!d || !d.alive) return;
+    if (a === 'skip') { d.step = 2; d.verdict = 'Engine check skipped.'; paintDesk(d); }
+    else if (a === 'form') { d.form = true; paintDesk(d); }
+    else if (a === 'tok') { if (!spendTokens(tokenCost())) { toast('Not enough tokens.'); return; } forgive(d, 'Mistake forgiven with a token.'); }
+    else if (a === 'keep') closeDesk();
+  }
+
+  /* ==========================================================================
+     v7: the Streak Rescue Clock (day streak), event countdowns, the profile photo.
+     ========================================================================== */
+  const endOfToday = () => { const d = new Date(); d.setHours(23, 59, 59, 999); return d.getTime(); };
+  const keyAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return dayKey(d); };
+  const pad = (n) => (n < 10 ? '0' : '') + n;
+  const fmtHMS = (ms) => { const t = Math.max(0, Math.floor(ms / 1000)); return Math.floor(t / 3600) + ':' + pad(Math.floor(t % 3600 / 60)) + ':' + pad(t % 60); };
+  const fmtDur = (ms) => { const t = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(t / 86400); return (d ? d + 'd ' : '') + fmtHMS(ms - d * 864e5); };
+  /* 'risk': you played yesterday and not yet today. 'rescue': you missed exactly one day; the old streak can be bought back until midnight. */
+  function rescueState() {
+    const s = st(), dl = App.daily || {}, now = Date.now(), R = C.CFG.rescue;
+    if (s.rescue && s.rescue.until > now) return { kind: 'rescue', count: s.rescue.count, until: s.rescue.until, cost: C.rescueCost(s.rescue.count) };
+    if (s.rescue) { s.rescue = null; save(); }
+    if (dl.last === keyAgo(1) && num(dl.count, 0) >= R.minStreak) return { kind: 'risk', count: dl.count, until: endOfToday(), cost: 0 };
+    if (dl.last === keyAgo(2) && num(dl.count, 0) >= R.minStreak) {
+      s.rescue = { count: dl.count | 0, day: today(), until: endOfToday() }; save();
+      return { kind: 'rescue', count: s.rescue.count, until: s.rescue.until, cost: C.rescueCost(s.rescue.count) };
+    }
+    return null;
+  }
+  function buyRescue() {
+    const r = rescueState();
+    if (!r || r.kind !== 'rescue') return false;
+    if (!spendTokens(r.cost)) { toast('Not enough tokens: this rescue costs ' + r.cost + '.'); return false; }
+    const played = App.daily.last === today();
+    App.daily.count = r.count + (played ? 2 : 1);                    // yesterday is bridged; today counts when you have already answered
+    if (!played) App.daily.last = keyAgo(1);
+    App.save(); st().rescue = null; save(true);
+    toast('Streak rescued: ' + App.streakDays() + ' days.', 'good');
+    try { refreshChip(); } catch (e) { /* the chip is optional */ }
+    paintTop();
+    return true;
+  }
+  function rescueHTML() {
+    const r = rescueState();
+    if (!r) return '';
+    if (r.kind === 'risk') return '<section class="v7-clock is-risk" role="status" data-v7-rescue>' + icon('fire') + '<div><b>Your ' + r.count + '-day streak ends in <span data-v7-t="' + r.until + '">' + fmtHMS(r.until - Date.now()) + '</span></b><small>Answer one drill correctly before midnight and it keeps going.</small></div></section>';
+    return '<section class="v7-clock is-lost" role="status" data-v7-rescue>' + icon('hourglass-half') + '<div><b>Streak lost. Buy it back within <span data-v7-t="' + r.until + '">' + fmtHMS(r.until - Date.now()) + '</span></b>' +
+      '<small>Your ' + r.count + '-day streak comes back for ' + r.cost + (r.cost === 1 ? ' token' : ' tokens') + ' (you have ' + esc(balText()) + '). The price is one token per ' + C.CFG.rescue.perTokenDays + ' days of streak, at most ' + C.CFG.rescue.maxCost + '.</small></div>' +
+      '<button type="button" class="btn btn-gold btn-sm" data-v7r="buy">' + icon('coins') + ' Rescue for ' + r.cost + '</button></section>';
+  }
+  function eventsHTML() {
+    const now = Date.now(), all = (st().cache.events || []).filter((e) => e.on !== false);
+    const live = all.filter((e) => C.eventActive(e, now)), soon = all.filter((e) => e.start > now && e.start - now < 7 * 864e5);
+    const row = (e, at, label, cls) => '<div class="v7-ev ' + cls + '"' + (e.theme && e.theme.accent ? ' style="--ev:' + e.theme.accent + '"' : '') + '>' + icon(cls === 'is-live' ? 'bolt' : 'calendar-day') + '<div><b>' + esc(e.title) + '</b><small>' + (e.xpMult !== 1 ? 'XP ×' + e.xpMult + ' · ' : '') + (e.challenge ? esc(e.challenge.title) : 'Special event') + '</small></div>' +
+      (at ? '<span class="v7-cd">' + label + ' <b data-v7-cd="' + at + '">' + fmtDur(at - now) + '</b></span>' : '<span class="v7-cd">Open-ended</span>') + '</div>';
+    return live.map((e) => row(e, e.end, 'Ends in', 'is-live')).concat(soon.map((e) => row(e, e.start, 'Starts in', 'is-soon'))).join('');
+  }
+  function paintTop() { const box = qs('[data-v7-top]'); if (box) box.innerHTML = rescueHTML() + eventsHTML(); }
+  function scanHome() {
+    const view = qs('#view');
+    if (!view || routeNow() !== 'home' || qs('[data-v7-top]', view)) return;
+    const box = document.createElement('div');
+    box.className = 'v7-top'; box.setAttribute('data-v7-top', '');
+    box.innerHTML = rescueHTML() + eventsHTML();
+    view.insertBefore(box, view.firstChild);
+  }
+  setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    const top = qs('[data-v7-top]');
+    if (!top) return;
+    const now = Date.now();
+    let stale = false;
+    qsa('[data-v7-t]', top).forEach((el) => { const u = +el.getAttribute('data-v7-t'); if (u <= now) stale = true; else el.textContent = fmtHMS(u - now); });
+    qsa('[data-v7-cd]', top).forEach((el) => { const u = +el.getAttribute('data-v7-cd'); if (u <= now) stale = true; else el.textContent = fmtDur(u - now); });
+    if (stale) paintTop();
+  }, 1000);
+  /* profile photo: cropped square, kept on this device only */
+  function setPhoto(file) {
+    if (!file || !/^image\//.test(file.type)) { toast('Choose an image file.'); return; }
+    const rd = new FileReader();
+    rd.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const n = 160, cv = document.createElement('canvas'), side = Math.min(img.width, img.height);
+          cv.width = cv.height = n;
+          cv.getContext('2d').drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, n, n);
+          const url = cv.toDataURL('image/jpeg', 0.82);
+          if (url.length >= 90000) { toast('That photo is too large.'); return; }
+          st().photo = url; save(true); paintAvatars(); toast('Profile photo saved on this device.', 'good');
+        } catch (e) { toast('That image could not be read.'); }
+      };
+      img.onerror = () => toast('That image could not be read.');
+      img.src = String(rd.result);
+    };
+    rd.readAsDataURL(file);
+  }
+  function paintAvatars() {
+    const ph = st().photo;
+    qsa('.v6-avatar').forEach((a) => {
+      const old = qs('img,span', a);
+      if (old) old.remove();
+      const el = ph ? document.createElement('img') : document.createElement('span');
+      if (ph) { el.src = ph; el.alt = ''; } else el.textContent = (App.profile.name || 'P').trim().slice(0, 1).toUpperCase() || 'P';
+      a.insertBefore(el, a.firstChild);
+    });
+  }
 
   /* ---------- hints: three tiers, the XP bar shrinks at once ---------- */
   const HINT_LABEL = ['Hint: position status', 'Hint: the piece', 'Hint: the solution'];
@@ -20876,12 +21215,8 @@ const V6 = (() => {
     const native = qs('[data-act="hint"]', trainer);
     if (!native || native.disabled) { toast('No further hint here.'); return; }
     const tier = pos.tier + 1;
-    if (module !== 'puzzles' && !boss) {                              // assisted XP is booked now: the drills do not score a move played after a hint
-      const q = payout(module, { hintTier: tier, noFlow: true, noClock: true });
-      const delta = q.xp - pos.booked;
-      pos.booked = q.xp;
-      addXp(module, delta, { noBench: delta < 0 });
-      if (q.rankPenalty && !pos.rankPen) { pos.rankPen = q.rankPenalty; addXp(module, -q.rankPenalty, { noBench: true }); toast('Full solution: ' + q.rankPenalty + ' rank XP deducted.'); }
+    if (module !== 'puzzles' && !boss) {                              // v7: the assisted answer is booked when the position ends (finalizePos)
+      pos.module = module; pos.section = routeNow();
       if (!pos.broke) { pos.broke = true; const m = C.flowMiss(st().flow, Date.now()); st().flow = m.flow; }
       pos.sealed = true;
     }
@@ -20894,15 +21229,26 @@ const V6 = (() => {
 
   /* ---------- the strip above every trainer ---------- */
   const PAWN = 'M12 4a3.2 3.2 0 1 1 0 6.4A3.2 3.2 0 0 1 12 4Z M10.2 10.2h3.6c0 1.4.3 2.2 1.1 3.2.9 1.1 1.4 2.5 1.4 4.6H7.7c0-2.1.5-3.5 1.4-4.6.8-1 1.1-1.8 1.1-3.2Z M6.8 18.5h10.4v2.4H6.8Z';
+  /* v7: the hourglass is a chess piece, picked by the time limit of the course type: King (longest) down to Pawn (shortest) */
+  const PIECES = {
+    pawn: PAWN,
+    knight: 'M6.5 21.5V19C6.5 15.5 8 13.4 9.7 11.8C8.7 11.5 7.4 11.9 6.3 12.8L4.8 11.4C5.5 9.6 7.4 8 9.4 6.9L10 3.6L12 5.3C16 5.4 19 8.3 19 12.4V19L18.2 21.5Z',
+    bishop: 'M12 2.5C13.1 2.5 14 3.4 14 4.5C14 5.2 13.7 5.7 13.3 6.2C15.6 7.9 17 10.3 17 12.8C17 14.6 16.3 15.9 15.2 16.8L15.8 18.3H18.5V21.5H5.5V18.3H8.2L8.8 16.8C7.7 15.9 7 14.6 7 12.8C7 10.3 8.4 7.9 10.7 6.2C10.3 5.7 10 5.2 10 4.5C10 3.4 10.9 2.5 12 2.5Z',
+    rook: 'M5.5 21V18.5H7.5L8.3 9.5H6.5V4H9.3V6.3H10.9V4H13.1V6.3H14.7V4H17.5V9.5H15.7L16.5 18.5H18.5V21Z',
+    queen: 'M4.2 8L7.4 15L8.6 6.3L12 13.4L15.4 6.3L16.6 15L19.8 8L18.4 18.5H5.6Z M6 20H18V22H6Z',
+    king: 'M10.8 2H13.2V3.8H15V6H13.2V8.2C16.6 9 19 11.4 19 14.6C19 16.2 18.4 17.4 17.5 18.4H18.8V21.8H5.2V18.4H6.5C5.6 17.4 5 16.2 5 14.6C5 11.4 7.4 9 10.8 8.2V6H9V3.8H10.8Z'
+  };
+  const WAVE = 'M-12 0q3 -1.4 6 0t6 0t6 0t6 0t6 0t6 0t6 0t6 0V2H-12Z';
   let stripSeq = 0;
   function stripHTML(id) {
     return '<button type="button" class="btn btn-ghost btn-sm v6-hint" data-v6="hint">' + icon('lightbulb') + '<span data-v6-hl>Hint</span></button>' +
       '<div class="v6-xp" role="img" aria-label="Possible XP for this answer"><span class="v6-xp-bar"><span class="v6-xp-fill" data-v6-fill></span></span><b data-v6-xp>+0 XP</b></div>' +
       '<span class="v6-viz v6-flow" data-v6-flow title="First-try answers in a row"></span>' +
-      '<span class="v6-viz v6-hg"><button type="button" class="v6-hg-btn" data-v6="hourglass" aria-pressed="false" title="Hard mode: answer before the glass empties for a bigger XP multiplier"><svg viewBox="0 0 24 24" class="v6-pawn" aria-hidden="true"><defs><clipPath id="v6c' + id + '"><rect data-v6-clip x="0" y="0" width="24" height="24"></rect></clipPath></defs><path class="v6-pawn-out" d="' + PAWN + '"></path><path class="v6-pawn-fill" d="' + PAWN + '" clip-path="url(#v6c' + id + ')"></path></svg><span data-v6-hgl>Hard mode</span></button></span>' +
+      '<span class="v6-viz v6-hg"><button type="button" class="v6-hg-btn" data-v6="hourglass" aria-pressed="false" title="Hard mode: answer before the glass empties for a bigger XP multiplier"><svg viewBox="0 0 24 24" class="v6-pawn" aria-hidden="true"><defs><clipPath id="v7p' + id + '"><path data-v7-piece d=""></path></clipPath></defs><path class="v6-pawn-out" data-v7-out d=""></path><g class="v6-pawn-fill" clip-path="url(#v7p' + id + ')"><g data-v7-level><rect x="-2" y="0" width="30" height="30"></rect><path class="v7-wave" d="' + WAVE + '"></path></g></g></svg><span data-v6-hgl>Hard mode</span></button></span>' +
       '<p class="v6-note small" data-v6-note hidden></p>';
   }
   function scan() {
+    try { scanHome(); } catch (e) { console.error(e); }
     qsa('.trainer').forEach((tr) => {
       if (tr.getAttribute('data-v6')) return;
       if (!stripModule()) return;
@@ -20934,9 +21280,12 @@ const V6 = (() => {
       if (btn) btn.disabled = !!strict || pos.tier >= 3;
       const fl = qs('[data-v6-flow]', el);
       if (fl) fl.innerHTML = pr ? icon('shield-halved') + ' Redeem ' + (pr.got || 0) + '/' + C.CFG.redeem.need + ' · ' + fmtClock(pr.until - now) : s.flow.count >= 3 ? icon('bolt') + ' ' + C.flowName(s.flow.count) + ' ×' + C.flowMult(s.flow.count).toFixed(2) + ' · ' + s.flow.count : icon('bolt') + ' Flow ' + s.flow.count;
-      const hbtn = qs('[data-v6="hourglass"]', el), clip = qs('[data-v6-clip]', el), hl = qs('[data-v6-hgl]', el);
+      const hbtn = qs('[data-v6="hourglass"]', el), lvl = qs('[data-v7-level]', el), hl = qs('[data-v6-hgl]', el);
       if (hbtn) hbtn.setAttribute('aria-pressed', String(hard));
-      if (clip) { const h = hard ? 24 * rem : 24; clip.setAttribute('y', String(24 - h)); clip.setAttribute('height', String(h)); }
+      const pk = C.hgPiece(module), pe = qs('[data-v7-piece]', el), po = qs('[data-v7-out]', el);
+      if (pe && pe.getAttribute('data-k') !== pk) { pe.setAttribute('d', PIECES[pk]); pe.setAttribute('data-k', pk); if (po) po.setAttribute('d', PIECES[pk]); }
+      if (lvl) lvl.setAttribute('transform', 'translate(0,' + (hard ? 24 * (1 - rem) : 0).toFixed(2) + ')');
+      if (hbtn) { const H = C.CFG.hourglass, full = H.mult[module] || 1.3; hbtn.title = 'The ' + pk + ' glass: ' + C.hgLimit(module) + ' seconds in this course. Hard mode (you commit first): ×' + full.toFixed(2) + ' inside the time. Off: ×' + (1 + (full - 1) / 2).toFixed(2) + ' if you answer inside ' + Math.round(C.hgLimit(module) * H.reactive) + ' seconds.'; }
       if (hl) hl.textContent = hard ? (rem > 0 ? fmtClock(rem * lim) : 'Time up') + ' · ×' + C.CFG.hourglass.mult[module].toFixed(2) : 'Hard mode';
       if (!pos.tier) { const nt = qs('[data-v6-note]', el); if (nt) nt.hidden = true; }
     });
@@ -21103,20 +21452,9 @@ const V6 = (() => {
         rescued('Mistake forgiven with a token.'); return;
       }
       if (secondLeft() < 1) { toast('No second chances left today.'); return; }
-      const fen = (b.last && b.last.fen) || b.board.fen(), mk = { fen, last: null, moves: [] };
-      let m = 'M', s2 = 'S', p = 'P';
-      try { m = mspcMReply(mk).text; s2 = mspcSReply(mk).text; p = mspcPReply(mk).text; } catch (e) { /* fall back to the labels */ }
       openSheet({ title: 'MSPC Second Chance', noFocus: true,
-        html: '<p class="muted small">Run the framework on the position before your move. Then you get the mistake back.</p>' +
-          [['M', m], ['S', s2], ['P', p]].map((x) => '<div class="v6-mspc"><p>' + esc(x[1]).replace(/\n/g, '<br>') + '</p></div>').join('') +
-          '<div class="v6-mspc"><p><b>C, Calculation:</b> the position is still on the board. Play the right move now, and check the opponent’s best reply first.</p></div>' +
-          '<label class="switch-row"><span>I ran M, S and P on this position</span><input type="checkbox" data-v6-ok></label>' +
-          '<div class="btn-row"><button type="button" class="btn btn-primary" data-v6-done disabled>Use the second chance</button><button type="button" class="btn btn-ghost" data-close>Cancel</button></div>',
-        onMount(sh) {
-          const ok = qs('[data-v6-ok]', sh.el), go = qs('[data-v6-done]', sh.el);
-          ok.addEventListener('change', () => { go.disabled = !ok.checked; });
-          go.addEventListener('click', () => { if (secondLeft() < 1) { sh.close(); return; } useSecond(); sh.close(); rescued('Second chance used. The mistake is not counted.'); });
-        } });
+        html: '<p class="muted small">Run the framework on the position before your move, in your own words. Then you get the mistake back. ' + secondLeft() + ' free left today.</p>' + formHTML(),
+        onMount(sh) { formBind(sh.el, () => { if (secondLeft() < 1) { sh.close(); return; } useSecond(); sh.close(); rescued('Second chance used. The mistake is not counted.'); }); } });
     };
     function fail(why) {
       if (b.over) return;
@@ -21167,8 +21505,10 @@ const V6 = (() => {
   const fmt = (n) => Math.round(num(n, 0)).toLocaleString('en');
   const dateText = (ms) => (ms ? new Date(ms).toLocaleDateString('en', { day: 'numeric', month: 'short' }) : '');
   function avatar(R) {
-    const name = App.profile.name || 'Player', ini = esc(name.trim().slice(0, 1).toUpperCase() || 'P');
-    return '<div class="v6-avatar" style="--ring:' + R.arena.color + '" title="Arena rank: ' + esc(R.arena.name) + '"><span>' + ini + '</span><i class="v6-avatar-badge">' + esc(R.student.name.slice(0, 3).toUpperCase()) + '</i></div>';
+    const name = App.profile.name || 'Player', ini = esc(name.trim().slice(0, 1).toUpperCase() || 'P'), ph = st().photo;
+    return '<div class="v6-avatar" data-arena="' + esc(R.arena.name) + '" style="--ring:' + R.arena.color + ';--glow:' + (R.arena.i * 5) + 'px" title="Arena rank: ' + esc(R.arena.name) + '">' + (ph ? '<img src="' + ph + '" alt="">' : '<span>' + ini + '</span>') +
+      '<i class="v6-avatar-badge" title="Student rank: ' + esc(R.student.name) + '">' + esc(R.student.name.slice(0, 3).toUpperCase()) + '</i>' +
+      '<label class="v7-photo" title="Change your profile photo">' + icon('camera') + '<input type="file" accept="image/*" data-v7-photo hidden></label></div>';
   }
   function multNow() {
     const R = ranks(), b = benchNow();
@@ -21185,7 +21525,7 @@ const V6 = (() => {
     ].map((x) => '<div class="v6-stat"><small>' + x[0] + '</small><b>' + esc(x[1]) + '</b><span>' + esc(x[2]) + '</span></div>').join('') + '</div>' +
       '<div class="v6-kpis"><div><small>Total XP</small><b>' + fmt(s.total) + '</b></div><div class="v6-viz"><small>Day streak</small><b>' + App.streakDays() + '</b><span>' + (nd ? 'Next boost at ' + nd.at + ' days' : 'Top boost reached') + '</span></div><div class="v6-viz"><small>Best flow</small><b>' + s.flow.best + '</b></div>' +
       '<div><small>XP multipliers now</small><b>×' + (mm.streak * mm.arena * mm.bench * mm.event).toFixed(2) + '</b><span>Streak ×' + mm.streak.toFixed(2) + ', arena ×' + mm.arena.toFixed(2) + ', community ×' + mm.bench.toFixed(2) + ', event ×' + mm.event.toFixed(2) + '</span></div></div>' +
-      '<h3>Modules</h3><div class="v6-mods">' + C.CFG.modules.map((m) => { const x = R.mr[m]; return '<div class="v6-mod"><div><b>' + esc(C.CFG.labels[m]) + '</b><span>' + esc(x.name) + (x.next ? ' → ' + esc(x.next) : '') + '</span>' + tag(m) + '</div>' + bar(x.pct) + '<small>' + fmt(x.xp) + ' XP</small></div>'; }).join('') + '</div>' +
+      '<h3>Modules</h3><p class="muted small">Ranks run on Rank Points (RP). You earn them in the Shuffle Trainers and in puzzles and lose some on a miss. XP is separate and never goes down.</p><div class="v6-mods">' + C.CFG.modules.map((m) => { const x = R.mr[m]; return '<div class="v6-mod"><div><b>' + esc(C.CFG.labels[m]) + '</b><span>' + esc(x.name) + (x.next ? ' → ' + esc(x.next) : '') + '</span>' + tag(m) + '</div>' + bar(x.pct) + '<small>' + fmt(x.xp) + ' RP</small></div>'; }).join('') + '</div>' +
       '<h3>Recent XP</h3>' + (s.log.length ? '<ul class="v6-log">' + s.log.slice().reverse().slice(0, 8).map((x) => '<li><span>' + esc(C.CFG.labels[x.m] || x.m) + '</span><b>+' + x.xp + '</b><small>×' + num(x.x, 1).toFixed(2) + (x.h ? ', hint ' + x.h : '') + '</small></li>').join('') + '</ul>' : '<p class="muted small">No XP yet. Answer one drill correctly.</p>');
   }
   function tabMatrix() {
@@ -21435,6 +21775,10 @@ const V6 = (() => {
   }
   /* ---------- wiring ---------- */
   function onDocClick(e) {
+    const dk = e.target.closest('[data-v7d]');
+    if (dk) { deskClick(dk.getAttribute('data-v7d')); return; }
+    const rb = e.target.closest('[data-v7r="buy"]');
+    if (rb) { buyRescue(); return; }
     const h = e.target.closest('[data-v6="hint"]');
     if (h) { hintPress(h.closest('[data-v6-strip]')); return; }
     const g = e.target.closest('[data-v6="hourglass"]');
@@ -21453,9 +21797,9 @@ const V6 = (() => {
       sel.dispatchEvent(new Event('change', { bubbles: true }));
     }
   }
-  function onDocChange(e) { const t = e.target; if (t && t.matches && t.matches('[data-v6-focus]')) { setFocus(t.checked); qsa('[data-v6-focus]').forEach((x) => { x.checked = t.checked; }); const lab = qs('.v6-focus > span'); if (lab && lab.firstChild) lab.firstChild.textContent = 'Focus Mode: ' + (t.checked ? 'ON' : 'OFF'); } }
+  function onDocChange(e) { const t = e.target; if (t && t.matches && t.matches('[data-v7-photo]')) { setPhoto(t.files && t.files[0]); t.value = ''; return; } if (t && t.matches && t.matches('[data-v6-focus]')) { setFocus(t.checked); qsa('[data-v6-focus]').forEach((x) => { x.checked = t.checked; }); const lab = qs('.v6-focus > span'); if (lab && lab.firstChild) lab.firstChild.textContent = 'Focus Mode: ' + (t.checked ? 'ON' : 'OFF'); } }
   function boot() {
-    S = load(); applyFocus(); applyTheme(); ensureBounties();
+    S = load(); applyFocus(); applyTheme(); ensureBounties(); try { rescueState(); } catch (e) { /* optional */ }
     const view = qs('#view');
     if (view) new MutationObserver(kick).observe(view, { childList: true, subtree: true });
     document.addEventListener('click', onDocClick);
@@ -21467,7 +21811,7 @@ const V6 = (() => {
   return {
     boot, mountProfile, mountEvents, narrow, filterOptions, filterBar, tagHTML, budget, legend, card, cleanCard, friendLine, chip, settingsHTML,
     ctx(o) { if (o && o.module) { ctx.shuffle = o.module; resetPos(); } },
-    state: st, ranks, level: () => C.levelOf(st().total), addTab: (t) => { if (t && t.id && !EXT.some((e) => e.id === t.id)) EXT.push(t); }, sync, events, payout, matrix,
+    state: st, ranks, level: () => C.levelOf(st().total), addTab: (t) => { if (t && t.id && !EXT.some((e) => e.id === t.id)) EXT.push(t); }, sync, events, payout, matrix, addRp, addXp, rescueState, buyRescue, Redeem: { offer: offerDesk, close: closeDesk },
     _t: { forceAdmin(v) { adminOverride = v; }, tokenOf, onScore, hintPress, makeBoss, resetPos, get pos() { return pos; }, get boss() { return boss; }, secondLeft, addXp, bountyEvent, eventProgress, trophy, benchNow, leakSets, shuffleCtx, setState(s) { S = s; }, ctxo: ctx }
   };
 })();
@@ -21981,7 +22325,7 @@ const LB4 = (() => {
     const lv = (xp) => C.levelOf(xp).level;
     const rows = [];
     const add = (name, you, v, label, sub) => { if (v == null || !Number.isFinite(v)) return; rows.push({ name, you, v, label, sub: sub || '' }); };
-    if (kind === 'module') add(me, true, R.mr[mod].exact, R.mr[mod].name, fmtN(R.mr[mod].xp) + ' XP');
+    if (kind === 'module') add(me, true, R.mr[mod].exact, R.mr[mod].name, fmtN(R.mr[mod].xp) + ' RP');
     else if (kind === 'arena') add(me, true, R.arena.rating ? R.arena.i + R.arena.rating / 10000 : null, R.arena.name + (R.arena.rating ? ' · ' + R.arena.rating : ''), '');
     else if (kind === 'overall') add(me, true, R.overall.exact, R.overall.name, 'Student ' + R.student.name);
     else add(me, true, s.total, 'Level ' + lv(s.total), fmtN(s.total) + ' XP');
