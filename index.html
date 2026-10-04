@@ -1785,6 +1785,38 @@ button.brand{background:none;border:0;padding:0;cursor:pointer;font-family:inher
 .lb4-row .r{font-weight:700;color:var(--accent);white-space:nowrap}.lb4-sub{grid-column:2 / 4}
 .data-banner{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:70;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-radius:14px;background:#3b1220;border:1px solid var(--miss);color:var(--chalk);box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .data-banner div{display:grid;gap:2px;min-width:0}.data-banner small{color:var(--fog);overflow:hidden;text-overflow:ellipsis}
+/* ===== v6.2: nav spacing. Even gaps between every tab (Home to About), clear air between logo / tabs / profile chip ===== */
+.topbar-inner{column-gap:12px}
+.topbar-right{gap:10px}
+.tabs-wrap{grid-area:tabs;min-width:0;container-type:inline-size;container-name:topnav}
+.tabs{--tab-gap:4px;--tab-pad:6px;position:relative;display:flex;align-items:stretch;justify-content:flex-start;gap:var(--tab-gap);width:100%;max-width:none;margin:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto;flex-direction:column;gap:3px;padding:0 var(--tab-pad);font-size:10px;white-space:nowrap;text-align:center}
+.tab i{font-size:15px}
+.tab:focus-visible{outline-offset:-2px}
+@media (min-width:521px){.tabs{--tab-pad:8px}.tab{font-size:11px}.tab i{font-size:16px}}
+@media (min-width:900px){
+  .topbar-inner{column-gap:24px}
+  .tabs{--tab-gap:6px;--tab-pad:10px;justify-content:flex-start}
+  .tab{flex:0 0 auto;gap:3px;font-size:11.5px}
+  .tab i{font-size:15px}
+  .tab:first-child{margin-left:auto}
+  .tab:last-child{margin-right:auto}
+}
+/* narrow desktop / tablet: free up room so the 8 tabs keep their gaps instead of squeezing */
+@media (min-width:900px) and (max-width:1139px){
+  .brand-name{display:none}
+  .chip-tier{display:none}
+  .admin-chip span{display:none}
+  .admin-chip{width:36px;padding:0;justify-content:center}
+  .tabs{--tab-gap:4px;--tab-pad:8px}
+}
+/* icon beside label only when the tab row really has the room; otherwise icon above label keeps every gap equal */
+@container topnav (min-width:820px){
+  .tabs{--tab-gap:6px;--tab-pad:10px}
+  .tab{flex-direction:row;gap:8px;font-size:14px}
+  .tab i{font-size:14px}
+}
 </style>
 </head>
 <body>
@@ -1796,7 +1828,9 @@ button.brand{background:none;border:0;padding:0;cursor:pointer;font-family:inher
       <span class="brand-name">lanckrietchess</span><i class="fa-solid fa-chevron-down brand-caret" aria-hidden="true"></i>
     </button>
     <div class="brand-menu" id="brand-menu" hidden></div>
-    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    <div class="tabs-wrap">
+      <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    </div>
     <div class="topbar-right"><span id="admin-slot"></span><button class="profile-chip" id="profile-chip" type="button" aria-haspopup="dialog">Profile</button></div>
   </div>
 </header>
@@ -22088,7 +22122,11 @@ function routeFromHash(setTab) {
 }
 function renderTabs(route) {
   const at = route === 'shuffle' ? (App.ui.shuffleFrom === 'think' ? 'think' : 'openings') : route;
-  qs('#tabs').innerHTML = TABS.map((t) => '<a class="tab" href="' + (t.href || '#' + t.id) + '"' + (t.routes.indexOf(at) >= 0 ? ' aria-current="page"' : '') + '>' + icon(t.icon) + '<span>' + t.label + '</span></a>').join('');
+  const nav = qs('#tabs');
+  nav.innerHTML = TABS.map((t) => '<a class="tab" href="' + (t.href || '#' + t.id) + '"' + (t.routes.indexOf(at) >= 0 ? ' aria-current="page"' : '') + '>' + icon(t.icon) + '<span>' + t.label + '</span></a>').join('');
+  /* v6.2: on very narrow phones the tab row can scroll sideways; keep the active tab in view */
+  const on = nav.querySelector('[aria-current="page"]');
+  if (on && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = Math.max(0, on.offsetLeft - (nav.clientWidth - on.offsetWidth) / 2);
 }
 function renderFoot() {
   qs('#foot').innerHTML = '<span>© ' + new Date().getFullYear() + ' Kyenzo Lanckriet, lanckrietchess</span><span style="display:flex;gap:14px;flex-wrap:wrap">' +
