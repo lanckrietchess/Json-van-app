@@ -4655,7 +4655,10 @@ const Feed = (() => {
    copy on this device, plus the admin draft, is then the only source, so a
    background sync can no longer replace local edits such as deleted branches
    in the opening tree explorer. Read live from storage on every call, so a
-   second tab sees the switch at once. */
+   second tab sees the switch at once.
+   Scope: the switch does exactly two things. (1) It blocks every write to GitHub (GitHubPublish.put). (2) It blocks every
+   overwrite of local data from the published file (GitHub, and this site's mirror of the same file). It never blocks saving
+   to localStorage: edits (tree editor, drafts, My repertoire) are always written to this device at once. */
 const SyncLock = (() => {
   const KEY = 'admin_sync_paused';
   const subs = new Set();
@@ -5011,6 +5014,15 @@ const Admin = (() => {
   const draft = () => Site.cleanDoc(Store.get(LS_DRAFT, null));
   const ensureDraft = () => draft() || clone(Site.published() || Site.emptyDoc());
   function saveDraft(d) { d.updated = new Date().toISOString(); Store.set(LS_DRAFT, d); Site.apply(); }
+  /* Autosave writer: true only when the draft really landed in localStorage (Store.set quietly falls back to memory
+     when the quota is full, which would look saved and then vanish on refresh). Never looks at SyncLock: local saves
+     always happen, whatever the kill-switch says. */
+  function persistDraft(d) {
+    d.updated = new Date().toISOString();
+    try { localStorage.setItem(LS_DRAFT, JSON.stringify(d)); } catch (e) { return false; }
+    Site.apply();
+    return true;
+  }
   function discardDraft() { Store.del(LS_DRAFT); Site.apply(); }
   function dirty() {
     const d = draft();
@@ -5030,7 +5042,7 @@ const Admin = (() => {
   return {
     get active() { return active; },
     configured, isTrigger, locked, fail, checkEmail, checkCode, startSession, restore, signOut,
-    draft, ensureDraft, saveDraft, discardDraft, dirty, keybook, saveKeybook, setPref, setEditTier,
+    draft, ensureDraft, saveDraft, persistDraft, discardDraft, dirty, keybook, saveKeybook, setPref, setEditTier,
     prefs: () => prefs,
     editTier: () => (prefs.tier === 'paid' ? 'paid' : 'free'),
     editing: () => active && prefs.edit !== false,
@@ -5145,7 +5157,7 @@ const CMS = (() => {
   }
   function syncLine() {
     const st = Site.status() || {}, r = CONFIG.remote || {};
-    if (SyncLock.paused()) return 'Sync is paused (kill-switch). Nothing is fetched from GitHub; this device keeps its own copy and your local edits.';
+    if (SyncLock.paused()) return 'Sync is paused (kill-switch). Nothing is sent to or fetched from GitHub; this device keeps its own copy and saves your edits locally.';
     if (st.source === 'github' && st.at) return 'Live data from GitHub (' + r.owner + '/' + r.repo + ', file ' + r.path + (st.commit ? ', commit ' + st.commit.slice(0, 7) : '') + '), synced ' + ago(st.at) + '.';
     if (st.source === 'site' && st.at) return 'GitHub did not answer, so the hub used the copy on this site, synced ' + ago(st.at) + '.';
     if (Site.published()) return 'GitHub did not answer; players keep the copy on their device' + (st.at ? ' from ' + ago(st.at) : '') + '.';
@@ -5160,7 +5172,7 @@ const CMS = (() => {
   function pauseRow() {
     const on = SyncLock.paused();
     return '<label class="switch-row"><span>Pause GitHub sync (kill-switch)<span class="small muted" style="display:block">' +
-      (on ? 'On: nothing is fetched, so local edits cannot be overwritten. Export the master JSON when you are done.' : 'Off: the hub keeps checking GitHub and can replace the copy on this device.') +
+      (on ? 'On: nothing is sent to GitHub and nothing from GitHub can overwrite this device. Your edits are still saved on this device at once. Export the master JSON when you are done.' : 'Off: the hub keeps checking GitHub and can replace the copy on this device.') +
       '</span></span><input type="checkbox" data-m-sync-pause' + (on ? ' checked' : '') + '></label>';
   }
   function togglePause(on) {
@@ -14709,10 +14721,11 @@ const GitHubPublish = (() => {
       '<p class="small muted">Commits your draft to the data file every player reads live, so nobody has to upload anything. Players get it within a few minutes (GitHub caches the file for about five). The file is written in the hub\u2019s own format, with every line, text and key hash; the hub reads that format and the hand-written one alike.</p>' +
       '<form class="stack" id="gh-form" autocomplete="off"><div class="rule-grid">' + f('owner', 'Owner (your GitHub name)', c.owner, R().owner || 'lanckrietchess') + f('repo', 'Repository', c.repo, R().repo || 'Json-van-app') + f('branch', 'Branch', c.branch, R().branch || 'main') + f('path', 'File path', c.path, R().path || 'json') + '</div>' +
       '<label class="field"><span class="field-label">Access token <small>fine-grained, Contents: read and write, this repository only</small></span><input class="input" name="token" type="password" value="' + esc(token()) + '" autocomplete="off"></label>' +
-      '<div class="btn-row"><button class="btn btn-primary btn-sm" type="submit">' + icon('cloud-arrow-up') + ' Publish to GitHub</button></div><p class="form-msg" id="gh-msg" aria-live="polite"></p></form>' +
+      '<div class="btn-row"><button class="btn btn-primary btn-sm" type="submit"' + (SyncLock.paused() ? ' disabled' : '') + '>' + icon('cloud-arrow-up') + ' Publish to GitHub</button></div>' + (SyncLock.paused() ? '<p class="small muted">Sync is paused (kill-switch): nothing is sent to GitHub until you switch it off.</p>' : '') + '<p class="form-msg" id="gh-msg" aria-live="polite"></p></form>' +
       '<p class="small muted">The token is kept in this browser tab only. Never paste it anywhere else, and never commit it.</p></div>';
   }
   async function put(json, c, tok) {
+    if (SyncLock.paused()) throw new Error('paused');   // kill-switch: nothing is ever sent to GitHub
     const base = 'https://api.github.com/repos/' + encodeURIComponent(c.owner) + '/' + encodeURIComponent(c.repo) + '/contents/' + c.path.split('/').map(encodeURIComponent).join('/');
     const h = { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + tok, 'X-GitHub-Api-Version': '2022-11-28' };
     let sha;
@@ -14735,6 +14748,7 @@ const GitHubPublish = (() => {
       const tok = f.elements.token.value.trim(), say = (t, bad) => { msg.textContent = t; msg.className = 'form-msg ' + (bad ? 'is-bad' : 'is-good'); };
       if (!/^[\w.-]{1,100}$/.test(c.owner) || !/^[\w.-]{1,100}$/.test(c.repo) || !/^[\w./-]{1,100}$/.test(c.branch) || !pathOk(c.path)) { say('Check the owner, repository, branch and file path.', true); return; }
       if (!/^[\w-]{20,255}$/.test(tok)) { say('Paste a GitHub access token first.', true); return; }
+      if (SyncLock.paused()) { say('Sync is paused (kill-switch). Nothing is sent to GitHub. Switch the kill-switch off in the admin menu first.', true); return; }
       Store.set(KEY, c);
       try { sessionStorage.setItem(TOK, tok); } catch (err) { /* this tab only */ }
       const btn = qs('button[type=submit]', f);
@@ -14746,7 +14760,7 @@ const GitHubPublish = (() => {
         say(live ? 'Published. Players get it within a few minutes.' : 'Published to ' + c.repo + '/' + c.path + '. The hub reads ' + R().repo + '/' + R().path + ', so change CONFIG.remote if this is the new home of your data.');
         toast('Published to GitHub.', 'good');
       }
-      catch (err) { say(err.message === 'token' ? 'GitHub refused the token. It needs Contents: read and write on this repository.' : err.message === 'conflict' ? 'Someone changed the file at the same time. Try again.' : 'GitHub could not be reached or refused the file (' + err.message + ').', true); }
+      catch (err) { say(err.message === 'paused' ? 'Sync is paused (kill-switch). Nothing was sent to GitHub.' : err.message === 'token' ? 'GitHub refused the token. It needs Contents: read and write on this repository.' : err.message === 'conflict' ? 'Someone changed the file at the same time. Try again.' : 'GitHub could not be reached or refused the file (' + err.message + ').', true); }
       finally { btn.disabled = false; }
     });
   }
@@ -17881,23 +17895,39 @@ const TreeEditor = (() => {
         '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-te="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-te="root">' + icon('house') + ' Start position</button><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button><button type="button" class="btn btn-ghost btn-sm" data-te="master">' + icon('file-export') + ' Export master JSON</button></div>';
     }
     function jump(path) { curPath = path; onJump(fenAt(path)); render(); }
+    /* Autosave: every edit (delete, promote, add) goes into the admin draft in localStorage at once, so a refresh,
+       a background redraw or a sync can never bring the old branch back. This does not depend on the kill-switch. */
+    function commit() {
+      dirty = true;
+      let ok = false;
+      try {
+        const d = Admin.ensureDraft();
+        d.trees = Array.isArray(d.trees) ? d.trees : [];
+        const entry = d.trees.filter((x) => x.id === t.id)[0];
+        if (entry) { entry.tree = stripPaths(clone(tree)); ok = Admin.persistDraft(d); }
+      } catch (e) { ok = false; }
+      if (ok) dirty = false;
+      else toast('Could not save on this device (browser storage is full or blocked). This edit is only in memory: use Export JSON now.', 'bad');
+      return ok;
+    }
     function doDelete(path) {
       const node = nodeAt(tree, path);
       if (!node) return;
       const kids = countNodes(node.c || []);
-      confirmSheet('Delete this move?', '“' + node.m + '”' + (kids ? ' and ' + kids + ' move' + (kids === 1 ? '' : 's') + ' after it' : '') + ' are removed from this chapter. Export JSON keeps a backup before you save.', 'Delete').then((ok) => {
+      confirmSheet('Delete this move?', '“' + node.m + '”' + (kids ? ' and ' + kids + ' move' + (kids === 1 ? '' : 's') + ' after it' : '') + ' are removed from this chapter and the change is saved on this device. Export JSON keeps a backup of the chapter as it was before this session.', 'Delete').then((ok) => {
         if (!ok) return;
         removeAt(tree, path);
         if (curPath === path || curPath.indexOf(path + '.') === 0) jump('');
-        dirty = true;
+        const saved = commit();
         render();
+        if (saved) toast('Deleted. Saved on this device.', 'good');
       });
     }
     function doPromote(path) {
       if (!promoteAt(tree, path)) return;
-      dirty = true;
+      const saved = commit();
       render();
-      toast('Promoted to the main line.', 'good');
+      if (saved) toast('Promoted to the main line. Saved on this device.', 'good');
     }
     function doAdd(path) {
       const sans = path ? sansAlongPath(tree, path) : [];
@@ -17909,9 +17939,9 @@ const TreeEditor = (() => {
       if (!mv) { toast('“' + input.trim() + '” is not legal there.', 'bad'); return; }
       if (path) { const node = nodeAt(tree, path); if (!node) return; node.c = node.c || []; node.c.push({ m: mv.san }); }
       else tree.push({ m: mv.san });
-      dirty = true;
+      const saved = commit();
       render();
-      toast('Added ' + mv.san + '.', 'good');
+      if (saved) toast('Added ' + mv.san + '. Saved on this device.', 'good');
     }
     function menuFor(path, x, y) {
       const node = nodeAt(tree, path);
