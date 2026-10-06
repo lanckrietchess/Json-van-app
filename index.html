@@ -1818,6 +1818,67 @@ button.brand{background:none;border:0;padding:0;cursor:pointer;font-family:inher
   .tab{flex-direction:row;gap:8px;font-size:14px}
   .tab i{font-size:14px}
 }
+/* ===== v6.2 Chess Dex ===== */
+.dx-page{max-width:980px;margin:0 auto;padding:6px 0 40px;display:grid;gap:16px}
+.dx-head{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.dx-headtext{flex:1 1 240px;min-width:0}.dx-headtext h1{margin:0 0 4px;font-size:26px}
+.dx-ring{--p:0;width:104px;height:104px;border-radius:50%;display:grid;place-items:center;align-content:center;flex:none;background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--raised) 0);position:relative}
+.dx-ring::before{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--surface)}
+.dx-ring b,.dx-ring span{position:relative;line-height:1.1}.dx-ring b{font-size:21px}.dx-ring span{font-size:11px;color:var(--fog)}
+.dx-friend{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.dx-pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.dx-pillars-mini{margin-bottom:12px}
+.dx-pcard{display:grid;gap:4px;text-align:left;padding:12px;border-radius:var(--r);background:var(--surface);border:1px solid var(--hair);color:var(--chalk)}
+.dx-pcard.is-on{border-color:var(--accent-line);background:var(--accent-soft)}
+.dx-pcard span{font-size:20px;font-weight:700}.dx-pcard small{color:var(--dim)}
+.dx-bar{display:block;height:6px;border-radius:99px;background:var(--raised);overflow:hidden;min-width:60px}
+.dx-bar>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.dx-body{display:grid;gap:10px}
+.dx-gen{padding:0}.dx-gen>summary,.dx-ch>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:14px 16px;list-style:none}
+.dx-gen>summary::-webkit-details-marker,.dx-ch>summary::-webkit-details-marker{display:none}
+.dx-ch{border-top:1px solid var(--hair)}.dx-ch>summary{padding:11px 16px 11px 28px;font-size:15px}
+.dx-gpct{display:flex;align-items:center;gap:10px;flex:none}.dx-gpct .dx-bar{width:90px}
+.dx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:6px 16px 16px 28px}
+.dx-card{display:grid;gap:6px;text-align:left;padding:11px;border-radius:var(--r-sm);background:var(--ink-2);border:2px solid var(--rule);color:var(--chalk);min-height:104px;align-content:start;position:relative}
+.dx-card b{font-size:13px;line-height:1.3}.dx-card small{color:var(--fog);font-size:12px}
+.dx-card.st-fridge{opacity:.75}.dx-card.st-permanent{border-color:var(--good)}
+.dx-card.is-locked{place-items:center;align-content:center;color:var(--dim);border-style:dashed}
+.dx-black{color:#475569}.dx-white{color:#e2e8f0}
+.dx-pips{display:inline-flex;gap:4px;margin-right:8px;vertical-align:middle}.dx-pips i{width:9px;height:9px;border-radius:50%;background:var(--raised)}.dx-pips i.on{background:var(--accent)}
+.dx-badge{font-size:11px;font-weight:700;display:inline-flex;gap:5px;align-items:center}
+.dx-card.shiny-gold{border-color:#fbbf24;box-shadow:0 0 0 1px #fbbf2455,0 0 14px #fbbf2433}.dx-card.shiny-gold .dx-badge{color:#fbbf24}
+.dx-card.shiny-plat{border-color:#e2e8f0;box-shadow:0 0 0 1px #67e8f955,0 0 14px #e2e8f033}.dx-card.shiny-plat .dx-badge{color:#e2e8f0}
+.dx-card.shiny-diamond{border-color:transparent;background:linear-gradient(var(--ink-2),var(--ink-2)) padding-box,linear-gradient(135deg,#67e8f9,#a78bfa,#67e8f9) border-box;box-shadow:0 0 16px #67e8f944}.dx-card.shiny-diamond .dx-badge{color:#67e8f9}
+.dx-card.is-shiny::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.16) 50%,transparent 60%);background-size:250% 100%;animation:dxShine 4s linear infinite;pointer-events:none}
+@keyframes dxShine{from{background-position:150% 0}to{background-position:-100% 0}}
+body.lc-focus .dx-card.is-shiny::after{animation:none;display:none}
+@media (prefers-reduced-motion:reduce){.dx-card.is-shiny::after{animation:none}.dx-bar>i{transition:none}}
+.dx-dots{display:inline-flex;gap:4px}.dx-dot{font-style:normal;font-size:11px;font-weight:700;padding:1px 6px;border-radius:99px;color:#0f172a}
+.dx-dot.gold{background:#fbbf24}.dx-dot.plat{background:#e2e8f0}.dx-dot.diamond{background:#67e8f9}
+.dx-grow{display:grid;grid-template-columns:1fr 90px 52px auto;gap:10px;align-items:center;padding:6px 0;font-size:14px}
+.dx-detail{display:grid;gap:6px;margin:10px 0}.dx-catch{display:grid;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--hair)}
+.dx-msg.is-bad{color:var(--miss)}.dx-rules{margin:0}
+/* ===== v2.0 Dex badges: live FEN board icons, three visual states, mastery frames ===== */
+.dx-defs{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+.dx-bd{display:block;width:84px;height:84px;flex:none;justify-self:center}
+.dx-bd.sm{width:60px;height:60px}.dx-bd.lg{width:140px;height:140px}
+.dx-bd svg{display:block;width:100%;height:100%;overflow:visible}
+.dxs-gray .dx-bd svg,.dx-lg-item.is-gray .dx-bd svg{filter:grayscale(1) contrast(1.05)}
+.dx-card.dxs-unseen{border-style:dashed}.dx-card.dxs-unseen>b{color:var(--fog)}
+.dx-card .dx-lv{font-size:11px;color:var(--dim);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dx-card .dx-lv .dx-tier{padding:0 6px;border-radius:99px;border:1px solid var(--rule);line-height:16px}
+.dx-legend{padding:0}.dx-legend>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;padding:14px 16px;list-style:none}
+.dx-legend>summary::-webkit-details-marker{display:none}
+.dx-lg-sec{padding:0 16px 14px}.dx-lg-sec h3{margin:10px 0 2px;font-size:14px}.dx-lg-sec p{margin:0 0 8px}
+.dx-lg-row{display:flex;flex-wrap:wrap;gap:10px 14px}
+.dx-lg-item{display:grid;gap:4px;justify-items:center;text-align:center;font-size:12px;color:var(--fog);width:92px}
+.dx-lg-item b{color:var(--chalk);font-size:12px}
+.dx-sheetbadge{display:flex;gap:16px;align-items:center;margin:8px 0 4px;flex-wrap:wrap}
+.dx-sheetbadge .dx-bd{margin:0}.dx-casc{margin:8px 0 0;padding:0 0 0 18px;font-size:13px;color:var(--fog)}
+@media (max-width:420px){.dx-bd{width:72px;height:72px}.dx-grid{padding-left:12px;padding-right:12px}}
+
+@media (max-width:640px){.dx-pillars{grid-template-columns:repeat(2,1fr)}.dx-gpct .dx-bar{width:48px}.dx-grid{padding-left:16px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}.dx-ch>summary{padding-left:16px}}
+.dx-ff{margin:6px 0 0;color:var(--fog)}
 </style>
 <style id="v8-css">
 /* ---------- v8: formula ranks: the five level pills under a module rank ---------- */
@@ -1965,7 +2026,7 @@ body.lc-focus .v7-clock.is-risk{display:none}
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '6.1.0',
+  version: '6.2.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -2067,6 +2128,13 @@ const CONFIG = {
       { id: 'large', price: '€20', credits: 300 }
     ]
   },
+
+  /* v6.2 Chess Dex. need: flawless runs in a row per level. cooldownDays: rest after level 1 and level 2.
+     xp: bonus per level. masterTokens: price of a Shiny catch (a Credit). aiCostsToken: while true (the Google Play
+     test phase) the AI coach's help on a wrong MSPC answer costs one token; set false at launch.
+     ffMinPlies: shortest trunk the Shuffle Trainer fast-forwards. skipEmptyPillars: a pillar with no cards yet
+     does not count in the total until it has some. */
+  dex: { need: 5, cooldownDays: [7, 30], xp: [150, 400, 1000], masterTokens: 1, aiCostsToken: true, ffMinPlies: 4, skipEmptyPillars: true },
 
   /* Admin mode. Type the trigger into any key field. The first time, a setup
      screen creates the three values below; paste them in here and upload.
@@ -7167,7 +7235,7 @@ function LineRunner(cfg) {
       later(() => { locked = false; board.setPosition(g.fen(), { animate: false, lastMove: lastOf() }); play(p, 'alt'); step(false); }, 1400);
       return;
     }
-    if (clean1 && !learn) { score(false); if (cfg.id) V33.miss(cfg.id, cfg.kind || cfg.section || '', idx, mv.san); V36.srsMiss(cfg, p, g.fen(), lastOf()); }
+    if (clean1 && !learn) { score(false); if (cfg.id) V33.miss(cfg.id, cfg.kind || cfg.section || '', idx, mv.san); V36.srsMiss(cfg, p, g.fen(), lastOf()); Dex.attempt(cfg.id); }
     const bad = pickNote(n.bad, mv.san), miss = pickNote(n.miss, mv.san);
     Sound.bad();
     if (bad || miss) {
@@ -7183,7 +7251,7 @@ function LineRunner(cfg) {
   function hint() {
     if (finished || locked || idx >= plies.length || plies[idx].color !== side) return;
     const p = plies[idx];
-    if (first) { total++; score(false); first = false; if (!learn) V36.srsMiss(cfg, p, g.fen(), lastOf()); }
+    if (first) { total++; score(false); first = false; if (!learn) { V36.srsMiss(cfg, p, g.fen(), lastOf()); Dex.attempt(cfg.id); } }
     hintLevel++;
     if (hintLevel === 1) { board.mark(p.from, 'hl-hint'); feedback = { v: 'hint', label: 'Hint', text: 'The piece to move stands on ' + p.from + '.' }; }
     else { board.setArrows([{ from: p.from, to: p.to, kind: 'best' }]); feedback = { v: 'hint', label: 'Hint', text: 'Play ' + p.san + '.' }; }
@@ -7192,7 +7260,7 @@ function LineRunner(cfg) {
   function showMove() {
     if (finished || locked || idx >= plies.length || plies[idx].color !== side) return;
     const p = plies[idx], n = notes[p.key] || {};
-    if (first) { total++; score(false); first = false; if (!learn) V36.srsMiss(cfg, p, g.fen(), lastOf()); }
+    if (first) { total++; score(false); first = false; if (!learn) { V36.srsMiss(cfg, p, g.fen(), lastOf()); Dex.attempt(cfg.id); } }
     lastNote = n.note || '';
     feedback = { v: 'info', label: 'The move was ' + p.san, text: n.note || '' };
     play(p, 'shown'); step(false);
@@ -7200,8 +7268,8 @@ function LineRunner(cfg) {
   function finish() {
     finished = true; locked = false; board.setInteractive(null);
     const acc = total ? clean / total : 1;
-    if (learn) { if (cfg.id) V36.learned(cfg.id); }
-    else if (cfg.id) { const before = (App.progress[cfg.id] || {}).best || 0; App.finish(cfg.id, acc); V33.afterFinish(cfg.id, acc, { kind: cfg.kind || cfg.section || '', moves: userPlies }, before); V36.srsDone(cfg, acc); }
+    if (learn) { if (cfg.id) { V36.learned(cfg.id); Dex.seen(cfg.id); } }
+    else if (cfg.id) { const before = (App.progress[cfg.id] || {}).best || 0; App.finish(cfg.id, acc); V33.afterFinish(cfg.id, acc, { kind: cfg.kind || cfg.section || '', moves: userPlies }, before); V36.srsDone(cfg, acc); Dex.record(cfg.id, acc >= 1, { src: cfg.section === 'shuffle' ? 'shuffle' : 'drill' }); }
     feedback = learn ? { v: 'done', label: 'Line learned', text: 'You have seen every move. Now play it from memory: tap Drill it.' } : { v: 'done', label: 'Line complete', text: (total ? clean + ' of ' + total + ' moves right on the first try. ' : '') + (lastNote || '') };
     Sound.done(); emit();
     if (cfg.onFinish) cfg.onFinish({ accuracy: acc, clean, total });
@@ -7306,6 +7374,7 @@ function StageRunner(cfg) {
     finished = true;
     const acc = stages.length ? results.filter((r) => r === true).length / stages.length : 1, before = (App.progress[d.id] || {}).best || 0;
     App.finish(d.id, acc);
+    Dex.record('c:' + d.id, acc >= 1, { src: 'think' });
     stages.forEach((s, i) => { if (s.k) V33.stage(d.id, s.k, results[i] === true); });
     stopHard();
     V33.afterFinish(hid, acc, { kind: hkind, moves: Math.max(1, stages.length) }, before);
@@ -7505,6 +7574,7 @@ function EndgameRunner(cfg) {
     const acc = tries ? clean / tries : 1, before = (App.progress[drill.id] || {}).best || 0;
     App.finish(drill.id, acc);
     V33.afterFinish(drill.id, acc, { kind: section, moves: Math.max(1, tries) }, before);
+    Dex.record(drill.id, acc >= 1, { src: section === 'shuffle' ? 'shuffle' : 'drill' });
     const texts = {
       promoted: 'Pawn promoted with the king in support. That is the technique.',
       pawnless: 'The pawn is gone. Bare kings, dead draw: exactly what you were asked to reach.',
@@ -8035,7 +8105,12 @@ function mountShuffle(root) {
   /* ----- play ----- */
   function start(pool) {
     cleanupRun();
-    S = { pool: pool.slice(), lines: 0, perfect: 0, combo: 0, best: 0, moves: 0, clean: 0, missed: {}, recent: [] };
+    /* v6.2: mastered lines rest in the fridge; if everything rests, it is free practice */
+    const cool = pool.filter((x) => !Dex.fridge(x.id));
+    if (cool.length && cool.length < pool.length) toast((pool.length - cool.length) + (pool.length - cool.length === 1 ? ' mastered line is' : ' mastered lines are') + ' resting in the fridge and left out of this mix.');
+    else if (!cool.length && pool.length) toast('Every line here is resting in the fridge. This is free practice: it will not change your mastery.');
+    if (cool.length) pool = cool;
+    S = { pool: pool.slice(), lines: 0, perfect: 0, combo: 0, best: 0, moves: 0, clean: 0, missed: {}, recent: [], proven: [], ff: '' };
     root.innerHTML = '<div class="hud" id="sh-hud" role="status" aria-live="polite"></div>' +
       '<div class="sh-bar"><span class="small muted" id="sh-mix"></span><span class="btn-row"><label class="switch-row"><span class="small">Keep playing automatically</span><input type="checkbox" data-sh-auto' + (cfg.auto ? ' checked' : '') + '></label>' +
         '<button type="button" class="btn btn-ghost btn-sm" data-act="stop">' + icon('flag-checkered') + ' Stop and see my score</button></span></div>' +
@@ -8055,7 +8130,12 @@ function mountShuffle(root) {
     if (item.kind === 'kpk') {
       runner = EndgameRunner(Object.assign(base, { drill: item.drill }));
       if (!KPK.isReady()) { qs('#sh-panel', root).innerHTML = '<p class="muted">Building the endgame table…</p>'; const r = runner; later(() => { if (alive && runner === r) r.start(); }, 30); return; }
-    } else runner = LineRunner(Object.assign(base, { id: item.id, fen: item.fen, moves: item.moves, side: item.side, ann: item.ann, lastMove: item.lastMove || null, silent: isStatic(item), delay: 320 }));
+    } else {
+      /* v6.2: the opening moves you already played right this session are fast-forwarded */
+      const f = Dex.fastForward(item, S.proven);
+      S.ff = f ? f.text : '';
+      runner = LineRunner(Object.assign(base, { id: item.id, fen: f ? f.fen : item.fen, moves: f ? f.moves : item.moves, side: item.side, ann: item.ann, lastMove: f ? f.lastMove : item.lastMove || null, silent: isStatic(item), delay: 320 }));
+    }
     runner.start();
   }
   function blindTask(x) {
@@ -8073,7 +8153,7 @@ function mountShuffle(root) {
     const auto = cfg.auto && !held;
     panel.innerHTML = '<p class="st-kicker">' + esc(scope + ', you play ' + colorName(item.side)) + '</p>' +
       '<h2 class="st-title">' + (hidden ? '<span class="sh-title-hidden">' + icon('eye-slash') + ' Hidden line</span>' : esc(item.title)) + '</h2>' +
-      '<p class="st-brief">' + esc(hidden ? blindTask(item) : item.courseName + (item.task ? '. ' + item.task : '')) + '</p>' +
+      '<p class="st-brief">' + esc(hidden ? blindTask(item) : item.courseName + (item.task ? '. ' + item.task : '')) + '</p>' + (S && S.ff && !v.finished ? '<p class="small dex-ff dx-ff">' + icon('forward') + ' Fast-forwarded ' + esc(S.ff) + ', which you already played right this session.</p>' : '') +
       turnHTML(v, item.kind === 'kpk' ? (v.prompt || 'Your move') : 'Your move as ' + colorName(item.side)) + (progress ? '<span class="dim small" style="margin-left:auto">' + progress + '</span>' : '') + '</div>' +
       '<div class="st-feedback">' + feedbackHTML(v.feedback) + '</div>' + playedHTML(v.played || []) +
       '<div class="st-actions">' + (v.finished
@@ -8088,7 +8168,7 @@ function mountShuffle(root) {
     done = true;
     const clean = +r.clean || 0, total = +r.total || 0, perfect = total ? clean === total : (r.accuracy == null || r.accuracy >= 1);
     S.lines++; S.moves += total; S.clean += clean;
-    if (perfect) { S.perfect++; S.combo++; S.best = Math.max(S.best, S.combo); delete S.missed[item.id]; }
+    if (perfect) { S.perfect++; S.combo++; S.best = Math.max(S.best, S.combo); delete S.missed[item.id]; if (item.kind === 'line' && item.fen === START_FEN && item.moves) { S.proven.push({ side: item.side, moves: item.moves.map(cleanSan) }); if (S.proven.length > 120) S.proven.shift(); } }
     else { S.combo = 0; S.missed[item.id] = item; }
     if (S.best > (+App.settings.shuffleBest || 0)) { App.settings.shuffleBest = S.best; App.save(); }
     hud(perfect); flashShow(perfect);
@@ -12685,11 +12765,15 @@ function TrimInterrogation(T) {
     const j = judge(k, text);
     let reply = j.reply, pass = j.pass;
     const b = coachBot();
-    if (AI.on() && b.canAi && b.canAi()) {
-      const r = await aiJudge(k, j);
-      if (!Q || Q.token !== tok || STEPS[Q.s] !== k) return;
-      if (r && r.text) { reply = r.text; if (!pass && r.pass) pass = true; }
-      paint();
+    /* v6.2 pay-per-mistake: a right answer is praised on the device at no cost; the AI only steps in when the answer is wrong */
+    if (pass) reply = reply + ' ' + Dex.PRAISE_MSPC;
+    else if (AI.on() && b.canAi && b.canAi()) {
+      if (Dex.aiCan()) {
+        const r = await aiJudge(k, j);
+        if (!Q || Q.token !== tok || STEPS[Q.s] !== k) return;
+        if (r && r.text) { Dex.aiSpend(); reply = r.text; if (r.pass) pass = true; }
+        paint();
+      } else reply = reply + ' (The AI coach needs a token and today’s is used. A new one arrives tomorrow.)';
     }
     if (pass) { say('bot', reply); passStep(k); }
     else { Q.miss[k]++; say('bot', reply + (Q.miss[k] >= 2 && Q.hints[k] < 3 ? ' Stuck? Tap 💡 Hint, or 🏳️ Give up to see it.' : '')); }
@@ -14929,8 +15013,20 @@ const SRS = (() => {
     const now = Date.now(), ps = positions(scope);
     return { open: ps.length, dueNow: ps.filter((x) => x.due <= now).length, lines: dueLines(scope).length, fixed: get().fixed, learned: Object.keys(get().learned).length };
   }
+  /* v6.2: a line whose id changed with the c6 move order keeps its schedule. */
+  function rename(map) {
+    const d = get(); let n = 0;
+    Object.keys(map).forEach((o) => {
+      const w = map[o];
+      if (d.lines[o] && !d.lines[w]) { d.lines[w] = d.lines[o]; n++; }
+      if (d.learned[o] && !d.learned[w]) { d.learned[w] = d.learned[o]; n++; }
+    });
+    Object.keys(d.pos).forEach((k) => { const x = d.pos[k]; if (map[x.id]) { x.id = map[x.id]; n++; } });
+    if (n) save();
+    return n;
+  }
   function clear() { db = { v: 1, lines: {}, pos: {}, fixed: 0, learned: {} }; save(true); }
-  return { on, miss, hit, posResult, done, learned, isNew, positions, dueLines, lineHasMistakes, forget, counts, clear, line: (id) => get().lines[id] || null, fixed: () => get().fixed, misses: (k) => (get().pos[k] || {}).m || 0 };
+  return { rename, on, miss, hit, posResult, done, learned, isNew, positions, dueLines, lineHasMistakes, forget, counts, clear, line: (id) => get().lines[id] || null, fixed: () => get().fixed, misses: (k) => (get().pos[k] || {}).m || 0 };
 })();
 
 /* ---------- the unlock rating and the ELO gates ----------
@@ -16943,6 +17039,101 @@ const V37 = {
      stop = half-moves from the start (a level with a stop and no moves of its
      own plays the next deeper level up to there), src = where the moves came from.
    ========================================================================== */
+/* ==========================================================================
+   v6.2: THE c6 TRANSPOSITION
+   A Black repertoire treats 1...c6 as Black's first move. A tree that runs
+   1.d4 d5 2.c4 c6 is re-ordered to 1.d4 c6 2.c4 d5: the same position, so the
+   trainer, the tree and the Semi-Slav course all speak one move order.
+   Nothing is dropped: notes, arrows, squares, glyphs and level flags stay on
+   the PLY they were written on. It runs on every way in (data file, saved
+   copy, admin import), so old and new data end up the same.
+   ========================================================================== */
+const C6 = (() => {
+  const PAY = ['n', 'g', 'ar', 'sq', 'l', 'x'];
+  const find = (list, m) => (list || []).filter((c) => c.m === m)[0] || null;
+  const payload = (n) => { const o = {}; PAY.forEach((k) => { if (n[k] !== undefined) o[k] = n[k]; }); return o; };
+  const copy = (v) => JSON.parse(JSON.stringify(v));
+  function merge(dst, src) {
+    if (src.n) { dst.n = dst.n || []; src.n.forEach((t) => { if (dst.n.indexOf(t) < 0) dst.n.push(t); }); }
+    ['g', 'ar', 'sq'].forEach((k) => { if (src[k]) { dst[k] = dst[k] || []; src[k].forEach((t) => { if (dst[k].indexOf(t) < 0) dst[k].push(t); }); } });
+    if (src.l !== undefined) dst.l = dst.l !== undefined ? Math.min(dst.l, src.l) : src.l;
+    if (src.x) { if (dst.x) { dst.x = dst.x.filter((k) => src.x.indexOf(k) >= 0); if (!dst.x.length) delete dst.x; } }   // left out only where BOTH leave it out
+  }
+  /* a node made a moment ago takes the annotations as they are; an existing one merges them */
+  function absorb(dst, src) {
+    if (dst._fresh) { delete dst._fresh; Object.keys(src).forEach((k) => { dst[k] = copy(src[k]); }); } else merge(dst, src);
+  }
+  function make(list, m) { let n = find(list, m); if (!n) { n = { m, _fresh: true }; list.push(n); } return n; }
+  function mergeKids(dst, src) {
+    (src || []).forEach((c) => {
+      const t = find(dst, c.m);
+      if (!t) dst.push(c);
+      else { merge(t, payload(c)); if (c.c) { t.c = t.c || []; mergeKids(t.c, c.c); } }
+    });
+  }
+  const posKey = (g) => g.fen().split(' ').slice(0, 3).join(' ');
+  function samePosition(w2) {
+    const a = new Chess(), b = new Chess();
+    try {
+      ['d4', 'd5', w2, 'c6'].forEach((s) => { if (!a.move(s, { sloppy: true })) throw new Error('x'); });
+      ['d4', 'c6', w2, 'd5'].forEach((s) => { if (!b.move(s, { sloppy: true })) throw new Error('x'); });
+    } catch (e) { return false; }
+    return posKey(a) === posKey(b);
+  }
+  function root(r) {
+    if (!r || r.m !== 'd4') return 0;
+    const d5 = find(r.c, 'd5');
+    if (!d5) return 0;
+    let moved = 0;
+    (d5.c || []).slice().forEach((w2) => {
+      if (/x[a-h]?d5/.test(w2.m) || /xd5/.test(w2.m)) return;
+      const c6 = find(w2.c, 'c6');
+      if (!c6 || !samePosition(w2.m)) return;
+      r.c = r.c || [];
+      const nc6 = make(r.c, 'c6'), nw2 = make(nc6.c = nc6.c || [], w2.m), nd5 = make(nw2.c = nw2.c || [], 'd5');
+      absorb(nd5, payload(c6));
+      nd5.c = nd5.c || [];
+      mergeKids(nd5.c, c6.c);
+      if (!nd5.c.length) delete nd5.c;
+      w2.c.splice(w2.c.indexOf(c6), 1);
+      if (!w2.c.length) { delete w2.c; absorb(nw2, payload(w2)); d5.c.splice(d5.c.indexOf(w2), 1); }
+      moved++;
+    });
+    if (moved && (!d5.c || !d5.c.length)) { absorb(find(r.c, 'c6'), payload(d5)); r.c.splice(r.c.indexOf(d5), 1); }
+    return moved;
+  }
+  const clearFresh = (n) => { delete n._fresh; (n.c || []).forEach(clearFresh); };
+  /* tree: the array of root nodes of a chapter. Only Black chapters are touched. Returns how many branches moved. */
+  function tree(list, side) {
+    if (side !== 'b' || !Array.isArray(list)) return 0;
+    let moved = 0;
+    list.forEach((r) => { moved += root(r); });
+    list.forEach(clearFresh);
+    return moved;
+  }
+  const path = (p, side) => (side === 'b' ? String(p || '').replace(/^(1\.d4) d5 (2\.\S+) c6\b/, '$1 c6 $2 d5') : p);
+  /* the path a line had before the transposition, to carry old progress over */
+  function legacyPath(p) {
+    const t = String(p || '').split(' ');
+    if (t.length < 4 || t[0] !== 'd4' || t[1] !== 'c6' || t[3] !== 'd5' || /xd5/.test(t[2])) return '';
+    t[1] = 'd5'; t[3] = 'c6';
+    return t.join(' ');
+  }
+  /* Progress on a line whose id changed with the move order moves to the new id. Safe to run any number of times. */
+  function migrate() {
+    const map = {};
+    Trees.lines().forEach((l) => { if (l.legacyId && l.legacyId !== l.id) map[l.legacyId] = l.id; });
+    const olds = Object.keys(map);
+    if (!olds.length) return 0;
+    let n = 0;
+    olds.forEach((o) => { const w = map[o]; if (App.progress[o] && !App.progress[w]) { App.progress[w] = App.progress[o]; n++; } });
+    n += SRS.rename(map);
+    if (n) App.save();
+    return n;
+  }
+  return { tree, path, legacyPath, migrate };
+})();
+
 const TreeData = (() => {
   const MAX_NODES = 40000, MAX_NOTE = 12000;
   const isObj = (x) => !!x && typeof x === 'object' && !Array.isArray(x);
@@ -17037,7 +17228,8 @@ const TreeData = (() => {
     if (!tree.length) return { error: label + ' has an empty tree.' };
     const levels = cleanLevels(c.levels, rep, label);
     if (!levels.length) return { error: label + ' has no levels.' };
-    const t = { id, title: title || id, group: ctx.group, side: ctx.side, path: str(c.path, 300), levels, tree };
+    C6.tree(tree, ctx.side);
+    const t = { id, title: title || id, group: ctx.group, side: ctx.side, path: C6.path(str(c.path, 300), ctx.side), levels, tree };
     validate(t, (bad) => rep.skipped.push(label + ': ' + bad.length + (bad.length === 1 ? ' move is' : ' moves are') + ' not legal and left out with what follows them (' + bad.slice(0, 3).join('; ') + (bad.length > 3 ? '; …' : '') + ').'));
     if (!t.tree.length) return { error: label + ': no legal moves left.' };
     return { entry: t };
@@ -17053,7 +17245,9 @@ const TreeData = (() => {
       const tree = (Array.isArray(t.tree) ? t.tree : []).map((o) => cleanNode(o, budget)).filter(Boolean);
       const levels = cleanLevels(t.levels, null, '');
       if (!tree.length || !levels.length) return null;
-      return { id, title: str(t.title, 90) || id, group: str(t.group, 60) || 'Chapters', side: sideWord(t.side) || 'w', path: str(t.path, 300), levels, tree };
+      const sd = sideWord(t.side) || 'w';
+      C6.tree(tree, sd);
+      return { id, title: str(t.title, 90) || id, group: str(t.group, 60) || 'Chapters', side: sd, path: C6.path(str(t.path, 300), sd), levels, tree };
     }).filter(Boolean);
   }
   function validateAll(list, rep) {
@@ -17134,6 +17328,8 @@ const Trees = (() => {
             if (L.g) item.guideline = L.g;
             if (L.s) item.skoolUrl = L.s;
             Object.defineProperty(item, 'ann', { get: () => annFor(item), enumerable: false, configurable: true });
+            const lp = t.side === 'b' ? C6.legacyPath(leaf.path) : '';
+            if (lp) Object.defineProperty(item, 'legacyId', { value: t.id + '--' + TreeData.fnv(lp), enumerable: false, configurable: true });
             made[leaf.path] = item; lines.push(item); lineBy[item.id] = item;
           }
           L.ids.push(item.id); L.labels.push(label);
@@ -17373,8 +17569,8 @@ function TreeRunner(cfg) {
   function lineDone() {
     const i = leaves.indexOf(cur), id = idAt(i), acc = run.total ? run.clean / run.total : 1;
     if (i < 0) { finished = true; emit(); return; }
-    if (learn) V36.learned(id);
-    else if (id) { const before = (App.progress[id] || {}).best || 0; App.finish(id, acc); V33.afterFinish(id, acc, { kind: 'openings', moves: Math.max(1, run.total) }, before); V36.srsDone(srsCfg(i), acc); }
+    if (learn) { V36.learned(id); Dex.seen(id); }
+    else if (id) { const before = (App.progress[id] || {}).best || 0; App.finish(id, acc); V33.afterFinish(id, acc, { kind: 'openings', moves: Math.max(1, run.total) }, before); V36.srsDone(srsCfg(i), acc); Dex.record(id, acc >= 1, { src: 'drill' }); }
     covered.add(i); sess.lines++;
     Sound.done();
     if (scope === 'line' || learn) {
@@ -18676,7 +18872,7 @@ const Friends = (() => {
   function myCard() {
     const s = Tourney.state(), r = Tourney.myRating(), f = App.profile.focus, lb = V5Peer.last();
     return { v: 1, p: V5Net.pid() || undefined, u: txt(App.profile.name, 30) || 'Player', e: r || null, d: r && s.base ? r - s.base : 0, f: f ? txt(Focus.name(f), 40) : '', fd: f ? Focus.day() : 0,
-      t: { w: s.wk || isoWeek(new Date()), m: s.metric || Tourney.cfg().metric, s: s.score || 0 }, b: lb ? { f: lb.f, p: lb.p, b: lb.b, o: lb.o, n: lb.n } : null, x: V6.card(), at: Date.now() };
+      t: { w: s.wk || isoWeek(new Date()), m: s.metric || Tourney.cfg().metric, s: s.score || 0 }, b: lb ? { f: lb.f, p: lb.p, b: lb.b, o: lb.o, n: lb.n } : null, x: V6.card(), dx: Dex.card(), at: Date.now() };
   }
   const code = () => 'LCF1.' + b64e(JSON.stringify(myCard()));
   const link = () => location.origin + location.pathname + '?friend=' + encodeURIComponent(code()) + '#friends';
@@ -18688,12 +18884,12 @@ const Friends = (() => {
   }
   function decode(c) {
     try {
-      const m = /^LCF1\.([A-Za-z0-9_-]{10,2400})$/.exec(String(c || '').trim());
+      const m = /^LCF1\.([A-Za-z0-9_-]{10,5200})$/.exec(String(c || '').trim());
       if (!m) return null;
       const o = JSON.parse(b64d(m[1]));
       if (!o || o.v !== 1 || !txt(o.u, 30)) return null;
       const t = o.t && /^\d{4}-W\d{2}$/.test(o.t.w || '') && Tourney.METRICS[o.t.m] ? { w: o.t.w, m: o.t.m, s: int(o.t.s, 0, 100000) || 0 } : null;
-      return { pid: /^[a-z0-9]{8,24}$/.test(o.p || '') ? o.p : '', name: txt(o.u, 30), rating: +o.e >= 100 && +o.e <= 3500 ? Math.round(+o.e) : null, d: int(o.d, -800, 800) || 0, focus: txt(o.f, 40), fd: int(o.fd, 0, 999) || 0, t, b: blunderOk(o.b), x: V6.cleanCard(o.x), at: int(o.at, 0, 4e12) || Date.now() };
+      return { pid: /^[a-z0-9]{8,24}$/.test(o.p || '') ? o.p : '', name: txt(o.u, 30), rating: +o.e >= 100 && +o.e <= 3500 ? Math.round(+o.e) : null, d: int(o.d, -800, 800) || 0, focus: txt(o.f, 40), fd: int(o.fd, 0, 999) || 0, t, b: blunderOk(o.b), x: V6.cleanCard(o.x), dex: Dex.cleanCard(o.dx), at: int(o.at, 0, 4e12) || Date.now() };
     } catch (e) { return null; }
   }
   function upsert(x) { const l = list(), i = l.findIndex((f) => f.id === x.id); if (i >= 0) l[i] = Object.assign(l[i], x); else l.unshift(x); save(l); return x; }
@@ -18954,10 +19150,10 @@ const Arena = (() => {
       return '<div class="ar5-card"><div class="ar5-av">' + (x.avatar && /^https:\/\//.test(x.avatar) ? '<img src="' + esc(x.avatar) + '" alt="" loading="lazy" referrerpolicy="no-referrer">' : esc(initials(x.name))) + '</div>' +
         '<div class="ar5-body"><b>' + esc(x.name) + '</b> <small class="muted">' + esc(x.site ? Elo.SITES[x.site] : 'friend code') + '</small>' +
         '<p class="ar5-elo">' + (x.rating ? '<b>' + x.rating + '</b>' + (d ? ' <span class="' + (d > 0 ? 'ar5-up' : 'ar5-down') + '">' + signed(d) + ' this week</span>' : '') : 'No rating shared') + '</p>' +
-        V6.friendLine(x) + (x.focus ? '<p>' + icon('bullseye') + ' Hyper-Focus: ' + esc(x.focus) + (x.fd ? ', day ' + x.fd : '') + '</p>' : '') +
+        V6.friendLine(x) + Dex.friendLine(x) + (x.focus ? '<p>' + icon('bullseye') + ' Hyper-Focus: ' + esc(x.focus) + (x.fd ? ', day ' + x.fd : '') + '</p>' : '') +
         (t ? '<p>' + icon('trophy') + ' ' + t.s + ' ' + esc((Tourney.METRICS[t.m] || Tourney.METRICS.mspc)[1]) + ' this week</p>' : '') +
         (!x.site && x.at ? '<p class="small muted">Card from ' + ago(x.at) + '</p>' : '') + '</div>' +
-        '<div class="ar5-acts">' + (x.b ? '<button type="button" class="btn btn-gold btn-sm" data-ar="solve" data-id="' + esc(x.id) + '">' + icon('crosshairs') + ' Punish their blunder</button>' : '') +
+        '<div class="ar5-acts">' + (x.dex ? '<button type="button" class="btn btn-ghost btn-sm" data-ar="dex" data-id="' + esc(x.id) + '">' + icon('layer-group') + ' Dex</button>' : '') + (x.b ? '<button type="button" class="btn btn-gold btn-sm" data-ar="solve" data-id="' + esc(x.id) + '">' + icon('crosshairs') + ' Punish their blunder</button>' : '') +
         '<button type="button" class="icon-btn" data-ar="remove" data-id="' + esc(x.id) + '" aria-label="Remove ' + esc(x.name) + '" title="Remove">' + icon('xmark') + '</button></div></div>';
     };
     const list = Friends.list();
@@ -19017,6 +19213,7 @@ const Arena = (() => {
     if (a === 'copy') copy(Friends.code(), 'Friend code copied. Send it to a friend.');
     else if (a === 'share') share();
     else if (a === 'remove') { Friends.remove(b.getAttribute('data-id')); paint(); }
+    else if (a === 'dex') Dex.openFriend(b.getAttribute('data-id'));
     else if (a === 'solve') solve(b.getAttribute('data-id'));
     else if (a === 'close-solve') closeSolve();
   }
@@ -22726,25 +22923,556 @@ document.addEventListener('click', (e) => {
   Site.fetchPublished(true).then(() => { dataBanner(); rerender(); }).catch(() => { b.disabled = false; });
 });
 
+/* ==========================================================================
+   v6.2: THE CHESS DEX
+   Four pillars of 25% each (Openings, Middlegame, Endgame, MSPC drills).
+   Every line or position is a card with a mastery level 0 to 3:
+     0 Active      practise it; 5 flawless runs in a row level it up
+     1 Mastered    1 week in the fridge, then a repeat round
+     2 Veteran     1 month in the fridge, then a repeat round
+     3 Grandmaster permanent
+   A slip in a repeat round drops the card to 0. From level 1 a card can be
+   caught as a Shiny in a real game (gold, platinum, diamond by level) for
+   one Master Token. Everything stays on the device (localStorage).
+   ========================================================================== */
+const Dex = (() => {
+  const KEY = 'lc-hub-dex-v1', MAXI = 6000, DAY = 864e5;
+  const cfg = () => Object.assign({ need: 5, cooldownDays: [7, 30], xp: [150, 400, 1000], masterTokens: 1, aiCostsToken: true, ffMinPlies: 4, skipEmptyPillars: true }, CONFIG.dex || {});
+  const PILLARS = [
+    { id: 'openings', label: 'Openings', icon: 'chess-pawn', xp: 'openings', blurb: 'Repertoire lines, grouped by course and chapter.' },
+    { id: 'middlegame', label: 'Middlegame', icon: 'chess-knight', xp: 'middlegame', blurb: 'Plans, structures and bootcamp positions.' },
+    { id: 'endgame', label: 'Endgame', icon: 'chess-rook', xp: 'endgame', blurb: 'Technique and the positions you must know.' },
+    { id: 'mspc', label: 'MSPC Drills', icon: 'brain', xp: 'think', blurb: 'Move, Specifics, Priorities, Calculation.' }
+  ];
+  const SHINY = [null, { name: 'Gold', cls: 'gold' }, { name: 'Platinum', cls: 'plat' }, { name: 'Diamond', cls: 'diamond' }];
+  const MASTERY = ['Active', 'Mastered', 'Veteran', 'Grandmaster'];
+  let db = null, saveT = 0, cat = null, catSig = '', by = {}, treeIdx = {}, fenIdx = {}, chMap = {};
+  const ui = () => App.ui.dex || (App.ui.dex = { pillar: 'openings', open: {} });
+  const fmt = (v) => (v >= 99.95 ? '100' : v >= 10 ? v.toFixed(0) : v.toFixed(1)) + '%';
+
+  /* ---------- storage ---------- */
+  function load() {
+    if (db) return db;
+    const raw = Store.get(KEY, null) || {};
+    db = { v: 1, it: {}, balls: Math.max(0, Math.round(+raw.balls || 0)) };
+    Object.keys(raw.it || {}).slice(0, MAXI).forEach((id) => {
+      const x = raw.it[id];
+      if (!x || typeof x !== 'object' || id.length > 90) return;
+      const o = { l: clamp(Math.round(+x.l || 0), 0, 3), s: clamp(Math.round(+x.s || 0), 0, 9), c: +x.c > 0 ? +x.c : 0, n: Math.max(0, Math.round(+x.n || 0)), m: Math.max(0, Math.round(+x.m || 0)),
+        t: +x.t || 0, sh: clamp(Math.round(+x.sh || 0), 0, 3), st: +x.st || 0, v: x.v ? 1 : 0, a: x.a ? 1 : 0, k: x.k ? 1 : 0 };
+      /* v2.0 migration: a card levelled or shiny from before the badge update was clearly caught; anything played counts as tried */
+      if (!('k' in x) && (o.l >= 1 || o.sh >= 1)) o.k = 1;
+      if (o.k || o.n || o.m || o.l) o.a = 1;
+      db.it[id] = o;
+    });
+    return db;
+  }
+  function save(now) {
+    clearTimeout(saveT);
+    const w = () => { const d = load(); Store.set(KEY, { v: 2, it: d.it, balls: d.balls }); };
+    if (now) w(); else saveT = setTimeout(w, 250);
+  }
+  function ent(id) { const d = load(); return d.it[id] || (d.it[id] = { l: 0, s: 0, c: 0, n: 0, m: 0, t: 0, sh: 0, st: 0, v: 0, a: 0, k: 0 }); }
+
+  /* ---------- the catalog: every card, from the data the hub already holds ---------- */
+  function build() {
+    const out = [];
+    const add = (x) => { if (x && x.id && x.pillar) out.push(x); };
+    (CONTENT.openings || []).forEach((o) => {
+      if (!o || !o.id || !(o.pgn || o.tree)) return;
+      add({ id: o.id, pillar: 'openings', gen: 'g:' + (o.group || 'Openings'), genName: o.group || 'Openings', ch: o.topicId || o.tree || o.id, chName: o.topic || o.title || o.id, title: o.subtitle || o.title || o.id, side: o.side === 'b' ? 'b' : 'w', src: o, line: true });
+    });
+    const lessons = (list, pillar, gen, genName) => (list || []).forEach((l) => (l.steps || []).forEach((st, i) => {
+      if (!st || st.ref || !st.fen) return;
+      const id = st.id || l.id + '-' + i;
+      add({ id, fen: st.fen, pillar, gen, genName, ch: l.id || l.title, chName: l.title, title: l.title + ' (' + (i + 1) + ')', side: st.side === 'b' || st.side === 'w' ? st.side : sideOf(st.fen), src: { id, lvl: Levels.of(l), requiredTier: Levels.required(l) } });
+    }));
+    const C = CONTENT.courses || {};
+    lessons(C.middlegame, 'middlegame', 'c:blunder', T('mg.blunderTitle'));
+    lessons(C.antiblunder, 'middlegame', 'c:anti', T('mg.antiTitle'));
+    (CONTENT.bridge || []).forEach((b) => { if (b && b.id) add({ id: 'p:' + b.id, fen: b.fen || '', pillar: 'middlegame', gen: 'c:plans', genName: 'Middlegame plans', ch: b.repertoire || 'Plans', chName: b.repertoire || 'Plans', title: b.title || b.id, side: b.side === 'b' ? 'b' : 'w', src: { id: 'p:' + b.id, lvl: Levels.of(b), requiredTier: Levels.required(b) } }); });
+    (CONTENT.endgame || []).forEach((d) => { if (d && d.id) add({ id: d.id, fen: d.fen || '', pillar: 'endgame', gen: d.type === 'kpk' ? 'c:kpk' : 'c:rook', genName: d.type === 'kpk' ? T('eg.kpkTitle') : T('eg.proTitle'), ch: d.id, chName: d.title || d.id, title: d.title || d.id, side: d.side === 'b' || d.side === 'w' ? d.side : sideOf(d.fen), src: d }); });
+    lessons(C.endgame, 'endgame', 'c:egboot', T('eg.bootTitle'));
+    (CONTENT.think || []).forEach((d) => {
+      if (!d || !d.id || !(d.stages || []).some((x) => x && x.type === 'line')) return;
+      add({ id: 'c:' + d.id, fen: d.fen || '', pillar: 'mspc', gen: 'c:mspc', genName: 'MSPC positions', ch: d.tag || 'General', chName: d.tag || 'General', title: d.title || d.id, side: sideOf(d.fen), src: d });
+    });
+    return out;
+  }
+  function catalog() {
+    const c = CONTENT, sig = [(c.openings || []).length, (c.think || []).length, (c.bridge || []).length, (c.endgame || []).length, ((c.courses || {}).middlegame || []).length, ((c.courses || {}).antiblunder || []).length, ((c.courses || {}).endgame || []).length,
+      ((c.openings || [])[0] || {}).id, ((c.openings || [])[(c.openings || []).length - 1] || {}).id].join(':');
+    if (!cat || sig !== catSig) { cat = build(); catSig = sig; by = {}; treeIdx = {}; fenIdx = {}; cat.forEach((x) => { by[x.id] = x; indexCard(x); }); }
+    return cat;
+  }
+  const has = (id) => { catalog(); return !!by[id]; };
+
+  /* ---------- state of a card ---------- */
+  function status(it, now) {
+    now = now || Date.now();
+    if (!it || (!it.l && !it.n && !it.s)) return 'new';
+    if (it.l >= 3) return 'permanent';
+    if (it.l >= 1 && it.c > now) return 'fridge';
+    if (it.l >= 1) return 'repeat';
+    return 'active';
+  }
+  const fridge = (id) => { const it = load().it[id]; return !!it && status(it) === 'fridge'; };
+  const daysLeft = (it) => Math.max(1, Math.ceil((it.c - Date.now()) / DAY));
+  const moduleOf = (id) => { const x = by[id]; const p = PILLARS.filter((q) => x && q.id === x.pillar)[0]; return p ? p.xp : 'openings'; };
+
+  function levelUp(id, it, now) {
+    const c = cfg();
+    it.l = Math.min(3, it.l + 1); it.s = 0;
+    it.c = it.l >= 3 ? 0 : now + (+c.cooldownDays[it.l - 1] || 7) * DAY;
+    const bonus = +c.xp[it.l - 1] || 0;
+    try { if (bonus) V6.addXp(moduleOf(id), bonus, { noBench: true }); } catch (e) { /* the XP engine is optional */ }
+    const x = by[id], name = x ? x.title : 'This line';
+    it.k = 1;                                  // a mastered card is a caught card
+    const casc = cascadeLevel(id, it);
+    toast(it.l >= 3 ? name + ': Grandmaster. Permanent, +' + bonus + ' XP.' : name + ': ' + MASTERY[it.l] + ' (+' + bonus + ' XP). In the fridge for ' + (it.l === 1 ? '1 week' : '1 month') + '.', 'good');
+    if (casc) toast(casc + (casc === 1 ? ' easier version is' : ' easier versions are') + ' mastered with it.', 'good');
+    return { kind: 'levelup', level: it.l };
+  }
+  /* One finished run of a card. perfect = every move right on the first try, no hints. */
+  function record(id, perfect, ctx) {
+    try {
+      if (!id || !has(id)) return null;
+      const it = ent(id), now = Date.now(), st = status(it, now), x = by[id];
+      /* v2.0 badge states: any finished run means tried; a flawless run in the Shuffle Trainer (or any flawless MSPC drill) means caught */
+      it.a = 1;
+      const via = ctx && ctx.src;
+      if (perfect && !it.k && (x.pillar === 'mspc' || via === 'shuffle')) {
+        it.k = 1;
+        const n = cascadeCaught(id);
+        toast(x.title + ': caught!' + (n ? ' ' + n + (n === 1 ? ' easier version' : ' easier versions') + ' caught too.' : ''), 'good');
+      }
+      if (st === 'fridge' || st === 'permanent') { save(); return { kind: st }; }   // practice outside the schedule changes nothing for the level
+      it.t = now;
+      let res;
+      if (perfect) {
+        it.n++; it.s++;
+        res = it.s >= cfg().need ? levelUp(id, it, now) : { kind: 'streak', s: it.s };
+      } else {
+        it.m++; it.s = 0;
+        if (st === 'repeat') { it.l = 0; it.c = 0; toast((by[id] ? by[id].title : 'A line') + ' slipped in its repeat round and is back to Active.'); res = { kind: 'decay' }; }
+        else res = { kind: 'reset' };
+      }
+      save();
+      return res;
+    } catch (e) { return null; }
+  }
+
+
+  /* ==========================================================================
+     v2.0 BADGES. Every card gets a mini-board icon drawn on the fly from the data:
+       puzzles       the start FEN of the position
+       openings      the FEN at the exact divergence: the last move where the line
+                     leaves the main line of its own branch (the final position for a
+                     line that never leaves it)
+     Three visual states: unseen (dark) -> seen or tried (black and white) -> caught (colour).
+       MSPC          a wrong answer is black and white, a flawless run is colour
+       the rest      Learn or Drill is black and white, a flawless Shuffle run is colour
+     The frame SHAPE is the mastery level (1 plain, 2 ornate, 3 delicate); the frame
+     MATERIAL is the Shiny status from a real game (wood, gold, platinum, diamond).
+     A card that levels up keeps its material until the line is played again in a real
+     game at the new level.
+     ========================================================================== */
+  const MAT = ['wood', 'gold', 'plat', 'diamond'];
+  const MATNAME = ['Wood', 'Gold', 'Platinum', 'Diamond'];
+  const GR = {   /* gradient stops (light, mid, dark) and a flat accent for the fine lines */
+    wood: ['#e0b074', '#a56b34', '#c58d4e', '#5b3a1a'],
+    gold: ['#fff3bf', '#f5b301', '#c27c0e', '#8a5a00'],
+    plat: ['#ffffff', '#d3dce8', '#9fb0c3', '#5f7186'],
+    diamond: ['#c8fbff', '#b9a7ff', '#5eead4', '#6d28d9'],
+    dark: ['#2a3652', '#121b30', '#1c2742', '#0a1020']
+  };
+  const SQ_LIGHT = '#dfe7f1', SQ_DARK = '#6b82a3';
+
+  function indexCard(x) {
+    x.lvl = Levels.of(x.src);
+    if (x.line && x.src && x.src.tree && typeof x.src.treePath === 'string') (treeIdx[x.src.tree] || (treeIdx[x.src.tree] = [])).push(x);
+    else if (x.fen) { x.fk = x.pillar + '|' + x.side + '|' + String(x.fen).split(' ').slice(0, 4).join(' '); (fenIdx[x.fk] || (fenIdx[x.fk] = [])).push(x); }
+  }
+  /* The easier versions that a harder card contains. Openings: the shorter lines of the same chapter that are
+     the first moves of this one. Puzzles: the same position on a lower level. */
+  function below(id) {
+    catalog();
+    const B = by[id], out = [];
+    if (!B) return out;
+    if (B.line && B.src.tree && typeof B.src.treePath === 'string') {
+      const P = B.src.treePath;
+      (treeIdx[B.src.tree] || []).forEach((A) => { if (A.id !== B.id && A.lvl < B.lvl && (P === A.src.treePath || P.indexOf(A.src.treePath + ' ') === 0)) out.push(A); });
+    } else if (B.fk) (fenIdx[B.fk] || []).forEach((A) => { if (A.id !== B.id && A.lvl < B.lvl) out.push(A); });
+    return out;
+  }
+  function cascadeCaught(id) {
+    let n = 0;
+    below(id).forEach((A) => { const a = ent(A.id); if (!a.k) { a.k = 1; a.a = 1; a.v = 1; n++; } });
+    return n;
+  }
+  function cascadeLevel(id, it) {
+    let n = 0;
+    below(id).forEach((A) => {
+      const a = ent(A.id); let ch = false;
+      if (!a.k) { a.k = 1; a.a = 1; a.v = 1; ch = true; }
+      if (a.l < it.l) { a.l = it.l; a.s = 0; a.c = it.c; ch = true; }
+      if (ch) n++;
+    });
+    return n;
+  }
+  /* 'unseen' | 'gray' | 'color' */
+  function vstate(it, x) {
+    if (!it) return 'unseen';
+    if (it.k) return 'color';
+    if (it.a || (x && x.pillar !== 'mspc' && it.v)) return 'gray';
+    return 'unseen';
+  }
+  function attempt(id) { try { if (!id || !has(id)) return; const it = ent(id); if (!it.a) { it.a = 1; save(); } } catch (e) { /* optional */ } }
+  function seen(id) { try { if (!id || !has(id) || by[id].pillar === 'mspc') return; const it = ent(id); if (!it.v) { it.v = 1; save(); } } catch (e) { /* optional */ } }
+
+  /* ---------- FEN -> mini board ---------- */
+  function parseFen(fen) {
+    const rows = String(fen || '').split(' ')[0].split('/');
+    if (rows.length !== 8) return null;
+    const grid = [];
+    for (let r = 0; r < 8; r++) {
+      const row = []; let n = 0;
+      for (const ch of rows[r]) {
+        if (/[1-8]/.test(ch)) { for (let i = 0; i < +ch; i++) { row.push(''); n++; } }
+        else if (/[pnbrqkPNBRQK]/.test(ch)) { row.push((ch === ch.toUpperCase() ? 'w' : 'b') + ch.toUpperCase()); n++; }
+        else return null;
+      }
+      if (n !== 8) return null;
+      grid.push(row);
+    }
+    return grid;
+  }
+  function boardSVG(fen, flip) {
+    const grid = parseFen(fen) || parseFen(START_FEN), sq = 9;
+    let dark = '', pcs = '';
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+      const x = (flip ? 7 - c : c) * sq, y = (flip ? 7 - r : r) * sq;
+      if ((r + c) % 2 === 1) dark += 'M' + x + ' ' + y + 'h' + sq + 'v' + sq + 'h-' + sq + 'z';
+      if (grid[r][c]) pcs += '<use href="#dxp-' + grid[r][c] + '" x="' + x + '" y="' + y + '" width="' + sq + '" height="' + sq + '"/>';
+    }
+    return '<g transform="translate(14 14)"><rect width="72" height="72" fill="' + SQ_LIGHT + '"/><path d="' + dark + '" fill="' + SQ_DARK + '"/>' + pcs + '</g>';
+  }
+  /* ---------- the frames: shape = mastery level, material = shiny ---------- */
+  function frameSVG(level, m) {
+    const f = 'url(#dxg-' + m + ')', a = GR[m][3], hi = 'rgba(255,255,255,.5)';
+    const ring = (o) => '<path fill-rule="evenodd" fill="' + f + '" d="M' + o + ' ' + o + 'H' + (100 - o) + 'V' + (100 - o) + 'H' + o + 'Z M14 14V86H86V14Z"/>';
+    const line = (p, w, col, extra) => '<rect x="' + p + '" y="' + p + '" width="' + (100 - 2 * p) + '" height="' + (100 - 2 * p) + '" fill="none" stroke="' + col + '" stroke-width="' + w + '"' + (extra || '') + '/>';
+    const corners = [[7, 7], [93, 7], [7, 93], [93, 93]];
+    let s = '';
+    if (level <= 1) {
+      s += ring(2) + line(2.6, 0.8, hi) + line(13.2, 1, a);
+    } else if (level === 2) {
+      s += ring(1) + line(1.8, 0.8, hi) + line(4.8, 1, a) + line(13, 1.4, a);
+      corners.forEach((p) => { s += '<rect x="' + (p[0] - 5.5) + '" y="' + (p[1] - 5.5) + '" width="11" height="11" rx="2.2" fill="' + a + '"/><circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.8" fill="' + f + '"/>'; });
+      [[50, 7.4], [50, 92.6], [7.4, 50], [92.6, 50]].forEach((p) => { s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.6" fill="' + a + '"/><circle cx="' + p[0] + '" cy="' + p[1] + '" r="1" fill="' + hi + '"/>'; });
+    } else {
+      s += ring(0.6) + line(1.5, 0.7, hi) + line(13, 1.2, a) + line(9.4, 1.5, a, ' stroke-dasharray="0.01 2.3" stroke-linecap="round"');
+      let sc = '';
+      for (let i = 0; i < 9; i++) { const x0 = 16 + i * 8.5; sc += 'M' + x0 + ' 5.4a4.25 4.25 0 0 1 8.5 0'; }
+      [0, 90, 180, 270].forEach((deg) => {
+        s += '<g transform="rotate(' + deg + ' 50 50)"><path d="' + sc + '" fill="none" stroke="' + a + '" stroke-width="0.8"/>' +
+          '<path d="M50 1.8L55.2 7.4L50 13L44.8 7.4Z" fill="' + a + '"/><path d="M50 4.4L52.6 7.4L50 10.4L47.4 7.4Z" fill="' + hi + '"/>' +
+          '<path d="M17 7.6Q24 2.6 31 7.6T43 7.6M83 7.6Q76 2.6 69 7.6T57 7.6" fill="none" stroke="' + a + '" stroke-width="0.8" stroke-linecap="round"/></g>';
+      });
+      corners.forEach((p) => { s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="6.4" fill="' + f + '" stroke="' + a + '" stroke-width="0.9"/><circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.8" fill="none" stroke="' + a + '" stroke-width="0.8"/><circle cx="' + p[0] + '" cy="' + p[1] + '" r="1.5" fill="' + a + '"/>'; });
+    }
+    return s;
+  }
+  function ensureDefs() {
+    if (typeof document === 'undefined' || document.getElementById('dx-defs')) return;
+    const grads = Object.keys(GR).map((k) => '<linearGradient id="dxg-' + k + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + GR[k][0] + '"/><stop offset="0.5" stop-color="' + GR[k][1] + '"/><stop offset="1" stop-color="' + GR[k][2] + '"/></linearGradient>').join('');
+    const syms = Object.keys(PIECE_SVG).map((k) => { const m = String(PIECE_SVG[k]).match(/^\s*<svg[^>]*>([\s\S]*)<\/svg>\s*$/); return m ? '<symbol id="dxp-' + k + '" viewBox="0 0 45 45">' + m[1] + '</symbol>' : ''; }).join('');
+    const d = document.createElement('div');
+    d.id = 'dx-defs'; d.className = 'dx-defs'; d.setAttribute('aria-hidden', 'true');
+    d.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" focusable="false"><defs>' + grads + syms + '</defs></svg>';
+    document.body.appendChild(d);
+  }
+
+  /* ---------- which position is the badge? ---------- */
+  function fenAtPly(pgn, ply) {
+    const g = new Chess(), t = pgnTokens(pgn);
+    for (let i = 0; i < Math.min(ply, t.length); i++) if (!g.move(t[i], { sloppy: true })) break;
+    return g.fen();
+  }
+  /* The ply of the last move where the line steps off the main line of its own branch; the end of the line when it never does. */
+  function divergePly(x) {
+    const o = x.src, t = o && o.tree ? Trees.info(o.tree) : null, leaf = t && t.idx && t.idx[o.treePath];
+    if (!leaf) return 0;
+    const L = t.levels && t.levels[o.lvl], has2 = L && typeof L.has === 'function' ? L.has : () => true;
+    for (let n = leaf; n && n.parent; n = n.parent) {
+      const sib = n.parent.kids.filter(has2);
+      if (sib.length > 1 && sib[0] !== n) return n.ply;
+    }
+    return leaf.ply;
+  }
+  function badgeFen(x) {
+    if (x.bfen) return x.bfen;
+    let f = '';
+    try {
+      if (x.line && x.src && x.src.pgn) { const t = pgnTokens(x.src.pgn), p = divergePly(x); f = fenAtPly(x.src.pgn, p > 0 ? p : t.length); }
+      else f = x.fen || '';
+    } catch (e) { f = ''; }
+    return (x.bfen = parseFen(f) ? f : START_FEN);
+  }
+  function badge(x, it, size) {
+    ensureDefs();
+    const vs = vstate(it, x), l = it ? it.l : 0, sh = it ? it.sh : 0;
+    const mat = vs === 'unseen' ? 'dark' : MAT[sh] || 'wood';
+    return '<span class="dx-bd' + (size ? ' ' + size : '') + '"><svg viewBox="0 0 100 100" focusable="false" aria-hidden="true">' + frameSVG(Math.max(1, l), mat) + boardSVG(badgeFen(x), x.side === 'b') +
+      (vs === 'unseen' ? '<rect x="14" y="14" width="72" height="72" fill="#0a1020" opacity="0.87"/>' : '') + '</svg></span>';
+  }
+  /* a plain sample badge for the legend */
+  function sampleBadge(fen, state, level, matIdx, size) {
+    ensureDefs();
+    const mat = state === 'unseen' ? 'dark' : MAT[matIdx || 0];
+    return '<span class="dx-bd' + (size ? ' ' + size : '') + '"><svg viewBox="0 0 100 100" focusable="false" aria-hidden="true">' + frameSVG(level, mat) + boardSVG(fen, false) +
+      (state === 'unseen' ? '<rect x="14" y="14" width="72" height="72" fill="#0a1020" opacity="0.87"/>' : '') + '</svg></span>';
+  }
+
+  /* ---------- numbers ---------- */
+  function stats() {
+    const d = load(), c = catalog(), out = { n: c.length, got: 0, caught: 0, sh: [0, 0, 0], pillars: [], total: 0 };
+    const P = {};
+    PILLARS.forEach((p) => { P[p.id] = Object.assign({ n: 0, pts: 0, gens: [], gmap: {}, sh: [0, 0, 0] }, p); out.pillars.push(P[p.id]); });
+    c.forEach((x) => {
+      const p = P[x.pillar], it = d.it[x.id], lv = it ? it.l : 0, sh = it ? it.sh : 0;
+      let g = p.gmap[x.gen]; if (!g) { g = p.gmap[x.gen] = { id: x.gen, name: x.genName, n: 0, pts: 0, chs: [], cmap: {}, sh: [0, 0, 0] }; p.gens.push(g); }
+      let h = g.cmap[x.ch]; if (!h) { h = g.cmap[x.ch] = { id: x.ch, name: x.chName, n: 0, pts: 0, items: [] }; g.chs.push(h); }
+      [p, g, h].forEach((o) => { o.n++; o.pts += lv / 3; });
+      h.items.push(x);
+      if (lv >= 1) out.got++;
+      if (it && it.k) out.caught++;
+      if (sh) { p.sh[sh - 1]++; g.sh[sh - 1]++; out.sh[sh - 1]++; }
+    });
+    out.pillars.forEach((p) => { p.pct = p.n ? p.pts / p.n * 100 : 0; p.gens.forEach((g) => { g.pct = g.n ? g.pts / g.n * 100 : 0; g.chs.forEach((h) => { h.pct = h.n ? h.pts / h.n * 100 : 0; }); }); });
+    const act = cfg().skipEmptyPillars ? out.pillars.filter((p) => p.n > 0) : out.pillars;
+    out.total = act.length ? act.reduce((a, p) => a + p.pct, 0) / act.length : 0;
+    return out;
+  }
+
+  /* ---------- skip the trunk you already proved this session ---------- */
+  function fastForward(item, proven) {
+    if (!item || item.kind !== 'line' || item.fen !== START_FEN || isStatic(item) || !item.moves || !item.moves.length || !proven || !proven.length) return null;
+    const mv = item.moves.map(cleanSan);
+    let best = 0;
+    proven.forEach((p) => {
+      if (p.side !== item.side) return;
+      let k = 0; const m = Math.min(p.moves.length, mv.length);
+      while (k < m && p.moves[k] === mv[k]) k++;
+      if (k > best) best = k;
+    });
+    best = Math.min(best, mv.length - 1);
+    if (best < cfg().ffMinPlies) return null;
+    const rest = item.moves.slice(best);
+    if (!rest.some((_, j) => ((best + j) % 2 === 0 ? 'w' : 'b') === item.side)) return null;   // always leave a decision
+    const g = new Chess();
+    let last = null;
+    for (let i = 0; i < best; i++) { const m = g.move(item.moves[i], { sloppy: true }); if (!m) return null; last = { from: m.from, to: m.to }; }
+    return { fen: g.fen(), moves: rest, lastMove: last, skipped: best, text: RepTree.sanText(item.moves.slice(0, best), 0) };
+  }
+
+  /* ---------- the Shiny catch (Master Token) ---------- */
+  const movesOf = (x) => (x && x.line && x.src && x.src.pgn ? pgnTokens(x.src.pgn) : null);
+  const tokens = () => (Admin.active ? Infinity : Credits.balance());
+  const key3 = (g) => g.fen().split(' ').slice(0, 3).join(' ');
+  /* The game must reach the line's final position after exactly as many plies as the line has, so a transposition counts. */
+  function check(id, pgnText, color, parsed) {
+    const x = by[id], it = load().it[id];
+    if (!x || !it || it.l < 1) return { ok: false, why: 'This card is not mastered yet. Reach Mastered (level 1) first.' };
+    if (it.sh >= it.l) return { ok: false, why: 'This card already carries a ' + SHINY[it.sh].name + ' frame at its current level.' };
+    const line = movesOf(x);
+    if (!line || !line.length) return { ok: false, why: 'Only opening lines can be caught in a real game.' };
+    if (color !== x.side) return { ok: false, why: 'This line is for ' + colorName(x.side) + '. Pick the colour you played.' };
+    const game = parsed || PGN.parse(pgnText);
+    if (!game.main.length) return { ok: false, why: 'I could not read any moves in that game. Paste the PGN from Chess.com, Lichess or your Trim review.' };
+    let depth = 0;
+    while (depth < line.length && depth < game.main.length && cleanSan(line[depth]) === cleanSan(game.main[depth])) depth++;
+    if (game.main.length < line.length) return { ok: false, depth, why: 'The game is shorter than the line (' + line.length + ' plies)' + (depth ? ' and left it after move ' + Math.ceil(depth / 2) : '') + '.' };
+    const a = new Chess(), b = new Chess();
+    for (let i = 0; i < line.length; i++) { if (!a.move(line[i], { sloppy: true })) return { ok: false, why: 'This line has an unreadable move.' }; if (!b.move(game.main[i], { sloppy: true })) return { ok: false, why: 'The game has an unreadable move.' }; }
+    if (key3(a) !== key3(b)) return { ok: false, miss: true, depth, why: 'The game did not reach this line’s position after ' + line.length + ' plies' + (depth ? ' (it followed the line up to move ' + Math.ceil(depth / 2) + ')' : '') + '. Check the line against the game and try another game.' };
+    return { ok: true };
+  }
+  /* v2.0: one verified game can catch the card you picked AND every easier version inside it. A game that leaves the
+     line at move 8 catches the shorter Free and Beginner lines (they end by move 8) but not the Intermediate line that runs to move 15. */
+  function catchShiny(id, pgnText, color) {
+    if (tokens() < cfg().masterTokens) return { ok: false, why: 'You need ' + cfg().masterTokens + ' Master Token. A free one arrives every day.' };
+    catalog();
+    const game = PGN.parse(pgnText), first = check(id, pgnText, color, game);
+    const hits = [];
+    if (first.ok) hits.push(by[id]);
+    below(id).forEach((A) => { if (check(A.id, pgnText, color, game).ok) hits.push(A); });
+    if (!hits.length) return first;
+    if (!Admin.active) { Credits.spend(cfg().masterTokens); App.save(); }
+    const now = Date.now();
+    hits.forEach((A) => {
+      const it = ent(A.id);
+      it.sh = it.l; it.st = now; it.k = 1; it.a = 1;
+      load().balls++;
+      try { V6.addXp(moduleOf(A.id), 100 * it.sh, { noBench: true }); } catch (e) { /* optional */ }
+    });
+    save(true);
+    const me = load().it[id];
+    return { ok: true, tier: me && first.ok ? me.sh : load().it[hits[0].id].sh, picked: first.ok, hits: hits.map((A) => ({ id: A.id, title: A.title, lvl: A.lvl, tier: load().it[A.id].sh })), left: first.ok ? 0 : (first.depth || 0) };
+  }
+
+  /* ---------- the AI coach: pay per mistake ---------- */
+  const aiCan = () => !cfg().aiCostsToken || tokens() >= 1;
+  function aiSpend() { if (!cfg().aiCostsToken || Admin.active) return; Credits.spend(1); App.save(); }
+  const PRAISE_MSPC = 'Well spotted, on to the next step!';
+
+  /* ---------- friends ---------- */
+  function card() {
+    const s = stats();
+    return { v: 1, t: Math.round(s.total * 10) / 10, p: s.pillars.map((p) => Math.round(p.pct * 10) / 10), s: s.sh.slice(),
+      g: s.pillars.reduce((a, p) => a.concat(p.gens.map((g) => [String(g.name).slice(0, 24), Math.round(g.pct * 10) / 10].concat(g.sh))), []).slice(0, 12) };
+  }
+  function cleanCard(o) {
+    if (!o || typeof o !== 'object' || o.v !== 1) return null;
+    const n = (v, hi) => clamp(Math.round((+v || 0) * 10) / 10, 0, hi || 100);
+    return { t: n(o.t), p: (Array.isArray(o.p) ? o.p : []).slice(0, 4).map((v) => n(v)), s: (Array.isArray(o.s) ? o.s : []).slice(0, 3).map((v) => n(v, 9999)),
+      g: (Array.isArray(o.g) ? o.g : []).slice(0, 12).map((g) => Array.isArray(g) ? [String(g[0] || '').replace(/[\u0000-\u001f<>]/g, ' ').slice(0, 24), n(g[1]), n(g[2], 999), n(g[3], 999), n(g[4], 999)] : null).filter(Boolean) };
+  }
+  const shinyText = (s) => (s && (s[0] || s[1] || s[2]) ? [s[0] ? s[0] + ' gold' : '', s[1] ? s[1] + ' platinum' : '', s[2] ? s[2] + ' diamond' : ''].filter(Boolean).join(', ') : 'no shinies yet');
+  function friendLine(f) {
+    const d = f && f.dex;
+    if (!d) return '';
+    return '<p class="v6-fline">' + icon('layer-group') + ' Chess Dex ' + esc(fmt(d.t)) + ', ' + esc(shinyText(d.s)) + '</p>';
+  }
+  function openFriend(id) {
+    const f = Friends.list().filter((x) => x.id === id)[0];
+    if (!f || !f.dex) return;
+    const d = f.dex;
+    openSheet({ title: f.name + '’s Chess Dex', html: '<div class="dx-friend"><div class="dx-ring" style="--p:' + d.t + '"><b>' + esc(fmt(d.t)) + '</b></div><div><p class="muted small">' + esc(shinyText(d.s)) + '</p></div></div>' +
+      '<div class="dx-pillars dx-pillars-mini">' + PILLARS.map((p, i) => '<div class="dx-pcard">' + icon(p.icon) + '<b>' + esc(p.label) + '</b><span>' + esc(fmt(d.p[i] || 0)) + '</span><i class="dx-bar"><i style="width:' + (d.p[i] || 0) + '%"></i></i></div>').join('') + '</div>' +
+      (d.g.length ? '<div class="dx-gens">' + d.g.map((g) => '<div class="dx-grow"><span>' + esc(g[0]) + '</span><i class="dx-bar"><i style="width:' + g[1] + '%"></i></i><b>' + esc(fmt(g[1])) + '</b>' + shinyDots(g.slice(2)) + '</div>').join('') + '</div>' : '') +
+      '<p class="small muted">A snapshot from their latest friend code.</p>' });
+  }
+  const shinyDots = (s) => '<span class="dx-dots">' + [0, 1, 2].map((i) => (s[i] ? '<em class="dx-dot ' + SHINY[i + 1].cls + '" title="' + SHINY[i + 1].name + '">' + s[i] + '</em>' : '')).join('') + '</span>';
+
+  /* ---------- the page ---------- */
+  function pips(l) { return '<span class="dx-pips" aria-label="Mastery ' + l + ' of 3">' + [1, 2, 3].map((i) => '<i class="' + (i <= l ? 'on' : '') + '"></i>').join('') + '</span>'; }
+  function cardHTML(x) {
+    const it = load().it[x.id], l = it ? it.l : 0, st = status(it), open = App.unlocked(x.src), sh = it ? it.sh : 0;
+    if (!open) return '<button type="button" class="dx-card is-locked" data-dx-lock="' + esc(x.id) + '" aria-label="Locked card">' + icon('lock') + '<b>???</b><small>' + (Levels.required(x.src) >= TOP_TIER ? 'Mentorship' : 'Accelerator') + '</small></button>';
+    const vs = vstate(it, x);
+    const sub = st === 'fridge' ? 'In the fridge, ' + daysLeft(it) + 'd' : st === 'repeat' ? 'Repeat round' : st === 'permanent' ? 'Permanent' : st === 'active' ? (it.s || 0) + ' / ' + cfg().need + ' clean' : 'New';
+    const note = vs === 'unseen' ? 'Not seen yet' : vs === 'gray' ? (x.pillar === 'mspc' ? 'Tried, not clean yet' : 'Seen. Catch it in Shuffle') : sub;
+    const tier = LEVELS[clamp(x.lvl || 1, 1, 5) - 1].label;
+    const aria = x.title + ', ' + tier + ' level, ' + (vs === 'unseen' ? 'not seen yet' : vs === 'gray' ? 'tried, not caught yet' : 'caught') + (vs === 'color' ? ', ' + MATNAME[sh] + ' frame, mastery ' + l : '');
+    return '<button type="button" class="dx-card st-' + st + ' dxs-' + vs + (sh && vs === 'color' ? ' is-shiny shiny-' + SHINY[sh].cls : '') + '" data-dx-card="' + esc(x.id) + '" aria-label="' + esc(aria) + '">' +
+      badge(x, it) + '<b>' + esc(x.title) + '</b><span class="dx-lv">' + icon('chess-pawn', x.side === 'b' ? 'dx-black' : 'dx-white') + '<span class="dx-tier">' + esc(tier) + '</span></span>' + pips(l) + '<small>' + esc(note) + '</small>' +
+      (sh && vs === 'color' ? '<span class="dx-badge">' + icon('gem') + ' ' + SHINY[sh].name + '</span>' : '') + '</button>';
+  }
+  function legendHTML() {
+    const F = 'rnbqkbnr/pp2pppp/2p5/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3';
+    const item = (inner, label, sub, cls) => '<div class="dx-lg-item' + (cls ? ' ' + cls : '') + '">' + inner + '<b>' + esc(label) + '</b><span>' + esc(sub) + '</span></div>';
+    return '<details class="panel dx-legend" data-dx-k="legend"' + (ui().open.legend ? ' open' : '') + '><summary><span class="dx-gname">' + icon('circle-info') + ' <b>Badge guide</b></span><span class="small muted">states, frames, shinies</span></summary>' +
+      '<div class="dx-lg-sec"><h3>Three states</h3><p class="small muted">MSPC drills: a wrong answer turns the badge black and white, a flawless run gives it colour. Openings, Middlegame and Endgame: Learn or Drill turns it black and white, a flawless run in the Shuffle Trainer catches it in colour.</p><div class="dx-lg-row">' +
+        item(sampleBadge(F, 'unseen', 1, 0, 'sm'), 'Unseen', 'Never opened', 'is-unseen') + item(sampleBadge(F, 'gray', 1, 0, 'sm'), 'Tried', 'Black and white', 'is-gray') + item(sampleBadge(F, 'color', 1, 0, 'sm'), 'Caught', 'Full colour', '') + '</div></div>' +
+      '<div class="dx-lg-sec"><h3>Frame shape is your mastery</h3><p class="small muted">The more you master a card, the finer the frame.</p><div class="dx-lg-row">' +
+        [1, 2, 3].map((k) => item(sampleBadge(F, 'color', k, 0, 'sm'), 'Master ' + k, k === 1 ? 'Plain' : k === 2 ? 'Ornate' : 'Delicate')).join('') + '</div></div>' +
+      '<div class="dx-lg-sec"><h3>Frame material is your Shiny</h3><p class="small muted">Play the line in a real game and verify it. Wood means no Shiny yet. When you reach a new mastery level the frame keeps its material until you play the line again in a real game at that level.</p><div class="dx-lg-row">' +
+        [0, 1, 2, 3].map((m) => item(sampleBadge(F, 'color', Math.max(1, m), m, 'sm'), MATNAME[m], m ? 'Shiny, level ' + m : 'No Shiny')).join('') + '</div></div>' +
+      '<div class="dx-lg-sec"><h3>Harder versions cover easier ones</h3><p class="small muted">Catch or master a line on a higher level and every easier version of it is caught and mastered too. A real game that leaves the line at move 8 earns a Shiny on the Free and Beginner versions that end by move 8, but not on an Intermediate version that runs to move 15.</p></div></details>';
+  }
+  function pageHTML(s) {
+    const u = ui(), P = s.pillars.filter((p) => p.id === u.pillar)[0] || s.pillars[0];
+    const bal = tokens();
+    chMap = {};
+    return '<div class="dx-page"><section class="panel pad dx-head"><div class="dx-ring" style="--p:' + s.total + '"><b>' + esc(fmt(s.total)) + '</b><span>Total</span></div>' +
+      '<div class="dx-headtext"><h1>Chess Dex</h1><p class="muted">' + s.caught + ' of ' + s.n + ' cards caught, ' + s.got + ' mastered. ' + esc(shinyText(s.sh)) + '.</p>' +
+      '<p class="small muted">Master Tokens: <b>' + (bal === Infinity ? 'unlimited (admin)' : bal) + '</b>. New content added by the coach lowers your percentage on purpose: that is your next grind.</p></div></section>' +
+      '<nav class="dx-pillars" aria-label="Pillars">' + s.pillars.map((p) => '<button type="button" class="dx-pcard' + (p.id === P.id ? ' is-on' : '') + '" data-dx-pillar="' + p.id + '">' + icon(p.icon) + '<b>' + esc(p.label) + '</b><span>' + (p.n ? esc(fmt(p.pct)) : 'No cards yet') + '</span><i class="dx-bar"><i style="width:' + p.pct + '%"></i></i><small>25%</small></button>').join('') + '</nav>' +
+      '<section class="dx-body">' + legendHTML() + '<p class="muted small">' + esc(P.blurb) + (P.n ? '' : ' Nothing is published here yet, so this pillar does not count against your total until it is.') + '</p>' +
+      P.gens.map((g, gi) => '<details class="panel dx-gen" data-dx-k="' + esc(P.id + '|' + g.id) + '"' + (u.open[P.id + '|' + g.id] ? ' open' : '') + '><summary><span class="dx-gname">' + icon('layer-group') + ' Generation ' + (gi + 1) + ': <b>' + esc(g.name) + '</b></span><span class="dx-gpct">' + shinyDots(g.sh) + '<i class="dx-bar"><i style="width:' + g.pct + '%"></i></i><b>' + esc(fmt(g.pct)) + '</b></span></summary>' +
+        g.chs.map((h) => { const hk = P.id + '|' + g.id + '|' + h.id; chMap[hk] = h; return '<details class="dx-ch" data-dx-k="' + esc(hk) + '"' + (u.open[hk] ? ' open' : '') + '><summary><span>' + esc(h.name) + '</span><span class="dx-gpct"><i class="dx-bar"><i style="width:' + h.pct + '%"></i></i><b>' + esc(fmt(h.pct)) + '</b></span></summary><div class="dx-grid">' + (u.open[hk] ? h.items.map(cardHTML).join('') : '') + '</div></details>'; }).join('') + '</details>').join('') + '</section>' +
+      '<p class="small muted dx-rules">' + icon('circle-info') + ' ' + cfg().need + ' flawless runs in a row level a card up. Level 1 rests for a week, level 2 for a month, level 3 is permanent. A slip in a repeat round sends the card back to Active. Practise in the <a href="#shuffle">Shuffle Trainer</a> or the opening drills.</p></div>';
+  }
+  function detail(id, repaint) {
+    const x = by[id], it = load().it[id] || { l: 0, s: 0, c: 0, n: 0, m: 0, sh: 0, v: 0, a: 0, k: 0 }, st = status(it);
+    if (!x) return;
+    const vs = vstate(it, x), lower = below(id);
+    const can = it.l >= 1 && movesOf(x) && (it.sh < it.l || lower.some((A) => { const a = load().it[A.id]; return a && a.l >= 1 && a.sh < a.l; }));
+    const next = it.sh < it.l ? SHINY[it.l].name : null;
+    const tier = LEVELS[clamp(x.lvl || 1, 1, 5) - 1].label;
+    const stateText = vs === 'unseen' ? 'Not seen yet.' : vs === 'gray' ? (x.pillar === 'mspc' ? 'Tried, but not answered cleanly yet. A flawless run catches it.' : 'Seen or drilled. A flawless run in the Shuffle Trainer catches it.') : 'Caught.';
+    const sheet = openSheet({ title: x.title, html: '<p class="muted small">' + esc(x.genName + ' · ' + x.chName + ' · ' + tier + ' level · you play ' + colorName(x.side)) + '</p>' +
+      '<div class="dx-sheetbadge">' + badge(x, it, 'lg') + '<div><p class="small"><b>' + esc(stateText) + '</b></p><p class="small muted">Frame: master level ' + Math.max(1, it.l) + ', ' + esc(MATNAME[it.sh]) + (it.sh ? ' (Shiny)' : ' (no Shiny yet)') + '.</p></div></div>' +
+      '<div class="dx-detail"><div>' + pips(it.l) + '<b>' + esc(MASTERY[it.l]) + '</b></div><p class="small muted">' + (st === 'fridge' ? 'In the fridge for ' + daysLeft(it) + ' more days. It returns as a repeat round.' : st === 'repeat' ? 'Repeat round: ' + it.s + ' of ' + cfg().need + ' clean runs. One slip sends it back to Active.' : st === 'permanent' ? 'Permanent. No more practice needed.' : 'Active: ' + (it.s || 0) + ' of ' + cfg().need + ' clean runs in a row.') + '</p>' +
+      '<p class="small muted">Clean runs ' + it.n + ', slips ' + it.m + '.' + (it.sh ? ' Shiny: <b>' + SHINY[it.sh].name + '</b>.' : '') + '</p>' +
+      (lower.length ? '<p class="small muted">Catching or mastering this card also covers ' + lower.length + (lower.length === 1 ? ' easier version:' : ' easier versions:') + '</p><ul class="dx-casc">' + lower.slice(0, 6).map((A) => '<li>' + esc(A.title) + ' (' + esc(LEVELS[clamp(A.lvl, 1, 5) - 1].label) + ')</li>').join('') + (lower.length > 6 ? '<li>and ' + (lower.length - 6) + ' more</li>' : '') + '</ul>' : '') + '</div>' +
+      (can ? '<div class="dx-catch"><h3>' + icon('gem') + ' Catch the ' + esc(next || 'next') + ' frame</h3><p class="small muted">Played this line in a real game? Paste the PGN. It costs ' + cfg().masterTokens + ' Master Token (you have ' + (tokens() === Infinity ? '∞' : tokens()) + '). The easier versions inside this line are checked as well, so a game that leaves the line early can still earn the shorter ones.</p>' +
+        '<label class="field"><span class="field-label">Game PGN</span><textarea class="input" rows="5" data-dx-pgn placeholder="[Event &quot;Rated Rapid game&quot;] 1. d4 d5 2. c4 …"></textarea></label>' +
+        '<div class="seg" role="group" aria-label="Your colour"><button type="button" data-dx-col="w" aria-pressed="' + (x.side === 'w') + '">I played White</button><button type="button" data-dx-col="b" aria-pressed="' + (x.side === 'b') + '">I played Black</button></div>' +
+        '<p class="small dx-msg" data-dx-msg role="status"></p><div class="btn-row"><button type="button" class="btn btn-gold" data-dx-go>' + icon('gem') + ' Verify and catch</button></div></div>'
+        : it.l < 1 ? '<p class="small muted">' + icon('lock') + ' Shiny hunting opens at Mastered (level 1).</p>' : '') });
+    let col = x.side;
+    sheet.el.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-dx-col]');
+      if (c) { col = c.getAttribute('data-dx-col'); qsa('[data-dx-col]', sheet.el).forEach((b) => b.setAttribute('aria-pressed', String(b === c))); return; }
+      if (!e.target.closest('[data-dx-go]')) return;
+      const msg = qs('[data-dx-msg]', sheet.el), r = catchShiny(id, qs('[data-dx-pgn]', sheet.el).value, col);
+      if (!r.ok) { msg.textContent = r.why; msg.className = 'small dx-msg is-bad'; return; }
+      sheet.close();
+      const names = r.hits.map((h) => LEVELS[clamp(h.lvl, 1, 5) - 1].label + ' ' + SHINY[h.tier].name).join(', ');
+      toast(r.hits.length === 1 ? x.title + ': ' + SHINY[r.tier].name + ' Shiny caught!' : r.hits.length + ' Shinies caught (' + names + ').' + (r.left ? ' The game left the line after move ' + Math.ceil(r.left / 2) + ', so the longer version stays open.' : ''), 'good');
+      repaint();
+    });
+  }
+  function mount(view) {
+    catalog();
+    const root = document.createElement('div');
+    view.appendChild(root);
+    const repaint = () => { root.innerHTML = pageHTML(stats()); };
+    repaint();
+    const onClick = (e) => {
+      const p = e.target.closest('[data-dx-pillar]');
+      if (p) { ui().pillar = p.getAttribute('data-dx-pillar'); repaint(); return; }
+      const lk = e.target.closest('[data-dx-lock]');
+      if (lk) { const x = by[lk.getAttribute('data-dx-lock')]; openUnlock(x && Levels.required(x.src) >= TOP_TIER ? 'mentor' : 'vault', 'This card'); return; }
+      const c = e.target.closest('[data-dx-card]');
+      if (c) detail(c.getAttribute('data-dx-card'), repaint);
+    };
+    const onToggle = (e) => {
+      const d = e.target, k = d && d.getAttribute && d.getAttribute('data-dx-k');
+      if (!k) return;
+      ui().open[k] = d.open;
+      if (d.open && chMap[k]) { const g = d.querySelector('.dx-grid'); if (g && !g.children.length) g.innerHTML = chMap[k].items.map(cardHTML).join(''); }   // v2.0: badges are drawn when a chapter opens
+    };
+    root.addEventListener('click', onClick);
+    root.addEventListener('toggle', onToggle, true);
+    return () => { root.removeEventListener('click', onClick); root.removeEventListener('toggle', onToggle, true); };
+  }
+  return { record, attempt, seen, fridge, fastForward, stats, mount, card, cleanCard, friendLine, openFriend, aiCan, aiSpend, PRAISE_MSPC, status, _t: { check, catchShiny, load, catalog, ent, below, vstate, badge, badgeFen, divergePly, frameSVG, boardSVG, parseFen, sampleBadge, cascadeCaught, cascadeLevel } };
+})();
+const mountDex = (view) => Dex.mount(view);
+
 const TABS = [
   { id: 'home', label: 'Home', icon: 'house', routes: ['home'] },
   { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'peer', 'srs'] },
   { id: 'theory', label: 'Theory', icon: 'book-open', routes: ['openings', 'middlegame', 'endgame', 'puzzles'], href: '#openings' },
   { id: 'trim', label: 'Trim', icon: 'scissors', routes: ['trim', 'games', 'brilliant'] },
+  { id: 'dex', label: 'Dex', icon: 'layer-group', routes: ['dex'] },
   { id: 'arena', label: 'Arena', icon: 'trophy', routes: ['leaderboard'] },
   { id: 'upgrades', label: 'Upgrades', icon: 'crown', routes: ['upgrades'] },
   { id: 'account', label: 'Account', icon: 'circle-user', routes: ['account', 'profile', 'events', 'trophies'] },
   { id: 'about', label: 'About', icon: 'user', routes: ['about'] }
 ];
-const ROUTE_TITLES = { account: 'your Account', profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
-const DOC_TITLES = { account: 'Account', profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
-const ALIASES = { executive: 'profile', 'skill-matrix': 'profile', matrix: 'profile', bosses: 'profile', 'boss-fight': 'profile', bounties: 'profile', community: 'profile', 'event-engine': 'events', 'master-events': 'events', arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
+const ROUTE_TITLES = { dex: 'the Chess Dex', account: 'your Account', profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
+const DOC_TITLES = { dex: 'Chess Dex', account: 'Account', profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
+const ALIASES = { pokedex: 'dex', 'chess-dex': 'dex', mastery: 'dex', executive: 'profile', 'skill-matrix': 'profile', matrix: 'profile', bosses: 'profile', 'boss-fight': 'profile', bounties: 'profile', community: 'profile', 'event-engine': 'events', 'master-events': 'events', arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
   arena: 'leaderboard', friends: 'leaderboard', tournament: 'leaderboard', tournaments: 'leaderboard',
   ranking: 'leaderboard', rankings: 'leaderboard', ranks: 'leaderboard', 'game-vault': 'games', gamevault: 'games', 'my-games': 'games', folders: 'games', stats: 'insights', brilliants: 'brilliant', brilliancies: 'brilliant', mistakes: 'vault-browser', 'mistake-browser': 'vault-browser', 'blunder-clinic': 'clinic', 'repertoire-trainer': 'mspc-rep',
   'peer-puzzles': 'peer', 'community-puzzles': 'peer', puzzle: 'puzzles', tactics: 'puzzles', 'lichess-puzzles': 'puzzles', 'rated-puzzles': 'puzzles', 'my-mistakes': 'srs', 'spaced-repetition': 'srs', repetition: 'srs', trophy: 'trophies', badges: 'trophies', achievements: 'trophies', queue: 'review-queue', 'admin-queue': 'review-queue',
   'privacy-policy': 'privacy', 'privacy-statement': 'privacy', privacybeleid: 'privacy', gdpr: 'privacy' };
 const MOUNT = {
-  home: mountHome, think: mountThink, shuffle: mountShufflePage,
+  dex: mountDex, home: mountHome, think: mountThink, shuffle: mountShufflePage,
   openings: (v) => mountTheory(v, 'openings'), middlegame: (v) => mountTheory(v, 'middlegame'), endgame: (v) => mountTheory(v, 'endgame'), puzzles: (v) => mountTheory(v, 'puzzles'),
   trim: mountTrim, upgrades: mountUpgrades, about: mountAbout,
   leaderboard: (v) => { const d = mountLeaderboard(v), a = Arena.mount(v); return () => { a(); if (typeof d === 'function') d(); }; }, games: mountVault, insights: mountInsights,
@@ -22804,6 +23532,7 @@ function boot() {
   const firstSync = Site.fetchPublished();   // v3.7: started before the first render, so empty pages can say "loading"
   App.load();
   Repertoire.migrate();
+  try { C6.migrate(); } catch (e) { /* old progress stays where it is */ }
   const expired = Access.recheck();
   refreshChip(); renderFoot();
   qs('#profile-chip').addEventListener('click', openProfile);
@@ -22824,6 +23553,7 @@ function boot() {
      and only redraws pages where that can't interrupt a drill. */
   const afterSync = (changed) => {
     dataBanner();
+    try { C6.migrate(); } catch (e) { /* optional */ }
     const gone = Access.recheck();
     if (gone) { lost(gone); return; }
     refreshChip();
