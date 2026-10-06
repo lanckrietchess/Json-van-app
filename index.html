@@ -1879,6 +1879,13 @@ body.lc-focus .dx-card.is-shiny::after{animation:none;display:none}
 
 @media (max-width:640px){.dx-pillars{grid-template-columns:repeat(2,1fr)}.dx-gpct .dx-bar{width:48px}.dx-grid{padding-left:16px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}.dx-ch>summary{padding-left:16px}}
 .dx-ff{margin:6px 0 0;color:var(--fog)}
+
+/* v6.3: chapters */
+.ch-section{margin-top:28px}
+.ch-pick{display:grid;gap:10px}
+.ch-pick [hidden]{display:none!important}
+.cm-title{width:100%;font-weight:700}
+.cm-sel{margin-top:6px;max-width:100%}
 </style>
 <style id="v8-css">
 /* ---------- v8: formula ranks: the five level pills under a module rank ---------- */
@@ -2026,7 +2033,7 @@ body.lc-focus .v7-clock.is-risk{display:none}
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '6.2.0',
+  version: '6.3.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -2272,6 +2279,7 @@ const CONTENT = {
   bridge: [],
   middlegame: [],
   endgame: [],
+  chapters: [],
   courses: { middlegame: [], antiblunder: [], endgame: [] },
   spotlights: [],
   logoLinks: [],
@@ -3824,7 +3832,7 @@ function sansOk(fen, map, what) {
 }
 function checkItem(name, it) {
   if (!it || typeof it !== 'object' || Array.isArray(it)) return 'This item is not readable.';
-  const ids = ['clinic', 'think', 'spotlights', 'openings', 'bridge', 'middlegame', 'endgame', 'courses.middlegame', 'courses.antiblunder', 'courses.endgame', 'peer', 'games'];
+  const ids = ['clinic', 'think', 'spotlights', 'openings', 'bridge', 'middlegame', 'endgame', 'courses.middlegame', 'courses.antiblunder', 'courses.endgame', 'peer', 'games', 'chapters'];
   if (ids.indexOf(name) >= 0 && !(typeof it.id === 'string' && /^[\w-]{2,60}$/.test(it.id))) return 'Every item needs an id made of letters, numbers and dashes.';
   if (it.lvl != null && it.lvl !== '' && !Levels.num(it.lvl)) return 'lvl must be a level from 1 to 5.';
   if (it.requiredTier != null && it.requiredTier !== '' && [0, PAID_TIER, TOP_TIER].indexOf(+it.requiredTier) < 0) return 'requiredTier must be 0 (Level 1), 2 (the Accelerator) or 3 (the Mentorship).';
@@ -3835,6 +3843,7 @@ function checkItem(name, it) {
     if (name === 'openings' || name === 'spotlights') return lineOk(START_FEN, it.pgn, isStatic(it));
     if (name === 'logoLinks') return it.label && /^(https:\/\/\S{3,}|#[\w\/-]+)$/i.test(String(it.url || '')) ? '' : 'A link needs a name and an https:// address.';
     if (name === 'groups') return it.name ? '' : 'A repertoire needs a name.';
+    if (name === 'chapters') return Chapters.MODS[it.module] && String(it.title || '').trim() ? '' : 'A chapter needs a name and a section (mspc, middlegame or endgame).';
     if (name === 'think' || name === 'middlegame') {
       if (!Array.isArray(it.stages) || !it.stages.length) return 'Add at least one stage.';
       for (const st of it.stages) {
@@ -3886,6 +3895,66 @@ function checkItem(name, it) {
     }
   } catch (e) { return 'This item could not be read: ' + e.message; }
   return '';
+}
+
+/* ---------- v6.3: chapters for MSPC, Middlegame and Endgame ----------
+   Storage: the chapter registry is one more list in the data file,
+   lists.chapters = [{ id, module: "mspc" | "middlegame" | "endgame", title }],
+   and its order is the order players see. A position or drill points at its
+   chapter with item.chap (the chapter id), so renaming a chapter never touches
+   the items. A data file may also name a chapter in plain text (item.chapter);
+   such a chapter is shown as it is and can be adopted into the registry in
+   Admin > Chapters. Items without a chapter stay in the old sections. */
+const Chapters = (() => {
+  const MODS = {
+    mspc: { label: 'MSPC', list: 'think', noun: 'position' },
+    middlegame: { label: 'Middlegame', list: 'middlegame', noun: 'drill' },
+    endgame: { label: 'Endgame', list: 'endgame', noun: 'drill' }
+  };
+  const MOD_OF = { think: 'mspc', middlegame: 'middlegame', endgame: 'endgame' };
+  const NEW = '__new__';
+  const clean = (x) => String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, 80);
+  const slug = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'chapter';
+  const all = () => (Array.isArray(CONTENT.chapters) ? CONTENT.chapters : []).filter((c) => c && typeof c === 'object' && typeof c.id === 'string' && c.title && MODS[c.module]);
+  const of = (mod) => all().filter((c) => c.module === mod);
+  function uid(mod, title, existing) {
+    const base = mod + '-' + slug(title), pool = existing || all();
+    let id = base, n = 2;
+    while (pool.some((c) => c.id === id)) id = base + '-' + n++;
+    return id;
+  }
+  /* The chapter an item sits in: by id first, then by the chapter name in the data file. */
+  function find(item, mod) {
+    if (!item || typeof item !== 'object') return null;
+    const reg = of(mod);
+    if (item.chap) { const c = reg.filter((x) => x.id === item.chap)[0]; if (c) return c; }
+    const t = clean(item.chapter);
+    if (!t) return null;
+    const low = t.toLowerCase(), c = reg.filter((x) => x.title.toLowerCase() === low)[0];
+    return c || { id: 'v-' + slug(t), title: t, module: mod, virtual: true };
+  }
+  /* A list cut into chapters (registry order, then chapters only the file names) plus the unsorted rest. */
+  function split(mod, list, withEmpty) {
+    const groups = of(mod).map((c) => ({ ch: c, items: [] })), by = {}, rest = [];
+    groups.forEach((g) => { by[g.ch.id] = g; });
+    (list || []).forEach((it) => {
+      const c = find(it, mod);
+      if (!c) { rest.push(it); return; }
+      let g = by[c.id];
+      if (!g) { g = by[c.id] = { ch: c, items: [] }; groups.push(g); }
+      g.items.push(it);
+    });
+    const keep = !!withEmpty || (typeof Admin !== 'undefined' && Admin.editing());
+    return { groups: groups.filter((g) => g.items.length || keep), rest };
+  }
+  function ordered(mod, list) { const sp = split(mod, list, false); return [].concat.apply([], sp.groups.map((g) => g.items)).concat(sp.rest); }
+  return { MODS, MOD_OF, NEW, all, of, uid, find, split, ordered, clean, modOfList: (n) => MOD_OF[n] || '' };
+})();
+function chapterBtn(mod) { return Admin.editing() ? '<button type="button" class="cms-manage" data-cms-chapters="' + esc(mod) + '">' + icon('layer-group') + ' Chapters</button>' : ''; }
+/* One section per chapter, each with the five-level cards of its items. */
+function chapterSections(mod, groups, cards, scope, body, noun) {
+  return (groups || []).map((g) => '<section class="section ch-section" data-chapter="' + esc(g.ch.id) + '"><div class="section-head"><div><h2>' + esc(g.ch.title) + '</h2><p>' + g.items.length + ' ' + noun + (g.items.length === 1 ? '' : 's') + '</p></div>' + chapterBtn(mod) + '</div>' +
+    (g.items.length ? cards.section(g.items, { id: 'ch-' + g.ch.id, scope, title: g.ch.title }, { body, noun }) : '<p class="muted small">Nothing in this chapter yet. Add a ' + noun + ' with Admin > Board editor > Save as a new drill, and pick this chapter.</p>') + '</section>').join('');
 }
 
 /* ---------- v3.5 Feed: read any Lanckrietchess data file ----------
@@ -4762,6 +4831,7 @@ const Site = (() => {
     'courses.antiblunder': ['Anti-Blunder Bootcamp lessons', 'Theory'],
     endgame: ['Endgame drills', 'Theory'],
     'courses.endgame': ['Endgame Bootcamp lessons', 'Theory'],
+    chapters: ['Chapters (MSPC, Middlegame, Endgame)', 'Theory'],
     story: ['About: ELO chapters', 'About'],
     proofs: ['Proof numbers', 'About'],
     credentials: ['Credentials', 'About'],
@@ -5125,7 +5195,9 @@ const CMS = (() => {
   const onBack = (s) => s.el.addEventListener('click', (e) => { if (e.target.closest('[data-back]')) { s.close(); later(manager); } });
   const saved = () => toast('Saved on this device. Publish to make it live.', 'good');
   const isObj = (x) => !!x && typeof x === 'object' && !Array.isArray(x);
-  const ID_LISTS = ['clinic', 'think', 'spotlights', 'openings', 'bridge', 'middlegame', 'endgame', 'courses.middlegame', 'courses.antiblunder', 'courses.endgame', 'peer', 'games'];
+  const ID_LISTS = ['clinic', 'think', 'spotlights', 'openings', 'bridge', 'middlegame', 'endgame', 'courses.middlegame', 'courses.antiblunder', 'courses.endgame', 'peer', 'games', 'chapters'];
+  let itemBack = null;                                    // v6.3: where the item editor returns to (the Chapter Manager, or the list)
+  const lastChap = {};                                    // v6.3: the chapter picked last, per section, so a batch of FENs lands in one chapter
   const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 36) || 'item';
 
   function gate() {
@@ -5350,7 +5422,7 @@ const CMS = (() => {
           row('treeimport', 'diagram-project', 'Import ChessTempo trees', Trees.count() + ' tree chapters live; a ChessTempo export becomes chapters, every branch kept') +
           row('treeedit', 'sitemap', 'Opening Tree Editor', 'Opens live under the board in Explore mode — pick a chapter to jump there') + '</div>' +
         '<div class="menu-rows">' + row('copy', 'font', 'Texts', 'Headlines and paragraphs on every page') + row('settings', 'sliders', 'Numbers and links', 'Peak rating, percentile, fast track, Skool, socials') + '</div>' +
-        '<div class="menu-rows">' + Object.keys(Site.LISTS).map((n) => row('list:' + n, 'list', Site.LISTS[n][0], Site.LISTS[n][1] + ', ' + (getPath(CONTENT, n) || []).length + ' items')).join('') + '</div>' +
+        '<div class="menu-rows">' + row('chapters', 'layer-group', 'Chapters: MSPC, Middlegame, Endgame', chapterCountLine()) + Object.keys(Site.LISTS).filter((n) => n !== 'chapters').map((n) => row('list:' + n, 'list', Site.LISTS[n][0], Site.LISTS[n][1] + ', ' + (getPath(CONTENT, n) || []).length + ' items')).join('') + '</div>' +
         '<div class="menu-rows">' + row('keys', 'key', 'Member keys', Site.keys().length + (Site.keys().length === 1 ? ' key' : ' keys')) + row('sync', 'rotate', 'Live data (GitHub)', syncSub()) + row('publish', 'cloud-arrow-up', 'Publish', dirty ? 'Send your draft to GitHub' : 'Up to date') + row('masterexport', 'file-export', 'Export master JSON', 'Download everything on this device, tree edits included, as content.json') + row('data', 'database', 'Data management & backups', 'Export or import the whole database as JSON') + '</div>' +
         '<div class="menu-rows">' + row('proofq', 'ranking-star', 'Potential Proof Queue', Proof.summary()) + row('insights', 'chart-column', 'Insights', 'What your players miss, ask and struggle with') + row('vaultbrowser', 'magnifying-glass-chart', 'Vault & Mistake Browser', 'Games, mistakes and brilliant moves by chapter') + row('course', 'graduation-cap', 'Course index', 'The curriculum the coach points to') + row('lb', 'ranking-star', 'Leaderboard', 'Hide or show players, ranking numbers') + '</div>' +
         '<div class="btn-row"><button type="button" class="btn btn-quiet btn-sm" data-m="signout">' + icon('right-from-bracket') + ' Sign out of admin</button></div>',
@@ -5400,6 +5472,7 @@ const CMS = (() => {
             else if (m === 'treeimport') TreeImport.open();
             else if (m === 'treeedit') TreeEditor.pick();
             else if (m === 'signout') { Admin.signOut(); refreshChip(); rerender(); toast('Signed out of admin mode.'); }
+            else if (m === 'chapters') chapterSheet();
             else if (m.indexOf('list:') === 0) listSheet(m.slice(5));
           });
         });
@@ -5474,7 +5547,8 @@ const CMS = (() => {
   }
   function summary(it) {
     const title = it.title || it.name || it.label || it.value || it.text || it.id || 'Item';
-    const sub = [it.id && it.title ? it.id : '', it.lvl ? 'Level ' + Levels.of(it) : '', isStatic(it) ? 'Static drill' : '', it.group || it.tag || it.repertoire || it.level || ''].filter(Boolean).join(', ');
+    const chT = it.chap ? ((Chapters.all().filter((c) => c.id === it.chap)[0]) || {}).title || '' : '';
+    const sub = [chT ? 'Chapter: ' + chT : '', it.id && it.title ? it.id : '', it.lvl ? 'Level ' + Levels.of(it) : '', isStatic(it) ? 'Static drill' : '', it.group || it.tag || it.repertoire || it.level || ''].filter(Boolean).join(', ');
     return [tok(String(title)), sub];
   }
   /* The drill-mode toggle on a list row: one tap moves a drill between
@@ -5512,8 +5586,8 @@ const CMS = (() => {
             if (problem) { toast(problem, 'bad'); return; }
             list[i] = next;
             commit(isStatic(next) ? 'Static drill: no opponent replies.' : 'Interactive: the opponent answers.');
-          } else if (act === 'edit') { s.close(); later(() => itemEditor(n, i)); }
-          else if (act === 'add') { s.close(); later(() => itemEditor(n, -1)); }
+          } else if (act === 'edit') { itemBack = null; s.close(); later(() => itemEditor(n, i)); }
+          else if (act === 'add') { itemBack = null; s.close(); later(() => itemEditor(n, -1)); }
           else if (act === 'del') {
             s.close();
             if (await confirmSheet('Delete this item?', '“' + summary(list[i])[0] + '” will be removed. You can undo it with Back to the live file, or by not publishing.', 'Delete')) { list.splice(i, 1); commit('Deleted.'); }
@@ -5613,16 +5687,35 @@ const CMS = (() => {
     const list = getPath(CONTENT, n) || [];
     let obj = withModes(n, seed ? clone(seed) : (index >= 0 ? clone(list[index]) : template(n, list)));
     let mode = 'form', pv = null;
+    /* v6.3: drills and positions of MSPC, Middlegame and Endgame get a chapter picker above the form. */
+    const chMod = Chapters.modOfList(n);
+    let chCarry = null, chFound = null;
+    if (chMod && isObj(obj)) { if (obj.__ch) { chCarry = obj.__ch; delete obj.__ch; } chFound = Chapters.find(obj, chMod); delete obj.chap; }
+    const chHTML = chMod ? '<fieldset class="ch-pick"><legend>Chapter</legend><label class="field"><span class="field-label">Which chapter does this ' + Chapters.MODS[chMod].noun + ' belong to?</span><select class="input" id="ch-sel"></select></label>' +
+      '<label class="field" id="ch-new-wrap" hidden><span class="field-label">Name of the new chapter</span><input class="input" id="ch-new" maxlength="80" placeholder="e.g. Pawn breaks" autocomplete="off"><span class="field-hint">The chapter is created when you save, and this ' + Chapters.MODS[chMod].noun + ' goes into it.</span></label></fieldset>' : '';
     openSheet({
       title: (index >= 0 ? 'Edit: ' + summary(obj)[0] : 'New: ' + Site.LISTS[n][0]).slice(0, 70), noFocus: true,
       html: '<div class="cms-fen"><div><p class="small muted">Position preview</p><p class="cms-err" id="pv-err"></p></div><div id="pv-board" class="board-host"></div></div>' +
         '<div class="seg" role="group" aria-label="Editor"><button type="button" data-mode="form" aria-pressed="true">Form</button><button type="button" data-mode="json" aria-pressed="false">JSON</button></div>' +
-        '<form class="cms-form" id="it-form" novalidate><div id="it-body" class="cms-form"></div><p class="cms-err" id="it-err" aria-live="polite"></p>' +
+        chHTML + '<form class="cms-form" id="it-form" novalidate><div id="it-body" class="cms-form"></div><p class="cms-err" id="it-err" aria-live="polite"></p>' +
         '<div class="btn-row"><button class="btn btn-primary" type="submit">Save</button><button class="btn btn-quiet" type="button" data-cancel>Cancel</button></div></form>',
       onClose() { if (pv) { pv.destroy(); pv = null; } },
       onMount(s) {
         const body = qs('#it-body', s.el), err = qs('#it-err', s.el);
         pv = Board(qs('#pv-board', s.el), { coords: false });
+        const chSelEl = qs('#ch-sel', s.el), chNewEl = qs('#ch-new', s.el), chNewWrap = qs('#ch-new-wrap', s.el);
+        const chToggle = () => { if (chNewWrap && chSelEl) chNewWrap.hidden = chSelEl.value !== Chapters.NEW; };
+        const chState = () => ({ sel: chSelEl ? chSelEl.value : '', text: chNewEl ? chNewEl.value : '' });
+        if (chSelEl) {
+          const regs = Chapters.of(chMod), opts = [['', 'No chapter (unsorted)', '']].concat(regs.map((c) => [c.id, c.title, '']));
+          if (chFound && chFound.virtual && !regs.some((c) => c.id === chFound.id)) opts.push([chFound.id, chFound.title + ' (named in the data file)', chFound.title]);
+          const want = chCarry ? chCarry.sel : chFound ? chFound.id : (index < 0 && regs.some((c) => c.id === lastChap[chMod]) ? lastChap[chMod] : '');
+          opts.push([Chapters.NEW, 'Nieuw Hoofdstuk Toevoegen', '']);
+          chSelEl.innerHTML = opts.map((o) => '<option value="' + esc(o[0]) + '" data-title="' + esc(o[2]) + '"' + (o[0] === want ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('');
+          if (chCarry && chCarry.text) chNewEl.value = chCarry.text;
+          chToggle();
+          chSelEl.addEventListener('change', () => { chToggle(); if (chSelEl.value === Chapters.NEW) setTimeout(() => { try { chNewEl.focus(); } catch (x) { /* ignore */ } }, 30); });
+        }
         const preview = (fen) => { const ok = fenOk(fen); qs('#pv-err', s.el).textContent = ok ? '' : 'Not a legal FEN yet.'; if (ok && pv) pv.setPosition(fen, { animate: false }); };
         function draw() {
           body.innerHTML = mode === 'json' ? '<textarea class="input cms-json" id="it-json" style="min-height:360px" spellcheck="false">' + esc(JSON.stringify(obj, null, 2)) + '</textarea>' : formHTML(obj, '');
@@ -5638,6 +5731,7 @@ const CMS = (() => {
           if (bd) {                                                  // open the free-placement editor on this FEN
             e.preventDefault();
             try { obj = read(); err.textContent = ''; } catch (x) { err.textContent = x.message; return; }
+            if (chMod) obj.__ch = chState();                   // the chapter choice survives the trip to the board editor
             const at = bd.getAttribute('data-board');
             s.close();
             later(() => boardEditor({
@@ -5660,7 +5754,7 @@ const CMS = (() => {
             else if (op === 'down' && i < arr.length - 1) arr.splice(i + 1, 0, arr.splice(i, 1)[0]);
             draw(); return;
           }
-          if (e.target.closest('[data-cancel]')) { s.close(); later(() => listSheet(n)); }
+          if (e.target.closest('[data-cancel]')) { const back = itemBack; itemBack = null; s.close(); later(() => (back ? back() : listSheet(n))); }
         });
         qs('#it-form', s.el).addEventListener('submit', (e) => {
           e.preventDefault();
@@ -5672,9 +5766,30 @@ const CMS = (() => {
           if (it.id && all.some((x, j) => j !== index && x.id === it.id)) { err.textContent = 'Another item already uses the id “' + it.id + '”.'; return; }
           const problem = checkItem(n, it);
           if (problem) { err.textContent = problem; return; }
+          /* v6.3: resolve the chapter, creating it first when "Nieuw Hoofdstuk Toevoegen" was chosen. */
+          let chapters = null;
+          if (chMod && chSelEl) {
+            const sel = chSelEl.value, newC = (title) => {
+              chapters = chapters || clone(getPath(CONTENT, 'chapters') || []);
+              const same = chapters.filter((c) => c.module === chMod && String(c.title).toLowerCase() === title.toLowerCase())[0];
+              if (same) return same.id;
+              const c = { id: Chapters.uid(chMod, title, chapters), module: chMod, title }; chapters.push(c); return c.id;
+            };
+            delete it.chap;
+            if (sel === Chapters.NEW) {
+              const title = Chapters.clean(chNewEl.value);
+              if (!title) { err.textContent = 'Type a name for the new chapter, or pick an existing chapter.'; return; }
+              it.chap = newC(title);
+            } else if (sel) {
+              if (Chapters.of(chMod).some((c) => c.id === sel)) it.chap = sel;
+              else { const title = Chapters.clean((qs('option:checked', chSelEl) || {}).getAttribute ? qs('option:checked', chSelEl).getAttribute('data-title') : ''); if (title) it.chap = newC(title); }
+            } else delete it.chapter;                           // "no chapter" also clears a chapter named in the data file
+            lastChap[chMod] = it.chap || '';
+          }
           if (index >= 0) all[index] = it; else all.push(it);
-          const d = Admin.ensureDraft(); d.lists[n] = all; Admin.saveDraft(d);
-          s.close(); rerender(); saved(); later(() => listSheet(n));
+          const d = Admin.ensureDraft(); d.lists[n] = all; if (chapters) d.lists.chapters = chapters; Admin.saveDraft(d);
+          const back = itemBack; itemBack = null;
+          s.close(); rerender(); saved(); later(() => (back ? back() : listSheet(n)));
         });
         draw();
       }
@@ -5910,6 +6025,7 @@ const CMS = (() => {
                 if (!b) return;
                 const n = b.getAttribute('data-new');
                 p.close(); s.close();
+                itemBack = null;
                 later(() => itemEditor(n, -1, Object.assign(template(n, getPath(CONTENT, n) || []), { fen })));
               });
             }
@@ -6482,13 +6598,159 @@ const CMS = (() => {
       }
     });
   }
+  /* ----- v6.3: the Chapter Manager for MSPC, Middlegame and Endgame -----
+     Create, rename, reorder and delete chapters; open one to move positions
+     between chapters, reorder them inside the chapter, edit or delete them.
+     Everything goes into the draft, like every other list. */
+  const chapterCountLine = () => { const n = (getPath(CONTENT, 'chapters') || []).length; return n + (n === 1 ? ' chapter' : ' chapters') + ': create, rename, reorder, move positions'; };
+  const cm = { mod: 'middlegame', ch: null };
+  function chapterSheet(mod, chId) {
+    if (mod && Chapters.MODS[mod]) { cm.mod = mod; if (chId === undefined) cm.ch = null; }
+    if (chId !== undefined) cm.ch = chId;
+    const M = Chapters.MODS[cm.mod], ln = M.list, list = getPath(CONTENT, ln) || [];
+    const sp = Chapters.split(cm.mod, list, true), regs = Chapters.of(cm.mod);
+    const keyOf = (it) => { const c = Chapters.find(it, cm.mod); return c ? c.id : '-'; };
+    const cur = cm.ch === null ? null : cm.ch === '-' ? { id: '-', title: 'Unsorted' } : ((sp.groups.filter((g) => g.ch.id === cm.ch)[0]) || {}).ch || null;
+    if (cm.ch !== null && !cur) cm.ch = null;
+    const plural = (n) => n + ' ' + M.noun + (n === 1 ? '' : 's');
+    const btn = (act, a, ico, label, off) => '<button type="button" class="icon-btn" data-cm="' + act + '" data-a="' + esc(a) + '" aria-label="' + label + '" title="' + label + '"' + (off ? ' disabled' : '') + '>' + icon(ico) + '</button>';
+    const seg = '<div class="seg" role="group" aria-label="Section">' + Object.keys(Chapters.MODS).map((k) => '<button type="button" data-cm-mod="' + k + '" aria-pressed="' + (k === cm.mod) + '">' + esc(Chapters.MODS[k].label) + '</button>').join('') + '</div>';
+    let body;
+    if (!cur) {
+      body = '<p class="small muted">' + esc(M.label) + ' chapters, in the order players see them. Rename a chapter by editing its name.</p><div class="cms-list">' +
+        sp.groups.map((g) => {
+          const real = !g.ch.virtual, ri = regs.findIndex((c) => c.id === g.ch.id);
+          return '<div class="cms-item"><span style="min-width:0;flex:1">' + (real ? '<input class="input cm-title" data-cm-title="' + esc(g.ch.id) + '" value="' + esc(g.ch.title) + '" maxlength="80" aria-label="Chapter name">' : '<b>' + esc(g.ch.title) + '</b>') +
+            '<small>' + plural(g.items.length) + (real ? '' : ', named in the data file') + '</small></span><span class="rep-actions">' +
+            (real ? btn('up', g.ch.id, 'arrow-up', 'Move up', ri <= 0) + btn('down', g.ch.id, 'arrow-down', 'Move down', ri < 0 || ri >= regs.length - 1) : btn('adopt', g.ch.id, 'circle-check', 'Make this an editable chapter')) +
+            btn('open', g.ch.id, 'list', 'Open this chapter') + (real ? btn('del', g.ch.id, 'trash', 'Delete chapter') : '') + '</span></div>';
+        }).join('') +
+        (sp.rest.length ? '<div class="cms-item"><span style="min-width:0"><b>Unsorted</b><small>' + plural(sp.rest.length) + ' not in a chapter yet</small></span><span class="rep-actions">' + btn('open', '-', 'list', 'Open') + '</span></div>' : '') + '</div>' +
+        (sp.groups.length || sp.rest.length ? '' : '<p class="small muted">No chapters yet.</p>') +
+        '<form class="cms-form" data-cm-add autocomplete="off"><label class="field"><span class="field-label">New chapter</span><input class="input" name="t" maxlength="80" placeholder="e.g. Pawn breaks"></label>' +
+        '<div class="btn-row"><button class="btn btn-primary btn-sm" type="submit">' + icon('plus') + ' Nieuw Hoofdstuk Toevoegen</button></div></form>';
+    } else {
+      const rows = list.map((it, i) => [it, i]).filter((q) => keyOf(q[0]) === cur.id);
+      body = '<div><button type="button" class="btn btn-quiet btn-sm" data-cm="chapters" data-a="">' + icon('chevron-left') + ' All chapters</button></div><h3>' + esc(cur.title) + '</h3>' +
+        (rows.length ? '' : '<p class="small muted">Nothing here yet.</p>') + '<div class="cms-list">' +
+        rows.map((q, k) => {
+          const it = q[0], i = q[1], sm = summary(it);
+          const sel = '<select class="input cm-sel" data-cm-move="' + i + '" aria-label="Move to another chapter">' + (cur.virtual ? '<option value="__keep" selected>' + esc(cur.title) + '</option>' : '') + '<option value=""' + (cur.id === '-' ? ' selected' : '') + '>Unsorted</option>' +
+            regs.map((c) => '<option value="' + esc(c.id) + '"' + (c.id === cur.id ? ' selected' : '') + '>' + esc(c.title) + '</option>').join('') + '</select>';
+          return '<div class="cms-item"><span style="min-width:0;flex:1"><b>' + esc(sm[0]) + '</b><small>' + esc(sm[1]) + '</small>' + sel + '</span><span class="rep-actions">' +
+            btn('iup', i, 'arrow-up', 'Move up', k === 0) + btn('idown', i, 'arrow-down', 'Move down', k === rows.length - 1) + btn('iedit', i, 'pen', 'Edit') + btn('idel', i, 'trash', 'Delete') + '</span></div>';
+        }).join('') + '</div>' +
+        '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-cm="iadd" data-a="">' + icon('plus') + ' Add a ' + M.noun + ' here</button></div>';
+    }
+    openSheet({
+      title: 'Chapters', noFocus: true,
+      html: backRow() + seg + body,
+      onMount(s) {
+        onBack(s);
+        const again = () => { s.close(); rerender(); later(() => chapterSheet()); };
+        const write = (fn) => {
+          const d = Admin.ensureDraft(), chs = clone(getPath(CONTENT, 'chapters') || []), lst = clone(getPath(CONTENT, ln) || []);
+          const touched = fn(chs, lst) || '';
+          if (touched.indexOf('c') >= 0) d.lists.chapters = chs;
+          if (touched.indexOf('l') >= 0) d.lists[ln] = lst;
+          if (touched) Admin.saveDraft(d);
+        };
+        const af = qs('[data-cm-add]', s.el);
+        if (af) af.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const t = Chapters.clean(af.elements.t.value);
+          if (!t) { toast('Type a name for the chapter.', 'bad'); return; }
+          if (regs.some((c) => c.title.toLowerCase() === t.toLowerCase())) { toast('That chapter already exists.', 'bad'); return; }
+          write((chs) => { chs.push({ id: Chapters.uid(cm.mod, t, chs), module: cm.mod, title: t }); return 'c'; });
+          toast('Chapter added.', 'good'); again();
+        });
+        s.el.addEventListener('change', (e) => {
+          const ti = e.target.closest ? e.target.closest('[data-cm-title]') : null;
+          if (ti) {
+            const id = ti.getAttribute('data-cm-title'), t = Chapters.clean(ti.value);
+            if (!t) { toast('A chapter needs a name.', 'bad'); return; }
+            if (regs.some((c) => c.id !== id && c.title.toLowerCase() === t.toLowerCase())) { toast('Another chapter already has that name.', 'bad'); return; }
+            write((chs, lst) => {
+              lst.forEach((it) => { const f = Chapters.find(it, cm.mod); if (f && f.id === id) it.chap = id; });   // items that matched by name keep their chapter
+              const c = chs.filter((x) => x.id === id)[0]; if (c) c.title = t;
+              return 'cl';
+            });
+            toast('Renamed.', 'good'); again(); return;
+          }
+          const mv = e.target.closest ? e.target.closest('[data-cm-move]') : null;
+          if (mv) {
+            const i = +mv.getAttribute('data-cm-move'), v = mv.value;
+            if (v === '__keep') return;
+            write((chs, lst) => { if (!lst[i]) return ''; if (v) lst[i].chap = v; else { delete lst[i].chap; delete lst[i].chapter; } return 'l'; });
+            toast(v ? 'Moved.' : 'Moved to unsorted.', 'good'); again();
+          }
+        });
+        s.el.addEventListener('click', async (e) => {
+          const mb = e.target.closest('[data-cm-mod]');
+          if (mb) { cm.mod = mb.getAttribute('data-cm-mod'); cm.ch = null; s.close(); later(() => chapterSheet()); return; }
+          const b = e.target.closest('[data-cm]');
+          if (!b || b.disabled) return;
+          const act = b.getAttribute('data-cm'), a = b.getAttribute('data-a');
+          if (act === 'chapters') { cm.ch = null; s.close(); later(() => chapterSheet()); }
+          else if (act === 'open') { cm.ch = a; s.close(); later(() => chapterSheet()); }
+          else if (act === 'up' || act === 'down') {
+            write((chs) => {
+              const mine = chs.filter((c) => c.module === cm.mod), k = mine.findIndex((c) => c.id === a), j = act === 'up' ? k - 1 : k + 1;
+              if (k < 0 || j < 0 || j >= mine.length) return '';
+              const gi = chs.indexOf(mine[k]), gj = chs.indexOf(mine[j]), t = chs[gi]; chs[gi] = chs[gj]; chs[gj] = t; return 'c';
+            });
+            again();
+          } else if (act === 'adopt') {
+            write((chs, lst) => {
+              const g = sp.groups.filter((x) => x.ch.id === a)[0]; if (!g) return '';
+              const c = { id: Chapters.uid(cm.mod, g.ch.title, chs), module: cm.mod, title: g.ch.title }; chs.push(c);
+              lst.forEach((it) => { const f = Chapters.find(it, cm.mod); if (f && f.id === a) it.chap = c.id; });
+              return 'cl';
+            });
+            toast('Now an editable chapter.', 'good'); again();
+          } else if (act === 'del') {
+            const c = regs.filter((x) => x.id === a)[0]; if (!c) return;
+            const n = (sp.groups.filter((g) => g.ch.id === a)[0] || { items: [] }).items.length;
+            s.close();
+            if (await confirmSheet('Delete this chapter?', '“' + c.title + '” will be removed.' + (n ? ' Its ' + plural(n) + ' stay in the app as unsorted.' : '') + ' You can undo it by not publishing.', 'Delete')) {
+              write((chs, lst) => {
+                lst.forEach((it) => { const f = Chapters.find(it, cm.mod); if (f && f.id === a) { delete it.chap; delete it.chapter; } });
+                const k = chs.findIndex((x) => x.id === a); if (k >= 0) chs.splice(k, 1);
+                return 'cl';
+              });
+              toast('Chapter deleted.', 'good'); rerender(); later(() => chapterSheet());
+            } else later(() => chapterSheet());
+          } else if (act === 'iup' || act === 'idown') {
+            const i = +a;
+            write((chs, lst) => {
+              const ids = lst.map((it, x) => [it, x]).filter((q) => keyOf(q[0]) === cur.id).map((q) => q[1]);
+              const k = ids.indexOf(i), j = act === 'iup' ? k - 1 : k + 1;
+              if (k < 0 || j < 0 || j >= ids.length) return '';
+              const t = lst[ids[k]]; lst[ids[k]] = lst[ids[j]]; lst[ids[j]] = t; return 'l';
+            });
+            again();
+          } else if (act === 'iedit') { itemBack = () => chapterSheet(); s.close(); later(() => itemEditor(ln, +a)); }
+          else if (act === 'iadd') { itemBack = () => chapterSheet(); if (cur && !cur.virtual && cur.id !== '-') lastChap[cm.mod] = cur.id; s.close(); later(() => itemEditor(ln, -1)); }
+          else if (act === 'idel') {
+            const i = +a, it = list[i]; if (!it) return;
+            s.close();
+            if (await confirmSheet('Delete this ' + M.noun + '?', '“' + summary(it)[0] + '” will be removed. You can undo it by not publishing.', 'Delete')) {
+              write((chs, lst) => { lst.splice(i, 1); return 'l'; });
+              toast('Deleted.', 'good'); rerender(); later(() => chapterSheet());
+            } else later(() => chapterSheet());
+          }
+        });
+      }
+    });
+  }
   function onClick(e) {
-    const b = e.target && e.target.closest ? e.target.closest('[data-cms-copy],[data-cms-list],[data-cms-setting],[data-cms-tier],[data-cms-tier-switch],[data-cms-avatar],[data-cms-bots],[data-cms-gating],#admin-chip') : null;
+    const b = e.target && e.target.closest ? e.target.closest('[data-cms-copy],[data-cms-list],[data-cms-chapters],[data-cms-setting],[data-cms-tier],[data-cms-tier-switch],[data-cms-avatar],[data-cms-bots],[data-cms-gating],#admin-chip') : null;
     if (!b || !Admin.active) return;
     e.preventDefault(); e.stopPropagation();
     if (b.id === 'admin-chip') manager();
     else if (b.hasAttribute('data-cms-copy')) editCopy(b.getAttribute('data-cms-copy'));
     else if (b.hasAttribute('data-cms-list')) listSheet(b.getAttribute('data-cms-list'));
+    else if (b.hasAttribute('data-cms-chapters')) chapterSheet(b.getAttribute('data-cms-chapters'), null);
     else if (b.hasAttribute('data-cms-tier')) { const p = b.getAttribute('data-cms-tier').split('|'); tierPick(p[0], p.slice(1).join('|')); }
     else if (b.hasAttribute('data-cms-tier-switch')) { Admin.setEditTier(Admin.editTier() === 'paid' ? 'free' : 'paid'); refreshChip(); rerender(); toast(Admin.editTier() === 'paid' ? 'Editing: Paid/Vault Tier Content.' : 'Editing: Free Tier Content.'); }
     else if (b.hasAttribute('data-cms-avatar')) avatarSheet();
@@ -6496,7 +6758,7 @@ const CMS = (() => {
     else if (b.hasAttribute('data-cms-gating')) gating();
     else settings();
   }
-  return { exportMaster, gate, manager, onClick, editCopy, listSheet, keysSheet, publish, settings, gating, tierPick, botsSheet, botEditor, avatarSheet, boardEditor, dataSheet, itemEditor };
+  return { exportMaster, gate, manager, onClick, editCopy, listSheet, keysSheet, publish, settings, gating, tierPick, botsSheet, botEditor, avatarSheet, boardEditor, dataSheet, itemEditor, chapterSheet };
 })();
 /* ==========================================================================
    4. BOARD: chessboard.js wrapper with tap-to-move, drag, highlights,
@@ -7843,16 +8105,22 @@ function mountThink(view) {
   /* v3.9: the MSPC positions come in topics with the five levels. Level N
      is its own set of positions (not a longer version of the level below),
      with a hard gate on levels 2 to 5 and the ELO advice on every button. */
-  const all = CONTENT.think || [], pro = App.isPro(), dynOk = App.can('repertoireRandom');
-  const topics = Levels.topics(all, { id: 'mspc-positions', scope: 'think', title: 'MSPC positions' });
+  const allItems = CONTENT.think || [], pro = App.isPro(), dynOk = App.can('repertoireRandom');
   const st = App.ui.lv || (App.ui.lv = {}), ui = App.ui.think || (App.ui.think = { topic: '', id: null });
+  /* v6.3: MSPC positions sit in chapters; a chip row filters the topics below to one chapter. */
+  const chs = Chapters.split('mspc', allItems, true), hasCh = chs.groups.some((g) => g.items.length), showCh = hasCh || Admin.editing();
+  const fbThink = { id: 'mspc-positions', scope: 'think', title: 'MSPC positions' };
+  if (!hasCh || (ui.chap && ui.chap !== '-' && !chs.groups.some((g) => g.ch.id === ui.chap))) ui.chap = '';
   const hit = Levels.take(['think']);
+  if (hit) ui.chap = '';
+  const inCh = (key) => (key === '-' ? chs.rest : key ? (chs.groups.filter((g) => g.ch.id === key)[0] || { items: [] }).items : Chapters.ordered('mspc', allItems));
+  let topics = Levels.topics(inCh(ui.chap || ''), fbThink);
   if (hit) { const t0 = topics.filter((x) => x.items.indexOf(hit.items[0]) >= 0)[0]; if (t0) { ui.topic = t0.key; st[t0.key] = hit.k; ui.id = null; } }
   let t = topics.filter((x) => x.key === ui.topic)[0] || topics[0] || null;
   if (t) ui.topic = t.key;
   view.innerHTML = cmsBar() + thinkTabs('think') + pageHeadK('think.title', 'think.intro') +
     '<div id="metrics-think">' + metricsHTML('think') + '</div>' +
-    '<p class="track-label">' + icon('layer-group') + ' ' + esc(T('think.levels')) + ed('think.levels') + ' ' + manageBtn('think', 'Positions') + '</p><div class="chips" id="think-topics" style="margin-bottom:12px"></div>' +
+    '<p class="track-label">' + icon('layer-group') + ' ' + esc(T('think.levels')) + ed('think.levels') + ' ' + manageBtn('think', 'Positions') + '</p>' + (showCh ? '<div class="chips" id="think-chapters" style="margin-bottom:8px"></div>' : '') + '<div class="chips" id="think-topics" style="margin-bottom:12px"></div>' +
     '<div class="lv39" id="think-levels"></div>' +
     V34.hardToggle() + trainerShell('think-board', 'think-panel') + V34.repCard() +
     '<section class="section">' + sectionHeadK('think.systemTitle', 'think.systemText') +
@@ -7867,7 +8135,14 @@ function mountThink(view) {
   const panel = qs('#think-panel', view), levelsHost = qs('#think-levels', view), veil = boardVeil(view, 'think-board');
   let runner = null;
   const sel = () => (t ? (st[t.key] = Levels.pick(t, st[t.key])) : 1);
+  function chapChips() {
+    const host = qs('#think-chapters', view);
+    if (!host) return;
+    const cur = ui.chap || '', one = (key, label, n) => '<button type="button" class="chip" data-chap="' + esc(key) + '" aria-pressed="' + (cur === key) + '">' + esc(label) + ' <span class="small dim">' + n + '</span></button>';
+    host.innerHTML = one('', 'All chapters', allItems.length) + chs.groups.filter((g) => g.items.length).map((g) => one(g.ch.id, g.ch.title, g.items.length)).join('') + (hasCh && chs.rest.length ? one('-', 'Unsorted', chs.rest.length) : '') + chapterBtn('mspc');
+  }
   function chips() {
+    chapChips();
     qs('#think-topics', view).innerHTML = topics.map((x) => '<button type="button" class="chip" data-topic="' + esc(x.key) + '" aria-pressed="' + (ui.id !== 'dyn' && t && x.key === t.key) + '">' + esc(x.title) + '</button>').join('') +
       '<button type="button" class="chip" data-dyn aria-pressed="' + (ui.id === 'dyn') + '">' + (dynOk ? icon('shuffle') : lockIcon(gateLevel('repertoireRandom'))) + ' Random repertoire position</button>';
   }
@@ -7919,6 +8194,8 @@ function mountThink(view) {
   function onClick(e) {
     if (e.target.closest('[data-dyn]')) { openDyn(); return; }
     if (e.target.closest('[data-upsell]')) { openUnlock('vault', 'Levels 2 to 5 of the MSPC trainer'); return; }
+    const chp = e.target.closest('#think-chapters [data-chap]');
+    if (chp) { ui.chap = chp.getAttribute('data-chap'); topics = Levels.topics(inCh(ui.chap), fbThink); t = topics[0] || null; ui.topic = t ? t.key : ''; ui.id = null; show(); return; }
     const tp = e.target.closest('#think-topics [data-topic]');
     if (tp) { t = topics.filter((x) => x.key === tp.getAttribute('data-topic'))[0] || t; ui.topic = t.key; ui.id = null; show(); return; }
     const lv = e.target.closest('#think-levels [data-lv]');
@@ -9528,11 +9805,13 @@ function mgHub(root, go) {
   const lessons = CONTENT.courses.middlegame || [], anti = CONTENT.courses.antiblunder || [];
   const sec = (n, html) => (n || Admin.editing() ? html : '');
   const cards = topicCards(root, 'Middlegame'), rows = (kind) => (items) => '<div class="rows">' + items.map((x) => simpleRow(x, kind)).join('') + '</div>';
+  const mgCh = Chapters.split('middlegame', CONTENT.middlegame);                 // v6.3: drills sorted into chapters
   root.innerHTML = '<div id="metrics-middlegame">' + metricsHTML('middlegame') + '</div>' +
     (lessons.length + anti.length + CONTENT.middlegame.length + CONTENT.bridge.length ? '' : dataEmptyHTML('middlegame lessons, drills or plans')) +
     sec(lessons.length, '<section class="section">' + sectionHeadK('mg.blunderTitle', 'mg.blunderText', manageBtn('courses.middlegame', 'Lessons')) + cards.section(lessons, { id: 'blunder-bootcamp', scope: 'mg', title: T('mg.blunderTitle') }, { body: rows('lesson'), noun: 'lesson' }) + '</section>') +
     sec(anti.length, '<section class="section">' + sectionHeadK('mg.antiTitle', 'mg.antiText', manageBtn('courses.antiblunder', 'Lessons')) + cards.section(anti, { id: 'anti-blunder-bootcamp', scope: 'mg', title: T('mg.antiTitle') }, { body: rows('anti'), noun: 'lesson' }) + '</section>') +
-    sec(CONTENT.middlegame.length, '<section class="section">' + sectionHeadK('mg.drillsTitle', 'mg.drillsText', manageBtn('middlegame', 'Drills')) + cards.section(CONTENT.middlegame, { id: 'structure-drills', scope: 'mg', title: T('mg.drillsTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>') +
+    chapterSections('middlegame', mgCh.groups, cards, 'mg', rows('drill'), 'drill') +
+    ((mgCh.rest.length || (Admin.editing() && !mgCh.groups.length)) ? '<section class="section">' + sectionHeadK('mg.drillsTitle', 'mg.drillsText', manageBtn('middlegame', 'Drills') + chapterBtn('middlegame')) + cards.section(mgCh.rest, { id: 'structure-drills', scope: 'mg', title: T('mg.drillsTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>' : '') +
     sec(CONTENT.bridge.length, '<section class="section">' + sectionHeadK('mg.plansTitle', 'mg.plansText', manageBtn('bridge', 'Plans')) + cards.section(CONTENT.bridge, { id: 'middlegame-plans', scope: 'mg', title: T('mg.plansTitle') }, { body: bridgeCards, noun: 'plan' }) + '</section>') +
     (App.isPro() ? '' : ctaStripHTML('mg.ctaTitle', 'mg.ctaText', 'Levels 2 to 5 of the middlegame suite'));
   cards.point(App.ui.mg && App.ui.mg.hit); if (App.ui.mg) App.ui.mg.hit = null;
@@ -9693,14 +9972,16 @@ function mountEndgame(root) {
   return () => { if (cleanup) cleanup(); };
 }
 function egHub(root, go) {
-  const kpk = CONTENT.endgame.filter((d) => d.type === 'kpk'), rook = CONTENT.endgame.filter((d) => d.type !== 'kpk'), boot = CONTENT.courses.endgame || [];
+  const egCh = Chapters.split('endgame', CONTENT.endgame);                      // v6.3: drills sorted into chapters
+  const kpk = egCh.rest.filter((d) => d.type === 'kpk'), rook = egCh.rest.filter((d) => d.type !== 'kpk'), boot = CONTENT.courses.endgame || [];
   const sec = (n, html) => (n || Admin.editing() ? html : '');
   const cards = topicCards(root, 'Endgame'), rows = (kind) => (items) => '<div class="rows">' + items.map((x) => simpleRow(x, kind)).join('') + '</div>';
   root.innerHTML = '<div id="metrics-endgame">' + metricsHTML('endgame') + '</div>' +
     (CONTENT.endgame.length + boot.length ? '' : dataEmptyHTML('endgame drills or lessons')) +
+    chapterSections('endgame', egCh.groups, cards, 'eg', rows('drill'), 'drill') +
     sec(kpk.length, '<section class="section">' + sectionHeadK('eg.kpkTitle', 'eg.kpkText', manageBtn('endgame', 'Drills')) + cards.section(kpk, { id: 'king-and-pawn', scope: 'eg', title: T('eg.kpkTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>') +
     sec(boot.length, '<section class="section">' + sectionHeadK('eg.bootTitle', 'eg.bootText', manageBtn('courses.endgame', 'Lessons')) + cards.section(boot, { id: 'endgame-bootcamp', scope: 'eg', title: T('eg.bootTitle') }, { body: rows('lesson'), noun: 'lesson' }) + '</section>') +
-    sec(rook.length, '<section class="section">' + sectionHeadK('eg.proTitle', 'eg.proText', manageBtn('endgame', 'Drills')) + cards.section(rook, { id: 'rook-endgames', scope: 'eg', title: T('eg.proTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>') +
+    sec(rook.length, '<section class="section">' + sectionHeadK('eg.proTitle', 'eg.proText', manageBtn('endgame', 'Drills') + chapterBtn('endgame')) + cards.section(rook, { id: 'rook-endgames', scope: 'eg', title: T('eg.proTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>') +
     (App.isPro() ? '' : ctaStripHTML('eg.ctaTitle', 'eg.ctaText', 'Levels 2 to 5 of the endgame suite'));
   cards.point(App.ui.eg && App.ui.eg.hit); if (App.ui.eg) App.ui.eg.hit = null;
   function onClick(e) {
@@ -22411,6 +22692,7 @@ const LogoMenu = (() => {
     const acts = (i) => '<span class="bm-edit">' + [['up', 'arrow-up', 'Move up'], ['down', 'arrow-down', 'Move down'], ['edit', 'pen', 'Edit'], ['del', 'trash', 'Remove']]
       .map((a) => '<button type="button" class="icon-btn" data-lm="' + a[0] + '" data-i="' + i + '" aria-label="' + a[2] + '" title="' + a[2] + '">' + icon(a[1]) + '</button>').join('') + '</span>';
     host.innerHTML = '<div class="bm-head"><b>lanckrietchess</b><small>Follow, watch and train with ' + esc(CONFIG.coach || 'Kyenzo') + '</small></div><ul class="bm-list" role="menu">' +
+      '<li role="none" class="bm-row"><a role="menuitem" class="bm-item" href="#home">' + icon('house') + '<span>Home</span>' + icon('chevron-right', 'bm-ext') + '</a></li>' +
       list.map((x, i) => { const ext = /^https:/i.test(x.url); return '<li role="none" class="bm-row"><a role="menuitem" class="bm-item" href="' + esc(x.url) + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + ico(x.icon) + '<span>' + esc(x.label) + '</span>' + icon(ext ? 'arrow-up-right-from-square' : 'chevron-right', 'bm-ext') + '</a>' + (edit ? acts(i) : '') + '</li>'; }).join('') + '</ul>' +
       (edit ? '<form class="bm-admin" data-lm-cmd autocomplete="off"><input class="input" name="c" maxlength="400" placeholder="add Name | https://…   ·   del Name   ·   edit Name | New | https://…" aria-label="Link command"><button class="btn btn-primary btn-sm" type="submit">Run</button></form>' +
         '<div class="bm-admin-row"><button type="button" class="btn btn-ghost btn-sm" data-lm="add" data-i="-1">' + icon('plus') + ' Add link</button><span class="small muted" data-lm-msg aria-live="polite"></span></div>' : '');
@@ -22991,11 +23273,11 @@ const Dex = (() => {
     lessons(C.middlegame, 'middlegame', 'c:blunder', T('mg.blunderTitle'));
     lessons(C.antiblunder, 'middlegame', 'c:anti', T('mg.antiTitle'));
     (CONTENT.bridge || []).forEach((b) => { if (b && b.id) add({ id: 'p:' + b.id, fen: b.fen || '', pillar: 'middlegame', gen: 'c:plans', genName: 'Middlegame plans', ch: b.repertoire || 'Plans', chName: b.repertoire || 'Plans', title: b.title || b.id, side: b.side === 'b' ? 'b' : 'w', src: { id: 'p:' + b.id, lvl: Levels.of(b), requiredTier: Levels.required(b) } }); });
-    (CONTENT.endgame || []).forEach((d) => { if (d && d.id) add({ id: d.id, fen: d.fen || '', pillar: 'endgame', gen: d.type === 'kpk' ? 'c:kpk' : 'c:rook', genName: d.type === 'kpk' ? T('eg.kpkTitle') : T('eg.proTitle'), ch: d.id, chName: d.title || d.id, title: d.title || d.id, side: d.side === 'b' || d.side === 'w' ? d.side : sideOf(d.fen), src: d }); });
+    (CONTENT.endgame || []).forEach((d) => { if (d && d.id) add({ id: d.id, fen: d.fen || '', pillar: 'endgame', gen: d.type === 'kpk' ? 'c:kpk' : 'c:rook', genName: d.type === 'kpk' ? T('eg.kpkTitle') : T('eg.proTitle'), ch: Chapters.find(d, 'endgame') ? 'chap-' + Chapters.find(d, 'endgame').id : d.id, chName: Chapters.find(d, 'endgame') ? Chapters.find(d, 'endgame').title : d.title || d.id, title: d.title || d.id, side: d.side === 'b' || d.side === 'w' ? d.side : sideOf(d.fen), src: d }); });
     lessons(C.endgame, 'endgame', 'c:egboot', T('eg.bootTitle'));
     (CONTENT.think || []).forEach((d) => {
       if (!d || !d.id || !(d.stages || []).some((x) => x && x.type === 'line')) return;
-      add({ id: 'c:' + d.id, fen: d.fen || '', pillar: 'mspc', gen: 'c:mspc', genName: 'MSPC positions', ch: d.tag || 'General', chName: d.tag || 'General', title: d.title || d.id, side: sideOf(d.fen), src: d });
+      add({ id: 'c:' + d.id, fen: d.fen || '', pillar: 'mspc', gen: 'c:mspc', genName: 'MSPC positions', ch: Chapters.find(d, 'mspc') ? 'chap-' + Chapters.find(d, 'mspc').id : d.tag || 'General', chName: Chapters.find(d, 'mspc') ? Chapters.find(d, 'mspc').title : d.tag || 'General', title: d.title || d.id, side: sideOf(d.fen), src: d });
     });
     return out;
   }
@@ -23390,7 +23672,7 @@ const Dex = (() => {
       '<p class="small muted">Master Tokens: <b>' + (bal === Infinity ? 'unlimited (admin)' : bal) + '</b>. New content added by the coach lowers your percentage on purpose: that is your next grind.</p></div></section>' +
       '<nav class="dx-pillars" aria-label="Pillars">' + s.pillars.map((p) => '<button type="button" class="dx-pcard' + (p.id === P.id ? ' is-on' : '') + '" data-dx-pillar="' + p.id + '">' + icon(p.icon) + '<b>' + esc(p.label) + '</b><span>' + (p.n ? esc(fmt(p.pct)) : 'No cards yet') + '</span><i class="dx-bar"><i style="width:' + p.pct + '%"></i></i><small>25%</small></button>').join('') + '</nav>' +
       '<section class="dx-body">' + legendHTML() + '<p class="muted small">' + esc(P.blurb) + (P.n ? '' : ' Nothing is published here yet, so this pillar does not count against your total until it is.') + '</p>' +
-      P.gens.map((g, gi) => '<details class="panel dx-gen" data-dx-k="' + esc(P.id + '|' + g.id) + '"' + (u.open[P.id + '|' + g.id] ? ' open' : '') + '><summary><span class="dx-gname">' + icon('layer-group') + ' Generation ' + (gi + 1) + ': <b>' + esc(g.name) + '</b></span><span class="dx-gpct">' + shinyDots(g.sh) + '<i class="dx-bar"><i style="width:' + g.pct + '%"></i></i><b>' + esc(fmt(g.pct)) + '</b></span></summary>' +
+      P.gens.map((g, gi) => '<details class="panel dx-gen" data-dx-k="' + esc(P.id + '|' + g.id) + '"' + (u.open[P.id + '|' + g.id] ? ' open' : '') + '><summary><span class="dx-gname">' + icon('layer-group') + ' <b>' + esc(g.name) + '</b></span><span class="dx-gpct">' + shinyDots(g.sh) + '<i class="dx-bar"><i style="width:' + g.pct + '%"></i></i><b>' + esc(fmt(g.pct)) + '</b></span></summary>' +
         g.chs.map((h) => { const hk = P.id + '|' + g.id + '|' + h.id; chMap[hk] = h; return '<details class="dx-ch" data-dx-k="' + esc(hk) + '"' + (u.open[hk] ? ' open' : '') + '><summary><span>' + esc(h.name) + '</span><span class="dx-gpct"><i class="dx-bar"><i style="width:' + h.pct + '%"></i></i><b>' + esc(fmt(h.pct)) + '</b></span></summary><div class="dx-grid">' + (u.open[hk] ? h.items.map(cardHTML).join('') : '') + '</div></details>'; }).join('') + '</details>').join('') + '</section>' +
       '<p class="small muted dx-rules">' + icon('circle-info') + ' ' + cfg().need + ' flawless runs in a row level a card up. Level 1 rests for a week, level 2 for a month, level 3 is permanent. A slip in a repeat round sends the card back to Active. Practise in the <a href="#shuffle">Shuffle Trainer</a> or the opening drills.</p></div>';
   }
@@ -23454,7 +23736,6 @@ const Dex = (() => {
 const mountDex = (view) => Dex.mount(view);
 
 const TABS = [
-  { id: 'home', label: 'Home', icon: 'house', routes: ['home'] },
   { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'peer', 'srs'] },
   { id: 'theory', label: 'Theory', icon: 'book-open', routes: ['openings', 'middlegame', 'endgame', 'puzzles'], href: '#openings' },
   { id: 'trim', label: 'Trim', icon: 'scissors', routes: ['trim', 'games', 'brilliant'] },
