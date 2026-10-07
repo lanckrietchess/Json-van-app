@@ -1,7 +1,7 @@
 {
  "app": "lanckrietchess-hub",
  "schema": 1,
- "updated": "2026-10-06T14:54:09.063Z",
+ "updated": "2026-10-07T06:56:47.113Z",
  "copy": {
   "home.title": "If you want to change the output, focus on the input.",
   "home.kicker": "Master the 2100+ ELO MSPC Decision-Making System",
@@ -838,6 +838,50 @@
     "name": "Black Model Games",
     "side": "b",
     "intro": "Complete model games that reach your Semi-Slav and Caro-Kann positions, grouped by the branch of the tree they follow. Play through each game once, then read the notes."
+   }
+  ],
+  "logoLinks": [
+   {
+    "id": "youtube",
+    "label": "YouTube: lanckrietchess",
+    "url": "https://www.youtube.com/@Lanckriet_Chess?sub_confirmation=1",
+    "icon": "b:youtube"
+   },
+   {
+    "id": "instagram",
+    "label": "Instagram",
+    "url": "https://www.instagram.com/lanckrietchess/",
+    "icon": "b:instagram"
+   },
+   {
+    "id": "tiktok",
+    "label": "TikTok",
+    "url": "https://www.tiktok.com/@lanckrietchess",
+    "icon": "b:tiktok"
+   },
+   {
+    "id": "facebook",
+    "label": "Facebook",
+    "url": "https://www.facebook.com/lanckrietchess",
+    "icon": "b:facebook"
+   },
+   {
+    "id": "skool",
+    "label": "Skool community",
+    "url": "https://www.skool.com/lanckriet-chess-1924",
+    "icon": "graduation-cap"
+   },
+   {
+    "id": "mspc",
+    "label": "Free MSPC course",
+    "url": "https://www.skool.com/lanckrietchess/classroom",
+    "icon": "brain"
+   },
+   {
+    "id": "dm",
+    "label": "Coaching: send a DM",
+    "url": "https://ig.me/m/lanckrietchess",
+    "icon": "comment-dots"
    }
   ]
  },
@@ -19921,7 +19965,7 @@
    "title": "Semi-Slav: the Meran (6.Bd3)",
    "group": "Black Model Games",
    "side": "b",
-   "path": "1.d4 d5 2.c4 c6 3.Nf3 Nf6 4.Nc3 e6 5.e3 Nbd7 6.Bd3",
+   "path": "1.d4 c6 2.c4 d5 3.Nf3 Nf6 4.Nc3 e6 5.e3 Nbd7 6.Bd3",
    "levels": [
     {
      "k": 1,
@@ -19947,7 +19991,7 @@
      "l": 5,
      "c": [
       {
-       "m": "d5",
+       "m": "c6",
        "n": [
         "WELCOME TO THE MODEL GAMES ENCYCLOPEDIA FOR YOUR BLACK REPERTOIRE.\n\nThis course does for your Black repertoire what the Model Games Encyclopedia already did for your Colle-Koltanowski White repertoire: it takes every structure you have learned in the Speedcourse, Intermediate and Advanced courses and shows it played out by strong players, usually with Black in exactly your seat.\n\nWHY THIS MATTERS: a repertoire course teaches you the moves. A model games course teaches you what those moves are FOR. Watching a 2600-rated grandmaster nurse the same ...b5/...a6 queenside majority you are learning, or defend the same isolated queen's pawn structure from the Exchange Slav side, does more for your understanding than another ten lines of pure theory.\n\nHOW THIS COURSE IS ORGANISED: by repertoire branch, in the same order as your existing courses.\nSemi-Slav side: Games 01-02 - the Meran; Game 03 - the Anti-Meran (6.Qc2); Games 04-05 - the Moscow declined and the Anti-Moscow Gambit accepted; Game 06 - the Exchange Slav.\nCaro-Kann side: Game 07 - the Classical Tartakower/Korchnoi; Game 08 - the Advance (3...c5); Game 09 - the Panov (5...e6); Game 10 - the King's Indian Attack.\n\nSOURCES FOR THIS COURSE: Cyrus Lakdawala and Keaton Kiewra, Opening Repertoire: ...c6 (Everyman 2017), for every game in this delivery, since its \"Index of Complete Games\" is built almost entirely from Alexey Dreev's and Igor Khenkin's own tournament praxis in exactly this repertoire.\n\nA NOTE ON ACCURACY: the ...c6 sourcebook survives only as a heavily degraded OCR scan - the original figurine piece symbols are gone, replaced by near-random Latin characters, which is a worse starting point than the source books used for your White model games course. Every game in this course has therefore been cross-checked move by move with python-chess for legality, and where a middlegame or endgame passage could not be reconstructed with full confidence from the scan, the game is presented as a verified opening-to-middlegame excerpt with an honest note on how the rest unfolded, rather than a guessed-at move sequence. You will never be shown a move that has not been confirmed legal and consistent with the source. Two games (06, Exchange Slav; and the ...a6-first note in Game 03) diverge slightly from your repertoire's exact move order in the source material; both are flagged transparently at the point of difference rather than silently altered.\n\nSTILL TO COME: the Catalan set-up (5.g3), the London/Colle/Torre systems, the Reti and the English on the Semi-Slav side; the Two Knights and Fantasy Variation sidelines on the Caro-Kann side; and the Moscow & Anti-Moscow monograph has not yet been mined for additional games beyond Game 05. These are lower-frequency branches of your repertoire and are flagged here as the natural next expansion pass, exactly as Koltanowski's uncatalogued games were for the White course."
        ],
@@ -19956,7 +20000,7 @@
          "m": "c4",
          "c": [
           {
-           "m": "c6",
+           "m": "d5",
            "n": [
             "AT THIS LEVEL YOUR OPPONENTS PREPARE, AND THE SEMI-SLAV PUNISHES SLOPPINESS.\n\nPavlovic compares the Meran to the Open Sicilian, and the comparison is exact: sharp, concrete, and unforgiving of general principles. This course gives you the modern main lines and, where a line is genuinely too heavy to learn from a course, says so instead of pretending.\n\nWHAT YOU ADD HERE:\n1. The modern Meran with 9.a3 and 11.Qc2 - the current main battleground.\n2. The critical Anti-Meran and Catalan set-ups.\n3. The Moscow Gambit, which is the upgrade you were promised in the earlier courses.\n4. An honest account of which of our positions are equal rather than better.\n\nTHE ONE HABIT THAT MATTERS MOST: in every line of this course, ask when to take on c4 and when to break with ...c5. Get those two decisions right and the rest follows.",
             "AN HONEST AUDIT OF YOUR 1.d4 REPERTOIRE.\n\nWHERE WE ARE GENUINELY FINE:\n- The Meran with 9.a3 and 11...Rc8. Modern, tested, and balanced.\n- The Anti-Meran with 6.Qc2. The queen really does end up misplaced on c2.\n- The Catalan set-up with 5.g3. Lakdawala is right that White is the one taking a risk.\n- The Exchange Slav with 6...Ne4. Not better, but full of play.\n\nWHERE WE ARE EQUAL AND SHOULD BE HAPPY WITH IT:\n- The Moscow with 6.Bxf6 Qxf6. We have the bishop pair and no weaknesses. Do not over-press.\n\nWHERE WE MAKE A CONCESSION:\n- Against 6.Bh4 we either accept a gambit that demands real study, or we decline and give White a comfortable game. There is no third road. Choose deliberately, and do not pretend the declining line is objectively equal - it is sound, not equalising.\n\nWHERE THE THEORY MOVES FASTEST:\nThe Meran and the Moscow Gambit. If you take those up, expect to refresh them every year or two. The Exchange Slav, the Catalan set-up and the London lines will still be valid in ten years.\n\nWHAT THIS MEANS FOR HOW YOU SPEND YOUR TIME:\nPut your study hours into the lines that do not expire, and use a reliable declining line in the ones that do - unless the sharp line is genuinely your style. A repertoire you maintain badly is worse than a slightly quieter one you know well.",
@@ -20752,7 +20796,7 @@
    "title": "Semi-Slav: the Anti-Meran (6.Qc2)",
    "group": "Black Model Games",
    "side": "b",
-   "path": "1.d4 d5 2.c4 c6 3.Nf3 Nf6 4.Nc3 e6 5.e3 Nbd7 6.Qc2",
+   "path": "1.d4 c6 2.c4 d5 3.Nf3 Nf6 4.Nc3 e6 5.e3 Nbd7 6.Qc2",
    "levels": [
     {
      "k": 1,
@@ -20771,13 +20815,13 @@
      "l": 5,
      "c": [
       {
-       "m": "d5",
+       "m": "c6",
        "c": [
         {
          "m": "c4",
          "c": [
           {
-           "m": "c6",
+           "m": "d5",
            "c": [
             {
              "m": "Nf3",
@@ -20935,7 +20979,7 @@
    "title": "Semi-Slav: the Moscow (6.Bxf6)",
    "group": "Black Model Games",
    "side": "b",
-   "path": "1.d4 d5 2.c4 c6 3.Nf3 Nf6 4.Nc3 e6 5.Bg5 h6 6.Bxf6",
+   "path": "1.d4 c6 2.c4 d5 3.Nf3 Nf6 4.Nc3 e6 5.Bg5 h6 6.Bxf6",
    "levels": [
     {
      "k": 1,
@@ -20954,13 +20998,13 @@
      "l": 5,
      "c": [
       {
-       "m": "d5",
+       "m": "c6",
        "c": [
         {
          "m": "c4",
          "c": [
           {
-           "m": "c6",
+           "m": "d5",
            "c": [
             {
              "m": "Nf3",
@@ -21139,7 +21183,7 @@
    "title": "Semi-Slav: the Anti-Moscow (6.Bh4)",
    "group": "Black Model Games",
    "side": "b",
-   "path": "1.d4 d5 2.c4 c6 3.Nf3 Nf6 4.Nc3 e6 5.Bg5 h6 6.Bh4",
+   "path": "1.d4 c6 2.c4 d5 3.Nf3 Nf6 4.Nc3 e6 5.Bg5 h6 6.Bh4",
    "levels": [
     {
      "k": 1,
@@ -21158,13 +21202,13 @@
      "l": 5,
      "c": [
       {
-       "m": "d5",
+       "m": "c6",
        "c": [
         {
          "m": "c4",
          "c": [
           {
-           "m": "c6",
+           "m": "d5",
            "c": [
             {
              "m": "Nf3",
@@ -21273,7 +21317,7 @@
    "title": "Slav: the Exchange (3.cxd5)",
    "group": "Black Model Games",
    "side": "b",
-   "path": "1.d4 d5 2.c4 c6 3.cxd5",
+   "path": "1.d4 c6 2.c4 d5 3.cxd5",
    "levels": [
     {
      "k": 1,
@@ -21292,13 +21336,13 @@
      "l": 5,
      "c": [
       {
-       "m": "d5",
+       "m": "c6",
        "c": [
         {
          "m": "c4",
          "c": [
           {
-           "m": "c6",
+           "m": "d5",
            "c": [
             {
              "m": "cxd5",
@@ -21949,5 +21993,29 @@
    ]
   }
  ],
- "v5": {}
+ "v5": {
+  "framework": {
+   "letters": {
+    "S": {
+     "name": "Specifics",
+     "text": "What makes this position unique: the game phase, the pawn structure, weaknesses, targets and what your repertoire’s structure asks for."
+    },
+    "C": {
+     "name": "Calculation",
+     "text": "Calculate your candidates to the end, including every reply your opponent has. No stopping halfway out of fear. Also include what you miscalculated or missed."
+    }
+   },
+   "tags": {
+    "M": [
+     "Check",
+     "Capture",
+     "Capture threat",
+     "Mate threat",
+     "Weak square",
+     "threaten a tactic",
+     "No threat"
+    ]
+   }
+  }
+ }
 }
