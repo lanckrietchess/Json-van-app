@@ -151,6 +151,14 @@ ul,ol{margin:0}
 @media (min-width:960px){.trainer{grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:24px}}
 .trainer-panel{padding:18px;min-width:0}
 .board-col{min-width:0}
+/* v6.5 layout-shift fix: the board column keeps its size whatever the text beside it does. The text lives in its own
+   scrollable panel with a fixed maximum height, and the page keeps room for its scrollbar so nothing shifts sideways. */
+html{scrollbar-gutter:stable}
+.trainer>.board-col{flex-shrink:0;width:100%;max-width:580px;justify-self:center;overflow-anchor:none}
+.trainer>.trainer-panel{overflow-anchor:none;overscroll-behavior:contain;overflow-y:auto;max-height:min(70vh,640px);scrollbar-gutter:stable}
+@media (min-width:960px){.trainer>.board-col{justify-self:start}.trainer>.trainer-panel{max-height:min(calc(100vh - 140px),640px)}}
+.trainer[data-split5-on]>.board-col{max-width:none}
+.trainer-panel .st-feedback{min-height:0}
 .board-shell{display:flex;gap:8px;align-items:stretch;justify-content:center;width:100%;max-width:580px;margin:0 auto}
 .board-host{flex:1;min-width:0;width:100%;max-width:560px;margin:0 auto;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .board-tools{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
@@ -349,6 +357,16 @@ textarea.input{resize:vertical;min-height:120px;line-height:1.45;font-size:14px}
 .eng-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .eng-eval{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
 .eng-pv{color:#cbd5e1;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+/* v6.5: the Explore engine shows its top three moves (MultiPV 3) under each other, each with its evaluation */
+.eng-rows{display:grid;gap:6px}
+.eng-row{display:grid;grid-template-columns:3.4em auto minmax(0,1fr);gap:8px;align-items:baseline;padding:6px 8px;border-radius:10px;border:1px solid var(--hair);background:rgba(255,255,255,.02)}
+.eng-row:first-child{border-color:var(--accent-line)}
+.eng-row .eng-eval{font-size:15px;text-align:right}
+.eng-mv{background:var(--ink);border:1px solid var(--hair);border-radius:8px;padding:2px 9px;font:inherit;font-weight:800;color:var(--chalk);cursor:pointer;font-variant-numeric:tabular-nums;white-space:nowrap}
+.eng-mv:hover,.eng-mv:focus-visible{border-color:var(--accent);color:var(--accent)}
+.eng-line{color:var(--fog);font-size:13px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.eng-tag{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;color:var(--accent);border:1px solid var(--accent-line);border-radius:999px;padding:0 6px}
+.eng-depth{font-size:12px;color:var(--dim)}
 .lesson-head{margin-bottom:16px}.lesson-head h2{font-size:clamp(22px,4.6vw,30px)}.lesson-head p{margin-top:6px;color:var(--fog);max-width:70ch}
 .steps-dots{display:flex;gap:6px;margin-top:10px}
 .steps-dots span{height:5px;flex:1;max-width:44px;border-radius:3px;background:var(--rule)}
@@ -1223,7 +1241,8 @@ a.cc-frame:hover{border-color:var(--accent)}
 .te-branch{list-style:none;margin:2px 0 4px 14px;padding-left:12px;border-left:2px solid var(--hair)}
 .te-branch>li{margin:0}
 .te-mvwrap{display:inline-flex;align-items:center;border-radius:6px}
-.te-mvwrap.is-cur{background:var(--accent)}
+.te-mvwrap{transition:background-color .15s ease,box-shadow .15s ease}
+.te-mvwrap.is-cur{background:var(--accent);box-shadow:0 0 0 2px var(--accent),0 0 0 4px rgba(56,189,248,.28),0 0 14px rgba(56,189,248,.45)}
 .te-mvwrap.is-cur .te-mv-btn{color:var(--accent-ink)}
 .te-mv-btn{background:none;border:0;padding:2px 3px;border-radius:4px;font:inherit;font-weight:700;cursor:pointer;color:inherit;font-variant-numeric:tabular-nums}
 .te-mv-btn:hover{background:var(--ink-2)}
@@ -1246,7 +1265,7 @@ a.cc-frame:hover{border-color:var(--accent)}
 .ctx-menu button.is-danger{color:var(--miss)}
 .ctx-menu hr{border:0;border-top:1px solid var(--hair);margin:4px 2px}
 .lv39-tree-slot{margin-top:8px;padding:10px;border:1px solid var(--hair);border-radius:10px;max-height:320px;overflow:auto}
-.board-tree-pane{margin-top:10px;padding:12px;border:1px solid var(--hair);border-radius:12px;background:var(--surface);max-height:360px;overflow:auto}
+.board-tree-pane{margin-top:10px;padding:12px;border:1px solid var(--hair);border-radius:12px;background:var(--surface);max-height:360px;overflow:auto;overscroll-behavior:contain;position:relative}
 /* v3.7: chapters straight from the data file */
 .chip-n{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--ink-2);border:1px solid var(--hair);color:var(--fog);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"] .chip-n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -2240,7 +2259,10 @@ const CONFIG = {
      puzzle_bank in the data file fills the gaps (below ~900, or offline). */
   puzzles: { api: 'https://lichess.org/api/puzzle/next', anonBase: 1500, window: 250, tries: 3, timeoutMs: 8000 },
   pwa: { serviceWorker: 'sw.js' },
-  opponentDelay: 450
+  opponentDelay: 450,
+  /* v6.5: Smart Skip plays the shared moves one after the other instead of teleporting. About 4 moves a second (250 ms);
+     a long shared trunk speeds up so the whole replay stays under about 3.2 s, but never faster than 110 ms a move. */
+  skipReplay: { stepMs: 250, minMs: 110, totalMs: 3200 }
 };
 
 /* ==========================================================================
@@ -7421,6 +7443,11 @@ function playedHTML(played) {
   return html + '</div>';
 }
 const PRAISE = ['Correct.', 'That’s the move.', 'Exactly right.', 'Clean.'];
+/* v6.5: the gap between two moves of a Smart Skip replay (ms) for a trunk of n plies */
+function skipGap(n) {
+  const R = CONFIG.skipReplay || { stepMs: 250, minMs: 110, totalMs: 3200 };
+  return Math.round(clamp(R.totalMs / Math.max(1, n), R.minMs, R.stepMs));
+}
 
 function LineRunner(cfg) {
   const board = cfg.board, startFen = cfg.fen || START_FEN;
@@ -7428,39 +7455,48 @@ function LineRunner(cfg) {
   const silent = !!cfg.silent;                                  // static drill: the opponent never answers
   const plies = buildDrillPlies(startFen, cfg.moves || pgnTokens(cfg.pgn), silent, side);
   const userPlies = plies.filter((p) => p.color === side).length;
-  let g, idx, first, hintLevel, locked, finished, total, clean, feedback, played, lastNote, skipInfo = null, noSkip = !!cfg.noSkip, timers = [];
+  let g, idx, first, hintLevel, locked, finished, total, clean, feedback, played, lastNote, skipInfo = null, noSkip = !!cfg.noSkip, timers = [], replaying = false;
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
   const lastOf = () => (played.length ? { from: played[played.length - 1].from, to: played[played.length - 1].to } : cfg.lastMove || null);
-  const view = () => ({ idx, plies, side, played: played.slice(), feedback, finished, yourTurn: !finished && !locked && idx < plies.length && plies[idx].color === side, total, clean, userPlies, silent, skip: skipInfo });
+  const view = () => ({ idx, plies, side, played: played.slice(), feedback, finished, yourTurn: !finished && !locked && idx < plies.length && plies[idx].color === side, total, clean, userPlies, silent, skip: skipInfo, replay: replaying });
   const learn = !!cfg.learn;                                     // v3.6 Learn mode: arrows on every move, nothing scored
   const emit = () => { if (cfg.onUpdate) cfg.onUpdate(view()); };
   const score = (ok) => { if (cfg.section && !learn) App.score(cfg.section, ok); };
   function start() {
     timers.forEach(clearTimeout); timers = [];
-    g = new Chess(startFen); idx = 0; first = true; hintLevel = 0; locked = false; finished = false; total = 0; clean = 0; played = []; lastNote = '';
+    g = new Chess(startFen); idx = 0; first = true; hintLevel = 0; locked = false; finished = false; total = 0; clean = 0; played = []; lastNote = ''; replaying = false;
     if (cfg.id && !learn) V33.begin(cfg.id, { kind: cfg.kind || cfg.section || '', moves: userPlies });
     V36.hud(cfg.section);
     feedback = learn ? { v: 'info', label: 'Learn mode', text: 'Follow the arrows once. Then drill the line from memory.' } : cfg.intro ? { v: 'info', label: 'Your task', text: cfg.intro }
       : silent ? { v: 'info', label: 'Static drill', text: 'No replies here. Play your moves one after the other.' } : null;
     board.setTapMode(null); board.setOnMove(move); board.clearMarks(); board.setArrows([]);
     board.orientation(side === 'w' ? 'white' : 'black');
-    /* v6.4 Smart Skip: the shared opening moves are played silently and stay on the board as carried moves */
+    /* v6.4 Smart Skip: the shared opening moves stay on the board as carried moves.
+       v6.5: they are not teleported any more; they are played one after the other, about 4 a second, so the context stays visible. */
     skipInfo = null;
     const k = !silent && !noSkip && startFen === START_FEN ? clamp(Math.floor(+cfg.skipPlies || 0), 0, Math.max(0, plies.length - 1)) : 0;
     let carried = 0;
-    for (; carried < k; carried++) {
-      const p = plies[carried];
-      if (!g.move(p.san)) break;
-      played.push({ san: p.san, color: p.color, num: p.num, from: p.from, to: p.to, verdict: 'carried', carried: true });
+    const probe = new Chess(startFen);
+    for (; carried < k; carried++) { if (!probe.move(plies[carried].san)) break; }
+    board.setPosition(g.fen(), { animate: false, lastMove: cfg.lastMove || null });
+    if (!carried) { step(true); return; }
+    const text = RepTree.sanText(plies.slice(0, carried).map((p) => p.san), 0);
+    skipInfo = { plies: carried, text, msg: 'Fast-forwarded ' + text + ', which you already covered.' };
+    feedback = { v: 'info', label: 'Shared moves skipped', text: skipInfo.msg + (learn ? ' Follow the arrows from here.' : ' Your move comes next.') };
+    replaying = true; locked = true; board.setInteractive(null);
+    const gap = skipGap(carried);
+    for (let i = 0; i < carried; i++) {
+      later(() => {
+        const p = plies[i];
+        if (!g.move(p.san)) return;
+        idx = i + 1;
+        played.push({ san: p.san, color: p.color, num: p.num, from: p.from, to: p.to, verdict: 'carried', carried: true });
+        const last = i === carried - 1;
+        board.setPosition(g.fen(), { lastMove: { from: p.from, to: p.to }, sound: last ? (p.captured ? 'capture' : 'move') : null });
+        if (last) { replaying = false; locked = false; step(true); } else emit();
+      }, gap * (i + 1));
     }
-    idx = carried;
-    board.setPosition(g.fen(), { animate: false, lastMove: carried ? { from: plies[carried - 1].from, to: plies[carried - 1].to } : cfg.lastMove || null });
-    if (carried) {
-      const text = RepTree.sanText(plies.slice(0, carried).map((p) => p.san), 0);
-      skipInfo = { plies: carried, text, msg: 'Fast-forwarded ' + text + ', which you already covered.' };
-      feedback = { v: 'info', label: 'Shared moves skipped', text: skipInfo.msg + (learn ? ' Follow the arrows from here.' : ' Your move comes next.') };
-    }
-    step(true);
+    emit();
   }
   function step(initial) {
     board.unmark('hl-hint'); board.setArrows([]);
@@ -7982,7 +8018,7 @@ function scrollToEl(el) {
   window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.pageYOffset - head - 12), behavior: 'smooth' });
 }
 function turnHTML(v, yourText) {
-  return '<div class="turn">' + (v.finished ? icon('flag-checkered') + ' Done' : v.yourTurn ? '<span class="live-dot"></span> ' + esc(yourText || 'Your move') : '<span class="wait-dot"></span> Opponent is moving…');
+  return '<div class="turn">' + (v.finished ? icon('flag-checkered') + ' Done' : v.replay ? '<span class="wait-dot"></span> Replaying the shared moves…' : v.yourTurn ? '<span class="live-dot"></span> ' + esc(yourText || 'Your move') : '<span class="wait-dot"></span> Opponent is moving…');
 }
 
 /* ---------- HOME: the app manual ---------- */
@@ -8918,6 +8954,21 @@ function plyPrefix(ply, isFirst) {
   const num = Math.floor(ply / 2) + 1, white = ply % 2 === 0;
   return white ? '<span class="te-mvnum">' + num + '.</span>' : isFirst ? '<span class="te-mvnum">' + num + '…</span>' : '';
 }
+/* v6.5: keep the current move of a branch pane (.board-tree-pane) in the middle of that pane, smoothly. The offset is worked out
+   from the pane's own box and applied to the pane's own scrollTop / scrollLeft, so only the pane moves. A plain
+   scrollIntoView({ behavior: 'smooth', block: 'center' }) would also scroll every scrollable ancestor, the page included. */
+function centerCurInPane(host) {
+  if (!host || host.hidden) return;
+  const cur = host.querySelector('.te-mvwrap.is-cur');
+  if (!cur) return;
+  const hr = host.getBoundingClientRect(), cr = cur.getBoundingClientRect();
+  const smooth = !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const top = host.scrollTop + (cr.top - hr.top - host.clientTop) - (host.clientHeight - cr.height) / 2;
+  let left = host.scrollLeft;
+  if (cr.left < hr.left + 12 || cr.right > hr.right - 12) left = host.scrollLeft + (cr.left - hr.left - host.clientLeft) - (host.clientWidth - cr.width) / 2;
+  const to = { top: Math.max(0, Math.round(top)), left: Math.max(0, Math.round(left)), behavior: smooth ? 'smooth' : 'auto' };
+  if (typeof host.scrollTo === 'function') host.scrollTo(to); else { host.scrollTop = to.top; host.scrollLeft = to.left; }
+}
 /* Raw-JSON trees ({m, c, ...}: the admin draft and the My Repertoire trie)
    carry no path of their own, unlike the prepped course format (node.path).
    One annotation pass before each render gives every node a stable _path
@@ -8976,6 +9027,13 @@ function mountChapterTreeView(host, chapterId, board) {
     host.innerHTML = '<p class="small muted">' + icon('sitemap') + ' <b>' + esc(info.title) + '</b>: click a move to see it on the board.</p>' +
       chainTreeHTML(info.root.kids, (n) => n.kids || [], renderMove) +
       '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-quiet btn-sm" data-rt="root">' + icon('house') + ' Start position</button></div>';
+    centerCurInPane(host);                                                  // v6.5: the active move stays in the middle of this pane
+  }
+  /* v6.5: the board moved (candidate move, a move played on the board, the Explorer's back button): follow it in the pane */
+  function nodeBySans(sans) {
+    let kids = info.root.kids, node = null;
+    for (const san of sans) { node = (kids || []).filter((k) => cleanSan(k.san) === cleanSan(san))[0]; if (!node) return null; kids = node.kids || []; }
+    return node;
   }
   function onClick(e) {
     const jumpBtn = e.target.closest('[data-rt-jump]');
@@ -8984,7 +9042,16 @@ function mountChapterTreeView(host, chapterId, board) {
   }
   host.addEventListener('click', onClick);
   render();
-  return { destroy() { host.removeEventListener('click', onClick); host.hidden = true; host.innerHTML = ''; } };
+  return {
+    setCur(sans) {
+      const list = sans || [], node = list.length ? nodeBySans(list) : null;
+      if (list.length && !node) return;
+      const key = node ? node.path : '';
+      if (key === curPath) { centerCurInPane(host); return; }
+      curPath = key; render();
+    },
+    destroy() { host.removeEventListener('click', onClick); host.hidden = true; host.innerHTML = ''; }
+  };
 }
 function levelCardHTML(c, i) {
   const t = opTopic(c, i), n = LEVELS.filter((L) => Levels.has(t, L.n)).length, sug = Levels.suggest();
@@ -9468,21 +9535,43 @@ function Explorer(cfg) {
     if (cfg.onPath) cfg.onPath(pathOf(node).map((n) => n.san));
     analyse();
   }
+  /* v6.5: Stockfish runs with MultiPV = 3 here. The three best moves sit under each other with their evaluation (White's point of view,
+     one decimal), so the student can pick the most human, most understandable line. A move button plays that move on the board:
+     it pivots into the tree when the move is in it, and in My repertoire / the admin editor it is added as a new variation. */
+  const EX_PV = 3;
+  let pvUci = [];
+  function evalText(l) {
+    if (!l) return '…';
+    if (l.mate != null) return (l.mate > 0 ? '#' : '-#') + Math.abs(l.mate);
+    const v = (l.cp || 0) / 100, t = (Math.abs(v) < 0.05 ? 0 : v).toFixed(1);
+    return (v > 0.049 ? '+' : '') + t;
+  }
   function paint(r) {
     const out = qs('#ex-eng-out', panel);
     if (!r || !r.lines.length || !out) return;
-    const l = r.lines[0];
-    out.innerHTML = '<span class="eng-eval">' + esc(Engine.fmt(l)) + '</span> <span class="dim small">depth ' + l.depth + '</span><br>' + esc(Engine.pvText(r.fen, l.pv, 8));
+    const lines = r.lines.slice(0, EX_PV), rows = [], arrows = [];
+    pvUci = [];
+    lines.forEach((l, i) => {
+      const mv = Engine.pvMoves(r.fen, l.pv, 8), f = mv[0];
+      if (!f) return;
+      pvUci[i] = l.pv[0];
+      const inTree = node.kids.some((k) => k.from === f.from && k.to === f.to);
+      rows.push('<div class="eng-row"><span class="eng-eval">' + esc(evalText(l)) + '</span>' +
+        '<button type="button" class="eng-mv" data-ex="pvmove" data-i="' + i + '" title="Play this move on the board">' + esc(moveLabel(f.num, f.color, f.san)) + '</button>' +
+        '<span class="eng-line">' + esc(mv.slice(1).map((m) => (m.color === 'w' ? m.num + '.' : '') + m.san).join(' ')) + (inTree ? '<span class="eng-tag">in tree</span>' : '') + '</span></div>');
+      arrows.push({ from: f.from, to: f.to, kind: i === 0 ? 'best' : 'plan' });
+    });
+    out.innerHTML = '<div class="eng-rows">' + rows.join('') + '</div><span class="eng-depth">depth ' + lines[0].depth + ', top ' + rows.length + (rows.length === 1 ? ' move' : ' moves') + '</span>';
     evalbar.hidden = false;
     evalbar.classList.toggle('is-flipped', board.orientation() === 'black');
-    qs('.evalfill', evalbar).style.height = Engine.winPct(Engine.toCp(l)).toFixed(1) + '%';
-    if (l.pv[0]) board.setArrows([{ from: l.pv[0].slice(0, 2), to: l.pv[0].slice(2, 4), kind: 'best' }]);
+    qs('.evalfill', evalbar).style.height = Engine.winPct(Engine.toCp(lines[0])).toFixed(1) + '%';
+    board.setArrows(arrows);
   }
   function analyse() {
     const my = ++token;
     if (!ui.engine) { evalbar.hidden = true; return; }
     if (new Chess(node.fen).game_over()) { qs('#ex-eng-out', panel).textContent = 'The game is over on the board.'; return; }
-    Engine.analyse(node.fen, { depth: Engine.depth(), multipv: 1 }, (r) => { if (my === token && !destroyed) paint(r); })
+    Engine.analyse(node.fen, { depth: Engine.depth(), multipv: EX_PV }, (r) => { if (my === token && !destroyed) paint(r); })
       .catch((e) => { if (my === token && !destroyed && !/superseded/.test(e.message)) { const out = qs('#ex-eng-out', panel); if (out) out.textContent = 'The engine could not start. Check your connection and try again.'; } });
   }
   function onClick(e) {
@@ -9494,10 +9583,11 @@ function Explorer(cfg) {
     else if (x === 'up' && node.parent) { node = node.parent; render(); }
     else if (x === 'root') { node = root; render(); }
     else if (x === 'engine') { ui.engine = !ui.engine; if (!ui.engine) { Engine.stop(); board.setArrows([]); } render(); }
+    else if (x === 'pvmove') { const u = pvUci[i]; if (u) onBoardMove({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || undefined }); }
     else if (x === 'drill') { const l = (node === root ? group.lines : node.lines).filter((y) => App.unlocked(y))[0]; if (l) cfg.onDrill(l); }
   }
   panel.addEventListener('click', onClick);
-  board.setOnMove((m) => {
+  function onBoardMove(m) {
     const k = node.kids.filter((x) => x.from === m.from && x.to === m.to)[0];
     if (k && open(k)) { node = k; render(); Sound.move(); return; }
     board.setPosition(node.fen, { lastMove: node.from ? { from: node.from, to: node.to } : null });
@@ -9508,7 +9598,8 @@ function Explorer(cfg) {
       if (mv) { cfg.onNewMove(pathOf(node).map((n) => n.san), mv.san); return; }
     }
     toast('Not in this repertoire. Pick one of the candidate moves.');
-  });
+  }
+  board.setOnMove(onBoardMove);
   render();
   return { goTo(path) { node = walk(path); render(); return pathOf(node).length === (path || []).length; }, destroy() { destroyed = true; token++; if (ui.engine) Engine.stop(); panel.removeEventListener('click', onClick); board.setOnMove(null); board.setArrows([]); evalbar.hidden = true; } };
 }
@@ -9636,6 +9727,7 @@ function mountRepTreeView(host, repId, board, onChange, hooks) {
     host.innerHTML = '<p class="small muted">' + icon('sitemap') + ' <b>' + esc(rep.name) + '</b>: click a move to see it on the board; right-click, or ' + icon('ellipsis-vertical') + ', to edit. ' + lines.length + ' line' + (lines.length === 1 ? '' : 's') + '.</p>' +
       (trie.length ? chainTreeHTML(trie, (n) => n.c || [], renderMove) : '<p class="muted">No lines yet.</p>') +
       '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-rp="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-rp="root">' + icon('house') + ' Start position</button></div>' + noteHTML();
+    centerCurInPane(host);                                                  // v6.5: the active move stays in the middle of this pane
   }
   function persist() {
     const list = Repertoire.list(), r = list.filter((x) => x.id === repId)[0];
@@ -17902,7 +17994,7 @@ function TreeRunner(cfg) {
   const covered = new Set();
   let cur = T.root, played = [], first = true, hints = 0, locked = false, finished = false, done = false, feedback = null, noteNode = null;
   let run = { total: 0, clean: 0 }, sess = { total: 0, clean: 0, lines: 0 }, timers = [], pivots = 0, destroyed = false;
-  let skipInfo = null, noSkip = !!cfg.noSkip;                       // v6.4 Smart Skip
+  let skipInfo = null, noSkip = !!cfg.noSkip, replaying = false;   // v6.4 Smart Skip; v6.5: the shared moves are replayed
   const later = (fn, ms) => timers.push(setTimeout(() => { if (!destroyed) fn(); }, ms));
   const pathTo = (n) => { const p = []; for (let x = n; x && x.parent; x = x.parent) p.unshift(x); return p; };
   const onPath = (n, i) => leafSet(n).indexOf(i) >= 0;
@@ -17929,24 +18021,40 @@ function TreeRunner(cfg) {
     const yourTurn = !finished && !locked && cur.turn === side && kids(cur).length > 0;
     const branch = kids(cur);
     const tPath = scope === 'line' && leaves[target] ? pathTo(leaves[target]) : [];
-    return { scope, target, n: leaves.length, covered: covered.size, coveredSet: covered, finished, done, locked, yourTurn, learn, played: played.slice(), feedback, skip: skipInfo,
+    return { scope, target, n: leaves.length, covered: covered.size, coveredSet: covered, finished, done, locked, yourTurn, learn, played: played.slice(), feedback, skip: skipInfo, replay: replaying,
       note: noteNode ? { label: lbl(noteNode), blocks: Trees.notesOf(T, noteNode).n } : null,
       branchMine: yourTurn ? branch.length : 0, branchOpen: yourTurn && scope === 'chapter' ? branch.filter((k) => open(k).length).length : 0,
       mine: played.filter((p) => p.color === side && !p.carried).length, lineMine: tPath.filter((n) => n.color === side).length,
       run: Object.assign({}, run), sess: Object.assign({}, sess), pivots, ply: cur.ply };
   }
   const emit = () => { if (cfg.onUpdate && !destroyed) cfg.onUpdate(view()); };
-  function begin(node, initial) {
+  /* replay (v6.5): Smart Skip start. The moves from the first position to `node` are played one after the other (about 4 a second)
+     instead of teleporting to `node`; the board is locked while they run. */
+  function begin(node, initial, replay) {
     timers.forEach(clearTimeout); timers = [];
-    cur = node; finished = false; done = false; locked = false; first = true; hints = 0;
+    cur = node; finished = false; done = false; locked = false; first = true; hints = 0; replaying = false;
     run = { total: 0, clean: 0 };
-    played = pathTo(node).map((n) => ({ san: n.san + nagOf(n), color: n.color, num: n.num, from: n.from, to: n.to, verdict: 'carried', carried: true }));
+    const path = pathTo(node), carriedPlies = path.map((n) => ({ san: n.san + nagOf(n), color: n.color, num: n.num, from: n.from, to: n.to, verdict: 'carried', carried: true }));
     noteNode = node.parent ? node : null;
     board.setTapMode(null); board.setOnMove(onMove); board.clearMarks(); board.setArrows([]);
     board.orientation(side === 'w' ? 'white' : 'black');
+    if (scope === 'line' && !learn && idAt(target)) V33.begin(idAt(target), { kind: 'openings', moves: view().lineMine || 1 });
+    if (replay && path.length) {
+      played = []; cur = T.root; noteNode = null; replaying = true; locked = true; board.setInteractive(null);
+      board.setPosition(T.root.fen, { animate: false, lastMove: null });
+      const gap = skipGap(path.length);
+      path.forEach((n, i) => later(() => {
+        cur = n; played.push(carriedPlies[i]);
+        const last = i === path.length - 1;
+        board.setPosition(n.fen, { lastMove: { from: n.from, to: n.to }, sound: last ? (n.captured ? 'capture' : 'move') : null });
+        if (last) { replaying = false; locked = false; noteNode = n; marks(n); step(initial); } else emit();
+      }, gap * (i + 1)));
+      emit();
+      return;
+    }
+    played = carriedPlies;
     board.setPosition(node.fen, { animate: !initial, lastMove: node.from ? { from: node.from, to: node.to } : null });
     marks(noteNode);
-    if (scope === 'line' && !learn && idAt(target)) V33.begin(idAt(target), { kind: 'openings', moves: view().lineMine || 1 });
     step(initial);
   }
   function start() {
@@ -17954,7 +18062,7 @@ function TreeRunner(cfg) {
     feedback = learn ? { v: 'info', label: 'Learn mode', text: 'Follow the arrows once. Then drill the line from memory.' }
       : scope === 'chapter' ? { v: 'info', label: 'Full chapter', text: 'Every line of this level in one session. The opponent varies his replies until you have covered them all.' } : null;
     /* v6.4 Smart Skip: start on the branch point instead of move 1 */
-    let node = T.root;
+    let node = T.root, replay = false;
     if (!noSkip) {
       let sk = null;
       if (scope === 'chapter' && !learn) {
@@ -17963,13 +18071,13 @@ function TreeRunner(cfg) {
         else if (SmartSkip.hideDone() && leaves.length && leaves.every((_, i) => SmartSkip.done(idAt(i), 'drill'))) feedback = { v: 'info', label: 'All lines completed', text: 'Every line of this level is marked as completed, so the full chapter runs again from the start.' };
       } else if (scope === 'line') sk = SmartSkip.lineStart(L, side, target, learn ? 'learn' : 'drill');
       if (sk && sk.node) {
-        node = sk.node;
+        node = sk.node; replay = node !== T.root;
         skipInfo = { plies: sk.skipped, text: sk.text, msg: sk.msg };
         feedback = { v: 'info', label: scope === 'chapter' ? 'Finished lines skipped' : 'Shared moves skipped', text: sk.msg + (learn ? ' Follow the arrows from here.' : '') };
       } else if (sk && sk.msg) feedback = { v: 'info', label: 'Finished lines skipped', text: sk.msg };
     }
     V36.hud('openings');
-    begin(node, true);
+    begin(node, true, replay);
   }
   function play(n, verdict) {
     cur = n;
@@ -18290,7 +18398,8 @@ function treeTrainScreen(body, group, go, line0) {
     ui.treeEx = null; exPath = exStart || [];
     explorer = Explorer(Object.assign({ board, panel, group: Object.assign({}, group, { lines }), evalbar, onDrill: (l) => { const i = L.ids.indexOf(l.id); if (i >= 0) li = i; mode = 'drill'; scope = 'line'; run(); } },
       exStart ? { path: exStart } : {},
-      Admin.active ? { onNewMove: addTreeMove, onPath: (p) => { exPath = p; }, newMoveHint: 'Play any other move on the board to add it to this chapter as a new branch (Level ' + sel + '). It is saved on this device at once.' } : {}));
+      Admin.active ? { onNewMove: addTreeMove, onPath: (p) => { exPath = p; if (treePane && treePane.setCur) treePane.setCur(p); }, newMoveHint: 'Play any other move on the board to add it to this chapter as a new branch (Level ' + sel + '). It is saved on this device at once.' }
+        : { onPath: (p) => { exPath = p; if (treePane && treePane.setCur) treePane.setCur(p); } }));   // v6.5: user mode follows the board in the tree pane too
     const host = treeHost();
     if (host) {
       if (Admin.active) {
@@ -18301,6 +18410,7 @@ function treeTrainScreen(body, group, go, line0) {
       } else {
         treePane = mountChapterTreeView(host, info.id, board);
       }
+      if (treePane && treePane.setCur && exPath && exPath.length) treePane.setCur(exPath);   // v6.5: highlight where the Explorer starts (e.g. the move that was just added)
     }
   }
   function showGate(k) {
@@ -18680,8 +18790,25 @@ const TreeEditor = (() => {
       host.innerHTML = '<p class="small muted" id="te-meta">' + icon('sitemap') + ' <b>' + esc(t.title) + '</b> — ' + countNodes(tree) + ' moves, ' + countLeaves(tree) + ' lines' + (dirty ? ', unsaved changes' : '') + '. Click a move to see it on the board; right-click, or ' + icon('ellipsis-vertical') + ', to edit.' + (SyncLock.paused() ? ' <b>Sync is paused: nothing on GitHub can overwrite this.</b>' : '') + '</p>' +
         chainTreeHTML(tree, (n) => n.c || [], renderMove) +
         '<div class="btn-row" style="margin-top:10px"><button type="button" class="btn btn-ghost btn-sm" data-te="add-root">' + icon('plus') + ' Add an opening move</button><button type="button" class="btn btn-quiet btn-sm" data-te="root">' + icon('house') + ' Start position</button><button type="button" class="btn btn-primary btn-sm" data-te="export">' + icon('download') + ' Export JSON</button><button type="button" class="btn btn-ghost btn-sm" data-te="master">' + icon('file-export') + ' Export master JSON</button></div>';
+      centerCurInPane(host);                                                // v6.5: the active move stays in the middle of this pane
     }
     function jump(path) { curPath = path; onJump(fenAt(path), path ? sansAlongPath(tree, path) : []); render(); }
+    /* v6.5: the board moved (candidate move, a move played on the board, Back): the pane follows. `sans` is the SAN path of the board. */
+    function pathForSans(sans) {
+      let arr = tree; const out = [];
+      for (const san of sans) {
+        const i = arr.findIndex((o) => cleanSan(o.m) === cleanSan(san));
+        if (i < 0) return null;
+        out.push(i); arr = arr[i].c || [];
+      }
+      return out.join('.');
+    }
+    function setCur(sans) {
+      const list = sans || [], p = list.length ? pathForSans(list) : '';
+      if (p === null) return;
+      if (p === curPath) { centerCurInPane(host); return; }
+      curPath = p; render();
+    }
     /* Autosave: every edit (delete, promote, add) goes into the admin draft in localStorage at once, so a refresh,
        a background redraw or a sync can never bring the old branch back. This does not depend on the kill-switch. */
     function commit() {
@@ -18731,6 +18858,57 @@ const TreeEditor = (() => {
       render();
       if (saved) toast('Added ' + mv.san + '. Saved on this device.', 'good');
     }
+    /* v6.5: Export subtree to Master. A move's "l" is the first level that has it (omitted = its parent's), and "x" lists deeper levels
+       that do NOT have it, so Level 5 (Master) already contains everything from Levels 1 to 4. Two ways to export a branch:
+       - Master only: the branch's first move and every move after it start at Level 5, so it leaves Advanced (Level 4) and below;
+       - Keep in Advanced too: nothing is taken away from the lower levels; only exclusions that would hide the branch from Master are cleared. */
+    const MASTER = 5;
+    function levelAt(path) {
+      let arr = tree, l = 1;
+      for (const i of path.split('.').map(Number)) { const n = arr[i]; if (!n) break; if (+n.l >= 1 && +n.l <= 5) l = +n.l; arr = n.c || []; }
+      return l;
+    }
+    function clearMasterExclusion(o) { if (Array.isArray(o.x)) { const before = o.x.length; o.x = o.x.filter((z) => +z !== MASTER); if (!o.x.length) delete o.x; return before - (o.x ? o.x.length : 0); } return 0; }
+    function raiseSubtree(node) {
+      let moved = 0;
+      (function walk(o, root) {
+        if (root || (+o.l >= 1 && +o.l < MASTER)) { if (+o.l !== MASTER) moved++; o.l = MASTER; }
+        clearMasterExclusion(o);
+        (o.c || []).forEach((c) => walk(c, false));
+      })(node, true);
+      return moved;
+    }
+    function doToMaster(path, how) {
+      const node = nodeAt(tree, path);
+      if (!node) return;
+      const total = countNodes([node]), lines = countLeaves([node]);
+      let touched = 0, freed = 0;
+      /* the moves leading here must exist at Level 5 too, or the branch could not be reached there */
+      (function ancestors() { let arr = tree; const idx = path.split('.').map(Number); idx.pop(); for (const i of idx) { const a = arr[i]; if (!a) break; freed += clearMasterExclusion(a); arr = a.c || []; } })();
+      if (how === 'only') touched = raiseSubtree(node);
+      else (function walk(o) { freed += clearMasterExclusion(o); (o.c || []).forEach(walk); })(node);
+      if (how === 'only' && !touched && !freed) { toast('“' + node.m + '” and its branch already start at Master (Level 5).'); return; }
+      const saved = commit();
+      render();
+      if (saved) toast((how === 'only' ? 'Exported to Master only: ' + total + (total === 1 ? ' move' : ' moves') + ', ' + lines + (lines === 1 ? ' line' : ' lines') + ' now start at Level 5 and leave Advanced.' : 'Master has the branch now (' + total + (total === 1 ? ' move' : ' moves') + '); Advanced keeps it too.') + ' Saved on this device.', 'good');
+    }
+    function masterSheet(path) {
+      const node = nodeAt(tree, path);
+      if (!node) return;
+      const total = countNodes([node]), lines = countLeaves([node]), here = levelAt(path);
+      openSheet({
+        title: 'Export subtree to Master', noFocus: true,
+        html: '<p class="small muted">“' + esc(node.m) + '” and everything after it: ' + total + (total === 1 ? ' move' : ' moves') + ', ' + lines + (lines === 1 ? ' line' : ' lines') + '. The branch starts at Level ' + here + ' now. Master is Level ' + MASTER + '.</p>' +
+          '<div class="menu-rows"><button type="button" data-te-master="only"><span>Master only<small>The branch leaves Advanced and every lower level and starts at Level ' + MASTER + '.</small></span>' + icon('chevron-right') + '</button>' +
+          '<button type="button" data-te-master="both"><span>Keep in Advanced too<small>Master gets the branch and Advanced keeps it: nothing is removed from the lower levels.</small></span>' + icon('chevron-right') + '</button></div>',
+        onMount(sh) {
+          sh.el.addEventListener('click', (e) => {
+            const b = e.target.closest('[data-te-master]');
+            if (b) { const how = b.getAttribute('data-te-master'); sh.close(); setTimeout(() => doToMaster(path, how), 240); }
+          });
+        }
+      });
+    }
     function menuFor(path, x, y) {
       const node = nodeAt(tree, path);
       if (!node) return;
@@ -18738,6 +18916,7 @@ const TreeEditor = (() => {
       openContextMenu(x, y, [
         { label: 'Add a move after ' + node.m, icon: 'plus', run: () => doAdd(path) },
         { label: isMain ? 'Already the main line' : 'Promote to main line', icon: 'star', run: () => doPromote(path) },
+        { label: 'Export subtree to Master', icon: 'crown', run: () => masterSheet(path) },
         { sep: true },
         { label: 'Delete this move and its branch', icon: 'trash', danger: true, run: () => doDelete(path) }
       ]);
@@ -18773,7 +18952,7 @@ const TreeEditor = (() => {
     host.addEventListener('click', onClick);
     host.addEventListener('contextmenu', onCtx);
     render();
-    return { destroy() { live.delete(handle); host.removeEventListener('click', onClick); host.removeEventListener('contextmenu', onCtx); host.hidden = true; host.innerHTML = ''; } };
+    return { setCur, destroy() { live.delete(handle); host.removeEventListener('click', onClick); host.removeEventListener('contextmenu', onCtx); host.hidden = true; host.innerHTML = ''; } };
   }
   return { pick, mount, pending, markSaved, addBoardMove };
 })();
@@ -21300,7 +21479,7 @@ const V6Core = (() => {
     flowTail: { step: 0.004, cap: 100 },
     flowNames: [[0, 'Warming up'], [3, 'Flow'], [12, 'Deep flow'], [25, 'Elite flow'], [50, 'Master Flow'], [100, 'Titan Flow'], [250, 'Grandmaster Flow']],
     /* v8: formula ranks. XP only ever goes up and never decides a rank.
-       Module Rank = Level (1-5) x Accuracy; Puzzle Rank = current Puzzle ELO x Accuracy.
+       Module Rank = Level (1-5) x Accuracy; Puzzle Rank = current Puzzle ELO x (3 + Accuracy) / 4 (v6.5: milder, 100% = x1.0, 60% = x0.9).
        Accuracy is read from the last `window` answers on that level (so a rank can go down as well as up).
        A level is CLEARED at clearPct over at least clearMin answers (rank up: the next level opens for ranking and its decay window applies);
        it stays cleared until accuracy sinks under holdPct. sequential: a level only counts once the one before it is cleared.
@@ -21378,12 +21557,14 @@ const V6Core = (() => {
     const exact = best ? best.score : 0, i = clampN(Math.max(Math.ceil(exact - 1e-9), c), 0, 5);
     return { kind: 'module', i, name: tierName(i), next: i < 5 ? tierName(i + 1) : '', exact, index: exact, c, active, level: best ? best.k : active, acc: best ? best.acc : 0, bn: best ? best.n : 0, answers, trained: answers > 0, per, decay: decayFor(active) };
   }
-  /* Puzzle rank = current Puzzle ELO x accuracy over the last answers; the tier comes from the same bands as the level ELO labels */
+  /* v6.5: the mild puzzle multiplier. accuracy 1.0 -> x1.0, 0.6 -> x0.9, 0 -> x0.75. Accuracy is always a decimal between 0 and 1. */
+  function puzzleFactor(acc) { const a = Math.min(1, Math.max(0, +acc || 0)); return (3 + a) / 4; }
+  /* Puzzle rank = current Puzzle ELO x (3 + accuracy) / 4 over the last answers; the tier comes from the same bands as the level ELO labels */
   function puzzleRank(elo, bits) {
     const R = CFG.rank, a = accOf(bits), e = Math.max(0, num(elo, 0)), B = R.puzzleBands;
     const base = { kind: 'puzzle', elo: Math.round(e), acc: a.acc, bn: a.n, answers: a.n, trained: a.n > 0, decay: decayFor(1) };
     if (!(e > 0) || a.n < R.minAnswers) return Object.assign(base, { i: 0, name: tierName(0), next: tierName(1), exact: 0, index: 0, value: 0, c: 0, active: 1, level: 1 });
-    const value = Math.round(e * a.acc);
+    const value = Math.round(e * puzzleFactor(a.acc));   // v6.5: Elo x (3 + accuracy) / 4, accuracy as 0..1
     let exact = B[B.length - 1][1];
     for (let k = 0; k + 1 < B.length; k++) { if (value < B[k + 1][0]) { exact = B[k][1] + (value - B[k][0]) / (B[k + 1][0] - B[k][0]); break; } }
     const i = clampN(Math.ceil(exact - 1e-9), 1, 5);
@@ -21852,7 +22033,7 @@ const V6 = (() => {
     save(); queueSync(); try { refreshChip(); } catch (e) { /* the chip is optional */ }
   }
   /* v8: formula ranks. One scored answer goes into the rolling window of its level (or of the puzzles); the cleared flag of that level
-     is re-checked and the player hears about every rank change. Module Rank = Level x Accuracy, Puzzle Rank = Puzzle ELO x Accuracy. */
+     is re-checked and the player hears about every rank change. Module Rank = Level x Accuracy, Puzzle Rank = Puzzle ELO x (3 + Accuracy) / 4. */
   const clampLv = (k) => Math.min(5, Math.max(1, Math.round(num(k, 1))));
   function announce(before, after, module, level) {
     const L = C.CFG.labels[module], b = before.mr[module], a = after.mr[module];
@@ -22533,7 +22714,7 @@ const V6 = (() => {
     const bandPct = x.i >= 1 ? C.clampN(x.exact - (x.i - 1), 0, 1) : C.clampN(x.exact, 0, 1);
     let formula, steps = '';
     if (m === 'puzzles') {
-      formula = x.value ? 'Puzzle ELO ' + x.elo + ' × ' + pct(x.acc) + ' = ' + x.value : x.elo ? x.bn + ' of ' + K.minAnswers + ' puzzles answered to place your rank' : 'Start your Puzzle ELO to get a puzzle rank';
+      formula = x.value ? 'Puzzle ELO ' + x.elo + ' × (3 + ' + pct(x.acc) + ') ÷ 4 = ' + x.value : x.elo ? x.bn + ' of ' + K.minAnswers + ' puzzles answered to place your rank' : 'Start your Puzzle ELO to get a puzzle rank';
     } else {
       formula = x.bn ? 'Level ' + x.level + ' × ' + pct(x.acc) + ' = ' + x.exact.toFixed(2) : 'Answer ' + K.minAnswers + ' Level ' + x.active + ' positions in a Shuffle Trainer to place your rank';
       steps = '<div class="v8-lv">' + x.per.map((p) => '<span class="v8-pill' + (p.cleared ? ' is-clear' : p.open ? ' is-open' : '') + '" title="Level ' + p.k + ': ' + (p.cleared ? 'cleared' : p.open ? 'counts toward your rank' : 'opens when Level ' + (p.k - 1) + ' is cleared') + '. ' + p.n + ' answers' + (p.n ? ', ' + pct(p.acc) : '') + '. Lines fade after ' + p.decay + ' days.">' + (p.cleared ? icon('check') + ' ' : '') + 'L' + p.k + (p.n ? ' ' + pct(p.acc) : '') + '</span>').join('') + '</div>';
@@ -22551,7 +22732,7 @@ const V6 = (() => {
     ].map((x) => '<div class="v6-stat"><small>' + x[0] + '</small><b>' + esc(x[1]) + '</b><span>' + esc(x[2]) + '</span></div>').join('') + '</div>' +
       '<div class="v6-kpis"><div class="v6-viz"><small>XP Level</small><b>Lv ' + XL.level + '</b><span>' + fmt(s.total) + ' XP total, ' + fmt(XL.toNext) + ' to Lv ' + (XL.level + 1) + '. XP never goes down.</span></div><div class="v6-viz"><small>Account age</small><b>' + AGE + ' days</b><span>' + (NL ? 'Next loyalty badge: ' + esc(NL[1]) + ' at ' + NL[0] + ' days' : 'Every loyalty badge earned') + '</span></div><div class="v6-viz"><small>Day streak</small><b>' + App.streakDays() + '</b><span>' + (nd ? 'Next boost at ' + nd.at + ' days' : 'Top boost reached') + '</span></div><div class="v6-viz"><small>Best flow</small><b>' + s.flow.best + '</b></div>' +
       '<div><small>XP multipliers now</small><b>×' + (mm.streak * mm.arena * mm.bench * mm.event).toFixed(2) + '</b><span>Streak ×' + mm.streak.toFixed(2) + ', arena ×' + mm.arena.toFixed(2) + ', community ×' + mm.bench.toFixed(2) + ', event ×' + mm.event.toFixed(2) + '</span></div></div>' +
-      '<h3>Module ranks</h3><p class="muted small">Your rank moves with your accuracy, never with XP. A module rank is the Level × your accuracy on it (Puzzle Rank is your Puzzle ELO × accuracy), read from your last ' + C.CFG.rank.window + ' answers in the Shuffle Trainers, MSPC drills and puzzles. Clear a level at ' + Math.round(C.CFG.rank.clearPct * 100) + '% over ' + C.CFG.rank.clearMin + ' answers to rank up: the next level opens for ranking and its lines fade faster.</p><div class="v6-mods">' + C.CFG.modules.map((m) => modRow(m, R, tag)).join('') + '</div>' +
+      '<h3>Module ranks</h3><p class="muted small">Your rank moves with your accuracy, never with XP. A module rank is the Level × your accuracy on it (Puzzle Rank is your Puzzle ELO × (3 + accuracy) ÷ 4, so 100% accuracy keeps your full ELO and 60% keeps 90% of it), read from your last ' + C.CFG.rank.window + ' answers in the Shuffle Trainers, MSPC drills and puzzles. Clear a level at ' + Math.round(C.CFG.rank.clearPct * 100) + '% over ' + C.CFG.rank.clearMin + ' answers to rank up: the next level opens for ranking and its lines fade faster.</p><div class="v6-mods">' + C.CFG.modules.map((m) => modRow(m, R, tag)).join('') + '</div>' +
       '<h3>Recent XP</h3>' + (s.log.length ? '<ul class="v6-log">' + s.log.slice().reverse().slice(0, 8).map((x) => '<li><span>' + esc(C.CFG.labels[x.m] || x.m) + '</span><b>+' + x.xp + '</b><small>×' + num(x.x, 1).toFixed(2) + (x.h ? ', hint ' + x.h : '') + '</small></li>').join('') + '</ul>' : '<p class="muted small">No XP yet. Answer one drill correctly.</p>');
   }
   function tabMatrix() {
