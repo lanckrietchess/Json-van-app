@@ -1394,6 +1394,16 @@ a.cc-frame:hover{border-color:var(--accent)}
 .tt40-notes summary{cursor:pointer;font-weight:700;color:var(--chalk);font-size:14px;margin-bottom:6px}
 .tt40-ask{flex-basis:100%;margin:0 0 4px;font-weight:700}
 .moves .mv.is-carried{opacity:.6}
+.ss-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:-4px 0 12px;color:var(--fog);font-size:13px}
+.ss-bar[hidden]{display:none}
+.ss-count{display:inline-flex;flex-wrap:wrap;gap:2px 14px;font-variant-numeric:tabular-nums;font-weight:700}
+.ss-count span{white-space:nowrap}
+.ss-count i.fa-solid{color:var(--accent);margin-right:5px}
+.ss-bar .chip{min-height:34px;padding:0 12px;font-size:13px}
+.ss-bar .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent)}
+.ss-note{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 0;padding:8px 10px;border-radius:var(--r-sm);background:var(--accent-soft);color:var(--chalk);font-size:14px}
+.ss-note i.fa-solid{color:var(--accent)}
+.ss-note span{flex:1 1 220px;min-width:0;overflow-wrap:anywhere}
 @media (max-width:520px){.tt40-bar .seg{width:100%}.tt40-bar .seg button{flex:1 1 0;padding:8px 6px;font-size:13px}.tt40-notes{max-height:260px}}
 /* v4.0 import sheet */
 .ti40-table{display:flex;flex-direction:column;gap:10px;margin:12px 0}
@@ -7406,7 +7416,7 @@ function playedHTML(played) {
   let html = '<div class="moves">';
   played.forEach((p, i) => {
     if (p.color === 'w') html += '<span class="mv-n">' + p.num + '.</span>'; else if (i === 0) html += '<span class="mv-n">' + p.num + '...</span>';
-    html += '<span class="mv' + (p.verdict === 'fixed' || p.verdict === 'shown' ? ' is-miss' : '') + '">' + esc(p.san) + '</span>';
+    html += '<span class="mv' + (p.verdict === 'fixed' || p.verdict === 'shown' ? ' is-miss' : p.carried ? ' is-carried' : '') + '">' + esc(p.san) + '</span>';
   });
   return html + '</div>';
 }
@@ -7418,10 +7428,10 @@ function LineRunner(cfg) {
   const silent = !!cfg.silent;                                  // static drill: the opponent never answers
   const plies = buildDrillPlies(startFen, cfg.moves || pgnTokens(cfg.pgn), silent, side);
   const userPlies = plies.filter((p) => p.color === side).length;
-  let g, idx, first, hintLevel, locked, finished, total, clean, feedback, played, lastNote, timers = [];
+  let g, idx, first, hintLevel, locked, finished, total, clean, feedback, played, lastNote, skipInfo = null, noSkip = !!cfg.noSkip, timers = [];
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
   const lastOf = () => (played.length ? { from: played[played.length - 1].from, to: played[played.length - 1].to } : cfg.lastMove || null);
-  const view = () => ({ idx, plies, side, played: played.slice(), feedback, finished, yourTurn: !finished && !locked && idx < plies.length && plies[idx].color === side, total, clean, userPlies, silent });
+  const view = () => ({ idx, plies, side, played: played.slice(), feedback, finished, yourTurn: !finished && !locked && idx < plies.length && plies[idx].color === side, total, clean, userPlies, silent, skip: skipInfo });
   const learn = !!cfg.learn;                                     // v3.6 Learn mode: arrows on every move, nothing scored
   const emit = () => { if (cfg.onUpdate) cfg.onUpdate(view()); };
   const score = (ok) => { if (cfg.section && !learn) App.score(cfg.section, ok); };
@@ -7434,7 +7444,22 @@ function LineRunner(cfg) {
       : silent ? { v: 'info', label: 'Static drill', text: 'No replies here. Play your moves one after the other.' } : null;
     board.setTapMode(null); board.setOnMove(move); board.clearMarks(); board.setArrows([]);
     board.orientation(side === 'w' ? 'white' : 'black');
-    board.setPosition(startFen, { animate: false, lastMove: cfg.lastMove || null });
+    /* v6.4 Smart Skip: the shared opening moves are played silently and stay on the board as carried moves */
+    skipInfo = null;
+    const k = !silent && !noSkip && startFen === START_FEN ? clamp(Math.floor(+cfg.skipPlies || 0), 0, Math.max(0, plies.length - 1)) : 0;
+    let carried = 0;
+    for (; carried < k; carried++) {
+      const p = plies[carried];
+      if (!g.move(p.san)) break;
+      played.push({ san: p.san, color: p.color, num: p.num, from: p.from, to: p.to, verdict: 'carried', carried: true });
+    }
+    idx = carried;
+    board.setPosition(g.fen(), { animate: false, lastMove: carried ? { from: plies[carried - 1].from, to: plies[carried - 1].to } : cfg.lastMove || null });
+    if (carried) {
+      const text = RepTree.sanText(plies.slice(0, carried).map((p) => p.san), 0);
+      skipInfo = { plies: carried, text, msg: 'Fast-forwarded ' + text + ', which you already covered.' };
+      feedback = { v: 'info', label: 'Shared moves skipped', text: skipInfo.msg + (learn ? ' Follow the arrows from here.' : ' Your move comes next.') };
+    }
     step(true);
   }
   function step(initial) {
@@ -7532,12 +7557,13 @@ function LineRunner(cfg) {
     const acc = total ? clean / total : 1;
     if (learn) { if (cfg.id) { V36.learned(cfg.id); Dex.seen(cfg.id); } }
     else if (cfg.id) { const before = (App.progress[cfg.id] || {}).best || 0; App.finish(cfg.id, acc); V33.afterFinish(cfg.id, acc, { kind: cfg.kind || cfg.section || '', moves: userPlies }, before); V36.srsDone(cfg, acc); Dex.record(cfg.id, acc >= 1, { src: cfg.section === 'shuffle' ? 'shuffle' : 'drill' }); }
+    if (cfg.id && cfg.section === 'openings') SmartSkip.mark(cfg.id, learn ? 'learn' : 'drill', learn ? 1 : acc);
     feedback = learn ? { v: 'done', label: 'Line learned', text: 'You have seen every move. Now play it from memory: tap Drill it.' } : { v: 'done', label: 'Line complete', text: (total ? clean + ' of ' + total + ' moves right on the first try. ' : '') + (lastNote || '') };
     Sound.done(); emit();
     if (cfg.onFinish) cfg.onFinish({ accuracy: acc, clean, total });
   }
   return {
-    start, restart: start, move, hint, showMove, view,
+    start, restart: start, restartFull() { noSkip = true; start(); noSkip = !!cfg.noSkip; }, move, hint, showMove, view,
     destroy() { timers.forEach(clearTimeout); timers = []; locked = true; finished = true; if (learn) V36.learnStop(); }
   };
 }
@@ -9116,17 +9142,23 @@ function trainScreen(body, group, go) {
   }
   const openBelow = (k) => { for (let j = k - 1; j >= 1; j--) if (Levels.has(topic, j) && Levels.open(Levels.lead(topic, j))) return j; return 0; };
   const nextLevel = (k) => { for (let j = k + 1; j <= 5; j++) if (Levels.has(topic, j)) return j; return 0; };
+  /* the line after this one in the level: Learn (and Drill with "skip finished lines") jump to the next open one */
+  function flatNext() {
+    const nx = SmartSkip.next(set.map((x) => x.id), si, curLearn ? 'learn' : 'drill');
+    return nx || (si < set.length - 1 ? { i: si + 1, skipped: 0, wrapped: false } : null);
+  }
   function drillPanel(v) {
     const mine = v.played.filter((p) => p.color === line.side).length, lad = !!topic && !ui.only;
-    const more = lad && si < set.length - 1, nk = lad && !more ? nextLevel(sel) : 0, nOpen = nk && Levels.open(Levels.lead(topic, nk));
-    const nextBtn = (cls) => (more ? '<button type="button" class="btn ' + cls + '" data-act="next-in-level">' + icon('forward') + ' Next line (' + (si + 2) + ' of ' + set.length + ')</button>'
+    const nxl = lad ? flatNext() : null, more = !!nxl, nk = lad && !more ? nextLevel(sel) : 0, nOpen = nk && Levels.open(Levels.lead(topic, nk));
+    const skipNote = v.skip && !v.finished ? '<p class="ss-note">' + icon('forward') + '<span>' + esc(v.skip.msg) + '</span><button type="button" class="btn btn-quiet btn-sm" data-act="from-start">Play from move 1</button></p>' : '';
+    const nextBtn = (cls) => (more ? '<button type="button" class="btn ' + cls + '" data-act="next-in-level">' + icon('forward') + (nxl.skipped || nxl.wrapped ? ' Next open line (' : ' Next line (') + (nxl.i + 1) + ' of ' + set.length + ')</button>'
       : nk ? '<button type="button" class="btn ' + cls + '" data-act="next-level">' + (nOpen ? icon('arrow-trend-up') + ' Next level: ' : icon('crown') + ' Unlock ') + esc(Levels.name(nk)) + '</button>'
         : lad ? '<button type="button" class="btn ' + cls + '" data-act="next-chapter">Next chapter</button>' : '<button type="button" class="btn ' + cls + '" data-act="next">Next line</button>');
     panel.innerHTML = (curLearn ? '<span class="learn36">' + icon('graduation-cap') + ' Learn mode</span>' : '') +
       '<p class="st-kicker">' + esc(group.name) + (topic ? ', ' + esc(Levels.name(sel)) + (set.length > 1 ? ', line ' + (si + 1) + ' of ' + set.length : '') : '') + '</p><h2 class="st-title">' + esc(topic ? topic.title : line.title) + '</h2>' +
       (line.idea ? '<p class="st-brief">' + esc(line.idea) + '</p>' : '') +
       turnHTML(v, 'Your move as ' + colorName(line.side)) + '<span class="dim small" style="margin-left:auto">' + Math.min(mine, v.userPlies) + ' / ' + v.userPlies + '</span></div>' +
-      '<div class="st-feedback">' + feedbackHTML(v.feedback) + '</div>' + playedHTML(v.played) +
+      '<div class="st-feedback">' + feedbackHTML(v.feedback) + '</div>' + skipNote + playedHTML(v.played) +
       (v.finished && nk && !nOpen ? '<p class="lv39-next">' + icon('crown') + ' ' + esc(Levels.name(nk)) + ' takes this chapter to move ' + maxMove(Levels.cut(topic, nk)) + ', with ' + Levels.cut(topic, nk).length + (Levels.cut(topic, nk).length === 1 ? ' line.' : ' lines.') + '</p>' : '') +
       '<div class="st-actions">' + (v.finished && curLearn
         ? '<button type="button" class="btn btn-primary" data-act="drill-now">' + icon('dumbbell') + ' Drill it from memory</button><button type="button" class="btn btn-ghost" data-act="restart">Learn it again</button>' + nextBtn('btn-quiet')
@@ -9143,7 +9175,7 @@ function trainScreen(body, group, go) {
     evalbar.hidden = true;
     board.setOnMove(null); board.setTapMode(null); board.setInteractive(null); board.clearMarks(); board.setArrows([]);
   }
-  function startDrill(l, learn) {
+  function startDrill(l, learn, full) {
     line = l; ui.lineId = l.id; ui.mode = learn ? 'learn' : 'drill'; curLearn = !!learn;
     ungate();
     if (topic) { lastOpen = sel; si = Math.max(0, set.indexOf(l)); remember(); }
@@ -9154,7 +9186,8 @@ function trainScreen(body, group, go) {
     evalbar.hidden = true;
     if (runner) runner.destroy();
     if (learn) LearnEngine.attach({ board, evalbar, host: qs('#op-board-learn', body) }); else LearnEngine.detach();
-    runner = LineRunner({ board, moves: l.moves, side: l.side, ann: l.ann, section: 'openings', id: l.id, title: group.name + ': ' + l.title, learn: !!learn, silent: isStatic(l), onUpdate: drillPanel });
+    runner = LineRunner({ board, moves: l.moves, side: l.side, ann: l.ann, section: 'openings', id: l.id, title: group.name + ': ' + l.title, learn: !!learn, silent: isStatic(l), onUpdate: drillPanel,
+      skipPlies: full ? 0 : SmartSkip.flatSkip(l, topic ? set : group.lines, learn ? 'learn' : 'drill') });
     runner.start();
   }
   /* A tap on a level: it runs straight away on the same board. A locked level
@@ -9261,7 +9294,8 @@ function trainScreen(body, group, go) {
     const act = a.getAttribute('data-act');
     if (act === 'back' || act === 'only-off') { go({ screen: 'list', only: false }); return; }
     if (act === 'drill-now') { startDrill(line, false); return; }
-    if (act === 'next-in-level') { const n = set[si + 1]; if (n) { startDrill(n, ui.mode === 'learn' || V36.autoLearn(n)); scrollToEl(body); } return; }
+    if (act === 'next-in-level') { const nx = flatNext(), n = nx && set[nx.i]; if (n) { startDrill(n, ui.mode === 'learn' || V36.autoLearn(n)); scrollToEl(body); } return; }
+    if (act === 'from-start') { startDrill(line, curLearn, true); return; }
     if (act === 'next-level') { const nk = nextLevel(sel); if (nk) { selectLevel(nk); scrollToEl(body); } return; }
     if (act === 'next-chapter') { nextChapter(); return; }
     if (!runner) return;
@@ -16342,10 +16376,13 @@ const V36 = {
   },
   settingsHTML() {
     const sw = (k, label, note) => '<label class="switch-row"><span>' + esc(label) + '<small class="sw36-note">' + esc(note) + '</small></span><input type="checkbox" data-p36="' + k + '"' + (App.settings[k] !== false ? ' checked' : '') + '></label>';
+    const swOff = (k, label, note) => '<label class="switch-row"><span>' + esc(label) + '<small class="sw36-note">' + esc(note) + '</small></span><input type="checkbox" data-p36="' + k + '"' + (App.settings[k] === true ? ' checked' : '') + '></label>';
     return sw('popups', 'Show achievement pop-ups', 'Off: nothing covers the board while you calculate. Badges, streaks and rating milestones still count, and a dot on your profile chip in the top bar says something new is waiting.') +
       sw('learnArrows', 'Learn mode on new opening lines', 'The first time you play a line, arrows show every move.') +
       sw('learnSf', 'Live Stockfish in Learn mode', 'An eval bar and Stockfish’s first choice on every move while you learn a line. Runs on this device.') +
-      sw('srs', 'Spaced repetition', 'Missed moves come back in My mistakes until you play them right twice.');
+      sw('srs', 'Spaced repetition', 'Missed moves come back in My mistakes until you play them right twice.') +
+      sw('ssTrunk', 'Smart Skip: fast-forward shared moves', 'A line that branches off a line you just finished starts where it branches off, not on move 1. Learn and Drill.') +
+      swOff('ssDone', 'Smart Skip: skip finished lines', 'Next line and the Full chapter jump over lines you already completed. Drill counts a line as completed with 80% or more right on the first try.');
   },
   bindSettings(s) {
     qsa('[data-p36]', s.el).forEach((el) => el.addEventListener('change', () => {
@@ -16354,7 +16391,7 @@ const V36 = {
       if (k === 'popups') toast(el.checked ? 'Achievement pop-ups on.' : 'Achievement pop-ups off. Moments are kept quietly: look for the dot on your profile chip.', 'good');
     }));
   },
-  reset() { SRS.clear(); Badges.clear(); Store.del(V36_STATE); refreshChip(); },
+  reset() { SRS.clear(); Badges.clear(); SmartSkip.clear(); Store.del(V36_STATE); refreshChip(); },
   /* ----- leaderboards ----- */
   lbRank(r) {
     const n = +r.rank, t = n === 1 ? 'gold' : n === 2 ? 'silver' : n === 3 ? 'bronze' : '';
@@ -17329,6 +17366,168 @@ const V37 = {
    the PLY they were written on. It runs on every way in (data file, saved
    copy, admin import), so old and new data end up the same.
    ========================================================================== */
+/* ==========================================================================
+   v6.4: SMART SKIP
+   Stops the same trunk from being replayed over and over.
+   1. Shared Prefix Skipping. A line that branches off a trunk you already
+      played in a line you just finished starts on the branch point instead
+      of move 1. The trunk stays on the board as carried (dimmed) moves, and
+      "Play from move 1" walks it anyway.
+   2. Completed lines. Every finished line is stored on this device in
+      completedLines.learn / completedLines.drill. Learn marks the line and
+      "Next line" jumps to the next open one. Drill can filter finished lines:
+      Next line skips them and the Full chapter starts at the first branch
+      that still has open lines.
+   Rules that keep it honest:
+   - Learn counts a line as done when its last move was followed (Drill
+     completions count as learned too).
+   - Drill counts a line as completed with at least CFG.minAcc right on the
+     first try; a weaker run takes the mark away again.
+   - A trunk only counts as already played for CFG.trunkTtlMs after the line
+     that covered it, so skipping never fossilises across days and spaced
+     repetition stays in charge of long-term recall.
+   - At least one move of the player's own is always left to play.
+   Settings: ssTrunk (shared moves, default on), ssDone (finished lines,
+   default off). Storage: localStorage key lc-hub-smartskip, written at once.
+   ========================================================================== */
+const SmartSkip = (() => {
+  const KEY = 'lc-hub-smartskip';
+  const CFG = { trunkTtlMs: 12 * 3600000, minSkipPlies: 2, minAcc: 0.8, maxLines: 4000 };
+  const MODES = ['learn', 'drill'];
+  let db = null;
+  const blank = () => ({ v: 1, completedLines: { learn: {}, drill: {} } });
+  function get() {
+    if (db) return db;
+    const d = blank(), s0 = Store.get(KEY, null), src = s0 && typeof s0 === 'object' ? s0.completedLines : null;
+    if (src && typeof src === 'object') MODES.forEach((m) => {
+      const o = src[m];
+      if (!o || typeof o !== 'object' || Array.isArray(o)) return;
+      Object.keys(o).slice(0, CFG.maxLines).forEach((id) => {
+        const x = o[id] || {};
+        d.completedLines[m][String(id).slice(0, 90)] = { t: +x.t || 0, acc: clamp(+x.acc || 0, 0, 1), n: Math.max(1, Math.floor(+x.n || 1)) };
+      });
+    });
+    db = d;
+    return d;
+  }
+  function save() {
+    const d = get();
+    MODES.forEach((m) => {
+      const o = d.completedLines[m], ids = Object.keys(o);
+      if (ids.length > CFG.maxLines) ids.sort((a, b) => o[a].t - o[b].t).slice(0, ids.length - CFG.maxLines).forEach((id) => { delete o[id]; });
+    });
+    Store.set(KEY, d);
+  }
+  const on = () => App.settings.ssTrunk !== false;
+  const hideDone = () => App.settings.ssDone === true;
+  const rec = (id, mode) => { const c = get().completedLines; return (id && c[mode] && c[mode][id]) || null; };
+  /* learned = followed in Learn or completed in Drill; drilled = completed in Drill */
+  const done = (id, mode) => (mode === 'learn' ? !!(rec(id, 'learn') || rec(id, 'drill')) : !!rec(id, 'drill'));
+  function fresh(id, mode) {
+    const now = Date.now(), f = (m) => { const r = rec(id, m); return !!r && now - r.t <= CFG.trunkTtlMs; };
+    return mode === 'learn' ? f('learn') || f('drill') : f('drill');
+  }
+  function mark(id, mode, acc) {
+    if (!id || MODES.indexOf(mode) < 0) return;
+    const o = get().completedLines[mode], prev = o[id], a = clamp(+acc || 0, 0, 1);
+    if (mode === 'drill' && a < CFG.minAcc) { if (prev) { delete o[id]; save(); } return; }
+    o[id] = { t: Date.now(), acc: a, n: (prev ? prev.n : 0) + 1 };
+    save();
+  }
+  const badge = (id) => (rec(id, 'drill') ? '★ ' : rec(id, 'learn') ? '✓ ' : '');
+  function counts(ids) {
+    let learned = 0, drilled = 0;
+    (ids || []).forEach((id) => { if (done(id, 'learn')) learned++; if (done(id, 'drill')) drilled++; });
+    return { n: (ids || []).length, learned, drilled };
+  }
+  /* The line after position i. Learn always, and Drill when "skip finished lines" is on, jump over lines that are done
+     (and wrap around to open ones before i). null = nothing open is left, or there is no line after i. */
+  function next(ids, i, mode) {
+    const n = ids.length, skip = mode === 'learn' || hideDone();
+    if (!skip) return i + 1 < n ? { i: i + 1, skipped: 0, wrapped: false } : null;
+    for (let s1 = 1; s1 < n; s1++) {
+      const j = (i + s1) % n;
+      if (!done(ids[j], mode)) return { i: j, skipped: s1 - 1, wrapped: j < i };
+    }
+    return null;
+  }
+  function firstOpen(ids, mode) { for (let j = 0; j < ids.length; j++) if (!done(ids[j], mode)) return j; return -1; }
+
+  /* ----- tree chapters (TreeRunner) ----- */
+  const upTo = (n) => { const p = []; for (let x = n; x && x.parent; x = x.parent) p.unshift(x); return p; };
+  const isUnder = (leaf, node) => { for (let x = leaf; x; x = x.parent) if (x === node) return true; return false; };
+  /* always leave at least one move of the player's own to play after the skipped part */
+  function leaveDecision(paths, k, side) { while (k > 0 && paths.some((p) => !p.slice(k).some((n) => n.color === side))) k--; return k; }
+  const sansText = (nodes) => RepTree.sanText(nodes.map((n) => n.san), 0);
+  /* Where a single line should start: the deepest node it shares with lines finished a moment ago. */
+  function lineStart(L, side, target, mode) {
+    if (!on() || !L || !L.leaves[target]) return null;
+    const P = new Set();
+    L.leaves.forEach((leaf, i) => {
+      if (i === target || !fresh(L.ids[i], mode)) return;
+      for (let x = leaf; x && !P.has(x); x = x.parent) P.add(x);
+    });
+    if (!P.size) return null;
+    const path = upTo(L.leaves[target]);
+    let k = 0;
+    while (k < path.length && P.has(path[k])) k++;
+    k = leaveDecision([path], k, side);
+    if (k < CFG.minSkipPlies) return null;
+    const node = path[k - 1];
+    let via = -1;
+    L.leaves.forEach((leaf, i) => { if (via < 0 && i !== target && fresh(L.ids[i], mode) && isUnder(leaf, node)) via = i; });
+    const text = sansText(path.slice(0, k));
+    return { node, skipped: k, text, via, msg: 'Fast-forwarded ' + text + ', which you already covered' + (via >= 0 ? ' in line ' + (via + 1) : '') + '.' };
+  }
+  /* "Skip finished lines" in the Full chapter: finished lines count as covered, and the run starts at the deepest
+     node that all the remaining open lines share. */
+  function chapterStart(L, side) {
+    if (!hideDone() || !L) return null;
+    const open = [], pre = [];
+    L.leaves.forEach((leaf, i) => { (done(L.ids[i], 'drill') ? pre : open).push(i); });
+    if (!pre.length || !open.length) return null;
+    const paths = open.map((i) => upTo(L.leaves[i]));
+    let c = 0;
+    for (;; c++) { const a = paths[0][c]; if (!a || paths.some((p) => p[c] !== a)) break; }
+    c = leaveDecision(paths, c, side);
+    const left = open.length + (open.length === 1 ? ' line is' : ' lines are');
+    if (c < CFG.minSkipPlies) return { node: null, pre, msg: pre.length + ' finished ' + (pre.length === 1 ? 'line is' : 'lines are') + ' counted as covered. ' + left + ' still open.' };
+    const text = sansText(paths[0].slice(0, c));
+    return { node: paths[0][c - 1], skipped: c, pre, text, msg: 'Started at ' + text + ', the first branch with open lines. ' + pre.length + ' finished ' + (pre.length === 1 ? 'line is' : 'lines are') + ' counted as covered, ' + left + ' left.' };
+  }
+
+  /* ----- flat lines (LineRunner: My repertoire and chapters without a tree) ----- */
+  function flatSkip(l, pool, mode) {
+    if (!on() || !l || isStatic(l) || !(l.moves || []).length) return 0;
+    const mv = l.moves.map(cleanSan);
+    let best = 0;
+    (pool || []).forEach((o) => {
+      if (!o || o.id === l.id || isStatic(o) || !fresh(o.id, mode)) return;
+      const om = (o.moves || []).map(cleanSan);
+      let k = 0;
+      while (k < om.length && k < mv.length && om[k] === mv[k]) k++;
+      if (k > best) best = k;
+    });
+    best = Math.min(best, mv.length - 1);
+    while (best > 0 && !mv.slice(best).some((_, j) => ((best + j) % 2 === 0 ? 'w' : 'b') === l.side)) best--;
+    return best >= CFG.minSkipPlies ? best : 0;
+  }
+
+  /* ----- housekeeping ----- */
+  function rename(map) {
+    const c = get().completedLines;
+    let n = 0;
+    MODES.forEach((m) => Object.keys(map).forEach((o) => { if (c[m][o] && !c[m][map[o]]) { c[m][map[o]] = c[m][o]; n++; } }));
+    if (n) save();
+    return n;
+  }
+  function clearIds(ids) { const c = get().completedLines; (ids || []).forEach((id) => { MODES.forEach((m) => { delete c[m][id]; }); }); save(); }
+  function clear() { db = null; Store.del(KEY); }
+  /* another tab or the installed app wrote the marks: read them again next time */
+  try { window.addEventListener('storage', (e) => { if (!e || e.key === null || e.key === KEY) db = null; }); } catch (e) { /* no window */ }
+  return { CFG, on, hideDone, done, fresh, mark, badge, counts, next, firstOpen, lineStart, chapterStart, flatSkip, rename, clearIds, clear };
+})();
+
 const C6 = (() => {
   const PAY = ['n', 'g', 'ar', 'sq', 'l', 'x'];
   const find = (list, m) => (list || []).filter((c) => c.m === m)[0] || null;
@@ -17409,6 +17608,7 @@ const C6 = (() => {
     let n = 0;
     olds.forEach((o) => { const w = map[o]; if (App.progress[o] && !App.progress[w]) { App.progress[w] = App.progress[o]; n++; } });
     n += SRS.rename(map);
+    n += SmartSkip.rename(map);
     if (n) App.save();
     return n;
   }
@@ -17702,6 +17902,7 @@ function TreeRunner(cfg) {
   const covered = new Set();
   let cur = T.root, played = [], first = true, hints = 0, locked = false, finished = false, done = false, feedback = null, noteNode = null;
   let run = { total: 0, clean: 0 }, sess = { total: 0, clean: 0, lines: 0 }, timers = [], pivots = 0, destroyed = false;
+  let skipInfo = null, noSkip = !!cfg.noSkip;                       // v6.4 Smart Skip
   const later = (fn, ms) => timers.push(setTimeout(() => { if (!destroyed) fn(); }, ms));
   const pathTo = (n) => { const p = []; for (let x = n; x && x.parent; x = x.parent) p.unshift(x); return p; };
   const onPath = (n, i) => leafSet(n).indexOf(i) >= 0;
@@ -17728,7 +17929,7 @@ function TreeRunner(cfg) {
     const yourTurn = !finished && !locked && cur.turn === side && kids(cur).length > 0;
     const branch = kids(cur);
     const tPath = scope === 'line' && leaves[target] ? pathTo(leaves[target]) : [];
-    return { scope, target, n: leaves.length, covered: covered.size, coveredSet: covered, finished, done, locked, yourTurn, learn, played: played.slice(), feedback,
+    return { scope, target, n: leaves.length, covered: covered.size, coveredSet: covered, finished, done, locked, yourTurn, learn, played: played.slice(), feedback, skip: skipInfo,
       note: noteNode ? { label: lbl(noteNode), blocks: Trees.notesOf(T, noteNode).n } : null,
       branchMine: yourTurn ? branch.length : 0, branchOpen: yourTurn && scope === 'chapter' ? branch.filter((k) => open(k).length).length : 0,
       mine: played.filter((p) => p.color === side && !p.carried).length, lineMine: tPath.filter((n) => n.color === side).length,
@@ -17749,11 +17950,26 @@ function TreeRunner(cfg) {
     step(initial);
   }
   function start() {
-    covered.clear(); sess = { total: 0, clean: 0, lines: 0 }; pivots = 0;
+    covered.clear(); sess = { total: 0, clean: 0, lines: 0 }; pivots = 0; skipInfo = null;
     feedback = learn ? { v: 'info', label: 'Learn mode', text: 'Follow the arrows once. Then drill the line from memory.' }
       : scope === 'chapter' ? { v: 'info', label: 'Full chapter', text: 'Every line of this level in one session. The opponent varies his replies until you have covered them all.' } : null;
+    /* v6.4 Smart Skip: start on the branch point instead of move 1 */
+    let node = T.root;
+    if (!noSkip) {
+      let sk = null;
+      if (scope === 'chapter' && !learn) {
+        sk = SmartSkip.chapterStart(L, side);
+        if (sk) sk.pre.forEach((i) => covered.add(i));
+        else if (SmartSkip.hideDone() && leaves.length && leaves.every((_, i) => SmartSkip.done(idAt(i), 'drill'))) feedback = { v: 'info', label: 'All lines completed', text: 'Every line of this level is marked as completed, so the full chapter runs again from the start.' };
+      } else if (scope === 'line') sk = SmartSkip.lineStart(L, side, target, learn ? 'learn' : 'drill');
+      if (sk && sk.node) {
+        node = sk.node;
+        skipInfo = { plies: sk.skipped, text: sk.text, msg: sk.msg };
+        feedback = { v: 'info', label: scope === 'chapter' ? 'Finished lines skipped' : 'Shared moves skipped', text: sk.msg + (learn ? ' Follow the arrows from here.' : '') };
+      } else if (sk && sk.msg) feedback = { v: 'info', label: 'Finished lines skipped', text: sk.msg };
+    }
     V36.hud('openings');
-    begin(T.root, true);
+    begin(node, true);
   }
   function play(n, verdict) {
     cur = n;
@@ -17852,6 +18068,7 @@ function TreeRunner(cfg) {
     if (i < 0) { finished = true; emit(); return; }
     if (learn) { V36.learned(id); Dex.seen(id); }
     else if (id) { const before = (App.progress[id] || {}).best || 0; App.finish(id, acc); V33.afterFinish(id, acc, { kind: 'openings', moves: Math.max(1, run.total) }, before); V36.srsDone(srsCfg(i), acc); Dex.record(id, acc >= 1, { src: 'drill' }); }
+    if (id) SmartSkip.mark(id, learn ? 'learn' : 'drill', learn ? 1 : acc);
     covered.add(i); sess.lines++;
     Sound.done();
     if (scope === 'line' || learn) {
@@ -17876,7 +18093,7 @@ function TreeRunner(cfg) {
     later(() => { locked = false; const keep = feedback; begin(a, false); if (!feedback || feedback === keep) { feedback = keep; emit(); } }, 1500);
   }
   return {
-    start, restart: start, onMove, hint, showMove, view,
+    start, restart: start, restartFull() { noSkip = true; start(); noSkip = !!cfg.noSkip; }, onMove, hint, showMove, view,
     expectedUci: () => { const e = !finished && cur.turn === side ? expected() : null; return e ? e.uci : ''; },
     setTarget(i) { target = clamp(i, 0, leaves.length - 1); },
     destroy() { destroyed = true; timers.forEach(clearTimeout); timers = []; locked = true; finished = true; if (learn) V36.learnStop(); board.setOnMove(null); }
@@ -17893,18 +18110,19 @@ function treeTrainScreen(body, group, go, line0) {
   let sel = (ui.lvLine === line0.id && Levels.num(ui.lv)) || Levels.of(line0);
   let scope = ui.scope === 'chapter' ? 'chapter' : 'line';
   let mode = ui.mode === 'explore' ? 'explore' : ui.mode === 'learn' ? 'learn' : 'drill';
-  let T = null, L = null, li = 0, runner = null, explorer = null, treePane = null, gated = 0, lastOpen = 0, finishedLine = false, chapterDone = false;
+  let T = null, L = null, li = 0, runner = null, explorer = null, treePane = null, gated = 0, lastOpen = 0, finishedLine = false, chapterDone = false, entering = true;
   const treeHost = () => qs('#op-board-tree', body);
   let wantPath = line0.treePath;
   body.innerHTML = backBar('All chapters', esc(group.name) + ' › <strong id="op-title">' + esc(info.title) + '</strong>') +
     '<div class="lv39" id="op-levels"></div>' +
     '<div class="tt40-bar"><div class="seg" role="tablist" aria-label="Mode"><button type="button" data-mode="learn">' + icon('graduation-cap') + ' Learn</button><button type="button" data-mode="drill">' + icon('dumbbell') + ' Drill</button><button type="button" data-mode="explore">' + icon('sitemap') + ' Explore</button></div>' +
       '<div class="seg tt40-scope" role="tablist" aria-label="What to train"><button type="button" data-scope="line">' + icon('route') + ' Single line</button><button type="button" data-scope="chapter">' + icon('diagram-project') + ' Full chapter</button></div></div>' +
-    '<div class="tt40-nav" id="op-nav"></div>' +
+    '<div class="tt40-nav" id="op-nav"></div><div class="ss-bar" id="op-ss" hidden></div>' +
     trainerShell('op-board', 'op-panel', { eval: true });
   const board = Board(qs('#op-board', body), { orientation: info.side === 'w' ? 'white' : 'black' });
   qs('[data-flip="op-board"]', body).addEventListener('click', () => board.flip());
   const panel = qs('#op-panel', body), evalbar = qs('#op-board-eval', body), levelsHost = qs('#op-levels', body), nav = qs('#op-nav', body), veil = boardVeil(body, 'op-board');
+  const ssBar = qs('#op-ss', body);
   const lineItem = (i) => (L && L.ids[i] ? Trees.line(L.ids[i]) : null);
   const reviewed = (i) => !!(L && L.ids[i] && ((App.progress[L.ids[i]] || {}).runs || !SRS.isNew(L.ids[i])));
   const allReviewed = () => !!L && L.ids.every((id, i) => reviewed(i));
@@ -17921,7 +18139,31 @@ function treeTrainScreen(body, group, go, line0) {
     if (rail && on && rail.scrollWidth > rail.clientWidth) rail.scrollLeft = Math.max(0, on.parentNode.offsetLeft - (rail.clientWidth - on.offsetWidth) / 2);
     if (focused && on) try { on.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
   }
+  /* v6.4 Smart Skip bar: what is done on this level, and the two switches */
+  function renderSS() {
+    if (!ssBar) return;
+    if (gated || !L || mode === 'explore') { ssBar.hidden = true; ssBar.innerHTML = ''; return; }
+    const c = SmartSkip.counts(L.ids), t = SmartSkip.on(), d = SmartSkip.hideDone();
+    ssBar.hidden = false;
+    ssBar.innerHTML = '<span class="ss-count" role="status"><span title="Lines you followed in Learn or completed in Drill">' + icon('circle-check') + c.learned + ' / ' + c.n + ' learned</span>' +
+      '<span title="Lines completed in Drill with ' + Math.round(SmartSkip.CFG.minAcc * 100) + '% or more right on the first try">' + icon('star') + c.drilled + ' / ' + c.n + ' drilled</span></span>' +
+      '<button type="button" class="chip" data-ss="trunk" aria-pressed="' + t + '" title="A new line starts where it branches off a line you just finished">' + icon('forward') + ' Skip shared moves</button>' +
+      '<button type="button" class="chip" data-ss="done" aria-pressed="' + d + '" title="Next line and the Full chapter jump over lines you already completed">' + icon('filter') + ' Skip finished lines</button>' +
+      (c.learned || c.drilled ? '<button type="button" class="btn btn-quiet btn-sm" data-ss="reset" title="Clear the learned and drilled marks of this level">Reset marks</button>' : '');
+  }
+  function ssAct(a) {
+    if (a === 'trunk') { App.settings.ssTrunk = !SmartSkip.on(); App.save(); toast(App.settings.ssTrunk ? 'Shared moves are skipped from the next line on.' : 'Every line starts from move 1 again.', 'good'); }
+    else if (a === 'done') { App.settings.ssDone = !SmartSkip.hideDone(); App.save(); toast(App.settings.ssDone ? 'Finished lines are skipped.' : 'Finished lines are shown again.', 'good'); }
+    else if (a === 'reset') { SmartSkip.clearIds(L.ids); toast('Marks cleared for this level.', 'good'); }
+    if (runner) draw(runner.view()); else renderSS();
+  }
+  /* the line after this one: Learn (and Drill with "skip finished lines") jump to the next open one */
+  function nextIdx(learn) {
+    const nx = SmartSkip.next(L.ids, li, learn ? 'learn' : 'drill');
+    return nx || (li < L.leaves.length - 1 ? { i: li + 1, skipped: 0, wrapped: false, all: true } : null);
+  }
   function renderNav(v) {
+    renderSS();
     if (gated || !L || mode === 'explore') { nav.hidden = true; nav.innerHTML = ''; return; }
     nav.hidden = false;
     const n = L.leaves.length;
@@ -17930,7 +18172,7 @@ function treeTrainScreen(body, group, go, line0) {
       nav.innerHTML = '<div class="tt40-cover" role="status"><span>' + icon('diagram-project') + ' <b>Full chapter</b>: ' + c + ' of ' + n + (n === 1 ? ' line' : ' lines') + ' covered</span><span class="tt40-meter" aria-hidden="true"><i style="width:' + Math.round(c / Math.max(1, n) * 100) + '%"></i></span></div>';
       return;
     }
-    const opt = L.labels.map((lab, i) => '<option value="' + i + '"' + (i === li ? ' selected' : '') + '>' + (reviewed(i) ? '✓ ' : '') + 'Line ' + (i + 1) + ' · ' + esc(lab) + '</option>').join('');
+    const opt = L.labels.map((lab, i) => '<option value="' + i + '"' + (i === li ? ' selected' : '') + '>' + (SmartSkip.badge(L.ids[i]) || (reviewed(i) ? '✓ ' : '')) + 'Line ' + (i + 1) + ' · ' + esc(lab) + '</option>').join('');
     nav.innerHTML = '<button type="button" class="icon-btn" data-tt="prev" aria-label="Previous line"' + (li <= 0 ? ' disabled' : '') + '>' + icon('chevron-left') + '</button>' +
       '<label class="tt40-pick"><span class="sr-only">Choose a line</span><select class="input" data-tt="pick">' + opt + '</select></label>' +
       '<button type="button" class="icon-btn" data-tt="next" aria-label="Next line"' + (li >= n - 1 ? ' disabled' : '') + '>' + icon('chevron-right') + '</button>' +
@@ -17964,10 +18206,10 @@ function treeTrainScreen(body, group, go, line0) {
         (nk ? '<button type="button" class="btn btn-ghost" data-act="tt-level">' + (nOpen ? icon('arrow-trend-up') + ' Next level: ' : icon('crown') + ' Unlock ') + esc(Levels.name(nk)) + '</button>' : '') +
         '<button type="button" class="btn btn-quiet" data-act="tt-chapter">Next chapter</button>';
     } else if (v.finished && isLine) {
-      const more = li < n - 1;
+      const nx = nextIdx(v.learn), more = !!nx, nLabel = (nx && (nx.skipped || nx.wrapped) ? 'Next open line (' : 'Next line (') + ((nx ? nx.i : li + 1) + 1) + ' of ' + n + ')';
       actions = '<p class="tt40-ask">' + (v.learn ? 'Drill it from memory now, or see the next line first?' : 'Would you like to see the next line or practice this one first?') + '</p>' +
         (v.learn ? '<button type="button" class="btn btn-primary" data-act="tt-drill">' + icon('dumbbell') + ' Drill this line</button>' : '') +
-        (more ? '<button type="button" class="btn ' + (v.learn ? 'btn-ghost' : 'btn-primary') + '" data-act="tt-next">' + icon('forward') + ' Next line (' + (li + 2) + ' of ' + n + ')</button>' : '') +
+        (more ? '<button type="button" class="btn ' + (v.learn ? 'btn-ghost' : 'btn-primary') + '" data-act="tt-next">' + icon('forward') + ' ' + nLabel + '</button>' : '') +
         (!v.learn ? '<button type="button" class="btn btn-ghost" data-act="tt-repeat">' + icon('rotate') + ' Practice this line again</button>' : '') +
         (n > 1 ? '<button type="button" class="btn ' + (!more && !v.learn || allReviewed() ? 'btn-primary' : 'btn-quiet') + '" data-act="tt-full">' + icon('diagram-project') + ' Train the full chapter (' + n + ' lines)</button>' : '') +
         (!more && n === 1 ? '<button type="button" class="btn btn-quiet" data-act="tt-chapter">Next chapter</button>' : '');
@@ -17976,11 +18218,12 @@ function treeTrainScreen(body, group, go, line0) {
         '<button type="button" class="btn btn-quiet btn-sm" data-act="restart">' + (isLine ? 'Restart line' : 'Restart chapter') + '</button>';
     }
     const status = isLine ? Math.min(v.mine, v.lineMine) + ' / ' + v.lineMine : v.covered + ' / ' + n + ' lines';
+    const skipNote = v.skip && !v.finished ? '<p class="ss-note">' + icon('forward') + '<span>' + esc(v.skip.msg) + '</span><button type="button" class="btn btn-quiet btn-sm" data-act="tt-fromstart">Play from move 1</button></p>' : '';
     const branch = v.yourTurn && v.branchMine > 1 ? '<p class="tt40-branch">' + icon('code-branch') + ' ' + v.branchMine + ' moves of yours are in this chapter here' + (v.scope === 'chapter' && !v.learn ? (v.branchOpen ? ', ' + v.branchOpen + ' with lines still to cover.' : '.') : ': any of them is right.') + '</p>' : '';
     return (v.learn ? '<span class="learn36">' + icon('graduation-cap') + ' Learn mode</span>' : '') +
       '<p class="st-kicker">' + kick + '</p><h2 class="st-title">' + esc(info.title) + '</h2>' +
       (isLine && L.labels[li] ? '<p class="tt40-line">' + icon('route') + ' ' + esc(L.labels[li]) + '</p>' : '') +
-      turnHTML(v, 'Your move as ' + colorName(info.side)) + '<span class="dim small" style="margin-left:auto">' + status + '</span></div>' + branch +
+      turnHTML(v, 'Your move as ' + colorName(info.side)) + '<span class="dim small" style="margin-left:auto">' + status + '</span></div>' + branch + skipNote +
       '<div class="st-feedback" aria-live="polite">' + feedbackHTML(v.feedback) + '</div>' + notesHTML(v.note) + movesHTML(v.played) +
       '<div class="st-actions">' + actions + '</div>';
   }
@@ -18093,8 +18336,14 @@ function treeTrainScreen(body, group, go, line0) {
     const at = want ? L.leaves.findIndex((n) => n.path === want || n.path.indexOf(want + ' ') === 0) : -1;
     li = at >= 0 ? at : Math.min(li, L.leaves.length - 1);
     wantPath = '';
+    let resumed = -1;
+    if (entering) {                                                  // v6.4: opening a level on its first line picks up at the first open one
+      entering = false;
+      if (scope === 'line' && li === 0 && (mode === 'learn' || (mode === 'drill' && SmartSkip.hideDone()))) { const j = SmartSkip.firstOpen(L.ids, mode); if (j > 0) { li = j; resumed = j; } }
+    }
     if (mode === 'drill' && scope === 'line' && !ui.pickedMode && V36.autoLearn(lineItem(li))) mode = 'learn';
     run();
+    if (resumed > 0) toast('Picked up at line ' + (resumed + 1) + ' of ' + L.leaves.length + ': the lines before it are already done.', 'good');
   }
   function toChapter(delta) {
     const c2 = chs[ci + delta];
@@ -18118,13 +18367,15 @@ function treeTrainScreen(body, group, go, line0) {
     if (m) { ui.pickedMode = true; const md = m.getAttribute('data-mode'); if (gated) { const b = lastOpen || openBelow(sel); if (!b) return; sel = b; } mode = md; if (gated) select(sel); else run(); return; }
     const sc = e.target.closest('[data-scope]');
     if (sc && !sc.disabled) { scope = sc.getAttribute('data-scope'); if (mode === 'learn' && scope === 'chapter') mode = 'drill'; run(); return; }
+    const ss = e.target.closest('[data-ss]');
+    if (ss && ssBar.contains(ss)) { ssAct(ss.getAttribute('data-ss')); return; }
     const tt = e.target.closest('[data-tt]');
     if (tt && tt.getAttribute('data-tt') !== 'pick') { const d = tt.getAttribute('data-tt') === 'prev' ? -1 : 1; li = clamp(li + d, 0, L.leaves.length - 1); scope = 'line'; if (mode !== 'learn' && !ui.pickedMode && V36.autoLearn(lineItem(li))) mode = 'learn'; run(); return; }
     const a = e.target.closest('[data-act]');
     if (!a) return;
     const act = a.getAttribute('data-act');
     if (act === 'back') { go({ screen: 'list' }); return; }
-    if (act === 'tt-next') { li = Math.min(li + 1, L.leaves.length - 1); if (!ui.pickedMode && V36.autoLearn(lineItem(li))) mode = 'learn'; else if (mode === 'learn') mode = 'drill'; run(); scrollToEl(body); return; }
+    if (act === 'tt-next') { const nx = nextIdx(mode === 'learn'); if (!nx) return; li = nx.i; if (nx.all) toast('Every other line is already done. Moving on to line ' + (li + 1) + '.'); if (!ui.pickedMode && V36.autoLearn(lineItem(li))) mode = 'learn'; else if (mode === 'learn') mode = 'drill'; run(); scrollToEl(body); return; }
     if (act === 'tt-repeat') { mode = 'drill'; run(); return; }
     if (act === 'tt-drill') { mode = 'drill'; scope = 'line'; run(); return; }
     if (act === 'tt-full' || act === 'tt-again') { mode = 'drill'; scope = 'chapter'; run(); scrollToEl(body); return; }
@@ -18134,6 +18385,7 @@ function treeTrainScreen(body, group, go, line0) {
     if (act === 'hint') runner.hint();
     else if (act === 'show') runner.showMove();
     else if (act === 'restart') runner.restart();
+    else if (act === 'tt-fromstart') runner.restartFull();
   }
   function onChange(e) {
     const s = e.target.closest('[data-tt="pick"]');
