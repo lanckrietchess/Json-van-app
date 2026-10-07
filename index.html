@@ -185,6 +185,9 @@ html{scrollbar-gutter:stable}
 .arrow{stroke-linecap:round;opacity:.88}
 .arrow-pv1{stroke:#38bdf8}.ah-pv1{fill:#38bdf8}.arrow-pv2{stroke:#4ade80}.ah-pv2{fill:#4ade80}.arrow-pv3{stroke:#fbbf24}.ah-pv3{fill:#fbbf24}.arrow-pv4{stroke:#a78bfa}.ah-pv4{fill:#a78bfa}.arrow-pv5{stroke:#94a3b8}.ah-pv5{fill:#94a3b8}
 .arrow-best{stroke:#38bdf8}.ah-best{fill:#38bdf8}.arrow-good{stroke:#4ade80}.ah-good{fill:#4ade80}.arrow-bad{stroke:#fb7185}.ah-bad{fill:#fb7185}.arrow-plan{stroke:#fbbf24}.ah-plan{fill:#fbbf24}
+.lc-user-arrows{z-index:2}
+.lc-board .um-g::before,.lc-board .um-r::before,.lc-board .um-b::before,.lc-board .um-y::before{content:"";position:absolute;inset:4%;border-radius:50%;border:4px solid;pointer-events:none;opacity:.88}
+.lc-board .um-g::before{border-color:#4ade80}.lc-board .um-r::before{border-color:#fb7185}.lc-board .um-b::before{border-color:#38bdf8}.lc-board .um-y::before{border-color:#fbbf24}
 .lc-promo{position:absolute;inset:0;display:grid;place-items:center;background:rgba(15,23,42,.6);z-index:5;border-radius:8px}
 .lc-promo[hidden]{display:none}
 .lc-promo-box{display:flex;gap:6px;padding:8px;background:var(--surface);border:1px solid var(--rule);border-radius:14px}
@@ -945,6 +948,23 @@ a.cc-frame:hover{border-color:var(--accent)}
 .iq-msg.is-win{background:var(--good-soft);border-left:3px solid var(--good);border-radius:4px 12px 12px 4px}
 .iq-msg.is-typing{color:var(--fog);font-style:italic}
 .iq-tools{display:flex;flex-wrap:wrap;gap:8px}
+.iq-ftitle{color:var(--accent);font-weight:800}
+.iq-pd{display:grid;gap:10px;width:100%;padding:12px;border-radius:12px;background:var(--ink);border:1px solid var(--hair)}
+.iq-pd-row{display:grid;gap:6px}
+.iq-pd-lab{font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--fog)}
+.iq-pd-btns{display:flex;flex-wrap:wrap;gap:8px}
+.iq-calc-line{width:100%;margin:0;padding:8px 10px;border-radius:10px;background:var(--ink);border-left:3px solid var(--accent);color:var(--chalk)}
+.iq-synth,.iq-hf{display:grid;gap:8px;padding:12px 14px;border-radius:12px;background:var(--ink);border:1px solid var(--hair);margin-top:10px}
+.iq-synth h3,.iq-hf h3{font-size:16px;display:flex;gap:8px;align-items:center}
+.iq-synth p{font-size:14.5px;color:#cbd5e1}
+.df-kicker{font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;margin:0 0 6px}
+.df-field{display:grid;gap:8px;margin:14px 0 4px}
+.df-opts button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.acc-banner{position:fixed;left:50%;top:calc(var(--head,98px) + env(safe-area-inset-top) + 8px);transform:translateX(-50%);width:min(560px,calc(100vw - 24px));z-index:45;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--accent-line);box-shadow:0 18px 40px -18px rgba(2,6,23,.85);animation:accIn .24s ease}
+.acc-ico{color:var(--accent);margin-top:2px}
+.acc-body p{margin:0 0 8px;font-size:14.5px;color:var(--chalk)}
+@keyframes accIn{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.acc-banner{animation:none}}
 .iq-tools .btn small{font-weight:600;color:var(--fog)}
 .iq-quick{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-bottom:2px}
 .iq-bridge{display:grid;gap:8px}
@@ -2062,12 +2082,95 @@ body.lc-focus .v7-clock.is-risk{display:none}
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '6.3.0',
+  version: '6.4.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
   startRating: 355,
   fastTrack: '2 years and 11 months',   // from day one on Chess.com (15 November 2023) to the peak
+
+  /* v6.4: the Hyper-Focus after a Trim session, the accountability checks and
+     the 7-day pop-up funnel. All texts, links, order and switches below are
+     plain data: change them here and nothing else needs to change. */
+  hyperfocus: {
+    games: 5,                                  // a Hyper-Focus runs for this many analysed games
+    texts: {                                   // {games} becomes the number above
+      M: 'Before every move in my next {games} games, I name what my opponent’s last move threatens.',
+      S: 'In my next {games} games, I count the defenders of my pieces and name the pawn structure before I pick a plan.',
+      P: 'In my next {games} games, I list every check, capture and attack, theirs and mine, before any quiet move.',
+      C: 'Spend extra time calculating your opponent’s best replies in your next {games} games.',
+      time: 'In my next {games} games, I save my clock for the critical moments and play the quiet moves fast.'
+    }
+  },
+  accountability: {
+    on: true,
+    everyPuzzles: 6,            // ask after this many finished puzzles
+    maxPerDay: 2,
+    minMinutes: 20,             // never twice within this time
+    freeNoTarget: 'growth',     // a free player who answers No gets this pop-up: growth, growthB, growthC, support or timeline
+    yesBtn: 'Yes', noBtn: 'Not really', helpBtn: 'Yes, show me', laterBtn: 'Not now', okBtn: 'OK', deeperBtn: 'Go deeper',
+    texts: {
+      ask: 'Hyper-Focus check: “{focus}” Are you sticking to it?',
+      yes: 'Keep it going. That is the habit that moves your rating.',
+      noFree: 'Honest answer, and that is where it starts. Want extra support to make it stick?',
+      noPaid: 'Honest answer. Put the habit in front of you again before your next game.',
+      done: 'Your Hyper-Focus ran for {games} games. How did it go?'
+    },
+    deepLinks: { M: '#think', S: '#middlegame', P: '#think', C: '#think', time: '#think' }   // paying players: where the “Go deeper” link leads
+  },
+  dayFunnel: {
+    enabled: true,
+    fireOn: ['refresh'],        // 'refresh' = the new free daily token arrives, 'spend' = the player spends a token. Never more than one pop-up per token.
+    skipFirstCycle: true,       // the very first token is the welcome day: Day 1 appears with the next token
+    dismissAdvances: true,      // closing a pop-up counts it as seen. false = it comes back with the next token
+    webhook: '',                // optional https address that receives every answer as JSON (POST)
+    youtube: {
+      subscribers: 0,           // update by hand. Below the threshold Day 4 uses the subscribe trick, from the threshold on it hands out quality videos for tokens
+      threshold: 1000,
+      channelUrl: '',           // empty = your YouTube link plus ?sub_confirmation=1 (the subscribe prompt)
+      videos: [{ title: 'The MSPC System in ten minutes', url: 'https://www.youtube.com/@lanckrietchess' }]   // TODO: real video links; one per token, in order
+    },
+    /* One object per day, in the order they appear. Placeholders: {coach} {name} {skool} {youtube} {instagram} {tiktok} {facebook} {channelUrl} {videoTitle} {videoUrl} {subs}.
+       fields: choice (options), rating (max) or text. buttons: url or hash; reward = free tokens, once per step. audience: 'all' or 'free'. on: false hides a day. */
+    steps: [
+      { id: 'feedback', on: true, audience: 'all', title: 'How do you like the hub so far?',
+        body: 'One tap tells {coach} what to build next.',
+        fields: [
+          { id: 'rating', type: 'rating', label: 'Your rating', max: 5 },
+          { id: 'best', type: 'text', label: 'What do you like most? (optional)', placeholder: 'For example: the Trim review', max: 200 }
+        ], submit: 'Send', skip: 'Not now', reward: 1, thanks: 'Thank you, that helps a lot.' },
+      { id: 'about-you', on: true, audience: 'all', title: 'A bit about you',
+        body: 'So {coach} can make lessons that fit you. Every question is optional.',
+        fields: [
+          { id: 'age', type: 'choice', label: 'Your age', options: ['Under 16', '16–20', '21–30', '31–45', '46+', 'Prefer not to say'], optional: true },
+          { id: 'years', type: 'choice', label: 'How long have you played chess?', options: ['Under 1 year', '1–3 years', '3–10 years', '10+ years'], optional: true },
+          { id: 'where', type: 'choice', label: 'Where do you play most?', options: ['Chess.com', 'Lichess', 'Both', 'Over the board'], optional: true }
+        ], submit: 'Send', skip: 'Not now', reward: 1, thanks: 'Thanks. That is all I need.' },
+      { id: 'goals', on: true, audience: 'all', title: 'Where do you want to be in a month?',
+        body: 'How do you see your improvement over the next month?',
+        fields: [
+          { id: 'goal', type: 'choice', label: 'My main goal', options: ['Stop blundering pieces', 'Find a plan in the middlegame', 'Know my openings properly', 'Convert won endgames', 'Gain 100+ rating'] },
+          { id: 'vision', type: 'text', label: 'In your own words (optional)', placeholder: 'In a month I want to…', max: 240 }
+        ], submit: 'Send', skip: 'Not now', reward: 1, thanks: 'Got it. A plan works backwards from that goal.' },
+      { id: 'youtube', on: true, audience: 'all',
+        variants: {
+          below: { title: 'Help the channel grow', body: 'Every subscriber helps {coach} publish more free chess lessons. Subscribe, then claim your token.',
+            buttons: [{ label: 'Subscribe on YouTube', url: '{channelUrl}', primary: true, reward: 2 }, { label: 'I already subscribed', reward: 2 }] },
+          above: { title: 'A video for your level', body: '{videoTitle}. One lesson, picked for this week. Watch it and claim a token.',
+            buttons: [{ label: 'Watch on YouTube', url: '{videoUrl}', primary: true, reward: 1 }] }
+        }, skip: 'Not now', thanks: 'Token added. Enjoy.' },
+      { id: 'community', on: true, audience: 'all', title: 'Train with other ambitious players',
+        body: 'The Skool community is where {coach} shares the free bootcamps, answers questions and posts new lessons first.',
+        buttons: [{ label: 'Open the community', url: '{skool}', primary: true, reward: 1 }], skip: 'Not now', thanks: 'See you in there.' },
+      { id: 'instagram', on: true, audience: 'all', title: 'More chess in your feed',
+        body: 'Follow on Instagram and tap “Interested” on a reel. Your For You page then shows more chess, and {coach} posts the quick tips there first.',
+        buttons: [{ label: 'Follow on Instagram', url: '{instagram}', primary: true, reward: 1 }], skip: 'Not now', thanks: 'Token added.' },
+      { id: 'tiktok-facebook', on: true, audience: 'all', title: 'Short lessons, wherever you scroll',
+        body: 'Pick the one you use: daily tactics on TikTok, longer breakdowns on Facebook.',
+        buttons: [{ label: 'TikTok', url: '{tiktok}', primary: true, reward: 1 }, { label: 'Facebook', url: '{facebook}', reward: 1 }], skip: 'Not now', thanks: 'Token added.' }
+    ]
+  },
+
 
   /* Links. Replace the ones marked TODO with your real URLs. */
   links: {
@@ -3116,7 +3219,8 @@ function sanitizeProfile(p) {
     name: cleanName(p.name), elo: elo >= 100 && elo <= 3500 ? elo : null,
     leak: LEAKS[p.leak] ? p.leak : '', goal: GOALS[p.goal] ? p.goal : '',
     created: day(p.created) ? p.created : dayKey(new Date()),
-    focus: f && (hasOwn(FOCUS, f.k) || f.k === 'custom') && ft ? { k: f.k, text: ft, since: day(f.since) ? f.since : dayKey(new Date()) } : null,
+    focus: f && (hasOwn(FOCUS, f.k) || f.k === 'custom') && ft ? Object.assign({ k: f.k, text: ft, since: day(f.since) ? f.since : dayKey(new Date()) },
+      +f.games > 0 ? { games: clamp(Math.round(+f.games), 1, 50), played: clamp(Math.round(+f.played || 0), 0, 50), last: String(f.last || '').replace(/[^\w-]/g, '').slice(0, 24) } : {}) : null,
     struggles: (Array.isArray(p.struggles) ? p.struggles : []).filter((k, i, a) => hasOwn(STRUGGLES, k) && a.indexOf(k) === i).slice(0, 9),
     rep: { w: hasOwn(REP.w, r.w) ? r.w : '', e4: hasOwn(REP.e4, r.e4) ? r.e4 : '', d4: hasOwn(REP.d4, r.d4) ? r.d4 : '' },
     openings: (Array.isArray(p.openings) ? p.openings : []).map((o) => cleanName(o).slice(0, 40)).filter((o, i, a) => o && a.indexOf(o) === i).slice(0, 8),
@@ -3363,6 +3467,7 @@ const Credits = (() => {
     App.credits.daily = Math.max(0, +CONFIG.credits.daily || 0);
     App.credits.lastReset = today;
     App.save();
+    try { DayFunnel.arm('refresh'); } catch (e) { /* the pop-up funnel is optional (v6.4) */ }
   }
   /* v4.1: Admin Mode never spends and never shows a shortfall — the coach
      testing his own hub shouldn't have to grind or buy credits on himself.
@@ -3377,6 +3482,7 @@ const Credits = (() => {
     const fromDaily = Math.min(App.credits.daily, n);
     App.credits.daily -= fromDaily;
     App.credits.purchased -= (n - fromDaily);
+    try { DayFunnel.arm('spend'); } catch (e) { /* the pop-up funnel is optional (v6.4) */ }
   }
   /* Unlocks one item (by id) forever on this device. Returns { ok, cost, short }. */
   function unlock(it) {
@@ -6801,15 +6907,16 @@ let boardSeq = 0;
 function Board(host, opts) {
   opts = opts || {};
   const id = 'lcb-' + (++boardSeq);
-  host.innerHTML = '<div class="lc-board"><div id="' + id + '"></div><svg class="lc-arrows" aria-hidden="true"></svg><div class="lc-promo" hidden></div></div>';
-  const wrap = host.firstChild, svg = qs('.lc-arrows', wrap), promo = qs('.lc-promo', wrap);
+  host.innerHTML = '<div class="lc-board"><div id="' + id + '"></div><svg class="lc-arrows" aria-hidden="true"></svg><svg class="lc-arrows lc-user-arrows" aria-hidden="true"></svg><div class="lc-promo" hidden></div></div>';
+  const wrap = host.firstChild, svg = qs('.lc-arrows', wrap), usvg = qs('.lc-user-arrows', wrap), promo = qs('.lc-promo', wrap);
   const g = new Chess();
   let fen = opts.fen || START_FEN;
   if (!g.load(fen)) { fen = START_FEN; g.load(fen); }
   let interactive = null, tapFn = null, onMove = opts.onMove || null;
   let selected = null, wasSelected = false, pending = null, lastMove = null, marks = {}, arrows = [];
   let lastDrop = { sq: null, at: 0 }, destroyed = false;
-  const HL = ['hl-last', 'hl-sel', 'hl-dot', 'hl-cap', 'hl-check', 'hl-hint', 'hl-good', 'hl-bad', 'hl-key', 'hl-brill', 'hl-great'];
+  let ua = [], um = {}, dragging = false, cancelling = false;     // v6.4: your own arrows and marks (right mouse button), a piece in the hand
+  const HL = ['hl-last', 'hl-sel', 'hl-dot', 'hl-cap', 'hl-check', 'hl-hint', 'hl-good', 'hl-bad', 'hl-key', 'hl-brill', 'hl-great', 'um-g', 'um-r', 'um-b', 'um-y'];
 
   const legal = (from, to) => g.moves({ square: from, verbose: true }).filter((m) => m.to === to);
   function dragStart(source, piece) {
@@ -6817,10 +6924,12 @@ function Board(host, opts) {
     if (piece.charAt(0) !== interactive || g.turn() !== interactive || g.game_over()) return false;
     if (source === lastDrop.sq && Date.now() - lastDrop.at < 650) return false;   // touch -> mouse echo
     wasSelected = selected === source;
-    selected = source; paint();
+    selected = source; dragging = true; paint();
     return true;
   }
   function drop(source, target) {
+    dragging = false;
+    if (cancelling) { cancelling = false; clearSelection(); return 'snapback'; }   // v6.4: cancelled with the right mouse button
     lastDrop = { sq: source, at: Date.now() };
     if (target === source || target === 'offboard') { if (target === source && wasSelected) clearSelection(); return 'snapback'; }
     const moves = legal(source, target);
@@ -6873,6 +6982,7 @@ function Board(host, opts) {
     if (selected) { put(selected, 'hl-sel'); g.moves({ square: selected, verbose: true }).forEach((m) => put(m.to, m.captured ? 'hl-cap' : 'hl-dot')); }
     if (g.in_check()) put(kingSquare(g.turn()), 'hl-check');
     Object.keys(marks).forEach((sq) => marks[sq].forEach((cls) => put(sq, cls)));
+    Object.keys(um).forEach((sq) => put(sq, 'um-' + um[sq]));
     qsa('#' + id + ' [data-square]').forEach((el) => {
       const sq = el.getAttribute('data-square');
       HL.forEach((c) => el.classList.remove(c));
@@ -6913,18 +7023,116 @@ function Board(host, opts) {
   function setPosition(newFen, o) {
     o = o || {};
     if (destroyed || !g.load(newFen)) return;
+    const fenBefore = fen;
     fen = newFen;
     if (o.lastMove !== undefined) lastMove = o.lastMove;
     selected = null;
+    if (newFen.split(' ')[0] !== fenBefore.split(' ')[0]) { ua = []; um = {}; }   // v6.4: your own arrows and marks go when the position changes
     cb.position(newFen, o.animate !== false);
-    paint(); drawArrows();
+    paint(); drawArrows(); drawUser();
     if (o.sound && Sound[o.sound]) Sound[o.sound]();
   }
   let ro = null, rt = null;
   host.classList.add('is-ready');                                   // v5: the placeholder square gives way to the board
-  function resize() { if (destroyed) return; cb.resize(); paint(); drawArrows(); }
+  function resize() { if (destroyed) return; cb.resize(); paint(); drawArrows(); drawUser(); }
   if (window.ResizeObserver) { ro = new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(resize, 60); }); ro.observe(host); }
   else window.addEventListener('resize', resize);
+  /* v6.4: Lichess-style mouse gestures. The left button selects and moves
+     pieces (and answers the MSPC steps). The right button marks a square
+     with a click and draws an arrow when you drag from one square to
+     another (Shift = red, Ctrl or Cmd = blue, Alt = yellow, otherwise green).
+     A right click while you hold a piece, or after you selected one, cancels
+     the move: the piece goes back to its square. Touch screens never fire
+     these paths, so taps and finger drags work exactly as before. */
+  const UCOL = { g: '#4ade80', r: '#fb7185', b: '#38bdf8', y: '#fbbf24' };
+  let rc = null, noCtxUntil = 0;
+  const hasUser = () => ua.length > 0 || Object.keys(um).length > 0;
+  const colorOf = (e) => (e.shiftKey ? 'r' : e.ctrlKey || e.metaKey ? 'b' : e.altKey ? 'y' : 'g');
+  function geom() {
+    const el = qs('#' + id + ' .board-b72b1');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return r.width ? { el, r, s: r.width / 8, white: cb.orientation() === 'white' } : null;
+  }
+  function sqAt(x, y) {
+    const G = geom();
+    if (!G) return null;
+    const fx = Math.floor((x - G.r.left) / G.s), fy = Math.floor((y - G.r.top) / G.s);
+    if (fx < 0 || fx > 7 || fy < 0 || fy > 7) return null;
+    return 'abcdefgh'[G.white ? fx : 7 - fx] + ((G.white ? 7 - fy : fy) + 1);
+  }
+  function drawUser(preview) {
+    if (destroyed) return;
+    const G = geom(), list = preview ? ua.concat([Object.assign({ pv: true }, preview)]) : ua;
+    if (!G || !list.length) { usvg.innerHTML = ''; return; }
+    const base = wrap.getBoundingClientRect(), s = G.s, size = G.r.width;
+    usvg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+    usvg.style.width = size + 'px'; usvg.style.height = size + 'px';
+    usvg.style.left = (G.r.left - base.left) + 'px'; usvg.style.top = (G.r.top - base.top) + 'px';
+    const center = (sq) => { const f = sq.charCodeAt(0) - 97, r = sq.charCodeAt(1) - 49; return [((G.white ? f : 7 - f) + 0.5) * s, ((G.white ? 7 - r : r) + 0.5) * s]; };
+    let html = '<defs>' + Object.keys(UCOL).map((k) => '<marker id="' + id + '-u' + k + '" viewBox="0 0 10 10" refX="4" refY="5" markerWidth="3" markerHeight="3" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="' + UCOL[k] + '"/></marker>').join('') + '</defs>';
+    list.forEach((a) => {
+      const p1 = center(a.from), p2 = center(a.to), dx = p2[0] - p1[0], dy = p2[1] - p1[1], len = Math.hypot(dx, dy) || 1;
+      html += '<line x1="' + p1[0] + '" y1="' + p1[1] + '" x2="' + (p2[0] - dx / len * s * 0.3) + '" y2="' + (p2[1] - dy / len * s * 0.3) + '" stroke="' + UCOL[a.c] + '" stroke-width="' + (s * 0.16).toFixed(1) + '" stroke-linecap="round" opacity="' + (a.pv ? 0.45 : 0.82) + '" marker-end="url(#' + id + '-u' + a.c + ')"/>';
+    });
+    usvg.innerHTML = html;
+  }
+  function clearUser() { if (!hasUser()) return; ua = []; um = {}; paint(); drawUser(); }
+  function toggleMark(sq, c) { if (um[sq] === c) delete um[sq]; else um[sq] = c; }
+  function toggleArrow(from, to, c) {
+    const i = ua.findIndex((a) => a.from === from && a.to === to);
+    if (i >= 0) { const same = ua[i].c === c; ua.splice(i, 1); if (same) return; }
+    ua.push({ from, to, c });
+  }
+  /* Cancel a held piece: end chessboard.js's drag with a mouse-up far outside
+     the board, which it answers with the snapback that drop() allows. */
+  function cancelDrag() {
+    if (!dragging) return;
+    cancelling = true; noCtxUntil = Date.now() + 600;
+    try { window.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, clientX: -9999, clientY: -9999, view: window })); } catch (e) { /* the state below is cleaned anyway */ }
+    dragging = false; cancelling = false;
+    clearSelection(); paint();
+  }
+  function onDocDown(e) {
+    if (destroyed) return;
+    if (e.button === 2) {
+      if (dragging) { e.preventDefault(); e.stopPropagation(); cancelDrag(); return; }
+      if (!wrap.contains(e.target)) return;
+      e.preventDefault(); e.stopPropagation();                      // chessboard.js would start a drag on a piece
+      if (selected) { clearSelection(); noCtxUntil = Date.now() + 600; return; }   // a selected piece: put it back
+      const sq = sqAt(e.clientX, e.clientY);
+      if (sq) rc = { from: sq, to: sq, c: colorOf(e) };
+      return;
+    }
+    if (e.button === 0 && hasUser() && wrap.contains(e.target)) clearUser();
+  }
+  function onWinMove(e) {
+    if (!rc) return;
+    if (!(e.buttons & 2)) { rc = null; drawUser(); return; }
+    const sq = sqAt(e.clientX, e.clientY) || rc.from;
+    if (sq !== rc.to) { rc.to = sq; drawUser(sq !== rc.from ? { from: rc.from, to: sq, c: rc.c } : null); }
+  }
+  function onWinUp(e) {
+    if (!rc || e.button !== 2) return;
+    const g0 = rc, sq = sqAt(e.clientX, e.clientY);
+    rc = null; noCtxUntil = Date.now() + 400;
+    if (sq) { if (sq === g0.from) toggleMark(sq, g0.c); else toggleArrow(g0.from, sq, g0.c); }
+    paint(); drawUser();
+  }
+  const onCtx = (e) => e.preventDefault();
+  const onDocCtx = (e) => { if (Date.now() < noCtxUntil) e.preventDefault(); };
+  document.addEventListener('mousedown', onDocDown, true);
+  document.addEventListener('contextmenu', onDocCtx, true);
+  window.addEventListener('mousemove', onWinMove);
+  window.addEventListener('mouseup', onWinUp);
+  wrap.addEventListener('contextmenu', onCtx);
+  function unbindGestures() {
+    document.removeEventListener('mousedown', onDocDown, true);
+    document.removeEventListener('contextmenu', onDocCtx, true);
+    window.removeEventListener('mousemove', onWinMove);
+    window.removeEventListener('mouseup', onWinUp);
+    wrap.removeEventListener('contextmenu', onCtx);
+  }
   paint();
 
   return {
@@ -6934,17 +7142,19 @@ function Board(host, opts) {
     setInteractive(color) { interactive = color || null; if (!interactive) clearSelection(); },
     setTapMode(fn) { tapFn = fn || null; clearSelection(); wrap.classList.toggle('is-tap', !!tapFn); },
     setOnMove(fn) { onMove = fn || null; },
-    orientation(o) { if (o && o !== cb.orientation()) { cb.orientation(o); paint(); drawArrows(); } return cb.orientation(); },
-    flip() { cb.flip(); paint(); drawArrows(); },
+    orientation(o) { if (o && o !== cb.orientation()) { cb.orientation(o); paint(); drawArrows(); drawUser(); } return cb.orientation(); },
+    flip() { cb.flip(); paint(); drawArrows(); drawUser(); },
     setLastMove(m) { lastMove = m || null; paint(); },
     mark(sq, cls) { (marks[sq] = marks[sq] || []).push(cls); paint(); },
     unmark(cls) { Object.keys(marks).forEach((sq) => { marks[sq] = marks[sq].filter((c) => c !== cls); if (!marks[sq].length) delete marks[sq]; }); paint(); },
     clearMarks() { marks = {}; paint(); },
     setArrows(list) { arrows = (list || []).filter((a) => a && /^[a-h][1-8]$/.test(a.from) && /^[a-h][1-8]$/.test(a.to)); drawArrows(); },
     shake() { wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake'); },
+    clearAnnotations: clearUser,
+    annotations: () => ({ arrows: ua.map((a) => ({ from: a.from, to: a.to, color: a.c })), marks: Object.assign({}, um) }),
     resize,
     destroy() {
-      destroyed = true; clearTimeout(rt);
+      destroyed = true; clearTimeout(rt); unbindGestures();
       if (ro) ro.disconnect(); else window.removeEventListener('resize', resize);
       wrap.removeEventListener('click', onClick);
       try { cb.destroy(); } catch (e) { /* already gone */ }
@@ -11667,13 +11877,21 @@ function cpText(cp) {
 /* ---------- Hyper-Focus: one MSPC habit the coach holds you to ---------- */
 const Focus = {
   name(f) { f = f || App.profile.focus; return !f ? '' : f.k === 'custom' ? 'Your own habit' : FOCUS[f.k][0]; },
-  set(k, text) {
+  set(k, text, opts) {
     if (!k || (!FOCUS[k] && k !== 'custom')) { App.profile.focus = null; App.save(); return null; }
     const t = String(text || '').replace(/[\u0000-\u001f\u007f<>]/g, ' ').trim().slice(0, 140) || (FOCUS[k] ? FOCUS[k][1] : '');
     if (!t) return null;
-    App.profile.focus = { k, text: t, since: dayKey(new Date()) };
+    const games = clamp(Math.round(+(opts && opts.games) || 0), 0, 50);          // v6.4: a Hyper-Focus can run for a number of games
+    App.profile.focus = Object.assign({ k, text: t, since: dayKey(new Date()) }, games ? { games, played: 0, last: String((opts && opts.sig) || '').replace(/[^\w-]/g, '').slice(0, 24) } : {});
     App.save(); Telemetry.log({ e: 'fx', x: k });
     return App.profile.focus;
+  },
+  /* v6.4: one more analysed game under this Hyper-Focus (each game counts once). */
+  noteGame(sig) {
+    const f = App.profile.focus, id = String(sig || '').replace(/[^\w-]/g, '').slice(0, 24);
+    if (!f || !f.games || !id || f.last === id || (f.played || 0) >= f.games) return null;
+    f.played = Math.min(f.games, (f.played || 0) + 1); f.last = id; App.save();
+    return { played: f.played, games: f.games, done: f.played >= f.games };
   },
   day() { const f = App.profile.focus; return f ? Math.max(1, Math.round((Date.parse(dayKey(new Date())) - Date.parse(f.since)) / 864e5) + 1) : 0; },
   checked() { const c = App.profile.checkins || []; return !!c.length && c[c.length - 1].d === dayKey(new Date()); },
@@ -11736,6 +11954,7 @@ const Attempts = (() => {
     all().push(x);
     if (list.length > MAX) list.splice(0, list.length - MAX);
     save();
+    try { Accountability.afterPuzzle(); } catch (e) { /* the accountability check is optional (v6.4) */ }
     return x;
   }
   function merge(arr) {
@@ -12131,6 +12350,7 @@ const V33 = {
   afterReview(T) {
     const A = T.A, mine = A.review.items.filter((it) => it.color === A.user), n = App.profile.name, f = App.profile.focus;
     A.opening = detectOpening(A.moves.map((m) => m.san), A.headers);
+    try { V5Trim.macroParts(A).forEach((p) => T.bubble(p.h + ': ' + p.t, 'bot', p.acts && p.acts.length ? p.acts : null)); A.macroShown = true; } catch (e) { /* the macro check is a bonus, the review goes on */ }
     mine.filter((it) => it.k).forEach((it) => Telemetry.log({ e: 'l', k: A.opening.name, x: it.k, c: it.cls, g: it.phase }));
     if (A.vaultId && Vault.item(A.vaultId)) { Vault.setReview(A.vaultId, reviewSummary(A)); T.renderReport(); }
     else if (App.settings.autoVault !== false && A.moves.length >= 10) saveGame(T, false);
@@ -12940,10 +13160,11 @@ function TrimInterrogation(T) {
     M: (f) => (f.check ? 'You were in check here. Where does the check come from, and what does it force you to do?'
       : f.last ? 'Your opponent just played ' + moveLabel(f.last.num, f.last.color, f.last.san) + '. What does it attack, what did it stop defending, and what is the threat?' : 'What is your opponent threatening here?'),
     S: () => 'What makes this position unique? Which of your pieces are loose (no defender)? Name them with their squares.',
-    P: () => 'Priorities: list your checks and captures. Which forcing moves do you have here?',
-    C: (it) => 'Find the better move. You played ' + it.san + ' in the game: play something stronger on the board or type it here, for example Nf5. Calculate it to the end first.'
+    P: () => 'Priorities: which kinds of forcing moves exist here? Tap them on the dashboard below, your options first and your opponent’s second, then check.',
+    C: (it) => 'Calculate before you look for a better move. You played ' + it.san + ' in the game. Press “This is what I’m calculating”, play your lines on the board (both sides), then press “This is what I calculated”. Only then do I tell you what you missed.'
   };
-  const PLACEHOLDER = { M: 'What does their move threaten?', S: 'Which of your pieces are loose?', P: 'Your checks and captures, e.g. Bxf7+, Nxe5', C: 'Type a move, e.g. Nf5, or play it on the board', V: 'Type next, or ask about this mistake' };
+  const PLACEHOLDER = { M: 'What does their move threaten?', S: 'Which of your pieces are loose?', P: 'Or type them, e.g. Bxf7+, Nxe5', C: 'Type a move, e.g. Nf5, or play it on the board', V: 'Type next, or ask about this mistake' };
+  const ph = (k) => (k === 'C' && Q && Q.cs !== 'find' ? 'Calculate on the board first, then use the buttons' : PLACEHOLDER[k]);
   const PIECES = { p: /\b(pawns?|pion(nen)?)\b/, n: /\b(knights?|horses?|paard(en)?|ridder)\b/, b: /\b(bishops?|lopers?)\b/, r: /\b(rooks?|torens?|castle)\b/, q: /\b(queen|dame|koningin)\b/, k: /\b(king|koning)\b/ };
   const NONE = /\b(nothing|none|no threats?|no danger|not really|nope|geen|niets|niks|nee)\b/;
   const DUNNO = /(i don'?t know|dont know|no idea|idk|weet (het )?niet|geen idee|^help$|^\?+$)/;
@@ -12965,6 +13186,8 @@ function TrimInterrogation(T) {
   }
   function start(at) {
     if (!A.review) { toast('Run the review first.'); return; }
+    const gm = Focus.noteGame(gameSig(A));                           // v6.4: each analysed game counts once for the Hyper-Focus
+    if (gm && gm.done) setTimeout(() => { try { Accountability.complete(); } catch (e) { /* optional */ } }, 1800);
     const list = mistakes();
     if (!list.length) { toast('No mistakes or blunders on your side in this game.'); return; }
     Q = { list, at: 0, verdicts: [], token: 0 };
@@ -12987,6 +13210,7 @@ function TrimInterrogation(T) {
   function enter(n) {
     Q.at = n; Q.s = 0; Q.log = []; Q.hints = { M: 0, S: 0, P: 0, C: 0 }; Q.miss = { M: 0, S: 0, P: 0, C: 0 }; Q.gave = {};
     Q.pre = null; Q.busy = false; Q.got = null; Q.tries = 0; Q.verdict = null; Q.why = ''; Q.committed = false; Q.done = false; Q.token++;
+    Q.pd = pdFresh(); Q.cs = ''; Q.calc = null; Q.calcRes = null;
     const it = Q.list[n], tok = Q.token;
     A.idx = it.i; A.iqArrows = [];
     T.show(false);
@@ -12996,7 +13220,9 @@ function TrimInterrogation(T) {
     if (n >= limit()) { renderLocked(); return; }
     Q.facts = facts(it);
     Engine.analyse(A.fens[it.i], { depth: 14, multipv: 2 }).then((r) => { if (Q && Q.token === tok && !Q.pre) Q.pre = r; }).catch(() => {});
-    if (n === 0 && A.review) Q.log.push({ w: 'fact', t: V5Trim.macro(A) });   // v5, Phase A: the macro reality check
+    if (n === 0 && A.review && !A.macroShown) {                      // v6.4, Phase 1: normally posted right after the review; shown here for a restored game
+      try { V5Trim.macroParts(A).forEach((p) => Q.log.push({ w: 'fact', h: p.h, t: p.t })); A.macroShown = true; } catch (e) { Q.log.push({ w: 'fact', t: V5Trim.macro(A) }); }
+    }
     Q.log.push({ w: 'bot', k: 'M', t: QUESTIONS.M(Q.facts) });
     render(true);
   }
@@ -13013,7 +13239,7 @@ function TrimInterrogation(T) {
   function msgHTML(m) {
     const cls = m.w === 'me' ? ' is-me' : m.w === 'fact' ? ' is-fact' : m.w === 'hint' ? ' is-hint' : m.w === 'win' ? ' is-win' : '';
     const lead = m.w === 'bot' && m.k ? '<b class="k">' + (m.k === 'V' ? icon('gavel') : m.k) + '</b>' : m.w === 'hint' ? '💡 ' : '';
-    return '<p class="iq-msg' + cls + '">' + lead + esc(m.t) + '</p>';
+    return '<p class="iq-msg' + cls + '">' + lead + (m.h ? '<b class="iq-ftitle">' + esc(m.h) + '</b> ' : '') + esc(m.t) + '</p>' + (m.html || '');
   }
   /* v4.4: hardcoded, zero-token quick phrases per step. Tapping one inserts
      the phrase into the answer box (not an instant pass — M and S are
@@ -13029,7 +13255,12 @@ function TrimInterrogation(T) {
   function toolsHTML(k) {
     if (k === 'V') return '';
     const off = Q.busy ? ' disabled' : '';
-    return quickHTML(k) + '<button type="button" class="btn btn-ghost btn-sm" data-iq="hint"' + off + '>💡 Hint' + (Q.hints[k] ? ' (' + Q.hints[k] + ' of 3)' : '') + '</button>' +
+    if (k === 'P') return pdashHTML() + stdTools(k, off, false);
+    if (k === 'C' && Q.cs !== 'find') return calcToolsHTML(off) + stdTools(k, off, false);
+    return stdTools(k, off, true);
+  }
+  function stdTools(k, off, quick) {
+    return (quick ? quickHTML(k) : '') + '<button type="button" class="btn btn-ghost btn-sm" data-iq="hint"' + off + '>💡 Hint' + (Q.hints[k] ? ' (' + Q.hints[k] + ' of 3)' : '') + '</button>' +
       '<button type="button" class="btn btn-quiet btn-sm" data-iq="giveup"' + off + '>🏳️ Give up <small>(Toon antwoord)</small></button>';
   }
   function logHTML() { return Q.log.map(msgHTML).join('') + (Q.busy ? '<p class="iq-msg is-typing">' + esc(Q.busyText || 'The coach is thinking…') + '</p>' : ''); }
@@ -13042,7 +13273,7 @@ function TrimInterrogation(T) {
       '<div class="iq-log" data-iq-part="log" role="log" aria-live="polite">' + logHTML() + '</div>' +
       '<div data-iq-part="verdict">' + (k === 'V' ? verdictHTML(it) : '') + '</div>' +
       '<div class="iq-tools" data-iq-part="tools">' + toolsHTML(k) + '</div>' +
-      '<form class="iq-ai" data-iq-form autocomplete="off"><input class="input" name="a" maxlength="300" autocomplete="off" placeholder="' + esc(PLACEHOLDER[k]) + '" aria-label="Your answer to the coach">' +
+      '<form class="iq-ai" data-iq-form autocomplete="off"><input class="input" name="a" maxlength="300" autocomplete="off" placeholder="' + esc(ph(k)) + '" aria-label="Your answer to the coach">' +
       '<button class="btn btn-primary btn-sm" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form></section>';
     scrollLog();
     if (focus && window.innerWidth >= 900) { const inp = qs('.iq-ai input', h); if (inp) try { inp.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
@@ -13057,7 +13288,7 @@ function TrimInterrogation(T) {
     part('verdict').innerHTML = k === 'V' ? verdictHTML(Q.list[Q.at]) : '';
     part('tools').innerHTML = toolsHTML(k);
     const inp = qs('.iq-ai input', h);
-    if (inp) inp.placeholder = PLACEHOLDER[k];
+    if (inp) inp.placeholder = ph(k);
     scrollLog();
   }
   function scrollLog() { const l = qs('[data-iq-part="log"]', host() || view); if (l) l.scrollTop = l.scrollHeight; }
@@ -13168,7 +13399,10 @@ function TrimInterrogation(T) {
       return;
     }
     if (DUNNO.test(text.toLowerCase().trim())) { hint(); return; }
-    if (k === 'C') { typedMove(text); return; }
+    if (k === 'C') {
+      if (Q.cs !== 'find') { say('bot', Q.cs === 'calc' ? 'Calculate on the board first, then press “This is what I calculated”.' : 'Read what the calculation missed, then press “Now find a better move”.'); return; }
+      typedMove(text); return;
+    }
     const j = judge(k, text);
     let reply = j.reply, pass = j.pass;
     const b = coachBot();
@@ -13214,6 +13448,11 @@ function TrimInterrogation(T) {
     if ((Q.hints[k] || 0) >= 3) { say('hint', 'That was the last hint for this step. Answer, or tap 🏳️ Give up to see it.'); return; }
     const n = Q.hints[k] = (Q.hints[k] || 0) + 1;
     let t = '';
+    if (k === 'C' && Q.cs !== 'find') {
+      t = n === 1 ? 'Start with your forcing moves: checks, captures and attacks. Which one do you want to calculate first?'
+        : n === 2 ? 'Play their reply too, not only your own moves. What is their best answer?' : 'Keep going until nothing is hanging and no check or capture is left on the board.';
+      say('hint', t); return;
+    }
     if (k === 'M') {
       const last = f.last, th = f.threat;
       if (f.check) t = n === 1 ? 'Look at your own king first.' : n === 2 ? 'Your king is attacked: every legal move has to deal with that.' : 'You were in check. Say so.';
@@ -13251,12 +13490,183 @@ function TrimInterrogation(T) {
     next();
   }
 
-  /* ----- C: find the better move, Stockfish judges it live ----- */
-  function toCalc() {
+  /* ----- C: first calculate, then find the better move; Stockfish judges it live ----- */
+  /* ----- v6.4 P: the Priorities dashboard. Your options and your opponent's
+     options as buttons: tap every kind of forcing move that exists, then check. ----- */
+  const PD_KEYS = [['checks', 'Checks'], ['captures', 'Captures'], ['attacks', 'Threats / attacks']];
+  const pdFresh = () => ({ mine: { checks: false, captures: false, attacks: false }, theirs: { checks: false, captures: false, attacks: false }, tries: 0 });
+  function pdashHTML() {
+    const D = Q.pd, off = Q.busy ? ' disabled' : '', inCheck = !Q.facts.theirs;
+    const row = (who, label) => '<div class="iq-pd-row"><span class="iq-pd-lab">' + label + '</span><div class="iq-pd-btns">' + PD_KEYS.map((x) =>
+      '<button type="button" class="btn btn-sm ' + (D[who][x[0]] ? 'btn-primary' : 'btn-ghost') + '" data-iq-pd="' + who + ':' + x[0] + '" aria-pressed="' + !!D[who][x[0]] + '"' + off + (who === 'theirs' && inCheck ? ' disabled' : '') + '>' +
+      (who === 'theirs' ? 'Their ' + x[1].toLowerCase() : x[1]) + '</button>').join('') + '</div></div>';
+    return '<div class="iq-pd" role="group" aria-label="Priorities dashboard"><p class="small muted">Tap every kind of forcing move that exists in this position: yours first, then your opponent’s. Then check.</p>' +
+      row('mine', 'My options') + row('theirs', 'Opponent options') + (inCheck ? '<p class="small muted">You are in check, so answering it comes first.</p>' : '') +
+      '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-iq="pd-check"' + off + '>' + icon('list-check') + ' Check my priorities</button></div></div>';
+  }
+  function pdToggle(key) {
+    const p = String(key).split(':');
+    if (!Q || STEPS[Q.s] !== 'P' || Q.busy || !Q.pd[p[0]] || !hasOwn(Q.pd[p[0]], p[1])) return;
+    Q.pd[p[0]][p[1]] = !Q.pd[p[0]][p[1]];
+    paint();
+  }
+  function pdCheck() {
+    if (!Q || STEPS[Q.s] !== 'P' || Q.busy) return;
+    const f = Q.facts, D = Q.pd, lab = { checks: 'checks', captures: 'captures', attacks: 'threats and attacks' }, miss = [], extra = [], picked = [];
+    ['mine', 'theirs'].forEach((who) => {
+      const own = PD_KEYS.filter((x) => D[who][x[0]]).map((x) => lab[x[0]]);
+      picked.push((who === 'mine' ? 'Mine: ' : 'Theirs: ') + (own.join(', ') || 'nothing'));
+      PD_KEYS.forEach((x) => {
+        const real = who === 'mine' ? f.mine[x[0]].length > 0 : !!f.theirs && f.theirs[x[0]].length > 0, name = (who === 'mine' ? 'your ' : 'their ') + lab[x[0]];
+        if (real && !D[who][x[0]]) miss.push(name);
+        if (!real && D[who][x[0]]) extra.push(name);
+      });
+    });
+    D.tries++;
+    say('me', 'My priorities. ' + picked.join('. ') + '.');
+    if (!miss.length && !extra.length) { say('bot', 'Right: that is every kind of forcing move on the board. ' + Dex.PRAISE_MSPC); passStep('P'); return; }
+    Q.miss.P++;
+    if (D.tries >= 3) { Q.gave.P = true; say('bot', 'Here they are, so you can see what you missed.'); passStep('P'); return; }
+    say('bot', (miss.length ? 'You missed ' + miss.join(', ') + '. ' : '') + (extra.length ? 'There are no ' + extra.join(', ') + ' here. ' : '') + 'Look again.');
+  }
+
+  /* ----- v6.4 C: calculate first. No "find a better move" up front: press
+     "This is what I'm calculating", play your lines on the board (both sides),
+     press "This is what I calculated", and only then does Stockfish say what
+     you missed or miscalculated. After that you look for a better move. ----- */
+  function lineText(L) {
     const it = Q.list[Q.at];
+    let num = it.num, col = it.color;
+    const out = [];
+    L.forEach((m, i) => { out.push(col === 'w' ? num + '.' + m.san : (i === 0 ? num + '...' + m.san : m.san)); if (col === 'b') num++; col = col === 'w' ? 'b' : 'w'; });
+    return out.join(' ');
+  }
+  function calcLines() { const C = Q.calc; return C.lines.concat(C.cur.length ? [C.cur] : []); }
+  function calcToolsHTML(off) {
+    if (Q.cs === 'eval') return Q.busy ? '' : '<button type="button" class="btn btn-primary btn-sm" data-iq="find">' + icon('magnifying-glass') + ' Now find a better move</button>';
+    const C = Q.calc;
+    if (!C.active) return '<button type="button" class="btn btn-primary btn-sm" data-iq="calc-start"' + off + '>' + icon('calculator') + ' This is what I’m calculating</button>';
+    return '<p class="iq-calc-line small">Line ' + (C.lines.length + 1) + ': ' + (C.cur.length ? esc(lineText(C.cur)) : 'play your first move on the board') + '</p>' +
+      '<button type="button" class="btn btn-ghost btn-sm" data-iq="calc-undo"' + (C.cur.length ? '' : ' disabled') + off + '>' + icon('rotate-left') + ' Undo</button>' +
+      (C.lines.length < 2 && C.cur.length ? '<button type="button" class="btn btn-ghost btn-sm" data-iq="calc-new"' + off + '>' + icon('code-branch') + ' Another line</button>' : '') +
+      '<button type="button" class="btn btn-primary btn-sm" data-iq="calc-done"' + off + '>' + icon('check') + ' This is what I calculated</button>';
+  }
+  function toCalc() {
+    const it = Q.list[Q.at], fen = A.fens[it.i];
+    Q.cs = 'calc'; Q.calcRes = null; Q.calc = { g: new Chess(fen), lines: [], cur: [], active: false };
+    board.clearMarks(); arrows([]);
+    board.setPosition(fen, { animate: false, lastMove: it.i > 0 ? { from: A.moves[it.i - 1].from, to: A.moves[it.i - 1].to } : null });
+    board.setTapMode(null); board.setInteractive(null);
+  }
+  function toFind() {
+    const it = Q.list[Q.at];
+    Q.cs = 'find';
     board.clearMarks(); arrows([]);
     board.setPosition(A.fens[it.i], { animate: false, lastMove: it.i > 0 ? { from: A.moves[it.i - 1].from, to: A.moves[it.i - 1].to } : null });
     board.setTapMode(null); board.setInteractive(it.color);
+  }
+  function calcStart() {
+    if (!Q || Q.cs !== 'calc' || Q.busy) return;
+    const C = Q.calc;
+    C.active = true; C.cur = []; C.g = new Chess(A.fens[Q.list[Q.at].i]);
+    board.setPosition(C.g.fen(), { animate: false });
+    board.setInteractive(C.g.turn());
+    say('me', C.lines.length ? 'This is the next line I’m calculating.' : 'This is what I’m calculating.');
+    say('bot', 'Play the line on the board: your move, their best reply, and on until the position is quiet. Undo if you change your mind.');
+  }
+  function calcMove(m) {
+    const C = Q.calc;
+    if (!C.active) { board.setPosition(C.g.fen(), { animate: false }); return; }
+    const mv = C.g.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
+    if (!mv) { board.setPosition(C.g.fen(), { animate: false }); return; }
+    C.cur.push({ san: mv.san, uci: mv.from + mv.to + (mv.promotion || ''), color: mv.color });
+    board.setPosition(C.g.fen(), { lastMove: { from: mv.from, to: mv.to }, sound: mv.captured ? 'capture' : 'move' });
+    board.setInteractive(C.g.game_over() ? null : C.g.turn());
+    paint();
+  }
+  function calcUndo() {
+    if (!Q || Q.cs !== 'calc' || !Q.calc.active || !Q.calc.cur.length || Q.busy) return;
+    const C = Q.calc;
+    C.g.undo(); C.cur.pop();
+    board.setPosition(C.g.fen(), { animate: false });
+    board.setInteractive(C.g.turn());
+    paint();
+  }
+  function calcNew() {
+    if (!Q || Q.cs !== 'calc' || !Q.calc.active || !Q.calc.cur.length || Q.busy) return;
+    const C = Q.calc;
+    C.lines.push(C.cur); C.cur = []; C.g = new Chess(A.fens[Q.list[Q.at].i]);
+    board.setPosition(C.g.fen(), { animate: false });
+    board.setInteractive(C.g.turn());
+    say('bot', 'Line ' + C.lines.length + ' is saved. Play your next line.');
+  }
+  function calcDone() {
+    if (!Q || Q.cs !== 'calc' || Q.busy) return;
+    const lines = calcLines();
+    if (!lines.length) { say('bot', 'Play at least one move on the board first: your move, then their reply. Calculating means playing it out.'); return; }
+    Q.calc.active = false;
+    evaluateCalc(lines);
+  }
+  const forcingMove = (mv) => !!mv && (!!mv.captured || /[+#]/.test(mv.san));
+  async function evaluateCalc(lines) {
+    const it = Q.list[Q.at], tok = Q.token, fen = A.fens[it.i], pov = it.color === 'w' ? 1 : -1, res = [];
+    Q.cs = 'eval'; board.setInteractive(null);
+    say('me', 'This is what I calculated: ' + lines.map(lineText).join('  |  '));
+    Q.busy = true; Q.busyText = 'Stockfish is checking your calculation…'; paint();
+    try {
+      for (const L of lines) {
+        const g1 = new Chess(fen), m1 = g1.move({ from: L[0].uci.slice(0, 2), to: L[0].uci.slice(2, 4), promotion: L[0].uci[4] || undefined });
+        if (!m1) continue;
+        const after1 = g1.fen(), entry = { L, first: m1.san, issues: [], note: '' };
+        if (g1.game_over()) { entry.note = m1.san + ' ends the game.'; res.push(entry); continue; }
+        const r = await Engine.analyse(after1, { depth: 13 });
+        if (!Q || Q.token !== tok) return;
+        const best = r.best || (r.lines[0] && r.lines[0].pv[0]), bestCp = Engine.toCp(r.lines[0]), bestSan = best ? Engine.uciToSan(after1, best) : '';
+        entry.cp = bestCp;
+        if (L.length < 2) entry.issues.push({ t: 'reply', msg: 'You stopped after your own move and never looked at their reply. Their best answer to ' + m1.san + ' is ' + bestSan + ', which leaves you at ' + cpText(bestCp) + '.' });
+        else if (best && L[1].uci !== best) {
+          const g2 = new Chess(after1), m2 = g2.move({ from: L[1].uci.slice(0, 2), to: L[1].uci.slice(2, 4), promotion: L[1].uci[4] || undefined });
+          let cp2 = null;
+          if (m2) {
+            if (g2.in_checkmate()) cp2 = 10000 * (m2.color === 'w' ? 1 : -1);
+            else if (g2.game_over()) cp2 = 0;
+            else { const r2 = await Engine.analyse(g2.fen(), { depth: 12 }); if (!Q || Q.token !== tok) return; cp2 = Engine.toCp(r2.lines[0]); }
+          }
+          if (cp2 != null && Engine.winPct(cp2 * pov) - Engine.winPct(bestCp * pov) >= 12) entry.issues.push({ t: 'reply', msg: 'You assumed ' + L[1].san + ', but their best reply is ' + bestSan + ': ' + cpText(cp2) + ' becomes ' + cpText(bestCp) + '.' });
+        }
+        const pv = (r.lines[0] && r.lines[0].pv) || [], gp = new Chess(after1);
+        let run = 0, stop = false;
+        for (let i = 0; i < Math.min(pv.length, 10) && !stop; i++) {
+          const mv = gp.move({ from: pv[i].slice(0, 2), to: pv[i].slice(2, 4), promotion: pv[i][4] || undefined });
+          if (!mv) break;
+          if (forcingMove(mv)) run++; else stop = true;
+        }
+        if (run >= 2 && L.length - 1 < run + 1) entry.issues.push({ t: 'depth', msg: 'You stopped too early: the forcing line after ' + m1.san + ' runs ' + (run + 1) + ' plies before it settles, and you calculated ' + (L.length - 1) + '.' });
+        res.push(entry);
+      }
+    } catch (e) { res.length = 0; }
+    if (!Q || Q.token !== tok) return;
+    Q.busy = false; Q.busyText = '';
+    const issues = [];
+    res.forEach((e) => e.issues.forEach((x) => issues.push(x)));
+    Q.calcRes = { ok: res.length > 0, issues, reply: issues.some((x) => x.t === 'reply'), depth: issues.some((x) => x.t === 'depth') };
+    if (!res.length) { say('bot', 'Stockfish is not available right now, so I can not grade your lines. Press “Now find a better move” to carry on.'); return; }
+    res.forEach((e) => {
+      const same = cleanSan(e.first) === cleanSan(it.san) ? ' This is the move you played in the game: Stockfish rates it ' + cpText(e.cp) + '.' : '';
+      say('fact', 'Your line ' + lineText(e.L) + ': ' + (e.note || (e.issues.length ? e.issues.map((x) => x.msg).join(' ') : 'it held up. You looked at their best reply and went deep enough.')) + same);
+    });
+    if (issues.length) {
+      const log = (Store.get('lc5-miscalc', []) || []).filter((x) => x && x.t).slice(-58);
+      if (Q.calcRes.reply) log.push({ t: 'Missed their best reply', id: 'iq-' + it.i, at: Date.now() });
+      if (Q.calcRes.depth) log.push({ t: 'Stopped calculating too early', id: 'iq-' + it.i, at: Date.now() });
+      Store.set('lc5-miscalc', log);
+    }
+    say('bot', issues.length ? 'That is what your calculation missed. Now look for a better move, with that in mind.' : 'Your calculation held up. Now look for a better move.');
+  }
+  function goFind() {
+    if (!Q || STEPS[Q.s] !== 'C' || Q.cs !== 'eval' || Q.busy) return;
+    toFind();
+    say('bot', 'Find a better move: play it on the board or type it, for example Nf5. Stockfish judges it.');
   }
   async function pre(fen) {
     if (Q.pre) return Q.pre;
@@ -13288,12 +13698,13 @@ function TrimInterrogation(T) {
   }
   function onMove(m) {
     const it = Q && Q.list[Q.at];
-    if (!it || STEPS[Q.s] !== 'C' || Q.got || Q.busy) { if (it) board.setPosition(A.fens[it.i], { animate: false }); return; }
+    if (it && STEPS[Q.s] === 'C' && Q.cs === 'calc' && !Q.busy) { calcMove(m); return; }     // v6.4: calculating, both sides, on the board
+    if (!it || STEPS[Q.s] !== 'C' || Q.cs !== 'find' || Q.got || Q.busy) { if (it) board.setPosition(Q && Q.cs === 'calc' && Q.calc ? Q.calc.g.fen() : A.fens[it.i], { animate: false }); return; }
     play(m);
   }
   async function play(m) {
     const it = Q.list[Q.at];
-    if (STEPS[Q.s] !== 'C' || Q.got || Q.busy) return;
+    if (STEPS[Q.s] !== 'C' || Q.cs !== 'find' || Q.got || Q.busy) return;
     const fen = A.fens[it.i], g = new Chess(fen), mv = g.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' }), tok = Q.token;
     if (!mv) { board.setPosition(fen, { animate: false }); return; }
     const uci = mv.from + mv.to + (mv.promotion || '');
@@ -13340,6 +13751,7 @@ function TrimInterrogation(T) {
   function autoVerdict(it) {
     const name = (k) => k + ', ' + MSPC_NAME[k];
     for (const k of ['M', 'S', 'P']) if (Q.gave[k]) return { k, why: 'you needed the answer at ' + name(k) + ', so that is where your thinking broke.' };
+    if (Q.calcRes && Q.calcRes.issues.length) return { k: 'C', why: (Q.calcRes.reply ? 'you missed their best reply' : 'you stopped calculating too early') + ', so the leak is ' + name('C') + '.' };
     if (Q.gave.C || (Q.got && Q.got.revealed)) return { k: 'C', why: 'you knew the facts but did not find the move, so the leak is ' + name('C') + '.' };
     if (Q.tries >= 3) return { k: 'C', why: 'the better move took you ' + Q.tries + ' tries: ' + name('C') + ' is the step to train.' };
     const load = (k) => (Q.hints[k] || 0) + (Q.miss[k] || 0), top = ['M', 'S', 'P', 'C'].filter((k) => load(k) >= 2).sort((a, b) => load(b) - load(a))[0];
@@ -13444,7 +13856,7 @@ function TrimInterrogation(T) {
     if (!Q || Q.committed || STEPS[Q.s] !== 'V') return;
     Q.committed = true;
     const it = Q.list[Q.at], found = !!(Q.got && !Q.got.revealed), v = Q.verdict;
-    Q.verdicts.push({ san: it.san, v, eng: it.k || '', found, i: it.i });
+    Q.verdicts.push({ san: it.san, v, eng: it.k || '', found, i: it.i, reply: !!(Q.calcRes && Q.calcRes.reply), depth: !!(Q.calcRes && Q.calcRes.depth) });
     Telemetry.log({ e: 'd', x: v, y: it.k || '', v: found ? 1 : 0 });
     const sk = VERDICT_STRUGGLE[v];
     if (sk && App.profile.struggles.indexOf(sk) < 0) { App.profile.struggles = App.profile.struggles.concat([sk]).slice(-8); App.save(); }
@@ -13458,17 +13870,31 @@ function TrimInterrogation(T) {
     h.innerHTML = '<section class="panel iq iq-lock" aria-label="Blunder interrogation">' + headHTML(Q.list[Q.at]) + '<p>The free interrogation covers the first two mistakes of every game. The full interrogation goes through all of them.</p>' +
       '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-iq="unlock">' + icon('lock-open') + ' Unlock the full interrogation</button>' + (Q.verdicts.length ? '<button type="button" class="btn btn-ghost btn-sm" data-iq="summary">See my summary</button>' : '') + '</div></section>';
   }
+  /* v6.4: the end evaluation. One synthesis of the session, then one Hyper-Focus for the next games. */
+  const hyperText = (k) => String((CONFIG.hyperfocus.texts && CONFIG.hyperfocus.texts[k]) || (FOCUS[k] ? FOCUS[k][1] : '')).replace(/\{games\}/g, CONFIG.hyperfocus.games);
+  function synthHTML(by, n, found, topV) {
+    if (!n) return '';
+    const vs = Q.verdicts, missedReply = vs.filter((x) => x.reply).length, tooShort = vs.filter((x) => x.depth).length;
+    const legs = Object.keys(by).sort((a, b) => by[b] - by[a]).map((v) => by[v] + '× ' + V5Trim.leakName(v));
+    return '<div class="iq-synth"><h3>' + icon('chart-simple') + ' What this session shows</h3><p>' + n + (n === 1 ? ' mistake' : ' mistakes') + ' looked at, ' + found + ' better ' + (found === 1 ? 'move' : 'moves') + ' found. Where your thinking broke: ' + esc(legs.join(', ')) + '.' +
+      (missedReply || tooShort ? ' In your calculations you ' + [missedReply ? 'missed their best reply ' + missedReply + '×' : '', tooShort ? 'stopped too early ' + tooShort + '×' : ''].filter(Boolean).join(' and ') + '.' : '') +
+      (topV ? ' The biggest leak: ' + esc(V5Trim.leakName(topV)) + '. ' + esc(V5Trim.TIPS[topV] || '') : '') + '</p></div>';
+  }
+  function hyperHTML(topV) {
+    if (!topV || !FOCUS[topV]) return '';
+    const c = CONFIG.hyperfocus, f = App.profile.focus, running = f && f.k === topV && f.games && (f.played || 0) < f.games;
+    return '<div class="iq-hf"><h3>' + icon('bullseye') + ' Your Hyper-Focus for the next ' + c.games + ' games</h3><blockquote class="pledge">' + esc(hyperText(topV)) + '</blockquote>' +
+      (running ? '<p class="small muted">Already running: game ' + (f.played || 0) + ' of ' + f.games + '. Keep it.</p>'
+        : '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-iq="hf-set" data-k="' + topV + '">' + icon('bullseye') + ' Set it as my Hyper-Focus</button></div>') +
+      '<p class="small muted">I will check in on it between your puzzles.</p></div>';
+  }
   function summary() {
     const h = host();
     if (!h || !Q) return;
     const n = Q.verdicts.length, found = Q.verdicts.filter((x) => x.found).length, by = {};
     Q.verdicts.forEach((x) => { by[x.v] = (by[x.v] || 0) + 1; });
-    const topV = Object.keys(by).sort((a, b) => by[b] - by[a])[0], f = App.profile.focus;
-    let focus = '';
-    if (topV && FOCUS[topV]) {
-      focus = f && f.k === topV ? '<p>Your Hyper-Focus is ' + esc(Focus.name(f)) + ', and your verdicts agree: it is still the leak. Keep it.</p>'
-        : '<p>Your verdicts point at <b>' + esc(FOCUS[topV][0]) + '</b>' + (f ? ', while your Hyper-Focus is ' + esc(Focus.name(f)) : '') + '.</p><div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-iq="focus" data-k="' + topV + '">Make ' + esc(FOCUS[topV][0]) + ' my Hyper-Focus</button></div>';
-    }
+    const topV = Object.keys(by).sort((a, b) => by[b] - by[a])[0];
+    const focus = synthHTML(by, n, found, topV) + hyperHTML(topV);
     board.setInteractive(null); arrows([]); board.clearMarks();
     Q.done = true;
     h.innerHTML = '<section class="panel iq iq-done" aria-label="Interrogation summary"><div class="iq-head"><div><span class="iq-count">Interrogation complete</span><strong>' + found + ' of ' + n + ' better moves found</strong></div>' +
@@ -13490,8 +13916,9 @@ function TrimInterrogation(T) {
     V34.saveTrimSoon(T);
   }
   function onClick(e) {
-    const b = e.target.closest('[data-iq],[data-iq-v],[data-iq-tpl]'), h = host();
+    const b = e.target.closest('[data-iq],[data-iq-v],[data-iq-tpl],[data-iq-pd]'), h = host();
     if (!b || !Q || !h || !h.contains(b) || b.disabled) return;
+    if (b.hasAttribute('data-iq-pd')) { pdToggle(b.getAttribute('data-iq-pd')); return; }
     if (b.hasAttribute('data-iq-v')) { if (!Q.committed) { Q.verdict = b.getAttribute('data-iq-v'); paint(); } return; }
     if (b.hasAttribute('data-iq-tpl')) {
       const t = b.getAttribute('data-iq-tpl');
@@ -13504,6 +13931,13 @@ function TrimInterrogation(T) {
     if (a === 'close') close();
     else if (a === 'hint') hint();
     else if (a === 'giveup') giveUp();
+    else if (a === 'pd-check') pdCheck();
+    else if (a === 'calc-start') calcStart();
+    else if (a === 'calc-undo') calcUndo();
+    else if (a === 'calc-new') calcNew();
+    else if (a === 'calc-done') calcDone();
+    else if (a === 'find') goFind();
+    else if (a === 'hf-set') { const k = b.getAttribute('data-k'); Focus.set(k, hyperText(k), { games: CONFIG.hyperfocus.games, sig: gameSig(A) }); toast('Hyper-Focus set for your next ' + CONFIG.hyperfocus.games + ' games.', 'good'); Q.done = false; summary(); }
     else if (a === 'after') after();
     else if (a === 'bridge-yes') { if (Funnel.on()) fnYes(); else { Q.bridgeStage = 'offer'; paint(); } }
     else if (a === 'bridge-no') { if (Funnel.on()) fnNo(); else { Q.bridgeStage = 'done'; paint(); } }
@@ -19750,9 +20184,114 @@ const V5Peer = (() => {
    summary gains working points, patterns across sessions (verdicts and
    miscalculation tags) and, for a leak that keeps coming back, the ManyChat
    sales bridge the admin configured. */
+/* ==========================================================================
+   v6.4: THE MACRO REALITY CHECK, in four parts
+   Opening and deviation, middlegame and structure, phase diagnostics and the
+   course link. Everything is computed on this device from the game, the
+   review and your repertoire lines (CONTENT.openings), so it costs no token.
+   ========================================================================== */
+const STEP_WHY = { M: 'missing their threat, at Move', S: 'a loose piece or a wrong plan, at Specifics', P: 'a missed forcing move, at Priorities', C: 'a miscalculation, at Calculation' };
+/* The repertoire line that matches the game longest, and the move where the game left it. */
+function repDeviation(A) {
+  const sans = A.moves.map((m) => cleanSan(m.san));
+  let best = null, depth = 0;
+  (CONTENT.openings || []).forEach((o) => {
+    const ms = pgnTokens(o.pgn || '').map(cleanSan);
+    let k = 0;
+    while (k < ms.length && k < sans.length && ms[k] === sans[k]) k++;
+    if (k > depth) { depth = k; best = { o, ms }; }
+  });
+  if (!best || depth < 2) return null;
+  return { group: String(best.o.group || best.o.title || 'your repertoire'), line: String(best.o.title || ''), ply: depth, ended: depth >= best.ms.length,
+    left: depth < sans.length ? A.moves[depth] : null, book: depth < best.ms.length ? best.ms[depth] : '' };
+}
+/* A plain-language read of the pawn structure: the centre, plus the well-known features. */
+function pawnStructure(fen) {
+  const g = new Chess();
+  if (!fen || !g.load(fen)) return null;
+  const P = { w: [], b: [] }, F = 'abcdefgh', NAME = { w: 'White', b: 'Black' };
+  g.board().forEach((row, r) => row.forEach((p, c) => { if (p && p.type === 'p') P[p.color].push({ f: c, r: 8 - r }); }));
+  const have = (col, f) => P[col].some((p) => p.f === f);
+  const count = (col, f) => P[col].filter((p) => p.f === f).length;
+  const locked = [];
+  P.w.forEach((w) => { if (P.b.some((b) => b.f === w.f && b.r === w.r + 1) && locked.indexOf(w.f) < 0) locked.push(w.f); });
+  const lc = locked.filter((f) => f >= 2 && f <= 5).sort(), lcText = lc.map((f) => F[f] + '-file').join(' and ');
+  const centre = [3, 4].filter((f) => have('w', f)).length + [3, 4].filter((f) => have('b', f)).length;
+  const label = centre === 0 ? 'an open centre (no d- or e-pawns left)'
+    : lc.length >= 2 ? 'a closed centre (pawns locked on the ' + lcText + ')'
+      : lc.length === 1 ? 'a semi-closed centre (locked on the ' + lcText + ')'
+        : centre <= 2 ? 'a semi-open centre' : 'a fluid centre, with the tension still on the board';
+  const notes = [];
+  ['w', 'b'].forEach((c) => {
+    if (have(c, 3) && !have(c, 2) && !have(c, 4)) notes.push('an isolated d-pawn for ' + NAME[c]);
+    else if (have(c, 2) && have(c, 3) && !have(c, 1) && !have(c, 4)) notes.push('hanging c- and d-pawns for ' + NAME[c]);
+    for (let f = 0; f < 8; f++) if (count(c, f) > 1) notes.push('doubled ' + F[f] + '-pawns for ' + NAME[c]);
+  });
+  const flank = (col, a, b) => P[col].filter((p) => p.f >= a && p.f <= b).length;
+  if (flank('w', 0, 3) !== flank('b', 0, 3)) notes.push((flank('w', 0, 3) > flank('b', 0, 3) ? 'White' : 'Black') + ' has the queenside pawn majority');
+  else if (flank('w', 4, 7) !== flank('b', 4, 7)) notes.push((flank('w', 4, 7) > flank('b', 4, 7) ? 'White' : 'Black') + ' has the kingside pawn majority');
+  return { label, notes: notes.slice(0, 3) };
+}
+const macroBad = (A) => ((A.review && A.review.items) || []).filter((it) => it.color === A.user && (it.cls === 'blunder' || it.cls === 'mistake'));
+function macroOpening(A) {
+  const d = repDeviation(A), name = A.opening && A.opening.name && A.opening.name !== 'Other' ? A.opening.name : '';
+  if (!d) return { h: 'Opening & deviation', t: (name ? 'Opening: ' + name + '. ' : '') + 'The first moves of this game are not in any line of your courses, so there is no theory deviation to show.' };
+  const where = d.group + (d.line ? ' (' + d.line + ')' : '');
+  if (!d.left) return { h: 'Opening & deviation', t: 'You played the ' + where + ' and stayed in the line until the game ended.' };
+  const mine = d.left.color === A.user, mv = moveLabel(d.left.num, d.left.color, d.left.san);
+  const it = ((A.review && A.review.items) || []).filter((x) => x.i === d.ply)[0];
+  const sf = mine && it && it.bestSan && cleanSan(it.bestSan) !== cleanSan(d.left.san) ? ' Stockfish’s first choice there: ' + it.bestSan + '.' : '';
+  return { h: 'Opening & deviation', t: 'You played the ' + where + '. ' + (d.ended ? 'The line ends at ' + mv + ': from there you were out of the course.'
+    : (mine ? 'You' : 'Your opponent') + ' left it at ' + mv + (d.book ? ', where the course continues with ' + d.book : '') + '.' + (mine ? '' : ' From there you were on your own.') + sf) };
+}
+function macroStructure(A) {
+  const items = (A.review && A.review.items) || [], d = repDeviation(A), mg = items.filter((it) => it.phase === 'middlegame');
+  if (!mg.length) return { h: 'Middlegame & structure', t: 'The game never reached a real middlegame, so there is no structure or plan to judge.' };
+  const ply = Math.min(mg[0].i, A.fens.length - 1), ps = pawnStructure(A.fens[ply]), mine = mg.filter((it) => it.color === A.user).slice(0, 8);
+  const early = mine.filter((it) => it.cls === 'blunder' || it.cls === 'mistake')[0];
+  const plan = early ? 'Plan not found: it broke early, at ' + moveLabel(early.num, early.color, early.san) + CLS_TAG[early.cls] + '.'
+    : 'Plan found: your first ' + mine.length + ' middlegame moves held up, with no mistake.';
+  return { h: 'Middlegame & structure', t: (ps ? 'The structure is ' + ps.label + (ps.notes.length ? ', with ' + ps.notes.join(', ') : '') + '. ' : '') + plan };
+}
+function macroDiag(A) {
+  const items = (A.review && A.review.items) || [], bad = macroBad(A);
+  if (!bad.length) return { h: 'Phase diagnostics', t: 'No blunders and no mistakes from you in this game.' };
+  const mgPlies = items.filter((it) => it.phase === 'middlegame').map((it) => it.i), split = mgPlies.length >= 24;
+  const mid = split ? (mgPlies[0] + mgPlies[mgPlies.length - 1]) / 2 : 0;
+  const bucket = (it) => (it.phase === 'middlegame' ? (split ? (it.i <= mid ? 'middlegame, part 1' : 'middlegame, part 2') : 'middlegame') : (it.phase || 'game'));
+  const order = ['opening', 'middlegame, part 1', 'middlegame', 'middlegame, part 2', 'endgame', 'game'], by = {};
+  bad.forEach((it) => { (by[bucket(it)] = by[bucket(it)] || []).push(it); });
+  const why = (xs) => { const ks = {}; xs.forEach((x) => { if (x.k && STEP_WHY[x.k]) ks[x.k] = (ks[x.k] || 0) + 1; }); return Object.keys(ks).map((k) => (ks[k] > 1 ? ks[k] + '× ' : '') + STEP_WHY[k]).join(', '); };
+  const part = (xs, word) => (xs.length ? xs.length + ' ' + word + (xs.length === 1 ? '' : 's') + (why(xs) ? ' (' + why(xs) + ')' : '') : '');
+  const lines = order.filter((p) => by[p]).map((p) => 'In the ' + p + ': ' + [part(by[p].filter((x) => x.cls === 'blunder'), 'blunder'), part(by[p].filter((x) => x.cls === 'mistake'), 'mistake')].filter(Boolean).join(' and ') + '.');
+  return { h: 'Phase diagnostics', t: lines.join(' ') };
+}
+function macroCourse(A) {
+  const bad = macroBad(A), d = repDeviation(A), op = (A.opening || {}).name || '', refs = [], soon = [];
+  const add = (it, fen, lead, k, topic) => {
+    let ref = null;
+    try { ref = Course.forItem(it, fen, op); } catch (e) { ref = null; }
+    if (ref && ref.ch) { if (!refs.some((r) => r.ref.ch.id === ref.ch.id)) refs.push({ ref, lead, k }); }
+    else soon.push(topic);
+  };
+  if (d && d.left && d.left.color === A.user) add({ k: 'S', phase: 'opening', cls: 'mistake', san: d.left.san, bestSan: d.book, best: '' }, A.fens[d.ply], 'For your opening:', 'S', 'your opening line (' + d.group + ')');
+  const ks = {};
+  bad.forEach((it) => { if (it.k) ks[it.k] = (ks[it.k] || 0) + 1; });
+  const topK = Object.keys(ks).sort((a, b) => ks[b] - ks[a])[0], first = topK ? bad.filter((it) => it.k === topK)[0] : null;
+  if (first) add(first, A.fens[first.i], 'For your biggest leak:', topK, MSPC_NAME[topK] ? 'the ' + MSPC_NAME[topK] + ' step' : 'your biggest leak');
+  return { refs, soon };
+}
 const V5Trim = {
   TIPS: { M: 'Before every move, ask what the last move changed.', S: 'Name the phase and count the defenders of every piece.', P: 'List every check, capture and attack for both sides before any quiet move.', C: 'Calculate to the end, including their best reply.', time: 'Spend your clock on the critical moments, not the obvious ones.' },
   leakName: (v) => (v === 'time' ? 'the clock' : v + ', ' + (MSPC_NAME[v] || '')),
+  /* v6.4, Phase 1: the macro reality check in four parts, ready the moment the review is done. */
+  macroParts(A) {
+    const parts = [macroOpening(A), macroStructure(A), macroDiag(A)], c = macroCourse(A);
+    parts.push({ h: 'Course link', t: c.refs.length ? 'These modules teach what this game showed.' : (c.soon.length ? 'Coming soon in a new module: ' + c.soon.join('; ') + '.' : 'Nothing to link here: no mistakes to teach from.'),
+      acts: c.refs.map((r) => ({ label: r.lead + ' ' + Course.label(r.ref), href: Bridge.access(r.ref.ch) ? Bridge.href(r.ref.ch) : '#upgrades' })), soon: c.refs.length ? c.soon : [] });
+    if (parts[3].soon.length) parts[3].t += ' Coming soon in a new module: ' + parts[3].soon.join('; ') + '.';
+    return parts;
+  },
   macro(A) {
     const mine = ((A.review && A.review.items) || []).filter((it) => it.color === A.user && (it.cls === 'blunder' || it.cls === 'mistake'));
     if (!mine.length) return 'Macro reality check: no blunders and no mistakes from you in this game.';
@@ -20783,6 +21322,221 @@ const Popups = (() => {
   });
 
   return { TARGETS, EVENTS, D, clean, merge, cfg, run, attr, fire: fireEvent, queue, flush, afterMiss, afterSession, panelHTML, answers };
+})();
+
+/* ==========================================================================
+   v6.4: ACCOUNTABILITY CHECKS
+   Between puzzles a small banner under the top bar asks whether you are
+   sticking to your Hyper-Focus. Free players who say No are offered extra
+   support (the funnel pop-up set in CONFIG.accountability.freeNoTarget).
+   Paying players get a pure check: a tip and a link to deeper content, no
+   sales trigger. Texts and numbers: CONFIG.accountability.
+   ========================================================================== */
+const Accountability = (() => {
+  const KEY = 'lc64-acc';
+  const cfg = () => CONFIG.accountability || { on: false };
+  const st = () => { const x = Store.get(KEY, {}); return x && typeof x === 'object' && !Array.isArray(x) ? x : {}; };
+  const put = (patch) => Store.set(KEY, Object.assign(st(), patch));
+  let el = null;
+  const fill = (t, f) => String(t == null ? '' : t).replace(/\{(focus|games|name|coach)\}/g, (m, k) => String({ focus: f ? f.text : '', games: f && f.games ? f.games : CONFIG.hyperfocus.games, name: App.profile.name || 'you', coach: CONFIG.coach }[k]));
+  const btn = (act, label, primary) => '<button type="button" class="btn btn-sm ' + (primary ? 'btn-primary' : 'btn-ghost') + '" data-acc="' + act + '">' + esc(label) + '</button>';
+  function close() { if (el) { el.remove(); el = null; } }
+  function draw(stage, f) {
+    const c = cfg(), T = c.texts || {}, pro = App.isPro();
+    let body = '', acts = '';
+    if (stage === 'ask' || stage === 'done') { body = fill(stage === 'ask' ? T.ask : T.done, f); acts = btn('yes', stage === 'ask' ? c.yesBtn : 'Good', true) + btn('no', stage === 'ask' ? c.noBtn : 'Not really'); }
+    else if (stage === 'yes') { body = fill(T.yes, f); acts = btn('close', c.okBtn, true); }
+    else if (pro) {
+      const link = c.deepLinks && c.deepLinks[f.k];
+      body = fill(T.noPaid, f) + ' ' + (V5Trim.TIPS[f.k] || '');
+      acts = (link ? '<a class="btn btn-ghost btn-sm" href="' + esc(link) + '" data-acc="close">' + esc(c.deeperBtn) + '</a>' : '') + btn('close', c.okBtn, true);
+    } else { body = fill(T.noFree, f); acts = btn('help', c.helpBtn, true) + btn('close', c.laterBtn); }
+    if (!el) { el = document.createElement('div'); el.className = 'acc-banner'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.innerHTML = '<span class="acc-ico">' + icon('bullseye') + '</span><div class="acc-body"><p>' + esc(body) + '</p><div class="btn-row">' + acts + '</div></div>' +
+      '<button type="button" class="icon-btn acc-x" data-acc="close" aria-label="Close">' + icon('xmark') + '</button>';
+    el.dataset.stage = stage;
+  }
+  function open(stage) {
+    const f = App.profile.focus;
+    if (!f || document.hidden || qs('.sheet-wrap') || el) return false;
+    draw(stage, f);
+    return true;
+  }
+  function afterPuzzle() {
+    const c = cfg(), f = App.profile.focus;
+    if (!c.on || !f || (Admin.active && !Admin.preview())) return;
+    const s = st(), today = dayKey(new Date()), shown = s.day === today ? +s.n || 0 : 0, count = (+s.puzzles || 0) + 1;
+    put({ puzzles: count });
+    if (shown >= (+c.maxPerDay || 1) || count < (+c.everyPuzzles || 6) || Date.now() - (+s.at || 0) < (+c.minMinutes || 0) * 60000) return;
+    setTimeout(() => { if (open('ask')) put({ day: today, n: shown + 1, at: Date.now(), puzzles: 0 }); }, 1400);
+  }
+  function complete() {
+    const f = App.profile.focus, c = cfg();
+    if (!c.on || !f || !f.games || (f.played || 0) < f.games) return;
+    if (open('done')) put({ at: Date.now() });
+  }
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('[data-acc]') : null;
+    if (!b || !el || !el.contains(b)) return;
+    const a = b.getAttribute('data-acc'), f = App.profile.focus;
+    if (a === 'yes') { Focus.checkin(2); try { Telemetry.log({ e: 'q', x: 'acc-yes' }); } catch (x) { /* optional */ } draw('yes', f); setTimeout(() => { if (el && el.dataset.stage === 'yes') close(); }, 3500); }
+    else if (a === 'no') { Focus.checkin(0); try { Telemetry.log({ e: 'q', x: 'acc-no' }); } catch (x) { /* optional */ } draw('no', f); }
+    else if (a === 'help') { close(); try { Telemetry.log({ e: 'q', x: 'acc-help' }); } catch (x) { /* optional */ } Popups.run(cfg().freeNoTarget || 'growth', { source: 'accountability' }); }
+    else close();
+  });
+  window.addEventListener('hashchange', close);
+  return { afterPuzzle, complete, close, open };
+})();
+
+/* ==========================================================================
+   v6.4: THE 7-DAY POP-UP FUNNEL, tied to the free daily token
+   One pop-up per token, never more: it is armed when the next free daily
+   token arrives (or is spent, see CONFIG.dayFunnel.fireOn) and shows at a
+   calm moment: not over a trainer board, not on top of another sheet. The
+   funnel remembers where the player stopped: after five days away the next
+   token shows the next step, not five of them. Everything the player sees
+   (order, texts, links, buttons, rewards, on/off) is CONFIG.dayFunnel.
+   Try it: LC.dayFunnel.show('goals'), LC.dayFunnel.status(), LC.dayFunnel.reset().
+   ========================================================================== */
+const DayFunnel = (() => {
+  const KEY = 'lc64-dayfunnel';
+  const SAFE = ['home', 'about', 'upgrades', 'dex', 'account', 'leaderboard', 'trophies', 'insights', 'events', 'profile'];
+  const plain = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+  const cfg = () => (plain(CONFIG.dayFunnel) ? CONFIG.dayFunnel : { enabled: false, fireOn: [], steps: [] });
+  const st = () => { const x = Store.get(KEY, {}); return plain(x) ? x : {}; };
+  const put = (patch) => { const n = Object.assign(st(), patch); Store.set(KEY, n); return n; };
+  const httpsOk = (u) => /^https:\/\/[^\s"'<>\\]{3,}$/i.test(String(u || ''));
+  const steps = () => (Array.isArray(cfg().steps) ? cfg().steps : []).filter((s) => plain(s) && /^[\w-]{1,40}$/.test(String(s.id || '')) && s.on !== false && (s.audience !== 'free' || App.rank() < 2));
+  const nextStep = () => { const done = st().done || {}; return steps().filter((s) => !done[s.id])[0] || null; };
+  let pendingFor = null, timer = null, tries = 0;
+
+  function vars() {
+    const c = cfg(), yt = plain(c.youtube) ? c.youtube : {}, L = CONFIG.links || {};
+    const vids = (Array.isArray(yt.videos) ? yt.videos : []).filter((v) => plain(v) && httpsOk(v.url)), v = vids.length ? vids[(+st().videoIdx || 0) % vids.length] : null;
+    const base = String(L.youtube || ''), subs = Math.max(0, +yt.subscribers || 0);
+    return { coach: CONFIG.coach, name: App.profile.name || 'you', skool: L.skool || '', youtube: base, instagram: L.instagram || '', tiktok: L.tiktok || '', facebook: L.facebook || '',
+      channelUrl: httpsOk(yt.channelUrl) ? yt.channelUrl : base + (base.indexOf('?') >= 0 ? '&' : '?') + 'sub_confirmation=1',
+      videoTitle: v ? String(v.title || 'A lesson from the channel') : 'A lesson from the channel', videoUrl: v ? v.url : base, subs: subs ? String(subs) : '' };
+  }
+  const fill = (t) => { const m = vars(); return String(t == null ? '' : t).replace(/\{(\w+)\}/g, (x, k) => (hasOwn(m, k) ? String(m[k]) : x)); };
+  /* Day 4 switches by itself: below the subscriber threshold the subscribe trick, from it on a quality video for a token. */
+  function resolve(s) {
+    if (!plain(s.variants)) return s;
+    const yt = plain(cfg().youtube) ? cfg().youtube : {}, below = (+yt.subscribers || 0) < (+yt.threshold || 1000), v = below ? s.variants.below : s.variants.above;
+    return Object.assign({}, s, plain(v) ? v : {});
+  }
+  function fieldHTML(f) {
+    if (!plain(f) || !/^[\w-]{1,30}$/.test(String(f.id || ''))) return '';
+    const label = '<span class="field-label">' + esc(fill(f.label)) + '</span>';
+    if (f.type === 'text') return '<label class="field df-field"><span class="field-label">' + esc(fill(f.label)) + '</span><textarea class="input" data-df-text="' + esc(f.id) + '" rows="3" maxlength="' + clamp(+f.max || 240, 20, 600) + '" placeholder="' + esc(fill(f.placeholder || '')) + '"></textarea></label>';
+    const opts = f.type === 'rating' ? Array.from({ length: clamp(+f.max || 5, 2, 10) }, (x, i) => String(i + 1)) : (Array.isArray(f.options) ? f.options.map(String) : []);
+    return '<div class="df-field" data-df-field="' + esc(f.id) + '" data-df-multi="' + (f.multi ? 1 : 0) + '" data-df-req="' + (f.optional ? 0 : 1) + '">' + label + '<div class="quick df-opts">' +
+      opts.map((o) => '<button type="button" data-df-opt="' + esc(o) + '" aria-pressed="false">' + esc(fill(o)) + '</button>').join('') + '</div></div>';
+  }
+  function btnHTML(b, i) {
+    if (!plain(b) || !b.label) return '';
+    const cls = 'btn ' + (b.primary ? 'btn-primary' : 'btn-ghost'), url = b.url ? fill(b.url) : '';
+    if (url && httpsOk(url)) return '<a class="' + cls + '" href="' + esc(url) + '" target="_blank" rel="noopener" data-df-btn="' + i + '">' + esc(fill(b.label)) + '</a>';
+    if (b.hash && /^#[\w/-]{1,40}$/.test(b.hash)) return '<a class="' + cls + '" href="' + esc(b.hash) + '" data-df-btn="' + i + '">' + esc(fill(b.label)) + '</a>';
+    return '<button type="button" class="' + cls + '" data-df-btn="' + i + '">' + esc(fill(b.label)) + '</button>';
+  }
+  function hook(payload) {
+    const u = cfg().webhook;
+    if (!httpsOk(u)) return;
+    const body = JSON.stringify(payload);
+    try { if (navigator.sendBeacon && navigator.sendBeacon(u, new Blob([body], { type: 'text/plain' }))) return; fetch(u, { method: 'POST', mode: 'no-cors', body, keepalive: true }).catch(() => {}); } catch (e) { /* the answer stays on this device */ }
+  }
+  function mark(s, how, answers) {
+    const cur = st(), done = Object.assign({}, cur.done); done[s.id] = { at: Date.now(), how };
+    const patch = { done };
+    if (answers) patch.answers = Object.assign({}, cur.answers, { [s.id]: { at: Date.now(), a: answers } });
+    if (s.id === 'youtube') patch.videoIdx = (+cur.videoIdx || 0) + 1;
+    put(patch);
+    hook({ event: 'day_funnel', step: s.id, how, day: steps().findIndex((x) => x.id === s.id) + 1, answers: answers || null, at: new Date().toISOString(), app: 'lanckrietchess-hub', version: CONFIG.version,
+      player: { name: App.profile.name || '', access: (TIERS[App.access.tier] || TIERS.free).label } });
+  }
+  function reward(s, b) {
+    const n = clamp(Math.round(+((b && b.reward !== undefined) ? b.reward : s.reward) || 0), 0, 50), got = st().rewarded || {};
+    if (!n || got[s.id]) return 0;
+    Credits.grant(n); put({ rewarded: Object.assign({}, got, { [s.id]: n }) });
+    try { refreshChip(); } catch (e) { /* the top bar redraws later */ }
+    toast('+' + n + (n === 1 ? ' token' : ' tokens') + ' added.', 'good');
+    return n;
+  }
+  function open(step) {
+    const s = resolve(step), all = steps(), n = Math.max(1, all.findIndex((x) => x.id === step.id) + 1);
+    let answered = false;
+    openSheet({
+      title: fill(s.title || 'A quick question'), cls: 'pp-sheet df-sheet', noFocus: true,
+      html: '<p class="df-kicker">Day ' + n + ' of ' + all.length + '</p>' + (s.body ? '<p class="muted">' + esc(fill(s.body)) + '</p>' : '') + (s.fields || []).map(fieldHTML).join('') +
+        '<p class="cms-err" data-df-err aria-live="polite"></p><div class="btn-row">' + ((s.fields || []).length ? '<button type="button" class="btn btn-primary" data-df-submit>' + esc(s.submit || 'Send') + '</button>' : '') +
+        (s.buttons || []).map(btnHTML).join('') + '<button type="button" class="btn btn-quiet" data-df-skip>' + esc(s.skip || 'Not now') + '</button></div>',
+      onClose() { if (!answered && cfg().dismissAdvances !== false) mark(step, 'dismissed'); },
+      onMount(sh) {
+        const thanks = () => { answered = true; qs('.sheet-body', sh.el).innerHTML = '<div class="gp-done"><span class="gp-done-ico">' + icon('circle-check') + '</span><p>' + esc(fill(s.thanks || 'Thank you.')) + '</p><div class="btn-row"><button type="button" class="btn btn-quiet" data-close>Close</button></div></div>'; };
+        sh.el.addEventListener('click', (e) => {
+          const o = e.target.closest('[data-df-opt]');
+          if (o) {
+            const field = o.closest('[data-df-field]'), on = o.getAttribute('aria-pressed') !== 'true';
+            if (field.getAttribute('data-df-multi') !== '1') qsa('[data-df-opt]', field).forEach((x) => x.setAttribute('aria-pressed', 'false'));
+            o.setAttribute('aria-pressed', on ? 'true' : 'false');
+            return;
+          }
+          if (e.target.closest('[data-df-skip]')) { return; }                                  // the sheet closes itself (data-close is on the backdrop and the X; Skip uses onClose)
+          if (e.target.closest('[data-df-submit]')) {
+            const data = {};
+            let bad = false;
+            qsa('[data-df-field]', sh.el).forEach((f) => {
+              const v = qsa('[data-df-opt][aria-pressed="true"]', f).map((x) => x.getAttribute('data-df-opt'));
+              if (f.getAttribute('data-df-req') === '1' && !v.length) bad = true;
+              data[f.getAttribute('data-df-field')] = f.getAttribute('data-df-multi') === '1' ? v : (v[0] || '');
+            });
+            qsa('[data-df-text]', sh.el).forEach((t) => { data[t.getAttribute('data-df-text')] = String(t.value || '').replace(/[\u0000-\u0009\u000b-\u001f\u007f<>]/g, ' ').trim().slice(0, 600); });
+            if (bad) { qs('[data-df-err]', sh.el).textContent = 'Pick an answer first, or tap Not now.'; return; }
+            mark(step, 'answered', data); reward(s, null); thanks();
+            return;
+          }
+          const b = e.target.closest('[data-df-btn]');
+          if (b) {
+            const def = (s.buttons || [])[+b.getAttribute('data-df-btn')];
+            mark(step, 'clicked'); reward(s, def); setTimeout(thanks, 80);                      // the link itself still opens in its own tab
+          }
+        });
+        sh.el.addEventListener('click', (e) => { if (e.target.closest('[data-df-skip]')) sh.close(); });
+      }
+    });
+  }
+  function tryShow() {
+    if (!pendingFor) return;
+    if (document.hidden || qs('.sheet-wrap') || SAFE.indexOf(routeFromHash()) < 0) { if (++tries < 40) retry(5000); return; }   // another sheet or a trainer is open: try again in a moment, and at every page change
+    const s = nextStep();
+    if (!s) { pendingFor = null; return; }
+    put({ cycle: pendingFor }); pendingFor = null;
+    open(s);
+  }
+  function arm(kind) {
+    const c = cfg();
+    if (!c.enabled || !Array.isArray(c.fireOn) || c.fireOn.indexOf(kind) < 0 || (Admin.active && !Admin.preview())) return;
+    const cycle = App.credits.lastReset || dayKey(new Date()), s = st();
+    if (s.cycle === cycle) return;                                                              // one pop-up per token
+    if (c.skipFirstCycle && !s.started) { put({ started: cycle, cycle }); return; }
+    if (!nextStep()) return;
+    pendingFor = cycle; tries = 0;
+    clearTimeout(timer); timer = setTimeout(tryShow, 2600);
+  }
+  function retry(ms) { if (pendingFor) { clearTimeout(timer); timer = setTimeout(tryShow, ms); } }
+  window.addEventListener('hashchange', () => { tries = 0; retry(1800); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) retry(1200); });
+  function boot() {                                                                             // a token that arrived while no pop-up could show: still this token's pop-up
+    try { Credits.resetIfNeeded(); } catch (e) { /* the balance is optional here */ }
+    arm('refresh');
+  }
+  const api = {
+    status: () => ({ next: (nextStep() || {}).id || null, done: Object.keys(st().done || {}), shownForToken: st().cycle || null, pending: !!pendingFor, rewarded: st().rewarded || {} }),
+    show: (id) => { const s = steps().filter((x) => x.id === id)[0] || nextStep(); if (s) open(s); return !!s; },
+    reset: () => { Store.set(KEY, {}); pendingFor = null; return true; }
+  };
+  return { arm, boot, api };
 })();
 
 const UpChat = (() => {
@@ -24312,7 +25066,8 @@ function boot() {
   Layout5.init();                                                  // v5: resizable panels
   Arena.boot();                                                    // v5: the weekly payout and friend links
   Proof.boot();                                                    // v6.1: rating sync and the proof trigger
-  window.LC = { version: CONFIG.version, hashKey: Access.hashKey, profileToken: Access.encodeProfile, ai: AI.on(), site: SiteURL.base(), deployment: SiteURL.kind(), data: () => Site.status() };
+  DayFunnel.boot();                                                // v6.4: the 7-day pop-up funnel, tied to the free daily token
+  window.LC = { dayFunnel: DayFunnel.api, version: CONFIG.version, hashKey: Access.hashKey, profileToken: Access.encodeProfile, ai: AI.on(), site: SiteURL.base(), deployment: SiteURL.kind(), data: () => Site.status() };
 }
 boot();
 
