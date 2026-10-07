@@ -1988,6 +1988,84 @@ body.lc-focus .dx-card.is-shiny::after{animation:none;display:none}
 @media (prefers-reduced-motion:reduce){.v7-wave,.v6-avatar[data-arena="Elite"],.v7-clock.is-lost>i,.v7-clock.is-lost>svg{animation:none}}
 body.lc-focus .v7-clock.is-risk{display:none}
 </style>
+<style id="v9-css">
+/* ===== v9: MSPC Opening Course hero, layered Middlegame, Plan Check ===== */
+.v9-hero{position:relative;margin:0 0 16px;padding:18px 18px 16px;border:1px solid rgba(56,189,248,.35);border-radius:16px;background:linear-gradient(135deg,rgba(56,189,248,.14),rgba(56,189,248,.03) 62%),var(--surface);overflow:hidden}
+.v9-hero::after{content:"";position:absolute;right:-34px;top:-34px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,.2),transparent 70%);pointer-events:none}
+.v9-kicker,.v9-eyebrow{display:flex;align-items:center;gap:8px;color:var(--accent);font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.v9-trigger{position:relative;margin-top:8px;max-width:34em;font-size:clamp(18px,4.6vw,24px);line-height:1.25;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+.v9-lock-strip,.v9-lockline{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;padding:10px 12px;border-radius:12px;background:rgba(15,23,42,.55);border:1px dashed var(--rule);color:var(--fog);font-size:14px;line-height:1.45}
+.v9-lockline{margin:0 0 14px}
+.v9-lock-strip i,.v9-lockline i{color:var(--accent);margin-top:3px;flex:none}
+.v9-lock-strip strong,.v9-lockline strong{color:var(--chalk)}
+
+.v9-layer{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:26px 0 12px;padding-top:6px}
+.v9-layer h2{font-size:clamp(20px,4.2vw,26px)}
+.v9-layer p{color:var(--fog);font-size:14.5px;margin-top:4px;max-width:62ch}
+.v9-layer>div{flex:1 1 220px;min-width:0}
+.v9-tag{flex:none;display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.v9-tag-free{background:rgba(74,222,128,.14);color:var(--good,#4ade80);border:1px solid rgba(74,222,128,.35)}
+.v9-tag-paid{background:rgba(251,191,36,.12);color:var(--warn,#fbbf24);border:1px solid rgba(251,191,36,.35)}
+
+.v9-lock{position:relative;padding:20px;border:1px dashed rgba(251,191,36,.5);background:linear-gradient(180deg,rgba(251,191,36,.07),transparent 55%),var(--surface);overflow:hidden}
+.v9-lock-head{display:flex;align-items:center;gap:14px}
+.v9-lock-head h2{font-size:clamp(20px,4.4vw,26px);margin-top:2px}
+.v9-lock-ico{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:rgba(251,191,36,.14);color:var(--warn,#fbbf24);font-size:19px;border:1px solid rgba(251,191,36,.4)}
+.v9-lock .v9-eyebrow{color:var(--warn,#fbbf24)}
+.v9-lock-trigger{margin-top:14px;font-size:clamp(16px,3.8vw,19px);font-weight:700;line-height:1.35;max-width:40em;text-wrap:balance}
+.v9-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.v9-chip{display:inline-flex;align-items:center;gap:7px;min-height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);background:rgba(15,23,42,.5);color:var(--fog);font-size:13px;font-weight:600}
+.v9-chip b{color:var(--chalk)}
+.v9-ghost{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px;filter:blur(2.5px);opacity:.55;user-select:none;pointer-events:none}
+.v9-ghost li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--raised);border:1px solid var(--hair);font-weight:600;font-size:14.5px}
+.v9-ghost i{color:var(--warn,#fbbf24);font-size:13px}
+.v9-lock .btn-row{margin-top:18px}
+
+.v9-pl{padding:2px 0}
+.v9-pl-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.v9-pl-head h2{font-size:clamp(20px,4.2vw,26px);margin-top:4px}
+.v9-pl-head .muted{margin-top:6px;max-width:60ch;font-size:14.5px}
+.v9-streak{flex:none;color:var(--warn,#fbbf24);font-size:13px;font-weight:700;white-space:nowrap}
+.v9-streak b{font-variant-numeric:tabular-nums}
+.v9-steps{list-style:none;display:flex;gap:6px;margin:0 0 14px;padding:0}
+.v9-steps li{flex:1;display:flex;align-items:center;gap:8px;min-width:0;padding:7px 10px;border-radius:10px;border:1px solid var(--hair);color:var(--dim);font-size:12.5px;font-weight:700}
+.v9-steps li b{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:6px;background:var(--raised);font-size:11.5px}
+.v9-steps li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v9-steps .is-now{border-color:var(--accent);color:var(--chalk)}
+.v9-steps .is-now b{background:var(--accent);color:var(--accent-ink)}
+.v9-steps .is-done{color:var(--fog)}
+.v9-steps .is-done b{background:rgba(74,222,128,.2);color:var(--good,#4ade80)}
+.v9-sub{margin:4px 0 12px}
+.v9-grid{display:grid;gap:8px;margin-bottom:14px}
+@media (min-width:520px){.v9-grid-plan{grid-template-columns:1fr 1fr}}
+.v9-opt{display:flex;align-items:flex-start;gap:12px;width:100%;min-height:54px;padding:11px 14px;text-align:left;border-radius:12px;border:1px solid var(--rule);background:var(--raised);color:var(--chalk);transition:border-color .14s,background .14s}
+.v9-opt>i{flex:none;margin-top:3px;color:var(--fog);width:18px;text-align:center}
+.v9-opt b{display:block;font-size:15px;font-weight:700}
+.v9-opt small{display:block;margin-top:2px;color:var(--fog);font-size:12.8px;line-height:1.35}
+.v9-opt:hover{border-color:rgba(56,189,248,.55)}
+.v9-opt[aria-pressed="true"]{border-color:var(--accent);background:rgba(56,189,248,.14)}
+.v9-opt[aria-pressed="true"]>i{color:var(--accent)}
+.v9-quota{margin-top:10px}
+.v9-wait{display:flex;align-items:center;gap:10px;padding:18px 4px;color:var(--fog);font-weight:600}
+.v9-wait i{width:8px;height:8px;border-radius:50%;background:var(--accent);opacity:.35;animation:v9dot 1s infinite ease-in-out}
+.v9-wait i:nth-child(2){animation-delay:.15s}.v9-wait i:nth-child(3){animation-delay:.3s}
+@keyframes v9dot{0%,80%,100%{opacity:.3}40%{opacity:1}}
+.v9-res{padding:14px 16px;border-radius:14px;border:1px solid var(--rule);background:var(--raised)}
+.v9-res.is-ok{border-color:rgba(74,222,128,.55);background:rgba(74,222,128,.09)}
+.v9-res.is-miss{border-color:rgba(251,113,133,.5);background:rgba(251,113,133,.07)}
+.v9-res.is-part{border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.07)}
+.v9-res-title{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;letter-spacing:-.01em}
+.v9-res.is-ok .v9-res-title i{color:var(--good,#4ade80)}
+.v9-res.is-miss .v9-res-title i{color:var(--miss,#fb7185)}
+.v9-res.is-part .v9-res-title i{color:var(--warn,#fbbf24)}
+.v9-res-body{margin-top:10px;font-size:15px;line-height:1.55}
+.v9-res .small{margin-top:10px}
+.v9-res .btn-row{margin-top:12px}
+.v9-recap{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:12px 0 14px;font-size:13px;color:var(--fog)}
+.v9-recap em{font-style:normal;padding:3px 10px;border-radius:999px;border:1px solid var(--rule);color:var(--chalk)}
+.v9-recap .v9-recap-plan{border-color:var(--accent);color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.v9-wait i{animation:none;opacity:.7}.v9-opt{transition:none}}
+</style>
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
@@ -2082,7 +2160,7 @@ body.lc-focus .v7-clock.is-risk{display:none}
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '6.4.0',
+  version: '6.5.0',
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -2453,6 +2531,13 @@ const CONTENT = {
        and {coach} fill in from CONFIG, and **double stars** make text bold.
    ========================================================================== */
 const COPY = {
+  'op.trigger': ['Emotional trigger above the opening trainer', 'Theory', 'Geen chaos meer van opening naar middenspel. Raak nooit meer verdwaald in je plannen en begrijp exact wat je opening van je vraagt.'],
+  'mg.freeTitle': ['Free layer title', 'Theory', 'Gratis fundamenten'],
+  'mg.freeText': ['Free layer text', 'Theory', 'Standaardlessen en een eerste Plan Check om je middenspel op te bouwen.'],
+  'mg.lockAllTitle': ['Locked section 1 title', 'Theory', 'Allround middengame plannen'],
+  'mg.lockAllTrigger': ['Locked section 1 conversion line', 'Theory', 'Voorkom dat je stuurloos rondvaart in het middenspel — krijg toegang tot alle strategische plannen'],
+  'mg.lockOpenTitle': ['Locked section 2 title', 'Theory', 'Openingsspecifieke plannen'],
+  'mg.lockOpenTrigger': ['Locked section 2 conversion line', 'Theory', 'De brug tussen je opening en het middenspel: precies welk plan bij welke structuur hoort.'],
   'home.kicker': ['Line above the headline (empty hides it)', 'Home', ''],
   'home.title': ['Headline', 'Home', 'If you want to change the output, focus on the input.'],
   'home.lede': ['Intro under the headline', 'Home', 'More puzzles won’t fix the way you decide. This hub trains the decision itself: the MSPC System makes you read every move, name what the position asks for and calculate to the end, so the structural blunders behind your losses stop showing up. I’m {coach}, a certified chess coach with a {peak} peak, and this is the system I used, in the order I used it.'],
@@ -8340,8 +8425,8 @@ function mountHome(view) {
 
 /* ---------- THINK: the MSPC trainer ---------- */
 /* A fresh drill from the member's repertoire: count your forcing moves (P), then play the move (C). */
-function makeRepertoireDrill() {
-  const lines = (CONTENT.openings || []).filter((o) => App.unlocked(o));
+function makeRepertoireDrill(groupName) {
+  const lines = (CONTENT.openings || []).filter((o) => App.unlocked(o) && o.pgn && (!groupName || o.group === groupName));
   for (let tries = 0; tries < 25 && lines.length; tries++) {
     const o = lines[Math.floor(Math.random() * lines.length)], side = o.side || 'w';
     const plies = buildPlies(START_FEN, pgnTokens(o.pgn));
@@ -9303,6 +9388,349 @@ function lineRow(l, opt) {
     '<span class="row-main"><span class="row-title">' + (n ? '<span class="ch37-pill">Ch. ' + n + '</span>' : '') + esc(l.title) + '</span><span class="row-sub">' + esc(l.subtitle || lineText(l.moves, START_FEN, 8)) + '</span></span>' +
     '<span class="row-side">' + (locked ? lockBadge(l) : progressBadge(l.id)) + tierPin(l, 'openings') + icon('chevron-right') + '</span></button>';
 }
+/* ==========================================================================
+   v9: MSPC Opening Course & Drills, layered Middlegame (free / locked) and the
+   Plan Check: Specifics -> Plan -> exactly ONE validation call per submission.
+   Everything the player sees here is Dutch and lives in TXT / COPY, so it can
+   be edited in one place. Course content still comes from the JSON file only.
+   ========================================================================== */
+const V9 = (() => {
+  const CFG = {
+    freeChecksPerDay: 1,          // free players: AI plan checks per day (members: unlimited). 0 = built-in check only
+    keyDay: 'lc-v9-plan-day',
+    keyStreak: 'lc-v9-plan-streak'
+  };
+  const SPECIFICS = [
+    { id: 'centre', icon: 'bullseye', label: 'Centrum', hint: 'Wie controleert d4, e4, d5 en e5?' },
+    { id: 'king', icon: 'chess-king', label: 'Koningsveiligheid', hint: 'Waar staan de koningen en hoe goed zijn ze beschermd?' },
+    { id: 'activity', icon: 'bolt', label: 'Stukkenactiviteit', hint: 'Welke stukken staan goed, welke staan slecht of los?' },
+    { id: 'material', icon: 'scale-balanced', label: 'Materiaalbalans', hint: 'Wie heeft meer, of een ander soort materiaal?' },
+    { id: 'structure', icon: 'chess-pawn', label: 'Structuurzwaktes', hint: 'Dubbele, geïsoleerde of achterlijke pionnen.' }
+  ];
+  const PLANS = [
+    { id: 'kingside-attack', label: 'Aanval op de koning' },
+    { id: 'pawn-break', label: 'Centrumdoorbraak met een pionnenzet' },
+    { id: 'improve-pieces', label: 'Het slechtste stuk verbeteren' },
+    { id: 'wing-play', label: 'Vleugelspel of minderheidsaanval' },
+    { id: 'trade', label: 'Ruilen en vereenvoudigen' },
+    { id: 'weak-target', label: 'Een zwakke pion of veld aanvallen' },
+    { id: 'prophylaxis', label: 'Profylaxe: het plan van de tegenstander stoppen' },
+    { id: 'passed-pawn', label: 'Een vrijpion maken en duwen' }
+  ];
+  const specLabel = (id) => (SPECIFICS.filter((s) => s.id === id)[0] || {}).label || id;
+  const planLabel = (id) => (PLANS.filter((p) => p.id === id)[0] || {}).label || id;
+  const full = () => { try { return !!(Admin.active || App.isPro()); } catch (e) { return false; } };
+  const unlimited = () => { try { return !!(Admin.active || App.can('coachPaid')); } catch (e) { return false; } };
+
+  /* ---------- daily cap for the free AI check ---------- */
+  const usedToday = () => { const d = Store.get(CFG.keyDay, null); return d && d.day === dayKey(new Date()) ? (+d.n || 0) : 0; };
+  const bump = () => Store.set(CFG.keyDay, { day: dayKey(new Date()), n: usedToday() + 1 });
+  const leftToday = () => (unlimited() ? Infinity : Math.max(0, CFG.freeChecksPerDay - usedToday()));
+  const streak = () => { const s = Store.get(CFG.keyStreak, null); return s && typeof s.n === 'number' ? s : { n: 0, best: 0 }; };
+
+  /* ====================== OPENINGS ====================== */
+  function openingHero(tab, screen) {
+    if (screen !== 'list' && screen !== 'mspc') return '';
+    const g = tab && tab !== 'mine' ? (CONTENT.groups || []).filter((x) => x.name === tab)[0] : null;
+    return '<section class="v9-hero" aria-label="MSPC Opening Cursus en Drills">' +
+      '<p class="v9-kicker">' + icon('compass') + ' MSPC Opening Cursus &amp; Drills</p>' +
+      '<p class="v9-trigger">' + esc(T('op.trigger')) + ed('op.trigger') + '</p>' +
+      '<div class="v9-lock-strip">' + icon('link') + '<span>' + (g
+        ? 'De drills zijn vergrendeld aan je repertoire: <strong>' + esc(g.name) + '</strong>. Je oefent alleen posities uit de lijnen die je hieronder studeert.'
+        : 'Kies een repertoire. De drills zijn altijd gekoppeld aan één repertoire, zodat je oefent wat je ook echt speelt.') + '</span></div></section>';
+  }
+
+  function drillScreen(body, group, go) {
+    body.innerHTML = backBar('Alle hoofdstukken', esc(group.name) + ' › <strong>MSPC-drills</strong>') +
+      '<div class="v9-lockline">' + icon('lock') + '<span>Vergrendeld aan <strong>' + esc(group.name) + '</strong>: elke positie komt uit een lijn van dit repertoire. Loop MSPC door voordat je zet.</span></div>' +
+      trainerShell('v9-board', 'v9-panel');
+    const board = Board(qs('#v9-board', body), { orientation: group.side === 'b' ? 'black' : 'white' });
+    qs('[data-flip="v9-board"]', body).addEventListener('click', () => board.flip());
+    const panel = qs('#v9-panel', body);
+    let runner = null;
+    function stop() { if (runner) { runner.destroy(); runner = null; } board.setOnMove(null); board.setInteractive(null); board.clearMarks(); board.setArrows([]); }
+    function next() {
+      stop();
+      const d = makeRepertoireDrill(group.name);
+      if (!d) {
+        board.setPosition(START_FEN, { animate: false });
+        panel.innerHTML = '<p class="muted" data-data-empty>' + (Site.loading() ? 'De lijnen worden geladen…' : 'Er zijn nog geen vrij te spelen lijnen in dit repertoire. Hogere niveaus openen met een lidmaatschap.') + '</p>';
+        return;
+      }
+      runner = StageRunner({ drill: d, board, host: panel, section: 'openings', mspc: true, hard: !!App.settings.hardMode, onNext: next, nextLabel: 'Volgende positie' });
+      runner.start();
+    }
+    function onClick(e) { if (e.target.closest('[data-act="back"]')) go({ screen: 'list' }); }
+    body.addEventListener('click', onClick);
+    next();
+    return () => { body.removeEventListener('click', onClick); stop(); board.destroy(); };
+  }
+
+  /* ====================== MIDDLEGAME LAYERS ====================== */
+  function layerHead(kind) {
+    const k = { free: ['Gratis', 'mg.freeTitle', 'mg.freeText'], all: ['Leden', 'mg.lockAllTitle', null], open: ['Leden', 'mg.lockOpenTitle', null] }[kind];
+    return '<div class="v9-layer v9-layer-' + kind + '"><span class="v9-tag v9-tag-' + (kind === 'free' ? 'free' : 'paid') + '">' + k[0] + '</span><div><h2>' + esc(T(k[1])) + ed(k[1]) + '</h2>' +
+      (k[2] ? '<p>' + esc(T(k[2])) + ed(k[2]) + '</p>' : '') + '</div>' +
+      (kind === 'free' ? '<a class="btn btn-ghost btn-sm" href="#puzzles">' + icon('puzzle-piece') + ' Naar de puzzels</a>' : '') + '</div>';
+  }
+  function lockedPanel(o) {
+    return '<section class="section v9-sec"><div class="panel v9-lock" role="region" aria-label="' + esc(o.title) + '">' +
+      '<div class="v9-lock-head"><span class="v9-lock-ico">' + icon('lock') + '</span><div><p class="v9-eyebrow">' + esc(o.eyebrow) + '</p><h2>' + esc(o.title) + ed(o.titleKey) + '</h2></div></div>' +
+      '<p class="v9-lock-trigger">' + esc(T(o.triggerKey)) + ed(o.triggerKey) + '</p>' +
+      (o.chips ? '<div class="v9-chips">' + o.chips + '</div>' : '') +
+      (o.ghosts.length ? '<ul class="v9-ghost" aria-hidden="true">' + o.ghosts.map((g) => '<li>' + icon('lock') + '<span>' + esc(g) + '</span></li>').join('') + '</ul>' : '') +
+      '<div class="btn-row"><button type="button" class="btn btn-gold" data-unlock="' + esc(o.what) + '">' + icon('crown') + ' Ontgrendel met de Accelerator</button></div></div></section>';
+  }
+  function lockedAll() {
+    const items = CONTENT.middlegame || [], n = items.length;
+    return lockedPanel({
+      eyebrow: 'Vergrendeld · Sectie 1', title: T('mg.lockAllTitle'), titleKey: 'mg.lockAllTitle', triggerKey: 'mg.lockAllTrigger',
+      chips: n ? '<span class="v9-chip">' + icon('layer-group') + ' ' + n + (n === 1 ? ' plan-drill' : ' plan-drills') + ' in de bibliotheek</span>' : '',
+      ghosts: items.slice(0, 4).map((x) => x.title).filter(Boolean), what: 'De bibliotheek met allround middengame plannen'
+    });
+  }
+  function lockedOpen() {
+    const list = CONTENT.bridge || [], by = {};
+    list.forEach((b) => { const r = String(b.repertoire || '').trim(); if (r) by[r] = (by[r] || 0) + 1; });
+    return lockedPanel({
+      eyebrow: 'Vergrendeld · Sectie 2', title: T('mg.lockOpenTitle'), titleKey: 'mg.lockOpenTitle', triggerKey: 'mg.lockOpenTrigger',
+      chips: Object.keys(by).map((r) => '<span class="v9-chip">' + icon('link') + ' ' + esc(r) + ' <b>' + by[r] + '</b></span>').join(''),
+      ghosts: list.slice(0, 4).map((x) => x.title).filter(Boolean), what: 'Openingsspecifieke plannen: van je opening naar het middenspel'
+    });
+  }
+
+  /* ====================== PLAN CHECK ====================== */
+  const FILES = 'abcdefgh';
+  function labFeatures(fen) {
+    const g = new Chess(fen), rows = g.board(), val = { p: 1, n: 3, b: 3, r: 5, q: 9 };
+    let mat = 0, queens = 0, central = 0;
+    const pawns = { w: {}, b: {} }, pawnSq = { w: {}, b: {} }, kings = {}, undeveloped = { w: 0, b: 0 };
+    rows.forEach((row, i) => row.forEach((p, j) => {
+      if (!p) return;
+      const sq = FILES[j] + (8 - i);
+      if (p.type === 'k') { kings[p.color] = sq; return; }
+      mat += (p.color === 'w' ? 1 : -1) * val[p.type];
+      if (p.type === 'q') queens++;
+      if (p.type === 'p') { pawns[p.color][sq[0]] = (pawns[p.color][sq[0]] || 0) + 1; pawnSq[p.color][sq] = 1; if (/^[de][45]$/.test(sq)) central++; }
+      const home = p.color === 'w' ? ['b1', 'g1', 'c1', 'f1'] : ['b8', 'g8', 'c8', 'f8'];
+      if ((p.type === 'n' || p.type === 'b') && home.indexOf(sq) >= 0) undeveloped[p.color]++;
+    }));
+    const holes = (c) => {
+      const k = kings[c]; if (!k) return 0;
+      const f = FILES.indexOf(k[0]), r = +k[1], dir = c === 'w' ? 1 : -1; let want = 0, have = 0;
+      for (let d = -1; d <= 1; d++) { const ff = f + d; if (ff < 0 || ff > 7) continue; want++; if (pawnSq[c][FILES[ff] + (r + dir)] || pawnSq[c][FILES[ff] + (r + 2 * dir)]) have++; }
+      return want - have;
+    };
+    const weakPawns = (c) => {
+      let n = 0;
+      Object.keys(pawns[c]).forEach((f) => {
+        if (pawns[c][f] > 1) n++;
+        const i = FILES.indexOf(f);
+        if (!pawns[c][FILES[i - 1]] && !pawns[c][FILES[i + 1]]) n++;
+      });
+      return n;
+    };
+    const loose = loosePieces(fen, 'w').length + loosePieces(fen, 'b').length;
+    const uncastled = (c) => !!kings[c] && /^[de]$/.test(kings[c][0]) && queens > 0;
+    return {
+      mat, loose,
+      centre: central >= 2,
+      king: uncastled('w') || uncastled('b') || (queens > 0 && (holes('w') >= 1 || holes('b') >= 1)),
+      activity: loose > 0 || undeveloped.w >= 2 || undeveloped.b >= 2,
+      material: Math.abs(mat) >= 1,
+      structure: weakPawns('w') + weakPawns('b') > 0
+    };
+  }
+  const WHY = {
+    centre: 'Er staan pionnen op d4, e4, d5 of e5: wie het centrum controleert, bepaalt welke plannen werken.',
+    king: 'Minstens één koning staat niet veilig weg, of mist pionnen ervoor. Dat bepaalt of een aanval kan.',
+    activity: 'Er staan stukken los of nog thuis. Eerst de slechtste stukken verbeteren is vaak het plan.',
+    material: 'Het materiaal is niet in balans. Dat verandert welke ruilen en welke plannen goed zijn.',
+    structure: 'Er zijn dubbele of geïsoleerde pionnen: dat zijn doelwitten (of juist jouw zwaktes).'
+  };
+  function localCheck(fen, specs, plan, why) {
+    const f = labFeatures(fen), key = SPECIFICS.map((s) => s.id), salient = key.filter((k) => f[k]);
+    const missed = salient.filter((k) => specs.indexOf(k) < 0), extra = specs.filter((k) => !f[k]);
+    const note = why === 'cap' ? 'Je gratis coachcheck van vandaag is al gebruikt, dus dit is de ingebouwde check.'
+      : why === 'fail' ? 'De coach was even niet bereikbaar, dus dit is de ingebouwde check.' : 'Dit is de ingebouwde check.';
+    let text;
+    if (!missed.length && !extra.length) {
+      text = 'Je specifics kloppen met wat ik op het bord zie: ' + specs.map(specLabel).join(', ') + '. Of **' + planLabel(plan) + '** het juiste plan is, beoordeelt alleen de coach volledig. Loop daarna Priorities (checks, captures, attacks) en Calculation door.';
+    } else {
+      text = (missed.length ? 'Je miste: ' + missed.map((k) => '**' + specLabel(k) + '**').join(', ') + '.\n' + missed.map((k) => '- ' + WHY[k]).join('\n') + '\n' : '') +
+        (extra.length ? 'Minder belangrijk in deze stelling: ' + extra.map(specLabel).join(', ') + '.\n' : '') +
+        'Pas MSPC zo toe: **M** wat deed de laatste zet? **S** begin bij ' + (missed.length ? missed.map(specLabel).join(' en ') : 'wat echt opvalt') + '. **P** tel je checks, captures en aanvallen. **C** reken je plan pas daarna uit.';
+    }
+    return { verdict: !missed.length && !extra.length ? 'part' : 'miss', body: text, ai: false, note };
+  }
+  function parseVerdict(raw) {
+    const t = AI.tags(raw).clean, m = t.match(/^\s*VERDICT\s*:\s*(CORRECT|JUIST|WRONG|INCORRECT|FOUT)\b[^\n]*\n?/i);
+    return { verdict: m ? (/^(CORRECT|JUIST)$/i.test(m[1]) ? 'ok' : 'miss') : 'unknown', body: (m ? t.slice(m[0].length) : t).trim(), ai: true };
+  }
+  /* The one and only API call of a submission. */
+  async function aiCheck(S) {
+    const bot = App.can('coachPaid') ? 'coachPaid' : 'coachFree', side = sideOf(S.fen) === 'w' ? 'wit' : 'zwart';
+    const ref = S.item && Array.isArray(S.item.plan) ? S.item.plan.slice(0, 5).map((x) => String(x)).join(' / ').slice(0, 500) : '';
+    const msg = [
+      'Valideer mijn MSPC-analyse in één antwoord.',
+      'Stelling (FEN): ' + S.fen,
+      'Aan zet: ' + side + '.',
+      'Specifics die ik koos: ' + S.specs.map(specLabel).join(', ') + '.',
+      'Plan dat ik koos: ' + planLabel(S.plan) + '.',
+      ref ? 'Referentieplan uit de cursus: ' + ref + '.' : '',
+      'Antwoordformat, strikt: de eerste regel is exact "VERDICT: CORRECT" of "VERDICT: WRONG".',
+      'Bij CORRECT: één kort compliment (maximaal 2 zinnen), niets anders.',
+      'Bij WRONG: leg uit welke specifics ik miste of overschatte, waarom mijn plan hier niet past, welk plan wel past, en hoe ik MSPC (Move, Specifics, Priorities, Calculation) had moeten toepassen. Maximaal 150 woorden, in het Nederlands, zetten in standaardnotatie.'
+    ].filter(Boolean).join('\n');
+    const r = await AI.chat(bot, [{ role: 'user', content: msg }], { plan_check: { fen: S.fen, side_to_move: side, specifics: S.specs.map(specLabel), plan: planLabel(S.plan), reference: ref } });
+    return r.text;
+  }
+
+  function PlanLab(host, opts) {
+    opts = opts || {};
+    const uid = 'v9p' + Math.random().toString(36).slice(2, 7);
+    const S = { item: null, fen: '', specs: [], plan: '', step: 1, busy: false, res: null };
+    let board = null, panel = null, dead = false;
+    const pool = () => [].concat(CONTENT.middlegame || [], CONTENT.think || [], full() ? (CONTENT.bridge || []) : []).filter((x) => x && typeof x.fen === 'string' && fenOk(x.fen) && App.unlocked(x));
+    function choose(another) {
+      if (opts.fen) { S.item = { id: 'fixed', title: opts.title || 'Stelling op het bord', fen: opts.fen }; S.fen = opts.fen; return true; }
+      let list = pool();
+      if (!list.length) { S.item = null; S.fen = ''; return false; }
+      if (another && S.item && list.length > 1) list = list.filter((x) => x.id !== S.item.id);
+      S.item = list[Math.floor(Math.random() * list.length)]; S.fen = S.item.fen;
+      return true;
+    }
+    function reset(another) {
+      S.specs = []; S.plan = ''; S.step = 1; S.res = null; S.busy = false;
+      const ok = choose(another);
+      if (board && ok) {
+        board.orientation(sideOf(S.fen) === 'b' ? 'black' : 'white');
+        const lm = S.item && Array.isArray(S.item.lastMove) && S.item.lastMove.length === 2 ? { from: S.item.lastMove[0], to: S.item.lastMove[1] } : null;
+        board.setPosition(S.fen, { animate: false, lastMove: lm });
+      }
+      paint();
+    }
+    function shell() {
+      host.innerHTML = '<div class="v9-pl"><div class="v9-pl-head"><div><p class="v9-eyebrow">' + icon('wand-magic-sparkles') + ' Plan Check</p><h2>Wat bepaalt de stelling, en welk plan past?</h2>' +
+        '<p class="muted">Kies eerst de specifics, dan je plan. Pas wanneer je op controleren klikt, kijkt de coach mee: één keer.</p></div><span class="v9-streak" data-part="streak"></span></div>' +
+        trainerShell(uid + '-b', uid + '-p') + '</div>';
+      board = Board(qs('#' + uid + '-b', host), { orientation: sideOf(S.fen || START_FEN) === 'b' ? 'black' : 'white' });
+      qs('[data-flip="' + uid + '-b"]', host).addEventListener('click', () => board.flip());
+      panel = qs('#' + uid + '-p', host);
+      if (S.fen) board.setPosition(S.fen, { animate: false });
+    }
+    const steps = () => '<ol class="v9-steps" aria-label="Voortgang">' + ['Specifics', 'Plan', 'Controle'].map((n, i) => '<li class="' + (S.step === i + 1 ? 'is-now' : S.step > i + 1 ? 'is-done' : '') + '"><b>' + (i + 1) + '</b><span>' + n + '</span></li>').join('') + '</ol>';
+    function paintStreak() {
+      const el = qs('[data-part="streak"]', host), s = streak();
+      if (el) el.innerHTML = s.n > 0 ? icon('fire') + ' Reeks <b>' + s.n + '</b>' : '';
+    }
+    function paint() {
+      if (dead || !panel) return;
+      paintStreak();
+      if (!S.item) { panel.innerHTML = '<p class="muted" data-data-empty>' + (Site.loading() ? 'De posities worden geladen…' : 'Er zijn nog geen vrij te spelen posities voor de Plan Check.') + '</p>'; return; }
+      const side = sideOf(S.fen) === 'w' ? 'Wit' : 'Zwart';
+      if (S.step === 1) {
+        panel.innerHTML = steps() + '<p class="st-kicker">' + esc(S.item.title || 'Stelling') + ' · ' + side + ' is aan zet</p>' +
+          '<p class="st-prompt"><span class="k">S</span>Welke stellingselementen bepalen deze stelling?</p><p class="small muted v9-sub">Kies alles wat je ziet.</p>' +
+          '<div class="v9-grid" role="group" aria-label="Specifics">' + SPECIFICS.map((s) => '<button type="button" class="v9-opt" data-spec="' + s.id + '" aria-pressed="' + (S.specs.indexOf(s.id) >= 0) + '">' + icon(s.icon) + '<span><b>' + s.label + '</b><small>' + s.hint + '</small></span></button>').join('') + '</div>' +
+          '<div class="st-actions"><button type="button" class="btn btn-primary" data-v9="to-plan"' + (S.specs.length ? '' : ' disabled') + '>Volgende: kies een plan ' + icon('arrow-right') + '</button>' +
+          (opts.fen ? '' : '<button type="button" class="btn btn-quiet" data-v9="another">' + icon('shuffle') + ' Andere stelling</button>') + '</div>';
+      } else if (S.step === 2) {
+        const left = leftToday();
+        panel.innerHTML = steps() + '<p class="st-prompt"><span class="k">P</span>Welk middengame-plan past volgens jou bij deze stelling?</p>' +
+          '<p class="small muted v9-sub">Jouw specifics: ' + S.specs.map(specLabel).join(', ') + '</p>' +
+          '<div class="v9-grid v9-grid-plan" role="radiogroup" aria-label="Plannen">' + PLANS.map((p) => '<button type="button" class="v9-opt v9-opt-plan" role="radio" data-plan="' + p.id + '" aria-checked="' + (S.plan === p.id) + '" aria-pressed="' + (S.plan === p.id) + '"><span><b>' + p.label + '</b></span></button>').join('') + '</div>' +
+          '<div class="st-actions"><button type="button" class="btn btn-primary" data-v9="check"' + (S.plan ? '' : ' disabled') + '>' + icon('circle-check') + ' Controleer mijn analyse</button><button type="button" class="btn btn-quiet" data-v9="to-specs">' + icon('arrow-left') + ' Terug</button></div>' +
+          '<p class="small muted v9-quota">' + (left === Infinity ? 'Onbeperkte coachchecks.' : left > 0 ? 'Gratis: nog ' + left + ' coachcheck vandaag.' : 'Je gratis coachcheck van vandaag is gebruikt. Je krijgt de ingebouwde check.') + '</p>';
+      } else if (S.busy) {
+        panel.innerHTML = steps() + '<div class="v9-wait" role="status" aria-live="polite"><i></i><i></i><i></i><span>De coach controleert je analyse…</span></div>';
+      } else {
+        const r = S.res || { verdict: 'unknown', body: '' }, ok = r.verdict === 'ok', part = r.verdict === 'part';
+        panel.innerHTML = steps() + '<div class="v9-res ' + (ok ? 'is-ok' : part ? 'is-part' : 'is-miss') + '" aria-live="polite">' +
+          '<p class="v9-res-title">' + icon(ok ? 'circle-check' : part ? 'circle-half-stroke' : 'circle-xmark') + ' ' + (ok ? 'Goed gedaan!' : part ? 'Specifics kloppen, plan nog niet beoordeeld' : r.verdict === 'unknown' ? 'Analyse van de coach' : 'Dit klopt nog niet helemaal') + '</p>' +
+          (r.body ? '<div class="v9-res-body">' + rich(r.body) + '</div>' : '') +
+          (r.note ? '<p class="small muted">' + esc(r.note) + '</p>' : '') +
+          (r.cap ? '<div class="btn-row"><button type="button" class="btn btn-gold btn-sm" data-v9-unlock="Onbeperkte Plan Checks door de coach">' + icon('crown') + ' Onbeperkte coachchecks</button></div>' : '') + '</div>' +
+          '<div class="v9-recap"><span>Jouw keuze:</span> ' + S.specs.map((k) => '<em>' + esc(specLabel(k)) + '</em>').join('') + '<em class="v9-recap-plan">' + esc(planLabel(S.plan)) + '</em></div>' +
+          '<div class="st-actions">' + (opts.fen ? '' : '<button type="button" class="btn btn-primary" data-v9="next">' + icon('forward') + ' Volgende stelling</button>') +
+          '<button type="button" class="btn ' + (opts.fen ? 'btn-primary' : 'btn-ghost') + '" data-v9="retry">' + icon('rotate-left') + ' Opnieuw proberen</button></div>';
+      }
+    }
+    async function check() {
+      if (S.busy || !S.specs.length || !S.plan || !S.fen) return;
+      S.busy = true; S.step = 3; paint();
+      const mayAi = AI.on() && leftToday() > 0;
+      let res = null;
+      if (mayAi) {
+        try {
+          const text = await aiCheck(S);                          // the single call
+          if (!unlimited()) bump();
+          res = parseVerdict(text);
+        } catch (e) { res = localCheck(S.fen, S.specs, S.plan, 'fail'); }
+      } else {
+        res = localCheck(S.fen, S.specs, S.plan, AI.on() ? 'cap' : 'off');
+        if (AI.on()) res.cap = true;
+      }
+      if (dead) return;
+      const s = streak();
+      if (res.verdict === 'ok') { s.n++; s.best = Math.max(s.best || 0, s.n); toast('Goed gedaan!', 'good'); }
+      else if (res.verdict === 'miss' || res.verdict === 'unknown') s.n = 0;
+      Store.set(CFG.keyStreak, s);
+      S.busy = false; S.res = res; paint();
+    }
+    function onClick(e) {
+      const sp = e.target.closest('[data-spec]');
+      if (sp && S.step === 1) {
+        const id = sp.getAttribute('data-spec'), i = S.specs.indexOf(id);
+        if (i >= 0) S.specs.splice(i, 1); else S.specs.push(id);
+        sp.setAttribute('aria-pressed', String(i < 0));
+        const nx = qs('[data-v9="to-plan"]', host); if (nx) nx.disabled = !S.specs.length;
+        return;
+      }
+      const pl = e.target.closest('[data-plan]');
+      if (pl && S.step === 2) {
+        S.plan = pl.getAttribute('data-plan');
+        qsa('[data-plan]', host).forEach((b) => { const on = b === pl; b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-checked', String(on)); });
+        const c = qs('[data-v9="check"]', host); if (c) c.disabled = false;
+        return;
+      }
+      const un = e.target.closest('[data-v9-unlock]');
+      if (un) { openUnlock('vault', un.getAttribute('data-v9-unlock')); return; }
+      const a = e.target.closest('[data-v9]'); if (!a) return;
+      const act = a.getAttribute('data-v9');
+      if (act === 'to-plan' && S.specs.length) { S.step = 2; paint(); }
+      else if (act === 'to-specs') { S.step = 1; paint(); }
+      else if (act === 'check') check();
+      else if (act === 'retry') { S.specs = []; S.plan = ''; S.step = 1; S.res = null; paint(); }
+      else if (act === 'next' || act === 'another') reset(true);
+    }
+    host.addEventListener('click', onClick);
+    choose(false); shell(); paint();
+    return { destroy() { dead = true; host.removeEventListener('click', onClick); if (board) { try { board.destroy(); } catch (e) { /* ignore */ } } } };
+  }
+
+  function planCheckCard() { return '<section class="section v9-sec" aria-label="Plan Check"><div id="v9-plan-host"></div></section>'; }
+  function planCheckMount(root) {
+    const host = qs('#v9-plan-host', root);
+    return host ? PlanLab(host) : { destroy() { /* nothing mounted */ } };
+  }
+  function openPlanSheet(fen, title) {
+    if (!fenOk(fen)) { toast('Er staat geen geldige stelling op het bord.', 'bad'); return; }
+    let lab = null;
+    openSheet({ title: 'MSPC Plan Check', cls: 'v9-sheet', noFocus: true, html: '<div id="v9-sheet-host"></div>',
+      onMount(s) { lab = PlanLab(qs('#v9-sheet-host', s.el), { fen, title: title || 'Stelling op het bord' }); },
+      onClose() { if (lab) lab.destroy(); } });
+  }
+
+  return { openingHero, drillScreen, layerHead, lockedAll, lockedOpen, planCheckCard, planCheckMount, openPlanSheet, full, CFG };
+})();
+function planCheckReply(ctx) {
+  return {
+    text: 'Kies eerst welke specifics de stelling op het bord bepalen, daarna je plan. De coach kijkt pas mee als je controleert.',
+    actions: [{ label: 'Open de Plan Check', fn: () => V9.openPlanSheet(ctx.fen, 'Stelling op het bord') }]
+  };
+}
+
 function mountOpenings(root) {
   const firstTab = () => (CONTENT.groups[0] || {}).name || 'mine';
   const ui = App.ui.op || (App.ui.op = { tab: firstTab(), screen: 'list', lineId: null, mode: 'drill', repId: null, engine: false, lv: 0 });
@@ -9318,7 +9746,7 @@ function mountOpenings(root) {
     if (ui.tab !== 'mine' && !CONTENT.groups.some((g) => g.name === ui.tab)) { ui.tab = firstTab(); ui.screen = 'list'; }
     const tabs = CONTENT.groups.map((g) => g.name).concat(['mine']);
     const count = (t) => chaptersOf(CONTENT.openings.filter((o) => o.group === t)).length;
-    root.innerHTML = '<div id="metrics-openings">' + metricsHTML('openings') + '</div>' + (CONTENT.groups.length ? '' : dataEmptyHTML('opening repertoires')) +
+    root.innerHTML = '<div id="metrics-openings">' + metricsHTML('openings') + '</div>' + V9.openingHero(ui.tab, ui.screen) + (CONTENT.groups.length ? '' : dataEmptyHTML('opening repertoires')) +
       '<div class="chips" style="margin-bottom:16px" role="tablist" aria-label="Repertoires">' + tabs.map((t) => '<button type="button" class="chip" role="tab" data-tab="' + esc(t) + '" aria-pressed="' + (ui.tab === t) + '">' +
         (t === 'mine' ? icon('pen-to-square') + ' My repertoire' : esc(t) + ' <span class="chip-n" title="Chapters in the course file">' + count(t) + '</span>') + '</button>').join('') + '</div><div id="op-body"></div>';
     qsa('[data-tab]', root).forEach((b) => b.addEventListener('click', () => go({ tab: b.getAttribute('data-tab'), screen: 'list', picked: true })));
@@ -9332,7 +9760,8 @@ function mountOpenings(root) {
     } else {
       const group = builtinGroup(ui.tab);
       const line = group.lines.filter((l) => l.id === ui.lineId)[0];
-      if (ui.screen === 'train' && line) cleanup = trainScreen(body, group, go);   // v3.9: a locked level opens on its gateway, never a blank page
+      if (ui.screen === 'mspc') cleanup = V9.drillScreen(body, group, go);
+      else if (ui.screen === 'train' && line) cleanup = trainScreen(body, group, go);   // v3.9: a locked level opens on its gateway, never a blank page
       else { ui.screen = 'list'; cleanup = listScreen(body, group, go); }
     }
     theoryHead(ui.screen === 'list');
@@ -9346,7 +9775,7 @@ function listScreen(body, group, go) {
   body.innerHTML = (group.intro ? '<p class="muted" style="max-width:70ch;margin-bottom:10px">' + esc(group.intro) + '</p>' : '') +
     (group.lines.length ? '<p class="ch37-sum">' + icon('book-open') + ' <span><b>' + nCh + (nCh === 1 ? ' chapter' : ' chapters') + '</b>' +
       (nCh === 1 ? ' in five levels' : ', each in five levels') + ', from Free to Master. You play ' + colorName(group.side) + '.</span></p>' : '') +
-    '<div class="btn-row" style="margin-bottom:16px"><button type="button" class="btn btn-primary" data-act="random">' + icon('shuffle') + ' Drill a random line</button>' +
+    '<div class="btn-row" style="margin-bottom:16px"><button type="button" class="btn btn-primary" data-act="mspc">' + icon('brain') + ' Start MSPC-drills</button>' +
     '<button type="button" class="btn btn-ghost" data-act="explore">' + icon('sitemap') + ' Explore the tree</button>' +
     (() => { const mist = V36.mistakeLines(group.lines), pc = V36.peerCount(group.name); return '<button type="button" class="btn btn-ghost" data-act="mistakes"' + (mist.length ? '' : ' disabled title="No missed moves in this repertoire yet"') + '>' + icon('crosshairs') + ' Train only my mistakes' + (mist.length ? ' (' + mist.length + ')' : '') + '</button>' +
       (pc ? '<a class="btn btn-quiet" href="#peer" data-v36="peer-op" data-op="' + esc(group.name) + '">' + icon('user-group') + ' ' + pc + ' peer ' + (pc === 1 ? 'puzzle' : 'puzzles') + '</a>' : ''); })() +
@@ -9374,7 +9803,7 @@ function listScreen(body, group, go) {
       const l = group.lines.filter((x) => x.id === row.getAttribute('data-line'))[0];
       if (!App.unlocked(l)) { openLocked(l); return; }
       go({ screen: 'train', lineId: l.id, lv: 0, mode: 'drill', only: false });
-    } else if (act && act.getAttribute('data-act') === 'random') { const pick = weakest(open); if (pick) go({ screen: 'train', lineId: pick.id, lv: 0, mode: 'drill', only: false }); }
+    } else if (act && act.getAttribute('data-act') === 'mspc') go({ screen: 'mspc' });
     else if (act && act.getAttribute('data-act') === 'mistakes') { const mist = V36.mistakeLines(group.lines); if (mist[0]) go({ screen: 'train', lineId: mist[0].id, lv: 0, mode: 'drill', only: true }); }
     else if (act && act.getAttribute('data-act') === 'explore' && open[0]) go({ screen: 'train', lineId: open[0].id, lv: 0, mode: 'explore', exploreAll: true });
   }
@@ -10142,15 +10571,18 @@ function mgHub(root, go) {
   const sec = (n, html) => (n || Admin.editing() ? html : '');
   const cards = topicCards(root, 'Middlegame'), rows = (kind) => (items) => '<div class="rows">' + items.map((x) => simpleRow(x, kind)).join('') + '</div>';
   const mgCh = Chapters.split('middlegame', CONTENT.middlegame);                 // v6.3: drills sorted into chapters
+  const full = V9.full();                                                        // v9: members (and admin) see the whole library, free players the two locked layers
   root.innerHTML = '<div id="metrics-middlegame">' + metricsHTML('middlegame') + '</div>' +
     (lessons.length + anti.length + CONTENT.middlegame.length + CONTENT.bridge.length ? '' : dataEmptyHTML('middlegame lessons, drills or plans')) +
+    V9.layerHead('free') +
     sec(lessons.length, '<section class="section">' + sectionHeadK('mg.blunderTitle', 'mg.blunderText', manageBtn('courses.middlegame', 'Lessons')) + cards.section(lessons, { id: 'blunder-bootcamp', scope: 'mg', title: T('mg.blunderTitle') }, { body: rows('lesson'), noun: 'lesson' }) + '</section>') +
     sec(anti.length, '<section class="section">' + sectionHeadK('mg.antiTitle', 'mg.antiText', manageBtn('courses.antiblunder', 'Lessons')) + cards.section(anti, { id: 'anti-blunder-bootcamp', scope: 'mg', title: T('mg.antiTitle') }, { body: rows('anti'), noun: 'lesson' }) + '</section>') +
-    chapterSections('middlegame', mgCh.groups, cards, 'mg', rows('drill'), 'drill') +
-    ((mgCh.rest.length || (Admin.editing() && !mgCh.groups.length)) ? '<section class="section">' + sectionHeadK('mg.drillsTitle', 'mg.drillsText', manageBtn('middlegame', 'Drills') + chapterBtn('middlegame')) + cards.section(mgCh.rest, { id: 'structure-drills', scope: 'mg', title: T('mg.drillsTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>' : '') +
-    sec(CONTENT.bridge.length, '<section class="section">' + sectionHeadK('mg.plansTitle', 'mg.plansText', manageBtn('bridge', 'Plans')) + cards.section(CONTENT.bridge, { id: 'middlegame-plans', scope: 'mg', title: T('mg.plansTitle') }, { body: bridgeCards, noun: 'plan' }) + '</section>') +
-    (App.isPro() ? '' : ctaStripHTML('mg.ctaTitle', 'mg.ctaText', 'Levels 2 to 5 of the middlegame suite'));
-  cards.point(App.ui.mg && App.ui.mg.hit); if (App.ui.mg) App.ui.mg.hit = null;
+    V9.planCheckCard() +
+    (full ? V9.layerHead('all') + chapterSections('middlegame', mgCh.groups, cards, 'mg', rows('drill'), 'drill') + ((mgCh.rest.length || (Admin.editing() && !mgCh.groups.length)) ? '<section class="section">' + sectionHeadK('mg.drillsTitle', 'mg.drillsText', manageBtn('middlegame', 'Drills') + chapterBtn('middlegame')) + cards.section(mgCh.rest, { id: 'structure-drills', scope: 'mg', title: T('mg.drillsTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>' : '') : V9.lockedAll()) +
+    (full ? V9.layerHead('open') + sec(CONTENT.bridge.length, '<section class="section">' + sectionHeadK('mg.plansTitle', 'mg.plansText', manageBtn('bridge', 'Plans')) + cards.section(CONTENT.bridge, { id: 'middlegame-plans', scope: 'mg', title: T('mg.plansTitle') }, { body: bridgeCards, noun: 'plan' }) + '</section>') : V9.lockedOpen()) +
+    (full ? '' : ctaStripHTML('mg.ctaTitle', 'mg.ctaText', 'Levels 2 to 5 of the middlegame suite'));
+  try { cards.point(App.ui.mg && App.ui.mg.hit); } catch (e) { /* the card sits in a locked layer */ } if (App.ui.mg) App.ui.mg.hit = null;
+  const plan = V9.planCheckMount(root);                                          // v9: Specifics -> Plan -> one validation call
   function onClick(e) {
     if (cards.onClick(e)) return;
     const u = e.target.closest('[data-unlock]');
@@ -10171,7 +10603,7 @@ function mgHub(root, go) {
     go({ screen: kind, id });
   }
   root.addEventListener('click', onClick);
-  return () => { root.removeEventListener('click', onClick); cards.destroy(); };
+  return () => { root.removeEventListener('click', onClick); plan.destroy(); cards.destroy(); };
 }
 
 function bridgeScreen(root, b, go) {
@@ -10548,6 +10980,7 @@ const COACH_ACTIONS = [
   { g: 'mspc', k: 'S', q: 'S: which pieces are loose?', label: 'Which pieces are loose?', run: mspcSReply },
   { g: 'mspc', k: 'P', q: 'P: my checks and captures', label: 'Checks and captures', run: mspcPReply },
   { g: 'mspc', k: 'C', q: 'C: how do I calculate this?', label: 'How do I calculate this?', run: mspcCReply },
+  { g: 'mspc', q: 'Plan check', label: 'Check my plan (Plan Check)', run: planCheckReply },
   { g: 'engine', q: 'Hint (MSPC)', label: 'MSPC hint' },
   { g: 'engine', q: 'Best move', label: 'Best move' },
   { g: 'engine', q: 'Why was that bad?', label: 'Why was that bad?' },
