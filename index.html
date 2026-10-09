@@ -2163,6 +2163,91 @@ body.lc-focus .v7-clock.is-risk{display:none}
 @media (max-width:520px){.fw-letters-mini{grid-template-columns:repeat(2,1fr)}.fw-two{grid-template-columns:1fr}.fw-blk{grid-template-columns:54px minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){.fw-meter i,.fw-slot i{transition:none}}
 .fw-home h2{margin:2px 0 4px}.fw-home-pts{list-style:none;padding:0;margin:10px 0;display:grid;gap:8px}.fw-home-pts li{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--ink-2);border:1px solid var(--hair)}.fw-home-pts b{flex:1 1 auto;font-size:15px;overflow-wrap:anywhere}
+/* ---------- v10: Endgame course (five levels, themes, Learn, simple and hard puzzles) ---------- */
+.egx-tabs{display:flex;width:100%;margin:2px 0 14px}
+.egx-tabs button{flex:1 1 0;min-width:104px;display:grid;justify-items:center;gap:1px;padding:8px 10px;line-height:1.15;position:relative}
+.egx-tabs button small{font-size:11.5px;font-weight:600;color:var(--dim)}
+.egx-tabs button[aria-pressed="true"] small{color:var(--accent)}
+.egx-tabs button .fa-crown{position:absolute;top:5px;right:6px;font-size:9px;color:var(--warn)}
+.egx-tabhead{padding:18px;display:grid;gap:12px}
+.egx-tabhead h2{font-size:clamp(20px,4.6vw,26px);margin:2px 0 4px}
+.egx-tabhead p{color:var(--fog);font-size:15px}
+.egx-tabhead-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.egx-prog{flex:none;text-align:right;display:grid;gap:0}
+.egx-prog b{font-size:22px;font-variant-numeric:tabular-nums;line-height:1.1}
+.egx-prog span{font-size:12px;color:var(--fog)}
+.egx-lockline{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:14px}
+.egx-more{border:1px solid var(--hair);border-radius:12px;background:var(--ink-2);padding:0 14px}
+.egx-more summary{cursor:pointer;padding:11px 0;font-weight:700;font-size:14.5px;color:var(--chalk)}
+.egx-more[open] summary{border-bottom:1px solid var(--hair);margin-bottom:10px}
+.egx-more>p{font-size:14.5px;margin-bottom:10px}
+.egx-more h4{font-size:13px;color:var(--accent);margin-bottom:6px}
+.egx-more ul{margin:0 0 12px 18px;padding:0;color:#cbd5e1;font-size:14.5px;display:grid;gap:4px}
+.egx-two{display:grid;gap:4px}
+.egx-group{margin:26px 0 10px;font-size:15px;color:var(--fog);text-transform:uppercase;letter-spacing:.06em}
+.egx-grid{display:grid;gap:14px;margin-top:14px}
+.egx-group+.egx-grid{margin-top:0}
+.egx-card{padding:18px;display:grid;gap:10px;align-content:start;scroll-margin-top:calc(var(--head) + 16px)}
+.egx-card.is-focus{border-color:var(--accent-line);box-shadow:0 0 0 3px var(--accent-soft)}
+.egx-card.is-locked h3{color:var(--fog)}
+.egx-card h3{font-size:18.5px;line-height:1.25}
+.egx-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.egx-card-top .st-kicker{margin:0;flex:1 1 auto;min-width:0}
+.egx-tier{font-size:11.5px;font-weight:800;color:var(--dim);border:1px solid var(--hair);border-radius:999px;padding:2px 8px}
+.egx-idea{color:#cbd5e1;font-size:15px}
+.egx-meta{color:var(--dim);font-size:13px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.egx-parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.egx-part{flex-direction:column;gap:2px;min-height:62px;padding:8px 6px;font-size:13.5px;text-align:center;position:relative}
+.egx-part>span{line-height:1.15}
+.egx-part small{font-size:11.5px;font-weight:600;opacity:.75}
+.egx-part em{font-style:normal;font-size:11.5px;font-weight:800;color:var(--good)}
+.egx-part.btn-primary em{color:#064e3b}
+.egx-part:not(.is-done) em .fa-crown{color:var(--warn)}
+.egx-thread{display:flex;flex-wrap:wrap;gap:4px 8px}
+.egx-thread .btn{min-height:30px;font-size:12.5px;padding:0 8px;color:var(--fog)}
+.egx-steps{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.egx-steps a{padding:7px 12px;border:1px solid var(--hair);border-radius:999px;color:var(--fog);font-weight:700;font-size:13.5px;text-decoration:none}
+.egx-steps a:hover{color:var(--chalk);border-color:var(--accent-line)}
+.egx-sec{margin-top:16px;scroll-margin-top:calc(var(--head) + 16px)}
+.egx-sec>h3{font-size:18px;margin-bottom:12px;display:flex;gap:8px;align-items:center}
+.egx-sec>h3 i{color:var(--accent)}
+.egx-mspc{display:grid;gap:10px}
+.egx-mspc-row{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;align-items:start;padding:12px;border:1px solid var(--hair);border-radius:12px;background:var(--ink-2)}
+.egx-mspc-k{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-size:19px;font-weight:900}
+.egx-mspc-row h4{font-size:15px}
+.egx-mspc-def{color:var(--dim);font-size:13px;margin-top:1px}
+.egx-mspc-do{color:#cbd5e1;font-size:14.5px;margin-top:6px}
+.egx-mspc.is-compact .egx-mspc-row{padding:8px 10px;grid-template-columns:30px minmax(0,1fr);gap:10px}
+.egx-mspc.is-compact .egx-mspc-k{width:30px;height:30px;font-size:15px}
+.egx-mspc.is-compact h4{font-size:13.5px}
+.egx-mspc.is-compact .egx-mspc-do{font-size:13.5px;margin-top:2px}
+.egx-mspc-fold{margin-top:14px}
+.egx-rules{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.egx-rule{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:10px 12px;border:1px solid var(--hair);border-radius:12px;background:var(--ink-2)}
+.egx-rule p{flex:1 1 100%;color:#cbd5e1;font-size:14.5px;margin:2px 0 0}
+.egx-rid{font-weight:800;font-size:12.5px;color:var(--accent);font-variant-numeric:tabular-nums}
+.egx-kind{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:999px;border:1px solid var(--hair);color:var(--fog)}
+.egx-k-law{color:#c4b5fd;border-color:rgba(167,139,250,.4)}
+.egx-k-theory{color:var(--good);border-color:rgba(74,222,128,.4)}
+.egx-k-principle{color:var(--warn);border-color:rgba(251,191,36,.4)}
+.egx-k-concept{color:var(--accent);border-color:var(--accent-line)}
+.egx-rule.is-plain{background:transparent;border-style:dashed}
+.egx-rule.is-sub{margin-left:16px;border:0;border-left:2px solid var(--rule);border-radius:0;background:transparent;padding:4px 12px}
+.egx-src{margin-top:12px}
+.egx-dots{display:flex;gap:6px;margin:8px 0 2px}
+.egx-dots span{flex:1 1 0;height:6px;border-radius:3px;background:var(--rule);max-width:34px}
+.egx-dots .is-now{background:var(--accent)}
+.egx-dots .is-done{background:var(--warn)}
+.egx-dots .is-perfect{background:var(--good)}
+.egx-themes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.egx-themes span{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.egx-elo{margin-top:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.egx-elo.is-up{color:var(--good)}.egx-elo.is-down{color:var(--miss)}
+.egx-done{margin-top:14px;display:grid;gap:10px}
+@media (min-width:640px){.egx-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.egx-two{grid-template-columns:1fr 1fr;gap:16px}}
+@media (min-width:1100px){.egx-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:420px){.egx-part{font-size:12.5px}.egx-tabhead-top{flex-direction:column}.egx-prog{text-align:left}}
+
 </style>
 </head>
 <body>
@@ -2581,6 +2666,8 @@ const CONTENT = {
   bridge: [],
   middlegame: [],
   endgame: [],
+  egtabs: [],
+  egthemes: [],
   chapters: [],
   courses: { middlegame: [], antiblunder: [], endgame: [] },
   spotlights: [],
@@ -2657,7 +2744,7 @@ const COPY = {
   'theory.middlegame.title': ['Middlegame title', 'Theory', 'Middlegame'],
   'theory.middlegame.text': ['Middlegame intro', 'Theory', 'Start with the free bootcamp lessons, then learn the plan behind every structure your openings create.'],
   'theory.endgame.title': ['Endgame title', 'Theory', 'Endgame'],
-  'theory.endgame.text': ['Endgame intro', 'Theory', 'The endings that decide won games: king-and-pawn technique for free, the rook-endgame suite for members.'],
+  'theory.endgame.text': ['Endgame intro', 'Theory', 'Five levels, from the laws of the game to grandmaster technique. Every theme has a Learn lesson built on MSPC, a set of simple puzzles and a set of hard puzzles.'],
   'theory.puzzles.title': ['Puzzles title', 'Theory', 'Puzzles'],
   'theory.puzzles.text': ['Puzzles intro', 'Theory', 'Rated tactics from the Lichess puzzle database, matched to your Puzzle ELO. Solve it clean and your rating goes up; one wrong move and it goes down.'],
   'mg.freeTitle': ['Free zone title', 'Theory', 'Start here, free'],
@@ -2675,6 +2762,17 @@ const COPY = {
   'mg.ctaTitle': ['Advanced upgrade title', 'Theory', 'Every structure in your repertoire'],
   'mg.ctaText': ['Advanced upgrade text', 'Theory', 'The Accelerator unlocks every plan above, the repertoire positions in the MSPC trainer and the full Trim report.'],
   'eg.freeTitle': ['Free zone title', 'Theory', 'Start here, free'],
+  'eg.btnLearn': ['Endgame: Learn button', 'Theory', 'Learn'],
+  'eg.btnSimple': ['Endgame: simple puzzles button', 'Theory', 'Simpele Puzzels'],
+  'eg.btnHard': ['Endgame: hard puzzles button', 'Theory', 'Moeilijke Puzzels'],
+  'eg.mspc.M': ['Endgame MSPC: M title', 'Theory', 'M · Move'],
+  'eg.mspc.MDef': ['Endgame MSPC: M meaning', 'Theory', 'The opponent’s threat or plan, and the new weaknesses their move created.'],
+  'eg.mspc.S': ['Endgame MSPC: S title', 'Theory', 'S · Specifics'],
+  'eg.mspc.SDef': ['Endgame MSPC: S meaning', 'Theory', 'Board features: pawn structure, king activity and the phase of the game.'],
+  'eg.mspc.P': ['Endgame MSPC: P title', 'Theory', 'P · Priorities'],
+  'eg.mspc.PDef': ['Endgame MSPC: P meaning', 'Theory', 'Checks, Captures and Attacks (CCAs): the forcing moves for both sides.'],
+  'eg.mspc.C': ['Endgame MSPC: C title', 'Theory', 'C · Calculation'],
+  'eg.mspc.CDef': ['Endgame MSPC: C meaning', 'Theory', 'Verify your candidate moves line by line until the position is clear.'],
   'eg.freeText': ['Free zone intro', 'Theory', 'King-and-pawn technique against a defender that never makes a mistake, and the first lessons of the Endgame Bootcamp.'],
   'eg.kpkTitle': ['King and pawn title', 'Theory', 'King and pawn'],
   'eg.kpkText': ['King and pawn intro', 'Theory', 'Opposition, key squares and the rule of the square.'],
@@ -4142,9 +4240,21 @@ function sansOk(fen, map, what) {
   const bad = Object.keys(map || {}).filter((san) => !new Chess(fen).move(san, { sloppy: true }));
   return bad.length ? what + ': “' + bad[0] + '” is not a legal move in that position.' : '';
 }
+/* puzzle_fen must be legal and every solution_moves entry a legal UCI move, one after the other (the first one may be the opponent's). */
+function egPuzzleProblem(p) {
+  if (!p || typeof p.puzzle_fen !== 'string') return 'This puzzle has no puzzle_fen.';
+  const g = new Chess(), sol = Array.isArray(p.solution_moves) ? p.solution_moves : [];
+  if (!g.load(p.puzzle_fen)) return 'The puzzle_fen is not a legal position.';
+  if (!sol.length) return 'This puzzle has no solution_moves.';
+  for (let i = 0; i < sol.length; i++) {
+    const u = sol[i];
+    if (typeof u !== 'string' || !/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(u) || !g.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] })) return 'solution_moves[' + i + '] is not a legal move.';
+  }
+  return '';
+}
 function checkItem(name, it) {
   if (!it || typeof it !== 'object' || Array.isArray(it)) return 'This item is not readable.';
-  const ids = ['clinic', 'think', 'spotlights', 'openings', 'bridge', 'middlegame', 'endgame', 'courses.middlegame', 'courses.antiblunder', 'courses.endgame', 'peer', 'games', 'chapters'];
+  const ids = ['clinic', 'think', 'spotlights', 'openings', 'bridge', 'middlegame', 'endgame', 'egtabs', 'egthemes', 'courses.middlegame', 'courses.antiblunder', 'courses.endgame', 'peer', 'games', 'chapters'];
   if (ids.indexOf(name) >= 0 && !(typeof it.id === 'string' && /^[\w-]{2,60}$/.test(it.id))) return 'Every item needs an id made of letters, numbers and dashes.';
   if (it.lvl != null && it.lvl !== '' && !Levels.num(it.lvl)) return 'lvl must be a level from 1 to 5.';
   if (it.requiredTier != null && it.requiredTier !== '' && [0, PAID_TIER, TOP_TIER].indexOf(+it.requiredTier) < 0) return 'requiredTier must be 0 (Level 1), 2 (the Accelerator) or 3 (the Mentorship).';
@@ -4193,7 +4303,15 @@ function checkItem(name, it) {
     }
     if (name === 'clinic') { if (!fenOk(it.fen)) return 'The FEN is not a legal position.'; if (!it.best || !new Chess(it.fen).move(String(it.best), { sloppy: true })) return 'best must be a legal move in that position, like Ndf6.'; if (it.played && !new Chess(it.fen).move(String(it.played), { sloppy: true })) return 'played must be a legal move in that position.'; return Array.isArray(it.steps) && it.steps.length ? '' : 'Add at least one step.'; }
     if (name === 'bridge') return sansOk(it.fen, (it.drill || {}).accept, 'drill.accept') || ((it.keySquares || []).every((q) => SQ_RE.test(q)) ? '' : 'keySquares must be squares like e4.');
+    if (name === 'egtabs') return it.tab >= 1 && it.tab <= 5 && String(it.label || '').trim() ? '' : 'An endgame tab needs a number from 1 to 5 and a label.';
+    if (name === 'egthemes') {
+      const idl = (a) => Array.isArray(a) && a.every((x) => typeof x === 'string' && /^[\w-]{2,60}$/.test(x));
+      if (!(it.tab >= 1 && it.tab <= 5)) return 'A theme needs a tab from 1 to 5.';
+      if (!String(it.title || '').trim() || !/^[\w-]{2,60}$/.test(String(it.lessonId || '')) || !/^[\w-]{2,60}$/.test(String(it.anchorId || ''))) return 'A theme needs a title, a lessonId and an anchorId.';
+      return idl(it.simpleIds) && idl(it.hardIds) ? '' : 'simpleIds and hardIds must be lists of puzzle ids.';
+    }
     if (name === 'endgame') {
+      if (it.puzzle_fen != null || it.solution_moves != null) { const bad = egPuzzleProblem(it); if (bad) return bad; }
       if (it.type === 'kpk') return String(it.fen).split(' ')[0].replace(/[^a-zA-Z]/g, '').split('').sort().join('') === 'KPk' ? '' : 'A king-and-pawn drill needs exactly a white king, a white pawn and a black king.';
       return lineOk(it.fen, it.pgn, isStatic(it));
     }
@@ -5143,6 +5261,8 @@ const Site = (() => {
     'courses.antiblunder': ['Anti-Blunder Bootcamp lessons', 'Theory'],
     endgame: ['Endgame drills', 'Theory'],
     'courses.endgame': ['Endgame Bootcamp lessons', 'Theory'],
+    egtabs: ['Endgame course: the five level tabs', 'Theory'],
+    egthemes: ['Endgame course: themes (Learn, simple and hard puzzles)', 'Theory'],
     chapters: ['Chapters (MSPC, Middlegame, Endgame)', 'Theory'],
     story: ['About: ELO chapters', 'About'],
     proofs: ['Proof numbers', 'About'],
@@ -10808,54 +10928,415 @@ function lessonScreen(root, lesson, section, go) {
   return () => { alive = false; root.removeEventListener('click', onClick); if (runner) runner.destroy(); board.destroy(); };
 }
 
-/* ---------- ENDGAME ---------- */
+/* ---------- ENDGAME v10: the five-tab course ----------
+   Source of truth, all read from the course file (nothing is hardcoded here):
+     lists.egtabs            the five ELO tabs, with the Blueprint's mission, typical errors and upgrade triggers
+     lists.egthemes          one card per Blueprint theme: lessonId, anchorId, simpleIds, hardIds, thread
+     lists.courses.endgame   the lesson text (idea, rules, MSPC debrief, takeaway)
+     lists.endgame           the puzzles: puzzle_fen + solution_moves (UCI), lc-… ids, rating, themes
+   Each theme has three parts: Learn (theory by MSPC + one anchor puzzle), Simple puzzles, Hard puzzles.
+   Finishing a puzzle feeds App.score (XP, flow, ranks), App.finish + V33 (attempts, leaderboard), Dex,
+   the My mistakes queue (SRS) and, when it is switched on, the Puzzle ELO. */
+const EG = (() => {
+  const PARTS = ['learn', 'simple', 'hard'];
+  const pkey = (th, part) => 'egt:' + th.id + ':' + part;                               // App.progress key of one part of one theme
+  const tabsList = () => (CONTENT.egtabs || []).slice().sort((a, b) => a.tab - b.tab);
+  const themesOf = (tab) => (CONTENT.egthemes || []).filter((t) => t.tab === tab);
+  const theme = (id) => (CONTENT.egthemes || []).filter((t) => t.id === id)[0] || null;
+  const lesson = (id) => ((CONTENT.courses || {}).endgame || []).filter((l) => l.id === id)[0] || null;
+  let idxSrc = null, idxMap = null;
+  function puzzle(id) {                                                                 // lookup by lc-… id, rebuilt when the list changes
+    const list = CONTENT.endgame || [];
+    if (idxSrc !== list || !idxMap || idxMap.n !== list.length) { idxMap = { n: list.length }; list.forEach((x) => { if (x && x.id) idxMap[x.id] = x; }); idxSrc = list; }
+    return id !== 'n' && Object.prototype.hasOwnProperty.call(idxMap, id) ? idxMap[id] : null;
+  }
+  const idsOf = (th, part) => (part === 'simple' ? th.simpleIds : part === 'hard' ? th.hardIds : [th.anchorId]) || [];
+  const ratingOf = (p) => (p && Number.isFinite(+p.rating) && p.rating !== null ? +p.rating : 0);
+  const best = (th, part) => ((App.progress[pkey(th, part)] || {}).best || 0);
+  const done = (th, part) => !!App.progress[pkey(th, part)];
+  const doneCount = (tab) => themesOf(tab).filter((t) => done(t, 'learn')).length;
+  const tabOf = (n) => tabsList().filter((t) => t.tab === n)[0] || null;
+  const labelFor = (key) => T(key);
+  /* the first move of solution_moves belongs to the opponent when puzzle_fen has the opponent to move (Lichess convention) */
+  function plan(p) {
+    const turn = String(p.puzzle_fen || p.fen).split(' ')[1] === 'b' ? 'b' : 'w';
+    const solver = p.side === 'b' || p.side === 'w' ? p.side : turn === 'w' ? 'b' : 'w';
+    return { solver, setup: turn !== solver, moves: Array.isArray(p.solution_moves) ? p.solution_moves.filter((m) => typeof m === 'string') : [] };
+  }
+  /* the problem with a puzzle, or '' when puzzle_fen and every solution move are legal (egPuzzleProblem lives next to checkItem) */
+  const check = (p) => egPuzzleProblem(p);
+
+  /* ---------- the runner: one puzzle, from puzzle_fen along solution_moves ---------- */
+  function Runner(cfg) {
+    const p = cfg.puzzle, board = cfg.board, pl = plan(p), side = pl.solver, sol = pl.moves, notes = annMap(p.ann), section = 'endgame';
+    const userPlies = sol.filter((m, i) => (i % 2 === 0) !== pl.setup).length;
+    let g, idx, first, hintLevel, locked, finished, total, clean, mistakes, hints, feedback, played, timers = [], eloRes = null, shown = 0;
+    const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+    const split = (u) => ({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || undefined });
+    const sanAt = (fen, u) => { try { const m = new Chess(fen).move(split(u)); return m ? m.san : u; } catch (e) { return u; } };
+    const lastOf = () => (played.length ? { from: played[played.length - 1].from, to: played[played.length - 1].to } : null);
+    const emit = () => { if (cfg.onUpdate) cfg.onUpdate(view()); };
+    const view = () => ({ idx, side, played: played.slice(), feedback, finished, total, clean, mistakes, hints, userPlies, replay: false, eloRes,
+      yourTurn: !finished && !locked && idx < sol.length && g.turn() === side });
+    const note = (num, color, san) => {
+      const n = notes[moveLabel(num, color, cleanSan(san))];
+      return n && n.note && !/^Lichess puzzle/i.test(n.note) ? n.note : '';
+    };
+    const score = (ok) => { try { App.score(section, ok); } catch (e) { /* optional */ } };
+    function play(u, verdict) {
+      const num = fullmove(g.fen()), mv = g.move(split(u));
+      if (!mv) return null;
+      idx++;
+      played.push({ san: mv.san, color: mv.color, num, from: mv.from, to: mv.to, verdict });
+      board.setPosition(g.fen(), { lastMove: { from: mv.from, to: mv.to }, sound: mv.captured ? 'capture' : 'move' });
+      return { mv, num };
+    }
+    function step(initial) {
+      board.unmark('hl-hint'); board.setArrows([]);
+      if (idx >= sol.length || g.game_over()) { finish(); return; }
+      if (g.turn() !== side) {                                                           // the opponent's move from solution_moves
+        locked = true; board.setInteractive(null); emit();
+        later(() => {
+          locked = false;
+          const r = play(sol[idx], null);
+          if (r) {
+            const n = note(r.num, r.mv.color, r.mv.san);
+            feedback = { v: 'info', label: initial ? 'Opponent just played' : 'Opponent replies', san: moveLabel(r.num, r.mv.color, r.mv.san), text: n || (initial ? 'Now it is your move.' : '') };
+          }
+          step(false);
+        }, initial ? 650 : (CONFIG.opponentDelay || 450));
+        return;
+      }
+      first = true; hintLevel = 0; board.setInteractive(side); emit();
+    }
+    function start() {
+      timers.forEach(clearTimeout); timers = [];
+      g = new Chess(p.puzzle_fen); idx = 0; first = true; hintLevel = 0; locked = false; finished = false; total = 0; clean = 0; mistakes = 0; hints = 0; played = []; eloRes = null; shown = 0;
+      feedback = null;
+      try { V33.begin(p.id, { kind: section, moves: userPlies }); V36.hud(section); V6.ctx({ level: Levels.of(p) }); } catch (e) { /* optional */ }
+      board.setTapMode(null); board.setOnMove(move); board.clearMarks(); board.setArrows([]);
+      board.orientation(side === 'w' ? 'white' : 'black');
+      board.setPosition(p.puzzle_fen, { animate: false, lastMove: null });
+      step(pl.setup);
+    }
+    function move(m) {
+      if (locked || finished || idx >= sol.length || g.turn() !== side) { board.setPosition(g.fen(), { lastMove: lastOf() }); return; }
+      const t = new Chess(g.fen()), pre = g.fen(), num = fullmove(pre), mv = t.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
+      if (!mv) { board.setPosition(g.fen(), { lastMove: lastOf() }); return; }
+      const expected = split(sol[idx]);
+      const exact = mv.from === expected.from && mv.to === expected.to && (mv.promotion || '') === (expected.promotion || '');
+      const mates = t.in_checkmate();                                                    // Lichess rule: any move that mates is accepted
+      const clean1 = first && hintLevel === 0;
+      if (first) total++;
+      first = false;
+      if (exact || mates) {
+        if (clean1) { clean++; score(true); try { V36.srsHit({ id: p.id, section }, { san: mv.san, color: mv.color, from: mv.from, to: mv.to, num, key: moveLabel(num, mv.color, cleanSan(mv.san)) }, pre); } catch (e) { /* optional */ } }
+        const n = note(num, mv.color, mv.san);
+        feedback = { v: 'good', label: mates && !exact ? 'Checkmate' : 'Correct', san: moveLabel(num, mv.color, mv.san), text: n || PRAISE[Math.floor(Math.random() * PRAISE.length)] };
+        Sound.good();
+        if (mates && !exact) { g = t; idx = sol.length; played.push({ san: mv.san, color: mv.color, num, from: mv.from, to: mv.to, verdict: clean1 ? 'good' : 'fixed' }); board.setPosition(g.fen(), { lastMove: { from: mv.from, to: mv.to }, sound: 'move' }); step(false); return; }
+        play(sol[idx], clean1 ? 'good' : 'fixed'); step(false);
+        return;
+      }
+      /* wrong move: it counts once per move, and the position is reset so the player can try again */
+      mistakes++;
+      if (clean1) {
+        score(false);
+        try {
+          V33.miss(p.id, section, idx, mv.san);
+          const wn = sanAt(pre, sol[idx]);
+          V36.srsMiss({ id: p.id, section, title: (cfg.title || p.title) }, { san: wn, color: side, from: expected.from, to: expected.to, num, key: moveLabel(num, side, cleanSan(wn)) }, pre, lastOf());
+          Dex.attempt(p.id);
+        } catch (e) { /* optional */ }
+      }
+      Sound.bad();
+      feedback = { v: 'off', label: 'Not the move', san: mv.san, text: 'That is not the winning idea here. Run MSPC again: what changed, what is the board about, which checks, captures and attacks exist, and does your move survive their best reply? Or tap Hint.' };
+      board.setPosition(g.fen(), { lastMove: lastOf() }); board.shake(); emit();
+    }
+    function hint() {
+      if (finished || locked || idx >= sol.length || g.turn() !== side) return;
+      const e = split(sol[idx]);
+      if (first) { total++; score(false); first = false; try { const hn = sanAt(g.fen(), sol[idx]), hnum = fullmove(g.fen()); V36.srsMiss({ id: p.id, section, title: cfg.title || p.title }, { san: hn, color: side, from: e.from, to: e.to, num: hnum, key: moveLabel(hnum, side, cleanSan(hn)) }, g.fen(), lastOf()); Dex.attempt(p.id); } catch (x) { /* optional */ } }
+      hints++; hintLevel++;
+      if (hintLevel === 1) { board.mark(e.from, 'hl-hint'); feedback = { v: 'hint', label: 'Hint', text: 'The piece to move stands on ' + e.from + '.' }; }
+      else { board.setArrows([{ from: e.from, to: e.to, kind: 'best' }]); feedback = { v: 'hint', label: 'Hint', text: 'Play ' + e.from + '–' + e.to + '.' }; }
+      emit();
+    }
+    function showMove() {
+      if (finished || locked || idx >= sol.length || g.turn() !== side) return;
+      if (first) { total++; score(false); first = false; try { Dex.attempt(p.id); } catch (e) { /* optional */ } }
+      hints++; shown++;
+      const r = play(sol[idx], 'shown');
+      if (r) { const n = note(r.num, r.mv.color, r.mv.san); feedback = { v: 'info', label: 'The move was ' + r.mv.san, text: n }; }
+      step(false);
+    }
+    function finish() {
+      if (finished) return;
+      finished = true; locked = false; board.setInteractive(null);
+      const acc = total ? clean / total : 1, perfect = total > 0 ? clean === total && hints === 0 && mistakes === 0 : true;
+      try {
+        const before = (App.progress[p.id] || {}).best || 0;
+        App.finish(p.id, acc);
+        V33.afterFinish(p.id, acc, { kind: section, moves: userPlies }, before);
+        V36.srsDone({ id: p.id, section }, acc);
+        Dex.record(p.id, perfect, { src: 'drill' });
+      } catch (e) { /* optional */ }
+      try { if (ratingOf(p) && PuzzleElo.started()) eloRes = PuzzleElo.record({ id: p.id, rating: ratingOf(p), themes: p.themes || [], source: 'lichess' }, perfect); } catch (e) { eloRes = null; }
+      feedback = { v: 'done', label: perfect ? 'Solved clean' : 'Solved', text: (total ? clean + ' of ' + total + ' moves right on the first try.' : 'Position studied.') + (p.principle ? ' ' + p.principle : '') };
+      Sound.done(); emit();
+      if (cfg.onFinish) cfg.onFinish({ accuracy: acc, clean, total, perfect, elo: eloRes });
+    }
+    return { start, restart: start, move, hint, showMove, view, destroy() { timers.forEach(clearTimeout); timers = []; locked = true; finished = true; } };
+  }
+
+  /* ---------- small renderers ---------- */
+  const RULE_RE = /^((?:[RCP]\d[A-C]?\.\d+)|(?:Wincondition framework[^.]*))\s*(?:\((Law|Theory|Principle|Concept|Position)\))?\.\s*(.*)$/s;
+  function ruleHTML(line) {
+    const m = RULE_RE.exec(String(line));
+    if (!m) {
+      const t = String(line).trim();
+      if (/^-{3,}$/.test(t)) return '';
+      return /^[–-]\s/.test(t) ? '<li class="egx-rule is-plain is-sub"><p>' + esc(t.replace(/^[–-]\s+/, '')) + '</p></li>' : '<li class="egx-rule is-plain"><p>' + esc(t) + '</p></li>';
+    }
+    const kind = (m[2] || '').toLowerCase();
+    return '<li class="egx-rule"><span class="egx-rid">' + esc(m[1]) + '</span>' + (kind ? '<span class="egx-kind egx-k-' + kind + '">' + esc(m[2]) + '</span>' : '') + '<p>' + esc(m[3]) + '</p></li>';
+  }
+  const MSPC_KEYS = ['M', 'S', 'P', 'C'];
+  function mspcHTML(les, compact) {
+    const deb = {}; (les && les.debrief || []).forEach((d) => { if (d && d.k) deb[d.k] = d.t || d.text || ''; });
+    return '<div class="egx-mspc' + (compact ? ' is-compact' : '') + '">' + MSPC_KEYS.map((k) => '<div class="egx-mspc-row"><b class="egx-mspc-k">' + k + '</b><div><h4>' + esc(T('eg.mspc.' + k)) + '</h4>' +
+      (compact ? '' : '<p class="egx-mspc-def">' + esc(T('eg.mspc.' + k + 'Def')) + '</p>') + (deb[k] ? '<p class="egx-mspc-do">' + esc(deb[k]) + '</p>' : '') + '</div></div>').join('') + '</div>';
+  }
+  const lockMini = (th) => (App.unlocked(th) ? '' : lockBadge(th));
+  function partBtn(th, part, n, open) {
+    const label = part === 'learn' ? T('eg.btnLearn') : part === 'simple' ? T('eg.btnSimple') : T('eg.btnHard');
+    const ico = part === 'learn' ? 'book-open' : part === 'simple' ? 'bullseye' : 'dumbbell';
+    const b = done(th, part) ? best(th, part) : -1;
+    return '<button type="button" class="btn ' + (part === 'learn' ? 'btn-primary' : 'btn-ghost') + ' egx-part' + (b >= 0 ? ' is-done' : '') + '" data-eg-open="' + esc(th.id + '|' + part) + '">' + icon(ico) + '<span>' + esc(label) + '</span>' +
+      (n ? '<small>' + n + '</small>' : '') + (b >= 0 ? '<em>' + icon('check') + ' ' + pct(b) + '</em>' : (open ? '' : '<em>' + icon('crown') + '</em>')) + '</button>';
+  }
+  function cardHTML(th) {
+    const les = lesson(th.lessonId), open = App.unlocked(th), tabs = tabsList();
+    const prev = th.thread && th.thread.prev ? (CONTENT.egthemes || []).filter((t) => t.lessonId === th.thread.prev)[0] : null;
+    const next = th.thread && th.thread.next ? (CONTENT.egthemes || []).filter((t) => t.lessonId === th.thread.next)[0] : null;
+    const tn = (t) => (tabs.filter((x) => x.tab === t.tab)[0] || {}).short || ('Level ' + t.tab);
+    const nRules = (les && les.covers || []).filter((c) => /^[RCP]\d/.test(c)).length;
+    return '<article class="panel egx-card' + (open ? '' : ' is-locked') + '" id="egc-' + esc(th.id) + '" data-eg-card="' + esc(th.id) + '">' +
+      '<div class="egx-card-top"><span class="st-kicker">' + esc(th.chapTitle || th.topic) + '</span>' + lockMini(th) + '<span class="egx-tier">' + esc('Tier ' + th.bpTier) + '</span></div>' +
+      '<h3>' + esc(th.title) + '</h3><p class="egx-idea">' + esc(th.idea) + '</p>' +
+      '<p class="egx-meta">' + icon('layer-group') + ' ' + esc(th.topic) + ' · step ' + th.thread.index + ' of ' + th.thread.of + (nRules ? ' · ' + nRules + ' rules, concepts and positions' : '') + '</p>' +
+      '<div class="egx-parts">' + partBtn(th, 'learn', 0, open) + partBtn(th, 'simple', th.simpleIds.length, open) + partBtn(th, 'hard', th.hardIds.length, open) + '</div>' +
+      ((prev || next) ? '<p class="egx-thread">' + (prev ? '<button type="button" class="btn btn-quiet btn-sm" data-eg-jump="' + esc(prev.id) + '">' + icon('arrow-left') + ' Builds on: ' + esc(tn(prev)) + '</button>' : '') +
+        (next ? '<button type="button" class="btn btn-quiet btn-sm" data-eg-jump="' + esc(next.id) + '">Goes deeper: ' + esc(tn(next)) + ' ' + icon('arrow-right') + '</button>' : '') + '</p>' : '') + '</article>';
+  }
+  function tabHeadHTML(tb) {
+    const list = themesOf(tb.tab), open = App.unlocked(tb);
+    return '<section class="panel egx-tabhead"><div class="egx-tabhead-top"><div><p class="st-kicker">' + esc(tb.elo) + ' ELO · ' + list.length + ' themes</p><h2>' + esc(tb.label) + '</h2><p>' + esc(tb.tagline) + '</p></div>' +
+      '<div class="egx-prog"><b>' + doneCount(tb.tab) + ' / ' + list.length + '</b><span>themes learned</span></div></div>' +
+      (open ? '' : '<p class="egx-lockline">' + lockBadge(tb) + ' <span>Browse every theme. Learn, Simpele Puzzels and Moeilijke Puzzels open with this level.</span></p>') +
+      (tb.tiers || []).map((tr) => '<details class="egx-more"><summary>' + esc(tr.name) + ': mission, typical errors, upgrade triggers</summary><p><b>Mission.</b> ' + esc(tr.mission.charAt(0).toUpperCase() + tr.mission.slice(1)) + '</p>' +
+        '<div class="egx-two"><div><h4>Typical errors</h4><ul>' + tr.errors.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div><div><h4>' + (tr.id === '3C' ? 'Grandmaster standard' : 'Ready to move on when…') + '</h4><ul>' + tr.triggers.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul></div></div></details>').join('') + '</section>';
+  }
+  /* the loose drills: puzzles that no theme points at (admin imports, older drills) stay reachable */
+  function strays() {
+    const used = {};
+    (CONTENT.egthemes || []).forEach((t) => { [t.anchorId].concat(t.simpleIds || [], t.hardIds || []).forEach((i) => { used[i] = 1; }); });
+    return (CONTENT.endgame || []).filter((d) => d && d.id && !used[d.id]);
+  }
+
+  /* ---------- the hub ---------- */
+  function hub(root, go) {
+    const ui = App.ui.eg;
+    const tabs = tabsList();
+    if (!tabs.length || !(CONTENT.egthemes || []).length) { root.innerHTML = '<div id="metrics-endgame">' + metricsHTML('endgame') + '</div>' + dataEmptyHTML('endgame course themes'); return () => {}; }
+    if (!tabOf(ui.tab)) ui.tab = tabs[0].tab;
+    const tb = tabOf(ui.tab), list = themesOf(tb.tab), loose = strays();
+    const groups = [];
+    list.forEach((th) => { const g = groups.filter((x) => x.k === th.bpTier)[0]; if (g) g.items.push(th); else groups.push({ k: th.bpTier, items: [th] }); });
+    const tierName = (k) => { const t = (tb.tiers || []).filter((x) => x.id === k)[0]; return t ? t.name : 'Tier ' + k; };
+    root.innerHTML = '<div id="metrics-endgame">' + metricsHTML('endgame') + '</div>' +
+      '<nav class="egx-tabs seg" aria-label="Endgame levels">' + tabs.map((t) => '<button type="button" data-eg-tab="' + t.tab + '" aria-pressed="' + (t.tab === tb.tab) + '"><span>' + esc(t.short) + '</span><small>' + esc(t.elo) + '</small>' + (App.unlocked(t) ? '' : icon('crown')) + '</button>').join('') + '</nav>' +
+      tabHeadHTML(tb) +
+      groups.map((gr) => (groups.length > 1 ? '<h3 class="egx-group">' + esc(tierName(gr.k)) + '</h3>' : '') + '<div class="egx-grid">' + gr.items.map(cardHTML).join('') + '</div>').join('') +
+      (loose.length ? '<section class="section"><div class="section-head"><div><h2>More endgame drills</h2><p>Drills in the course file that are not part of a theme.</p></div></div><div class="rows">' + loose.map((x) => simpleRow(x, 'drill')).join('') + '</div></section>' : '') +
+      (App.isPro() ? '' : ctaStripHTML('eg.ctaTitle', 'eg.ctaText', 'Levels 2 to 5 of the endgame suite'));
+    if (ui.focus) { const el = qs('#egc-' + ui.focus, root); ui.focus = null; if (el) { el.classList.add('is-focus'); setTimeout(() => scrollToEl(el), 60); } }
+    function onClick(e) {
+      const t = e.target.closest('[data-eg-tab]');
+      if (t) { ui.tab = +t.getAttribute('data-eg-tab'); go({}); return; }
+      const j = e.target.closest('[data-eg-jump]');
+      if (j) { const th = theme(j.getAttribute('data-eg-jump')); if (th) { ui.tab = th.tab; ui.focus = th.id; go({}); } return; }
+      const u = e.target.closest('[data-unlock]');
+      if (u) { openUnlock('vault', u.getAttribute('data-unlock')); return; }
+      const o = e.target.closest('[data-eg-open]');
+      if (o) {
+        const parts = o.getAttribute('data-eg-open').split('|'), th = theme(parts[0]);
+        if (!th) return;
+        if (!App.unlocked(th)) { openLocked(th); return; }
+        go({ screen: parts[1] === 'learn' ? 'learn' : 'puz', themeId: th.id, part: parts[1], i: 0 });
+        return;
+      }
+      const b = e.target.closest('[data-open]');
+      if (!b) return;
+      const item = (CONTENT.endgame || []).filter((y) => y.id === b.getAttribute('data-open'))[0];
+      if (!item) return;
+      if (!App.unlocked(item)) { openLocked(item); return; }
+      go({ screen: 'drill', id: item.id });
+    }
+    root.addEventListener('click', onClick);
+    return () => root.removeEventListener('click', onClick);
+  }
+
+  /* ---------- Learn: idea, MSPC, theory, one anchor puzzle ---------- */
+  function learnScreen(root, th, go) {
+    const les = lesson(th.lessonId), anchor = puzzle(th.anchorId);
+    let runner = null, board = null;
+    const rules = (les && les.learn || []).slice(1);                                    // learn[0] repeats the idea
+    const next = (th.thread && th.thread.next) ? (CONTENT.egthemes || []).filter((t) => t.lessonId === th.thread.next)[0] : null;
+    root.innerHTML = backBar('All themes', esc(tabOf(th.tab) ? tabOf(th.tab).label : '') + ' › <strong>' + esc(th.title) + '</strong>') +
+      '<div id="metrics-endgame">' + metricsHTML('endgame') + '</div>' +
+      '<header class="lesson-head"><p class="st-kicker">' + esc(th.topic + ', ' + Levels.badgeText(th)) + ' · Tier ' + esc(th.bpTier) + '</p><h2>' + esc(th.title) + '</h2><p>' + esc(th.idea) + '</p></header>' +
+      '<div class="egx-steps"><a href="#egx-mspc" data-eg-scroll="egx-mspc">1 · MSPC</a><a href="#egx-theory" data-eg-scroll="egx-theory">2 · Theory</a><a href="#egx-anchor" data-eg-scroll="egx-anchor">3 · Anchor puzzle</a></div>' +
+      '<section class="panel pad egx-sec" id="egx-mspc"><h3>' + icon('brain') + ' Read it with MSPC</h3>' + mspcHTML(les, false) + (les && les.takeaway ? '<div class="st-feedback">' + feedbackHTML({ v: 'info', label: 'Takeaway', text: les.takeaway }) + '</div>' : '') + '</section>' +
+      '<section class="panel pad egx-sec" id="egx-theory"><h3>' + icon('book-open') + ' Theory: ' + rules.length + ' rules, concepts and positions</h3><ol class="egx-rules">' + rules.map(ruleHTML).join('') + '</ol>' +
+      (les && les.source ? '<p class="small muted egx-src">' + esc(les.source) + '</p>' : '') + '</section>' +
+      '<section class="egx-sec" id="egx-anchor"><div class="section-head"><div><h2>Anchor puzzle</h2><p>One clean position that shows the idea. Run MSPC, then play it.</p></div></div>' + (anchor ? trainerShell('egl-board', 'egl-panel') : '<p class="muted">This theme has no anchor puzzle in the course file.</p>') + '</section>';
+    const panel = qs('#egl-panel', root);
+    function render(v) {
+      const p = anchor, playing = !v.finished;
+      panel.innerHTML = '<p class="st-kicker">' + esc(p.id) + (ratingOf(p) ? ' · rated ' + ratingOf(p) : '') + '</p><h2 class="st-title">' + esc(colorName(v.side) + ' to play') + '</h2>' +
+        (p.brief && /^bp-/.test(p.id) ? '<p class="st-brief">' + esc(p.brief) + '</p>' : '') + turnHTML(v) + '</div>' +
+        '<div class="st-feedback">' + feedbackHTML(v.feedback) + '</div>' + playedHTML(v.played) +
+        (v.finished ? '<div class="egx-done"><p><b>Learn complete.</b> Now drill the idea:</p><div class="egx-parts">' + partBtn(th, 'simple', th.simpleIds.length, true) + partBtn(th, 'hard', th.hardIds.length, true) + '</div>' +
+          '<div class="st-actions"><button type="button" class="btn btn-ghost btn-sm" data-act="again">Again</button>' + (next ? '<button type="button" class="btn btn-quiet btn-sm" data-eg-jump="' + esc(next.id) + '">Goes deeper ' + icon('arrow-right') + '</button>' : '') + '<button type="button" class="btn btn-quiet btn-sm" data-act="back">Back to the themes</button></div></div>'
+          : '<div class="st-actions"><button type="button" class="btn btn-ghost btn-sm" data-act="hint">' + icon('lightbulb') + ' Hint</button><button type="button" class="btn btn-quiet btn-sm" data-act="show">Show move</button></div>');
+    }
+    if (anchor) {
+      board = Board(qs('#egl-board', root), {});
+      const flip = qs('[data-flip="egl-board"]', root); if (flip) flip.addEventListener('click', () => board.flip());
+      const bad = check(anchor);
+      if (bad) panel.innerHTML = '<p class="muted">' + esc(bad) + '</p>';
+      else {
+        runner = Runner({ puzzle: anchor, board, title: th.title, onUpdate: render, onFinish: (r) => {
+          App.finish(pkey(th, 'learn'), r.accuracy);
+          try { App.finish(th.lessonId, Math.max(r.accuracy, 0.01)); V36.learned(th.lessonId); } catch (e) { /* optional */ }
+          const host = qs('#metrics-endgame', root); if (host) host.innerHTML = metricsHTML('endgame');
+        } });
+        runner.start();
+      }
+    }
+    function onClick(e) {
+      const sc = e.target.closest('[data-eg-scroll]');
+      if (sc) { e.preventDefault(); scrollToEl(qs('#' + sc.getAttribute('data-eg-scroll'), root)); return; }
+      const j = e.target.closest('[data-eg-jump]');
+      if (j) { const t2 = theme(j.getAttribute('data-eg-jump')); if (t2) { App.ui.eg.tab = t2.tab; go({ screen: 'hub', focus: t2.id }); } return; }
+      const o = e.target.closest('[data-eg-open]');
+      if (o) { const parts = o.getAttribute('data-eg-open').split('|'); go({ screen: 'puz', themeId: th.id, part: parts[1], i: 0 }); return; }
+      const a = e.target.closest('[data-act]');
+      if (!a || !root.contains(a)) return;
+      const act = a.getAttribute('data-act');
+      if (act === 'back') go({ screen: 'hub', focus: th.id });
+      else if (act === 'hint' && runner) runner.hint();
+      else if (act === 'show' && runner) runner.showMove();
+      else if (act === 'again' && runner) runner.restart();
+    }
+    root.addEventListener('click', onClick);
+    return () => { root.removeEventListener('click', onClick); if (runner) runner.destroy(); if (board) board.destroy(); };
+  }
+
+  /* ---------- Simple / Hard puzzle session ---------- */
+  function puzzleScreen(root, th, part, startAt, go) {
+    const ids = idsOf(th, part).filter((i) => puzzle(i)), les = lesson(th.lessonId), hard = part === 'hard';
+    const label = hard ? T('eg.btnHard') : T('eg.btnSimple');
+    let i = clamp(startAt || 0, 0, Math.max(0, ids.length - 1)), runner = null, board = null, results = [];
+    root.innerHTML = backBar('All themes', esc(tabOf(th.tab) ? tabOf(th.tab).label : '') + ' › ' + esc(th.title) + ' › <strong>' + esc(label) + '</strong>') + '<div id="metrics-endgame">' + metricsHTML('endgame') + '</div>' + trainerShell('egp-board', 'egp-panel');
+    const panel = qs('#egp-panel', root);
+    board = Board(qs('#egp-board', root), {});
+    const flip = qs('[data-flip="egp-board"]', root); if (flip) flip.addEventListener('click', () => board.flip());
+    const dots = () => '<div class="egx-dots" aria-hidden="true">' + ids.map((id, k) => '<span class="' + (results[k] ? (results[k].perfect ? 'is-perfect' : 'is-done') : k === i ? 'is-now' : '') + '"></span>').join('') + '</div>';
+    function render(v) {
+      const p = puzzle(ids[i]), last = i === ids.length - 1, bp = /^bp-/.test(p.id);
+      const eloLine = v.eloRes ? '<p class="egx-elo ' + (v.eloRes.delta >= 0 ? 'is-up' : 'is-down') + '">' + icon('chart-line') + ' Puzzle ELO ' + (v.eloRes.delta >= 0 ? '+' : '') + v.eloRes.delta + ' → ' + v.eloRes.after + '</p>' : '';
+      panel.innerHTML = '<p class="st-kicker">' + esc(label) + ' · puzzle ' + (i + 1) + ' of ' + ids.length + (ratingOf(p) ? ' · rated ' + ratingOf(p) : '') + '</p>' + dots() +
+        '<h2 class="st-title">' + esc(colorName(v.side) + ' to play') + '</h2>' + (bp && p.brief ? '<p class="st-brief">' + esc(p.brief) + '</p>' : '') +
+        (v.finished && p.themes && p.themes.length ? '<p class="egx-themes">' + p.themes.map((x) => '<span>' + esc(x) + '</span>').join('') + '</p>' : '') +
+        turnHTML(v) + '</div><div class="st-feedback">' + feedbackHTML(v.feedback) + '</div>' + playedHTML(v.played) + eloLine +
+        (v.finished ? '<div class="st-actions">' + (last ? '<button type="button" class="btn btn-primary" data-act="finish">Finish ' + esc(label) + '</button>' : '<button type="button" class="btn btn-primary" data-act="next">Next puzzle</button>') + '<button type="button" class="btn btn-ghost" data-act="again">Again</button></div>'
+          : '<div class="st-actions"><button type="button" class="btn btn-ghost btn-sm" data-act="hint">' + icon('lightbulb') + ' Hint</button><button type="button" class="btn btn-quiet btn-sm" data-act="show">Show move</button></div>') +
+        '<details class="egx-more egx-mspc-fold"><summary>MSPC check for this theme</summary>' + mspcHTML(les, true) + '</details>';
+    }
+    function load() {
+      if (runner) runner.destroy();
+      const p = puzzle(ids[i]), bad = check(p);
+      if (bad) { panel.innerHTML = '<p class="muted">' + esc(bad) + '</p><div class="st-actions"><button type="button" class="btn btn-quiet btn-sm" data-act="next">Skip</button></div>'; return; }
+      runner = Runner({ puzzle: p, board, title: th.title + ' · ' + label, onUpdate: render, onFinish: (r) => { results[i] = r; const host = qs('#metrics-endgame', root); if (host) host.innerHTML = metricsHTML('endgame'); } });
+      runner.start();
+    }
+    function summary() {
+      if (runner) { runner.destroy(); runner = null; }
+      const tot = results.filter(Boolean), acc = tot.length ? tot.reduce((s, r) => s + r.accuracy, 0) / tot.length : 0, perfect = tot.filter((r) => r.perfect).length;
+      App.finish(pkey(th, part), acc);
+      try { Sound.done(); } catch (e) { /* optional */ }
+      const other = hard ? 'simple' : 'hard', next = (th.thread && th.thread.next) ? (CONTENT.egthemes || []).filter((t) => t.lessonId === th.thread.next)[0] : null;
+      board.setInteractive(null);
+      panel.innerHTML = '<p class="st-kicker">' + esc(th.title) + '</p><h2 class="st-title">' + esc(label) + ' complete</h2>' + dots() +
+        '<div class="st-feedback">' + feedbackHTML({ v: 'done', label: pct(acc) + ' accuracy', text: perfect + ' of ' + ids.length + ' puzzles solved clean on the first try.' }) + '</div>' +
+        '<div class="st-actions">' + (done(th, other) ? '' : '<button type="button" class="btn btn-primary" data-eg-open="' + esc(th.id + '|' + other) + '">' + esc(hard ? T('eg.btnSimple') : T('eg.btnHard')) + '</button>') +
+        '<button type="button" class="btn btn-ghost" data-act="restart">Play them again</button>' + (next ? '<button type="button" class="btn btn-quiet" data-eg-jump="' + esc(next.id) + '">Goes deeper ' + icon('arrow-right') + '</button>' : '') +
+        '<button type="button" class="btn btn-quiet" data-act="back">Back to the themes</button></div>';
+      const host = qs('#metrics-endgame', root); if (host) host.innerHTML = metricsHTML('endgame');
+    }
+    function onClick(e) {
+      const j = e.target.closest('[data-eg-jump]');
+      if (j) { const t2 = theme(j.getAttribute('data-eg-jump')); if (t2) { App.ui.eg.tab = t2.tab; go({ screen: 'hub', focus: t2.id }); } return; }
+      const o = e.target.closest('[data-eg-open]');
+      if (o) { const parts = o.getAttribute('data-eg-open').split('|'); go({ screen: 'puz', themeId: th.id, part: parts[1], i: 0 }); return; }
+      const a = e.target.closest('[data-act]');
+      if (!a || !root.contains(a)) return;
+      const act = a.getAttribute('data-act');
+      if (act === 'back') go({ screen: 'hub', focus: th.id });
+      else if (act === 'hint' && runner) runner.hint();
+      else if (act === 'show' && runner) runner.showMove();
+      else if (act === 'again' && runner) runner.restart();
+      else if (act === 'next') { i++; if (i >= ids.length) summary(); else { load(); scrollToEl(qs('.trainer', root)); } }
+      else if (act === 'finish') summary();
+      else if (act === 'restart') { i = 0; results = []; load(); }
+    }
+    root.addEventListener('click', onClick);
+    if (!ids.length) panel.innerHTML = '<p class="muted">This theme has no ' + esc(label) + ' in the course file yet.</p>'; else load();
+    return () => { root.removeEventListener('click', onClick); if (runner) runner.destroy(); if (board) board.destroy(); };
+  }
+  return { hub, learnScreen, puzzleScreen, theme, puzzle, plan, check, Runner, pkey, tabsList, themesOf, lesson, strays };
+})();
+
+/* ---------- ENDGAME: the screen router ---------- */
 function mountEndgame(root) {
-  const ui = App.ui.eg || (App.ui.eg = { screen: 'hub', id: null });
-  const hit = Levels.take(['courses.endgame', 'endgame']);          // v3.9: #topic/<id>/<level>
-  if (hit) { ui.screen = 'hub'; ui.hit = hit; }
+  const ui = App.ui.eg || (App.ui.eg = { screen: 'hub', id: null, tab: 0 });
+  const hit = Levels.take(['egthemes', 'courses.endgame', 'endgame']);          // #topic/<id>/<level> opens that theme's tab
+  if (hit) {
+    ui.screen = 'hub';
+    const want = (CONTENT.egthemes || []).filter((t) => t.topicId === hit.id && t.lvl === hit.k)[0] || (CONTENT.egthemes || []).filter((t) => t.topicId === hit.id || t.id === hit.id)[0];
+    if (want) { ui.tab = want.tab; ui.focus = want.id; }
+  }
   let cleanup = null;
   function go(patch) { Object.assign(ui, patch); render(); scrollToEl(root); }
   function render() {
     if (cleanup) { cleanup(); cleanup = null; }
-    const find = (list) => (list || []).filter((x) => x.id === ui.id)[0];
-    let item;
+    let th = null;
     theoryHead(false);
-    if (ui.screen === 'drill' && (item = find(CONTENT.endgame)) && App.unlocked(item)) { cleanup = egDrillScreen(root, item, go); return; }
-    if (ui.screen === 'lesson' && (item = find(CONTENT.courses.endgame)) && App.unlocked(item)) { cleanup = lessonScreen(root, item, 'endgame', go); return; }
+    if ((ui.screen === 'learn' || ui.screen === 'puz') && (th = EG.theme(ui.themeId)) && App.unlocked(th)) {
+      cleanup = ui.screen === 'learn' ? EG.learnScreen(root, th, go) : EG.puzzleScreen(root, th, ui.part === 'hard' ? 'hard' : 'simple', ui.i, go);
+      return;
+    }
+    const item = ui.screen === 'drill' ? (CONTENT.endgame || []).filter((x) => x.id === ui.id)[0] : null;
+    if (item && App.unlocked(item)) { cleanup = egDrillScreen(root, item, go); return; }
     theoryHead(true);
-    ui.screen = 'hub'; cleanup = egHub(root, go);
+    ui.screen = 'hub'; cleanup = EG.hub(root, go);
   }
   render();
   return () => { if (cleanup) cleanup(); };
 }
-function egHub(root, go) {
-  const egCh = Chapters.split('endgame', CONTENT.endgame);                      // v6.3: drills sorted into chapters
-  const kpk = egCh.rest.filter((d) => d.type === 'kpk'), rook = egCh.rest.filter((d) => d.type !== 'kpk'), boot = CONTENT.courses.endgame || [];
-  const sec = (n, html) => (n || Admin.editing() ? html : '');
-  const cards = topicCards(root, 'Endgame'), rows = (kind) => (items) => '<div class="rows">' + items.map((x) => simpleRow(x, kind)).join('') + '</div>';
-  root.innerHTML = '<div id="metrics-endgame">' + metricsHTML('endgame') + '</div>' +
-    (CONTENT.endgame.length + boot.length ? '' : dataEmptyHTML('endgame drills or lessons')) +
-    chapterSections('endgame', egCh.groups, cards, 'eg', rows('drill'), 'drill') +
-    sec(kpk.length, '<section class="section">' + sectionHeadK('eg.kpkTitle', 'eg.kpkText', manageBtn('endgame', 'Drills')) + cards.section(kpk, { id: 'king-and-pawn', scope: 'eg', title: T('eg.kpkTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>') +
-    sec(boot.length, '<section class="section">' + sectionHeadK('eg.bootTitle', 'eg.bootText', manageBtn('courses.endgame', 'Lessons')) + cards.section(boot, { id: 'endgame-bootcamp', scope: 'eg', title: T('eg.bootTitle') }, { body: rows('lesson'), noun: 'lesson' }) + '</section>') +
-    sec(rook.length, '<section class="section">' + sectionHeadK('eg.proTitle', 'eg.proText', manageBtn('endgame', 'Drills') + chapterBtn('endgame')) + cards.section(rook, { id: 'rook-endgames', scope: 'eg', title: T('eg.proTitle') }, { body: rows('drill'), noun: 'drill' }) + '</section>') +
-    (App.isPro() ? '' : ctaStripHTML('eg.ctaTitle', 'eg.ctaText', 'Levels 2 to 5 of the endgame suite'));
-  cards.point(App.ui.eg && App.ui.eg.hit); if (App.ui.eg) App.ui.eg.hit = null;
-  function onClick(e) {
-    if (cards.onClick(e)) return;
-    const u = e.target.closest('[data-unlock]');
-    if (u) { openUnlock('vault', u.getAttribute('data-unlock')); return; }
-    const b = e.target.closest('[data-open]');
-    if (!b) return;
-    const kind = b.getAttribute('data-kind'), id = b.getAttribute('data-open');
-    const item = (kind === 'lesson' ? CONTENT.courses.endgame : CONTENT.endgame).filter((y) => y.id === id)[0];
-    if (!item) return;
-    if (!App.unlocked(item)) { openLocked(item); return; }
-    go({ screen: kind, id });
-  }
-  root.addEventListener('click', onClick);
-  return () => { root.removeEventListener('click', onClick); cards.destroy(); };
-}
+
 
 function egDrillScreen(root, d, go) {
   let alive = true;
@@ -12442,6 +12923,8 @@ function levelMid(level) {
   return p ? +p[1] + 200 : 0;
 }
 function puzzleRating(id, kind) {
+  const egp = (CONTENT.endgame || []).filter((x) => x && x.id === String(id))[0];             // v10: endgame puzzles carry their own Lichess rating
+  if (egp) return clamp(Math.round(Number.isFinite(+egp.rating) && egp.rating !== null ? +egp.rating : [600, 1000, 1400, 1800, 2200][Levels.of(egp) - 1]), 500, 2400);
   if (/^peer:/.test(String(id))) { const it = (CONTENT.peer || []).filter((x) => 'peer:' + x.id === String(id))[0]; return clamp((it && (+it.elo || levelMid(it.level))) || 1200, 500, 2400); }
   const bare = String(id).replace(/^hard:/, '').replace(/^[cp]:/, '');
   let lv = '';
