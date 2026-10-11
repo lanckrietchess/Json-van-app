@@ -2556,6 +2556,90 @@ button.bm-item{width:100%;background:none;border:0;font-family:inherit;text-alig
 @media (max-width:520px){.fbq-act .btn{flex:1 1 auto}}
 @media (prefers-reduced-motion:reduce){.fb-cat span{transition:none}}
 </style>
+<style id="v13-css">
+/* ===== v13: universal Continue bar, Board Vision, themed puzzles, Survival, feedback stars ===== */
+.cbar{position:fixed;left:0;right:0;bottom:0;z-index:45;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,rgba(15,23,42,.98) 72%,rgba(15,23,42,0));pointer-events:none}
+.cbar[hidden]{display:none}
+.cbar-in{max-width:760px;margin:0 auto;pointer-events:auto}
+.cbar-btn{width:100%;min-height:54px;border-radius:14px;border:1px solid var(--rule);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 16px;font:inherit;font-weight:800;cursor:pointer;transition:background .18s,color .18s,border-color .18s,transform .12s}
+.cbar-btn.is-wait{flex-direction:row;gap:10px;background:var(--surface);color:var(--fog);border:1px dashed var(--rule);font-weight:600;font-size:14.5px;cursor:not-allowed;opacity:.92}
+.cbar-btn.is-wait i{font-size:13px;color:var(--dim)}
+.cbar-btn.is-ready{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 0 0 0 rgba(56,189,248,.5);animation:cbarPulse 1.9s ease-out 2}
+.cbar-btn.is-ready:hover{background:#7dd3fc}
+.cbar-btn.is-ready:active{transform:scale(.985)}
+.cbar-go{font-size:17px;letter-spacing:.06em}
+.cbar-next{font-size:11.5px;font-weight:700;opacity:.8;letter-spacing:.02em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes cbarPulse{0%{box-shadow:0 0 0 0 rgba(56,189,248,.5)}100%{box-shadow:0 0 0 14px rgba(56,189,248,0)}}
+@media (prefers-reduced-motion:reduce){.cbar-btn.is-ready{animation:none}.cbar-btn{transition:none}}
+body.has-cbar .view{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+body.has-cbar .foot{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+body.has-cbar .data-banner{bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+body.has-cbar .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+/* Board Vision */
+.bv-head{margin:6px 0 16px}.bv-head h1{font-size:26px;letter-spacing:-.02em;display:flex;gap:10px;align-items:center}.bv-head h1 i{color:var(--accent);font-size:22px}.bv-head p{max-width:64ch;margin-top:6px}
+.bv-modes{margin-bottom:16px}
+.theory-tabs.three.bv-modes .theory-tab{text-align:left;font:inherit;cursor:pointer}
+.bv-nolabels .notation-322f9{display:none}
+.bv-opts{display:grid;gap:6px;margin:10px 0 12px}
+.bv-seg{margin-bottom:4px}
+.bv-target{font-size:clamp(64px,22vw,112px);font-weight:900;letter-spacing:-.04em;line-height:1;text-align:center;color:var(--accent);margin:6px 0 10px;font-variant-numeric:tabular-nums}
+.bv-bar{height:8px;border-radius:99px;background:var(--ink-2);border:1px solid var(--hair);overflow:hidden;margin:8px 0}
+.bv-bar>i{display:block;height:100%;width:100%;background:var(--accent);border-radius:99px;transition:width .12s linear}
+.bv-bar-sq{height:5px}.bv-bar-sq>i{background:var(--warn)}
+.bv-score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0}
+.bv-score span{background:var(--ink-2);border:1px solid var(--hair);border-radius:12px;padding:8px 6px;text-align:center}
+.bv-score b{display:block;font-size:20px;font-variant-numeric:tabular-nums}.bv-score small{display:block;font-size:11.5px;color:var(--fog)}
+.bv-find{font-size:15px;margin:4px 0}.bv-why{font-size:13.5px;color:var(--miss);margin:6px 0}
+.lc-board .hl-sel{box-shadow:inset 0 0 0 4px rgba(56,189,248,.8)}
+/* Themed puzzles */
+.tp-top{display:grid;gap:14px;margin-bottom:12px}.tp-top h2{font-size:20px}
+.tp-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:6px 0}
+.tp-facts span{background:var(--ink-2);border:1px solid var(--hair);border-radius:12px;padding:8px 6px;text-align:center}.tp-facts b{display:block;font-size:20px}.tp-facts small{font-size:11.5px;color:var(--fog)}
+.tp-deckrow{margin:0 0 14px}
+.tp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:760px){.tp-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.tp-card{display:grid;gap:4px;text-align:left;padding:14px;border-radius:16px;border:1px solid var(--rule);background:var(--surface);color:var(--chalk);font:inherit;cursor:pointer;transition:border-color .15s,transform .12s}
+.tp-card:hover{border-color:var(--accent-line)}.tp-card:active{transform:scale(.99)}
+.tp-card .tp-ico{font-size:22px;color:var(--accent)}.tp-card b{font-size:16px}.tp-card small{color:var(--fog);font-size:12.5px;line-height:1.35}
+.tp-badge{display:inline-flex;gap:6px;align-items:center;margin-top:6px;font-size:12px;font-weight:700;color:var(--dim);padding:4px 8px;border-radius:999px;border:1px dashed var(--rule);width:fit-content;max-width:100%}
+.tp-badge.is-got{color:var(--warn);border:1px solid rgba(251,191,36,.45);background:var(--warn-soft)}
+.tp-card.is-done{border-color:rgba(251,191,36,.3)}
+.tp-signal{display:flex;gap:10px;align-items:flex-start;margin:12px 0;padding:12px 14px;border-radius:12px;background:var(--warn-soft);border:1px solid rgba(251,191,36,.3)}.tp-signal i{color:var(--warn);margin-top:3px}.tp-signal p{font-size:14.5px}
+.tp-dots{display:flex;gap:6px;margin:6px 0 10px;flex-wrap:wrap}.tp-dots i{width:22px;height:8px;border-radius:99px;background:var(--rule)}.tp-dots i.is-ok{background:var(--good)}.tp-dots i.is-miss{background:var(--miss)}.tp-dots i.is-now{background:var(--accent)}
+.tp-streak{font-size:13.5px;color:var(--fog);margin:8px 0}.tp-streak i{color:var(--warn)}.tp-streak b{color:var(--chalk)}
+.tp-fetch{height:8px;border-radius:99px;background:var(--ink-2);overflow:hidden;margin:14px 0 8px}.tp-fetch i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.tp-win{margin:8px 0;padding:10px 12px;border-radius:12px;background:var(--warn-soft);border:1px solid rgba(251,191,36,.4);color:var(--warn);font-weight:700}
+.tp-seg{margin:0 0 16px;display:flex}
+/* Survival */
+.sv-group{margin:18px 0}.sv-group h2{font-size:19px;display:flex;gap:8px;align-items:center}.sv-group h2 i{color:var(--accent)}
+.sv-grid{display:grid;gap:10px;margin-top:10px}
+@media (min-width:760px){.sv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.sv-card{display:grid;gap:6px;text-align:left;padding:14px 16px;border-radius:16px;border:1px solid var(--rule);background:var(--surface);color:var(--chalk);font:inherit;cursor:pointer}
+.sv-card:hover{border-color:var(--accent-line)}.sv-card b{font-size:16px}
+.sv-card.is-done{border-color:rgba(74,222,128,.4)}.sv-card.is-locked{opacity:.78}
+.sv-meta{display:flex;gap:6px;flex-wrap:wrap}.sv-meta i{font-style:normal;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--ink-2);border:1px solid var(--hair);color:var(--fog)}
+.sv-meta i.is-ok{color:var(--good)}.sv-meta i.is-lock{color:var(--warn)}
+.sv-prog{margin:10px 0}.sv-prog-h{display:flex;justify-content:space-between;font-size:13.5px;color:var(--fog)}.sv-prog-h b{color:var(--chalk)}
+.sv-meter{height:10px;border-radius:99px;background:var(--ink-2);border:1px solid var(--hair);overflow:hidden;margin-top:6px}.sv-meter>i{display:block;height:100%;border-radius:99px;transition:width .3s}
+.sv-meter.is-ok>i{background:var(--good)}.sv-meter.is-warn>i{background:var(--warn)}.sv-meter.is-bad>i{background:var(--miss)}
+.sv-res{margin:12px 0;padding:14px;border-radius:14px;border:1px solid var(--rule)}.sv-res h3{font-size:18px;display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.sv-res.is-win{background:var(--good-soft);border-color:rgba(74,222,128,.4)}.sv-res.is-win h3 i{color:var(--good)}
+.sv-res.is-loss{background:var(--miss-soft);border-color:rgba(251,113,133,.4)}.sv-res.is-loss h3 i{color:var(--miss)}
+/* Think link cards */
+.v13-links{display:grid;gap:10px;margin:12px 0 4px}
+@media (min-width:760px){.v13-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.v13-links .bt-think-link{margin:0}
+/* Feedback: stars and social-proof fields */
+.fb-stars{display:flex;gap:6px}
+.fb-stars button{width:44px;height:44px;border-radius:12px;border:1px solid var(--rule);background:var(--ink-2);color:var(--dim);font-size:22px;line-height:1;cursor:pointer;transition:color .12s,border-color .12s,transform .1s}
+.fb-stars button.is-on{color:var(--warn);border-color:rgba(251,191,36,.5);background:var(--warn-soft)}
+.fb-stars button:active{transform:scale(.94)}
+.fb-consent{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--fog)}.fb-consent input{margin-top:4px;flex:none}
+.fb-sec{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-top:2px}
+.fbq-social{margin:6px 0;padding:8px 10px;border-radius:10px;background:var(--ink-2);border:1px solid var(--hair);font-size:13.5px;display:grid;gap:4px}
+.fb-stars-ro{color:var(--warn);letter-spacing:2px;font-size:15px}
+.fb-badge.is-ok{background:var(--good-soft);color:var(--good)}
+</style>
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
@@ -2651,7 +2735,44 @@ button.bm-item{width:100%;background:none;border:0;font-family:inherit;text-alig
       app with admin mode, and is published through content.json.
    ========================================================================== */
 const CONFIG = {
-  version: '7.1.0',
+  version: '13.0.0',
+
+  /* v13: categorized Lichess puzzles (Theory > Puzzles > By theme). id = the Lichess theme ("angle"). */
+  themePuzzles: {
+    api: 'https://lichess.org/api/puzzle/next', setSizes: [5, 10], gapMs: 400, deckMax: 40,
+    themes: [
+      { id: 'mateIn1', label: 'Mate in 1', icon: 'crown', badge: 'Mate Spotter', short: 'The finishing blow, one move deep',
+        learn: 'A mate in one is always a check. Before you do anything clever, list every check against their king and ask which one leaves it no square, no capture and no block.',
+        signal: 'When their king has two squares or fewer and a piece of yours already looks at it, stop and list every check before you play anything else.' },
+      { id: 'mateIn2', label: 'Mate in 2', icon: 'chess-king', badge: 'Two-Move Finisher', short: 'A quiet move or a check, then mate',
+        learn: 'The first move takes away the last escape square or forces a single reply. Count their replies after each candidate: if there is only one, calculate it to the end.',
+        signal: 'When their king is boxed in by its own pieces, look for the check that leaves exactly one legal reply.' },
+      { id: 'fork', label: 'Fork', icon: 'code-fork', badge: 'Fork Master', short: 'One piece, two targets',
+        learn: 'A fork attacks two things at once, and the opponent can only fix one. Knights are the classic forker because nothing can block them; look for squares that touch a king and a loose piece together.',
+        signal: 'When two of their pieces sit a knight-jump apart, or one is undefended, ask which square attacks both.' },
+      { id: 'pin', label: 'Pin', icon: 'thumbtack', badge: 'Pin Tactician', short: 'A piece that cannot move',
+        learn: 'A pinned piece stands in front of something more valuable and may not move without losing it. Attack the pinned piece again: it cannot run away and it cannot be defended enough.',
+        signal: 'When a bishop or rook lines up with their king or queen through a single piece, pile on that piece.' },
+      { id: 'skewer', label: 'Skewer', icon: 'bars-staggered', badge: 'Skewer Sniper', short: 'The big piece must move first',
+        learn: 'A skewer is a pin in reverse: the valuable piece is in front and has to step aside, which exposes what stands behind it. Long-range pieces on open lines do the work.',
+        signal: 'When their king or queen and a rook share a rank, file or diagonal, check whether a check or attack forces the front piece to move.' },
+      { id: 'backRankMate', label: 'Back-rank mate', icon: 'border-bottom', badge: 'Back-Rank Breaker', short: 'The king boxed in by its own pawns',
+        learn: 'When a king is hemmed in by its own pawns on the back rank, a rook or queen check on that rank can be mate. Remove or deflect the defender, then deliver it.',
+        signal: 'When their king has no luft and only one rook guards the back rank, ask what happens if that rook is taken or lured away.' },
+      { id: 'discoveredAttack', label: 'Discovered attack', icon: 'eye', badge: 'Discovery Artist', short: 'Move one piece, unleash another',
+        learn: 'Moving a piece uncovers an attack from the piece behind it. The moving piece can make a threat of its own, so the opponent faces two problems at once.',
+        signal: 'When your bishop, rook or queen is lined up behind your own piece, check what the front piece can do with tempo.' },
+      { id: 'hangingPiece', label: 'Hanging piece', icon: 'link-slash', badge: 'Loose Piece Hunter', short: 'Free material, if you look',
+        learn: 'A hanging piece is attacked and not defended enough. Before every move, count attackers and defenders on every piece, yours and theirs.',
+        signal: 'After every opponent move, ask what it stopped defending and what it now attacks.' },
+      { id: 'endgame', label: 'Endgame', icon: 'chess-pawn', badge: 'Endgame Finisher', short: 'Technique that converts',
+        learn: 'Endgames are decided by king activity, pawn majorities and the opposition. Calculate exact tempo counts for pawn races and keep your king active.',
+        signal: 'When the queens come off, bring the king to the centre first and count pawn tempi before you move a pawn.' },
+      { id: 'defense', label: 'Defense', icon: 'shield-halved', badge: 'Iron Defender', short: 'Find the only move',
+        learn: 'In a defensive puzzle you must find the move that holds the position. List their threats first, then look for the move that answers all of them, often a quiet one.',
+        signal: 'When you are worse, stop looking for your own attack: find their strongest threat and the one move that parries it.' }
+    ]
+  },
   coach: 'Kyenzo',
   peakRating: 2105,
   percentile: 'Top 0.1%',
@@ -10079,7 +10200,7 @@ function thinkTabs(active) {
   return '<nav class="theory-tabs grid2x2" aria-label="Think modes">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === active ? ' aria-current="page"' : '') + '>' + icon(t[1]) +
     '<b>' + t[2] + (t[0] === 'srs' && due ? '<span class="tab-count" aria-label="' + due + ' due">' + due + '</span>' : '') + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' +
     (active === 'think' ? '<a class="bt-think-link" href="#bot"><div><h3>' + icon('robot') + ' Test your framework against a bot</h3><p>Play Stockfish and run MSPC on every move. Think 15 to 30 minutes per position: the goal is no mistakes.</p></div><span class="btn btn-primary btn-sm">Play the bot ' + icon('arrow-right') + '</span></a>' : '') +
-    (active === 'think' ? shuffleBar('think') : '') + '<p class="v6-thinklink small"><a href="#account">Level, ranks, Skill Matrix and bounties</a></p>';
+    (active === 'think' ? v13Links() : '') + (active === 'think' ? shuffleBar('think') : '') + '<p class="v6-thinklink small"><a href="#account">Level, ranks, Skill Matrix and bounties</a></p>';
 }
 function mountShufflePage(view) {
   view.innerHTML = cmsBar() + shuffleBack() + '<div id="shuffle-root"></div>' + gateNote('shuffle') + gateNote('shuffleAll');
@@ -10410,12 +10531,17 @@ function mountShuffle(root) {
 
 /* ---------- THEORY shell: three big section tabs and a header per section ---------- */
 function theoryHead(show) { const h = qs('#theory-head'); if (h) h.hidden = !show; }
+function puzzleSeg(mode) {
+  return '<nav class="seg tp-seg" aria-label="Puzzle modes"><a href="#puzzles"' + (mode === 'puzzles' ? ' aria-current="page"' : '') + '>' + icon('chart-line') + ' Rated puzzles</a><a href="#themes"' + (mode === 'themes' ? ' aria-current="page"' : '') + '>' + icon('puzzle-piece') + ' By theme</a></nav>';
+}
 function mountTheory(view, sub) {
+  const mode = sub;
+  if (sub === 'themes') sub = 'puzzles';
   const tabs = [['openings', 'chess-pawn', 'Openings', 'Repertoires and drills'], ['middlegame', 'chess-knight', 'Middlegame', 'Plans and bootcamps'], ['endgame', 'chess-king', 'Endgame', 'Technique that converts'], ['puzzles', 'puzzle-piece', 'Puzzles', 'Rated tactics, live']];
   view.innerHTML = cmsBar() + '<nav class="theory-tabs grid2x2" aria-label="Theory sections">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === sub ? ' aria-current="page"' : '') + '>' + icon(t[1]) + '<b>' + t[2] + rankPill(t[0]) + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' + shuffleBar(sub) +
-    '<div id="theory-head">' + pageHeadK('theory.' + sub + '.title', 'theory.' + sub + '.text') + '</div><div id="theory-root"></div>';
+    (sub === 'puzzles' ? puzzleSeg(mode) : '') + '<div id="theory-head">' + pageHeadK('theory.' + sub + '.title', 'theory.' + sub + '.text') + '</div><div id="theory-root"></div>';
   const root = qs('#theory-root', view);
-  return (sub === 'openings' ? mountOpenings : sub === 'middlegame' ? mountMiddlegame : sub === 'puzzles' ? mountPuzzles : mountEndgame)(root);
+  return (mode === 'themes' ? ThemePuzzles.mount : sub === 'openings' ? mountOpenings : sub === 'middlegame' ? mountMiddlegame : sub === 'puzzles' ? mountPuzzles : mountEndgame)(root);
 }
 
 /* ---------- OPENINGS ---------- */
@@ -16995,13 +17121,41 @@ function TrimInterrogation(T) {
     f.elements.a.value = '';
     answer(v);
   }
+  /* v13: what the universal Continue bar shows for this step */
+  function barState() {
+    if (!Q || Q.done) return null;
+    const h = host();
+    if (!h || !qs('.iq-chat', h) || Q.at >= limit()) return null;
+    const k = STEPS[Q.s];
+    if (Q.busy) return { ready: false, hint: 'The coach is reviewing your answer…' };
+    const inp = qs('.iq-ai input', h), typed = !!(inp && inp.value.trim());
+    const submit = () => { const f = qs('[data-iq-form]', h); if (!f) return; if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); };
+    const click = (sel) => () => { const b = qs(sel, h); if (b && !b.disabled) b.click(); };
+    if (k === 'V') return { ready: true, next: Q.at < Q.list.length - 1 ? 'Next mistake' : 'See my summary', run: click('[data-iq="after"]') };
+    if (k === 'P') {
+      const D = Q.pd, any = !!D && ['mine', 'theirs'].some((w) => Object.keys(D[w]).some((x) => D[w][x]));
+      if (any) return { ready: true, next: 'Checks your priorities, then Calculation', run: click('[data-iq="pd-check"]') };
+      return typed ? { ready: true, next: 'Sends your answer to the coach', run: submit } : { ready: false, hint: 'Select required moves to proceed' };
+    }
+    if (k === 'C') {
+      if (Q.cs === 'calc' && Q.calc) {
+        if (!Q.calc.active) return { ready: true, next: 'Start calculating your lines', run: click('[data-iq="calc-start"]') };
+        return calcLines().length ? { ready: true, next: 'Submit what you calculated', run: click('[data-iq="calc-done"]') } : { ready: false, hint: 'Play your line on the board to proceed' };
+      }
+      if (Q.cs === 'eval') return { ready: true, next: 'Now find a better move', run: click('[data-iq="find"]') };
+      return typed ? { ready: true, next: 'Sends your move to the coach', run: submit } : { ready: false, hint: 'Play your better move on the board to proceed' };
+    }
+    const next = k === 'M' ? 'Sends your answer, then Specifics' : 'Sends your answer, then Priorities';
+    return typed ? { ready: true, next, run: submit } : { ready: false, hint: k === 'M' ? 'Name their threat (or tap “No threat”) to proceed' : 'Name the key feature of the position to proceed' };
+  }
+  ContinueBar.register('trim', barState);
   view.addEventListener('click', onClick);
   view.addEventListener('submit', onSubmit);
   return {
     start, onMove, active: () => !!Q,
     state: () => (Q && !Q.done ? { at: Q.at } : null),
     stop(quiet) { if (!Q) return; board.setTapMode(null); if (quiet) { Q = null; A.interro = false; A.iqArrows = []; layout(false); const h = host(); if (h) h.innerHTML = ''; } else close(); },
-    destroy() { Q = null; A.interro = false; view.removeEventListener('click', onClick); view.removeEventListener('submit', onSubmit); }
+    destroy() { Q = null; A.interro = false; ContinueBar.unregister('trim', barState); view.removeEventListener('click', onClick); view.removeEventListener('submit', onSubmit); }
   };
 }
 
@@ -19075,7 +19229,7 @@ const EloGate = (() => {
 const TROPHY = [
   ['diamond', 'Diamond', 25], ['platinum', 'Platinum', 20], ['gold', 'Gold', 14], ['silver', 'Silver', 8], ['bronze', 'Bronze', 3]
 ];
-const BADGE_CATS = [['streak', 'Streaks'], ['volume', 'Volume and accuracy'], ['theory', 'Openings and theory'], ['think', 'Thinking'], ['trim', 'Game review'], ['rating', 'Rating'], ['community', 'Community']];
+const BADGE_CATS = [['puzzles', 'Puzzle sets'], ['challenge', 'Challenges'], ['streak', 'Streaks'], ['volume', 'Volume and accuracy'], ['theory', 'Openings and theory'], ['think', 'Thinking'], ['trim', 'Game review'], ['rating', 'Rating'], ['community', 'Community']];
 const Badges = (() => {
   const KEY = 'lc-hub-badges-v1';
   const uniq = (fn) => { const s = {}; Attempts.all().forEach((x) => { if (fn(x)) s[x.id] = 1; }); return Object.keys(s).length; };
@@ -19112,7 +19266,14 @@ const Badges = (() => {
     { id: 'ranked', cat: 'community', ico: 'ranking-star', name: 'Ranked', how: 'Get ranked on the weekly leaderboard.', goal: 1, cur: () => (v36State().ranked || Ranks.mine('week').ranked ? 1 : 0) },
     { id: 'verified', cat: 'community', ico: 'circle-check', name: 'Verified', how: 'Connect a verified Chess.com or Lichess account.', goal: 1, cur: () => (Elo.best() ? 1 : 0) },
     { id: 'featured', cat: 'community', ico: 'star', name: 'Featured', how: 'Get one of your games featured on the Games leaderboard.', goal: 1, cur: featured }
-  ];
+  ].concat((CONFIG.themePuzzles.themes || []).map((t) => ({ id: 'tp-' + t.id, cat: 'puzzles', ico: t.icon, name: t.badge, how: 'Finish a ' + t.label + ' puzzle set.', goal: 1, cur: () => ThemePuzzles.sets(t.id) })), [
+    { id: 'tp-flawless', cat: 'puzzles', ico: 'gem', name: 'Flawless Set', how: 'Finish a themed puzzle set without a single miss.', goal: 1, cur: () => ThemePuzzles.flawlessSets() },
+    { id: 'tp-streak10', cat: 'puzzles', ico: 'fire', name: 'Ten in a Row', how: '10 themed puzzles in a row, clean.', goal: 10, cur: () => ThemePuzzles.bestStreak() },
+    { id: 'tp-deck10', cat: 'puzzles', ico: 'layer-group', name: 'Deck Cleaner', how: 'Clear 10 puzzles from your Mistake Deck.', goal: 10, cur: () => ThemePuzzles.cleared() },
+    { id: 'sv-survive', cat: 'challenge', ico: 'shield-halved', name: 'Survivor', how: 'Win a Survive challenge against Stockfish.', goal: 1, cur: () => Survival.wins('survive') },
+    { id: 'sv-draw', cat: 'challenge', ico: 'handshake', name: 'Fortress Builder', how: 'Hold a drawn endgame against Stockfish.', goal: 1, cur: () => Survival.wins('draw') },
+    { id: 'sv-convert', cat: 'challenge', ico: 'bullseye', name: 'Closer', how: 'Convert a winning position against Stockfish.', goal: 1, cur: () => Survival.wins('convert') }
+  ]);
   let st = null, timer = null;
   const get = () => {
     if (st) return st;
@@ -22652,9 +22813,25 @@ const V5Doc = (() => {
   const str = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n) : '');
   const strN = (v, n) => (typeof v === 'string' ? v.replace(/\r/g, '').replace(/[\u0000-\u0009\u000b-\u001f\u007f]/g, ' ').trim().slice(0, n) : '');
   const list = (v, n, len) => (Array.isArray(v) ? v.map((x) => str(x, len)).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, n) : null);
+  /* v13: Survival, Draw and Conversion scenarios (v5.survival in the data file). A scenario with an illegal position,
+     an unknown mode or a finished game is dropped, so nothing broken reaches a player. */
+  const SV_LEVELS = ['l800', 'l1200', 'l1600', 'l2000', 'max'], SV_FLOOR = { survive: -400, draw: -150, convert: 80 };
+  function svClean(x) {
+    if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
+    const id = String(x.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40), mode = ['survive', 'draw', 'convert'].indexOf(x.mode) >= 0 ? x.mode : '';
+    const fen = String(x.fen || '').replace(/\s+/g, ' ').trim().slice(0, 100);
+    if (!id || !mode || !fen) return null;
+    let g = null;
+    try { g = new Chess(); if (!g.load(fen)) return null; } catch (e) { return null; }
+    if (g.game_over()) return null;
+    const fl = Number.isFinite(+x.floorCp) && x.floorCp !== '' && x.floorCp != null ? clamp(Math.round(+x.floorCp), -3000, 3000) : SV_FLOOR[mode];
+    return { id, mode, title: str(x.title, 80) || id, brief: strN(x.brief, 500), tip: strN(x.tip, 300), fen, moves: clamp(Math.round(+x.moves || 12), 3, 60), floorCp: fl,
+      goal: x.goal === 'promote' || x.goal === 'mate' || x.goal === 'eval' ? x.goal : mode === 'convert' ? 'mate' : 'hold', goalCp: clamp(Math.round(+x.goalCp || 350), 100, 2000), level: SV_LEVELS.indexOf(x.level) >= 0 ? x.level : 'l1600', tier: clamp(Math.round(+x.tier || 1), 1, 5) };
+  }
   function clean(v) {
     const o = {};
     if (!v || typeof v !== 'object' || Array.isArray(v)) return o;
+    if (Array.isArray(v.survival)) { const sv = v.survival.map(svClean).filter(Boolean).filter((a, i, all) => all.findIndex((b) => b.id === a.id) === i).slice(0, 60); if (sv.length) o.survival = sv; }
     const f = v.framework;
     if (f && typeof f === 'object' && !Array.isArray(f)) {
       const fr = {};
@@ -22826,7 +23003,13 @@ function MSPCStep(cfg) {
       (k !== 'C' ? '<button type="button" class="btn btn-quiet btn-sm" data-m5="clear">Clear</button>' : '') +
       '<button type="button" class="btn btn-quiet btn-sm" data-m5="show" hidden>' + icon('eye') + ' Show me</button></div></div>';
   }
+  function syncReady() {                                            // v13: tells the universal Continue bar whether Check can run
+    if (!host) return;
+    const ready = done ? 'done' : k === 'C' ? '0' : (k === 'P' ? (found.size > 0 || on.size > 0) : (sel.size > 0 || on.size > 0 || !!phaseSel)) ? '1' : '0';
+    host.setAttribute('data-m5-k', k); host.setAttribute('data-m5-ready', ready);
+  }
   function paintPicked() {
+    syncReady();
     const el = qs('[data-m5-picked]', host);
     if (!el) return;
     if (k === 'M' || k === 'S') el.textContent = sel.size ? 'Tapped: ' + [...sel].join(', ') : 'Nothing tapped yet.';
@@ -22941,7 +23124,7 @@ function MSPCStep(cfg) {
     paintPicked(); cfg.onFeedback(null);
   }
   function finish(pass) {
-    done = true;
+    done = true; syncReady();
     board.setTapMode(null); board.setInteractive(null); board.setOnMove(null);
     board.setPosition(fen, { animate: false, lastMove: cfg.lastMove || null });
     board.unmark('hl-hint'); board.unmark('hl-key');
@@ -22956,8 +23139,8 @@ function MSPCStep(cfg) {
   function onClick(e) {
     const b = e.target.closest('button');
     if (!b || !host.contains(b) || b.disabled || done) return;
-    if (b.hasAttribute('data-m5-tag')) { const i = +b.getAttribute('data-m5-tag'); if (on.has(i)) on.delete(i); else on.add(i); b.setAttribute('aria-pressed', String(on.has(i))); b.classList.remove('is-yes', 'is-no'); return; }
-    if (b.hasAttribute('data-m5-phase')) { phaseSel = b.getAttribute('data-m5-phase'); qsa('[data-m5-phase]', host).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); return; }
+    if (b.hasAttribute('data-m5-tag')) { const i = +b.getAttribute('data-m5-tag'); if (on.has(i)) on.delete(i); else on.add(i); b.setAttribute('aria-pressed', String(on.has(i))); b.classList.remove('is-yes', 'is-no'); syncReady(); return; }
+    if (b.hasAttribute('data-m5-phase')) { phaseSel = b.getAttribute('data-m5-phase'); qsa('[data-m5-phase]', host).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); syncReady(); return; }
     if (b.hasAttribute('data-m5-side')) { setMode(b.getAttribute('data-m5-side')); return; }
     const a = b.getAttribute('data-m5');
     if (a === 'check') check(); else if (a === 'hint') hint(); else if (a === 'clear') clear(); else if (a === 'show') { cfg.onCheck(false); finish(false); }
@@ -29428,7 +29611,14 @@ const BotTrainer = (() => {
     quickMoveSec: 45, maxNudges: 3,                       // gentle "that was fast" reminders per game
     minPliesForLog: 10,                                   // shorter games do not count as a played game
     statsKeep: 60,
+    /* rating: shown strength. rand: chance that the bot plays a random legal move instead of its own choice (only below ~800,
+       where Stockfish's weakest setting is still too strong for a true beginner). */
     levels: [
+      { id: 'l300', label: '≈ 300 (absolute beginner)', rating: 300, skill: 0, depth: 1, mt: 40, rand: 0.55 },
+      { id: 'l400', label: '≈ 400', rating: 400, skill: 0, depth: 1, mt: 40, rand: 0.42 },
+      { id: 'l500', label: '≈ 500', rating: 500, skill: 0, depth: 1, mt: 50, rand: 0.30 },
+      { id: 'l600', label: '≈ 600', rating: 600, skill: 0, depth: 1, mt: 50, rand: 0.20 },
+      { id: 'l700', label: '≈ 700', rating: 700, skill: 0, depth: 1, mt: 60, rand: 0.10 },
       { id: 'l800', label: '≈ 800', skill: 0, depth: 1, mt: 60 },
       { id: 'l1000', label: '≈ 1000', skill: 2, depth: 2, mt: 80 },
       { id: 'l1200', label: '≈ 1200', skill: 5, depth: 4, mt: 120 },
@@ -29457,6 +29647,9 @@ const BotTrainer = (() => {
     onbPoints: ['Stockfish runs on your device: unlimited games, no cost.', 'On an inaccuracy or worse the game pauses and you fill in your MSPC framework to earn a Second Chance.', 'Pro: the Socratic AI coach reads your framework and guides you with questions, linked to the courses.'],
     welcome: 'Welcome. I will not give you moves. I will ask you questions. Take your time: a full MSPC pass on a critical position is 15 to 30 minutes, and doubt means the thinking is not finished yet.',
     pause: 'Pause. {move} cost you about {loss}% of your winning chances, so I took it back. I will not show you the better move yet. Fill in your MSPC framework and you get a Second Chance.',
+    forced: 'Understood: you play {move} anyway. Let us see how Stockfish answers it. This is a learning moment, not a penalty.',
+    punish: 'Stockfish answered with {reply} at full strength. The evaluation is now {ev} (from White’s side). Look at what that move attacks or exploits, then ask which MSPC step would have caught it.',
+    skipped: 'You skipped {step}. That is fine: you can still play on. Come back to this step when you want the full framework.',
     cleared: 'Second Chance cleared. That is the framework working: slow input, better output.',
     stillBad: 'Still not it ({loss}% lost). Look at your framework again: which step was the thinnest? You get one more Second Chance.',
     reveal: 'Here is the move that held the position: {best}. {why} I played it for you. Study the position, then keep going.',
@@ -29584,7 +29777,7 @@ const BotTrainer = (() => {
     const prefs = Object.assign({ level: 'l1400', side: 'w' }, Store.get(K_PREFS, {}) || {});
     const timers = [];
     const later = (fn, ms) => { const t = setTimeout(() => { if (alive) fn(); }, ms); timers.push(t); return t; };
-    const lvl = () => cfg().levels.filter((l) => l.id === prefs.level)[0] || cfg().levels[3];
+    const lvl = () => cfg().levels.filter((l) => l.id === prefs.level)[0] || cfg().levels.filter((l) => l.id === 'l1400')[0] || cfg().levels[0];
     const isPro = () => { try { return App.can('coachPaid'); } catch (e) { return false; } };
     const canType = () => { try { return App.can('coachChat'); } catch (e) { return false; } };
     const focusOn = () => { try { return !!V6.state().focus; } catch (e) { return false; } };
@@ -29670,11 +29863,11 @@ const BotTrainer = (() => {
     /* ----- persistent game ----- */
     function saveGame() {
       if (!S || S.over) { Store.del(K_GAME); return; }
-      Store.set(K_GAME, { v: 1, pgn: S.g.pgn(), side: S.side, level: S.level, startedAt: S.startedAt, id: S.id, rec: S.rec, c: { inacc: S.inacc, mist: S.mist, blund: S.blund, second: S.second, cleared: S.cleared, wpHits: S.wpHits, assisted: S.assisted, nudges: S.nudges, searches: S.searches, engineMs: S.engineMs, depthSum: S.depthSum }, last: S.lastMove || null });
+      Store.set(K_GAME, { v: 1, pgn: S.g.pgn(), side: S.side, level: S.level, startedAt: S.startedAt, id: S.id, rec: S.rec, c: { inacc: S.inacc, mist: S.mist, blund: S.blund, forced: S.forced, second: S.second, cleared: S.cleared, wpHits: S.wpHits, assisted: S.assisted, nudges: S.nudges, searches: S.searches, engineMs: S.engineMs, depthSum: S.depthSum }, last: S.lastMove || null });
     }
     function fresh(side, level) {
       return { g: new Chess(), side, level, status: 'idle', startedAt: Date.now(), id: 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), token: 0, rec: [], chat: [],
-        inacc: 0, mist: 0, blund: 0, second: 0, cleared: 0, wpHits: 0, assisted: 0, nudges: 0, searches: 0, engineMs: 0, depthSum: 0, wpIds: {}, over: false,
+        inacc: 0, mist: 0, blund: 0, second: 0, cleared: 0, wpHits: 0, assisted: 0, nudges: 0, searches: 0, engineMs: 0, depthSum: 0, wpIds: {}, forced: 0, punish: false, over: false,
         fenBefore: '', evalP: null, moveStart: 0, attempts: 0, pending: null, fw: null, lastMove: null, unsure: 0, gaveUp: false };
     }
 
@@ -29784,7 +29977,7 @@ const BotTrainer = (() => {
       board.setInteractive(null);
       Sound.bad();
       const prev = S.fw;
-      S.fw = { step: 0, round: prev ? prev.round + 1 : 1, M: prev ? prev.M : { chips: [], text: '' }, S: prev ? prev.S : { feats: [], phase: '', text: '' }, P: prev ? prev.P : { picked: [], text: '' }, C: prev ? prev.C : { line: '' }, notes: {} };
+      S.fw = { step: 0, skipped: {}, round: prev ? prev.round + 1 : 1, M: prev ? prev.M : { chips: [], text: '' }, S: prev ? prev.S : { feats: [], phase: '', text: '' }, P: prev ? prev.P : { picked: [], text: '' }, C: prev ? prev.C : { line: '' }, notes: {} };
       if (S.fw.round === 1) say('bot', T.pause.replace('{move}', '**' + S.pending.san + '**').replace('{loss}', Math.round(v.loss)));
       else say('bot', 'Take the framework again, slowly, with your last answers still in place. Change what the board is telling you to change.');
       matchWorkingPoint(mv, v);
@@ -29830,22 +30023,39 @@ const BotTrainer = (() => {
       board.setArrows([{ from: best.slice(0, 2), to: best.slice(2, 4) }]);
       say('bot', T.reveal.replace('{best}', '**' + san + '**').replace('{why}', why));
       paintAct(); paintStatus();
-      later(() => {
-        if (!S || S.over) return;
+      const playBest = () => {
+        if (!S || S.over || S.status !== 'revealed') return;
         const m2 = S.g.move({ from: best.slice(0, 2), to: best.slice(2, 4), promotion: best[4] || 'q' });
-        if (!m2) return;
+        if (!m2) { retryTurn(); return; }
         S.lastMove = { from: m2.from, to: m2.to };
         board.setArrows([]);
         board.setPosition(S.g.fen(), { lastMove: S.lastMove, sound: m2.captured ? 'capture' : 'move' });
         saveGame(); botTurn();
-      }, 3200);
+      };
+      S.revealPlay = playBest;
+      later(playBest, 7000);
+    }
+    /* Play the paused move anyway: the player overrides the interrogation and Stockfish answers it at full strength. */
+    function forceMove() {
+      if (!S || S.over || S.status !== 'paused' || !S.pending) return;
+      const p = S.pending, mv = S.g.move({ from: p.uci.slice(0, 2), to: p.uci.slice(2, 4), promotion: p.uci[4] || 'q' });
+      if (!mv) { say('bot', 'That move is no longer possible. Try another move.'); retryTurn(); return; }
+      S.forced++; S.punish = true;
+      S.lastMove = { from: mv.from, to: mv.to };
+      board.setArrows([]); board.clearMarks();
+      board.setPosition(S.g.fen(), { lastMove: S.lastMove, sound: mv.captured ? 'capture' : 'move' });
+      say('me', 'I will play ' + mv.san + ' anyway.');
+      say('bot', T.forced.replace('{move}', '**' + mv.san + '**'));
+      S.fw = null; S.pending = null;
+      saveGame(); botTurn();
     }
     function submitFramework() {
       Activity.log('m', 1);
       S.status = 'think'; S.moveStart = Date.now();
-      const fb = S.fw.notes;
-      say('bot', 'Framework saved. ' + (fb.C || '') + ' Now take the move back and play it again, slowly.');
+      const fb = S.fw.notes, sk = S.fw.skipped || {}, filled = STEPS.filter((k) => !sk[k]).length;
+      say('bot', filled ? 'Framework saved. ' + (sk.C ? '' : (fb.C || '')) + ' Now take the move back and play it again, slowly.' : 'Moving on without a framework this time. Take the move back and play it again, or choose another move.');
       retryTurn();
+      if (!filled) return;
       if (isPro() && AI.on()) {
         if (Dex.aiCan()) aiFeedback('framework'); else say('bot', T.noToken);
       } else if (AI.on() && tokens() >= 1 && Dex.aiCan()) {
@@ -29882,9 +30092,11 @@ const BotTrainer = (() => {
           '<p class="small ' + (okLine ? 'bt-ok' : 'muted') + '" id="bt-cline">' + (fw.C.line.trim() ? esc(lineNote(lp, need)) : 'Nothing yet.') + '</p>';
       }
       const ready = stepReady();
-      return dots + body + '<div class="btn-row bt-nav"><button type="button" class="btn btn-primary btn-sm" data-bt="next"' + (ready ? '' : ' disabled') + '>' + (fw.step === 3 ? 'Check my framework' : 'Continue') + '</button>' +
+      return dots + body + '<div class="btn-row bt-nav"><button type="button" class="btn btn-primary btn-sm" data-bt="next">' + (fw.step === 3 ? (ready ? 'Check my framework' : 'Skip and continue') : (ready ? 'Continue' : 'Skip this step')) + '</button>' +
         (fw.step > 0 ? '<button type="button" class="btn btn-quiet btn-sm" data-bt="prev">Back</button>' : '') +
-        '<button type="button" class="btn btn-quiet btn-sm" data-bt="giveup">Show me the better move</button></div>';
+        '<button type="button" class="btn btn-quiet btn-sm" data-bt="giveup">Show me the better move</button>' +
+        '<button type="button" class="btn btn-ghost btn-sm" data-bt="force">Play ' + esc(S.pending ? S.pending.san : 'my move') + ' anyway</button></div>' +
+        '<p class="small muted bt-skiphint">Nothing here is mandatory. You can skip a step, play your move anyway, or see the better move.</p>';
     }
     function lineNote(lp, need) {
       if (lp.bad) return lp.plies.length + ' legal ply' + (lp.plies.length === 1 ? '' : 's') + ', then “' + lp.bad + '” is not legal there.';
@@ -29923,7 +30135,10 @@ const BotTrainer = (() => {
     }
     function nextStep() {
       const fw = S.fw, k = STEPS[fw.step];
-      const fb = stepFeedback(k);
+      const skipped = !stepReady();
+      fw.skipped = fw.skipped || {};
+      if (skipped) fw.skipped[k] = 1; else delete fw.skipped[k];
+      const fb = skipped ? T.skipped.replace('{step}', STEP_NAME[k]) : stepFeedback(k);
       fw.notes[k] = fb;
       say('bot', fb);
       if (fw.step < 3) { fw.step++; paintAct(); return; }
@@ -29934,7 +30149,7 @@ const BotTrainer = (() => {
       if (!el || !S || !S.fw) return;
       const k = el.getAttribute('data-bt-in'), v = el.value;
       if (k === 'M') S.fw.M.text = v; else if (k === 'S') S.fw.S.text = v; else if (k === 'P') S.fw.P.text = v; else S.fw.C.line = v;
-      const btn = qs('[data-bt="next"]', elAct); if (btn) btn.disabled = !stepReady();
+      const btn = qs('[data-bt="next"]', elAct); if (btn) { const rd = stepReady(); btn.textContent = S.fw.step === 3 ? (rd ? 'Check my framework' : 'Skip and continue') : (rd ? 'Continue' : 'Skip this step'); }
       if (k === 'C') { const out = qs('#bt-cline', elAct); if (out) { const lp = parseLine(S.fenBefore, v), need = cfg().minCalcPlies; out.textContent = v.trim() ? lineNote(lp, need) : 'Nothing yet.'; out.className = 'small ' + (stepReady() ? 'bt-ok' : 'muted'); } }
     }
     function onChip(c) {
@@ -29962,7 +30177,7 @@ const BotTrainer = (() => {
       else if (S.status === 'think') h = '<p class="bt-hint">' + (S.attempts ? '<b>Second Chance.</b> Your framework is saved. Play your move again, slowly.' : 'Your move. Take the time you need. If you are doubting, the thinking is not finished yet.') + '</p>' + typeRow();
       else if (S.status === 'checking') h = '<p class="bt-hint">Checking your move with Stockfish on this device…</p>';
       else if (S.status === 'bot') h = '<p class="bt-hint">The bot is thinking…</p>';
-      else if (S.status === 'revealed') h = '<p class="bt-hint">Study the arrow on the board. The move is played for you in a moment.</p>';
+      else if (S.status === 'revealed') h = '<p class="bt-hint">Study the arrow on the board. The move is played for you in a few seconds, or press Continue when you are ready.</p><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-bt="after-reveal">Continue</button></div>';
       else h = '<p class="bt-hint">' + (eng === 'loading' ? 'Loading Stockfish…' : 'Press New game to start.') + '</p>';
       if (S.status !== 'paused' && S.status !== 'over' && eng !== 'failed') h += '';
       elAct.innerHTML = h;
@@ -30030,7 +30245,7 @@ const BotTrainer = (() => {
       }
       const first = S.rec, plies = S.g.history().length, accs = first.map((x) => accuracyOf(x.loss)), acc = accs.length ? Math.round(accs.reduce((a, b) => a + b, 0) / accs.length * 10) / 10 : 0;
       const ms = first.map((x) => x.ms).filter((x) => x > 0), avg = ms.length ? Math.round(ms.reduce((a, b) => a + b, 0) / ms.length / 1000) : 0, mx = ms.length ? Math.round(Math.max.apply(null, ms) / 1000) : 0;
-      const rec = { id: S.id, at: Date.now(), lv: lvl().elo || null, res, pl: plies, acc, in: S.inacc, mi: S.mist, bl: S.blund, sc: S.second, ok: S.cleared, avg, max: mx, wp: S.wpHits };
+      const rec = { id: S.id, at: Date.now(), lv: lvl().elo || lvl().rating || null, res, pl: plies, acc, in: S.inacc, mi: S.mist, bl: S.blund, sc: S.second, ok: S.cleared, avg, max: mx, wp: S.wpHits };
       if (plies >= cfg().minPliesForLog) { Activity.log('b', 1); Activity.addGame(rec); pushStat(rec); }
       const title = { win: 'You won', loss: 'You lost', draw: 'Draw', abandoned: 'Game ended' }[res];
       S.sum = { title, acc: Math.round(acc), bad: S.inacc + ' / ' + S.mist + ' / ' + S.blund, sc: S.second, ok: S.cleared, avg: fmtClock(avg * 1000), searches: S.searches, depth: S.searches ? Math.round(S.depthSum / S.searches) : 0, secs: Math.round(S.engineMs / 1000) };
@@ -30041,20 +30256,25 @@ const BotTrainer = (() => {
       if (!alive || !S) return;
       if (S.g.game_over()) { finish(); return; }
       S.status = 'bot'; S.attempts = 0; paintAct(); paintStatus();
-      const tok = S.token, L = lvl(), fen = S.g.fen(), t0 = Date.now();
+      const tok = S.token, L = lvl(), fen = S.g.fen(), t0 = Date.now(), punish = S.punish;
+      S.punish = false;
       let r = null;
-      try { r = await search(fen, { movetime: L.mt, depthCap: L.depth, skill: L.skill, elo: L.elo }); } catch (e) { r = null; }
+      const slip = !punish && L.rand && Math.random() < L.rand;   // beginner levels: sometimes a random legal move
+      if (!slip) {
+        try { r = await search(fen, punish ? { movetime: 1000 } : { movetime: L.mt, depthCap: L.depth, skill: L.skill, elo: L.elo }); } catch (e) { r = null; }
+      }
       if (!alive || !S || tok !== S.token) return;
       const wait = Math.max(0, 500 - (Date.now() - t0));
       if (wait) await sleep(wait);
       if (!alive || !S || tok !== S.token) return;
       let mv = null;
-      const u = r && r.best;
+      const u = slip ? null : r && r.best;
       if (u) mv = S.g.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] || 'q' });
       if (!mv) { const all = S.g.moves({ verbose: true }); if (all.length) mv = S.g.move(all[Math.floor(Math.random() * all.length)]); }
       if (!mv) { finish(); return; }
       S.lastMove = { from: mv.from, to: mv.to };
       board.setPosition(S.g.fen(), { lastMove: S.lastMove, sound: mv.captured ? 'capture' : 'move' });
+      if (punish && r && r.lines && r.lines[0]) say('bot', T.punish.replace('{reply}', '**' + mv.san + '**').replace('{ev}', Engine.fmt(r.lines[0])));
       saveGame();
       if (S.g.game_over()) { finish(); return; }
       startTurn();
@@ -30078,7 +30298,9 @@ const BotTrainer = (() => {
       else if (a === 'resign') { if (S && !S.over && await confirmSheet('Resign?', 'You lose this game.', 'Resign')) finish('loss'); }
       else if (a === 'next') nextStep();
       else if (a === 'prev') { S.fw.step = Math.max(0, S.fw.step - 1); paintAct(); }
-      else if (a === 'giveup') { if (S && S.pending) { S.gaveUp = true; S.attempts = cfg().maxSecondChances; say('me', 'I would like to see the better move.'); reveal({ from: '', to: '' }, { best: S.pending.best }, S.fenBefore, false); } }
+      else if (a === 'force') forceMove();
+      else if (a === 'after-reveal') { if (S && S.revealPlay) S.revealPlay(); }
+      else if (a === 'giveup') { if (S && S.pending && S.status === 'paused') { S.gaveUp = true; S.attempts = cfg().maxSecondChances; say('me', 'I would like to see the better move.'); reveal({ from: '', to: '' }, { best: S.pending.best }, S.fenBefore, false); } }
       else if (a === 'send') sendTyped();
       else if (a === 'unlock') { try { openUnlock(gateLevel('coachChat'), 'The Socratic coach chat'); } catch (er) { location.hash = '#upgrades'; } }
       else if (a === 'retry-engine') { await Engine.load(); paintBar(); paintAct(); if (Engine.status() === 'ready' && S && !S.over) { if (S.g.turn() === S.side) startTurn(); else botTurn(); } }
@@ -30216,23 +30438,45 @@ const Feedback = (() => {
     const day = dayKey(new Date()), s = Store.get(K_LOG, null) || {};
     Store.set(K_LOG, { d: day, n: (s.d === day ? (+s.n || 0) : 0) + 1, last: Date.now() });
   }
+  /* v13: social-proof fields. Columns come from 006_feedback_social_proof.sql; when they are not installed yet the
+     same values travel inside metadata.social, so nothing a player writes is lost. */
+  const SOCIAL = ['rating', 'elo_progress', 'video_question', 'showcase_ok'];
+  const MAX_ELO = 300, MAX_Q = 600;
+  const cleanOne = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
+  const starsText = (n) => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+  function socialOf(r) {
+    const md = r && r.metadata && typeof r.metadata === 'object' && r.metadata.social && typeof r.metadata.social === 'object' ? r.metadata.social : {};
+    return { rating: clamp(Math.round(+(r.rating != null ? r.rating : md.rating) || 0), 0, 5), elo: String(r.elo_progress != null ? r.elo_progress : md.elo_progress || ''), video: String(r.video_question != null ? r.video_question : md.video_question || ''), ok: !!(r.showcase_ok != null ? r.showcase_ok : md.showcase_ok) };
+  }
+  const legacy = (row) => {
+    const o = Object.assign({}, row), social = {};
+    SOCIAL.forEach((k) => { if (k in o) { if (o[k] != null && o[k] !== false && o[k] !== '') social[k] = o[k]; delete o[k]; } });
+    o.metadata = Object.assign({}, o.metadata, { social });
+    return o;
+  };
+  const send = (row) => TokenFlag.call('/rest/v1/' + table(), { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify(row) });
   /* retry: true when sending again later can work (offline, server trouble, table not installed yet). */
   async function post(row) {
     if (!TokenFlag.configured()) return { ok: false, retry: true, error: 'off' };
     try {
-      const res = await TokenFlag.call('/rest/v1/' + table(), { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify(row) });
+      let res = await send(row);
+      if (!res.ok && res.status === 400 && SOCIAL.some((k) => k in row)) res = await send(legacy(row));   // the new columns are not installed yet
       if (res.ok) return { ok: true };
       return { ok: false, retry: !(res.status === 400 || res.status === 422), error: 'http_' + res.status };
     } catch (e) { return { ok: false, retry: true, error: 'network' }; }
   }
   async function submit(input) {
     const message = cleanMsg(input.message), category = cat(input.category).id, email = norm(input.email).toLowerCase();
-    if (message.length < MIN_MSG) return { ok: false, message: 'Please write at least a few words so we can understand your feedback.' };
+    const rating = clamp(Math.round(+input.rating || 0), 0, 5), elo = cleanOne(input.elo, MAX_ELO), video = cleanOne(input.video, MAX_Q);
+    if (!rating && !elo && !video && message.length < MIN_MSG) return { ok: false, message: 'Add a star rating, or write a few words in at least one of the boxes.' };
+    if (message && message.length < MIN_MSG && !rating && !elo && !video) return { ok: false, message: 'Please write at least a few words so we can understand your feedback.' };
     if (email && !emailOk(email)) return { ok: false, message: 'That email address does not look right. Check it, or leave the field empty.' };
     const gate = allowed();
     if (!gate.ok) return { ok: false, message: gate.why };
     if (email) Store.set(K_EMAIL, email);
-    const row = { user_email: email || null, category, message, metadata: metadata(), status: 'pending' };
+    const body = (message || [rating ? 'Rating ' + rating + '/5' : '', elo ? 'ELO progress: ' + elo : '', video ? 'Video question: ' + video : ''].filter(Boolean).join(' | ')).slice(0, MAX_MSG);
+    const row = { user_email: email || null, category, message: body.length >= MIN_MSG ? body : body + ' (no text)', rating: rating || null, elo_progress: elo || null, video_question: video || null,
+      showcase_ok: !!input.showcase && !!(elo || video || rating), metadata: metadata(), status: 'pending' };
     const r = await post(row);
     if (r.ok) { noteSent(); return { ok: true, message: 'Thank you! Your feedback has been sent.' }; }
     if (!r.retry) return { ok: false, message: 'Your message was not accepted. Please shorten it a little and try again.' };
@@ -30255,44 +30499,51 @@ const Feedback = (() => {
     } finally { flushing = false; }
   }
 
-  /* ---------- the form ---------- */
+  /* ---------- the form (v13: rating, results, video question, ideas and bugs) ---------- */
   let sheetOpen = false, draft = null;
   function open(opts) {
     if (!enabled() || sheetOpen) return;
     sheetOpen = true;
     const keep = draft && Date.now() - draft.at < 30 * 60000 ? draft : null;   // an unsent message survives an accidental close
-    const st = { category: (keep && keep.category) || (opts && opts.category) || 'bug', message: (keep && keep.message) || '', email: (keep && keep.email) || String(Store.get(K_EMAIL, '') || ''), sent: false };
+    const st = { category: (keep && keep.category) || (opts && opts.category) || 'feature', message: (keep && keep.message) || '', email: (keep && keep.email) || String(Store.get(K_EMAIL, '') || ''),
+      rating: (keep && keep.rating) || 0, elo: (keep && keep.elo) || '', video: (keep && keep.video) || '', showcase: !!(keep && keep.showcase), sent: false };
     draft = null;
+    const dirty = () => !!(norm(st.message) || norm(st.elo) || norm(st.video) || st.rating);
     const radios = CATS.map((c) => '<label class="fb-cat"><input type="radio" name="category" value="' + c.id + '"' + (st.category === c.id ? ' checked' : '') + '><span>' + icon(c.icon) + '<b>' + esc(c.label) + '</b></span></label>').join('');
+    const stars = [1, 2, 3, 4, 5].map((n) => '<button type="button" role="radio" data-fb-star="' + n + '" aria-checked="false" aria-label="' + n + (n === 1 ? ' star' : ' stars') + '">★</button>').join('');
     openSheet({
       title: 'Send feedback', noFocus: true,
-      onClose() { sheetOpen = false; if (!st.sent && norm(st.message)) draft = { category: st.category, message: st.message, email: st.email, at: Date.now() }; },
+      onClose() { sheetOpen = false; if (!st.sent && dirty()) draft = { category: st.category, message: st.message, email: st.email, rating: st.rating, elo: st.elo, video: st.video, showcase: st.showcase, at: Date.now() }; },
       html: '<form class="stack fb-form" data-fb-form novalidate autocomplete="off">' +
-        '<p class="small muted fb-intro">Found a bug, or have an idea? Tell us. Every message is read.</p>' +
-        '<div class="field"><span class="field-label" id="fb-cat-label">What is this about?</span><div class="fb-cats" role="radiogroup" aria-labelledby="fb-cat-label">' + radios + '</div></div>' +
-        '<label class="field"><span class="field-label">Your message</span><textarea class="input" name="message" rows="5" maxlength="' + MAX_MSG + '" required aria-describedby="fb-count"></textarea>' +
-        '<span class="small dim fb-count" id="fb-count" data-fb-count>0 / ' + MAX_MSG + '</span></label>' +
+        '<p class="small muted fb-intro">Every message is read. Fill in whatever fits: one box is enough.</p>' +
+        '<div class="field"><span class="fb-sec">1 · Rating</span><span class="field-label" id="fb-rate-label">How do you rate the hub so far?</span><div class="fb-stars" role="radiogroup" aria-labelledby="fb-rate-label">' + stars + '</div></div>' +
+        '<label class="field"><span class="fb-sec">2 · ELO progress / results</span><span class="field-label">What ELO jumps or results have you achieved? <small class="muted">(optional)</small></span><input class="input" name="elo" maxlength="' + MAX_ELO + '" placeholder="For example: 1180 to 1420 in 10 weeks, or my first tournament win"></label>' +
+        '<label class="field"><span class="fb-sec">3 · Video question for Kyenzo</span><span class="field-label">Ask a strategy or chess question for an upcoming video <small class="muted">(optional)</small></span><textarea class="input" name="video" rows="3" maxlength="' + MAX_Q + '" placeholder="For example: how do I stop blundering in time trouble?"></textarea></label>' +
+        '<div class="field"><span class="fb-sec">4 · App ideas / bug reports</span><span class="field-label" id="fb-cat-label">What is this about?</span><div class="fb-cats" role="radiogroup" aria-labelledby="fb-cat-label">' + radios + '</div></div>' +
+        '<label class="field"><textarea class="input" name="message" rows="4" maxlength="' + MAX_MSG + '" aria-label="Your idea or bug report" aria-describedby="fb-count"></textarea><span class="small dim fb-count" id="fb-count" data-fb-count>0 / ' + MAX_MSG + '</span></label>' +
         '<label class="field"><span class="field-label">Email <small class="muted">(optional, only if you would like a reply)</small></span><input class="input" type="email" name="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" maxlength="254" placeholder="you@example.com"></label>' +
+        '<label class="fb-consent"><input type="checkbox" name="showcase"><span>It is OK to feature my result or question (first name only, no email) in videos and community posts.</span></label>' +
         '<p class="small dim fb-note">Your message is sent together with a few technical details (the page you are on, your rating, Free or Pro, the app version and recent error messages) so problems can be fixed faster. <a href="#privacy" data-close>Privacy policy</a></p>' +
         '<p class="form-msg" data-fb-msg role="status" aria-live="polite"></p>' +
         '<div class="btn-row"><button type="submit" class="btn btn-primary" data-fb-send>' + icon('paper-plane') + ' Send feedback</button><button type="button" class="btn btn-ghost" data-close>Cancel</button></div></form>',
       onMount(sh) {
-        const form = qs('[data-fb-form]', sh.el), ta = form.elements.message, em = form.elements.email, msg = qs('[data-fb-msg]', form), count = qs('[data-fb-count]', form), send = qs('[data-fb-send]', form);
-        ta.value = st.message; em.value = st.email;
-        const paint = () => { ta.placeholder = cat(st.category).hint; count.textContent = ta.value.length + ' / ' + MAX_MSG; };
+        const form = qs('[data-fb-form]', sh.el), ta = form.elements.message, em = form.elements.email, elo = form.elements.elo, vq = form.elements.video, ok = form.elements.showcase, msg = qs('[data-fb-msg]', form), count = qs('[data-fb-count]', form), send = qs('[data-fb-send]', form);
+        ta.value = st.message; em.value = st.email; elo.value = st.elo; vq.value = st.video; ok.checked = st.showcase;
+        const paintStars = () => qsa('[data-fb-star]', form).forEach((b) => { const n = +b.getAttribute('data-fb-star'); b.classList.toggle('is-on', n <= st.rating); b.setAttribute('aria-checked', String(n === st.rating)); });
+        const paint = () => { ta.placeholder = cat(st.category).hint; count.textContent = ta.value.length + ' / ' + MAX_MSG; paintStars(); };
         paint();
-        form.addEventListener('change', (e) => { if (e.target.name === 'category') { st.category = e.target.value; paint(); } });
-        form.addEventListener('input', (e) => { if (e.target === ta) { st.message = ta.value; paint(); } else if (e.target === em) st.email = em.value; });
+        form.addEventListener('click', (e) => { const b = e.target.closest('[data-fb-star]'); if (!b) return; const n = +b.getAttribute('data-fb-star'); st.rating = st.rating === n ? 0 : n; paintStars(); });
+        form.addEventListener('change', (e) => { if (e.target.name === 'category') { st.category = e.target.value; paint(); } else if (e.target === ok) st.showcase = ok.checked; });
+        form.addEventListener('input', (e) => { if (e.target === ta) { st.message = ta.value; paint(); } else if (e.target === em) st.email = em.value; else if (e.target === elo) st.elo = elo.value; else if (e.target === vq) st.video = vq.value; });
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           msg.textContent = ''; msg.className = 'form-msg';
           send.disabled = true; msg.textContent = 'Sending…';
-          const r = await submit({ category: st.category, message: ta.value, email: em.value });
+          const r = await submit({ category: st.category, message: ta.value, email: em.value, rating: st.rating, elo: elo.value, video: vq.value, showcase: ok.checked });
           if (!r.ok) { send.disabled = false; msg.textContent = r.message; msg.className = 'form-msg is-bad'; return; }
           st.sent = true;
           form.outerHTML = '<div class="fb-done" role="status"><span class="fb-done-ico">' + icon(r.queued ? 'cloud-arrow-up' : 'check') + '</span><h3>' + (r.queued ? 'Saved' : 'Thank you!') + '</h3><p class="muted">' + esc(r.message) + '</p><button type="button" class="btn btn-primary" data-close>Done</button></div>';
         });
-        try { if (window.matchMedia && matchMedia('(pointer:fine)').matches) ta.focus({ preventScroll: true }); } catch (e) { /* on a phone the keyboard waits for a tap */ }
       }
     });
   }
@@ -30370,8 +30621,13 @@ const Feedback = (() => {
       'Device: ' + (md.device || '') + ' · ' + (md.user_agent || ''),
       'Recent errors: ' + (errs.length ? '' : 'none')].concat(errs.map((x) => ' - ' + (x && x.message ? x.message : '') + (x && x.count > 1 ? ' (x' + x.count + ')' : '') + (x && x.seconds_ago != null ? ' [' + x.seconds_ago + 's before sending]' : ''))).join('\n');
   }
-  const reportText = (r) => '[' + cat(r.category).label + '] ' + (r.message || '') + '\n\nFrom: ' + (r.user_email || 'anonymous') + '\n' + detailsText(r);
+  const reportText = (r) => '[' + cat(r.category).label + '] ' + (r.message || '') + (() => { const so = socialOf(r); return (so.rating ? '\nRating: ' + so.rating + '/5' : '') + (so.elo ? '\nELO / results: ' + so.elo : '') + (so.video ? '\nVideo question: ' + so.video : '') + (so.ok ? '\nOK to feature: yes' : ''); })() + '\n\nFrom: ' + (r.user_email || 'anonymous') + '\n' + detailsText(r);
 
+  function socialHTML(r) {
+    const so = socialOf(r);
+    if (!so.rating && !so.elo && !so.video) return '';
+    return '<div class="fbq-social">' + (so.rating || so.ok ? '<p>' + (so.rating ? '<span class="fb-stars-ro" title="Rating">' + starsText(so.rating) + '</span> ' : '') + (so.ok ? '<span class="fb-badge is-ok">OK to feature</span>' : '') + '</p>' : '') + (so.elo ? '<p><b>ELO / results:</b> ' + esc(so.elo) + '</p>' : '') + (so.video ? '<p><b>Video question:</b> ' + esc(so.video) + '</p>' : '') + '</div>';
+  }
   function rowHTML(r, i) {
     const c = cat(r.category), s = STATUS[r.status] ? r.status : 'pending', md = r.metadata && typeof r.metadata === 'object' ? r.metadata : {};
     const em = norm(r.user_email), mail = emailOk(em) ? 'mailto:' + encodeURIComponent(em) + '?subject=' + encodeURIComponent('Re: your Lanckrietchess Training Hub feedback') + '&body=' + encodeURIComponent('Hi,\n\nThanks for your feedback:\n"' + String(r.message || '').slice(0, 300) + '"\n\n') : '';
@@ -30381,7 +30637,7 @@ const Feedback = (() => {
     const acts = (s === 'pending' ? btn('reviewed', 'Mark reviewed', 'eye') + btn('resolved', 'Resolve', 'check') : s === 'reviewed' ? btn('resolved', 'Resolve', 'check') + btn('pending', 'Back to pending', 'rotate-left') : btn('pending', 'Reopen', 'rotate-left')) +
       (mail ? '<a class="btn btn-ghost btn-sm" href="' + esc(mail) + '">' + icon('envelope') + ' Reply</a>' : '') + btn('copy', 'Copy', 'copy') + btn('delete', 'Delete', 'trash', 'btn-quiet');
     return '<article class="fbq-item is-' + s + '"><div class="fbq-head"><span class="fb-badge is-' + c.id + '">' + esc(c.label) + '</span><span class="fb-badge is-' + s + '">' + STATUS[s] + '</span><span class="fbq-when">' + esc(when(r.created_at)) + '</span></div>' +
-      '<p class="fbq-msg">' + esc(r.message || '') + '</p>' +
+      '<p class="fbq-msg">' + esc(r.message || '') + '</p>' + socialHTML(r) +
       '<p class="fbq-meta">' + (em ? esc(em) : 'No email') + (meta ? ' · ' + esc(meta) : '') + '</p>' +
       '<details class="fbq-tech"><summary>Technical details' + (nErr ? ' · ' + nErr + (nErr === 1 ? ' error' : ' errors') : '') + '</summary><pre>' + esc(detailsText(r)) + '</pre></details>' +
       '<div class="btn-row fbq-act">' + acts + '</div></article>';
@@ -30473,9 +30729,876 @@ const Feedback = (() => {
   return { open, menuRow, accountBtn, rememberEmail, bind, flush, adminSheet, adminRow, paintCount, _t: { metadata, submit, readQ, reportText } };
 })();
 
+/* ==========================================================================
+   v13: THE UNIVERSAL CONTINUE BAR
+   One fixed bar at the bottom of the screen for every interactive flow (Trim interrogation, MSPC steps and
+   Priorities, the stage drills, the Bot Trainer wizard, the coach chat and the new Board Vision, Themes and
+   Survival trainers). It always says what to do next:
+   - waiting: a quiet, locked button with a short hint ("Select required moves to proceed");
+   - ready: a bright "CONTINUE ➔" that runs the step's real action (check, submit, next).
+   Flows are resolved from their own state or, for the older trainers, from what is on screen. Each resolver returns
+   null (the bar hides) or { ready, hint, next, run }. The bar never decides anything itself: it presses the button
+   the flow already has, so nothing can get out of sync.
+   ========================================================================== */
+const ContinueBar = (() => {
+  const ORDER = ['trim', 'vision', 'survival', 'themes', 'stage', 'plan', 'puzzle', 'bot', 'coach'];
+  const HINT_M5 = { M: 'Tap the key squares or pick a tag to proceed', S: 'Pick the phase and tap what matters to proceed', P: 'Select required moves to proceed', C: 'Play your candidate move to proceed' };
+  const HINT_BT = { M: 'Pick a chip and describe their threat to proceed', S: 'Pick features, a phase and a plan to proceed', P: 'Tap your forcing moves and say which first', C: 'Write a legal line of at least 3 plies to proceed' };
+  const flows = {};
+  let el = null, btn = null, raf = 0, shown = '', started = false;
+  const txt = (n) => String(n ? n.textContent : '').replace(/\s+/g, ' ').trim();
+
+  /* ----- the older trainers, read from the screen ----- */
+  function stageFlow() {
+    const act = qs('#view [data-part="actions"]');
+    if (!act) return null;
+    const adv = qs('[data-act="advance"],[data-act="finish"],[data-act="next"],[data-act="next-chapter"]', act);
+    if (adv && !adv.disabled) return { ready: true, next: txt(adv).slice(0, 44), run: () => adv.click() };
+    const host = qs('#view [data-part="m5"]');
+    if (host && qs('.m5', host)) {
+      const k = host.getAttribute('data-m5-k') || '', chk = qs('[data-m5="check"]', host);
+      if (chk && !chk.disabled) return host.getAttribute('data-m5-ready') === '1' ? { ready: true, next: 'Checks your answer', run: () => chk.click() } : { ready: false, hint: HINT_M5[k] || 'Complete this step to proceed' };
+      if (!chk && k === 'C' && host.getAttribute('data-m5-ready') !== 'done') return { ready: false, hint: HINT_M5.C };
+      return null;
+    }
+    const stage = qs('#view [data-part="stage"]');
+    if (stage && !qs('[data-act="again"]', act)) {
+      if (qs('[data-part="line"]', stage)) return { ready: false, hint: 'Play the line on the board to proceed' };
+      const tip = txt(qs('.tap-hint', stage));
+      if (tip) return { ready: false, hint: /^tap/i.test(tip) ? 'Tap a square on the board to proceed' : 'Play the move on the board to proceed' };
+    }
+    return null;
+  }
+  function planFlow() {                                              // the Plan Check on the Middlegame page: what defines it, then a plan, then check
+    const b = qs('#view [data-v9="next"]') || qs('#view [data-v9="check"]') || qs('#view [data-v9="to-plan"]');
+    if (!b) return null;
+    const k = b.getAttribute('data-v9'), label = txt(b);
+    if (!b.disabled) return { ready: true, next: label.slice(0, 44), run: () => b.click() };
+    return { ready: false, hint: k === 'to-plan' ? 'Pick what defines the position to proceed' : 'Choose a plan to proceed' };
+  }
+  function puzzleFlow() {
+    const p = qs('#view #pz-panel');
+    if (!p) return null;
+    const nx = qs('[data-pzx="next"]', p);
+    if (nx) return { ready: true, next: 'Next puzzle', run: () => nx.click() };
+    return qs('[data-pzx="hint"]', p) ? { ready: false, hint: 'Find the best move to proceed' } : null;
+  }
+  function botFlow() {
+    const b = qs('#view #bt-act [data-bt="next"]');
+    if (!b) return null;
+    const on = txt(qs('#view .bt-step.is-on')), label = txt(b);
+    return b.disabled ? { ready: false, hint: HINT_BT[on] || 'Complete this step to proceed' } : { ready: true, next: label === 'Continue' ? '' : label, run: () => b.click() };
+  }
+  function coachFlow() {
+    const f = qs('#view #coach-form');
+    if (!f) return null;
+    const inp = f.elements && f.elements.q, typed = !!(inp && inp.value.trim());
+    if (typed) return { ready: true, next: 'Sends your question to the coach', run: () => { if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); } };
+    const msgs = qsa('#coach-chat .msg-bot:not(.typing)'), last = msgs[msgs.length - 1];
+    if (last && qs('.msg-actions', last)) return { ready: false, hint: 'Pick a suggestion or type your question' };
+    return null;
+  }
+  const BUILTIN = { stage: stageFlow, plan: planFlow, puzzle: puzzleFlow, bot: botFlow, coach: coachFlow };
+
+  function resolve() {
+    if (qs('.sheet-wrap')) return null;                        // a dialog is open: it has its own buttons
+    for (const id of ORDER) {
+      const fn = flows[id] || BUILTIN[id];
+      if (!fn) continue;
+      let st = null;
+      try { st = fn(); } catch (e) { st = null; }
+      if (st) return st;
+    }
+    return null;
+  }
+  function ensure() {
+    if (el) return;
+    el = document.createElement('div');
+    el.id = 'cbar'; el.className = 'cbar'; el.hidden = true;
+    el.setAttribute('role', 'region'); el.setAttribute('aria-label', 'Next step');
+    el.innerHTML = '<div class="cbar-in"><button type="button" class="cbar-btn is-wait" id="cbar-btn" disabled aria-disabled="true"></button></div>';
+    document.body.appendChild(el);
+    btn = qs('#cbar-btn', el);
+    btn.addEventListener('click', () => {
+      const st = resolve();                                     // look again: the screen may have changed since the last paint
+      if (st && st.ready && st.run) { try { st.run(); } catch (e) { console.error(e); } }
+      schedule();
+    });
+  }
+  function paint(st) {
+    ensure();
+    const key = st ? (st.ready ? 'r|' + (st.next || '') : 'w|' + st.hint) : '';
+    if (key === shown) return;
+    shown = key;
+    if (!st) { el.hidden = true; document.body.classList.remove('has-cbar'); return; }
+    el.hidden = false; document.body.classList.add('has-cbar');
+    btn.disabled = !st.ready; btn.setAttribute('aria-disabled', String(!st.ready));
+    btn.className = 'cbar-btn ' + (st.ready ? 'is-ready' : 'is-wait');
+    btn.innerHTML = st.ready
+      ? (st.next ? '<small class="cbar-next">' + esc(st.next) + '</small>' : '') + '<span class="cbar-go">CONTINUE ➔</span>'
+      : icon('lock') + '<span class="cbar-hint">' + esc(st.hint) + '</span>';
+  }
+  function evaluate() { raf = 0; paint(resolve()); }
+  function schedule() { if (!raf) raf = requestAnimationFrame(evaluate); }
+  function start() {
+    if (started) return;
+    started = true; ensure();
+    const mo = new MutationObserver(schedule);
+    ['#view', '#layer'].forEach((s) => { const n = qs(s); if (n) mo.observe(n, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'hidden', 'aria-pressed', 'class', 'data-m5-ready'] }); });
+    ['input', 'change', 'click', 'keyup'].forEach((t) => document.addEventListener(t, schedule, true));
+    window.addEventListener('hashchange', () => setTimeout(schedule, 60));
+    schedule();
+  }
+  return {
+    start, poke: schedule, state: resolve,
+    register(id, fn) { flows[id] = fn; schedule(); },
+    unregister(id, fn) { if (!fn || flows[id] === fn) delete flows[id]; schedule(); }
+  };
+})();
+
+/* ==========================================================================
+   v13: BOARD VISION & FUNDAMENTALS  (#vision, under Think)
+   Three quick trainers that build the part of chess that happens before calculation: seeing the board.
+   1. Coordinates Blitz: a square name appears, tap it on a blank board (White or Black at the bottom).
+   2. Knight Navigation: walk the knight to the target in the fewest moves; the shortest route is shown afterwards.
+   3. Legal Move Blitz: a real, messy position; tap every legal destination of the marked piece (or, when you are in
+      check, every piece that can answer it). Pins and checks are exactly where this gets hard.
+   Everything is generated on the device. Personal bests live in localStorage (lc13-bv).
+   ========================================================================== */
+const BoardVision = (() => {
+  const K = 'lc13-bv', FILES = 'abcdefgh', EMPTY = '8/8/8/8/8/8/8/8 w - - 0 1';
+  const KN = [[1, 2], [2, 1], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]];
+  const MODES = [['coord', 'crosshairs', 'Coordinates Blitz', 'Name it, tap it'], ['knight', 'chess-knight', 'Knight Navigation', 'Shortest path wins'], ['legal', 'bolt', 'Legal Move Blitz', 'Every legal move, fast']];
+  const idx = (sq) => (sq.charCodeAt(0) - 97) + (parseInt(sq[1], 10) - 1) * 8;
+  const sqOf = (i) => FILES[i % 8] + (Math.floor(i / 8) + 1);
+  const nbrs = (i) => { const f = i % 8, r = Math.floor(i / 8); return KN.map((d) => [f + d[0], r + d[1]]).filter((p) => p[0] >= 0 && p[0] < 8 && p[1] >= 0 && p[1] < 8).map((p) => p[1] * 8 + p[0]); };
+  const NB = []; for (let i = 0; i < 64; i++) NB[i] = nbrs(i);
+  const DIST = [];                                                        // knight distance from every square to every square
+  for (let s = 0; s < 64; s++) { const d = new Array(64).fill(-1); d[s] = 0; const q = [s]; while (q.length) { const c = q.shift(); NB[c].forEach((n) => { if (d[n] < 0) { d[n] = d[c] + 1; q.push(n); } }); } DIST[s] = d; }
+  function path(a, b) {                                                   // one shortest route, as squares
+    const out = [a]; let c = idx(a); const t = idx(b);
+    while (c !== t) { const n = NB[c].filter((x) => DIST[x][t] === DIST[c][t] - 1); c = n[Math.floor(Math.random() * n.length)]; out.push(sqOf(c)); }
+    return out;
+  }
+  const lone = (sq) => { const f = sq.charCodeAt(0) - 97, r = parseInt(sq[1], 10), rows = []; for (let rk = 8; rk >= 1; rk--) rows.push(rk === r ? (f ? f : '') + 'N' + (7 - f ? 7 - f : '') : '8'); return rows.join('/') + ' w - - 0 1'; };
+  const load = () => { const s = Store.get(K, null); return s && typeof s === 'object' ? s : {}; };
+  const save = (s) => Store.set(K, s);
+  const rnd = (n) => Math.floor(Math.random() * n);
+  const fmtS = (n) => (Math.round(n * 10) / 10).toFixed(1);
+
+  function randomPosition() {
+    for (let tries = 0; tries < 40; tries++) {
+      const g = new Chess(), plies = 12 + rnd(34);
+      for (let i = 0; i < plies; i++) { const m = g.moves(); if (!m.length) break; g.move(m[rnd(m.length)]); }
+      if (!g.game_over() && g.moves().length >= 8) return g;
+    }
+    return new Chess();
+  }
+  function legalTask(g) {                                                  // what to find in this position
+    const mv = g.moves({ verbose: true });
+    if (g.in_check()) { const from = {}; mv.forEach((m) => { from[m.from] = 1; }); return { kind: 'check', focus: null, targets: Object.keys(from), side: g.turn() }; }
+    const by = {}; mv.forEach((m) => { (by[m.from] = by[m.from] || []).push(m.to); });
+    let list = Object.keys(by).filter((s) => by[s].length >= 2 && by[s].length <= 9);
+    if (!list.length) list = Object.keys(by);
+    const king = list.filter((s) => (g.get(s) || {}).type === 'k'), pick = king.length && Math.random() < 0.25 ? king[rnd(king.length)] : list[rnd(list.length)];
+    return { kind: 'piece', focus: pick, targets: by[pick].filter((x, i, a) => a.indexOf(x) === i), side: g.turn() };
+  }
+
+  function mount(view) {
+    const saved = load(), ui = { mode: MODES.some((m) => m[0] === saved.mode) ? saved.mode : 'coord', orient: saved.orient === 'black' ? 'black' : 'white', round: +saved.round === 60 ? 60 : 30, per: [0, 2, 3, 5].indexOf(+saved.per) >= 0 ? +saved.per : 5, level: ['easy', 'mid', 'hard'].indexOf(saved.level) >= 0 ? saved.level : 'easy', labels: !!saved.labels };
+    view.innerHTML = cmsBar() + '<p class="small"><a href="#think">' + icon('arrow-left') + ' Think</a></p>' +
+      '<header class="bv-head"><h1>' + icon('eye') + ' Board Vision &amp; Fundamentals</h1><p class="muted">Calculation starts with seeing. Three short drills that make the board automatic, so your thinking time goes to ideas instead of squares.</p></header>' +
+      '<nav class="theory-tabs three bv-modes" aria-label="Board Vision modes">' + MODES.map((m) => '<button type="button" class="theory-tab" data-bv-mode="' + m[0] + '">' + icon(m[1]) + '<b>' + m[2] + '</b><small>' + m[3] + '</small></button>').join('') + '</nav>' +
+      trainerShell('bv-board', 'bv-panel');
+    const host = qs('#bv-board', view), panel = qs('#bv-panel', view);
+    const board = Board(host, { orientation: ui.orient });
+    qs('[data-flip="bv-board"]', view).addEventListener('click', () => { ui.orient = board.orientation() === 'white' ? 'black' : 'white'; board.orientation(ui.orient); persist(); });
+    let ctl = null, alive = true, timers = [];
+    const later = (fn, ms) => { const t = setTimeout(() => { if (alive) fn(); }, ms); timers.push(t); return t; };
+    const persist = () => { const s = load(); Object.assign(s, { mode: ui.mode, orient: ui.orient, round: ui.round, per: ui.per, level: ui.level, labels: ui.labels }); save(s); };
+    const stats = () => { const s = load(); s.coord = s.coord || { best: 0, bestStreak: 0, plays: 0 }; s.knight = s.knight || { solved: 0, perfect: 0, bestRun: 0 }; s.legal = s.legal || { best: 0, plays: 0 }; return s; };
+    const seg = (key, items, cur) => '<div class="seg bv-seg" role="group">' + items.map((x) => '<button type="button" data-bvo="' + key + ':' + x[0] + '" aria-pressed="' + (String(x[0]) === String(cur)) + '">' + esc(x[1]) + '</button>').join('') + '</div>';
+    const flash = (sq, cls, ms) => { board.mark(sq, cls); later(() => board.unmark(cls), ms || 420); };
+    const reset = () => { board.setTapMode(null); board.setInteractive(null); board.setOnMove(null); board.clearMarks(); board.setArrows([]); };
+
+    /* ---------- 1. Coordinates Blitz ---------- */
+    function coordMode() {
+      let target = '', prev = '', score = 0, miss = 0, streak = 0, bestStreak = 0, left = 0, running = false, locked = false, iv = null, t0 = 0, over = false;
+      const intro = () => {
+        const b = stats().coord;
+        host.classList.toggle('bv-nolabels', !ui.labels);
+        panel.innerHTML = '<p class="st-kicker">Coordinates Blitz</p><h2 class="st-title">Find the square, fast</h2><p class="st-brief">A square name appears on a blank board. Tap that square. A wrong tap or a slow one resets your streak. Playing Black? Switch the side: the board turns with you.</p>' +
+          '<div class="bv-opts"><span class="small muted">Board side</span>' + seg('orient', [['white', 'White'], ['black', 'Black']], ui.orient) +
+          '<span class="small muted">Round length</span>' + seg('round', [[30, '30 s'], [60, '60 s']], ui.round) +
+          '<span class="small muted">Time per square</span>' + seg('per', [[5, '5 s'], [3, '3 s'], [2, '2 s'], [0, 'No limit']], ui.per) +
+          '<span class="small muted">Square labels</span>' + seg('labels', [['off', 'Hidden'], ['on', 'Shown']], ui.labels ? 'on' : 'off') + '</div>' +
+          '<p class="small muted">Best: <b>' + b.best + '</b> squares, longest streak <b>' + b.bestStreak + '</b>, ' + b.plays + (b.plays === 1 ? ' round' : ' rounds') + ' played.</p>' +
+          '<div class="st-actions"><button type="button" class="btn btn-primary" data-bv="start">' + icon('play') + ' Start the round</button></div>';
+        reset(); board.orientation(ui.orient); board.setPosition(EMPTY, { animate: false, lastMove: null });
+      };
+      function begin() {
+        score = miss = streak = bestStreak = 0; left = ui.round; running = true; over = false; locked = false;
+        host.classList.toggle('bv-nolabels', !ui.labels);
+        reset(); board.orientation(ui.orient); board.setPosition(EMPTY, { animate: false, lastMove: null }); board.setTapMode(onTap);
+        next(); clearInterval(iv); iv = setInterval(tick, 100);
+        scrollToEl(qs('.trainer', view));
+      }
+      function next() {
+        do { target = sqOf(rnd(64)); } while (target === prev); prev = target; t0 = Date.now(); draw();
+      }
+      function draw() {
+        panel.innerHTML = '<p class="st-kicker">Coordinates Blitz · ' + (ui.orient === 'white' ? 'White' : 'Black') + ' at the bottom</p><div class="bv-target" aria-live="assertive">' + esc(target) + '</div>' +
+          '<div class="bv-bar" aria-hidden="true"><i id="bv-time"></i></div><div class="bv-bar bv-bar-sq" aria-hidden="true"><i id="bv-per"></i></div>' +
+          '<div class="bv-score"><span><b id="bv-n">' + score + '</b><small>correct</small></span><span><b>' + streak + '</b><small>streak</small></span><span><b>' + miss + '</b><small>missed</small></span><span><b id="bv-sec">' + Math.ceil(left) + '</b><small>seconds</small></span></div>';
+        tick(true);
+      }
+      function tick(only) {
+        if (!running) return;
+        if (only !== true) {
+          left -= 0.1;
+          if (ui.per && Date.now() - t0 > ui.per * 1000 && !locked) { miss++; streak = 0; Sound.bad(); flash(target, 'hl-key', 500); next(); }
+          if (left <= 0) { end(); return; }
+        }
+        const a = qs('#bv-time', panel), p = qs('#bv-per', panel), s = qs('#bv-sec', panel);
+        if (a) a.style.width = clamp(left / ui.round * 100, 0, 100) + '%';
+        if (p) p.style.width = ui.per ? clamp(100 - (Date.now() - t0) / (ui.per * 1000) * 100, 0, 100) + '%' : '0%';
+        if (s) s.textContent = Math.max(0, Math.ceil(left));
+      }
+      function onTap(sq) {
+        if (!running || locked) return;
+        if (sq === target) { score++; streak++; bestStreak = Math.max(bestStreak, streak); Sound.good(); flash(sq, 'hl-good', 260); next(); }
+        else { miss++; streak = 0; Sound.bad(); board.mark(sq, 'hl-bad'); board.mark(target, 'hl-good'); locked = true; later(() => { board.unmark('hl-bad'); board.unmark('hl-good'); locked = false; if (running) next(); }, 650); draw(); }
+      }
+      function end() {
+        running = false; over = true; clearInterval(iv); board.setTapMode(null);
+        const s = stats(), c = s.coord, acc = score + miss ? Math.round(score / (score + miss) * 100) : 0, newBest = score > c.best;
+        c.plays++; c.best = Math.max(c.best, score); c.bestStreak = Math.max(c.bestStreak, bestStreak); save(s);
+        panel.innerHTML = '<p class="st-kicker">Round over</p><h2 class="st-title">' + score + (score === 1 ? ' square' : ' squares') + (newBest && score ? ' · new best!' : '') + '</h2>' +
+          '<div class="bv-score"><span><b>' + score + '</b><small>correct</small></span><span><b>' + acc + '%</b><small>accuracy</small></span><span><b>' + bestStreak + '</b><small>best streak</small></span><span><b>' + fmtS(score ? ui.round / score : 0) + '</b><small>s per square</small></span></div>' +
+          '<p class="small muted">' + (score >= 30 ? 'That is fast. Try the 2-second limit, or play it as Black.' : score >= 15 ? 'Solid. Switch the side and see how much drops.' : 'Turn the labels on for a round, then hide them again. The speed comes quickly.') + '</p>' +
+          '<div class="st-actions"><button type="button" class="btn btn-primary" data-bv="start">' + icon('rotate-right') + ' Play again</button><button type="button" class="btn btn-ghost" data-bv="intro">Change settings</button></div>';
+        if (newBest && score >= 20) Celebrate.perfect('New Coordinates Blitz best: ' + score + '.');
+        Sound.done(); ContinueBar.poke();
+      }
+      return {
+        start: intro, begin, intro,
+        stop() { running = false; clearInterval(iv); },
+        bar() {
+          if (running) return { ready: false, hint: 'Tap the square to proceed' };
+          return over ? { ready: true, next: 'Play another round', run: begin } : { ready: true, next: 'Start the round', run: begin };
+        }
+      };
+    }
+
+    /* ---------- 2. Knight Navigation ---------- */
+    function knightMode() {
+      const LV = { easy: [2, 3], mid: [3, 4], hard: [5, 6] };
+      let pos = '', start = '', target = '', moves = 0, hinted = false, solved = false, trail = [], min = 0;
+      const intro = () => { newPuzzle(); };
+      function newPuzzle() {
+        const [lo, hi] = LV[ui.level];
+        let a, b, d;
+        do { a = rnd(64); b = rnd(64); d = DIST[a][b]; } while (d < lo || d > hi);
+        start = pos = sqOf(a); target = sqOf(b); min = d; moves = 0; hinted = false; solved = false; trail = [start];
+        host.classList.remove('bv-nolabels');
+        reset(); board.orientation('white');
+        board.setPosition(lone(pos), { animate: false, lastMove: null }); board.setInteractive('w'); board.setOnMove(onMove);
+        board.mark(target, 'hl-key');
+        draw();
+      }
+      function draw(extra) {
+        const s = stats().knight;
+        panel.innerHTML = '<p class="st-kicker">Knight Navigation</p><h2 class="st-title">Reach ' + esc(target) + ' in the fewest moves</h2>' +
+          '<p class="st-brief">The knight stands on <b>' + esc(start) + '</b>. Get it to <b>' + esc(target) + '</b> (the marked square). The shortest route is hidden until you arrive.</p>' +
+          '<div class="bv-opts"><span class="small muted">Distance</span>' + seg('level', [['easy', 'Easy · 2–3'], ['mid', 'Medium · 3–4'], ['hard', 'Hard · 5–6']], ui.level) + '</div>' +
+          '<div class="bv-score"><span><b>' + moves + '</b><small>moves</small></span><span><b>' + s.solved + '</b><small>solved</small></span><span><b>' + s.perfect + '</b><small>perfect</small></span><span><b>' + s.bestRun + '</b><small>best run</small></span></div>' +
+          '<div class="st-feedback">' + (extra ? feedbackHTML(extra) : '') + '</div>' +
+          '<div class="st-actions">' + (solved ? '<button type="button" class="btn btn-primary" data-bv="next">' + icon('forward') + ' Next puzzle</button>' + (moves !== min ? '<button type="button" class="btn btn-ghost" data-bv="retry">' + icon('rotate-left') + ' Try it again</button>' : '')
+            : '<button type="button" class="btn btn-ghost btn-sm" data-bv="hint">' + icon('lightbulb') + ' Hint</button><button type="button" class="btn btn-quiet btn-sm" data-bv="retry">' + icon('rotate-left') + ' Start over</button>') + '</div>';
+      }
+      function onMove(m) {
+        if (solved || m.from !== pos) { board.setPosition(lone(pos), { animate: false }); return; }
+        pos = m.to; moves++; trail.push(pos);
+        board.setArrows([]); board.setPosition(lone(pos), { animate: false, lastMove: { from: m.from, to: m.to } });
+        if (pos !== target) { Sound.move(); draw(); return; }
+        solved = true; board.setInteractive(null);
+        const s = stats(), k = s.knight, perfect = moves === min && !hinted;
+        k.solved++; if (perfect) { k.perfect++; k.run = (k.run || 0) + 1; k.bestRun = Math.max(k.bestRun || 0, k.run); } else k.run = 0;
+        save(s);
+        const route = path(start, target);
+        board.setArrows(moves === min ? [] : route.slice(1).map((q, i) => ({ from: route[i], to: q, kind: 'best' })));
+        draw(perfect ? { v: 'win', label: 'Shortest path!', text: moves + ' moves is the minimum from ' + start + ' to ' + target + '.' }
+          : moves === min ? { v: 'good', label: 'Minimum, with a hint', text: 'You found a shortest route with a little help. Again without the hint?' }
+            : { v: 'info', label: moves + ' moves, minimum is ' + min, text: 'The arrows show one shortest route: ' + route.join(' → ') + '. Think in pairs of squares: a knight changes colour on every move.' });
+        Sound[perfect ? 'done' : 'good']();
+        if (perfect && k.run % 5 === 0) Celebrate.streak(k.run);
+        ContinueBar.poke();
+      }
+      function hint() {
+        if (solved) return;
+        const c = idx(pos), t = idx(target), n = NB[c].filter((x) => DIST[x][t] === DIST[c][t] - 1)[0];
+        if (n == null) return;
+        hinted = true; board.setArrows([{ from: pos, to: sqOf(n), kind: 'best' }]);
+        draw({ v: 'hint', label: 'Hint', text: 'This move keeps you on a shortest route. Using it means the puzzle is not counted as perfect.' });
+      }
+      function retry() {
+        pos = start; moves = 0; solved = false; trail = [start]; hinted = hinted && false;
+        board.setArrows([]); board.setPosition(lone(pos), { animate: false, lastMove: null }); board.setInteractive('w'); board.setOnMove(onMove);
+        draw(); ContinueBar.poke();
+      }
+      return { start: intro, next: newPuzzle, hint, retry, restart: newPuzzle, stop() {}, bar() { return solved ? { ready: true, next: 'Next puzzle', run: newPuzzle } : { ready: false, hint: 'Move the knight to the target to proceed' }; } };
+    }
+
+    /* ---------- 3. Legal Move Blitz ---------- */
+    function legalMode() {
+      let g = null, task = null, found = {}, score = 0, miss = 0, left = 0, running = false, locked = false, iv = null, over = false, shownAt = 0, times = [];
+      const intro = () => {
+        const b = stats().legal;
+        host.classList.remove('bv-nolabels');
+        panel.innerHTML = '<p class="st-kicker">Legal Move Blitz</p><h2 class="st-title">Every legal move, no exceptions</h2><p class="st-brief">A real position from the middle of a game. One piece is marked: tap every square it can legally move to. Pinned pieces and checks are the traps. When your king is in check, tap every piece that has a legal answer.</p>' +
+          '<div class="bv-opts"><span class="small muted">Round length</span>' + seg('round', [[30, '30 s'], [60, '60 s']], ui.round) + '</div>' +
+          '<p class="small muted">Best: <b>' + b.best + '</b> positions cleared, ' + b.plays + (b.plays === 1 ? ' round' : ' rounds') + ' played.</p>' +
+          '<div class="st-actions"><button type="button" class="btn btn-primary" data-bv="start">' + icon('play') + ' Start the round</button></div>';
+        reset(); board.setPosition(START_FEN, { animate: false, lastMove: null }); board.orientation('white');
+      };
+      function begin() {
+        score = miss = 0; left = ui.round; running = true; over = false; times = [];
+        clearInterval(iv); iv = setInterval(tick, 100); nextPos(); scrollToEl(qs('.trainer', view));
+      }
+      function nextPos() {
+        g = randomPosition(); task = legalTask(g); found = {}; locked = false; shownAt = Date.now();
+        reset(); board.orientation(g.turn() === 'w' ? 'white' : 'black');
+        board.setPosition(g.fen(), { animate: false, lastMove: null }); board.setTapMode(onTap);
+        if (task.focus) board.mark(task.focus, 'hl-sel');
+        draw();
+      }
+      function draw() {
+        const need = task.targets.length, got = Object.keys(found).length;
+        panel.innerHTML = '<p class="st-kicker">Legal Move Blitz · ' + colorName(g.turn()) + ' to move</p>' +
+          '<h2 class="st-title">' + (task.kind === 'check' ? 'You are in check: tap every piece that can answer it' : 'Tap every legal move of the marked piece') + '</h2>' +
+          '<p class="bv-find"><b>' + got + '</b> of <b>' + need + '</b> found' + (task.kind === 'piece' ? ' · the ' + pieceName((g.get(task.focus) || {}).type) + ' on ' + task.focus : '') + '</p>' +
+          '<div class="bv-bar" aria-hidden="true"><i id="bv-time"></i></div>' +
+          '<div class="bv-score"><span><b>' + score + '</b><small>cleared</small></span><span><b>' + miss + '</b><small>mistakes</small></span><span><b id="bv-sec">' + Math.ceil(left) + '</b><small>seconds</small></span></div>' +
+          '<div class="st-actions"><button type="button" class="btn btn-quiet btn-sm" data-bv="skip">' + icon('forward') + ' Skip this one</button></div>';
+        tick(true);
+      }
+      const pieceName = (t) => ({ p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' })[t] || 'piece';
+      function tick(only) {
+        if (!running) return;
+        if (only !== true) { left -= 0.1; if (left <= 0) { end(); return; } }
+        const a = qs('#bv-time', panel), s = qs('#bv-sec', panel);
+        if (a) a.style.width = clamp(left / ui.round * 100, 0, 100) + '%';
+        if (s) s.textContent = Math.max(0, Math.ceil(left));
+      }
+      function onTap(sq) {
+        if (!running || locked || found[sq]) return;
+        if (task.targets.indexOf(sq) >= 0) {
+          found[sq] = 1; Sound.good(); board.mark(sq, 'hl-good');
+          if (Object.keys(found).length === task.targets.length) {
+            score++; times.push((Date.now() - shownAt) / 1000); locked = true; draw(); later(() => { if (running) nextPos(); }, 380); return;
+          }
+          draw();
+        } else {
+          miss++; Sound.bad(); flash(sq, 'hl-bad', 450);
+          const why = task.kind === 'check' ? 'That piece has no legal answer to the check.' : explain(sq);
+          const f = qs('.bv-find', panel); if (f) f.insertAdjacentHTML('afterend', '<p class="bv-why" role="status">' + esc(why) + '</p>');
+        }
+      }
+      function explain(sq) {                                            // why this square is not legal
+        const p = g.get(sq), me = g.get(task.focus);
+        if (p && p.color === g.turn()) return 'Your own piece stands on ' + sq + '.';
+        return me && me.type === 'k' ? sq + ' is attacked, or too far for a king.' : 'The ' + pieceName(me && me.type) + ' cannot reach ' + sq + ' legally (it may be blocked, or moving it would expose your king).';
+      }
+      function skip() {
+        if (!running || locked) return;
+        miss++; locked = true; Sound.bad();
+        task.targets.forEach((q) => board.mark(q, 'hl-key'));
+        later(() => { if (running) nextPos(); }, 1100);
+      }
+      function end() {
+        running = false; over = true; clearInterval(iv); board.setTapMode(null);
+        const s = stats(), l = s.legal, avg = times.length ? times.reduce((a, b) => a + b, 0) / times.length : 0, newBest = score > l.best;
+        l.plays++; l.best = Math.max(l.best, score); save(s);
+        panel.innerHTML = '<p class="st-kicker">Round over</p><h2 class="st-title">' + score + ' positions cleared' + (newBest && score ? ' · new best!' : '') + '</h2>' +
+          '<div class="bv-score"><span><b>' + score + '</b><small>cleared</small></span><span><b>' + miss + '</b><small>mistakes</small></span><span><b>' + (avg ? fmtS(avg) : '–') + '</b><small>s per position</small></span></div>' +
+          '<p class="small muted">Every illegal tap was a piece you thought could move but could not. Those are the squares to look at again.</p>' +
+          '<div class="st-actions"><button type="button" class="btn btn-primary" data-bv="start">' + icon('rotate-right') + ' Play again</button><button type="button" class="btn btn-ghost" data-bv="intro">Change settings</button></div>';
+        if (newBest && score >= 8) Celebrate.perfect('New Legal Move Blitz best: ' + score + '.');
+        Sound.done(); ContinueBar.poke();
+      }
+      return { start: intro, begin, intro, skip, stop() { running = false; clearInterval(iv); }, bar() { if (running) return { ready: false, hint: 'Tap every legal move to proceed' }; return { ready: true, next: over ? 'Play another round' : 'Start the round', run: begin }; } };
+    }
+
+    /* ---------- the shell ---------- */
+    function setMode(m) {
+      if (ctl) ctl.stop();
+      timers.forEach(clearTimeout); timers = [];
+      ui.mode = m; persist();
+      qsa('[data-bv-mode]', view).forEach((b) => b.setAttribute('aria-current', b.getAttribute('data-bv-mode') === m ? 'page' : 'false'));
+      ctl = m === 'coord' ? coordMode() : m === 'knight' ? knightMode() : legalMode();
+      reset(); ctl.start();
+      ContinueBar.poke();
+    }
+    function onClick(e) {
+      const md = e.target.closest('[data-bv-mode]');
+      if (md) { setMode(md.getAttribute('data-bv-mode')); return; }
+      const o = e.target.closest('[data-bvo]');
+      if (o) {
+        const p = o.getAttribute('data-bvo').split(':'), k = p[0], v = p[1];
+        if (k === 'orient') { ui.orient = v; board.orientation(v); } else if (k === 'round') ui.round = +v; else if (k === 'per') ui.per = +v; else if (k === 'level') ui.level = v; else if (k === 'labels') { ui.labels = v === 'on'; host.classList.toggle('bv-nolabels', !ui.labels); }
+        persist();
+        qsa('[data-bvo^="' + k + ':"]', panel).forEach((b) => b.setAttribute('aria-pressed', String(b === o)));
+        if (k === 'level' && ui.mode === 'knight') ctl.next();
+        return;
+      }
+      const a = e.target.closest('[data-bv]');
+      if (!a || !ctl) return;
+      const act = a.getAttribute('data-bv');
+      if (act === 'start') ctl.begin ? ctl.begin() : ctl.start(); else if (act === 'intro') ctl.intro(); else if (act === 'next') ctl.next(); else if (act === 'hint') ctl.hint(); else if (act === 'retry') ctl.retry(); else if (act === 'skip') ctl.skip();
+      ContinueBar.poke();
+    }
+    view.addEventListener('click', onClick);
+    const flow = () => (ctl && ctl.bar ? ctl.bar() : null);
+    ContinueBar.register('vision', flow);
+    setMode(ui.mode);
+    return () => { alive = false; if (ctl) ctl.stop(); timers.forEach(clearTimeout); view.removeEventListener('click', onClick); ContinueBar.unregister('vision', flow); board.destroy(); };
+  }
+  return { mount, _t: { DIST, path, lone, legalTask, randomPosition } };
+})();
+
+/* ==========================================================================
+   v13: CATEGORIZED PUZZLES  (#themes, Theory > Puzzles > By theme)
+   Lichess puzzles by theme (the API's "angle"). Per theme:
+   - Learn: one short concept card and the alarm signal to look for in your own games;
+   - Drill: a set of 5 or 10 puzzles fetched live from lichess.org/api/puzzle/next?angle=<theme>;
+   - Streak and review: flawless streaks are counted; every miss goes into the Mistake Deck on this device
+     (max CONFIG.themePuzzles.deckMax), where each puzzle waits until you solve it cleanly once;
+   - Badges: finishing a set earns that theme's badge (Badges.LIST, category "Puzzle sets"), plus Flawless Set,
+     Ten in a Row and Deck Cleaner.
+   Practice puzzles are unrated: they never move the Puzzle ELO. Progress is kept in localStorage (lc13-tp).
+   ========================================================================== */
+const ThemePuzzles = (() => {
+  const K = 'lc13-tp';
+  const cfg = () => CONFIG.themePuzzles || { themes: [] };
+  const themes = () => cfg().themes || [];
+  const theme = (id) => themes().filter((t) => t.id === id)[0] || null;
+  const blank = () => ({ done: {}, deck: [], cleared: 0, streak: 0, bestStreak: 0, seen: {} });
+  function read() {
+    const s = Store.get(K, null), b = blank();
+    if (!s || typeof s !== 'object') return b;
+    b.done = s.done && typeof s.done === 'object' ? s.done : {};
+    b.deck = (Array.isArray(s.deck) ? s.deck : []).filter((p) => p && typeof p.id === 'string' && Array.isArray(p.solution) && typeof p.fen === 'string' && typeof p.before === 'string' && p.setup).slice(0, 80);
+    b.cleared = +s.cleared || 0; b.streak = +s.streak || 0; b.bestStreak = +s.bestStreak || 0; b.seen = s.seen && typeof s.seen === 'object' ? s.seen : {};
+    return b;
+  }
+  const write = (s) => Store.set(K, s);
+  const slim = (p, t) => ({ id: p.id, source: 'lichess', rating: p.rating, plays: 0, themes: p.themes || [], before: p.before, setup: p.setup, fen: p.fen, solution: p.solution, game: null, url: p.url, theme: t, at: Date.now() });
+  const sets = (id) => { const d = read().done[id]; return d ? +d.sets || 0 : 0; };
+  const flawlessSets = () => Object.keys(read().done).reduce((n, k) => n + (+read().done[k].flawless || 0), 0);
+  const deckSize = () => read().deck.length;
+  const diffFor = () => { try { const r = PuzzleElo.get().rating; return r && r < 1100 ? 'easier' : r >= 1800 ? 'harder' : 'normal'; } catch (e) { return 'normal'; } };
+
+  async function fetchSet(id, size, diff, onProgress, isLive) {
+    const out = [], seenNow = {}, st = read(), old = st.seen[id] || [];
+    let fails = 0, why = '';
+    while (out.length < size && fails < 8 && isLive()) {
+      let res;
+      try { res = await fetchWithTimeout((cfg().api || 'https://lichess.org/api/puzzle/next') + '?angle=' + encodeURIComponent(id) + '&difficulty=' + diff, { credentials: 'omit', headers: { Accept: 'application/json' } }, 8000); }
+      catch (e) { fails++; why = navigator.onLine === false ? 'offline' : 'network'; await sleep(600); continue; }
+      if (res.status === 429) { why = 'rate'; break; }
+      if (!res.ok) { fails++; why = 'http'; continue; }
+      let p;
+      try { p = PuzzleFeed.fromLichess(await res.json()); } catch (e) { fails++; why = 'shape'; continue; }
+      if (seenNow[p.id] || (old.indexOf(p.id) >= 0 && fails < 4)) { fails++; await sleep(250); continue; }
+      seenNow[p.id] = 1; out.push(p); onProgress(out.length);
+      await sleep(+cfg().gapMs || 400);
+    }
+    if (out.length) { st.seen[id] = old.concat(out.map((p) => p.id)).slice(-120); write(st); }
+    return { puzzles: out, why };
+  }
+
+  function mount(root) {
+    const ui = { screen: 'home', id: '', size: 5, diff: diffFor(), tab: 'themes' };
+    let board = null, runner = null, set = null, cur = null, token = 0, alive = true, busy = false;
+    const T = () => theme(ui.id);
+    const dots = () => '<div class="tp-dots" aria-hidden="true">' + set.puzzles.map((p, i) => '<i class="' + (set.rec[i] === true ? 'is-ok' : set.rec[i] === false ? 'is-miss' : i === set.i ? 'is-now' : '') + '"></i>').join('') + '</div>';
+    const lvl = () => '<div class="seg" role="group" aria-label="Difficulty">' + [['easier', 'Easier'], ['normal', 'Normal'], ['harder', 'Harder']].map((x) => '<button type="button" data-tp-diff="' + x[0] + '" aria-pressed="' + (ui.diff === x[0]) + '">' + x[1] + '</button>').join('') + '</div>';
+    const killRunner = () => { if (runner) { runner.destroy(); runner = null; } if (board) { board.destroy(); board = null; } cur = null; };
+
+    /* ----- home: every theme, with its badge state ----- */
+    function home() {
+      killRunner(); ui.screen = 'home'; set = null;
+      const st = read(), n = st.deck.length;
+      root.innerHTML = '<section class="panel pad tp-top"><div><h2>Practice by theme</h2><p class="muted">Pick a pattern, read the 20-second idea, then drill a set of live Lichess puzzles. Misses land in your Mistake Deck, so nothing you got wrong is lost.</p></div>' +
+        '<div class="tp-facts"><span><b>' + st.streak + '</b><small>flawless streak</small></span><span><b>' + st.bestStreak + '</b><small>best streak</small></span><span><b>' + n + '</b><small>in Mistake Deck</small></span></div></section>' +
+        '<div class="btn-row tp-deckrow"><button type="button" class="btn ' + (n ? 'btn-primary' : 'btn-ghost') + '" data-tp="deck"' + (n ? '' : ' disabled') + '>' + icon('layer-group') + ' Review my Mistake Deck' + (n ? ' (' + n + ')' : '') + '</button></div>' +
+        '<div class="tp-grid">' + themes().map((t) => {
+          const d = st.done[t.id] || {}, got = (+d.sets || 0) > 0;
+          return '<button type="button" class="tp-card' + (got ? ' is-done' : '') + '" data-tp-theme="' + esc(t.id) + '"><span class="tp-ico">' + icon(t.icon) + '</span><b>' + esc(t.label) + '</b><small>' + esc(t.short) + '</small>' +
+            '<span class="tp-badge' + (got ? ' is-got' : '') + '">' + icon(got ? 'trophy' : 'lock') + ' ' + esc(t.badge) + (d.flawless ? ' · ' + d.flawless + ' flawless' : '') + '</span></button>';
+        }).join('') + '</div>' +
+        '<p class="small dim pz37-credit">Puzzles from the <a href="https://database.lichess.org/#puzzles" target="_blank" rel="noopener">Lichess puzzle database</a> (CC0), served live by lichess.org. Practice puzzles are unrated and do not change your Puzzle ELO.</p>';
+      ContinueBar.poke();
+    }
+
+    /* ----- learn ----- */
+    function learn(id) {
+      killRunner(); ui.screen = 'learn'; ui.id = id;
+      const t = T(), d = read().done[id] || {};
+      root.innerHTML = '<p class="small"><a href="#themes" data-tp="home">' + icon('arrow-left') + ' All themes</a></p>' +
+        '<section class="panel pad tp-learn"><p class="st-kicker">Learn</p><h2 class="st-title">' + icon(t.icon) + ' ' + esc(t.label) + '</h2><p class="st-brief">' + esc(t.learn) + '</p>' +
+        '<div class="tp-signal">' + icon('triangle-exclamation') + '<p><b>Alarm signal.</b> ' + esc(t.signal) + '</p></div>' +
+        '<div class="bv-opts"><span class="small muted">Set size</span><div class="seg" role="group">' + (cfg().setSizes || [5, 10]).map((n) => '<button type="button" data-tp-size="' + n + '" aria-pressed="' + (ui.size === n) + '">' + n + ' puzzles</button>').join('') + '</div>' +
+        '<span class="small muted">Difficulty</span>' + lvl() + '</div>' +
+        '<p class="small muted">' + (d.sets ? d.sets + (d.sets === 1 ? ' set' : ' sets') + ' finished, ' + (d.flawless || 0) + ' flawless, best streak ' + (d.best || 0) + '.' : 'Finish one set to unlock the “' + esc(t.badge) + '” badge.') + '</p>' +
+        '<div class="st-actions"><button type="button" class="btn btn-primary" data-tp="start">' + icon('play') + ' Start the drill</button></div></section>';
+      ContinueBar.poke();
+    }
+
+    /* ----- drill ----- */
+    async function begin(kind) {
+      if (busy) return;
+      busy = true; const my = ++token;
+      killRunner(); ui.screen = 'loading';
+      let puzzles = [], note = '';
+      if (kind === 'deck') {
+        puzzles = shuffle(read().deck).slice(0, 10);
+        ui.id = ''; ui.deck = true;
+      } else {
+        ui.deck = false;
+        const t = T();
+        root.innerHTML = '<section class="panel pad"><p class="st-kicker">' + esc(t.label) + '</p><h2 class="st-title">Fetching your puzzles…</h2><div class="tp-fetch"><i id="tp-fi"></i></div><p class="small muted" id="tp-ft">Puzzle 0 of ' + ui.size + '</p></section>';
+        ContinueBar.poke();
+        const r = await fetchSet(ui.id, ui.size, ui.diff, (n) => { const i = qs('#tp-fi', root), x = qs('#tp-ft', root); if (i) i.style.width = n / ui.size * 100 + '%'; if (x) x.textContent = 'Puzzle ' + n + ' of ' + ui.size; }, () => alive && my === token);
+        if (!alive || my !== token) { busy = false; return; }
+        puzzles = r.puzzles; note = r.why;
+      }
+      busy = false;
+      if (!puzzles.length) {
+        const why = note === 'rate' ? 'Lichess asked the hub to pause for a minute.' : note === 'offline' ? 'You are offline.' : kind === 'deck' ? 'Your Mistake Deck is empty. Nice.' : 'Lichess did not answer.';
+        root.innerHTML = '<section class="panel pad"><p class="st-kicker">No puzzles</p><h2 class="st-title">Nothing to drill right now</h2><p class="st-brief">' + esc(why) + '</p><div class="st-actions">' + (kind === 'deck' ? '' : '<button type="button" class="btn btn-primary" data-tp="start">' + icon('rotate') + ' Try again</button>') + '<button type="button" class="btn btn-ghost" data-tp="home">All themes</button></div></section>';
+        ui.screen = 'error'; ContinueBar.poke(); return;
+      }
+      set = { puzzles, i: 0, rec: [], kind, short: puzzles.length < ui.size && kind !== 'deck' };
+      ui.screen = 'drill';
+      root.innerHTML = '<p class="small"><a href="#themes" data-tp="home">' + icon('arrow-left') + ' Leave the drill</a></p>' + trainerShell('tp-board', 'tp-panel');
+      board = Board(qs('#tp-board', root), {});
+      qs('[data-flip="tp-board"]', root).addEventListener('click', () => board.flip());
+      scrollToEl(qs('.trainer', root));
+      puzzle();
+    }
+    function puzzle() {
+      if (runner) runner.destroy();
+      cur = null;
+      runner = PuzzleRunner({ board, puzzle: set.puzzles[set.i], onUpdate });
+      runner.start({ unrated: true });
+    }
+    function onUpdate(v) {
+      if (!alive || ui.screen !== 'drill' || !set) return;
+      cur = v;
+      if (v.done && set.rec[set.i] == null) settle(v);
+      panel(v);
+      ContinueBar.poke();
+    }
+    function settle(v) {
+      const clean = !v.failed, p = v.puzzle, st = read();
+      set.rec[set.i] = clean;
+      if (clean) {
+        st.streak++; st.bestStreak = Math.max(st.bestStreak, st.streak);
+        if (set.kind === 'deck') { st.deck = st.deck.filter((x) => x.id !== p.id); st.cleared++; }
+        if (st.streak % 10 === 0) Celebrate.streak(st.streak);
+      } else {
+        st.streak = 0;
+        if (!st.deck.some((x) => x.id === p.id)) { st.deck.push(slim(p, ui.id || p.theme || '')); st.deck = st.deck.slice(-(+cfg().deckMax || 40)); }
+      }
+      write(st); Badges.soon();
+    }
+    function panel(v) {
+      const host = qs('#tp-panel', root); if (!host) return;
+      const t = T(), last = set.i >= set.puzzles.length - 1, st = read();
+      const kick = (set.kind === 'deck' ? 'Mistake Deck' : t.label) + ' · puzzle ' + (set.i + 1) + ' of ' + set.puzzles.length;
+      const title = v.done ? (v.shown ? 'Solution shown' : v.failed ? 'Solved after a miss' : 'Solved, clean') : v.showing ? 'The solution' : v.started ? 'Find the best move for ' + colorName(v.solver) : 'Watch the last move';
+      host.innerHTML = '<p class="st-kicker">' + esc(kick) + '</p>' + dots() + '<h2 class="st-title">' + esc(title) + '</h2>' +
+        '<div class="turn">' + (v.done ? icon('flag-checkered') + ' Done' : v.yourTurn ? '<span class="live-dot"></span> Your move as ' + colorName(v.solver) : '<span class="wait-dot"></span> ' + (v.showing ? 'Playing the solution…' : 'Opponent is moving…')) + '</div>' +
+        '<div class="st-feedback">' + feedbackHTML(v.feedback) + '</div>' + playedHTML(v.played) +
+        '<p class="tp-streak">' + icon('fire') + ' Flawless streak <b>' + st.streak + '</b> · best ' + st.bestStreak + '</p>' +
+        (v.done && v.failed ? '<p class="small muted">' + (set.kind === 'deck' ? 'It stays in your Mistake Deck until you solve it cleanly.' : 'Saved to your Mistake Deck for a review.') + '</p>' : '') +
+        '<div class="st-actions">' + (v.done
+          ? '<button type="button" class="btn btn-primary" data-tp="next">' + icon('forward') + ' ' + (last ? 'See my results' : 'Next puzzle') + '</button>' + (v.failed ? '<button type="button" class="btn btn-ghost" data-tp="retry">' + icon('rotate-left') + ' Retry</button>' : '') + (v.puzzle.url ? '<a class="btn btn-quiet btn-sm" href="' + esc(v.puzzle.url) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Lichess</a>' : '')
+          : '<button type="button" class="btn btn-ghost btn-sm" data-tp="hint"' + (v.yourTurn ? '' : ' disabled') + '>' + icon('lightbulb') + (v.hints ? ' Show the move' : ' Hint') + '</button><button type="button" class="btn btn-quiet btn-sm" data-tp="solution"' + (v.started && !v.showing ? '' : ' disabled') + '>' + icon('eye') + ' View the solution</button>') + '</div>';
+    }
+    function nextOrFinish() {
+      if (set.i >= set.puzzles.length - 1) { summary(); return; }
+      set.i++; puzzle();
+    }
+
+    /* ----- summary ----- */
+    function summary() {
+      const ok = set.rec.filter((x) => x === true).length, n = set.puzzles.length, flawless = ok === n, st = read(), t = T();
+      killRunner(); ui.screen = 'summary';
+      let badgeLine = '';
+      if (set.kind !== 'deck' && t) {
+        const d = st.done[t.id] || (st.done[t.id] = { sets: 0, flawless: 0, best: 0 });
+        const first = !d.sets;
+        d.sets++; if (flawless) d.flawless++; d.best = Math.max(d.best || 0, ok); d.last = Date.now();
+        write(st); Badges.soon();
+        badgeLine = first ? '<p class="tp-win">' + icon('trophy') + ' Badge unlocked: <b>' + esc(t.badge) + '</b></p>' : '';
+      }
+      root.innerHTML = '<section class="panel pad tp-sum"><p class="st-kicker">' + (set.kind === 'deck' ? 'Mistake Deck review' : esc(t.label) + ' · set complete') + '</p>' +
+        '<h2 class="st-title">' + ok + ' of ' + n + ' solved clean' + (flawless ? ' · flawless!' : '') + '</h2>' + dots() + badgeLine +
+        '<div class="tp-facts"><span><b>' + st.streak + '</b><small>flawless streak</small></span><span><b>' + st.bestStreak + '</b><small>best streak</small></span><span><b>' + st.deck.length + '</b><small>in Mistake Deck</small></span></div>' +
+        '<p class="muted">' + (flawless ? 'Not a single miss. Try the harder level, or another theme.' : n - ok + (n - ok === 1 ? ' puzzle' : ' puzzles') + ' went into your Mistake Deck. Review it while the pattern is fresh.') + '</p>' +
+        '<div class="st-actions">' + (set.kind === 'deck' ? (st.deck.length ? '<button type="button" class="btn btn-primary" data-tp="deck">' + icon('layer-group') + ' Review more</button>' : '') : '<button type="button" class="btn btn-primary" data-tp="start">' + icon('rotate-right') + ' Another set</button>') +
+          (set.kind !== 'deck' && st.deck.length ? '<button type="button" class="btn btn-ghost" data-tp="deck">' + icon('layer-group') + ' Mistake Deck (' + st.deck.length + ')</button>' : '') + '<button type="button" class="btn btn-ghost" data-tp="home">All themes</button></div></section>';
+      Sound.done(); if (flawless) Celebrate.perfect('A flawless ' + (set.kind === 'deck' ? 'review' : t.label + ' set') + '.');
+      ContinueBar.poke();
+    }
+
+    function onClick(e) {
+      const th = e.target.closest('[data-tp-theme]');
+      if (th) { learn(th.getAttribute('data-tp-theme')); return; }
+      const sz = e.target.closest('[data-tp-size]');
+      if (sz) { ui.size = +sz.getAttribute('data-tp-size'); qsa('[data-tp-size]', root).forEach((b) => b.setAttribute('aria-pressed', String(b === sz))); return; }
+      const df = e.target.closest('[data-tp-diff]');
+      if (df) { ui.diff = df.getAttribute('data-tp-diff'); qsa('[data-tp-diff]', root).forEach((b) => b.setAttribute('aria-pressed', String(b === df))); return; }
+      const a = e.target.closest('[data-tp]');
+      if (!a) return;
+      const act = a.getAttribute('data-tp');
+      if (act === 'home') { if (a.tagName === 'A') e.preventDefault(); home(); }
+      else if (act === 'start') begin('theme');
+      else if (act === 'deck') begin('deck');
+      else if (act === 'next') nextOrFinish();
+      else if (act === 'retry') { if (runner) { set.rec[set.i] = set.rec[set.i]; runner.retry(); } }
+      else if (act === 'hint' && runner) runner.hint();
+      else if (act === 'solution' && runner) runner.solution();
+    }
+    root.addEventListener('click', onClick);
+    const flow = () => {
+      if (ui.screen === 'learn') return { ready: true, next: 'Start the ' + ui.size + '-puzzle drill', run: () => begin('theme') };
+      if (ui.screen === 'drill' && set) {
+        if (cur && cur.done) return { ready: true, next: set.i >= set.puzzles.length - 1 ? 'See my results' : 'Next puzzle', run: nextOrFinish };
+        return { ready: false, hint: 'Find the best move to proceed' };
+      }
+      if (ui.screen === 'summary') return { ready: true, next: set && set.kind === 'deck' ? 'Back to all themes' : 'Another set', run: () => (set && set.kind === 'deck' ? home() : begin('theme')) };
+      return null;
+    };
+    ContinueBar.register('themes', flow);
+    home();
+    return () => { alive = false; token++; root.removeEventListener('click', onClick); killRunner(); ContinueBar.unregister('themes', flow); };
+  }
+  return { mount, sets, flawlessSets, deckSize, bestStreak: () => read().bestStreak, cleared: () => read().cleared, theme, themes };
+})();
+
+/* ==========================================================================
+   v13: STOCKFISH SURVIVAL, DRAW AND CONVERSION CHALLENGES  (#survival, under Think)
+   You are dropped into a prepared position (scenarios come from content.json, section v5.survival) and play it
+   against Stockfish, which runs on the device (no API cost, same engine as the Bot Trainer).
+   - Survive ("Overleef X zetten"): a squeezed position; stay alive for X moves without losing decisive material
+     or walking into mate.
+   - Hold the draw: a drawn endgame; keep the evaluation within reach of equal for X moves.
+   - Convert: a winning position; reach the goal (checkmate or promotion) within X moves and never throw the advantage away.
+   Stockfish judges every move you play (about half a second) and tells you how much it cost. The failure line is
+   set per scenario (floorCp, in centipawns, from your point of view). Results live in localStorage (lc13-sv).
+   ========================================================================== */
+const Survival = (() => {
+  const K = 'lc13-sv';
+  const LEVELS = { l800: { label: '≈ 800', skill: 0, depthCap: 1, mt: 60 }, l1200: { label: '≈ 1200', skill: 5, depthCap: 4, mt: 120 }, l1600: { label: '≈ 1600', skill: 10, elo: 1600, mt: 300 }, l2000: { label: '≈ 2000', skill: 15, elo: 2000, mt: 500 }, max: { label: 'Full strength', skill: 20, mt: 900 } };
+  const MODES = {
+    survive: { label: 'Survive', icon: 'shield-halved', verb: 'Survive', blurb: 'Squeezed positions. Stay alive without losing decisive material or walking into mate.' },
+    draw: { label: 'Hold the draw', icon: 'handshake', verb: 'Hold the draw', blurb: 'Drawn endgames that are only drawn if you defend precisely.' },
+    convert: { label: 'Convert', icon: 'bullseye', verb: 'Convert', blurb: 'Winning positions. Finish the job before the advantage slips.' }
+  };
+  const list = () => (V5Doc.get().survival || []);
+  const find = (id) => list().filter((s) => s.id === id)[0] || null;
+  const read = () => { const s = Store.get(K, null); return s && typeof s === 'object' && s.r && typeof s.r === 'object' ? s : { r: {} }; };
+  const write = (s) => Store.set(K, s);
+  const wins = (mode) => { const r = read().r; return Object.keys(r).filter((id) => r[id] && r[id].mode === mode).reduce((n, id) => n + (+r[id].wins || 0), 0); };
+  const paid = () => { try { return Admin.active || (TIERS[(App.access && App.access.tier) || 'free'] || TIERS.free).rank >= 2; } catch (e) { return false; } };
+  const open = (sc) => sc.tier <= 1 || paid();
+  const goalText = (sc) => sc.mode === 'convert' ? (sc.goal === 'promote' ? 'Promote a pawn' : sc.goal === 'eval' ? 'Grow your advantage to +' + ((sc.goalCp || 350) / 100).toFixed(1) : 'Checkmate') + ' within ' + sc.moves + ' moves' : sc.mode === 'draw' ? 'Hold the draw for ' + sc.moves + ' moves' : 'Survive ' + sc.moves + ' moves';
+  const money = (cp) => (Math.abs(cp) >= 9000 ? (cp > 0 ? 'mate for you' : 'mate against you') : (cp > 0 ? '+' : cp < 0 ? '−' : '') + (Math.abs(cp) / 100).toFixed(1));
+
+  function mount(view) {
+    let board = null, G = null, alive = true, token = 0, screen = 'list';
+    const poke = () => ContinueBar.poke();
+    const userPov = (r) => Engine.toCp(r.lines[0]) * (G.user === 'w' ? 1 : -1);
+    const bad = (e) => !alive || !G || e && e.message === 'superseded';
+
+    function listScreen() {
+      killGame(); screen = 'list';
+      const res = read().r, all = list();
+      view.innerHTML = cmsBar() + '<p class="small"><a href="#think">' + icon('arrow-left') + ' Think</a></p>' +
+        '<header class="bv-head"><h1>' + icon('shield-halved') + ' Survival &amp; Defense Challenges</h1><p class="muted">Most rating points are lost in bad positions, not good ones. Play prepared positions against Stockfish: survive the squeeze, hold the draw, and convert the win. Stockfish runs on your device, so you can retry as often as you like.</p></header>' +
+        (all.length ? Object.keys(MODES).map((m) => {
+          const items = all.filter((s) => s.mode === m);
+          if (!items.length) return '';
+          return '<section class="sv-group"><h2>' + icon(MODES[m].icon) + ' ' + MODES[m].label + '</h2><p class="small muted">' + MODES[m].blurb + '</p><div class="sv-grid">' + items.map((s) => {
+            const r = res[s.id] || {}, lock = !open(s);
+            return '<button type="button" class="sv-card' + (lock ? ' is-locked' : '') + (r.wins ? ' is-done' : '') + '" data-sv-open="' + esc(s.id) + '"><b>' + esc(s.title) + '</b><span class="small muted">' + esc(goalText(s)) + '</span>' +
+              '<span class="sv-meta"><i>' + esc((LEVELS[s.level] || LEVELS.l1600).label) + '</i>' + (r.wins ? '<i class="is-ok">' + icon('check') + ' ' + r.wins + (r.wins === 1 ? ' win' : ' wins') + '</i>' : r.tries ? '<i>' + r.tries + (r.tries === 1 ? ' try' : ' tries') + '</i>' : '') + (lock ? '<i class="is-lock">' + icon('lock') + ' Members</i>' : '') + '</span></button>';
+          }).join('') + '</div></section>';
+        }).join('') : '<section class="panel pad"><h2>No scenarios published yet</h2><p class="muted">The challenge positions are loaded from the hub’s data file. Check your connection and reload, or ask ' + esc(CONFIG.coach) + ' to publish them.</p></section>') +
+        '<p class="small dim">Stockfish is a chess engine that runs inside this page. Strong levels are meant to hurt: a loss here is the lesson, not the verdict.</p>';
+      poke();
+    }
+
+    function play(id) {
+      const sc = find(id);
+      if (!sc) return;
+      if (!open(sc)) { toast('This challenge is part of the member levels.', 'bad'); return; }
+      killGame(); screen = 'play';
+      const g = new Chess(sc.fen), user = g.turn();
+      G = { sc, g, user, moves: 0, startCp: null, cp: null, pre: null, hints: 0, busy: true, done: false, fb: null, worst: null, my: ++token, res: null, hintSq: '' };
+      view.innerHTML = cmsBar() + '<p class="small"><a href="#survival" data-sv="list">' + icon('arrow-left') + ' All challenges</a></p>' + trainerShell('sv-board', 'sv-panel');
+      board = Board(qs('#sv-board', view), { orientation: user === 'w' ? 'white' : 'black', fen: sc.fen });
+      qs('[data-flip="sv-board"]', view).addEventListener('click', () => board.flip());
+      board.setOnMove(onMove);
+      draw('Stockfish is looking at the position…');
+      scrollToEl(qs('.trainer', view));
+      Engine.load().then((ok) => {
+        if (!ok) { if (G) { G.busy = true; draw(''); const f = qs('#sv-fb', view); if (f) f.innerHTML = feedbackHTML({ v: 'miss', label: 'Stockfish did not start', text: 'The engine could not load on this device. Check your connection and try again.' }); } return; }
+        analysePre(true);
+      });
+    }
+    async function analysePre(first) {
+      const my = G.my;
+      try {
+        const r = await Engine.analyse(G.g.fen(), { movetime: 450 });
+        if (bad() || G.my !== my) return;
+        G.pre = { cp: userPov(r), best: r.best, fen: G.g.fen() };
+        if (first) { G.startCp = G.pre.cp; G.cp = G.pre.cp; }
+        G.busy = false; board.setInteractive(G.user); draw();
+      } catch (e) { if (!bad(e)) { G.busy = false; board.setInteractive(G.user); draw(); } }
+      poke();
+    }
+    function meter() {
+      const sc = G.sc, floor = sc.floorCp, top = Math.max((G.startCp == null ? 0 : G.startCp) + 200, floor + 300), cp = G.cp == null ? top : G.cp;
+      return clamp((cp - floor) / (top - floor), 0, 1);
+    }
+    function draw(status) {
+      const host = qs('#sv-panel', view); if (!host || !G) return;
+      const sc = G.sc, m = MODES[sc.mode], pct = Math.min(100, Math.round(G.moves / sc.moves * 100)), mt = meter();
+      host.innerHTML = '<p class="st-kicker">' + esc(m.label) + ' · ' + esc(sc.title) + '</p><h2 class="st-title">' + esc(goalText(sc)) + '</h2>' +
+        (sc.brief ? '<p class="st-brief">' + esc(sc.brief) + '</p>' : '') +
+        '<div class="sv-prog"><div class="sv-prog-h"><span>' + (sc.mode === 'convert' ? 'Moves used' : 'Moves survived') + '</span><b>' + G.moves + ' / ' + sc.moves + '</b></div><div class="bv-bar"><i style="width:' + pct + '%"></i></div></div>' +
+        '<div class="sv-prog"><div class="sv-prog-h"><span>' + (sc.mode === 'convert' ? 'Advantage left' : 'Safety margin') + '</span><b>' + (G.cp == null ? '…' : mt < 0.15 ? 'danger' : mt < 0.4 ? 'thin' : 'solid') + '</b></div><div class="sv-meter ' + (mt < 0.15 ? 'is-bad' : mt < 0.4 ? 'is-warn' : 'is-ok') + '"><i style="width:' + Math.round(mt * 100) + '%"></i></div></div>' +
+        '<div class="turn">' + (G.done ? icon('flag-checkered') + ' Finished' : G.busy ? '<span class="wait-dot"></span> ' + esc(status || 'Stockfish is thinking…') : '<span class="live-dot"></span> Your move as ' + colorName(G.user)) + '</div>' +
+        '<div class="st-feedback" id="sv-fb">' + feedbackHTML(G.fb) + '</div>' +
+        (G.done ? resultHTML() : '<div class="st-actions"><button type="button" class="btn btn-ghost btn-sm" data-sv="hint"' + (G.busy || !G.pre ? ' disabled' : '') + '>' + icon('lightbulb') + (G.hints ? ' Show the move' : ' Hint') + '</button><button type="button" class="btn btn-quiet btn-sm" data-sv="resign">' + icon('flag') + ' Give up</button></div>');
+    }
+    function resultHTML() {
+      const r = G.res, sc = G.sc, next = nextOf(sc);
+      return '<div class="sv-res ' + (r.win ? 'is-win' : 'is-loss') + '"><h3>' + icon(r.win ? 'trophy' : 'circle-xmark') + ' ' + esc(r.title) + '</h3><p>' + esc(r.text) + '</p>' + (sc.tip ? '<p class="small muted">' + icon('lightbulb') + ' ' + esc(sc.tip) + '</p>' : '') +
+        '<p class="small muted">' + G.moves + ' of ' + sc.moves + ' moves played' + (G.hints ? ' · hint used' : '') + (G.worst != null ? ' · biggest slip ' + G.worst + ' win-chance points' : '') + '.</p></div>' +
+        '<div class="st-actions"><button type="button" class="btn btn-primary" data-sv="' + (r.win && next ? 'next' : 'retry') + '">' + icon(r.win && next ? 'forward' : 'rotate-right') + ' ' + (r.win && next ? 'Next challenge' : 'Try again') + '</button>' + (r.win && next ? '<button type="button" class="btn btn-ghost" data-sv="retry">' + icon('rotate-right') + ' Replay</button>' : '') + '<button type="button" class="btn btn-ghost" data-sv="list">All challenges</button></div>';
+    }
+    const nextOf = (sc) => { const a = list(), i = a.findIndex((s) => s.id === sc.id); for (let j = 1; j < a.length; j++) { const s = a[(i + j) % a.length]; if (open(s) && s.id !== sc.id) return s; } return null; };
+
+    function finish(win, title, text) {
+      if (!G || G.done) return;
+      G.done = true; G.busy = false; G.res = { win, title, text };
+      board.setInteractive(null); board.unmark('hl-hint'); board.setArrows([]);
+      const s = read(), r = s.r[G.sc.id] || (s.r[G.sc.id] = { mode: G.sc.mode, wins: 0, tries: 0 });
+      r.mode = G.sc.mode; r.tries++; if (win) { r.wins++; r.best = Math.max(r.best || 0, G.moves); } r.last = Date.now();
+      write(s); Badges.soon();
+      G.fb = win ? { v: 'win', label: title, text: '' } : { v: 'bad', label: title, text: '' };
+      (win ? Sound.done : Sound.bad)();
+      if (win && r.wins === 1) Celebrate.perfect(G.sc.title + ': done.');
+      draw(); poke();
+    }
+    function terminal(mv) {                                            // the game ended on the board
+      const g = G.g, sc = G.sc;
+      if (g.in_checkmate()) {
+        if (mv.color === G.user) { finish(true, 'Checkmate!', 'You finished it. That is the whole point of converting.'); return true; }
+        finish(false, 'Checkmated', 'Stockfish found the mate. Before every move, list their checks first: that is the P in MSPC.'); return true;
+      }
+      if (g.game_over()) {
+        if (sc.mode === 'convert') { finish(false, 'The win slipped into a draw', 'A drawn position is not a conversion. Keep more material and avoid stalemate tricks.'); return true; }
+        finish(true, 'Draw reached', 'The game ended in a draw, which is exactly the result this position asks for.'); return true;
+      }
+      return false;
+    }
+    async function onMove(m) {
+      if (!G || G.done || G.busy) { if (board) board.setPosition(G.g.fen(), { animate: false }); return; }
+      const sc = G.sc, g = G.g, mv = g.move({ from: m.from, to: m.to, promotion: m.promotion || 'q' });
+      if (!mv) { board.setPosition(g.fen(), { animate: false }); return; }
+      const my = G.my, pre = G.pre;
+      G.busy = true; G.moves++; board.setInteractive(null); board.unmark('hl-hint'); board.setArrows([]);
+      board.setPosition(g.fen(), { lastMove: { from: mv.from, to: mv.to }, sound: mv.captured ? 'capture' : 'move' });
+      if (sc.mode === 'convert' && sc.goal === 'promote' && mv.promotion) { G.fb = null; finish(true, 'Promoted!', 'The pawn made it. With a new queen the rest is technique.'); return; }
+      if (terminal(mv)) return;
+      draw('Stockfish is judging your move…');
+      try {
+        const r = await Engine.analyse(g.fen(), { movetime: 450 });
+        if (bad() || G.my !== my) return;
+        const cp = userPov(r), loss = pre ? Math.max(0, Math.round(Engine.winPct(pre.cp) - Engine.winPct(cp))) : 0;
+        G.cp = cp; G.worst = Math.max(G.worst || 0, loss);
+        const tag = loss < 4 ? { v: 'good', label: 'Accurate' } : loss < 8 ? { v: 'info', label: 'Inaccuracy' } : loss < 16 ? { v: 'off', label: 'Mistake' } : { v: 'bad', label: 'Blunder' };
+        G.fb = Object.assign(tag, { san: mv.san, text: (loss >= 4 ? 'That cost about ' + loss + ' win-chance points. ' : '') + 'Stockfish now sees ' + money(cp) + ' for you.' });
+        const floor = sc.floorCp;
+        if (cp <= floor) {
+          finish(false, sc.mode === 'convert' ? 'The advantage is gone' : cp <= -9000 ? 'You walked into mate' : 'Decisive material lost', sc.mode === 'convert' ? 'After ' + mv.san + ' the evaluation fell to ' + money(cp) + '. A won position needs the safest route, not the fastest.' : mv.san + ' lost too much (' + money(cp) + '). ' + (pre && pre.best ? 'Better was ' + (Engine.uciToSan(pre.fen, pre.best) || pre.best) + '.' : ''));
+          return;
+        }
+        if (sc.mode === 'convert' && sc.goal === 'eval' && cp >= (sc.goalCp || 350)) { finish(true, 'Winning advantage reached', 'Stockfish now sees ' + money(cp) + ' for you. That is a converted position: the rest is technique.'); return; }
+        if (sc.mode === 'convert' && G.moves >= sc.moves) { finish(false, 'Out of moves', 'You kept the advantage but did not finish in ' + sc.moves + ' moves. Convert faster: trade the right pieces and push the pawn.'); return; }
+        draw('Stockfish replies…');
+        const lv = LEVELS[sc.level] || LEVELS.l1600, opts = { skill: lv.skill, movetime: lv.mt };
+        if (lv.elo) opts.elo = lv.elo; if (lv.depthCap) opts.depthCap = lv.depthCap;
+        const br = await Engine.analyse(g.fen(), opts);
+        if (bad() || G.my !== my) return;
+        const bm = br.best, reply = bm ? g.move({ from: bm.slice(0, 2), to: bm.slice(2, 4), promotion: bm[4] || 'q' }) : null;
+        if (reply) { board.setPosition(g.fen(), { lastMove: { from: reply.from, to: reply.to }, sound: reply.captured ? 'capture' : 'move' }); if (terminal(reply)) return; }
+        if (sc.mode !== 'convert' && G.moves >= sc.moves) { finish(true, sc.mode === 'draw' ? 'The draw is yours' : 'You survived', 'Stockfish pressed for ' + sc.moves + ' moves and found nothing. That is what accurate defence looks like.'); return; }
+        await analysePre(false);
+      } catch (e) { if (!bad(e)) { G.busy = false; G.fb = { v: 'miss', label: 'Engine hiccup', text: 'Stockfish stopped for a moment. Keep going.' }; board.setInteractive(G.user); draw(); } }
+      poke();
+    }
+    function hint() {
+      if (!G || G.done || G.busy || !G.pre || !G.pre.best) return;
+      const u = G.pre.best; G.hints++;
+      if (G.hints === 1) { board.mark(u.slice(0, 2), 'hl-hint'); G.fb = { v: 'hint', label: 'Hint', text: 'The piece to move stands on ' + u.slice(0, 2) + '. Ask first what your opponent is threatening.' }; }
+      else { board.setArrows([{ from: u.slice(0, 2), to: u.slice(2, 4), kind: 'best' }]); G.fb = { v: 'hint', label: 'The move', text: 'Play the arrow. This challenge will not count as clean.' }; }
+      draw();
+    }
+    function killGame() { token++; if (G) { G.done = true; G = null; } try { Engine.stop(); } catch (e) { /* idle */ } if (board) { board.destroy(); board = null; } }
+
+    function onClick(e) {
+      const o = e.target.closest('[data-sv-open]');
+      if (o) { play(o.getAttribute('data-sv-open')); return; }
+      const a = e.target.closest('[data-sv]');
+      if (!a) return;
+      const act = a.getAttribute('data-sv');
+      if (act === 'list') { if (a.tagName === 'A') e.preventDefault(); listScreen(); }
+      else if (act === 'hint') hint();
+      else if (act === 'resign') { if (G && !G.done) finish(false, 'You gave up', 'Resigning is allowed here. Look at the position again before you try it.'); }
+      else if (act === 'retry' && G) play(G.sc.id);
+      else if (act === 'next' && G) { const n = nextOf(G.sc); if (n) play(n.id); else listScreen(); }
+    }
+    view.addEventListener('click', onClick);
+    const flow = () => {
+      if (screen !== 'play' || !G) return null;
+      if (G.done) return { ready: true, next: G.res && G.res.win ? 'Next challenge' : 'Try again', run: () => { if (G.res && G.res.win) { const n = nextOf(G.sc); n ? play(n.id) : listScreen(); } else play(G.sc.id); } };
+      return { ready: false, hint: G.busy ? 'Stockfish is replying…' : 'Play your move to proceed' };
+    };
+    ContinueBar.register('survival', flow);
+    listScreen();
+    return () => { alive = false; killGame(); view.removeEventListener('click', onClick); ContinueBar.unregister('survival', flow); };
+  }
+  return { mount, wins, list, find, LEVELS, goalText };
+})();
+
+/* v13: the two extra Think entries, below the 2x2 matrix */
+function v13Links() {
+  return '<div class="v13-links">' +
+    '<a class="bt-think-link" href="#vision"><div><h3>' + icon('eye') + ' Board Vision &amp; Fundamentals</h3><p>Coordinates, knight paths and legal moves. The board becomes automatic, so thinking time goes to ideas.</p></div><span class="btn btn-primary btn-sm">Train ' + icon('arrow-right') + '</span></a>' +
+    '<a class="bt-think-link" href="#survival"><div><h3>' + icon('shield-halved') + ' Survival &amp; Defense Challenges</h3><p>Survive the squeeze, hold the draw and convert the win against Stockfish.</p></div><span class="btn btn-primary btn-sm">Play ' + icon('arrow-right') + '</span></a></div>';
+}
+
+
 const TABS = [
-  { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'peer', 'srs', 'bot'] },
-  { id: 'theory', label: 'Theory', icon: 'book-open', routes: ['openings', 'middlegame', 'endgame', 'puzzles'], href: '#openings' },
+  { id: 'think', label: 'Think', icon: 'brain', routes: ['think', 'clinic', 'mspc-rep', 'peer', 'srs', 'bot', 'vision', 'survival'] },
+  { id: 'theory', label: 'Theory', icon: 'book-open', routes: ['openings', 'middlegame', 'endgame', 'puzzles', 'themes'], href: '#openings' },
   { id: 'trim', label: 'Trim', icon: 'scissors', routes: ['trim', 'games', 'brilliant'] },
   { id: 'dex', label: 'Dex', icon: 'layer-group', routes: ['dex'] },
   { id: 'arena', label: 'Arena', icon: 'trophy', routes: ['leaderboard'] },
@@ -30483,14 +31606,15 @@ const TABS = [
   { id: 'account', label: 'Account', icon: 'circle-user', routes: ['account', 'profile', 'events', 'trophies'] },
   { id: 'about', label: 'About', icon: 'user', routes: ['about'] }
 ];
-const ROUTE_TITLES = { bot: 'the Bot Trainer', dex: 'the Chess Dex', account: 'your Account', profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
-const DOC_TITLES = { bot: 'Think: Bot Deep-Thinking Trainer', dex: 'Chess Dex', account: 'Account', profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
-const ALIASES = { 'bot-trainer': 'bot', 'play-bot': 'bot', 'play-the-bot': 'bot', pokedex: 'dex', 'chess-dex': 'dex', mastery: 'dex', executive: 'profile', 'skill-matrix': 'profile', matrix: 'profile', bosses: 'profile', 'boss-fight': 'profile', bounties: 'profile', community: 'profile', 'event-engine': 'events', 'master-events': 'events', arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
+const ROUTE_TITLES = { vision: 'Board Vision', survival: 'the Survival challenges', themes: 'Themed puzzles', bot: 'the Bot Trainer', dex: 'the Chess Dex', account: 'your Account', profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
+const DOC_TITLES = { vision: 'Think: Board Vision & Fundamentals', survival: 'Think: Survival & Defense Challenges', themes: 'Theory: Puzzles by theme', bot: 'Think: Bot Deep-Thinking Trainer', dex: 'Chess Dex', account: 'Account', profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
+const ALIASES = { 'board-vision': 'vision', fundamentals: 'vision', coordinates: 'vision', 'knight-path': 'vision', survive: 'survival', defense: 'survival', defence: 'survival', 'survival-mode': 'survival', conversion: 'survival', 'themed-puzzles': 'themes', 'puzzle-themes': 'themes', themes: 'themes', 'bot-trainer': 'bot', 'play-bot': 'bot', 'play-the-bot': 'bot', pokedex: 'dex', 'chess-dex': 'dex', mastery: 'dex', executive: 'profile', 'skill-matrix': 'profile', matrix: 'profile', bosses: 'profile', 'boss-fight': 'profile', bounties: 'profile', community: 'profile', 'event-engine': 'events', 'master-events': 'events', arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
   arena: 'leaderboard', friends: 'leaderboard', tournament: 'leaderboard', tournaments: 'leaderboard',
   ranking: 'leaderboard', rankings: 'leaderboard', ranks: 'leaderboard', 'game-vault': 'games', gamevault: 'games', 'my-games': 'games', folders: 'games', stats: 'insights', brilliants: 'brilliant', brilliancies: 'brilliant', mistakes: 'vault-browser', 'mistake-browser': 'vault-browser', 'blunder-clinic': 'clinic', 'repertoire-trainer': 'mspc-rep',
   'peer-puzzles': 'peer', 'community-puzzles': 'peer', puzzle: 'puzzles', tactics: 'puzzles', 'lichess-puzzles': 'puzzles', 'rated-puzzles': 'puzzles', 'my-mistakes': 'srs', 'spaced-repetition': 'srs', repetition: 'srs', trophy: 'trophies', badges: 'trophies', achievements: 'trophies', queue: 'review-queue', 'admin-queue': 'review-queue',
   'privacy-policy': 'privacy', 'privacy-statement': 'privacy', privacybeleid: 'privacy', gdpr: 'privacy' };
 const MOUNT = {
+  vision: BoardVision.mount, survival: Survival.mount, themes: (v) => mountTheory(v, 'themes'),
   dex: mountDex, bot: BotTrainer.mount, home: mountHome, think: mountThink, shuffle: mountShufflePage,
   openings: (v) => mountTheory(v, 'openings'), middlegame: (v) => mountTheory(v, 'middlegame'), endgame: (v) => mountTheory(v, 'endgame'), puzzles: (v) => mountTheory(v, 'puzzles'),
   trim: mountTrim, upgrades: mountUpgrades, about: mountAbout,
@@ -30625,6 +31749,7 @@ function boot() {
   Activity.start();                                                // v11: activity log, streaks and the Supabase queue
   TokenFlag.start();                                               // v6.9.1: TOKENS_ENABLED, read from Supabase and re-checked while the hub is open
   License.start();
+  ContinueBar.start();                                             // v13: the universal Continue bar
   Feedback.bind();                                                 // v12: feedback button, offline outbox                                                 // v7.0: licence expiry and renewal, checked against Supabase
   TokenFlag.onChange(() => { try { refreshChip(); if (!qs('.sheet-wrap') && !qs('#view .trainer')) rerender(); } catch (e) { /* a redraw can wait */ } });
   window.LC = { onboarding: Onboard.api, tokensEnabled: () => TokenFlag.on(), dayFunnel: DayFunnel.api, version: CONFIG.version, hashKey: Access.hashKey, profileToken: Access.encodeProfile, ai: AI.on(), site: SiteURL.base(), deployment: SiteURL.kind(), data: () => Site.status() };

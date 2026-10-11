@@ -1,7 +1,7 @@
 {
  "app": "lanckrietchess-hub",
  "schema": 1,
- "updated": "2026-10-11T09:00:00.000Z",
+ "updated": "2026-10-11T12:00:00.000Z",
  "copy": {
   "onb.title": "Feeling overwhelmed? Take the 3-minute Quick Tour",
   "onb.subtitle": "Get a clear walkthrough of all features, training tools, and how to get the most out of your chess training.",
@@ -52099,7 +52099,148 @@
      "No threat"
     ]
    }
-  }
+  },
+  "survival": [
+   {
+    "id": "sv-squeeze-1",
+    "mode": "survive",
+    "title": "Out-pressed in a middlegame",
+    "brief": "You are a little worse and Stockfish is pressing. Nothing is lost yet: every move you make has to answer a threat, not start a plan.",
+    "tip": "List their checks, captures and threats before every move. If you cannot find one, improve your worst piece.",
+    "fen": "r1br2k1/pp2qpbp/4p1p1/3n4/3p4/1Q1P2PP/PP2PPB1/1NR1K1NR w K - 0 14",
+    "moves": 14,
+    "level": "l1600",
+    "tier": 1,
+    "floorCp": -400
+   },
+   {
+    "id": "sv-squeeze-2",
+    "mode": "survive",
+    "title": "The queenside squeeze",
+    "brief": "A cramped position against a stronger opponent. Keep your pieces defended and avoid pawn grabs.",
+    "tip": "When you are worse, trade the pieces that attack you, not the ones that defend you.",
+    "fen": "rr4k1/ppqb1pp1/2np1n1p/PB1p4/Q1Pp4/R3P2P/1P1NNPP1/4K2R w K - 0 15",
+    "moves": 14,
+    "level": "l1600",
+    "tier": 2,
+    "floorCp": -400
+   },
+   {
+    "id": "sv-squeeze-3",
+    "mode": "survive",
+    "title": "Held back in the centre",
+    "brief": "Your opponent has more space and the better pieces. Hold the centre together and keep your king safe.",
+    "tip": "Find their best plan first. Then make the move that makes that plan harder, even if it looks passive.",
+    "fen": "rbbq1rk1/pp3ppp/5n2/3pp3/8/1N1B4/PPP2PPP/R1BQ1RK1 w - - 0 13",
+    "moves": 16,
+    "level": "l2000",
+    "tier": 3,
+    "floorCp": -400
+   },
+   {
+    "id": "sv-squeeze-4",
+    "mode": "survive",
+    "title": "The uncomfortable king",
+    "brief": "Your king is not yet safe and Stockfish is happy to keep it that way. Survive 16 moves.",
+    "tip": "Before moving, ask where their pieces want to go next and take that square away.",
+    "fen": "r3k2r/pp1bqppp/1bn5/4p3/4n3/1N2B3/PPPQ1PPP/R3KBNR w KQkq - 10 14",
+    "moves": 16,
+    "level": "max",
+    "tier": 4,
+    "floorCp": -400
+   },
+   {
+    "id": "dr-philidor",
+    "mode": "draw",
+    "title": "Philidor: hold the rook ending",
+    "brief": "White has an extra pawn on e5. Keep your rook on the sixth rank until the pawn moves, then switch to checking from behind.",
+    "tip": "Rook on the sixth rank until the pawn advances, then check from behind. The king stays near e8.",
+    "fen": "4k3/8/7r/3KP3/8/8/8/R7 b - - 0 1",
+    "moves": 16,
+    "level": "max",
+    "tier": 1,
+    "floorCp": -150
+   },
+   {
+    "id": "dr-queen-pawn",
+    "mode": "draw",
+    "title": "Queen against a rook pawn",
+    "brief": "Your pawn on a2 is one step from queening, but White’s queen is faster. Only one move holds the draw here, and it relies on stalemate.",
+    "tip": "Against a queen, a pawn on the seventh with the king close by can force stalemate. Find the move that does not lose at once.",
+    "fen": "8/8/8/3Q4/8/2K5/p7/1k6 b - - 0 1",
+    "moves": 12,
+    "level": "max",
+    "tier": 2,
+    "floorCp": -150
+   },
+   {
+    "id": "cv-kq-mate",
+    "mode": "convert",
+    "title": "Queen and king against king",
+    "brief": "Checkmate with a queen and king. Box the king in with queen moves a knight’s distance away, then bring your king up.",
+    "tip": "Never give stalemate: leave the enemy king one square until the last move.",
+    "fen": "8/8/8/3k4/8/8/8/Q3K3 w - - 0 1",
+    "moves": 14,
+    "level": "l800",
+    "tier": 1,
+    "floorCp": 300,
+    "goal": "mate"
+   },
+   {
+    "id": "cv-kr-mate",
+    "mode": "convert",
+    "title": "Rook and king against king",
+    "brief": "Checkmate with a rook and king. Cut the king off along a rank, bring your king to meet it, and use the rook to mate on the edge.",
+    "tip": "Use the opposition: kings face each other with one square between, then a rook check finishes.",
+    "fen": "8/8/8/8/3k4/8/8/R3K3 w - - 0 1",
+    "moves": 18,
+    "level": "l1200",
+    "tier": 2,
+    "floorCp": 300,
+    "goal": "mate"
+   },
+   {
+    "id": "cv-lucena",
+    "mode": "convert",
+    "title": "The Lucena position",
+    "brief": "You have an extra pawn on the seventh, but your king is in front of it. Build the bridge with your rook and shield your king from the checks.",
+    "tip": "Rook to the fourth rank is the bridge: when the checks come, step the king out and block with the rook.",
+    "fen": "3K4/3P1k2/8/8/8/8/r7/2R5 w - - 0 1",
+    "moves": 15,
+    "level": "max",
+    "tier": 3,
+    "floorCp": 200,
+    "goal": "promote"
+   },
+   {
+    "id": "cv-grow-1",
+    "mode": "convert",
+    "title": "Make the extra edge count",
+    "brief": "You are clearly better. Do not rush: trade pieces, remove their counterplay and grow the advantage to a clearly winning +3.5.",
+    "tip": "When you are better, trade the active enemy pieces and keep your king safe.",
+    "fen": "5rk1/rbppqpp1/np3n1p/p3p3/2PPP3/2P2NP1/P4PBP/1RBQ1RK1 w - - 1 13",
+    "moves": 16,
+    "level": "l1600",
+    "tier": 3,
+    "floorCp": 60,
+    "goal": "eval",
+    "goalCp": 350
+   },
+   {
+    "id": "cv-grow-2",
+    "mode": "convert",
+    "title": "Convert the better position",
+    "brief": "The evaluation is in your favour but the position is still full of pieces. Find the safest route to a decisive edge.",
+    "tip": "A better position is won with the safest moves, not the cleverest ones.",
+    "fen": "r1b2knr/pp1pb2p/2q2p2/2p1p3/P3N2N/3P2P1/1PP2P1P/R1BQK2R w KQ - 2 13",
+    "moves": 16,
+    "level": "l2000",
+    "tier": 4,
+    "floorCp": 60,
+    "goal": "eval",
+    "goalCp": 350
+   }
+  ]
  },
  "middlegameMasterclass": {
   "courseTitle": "The Middlegame Masterclass: From Zero to Grandmaster",
