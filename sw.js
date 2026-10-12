@@ -7,7 +7,7 @@
    - fetch:    own files are network-first (always the newest release when online, the cached copy when offline).
                Third-party libraries from cdnjs are version-pinned, so they are cached after the first load for offline use.
                Everything else (GitHub JSON, Supabase, the Arena server, fonts, analytics-free APIs) is never touched by this worker. */
-const VERSION = 'v7.3';
+const VERSION = 'v16';
 const CACHE = 'lanckrietchess-hub-' + VERSION;
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'icons/apple-touch-icon.png'];
 const PINNED_HOSTS = ['cdnjs.cloudflare.com'];
