@@ -1,18 +1,24 @@
 {
   "id": "/",
-  "name": "Lanckrietchess Training Hub",
-  "short_name": "Training Hub",
-  "description": "Think, Theory, Trim: the MSPC training hub by Kyenzo (lanckrietchess).",
-  "start_url": "./",
-  "scope": "./",
+  "name": "Lanckriet Chess Training Hub",
+  "short_name": "Lanckriet Chess",
+  "description": "Train the way you actually lose games: MSPC thinking drills, Caro-Kann, Colle and Semi-Slav repertoires, middlegame plans, endgames and Stockfish game review.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
+  "lang": "en",
+  "dir": "ltr",
   "categories": ["education", "games"],
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/icons/icon-192.png?v=7.1.3", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png?v=7.1.3", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png?v=7.1.3", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Refer a Friend", "short_name": "Refer", "url": "/#refer", "icons": [{ "src": "/icons/icon-192.png?v=7.1.3", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Hall of Fame", "short_name": "Hall of Fame", "url": "/#hall", "icons": [{ "src": "/icons/icon-192.png?v=7.1.3", "sizes": "192x192", "type": "image/png" }] }
   ]
 }
