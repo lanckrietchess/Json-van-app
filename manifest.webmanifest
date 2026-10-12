@@ -13,12 +13,12 @@
   "dir": "ltr",
   "categories": ["education", "games"],
   "icons": [
-    { "src": "/icons/icon-192.png?v=7.1.3", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png?v=7.1.3", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-maskable-512.png?v=7.1.3", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/icons/icon-192.png?v=7.3.0", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png?v=7.3.0", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png?v=7.3.0", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Refer a Friend", "short_name": "Refer", "url": "/#refer", "icons": [{ "src": "/icons/icon-192.png?v=7.1.3", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "Hall of Fame", "short_name": "Hall of Fame", "url": "/#hall", "icons": [{ "src": "/icons/icon-192.png?v=7.1.3", "sizes": "192x192", "type": "image/png" }] }
+    { "name": "Refer a Friend", "short_name": "Refer", "url": "/#refer", "icons": [{ "src": "/icons/icon-192.png?v=7.3.0", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Hall of Fame", "short_name": "Hall of Fame", "url": "/#hall", "icons": [{ "src": "/icons/icon-192.png?v=7.3.0", "sizes": "192x192", "type": "image/png" }] }
   ]
 }
