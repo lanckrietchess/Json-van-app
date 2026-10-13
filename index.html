@@ -2954,6 +2954,92 @@ html.has-walk{--head:164px}
 .v6-sec{margin-bottom:28px}
 .v6-sec>h2{font-size:20px;margin:0 0 8px}
 </style>
+<style id="uniform-css">
+/* ==========================================================================
+   UNIFORM LAYOUT LAYER (phone = tablet = desktop)
+   Goal: the same structure, spacing and proportions at every width, so screen
+   recordings and course documentation look identical on every device.
+   Must load LAST (after every other <style>), so it wins the cascade.
+   Rules of this layer:
+   - one set of spacing tokens, no per-breakpoint padding jumps
+   - modals are always centred: width 90%, a fixed max-width, never a bottom sheet
+   - boards and trainer frames scale with min()/clamp() and aspect-ratio 1/1
+   ========================================================================== */
+:root{
+  --u-gutter:20px;                 /* side padding of every page, all widths */
+  --u-pad:20px;                    /* inner padding of every card/panel */
+  --u-gap:16px;                    /* gap between blocks inside a view */
+  --u-modal:560px;                 /* default modal max-width */
+  --u-modal-wide:980px;            /* wide modals (growth path) */
+  --u-board:min(100%,560px,calc(100dvh - var(--head) - 160px));  /* board edge: never taller than the screen */
+  --u-board-min:260px;
+}
+
+/* ---------- 1. Page + container spacing: one rhythm everywhere ---------- */
+.view{padding:calc(var(--head) + env(safe-area-inset-top) + 24px) var(--u-gutter) 88px}
+@media (min-width:900px){.view{padding:calc(var(--head) + env(safe-area-inset-top) + 24px) var(--u-gutter) 88px}}
+@media (min-width:900px){.view:has(>.hero){padding-top:calc(var(--head) + env(safe-area-inset-top) + 24px)}}
+.topbar-inner{padding-left:var(--u-gutter);padding-right:var(--u-gutter)}
+@media (min-width:900px){.topbar-inner{padding-left:var(--u-gutter);padding-right:var(--u-gutter)}}
+.pad,.trainer-panel,.sh-setup{padding:var(--u-pad)}
+@media (min-width:640px){.pad,.sh-setup{padding:var(--u-pad)}}
+.section{margin-top:40px}
+.page-head{margin-bottom:24px}
+.trainer{gap:var(--u-gap)}
+@media (min-width:960px){.trainer{gap:var(--u-gap)}}
+/* sticky Endgame/Middlegame level bar bleeds exactly to the page edge (it used -16px / -28px) */
+.egx-sticky{margin:0 calc(-1 * var(--u-gutter)) 14px;padding:10px var(--u-gutter) 12px}
+@media (min-width:900px){.egx-sticky{margin:0 calc(-1 * var(--u-gutter)) 14px;padding:10px var(--u-gutter) 12px}}
+
+/* ---------- 2. Modals and overlays: one construction on every screen ---------- */
+.sheet-wrap{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+@media (min-width:700px){.sheet-wrap{align-items:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}}
+.sheet{position:relative;width:90%;max-width:var(--u-modal);max-height:min(88vh,880px);max-height:min(88dvh,880px);
+  border-radius:20px;padding:0 var(--u-pad) var(--u-pad);
+  transform:translateY(12px) scale(.985);opacity:0;transition:transform .2s ease-out,opacity .2s}
+@media (min-width:700px){.sheet{border-radius:20px}}
+.sheet-wrap.is-open .sheet{transform:none;opacity:1}
+.sheet-wrap.is-closing .sheet{transform:translateY(12px) scale(.985);opacity:0}
+.sheet.gp-sheet{max-width:var(--u-modal-wide)}
+.sheet.gp-t2{max-width:600px}
+.sheet-head{padding:var(--u-pad) 0 12px}
+/* floating overlays share the same width rule instead of full-bleed on phones */
+.cele{padding:16px}
+.acc-banner{width:min(560px,90vw)}
+.toast{max-width:min(560px,90vw)}
+.data-banner{left:50%;right:auto;transform:translateX(-50%);width:min(560px,90vw)}
+.cbar{padding-left:var(--u-gutter);padding-right:var(--u-gutter)}
+.cbar>*{max-width:560px;margin-left:auto;margin-right:auto}
+
+/* ---------- 3. Board + training frames: fluid units, no layout jumps ---------- */
+.board-host{aspect-ratio:1/1;width:100%;max-width:min(560px,100%);min-width:0}
+.board-shell{width:100%;max-width:var(--u-board);margin-left:auto;margin-right:auto}
+.board-sm{max-width:min(360px,100%)}.board-xs{max-width:min(250px,100%)}
+.hero .board-sm,.hero-fig .board-sm{max-width:min(430px,100%)}
+.hero .hero-fig,.hero-fig{max-width:min(430px,100%,62dvh)}
+/* trainer: the board column is a fluid square, the text panel takes the rest.
+   (The 2-column switch at 960px stays in the existing grid + Layout5 splitter.) */
+.trainer{align-items:start}
+.trainer>.board-col{width:100%;max-width:min(580px,100%);justify-self:center}
+@media (min-width:960px){.trainer>.board-col{justify-self:start}}
+.trainer>.trainer-panel{max-height:min(70vh,640px);max-height:min(70dvh,640px)}
+@media (min-width:960px){.trainer>.trainer-panel{max-height:min(calc(100dvh - 140px),640px)}}
+/* every secondary board frame uses the same square rule */
+.gm36-bd .board-host,.q36-bd .board-host,.vb-prev .board-host,.gh-explorer .board-host,.bm-grid .board-host{width:100%;max-width:min(440px,100%);aspect-ratio:1/1}
+
+/* ---------- 4. Same hierarchy of text and buttons everywhere ---------- */
+.btn{min-height:44px}
+.page-head h1{font-size:clamp(28px,5vw,44px)}
+.section-head h2{font-size:clamp(20px,3vw,26px)}
+.rows,.cards,.panel{border-radius:var(--r-lg)}
+
+/* ---------- 5. v6 screens (profile, Skill Matrix, Boss Fight): no phone-only restructuring ---------- */
+.v6-page{padding:0 0 40px}
+.v6-strip{gap:8px 14px}
+.v6-mod{grid-template-columns:minmax(0,1.2fr) minmax(64px,1fr) auto;gap:10px 12px}
+.v6-chap-act{width:auto}
+</style>
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
