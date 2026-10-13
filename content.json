@@ -41,7 +41,7 @@
  },
  "settings": {
   "links": {
-   "walkthrough": "https://www.skool.com/lanckrietchess/classroom"
+   "walkthrough": "https://www.skool.com/lanckriet-chess-1924/classroom"
   },
   "onboarding": {
    "enabled": true,
@@ -59,6 +59,380 @@
  },
  "lists": {
   "think": [
+   {
+    "id": "think-free-legal",
+    "title": "The queen that was not a gift",
+    "tag": "Free MSPC basics",
+    "level": "0-800",
+    "fen": "rn1qkbnr/ppp2p1p/3p2p1/4N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w KQkq - 0 6",
+    "orientation": "w",
+    "lastMove": [
+     "g4",
+     "d1"
+    ],
+    "brief": "Black just captured your queen with ...Bxd1. Before you recapture, ask what that capture left behind.",
+    "stages": [
+     {
+      "type": "mcq",
+      "prompt": "Black took your queen with ...Bxd1. What did that capture leave behind?",
+      "options": [
+       {
+        "text": "The f7-pawn is attacked twice, by your bishop and your knight, and defended only by the king.",
+        "correct": true,
+        "why": "Yes. Taking the queen pulled the bishop away from the kingside, and f7 is now a weak square with too few defenders."
+       },
+       {
+        "text": "Nothing: Black is simply a queen up and you must recapture.",
+        "correct": false,
+        "why": "The recapture can wait. Read what their move changed on the board before you decide."
+       },
+       {
+        "text": "Black now threatens ...Bxc2 to win more material.",
+        "correct": false,
+        "why": "It is a threat, but a slow one. When your opponent has no time, your own forcing moves come first."
+       }
+      ],
+      "k": "M"
+     },
+     {
+      "type": "tap",
+      "prompt": "Tap the square that both your bishop on c4 and your knight on e5 attack.",
+      "answer": [
+       "f7"
+      ],
+      "hint": "Follow the diagonal from c4 towards the black king.",
+      "explain": "f7. Two attackers, one defender: the king alone cannot hold it, and the king is also the piece you want to drive out.",
+      "k": "S"
+     },
+     {
+      "type": "mcq",
+      "prompt": "Which of your checks, captures and attacks do you calculate first?",
+      "options": [
+       {
+        "text": "Bxf7+, a check that forces the king to move.",
+        "correct": true,
+        "why": "Checks first. This one leaves Black exactly one legal reply, so you can calculate it to the very end."
+       },
+       {
+        "text": "Nxf7, a capture that forks the queen and the rook.",
+        "correct": false,
+        "why": "It looks tempting, but it lets Black catch their breath: your king is still on e1 and Black is a queen up. Check the checks first."
+       },
+       {
+        "text": "Kxd1, winning the bishop back.",
+        "correct": false,
+        "why": "That recovers material but gives away the attack. When a forced mate is on the board, material can wait."
+       }
+      ],
+      "k": "P"
+     },
+     {
+      "type": "line",
+      "prompt": "Find the mate. Black's reply comes automatically.",
+      "pgn": "6.Bxf7+ Ke7 7.Nd5#",
+      "ann": {
+       "6.Bxf7+": {
+        "note": "Check. The knight on e5 protects the bishop, so the king cannot take it and has only one square: e7.",
+        "bad": {
+         "Nxf7": "Black is a queen up and this lets them organise a defence. Play the check first.",
+         "Kxd1": "Greedy in the wrong direction: you win a bishop and lose the attack."
+        }
+       },
+       "7.Nd5#": {
+        "note": "Mate. The knight checks from d5, the king has no flight squares, and nothing can capture the knight or block."
+       }
+      },
+      "k": "C"
+     }
+    ],
+    "debrief": [
+     {
+      "k": "M",
+      "t": "Black grabbed the queen with ...Bxd1 and in doing so left f7 under double attack."
+     },
+     {
+      "k": "S",
+      "t": "The black king has no way out: e7 is the only square, and your pieces already cover everything else."
+     },
+     {
+      "k": "P",
+      "t": "The check on f7 comes before any capture: it limits Black to one reply."
+     },
+     {
+      "k": "C",
+      "t": "Calculate the line to the end: 6.Bxf7+ Ke7 7.Nd5# is forced, so you can give up the queen with confidence."
+     }
+    ],
+    "topicId": "mspc-positions",
+    "topic": "MSPC positions",
+    "lvl": 1,
+    "requiredTier": 0,
+    "chap": "mspc-free-starter",
+    "repertoire": false,
+    "description": "Black just captured your queen with ...Bxd1. Before you recapture, ask what that capture left behind.",
+    "ms_pc_breakdown": {
+     "M": "Black grabbed the queen with ...Bxd1 and in doing so left f7 under double attack.",
+     "S": "The black king has no way out: e7 is the only square, and your pieces already cover everything else.",
+     "P": "The check on f7 comes before any capture: it limits Black to one reply.",
+     "C": "Calculate the line to the end: 6.Bxf7+ Ke7 7.Nd5# is forced, so you can give up the queen with confidence."
+    },
+    "explanation": "It is natural to want your queen back. The lesson of this position is the order: read their move, find the weak square, list your checks, and only then think about material.",
+    "alarm_signal": "⚠️ ALARM SIGNAL / RED FLAG: When you see your opponent grab material while their king still sits in the centre, instantly ask yourself if a check against the weakest square, usually f7 or f2, is winning or necessary!",
+    "coaching_tip": "💡 Linked Course: The Blunder Bootcamp and MSPC System: P, checks first. Remember: a forced line of checks needs no defence from you, only a calculation that reaches the end.",
+    "elo_insight": {
+     "tier": "Free · 0–800",
+     "foundation": "Foundation: when your opponent takes something big, look at what the capture left undefended before you recapture.",
+     "advanced": "Sharper: a sacrifice is only a sacrifice if the forced line ends in mate. Count every legal reply before you believe it."
+    }
+   },
+   {
+    "id": "think-free-scholar",
+    "title": "The move that ignored f7",
+    "tag": "Free MSPC basics",
+    "level": "0-800",
+    "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+    "orientation": "w",
+    "lastMove": [
+     "g8",
+     "f6"
+    ],
+    "brief": "Black just developed with 3...Nf6. Does that move deal with the threat on f7?",
+    "stages": [
+     {
+      "type": "mcq",
+      "prompt": "Black just played 3...Nf6. What did that move forget?",
+      "options": [
+       {
+        "text": "Nothing defends f7 except the king, and your queen and bishop both aim at it.",
+        "correct": true,
+        "why": "Exactly. Developing a piece felt natural, but f7 is still attacked twice and defended once."
+       },
+       {
+        "text": "It attacks your queen, so you have to move it.",
+        "correct": false,
+        "why": "The knight does attack your queen on h5, but that is a threat to answer with a better move, not a retreat. Look at what you can do first."
+       },
+       {
+        "text": "It opens the f-file for Black's rook.",
+        "correct": false,
+        "why": "Not yet: the rook is still in the corner. Read the squares around the black king instead."
+       }
+      ],
+      "k": "M"
+     },
+     {
+      "type": "tap",
+      "prompt": "Tap the weakest square in Black's position.",
+      "answer": [
+       "f7"
+      ],
+      "hint": "Your bishop on c4 looks along a diagonal at the black king.",
+      "explain": "f7. It is guarded only by the king, and your queen and bishop both hit it.",
+      "k": "S"
+     },
+     {
+      "type": "mcq",
+      "prompt": "Which check, capture or attack do you calculate first?",
+      "options": [
+       {
+        "text": "Qxf7#, a capture that is also check.",
+        "correct": true,
+        "why": "Checks and captures at once. After Qxf7 the king has no square and nothing can capture the queen: mate."
+       },
+       {
+        "text": "Qxe5+, a capture with check.",
+        "correct": false,
+        "why": "It wins a pawn, but it lets Black play ...Nxe5 and you lose your queen. Always look at who can capture back."
+       },
+       {
+        "text": "Qxf6, taking the knight.",
+        "correct": false,
+        "why": "That gives your queen for a knight after ...gxf6 or ...Qxf6. A mate was available."
+       }
+      ],
+      "k": "P"
+     },
+     {
+      "type": "line",
+      "prompt": "Deliver the mate.",
+      "pgn": "4.Qxf7#",
+      "ann": {
+       "4.Qxf7#": {
+        "note": "Checkmate. The king cannot capture a queen protected by the bishop, and e7, d8 and e8 are covered or blocked."
+       }
+      },
+      "k": "C"
+     }
+    ],
+    "debrief": [
+     {
+      "k": "M",
+      "t": "3...Nf6 developed a piece but did nothing about f7, which is attacked twice."
+     },
+     {
+      "k": "S",
+      "t": "Black's king has no spare square: the queen, bishop and rook around it block its own escape."
+     },
+     {
+      "k": "P",
+      "t": "Capture with check beats every quiet move: Qxf7 is mate."
+     },
+     {
+      "k": "C",
+      "t": "One move deep, but still verify: the queen is protected, the king has no square, nothing can take."
+     }
+    ],
+    "topicId": "mspc-positions",
+    "topic": "MSPC positions",
+    "lvl": 1,
+    "requiredTier": 0,
+    "chap": "mspc-free-starter",
+    "repertoire": false,
+    "description": "Black just developed with 3...Nf6. Does that move deal with the threat on f7?",
+    "ms_pc_breakdown": {
+     "M": "3...Nf6 developed a piece but did nothing about f7, which is attacked twice.",
+     "S": "Black's king has no spare square: the queen, bishop and rook around it block its own escape.",
+     "P": "Capture with check beats every quiet move: Qxf7 is mate.",
+     "C": "One move deep, but still verify: the queen is protected, the king has no square, nothing can take."
+    },
+    "explanation": "Many players develop automatically and forget the weak square. MSPC asks one question first: what does their last move leave undefended?",
+    "alarm_signal": "⚠️ ALARM SIGNAL / RED FLAG: When you see an enemy king with a pawn on f7 or f2 that only the king defends, instantly ask yourself if a queen and bishop battery on that square is winning or necessary!",
+    "coaching_tip": "💡 Linked Course: The Blunder Bootcamp and MSPC System: M, what did their move change? Remember: every move changes what is protected, so check the protectors of the king's neighbours.",
+    "elo_insight": {
+     "tier": "Free · 0–800",
+     "foundation": "Foundation: before you move, count attackers and defenders of the squares next to the enemy king.",
+     "advanced": "Sharper: when a capture is also check, ask who can capture back before you celebrate."
+    }
+   },
+   {
+    "id": "think-free-blackburne",
+    "title": "The knight that took too much",
+    "tag": "Free MSPC basics",
+    "level": "800-1400",
+    "fen": "r1b1kbnr/pppp1Npp/8/6q1/2BnP3/8/PPPP1PPP/RNBQK2R b KQkq - 0 5",
+    "orientation": "b",
+    "lastMove": [
+     "e5",
+     "f7"
+    ],
+    "brief": "You are Black. White just captured on f7 with the knight, attacking your queen and the rook on h8. Do not run yet.",
+    "stages": [
+     {
+      "type": "mcq",
+      "prompt": "White just played Nxf7, hitting your queen and rook. What did that capture overlook?",
+      "options": [
+       {
+        "text": "The g2-pawn: it is only protected by the rook, and your queen can take it with tempo.",
+        "correct": true,
+        "why": "Yes. The knight went hunting and left the kingside weak. Your queen is attacked, but it can attack back with more."
+       },
+       {
+        "text": "Nothing: your queen is attacked, so you must move it to safety.",
+        "correct": false,
+        "why": "The reflex to save the queen is exactly what MSPC slows down. First list your own checks, captures and attacks."
+       },
+       {
+        "text": "It leaves the knight on f7 undefended, so you can simply take it.",
+        "correct": false,
+        "why": "The knight is protected by the bishop on c4, so the king cannot capture it. Check what protects it before you plan around it."
+       }
+      ],
+      "k": "M"
+     },
+     {
+      "type": "tap",
+      "prompt": "Tap the square where your queen can capture with tempo.",
+      "answer": [
+       "g2"
+      ],
+      "hint": "Look down the g-file from your queen: what is on the other side of g2?",
+      "explain": "g2. Capturing there attacks the rook on h1 and keeps the e4-pawn hanging with check.",
+      "k": "S"
+     },
+     {
+      "type": "mcq",
+      "prompt": "Which capture or attack do you calculate first?",
+      "options": [
+       {
+        "text": "Qxg2, attacking the rook on h1 and eyeing e4 with check.",
+        "correct": true,
+        "why": "A capture that creates two new threats. White cannot meet both."
+       },
+       {
+        "text": "Qh4, attacking the e4-pawn.",
+        "correct": false,
+        "why": "It moves the queen out of the attack, but Nxh8 wins your rook and you have gained nothing."
+       },
+       {
+        "text": "Nxc2+, forking the king and the rook on a1.",
+        "correct": false,
+        "why": "It is a fork, but White simply takes with the queen, and your own queen is still hanging on g5."
+       }
+      ],
+      "k": "P"
+     },
+     {
+      "type": "line",
+      "prompt": "Play the combination. White's replies come automatically.",
+      "pgn": "5...Qxg2 6.Rf1 Qxe4+ 7.Be2 Nf3#",
+      "ann": {
+       "5...Qxg2": {
+        "note": "The queen takes with tempo: the rook on h1 is attacked and the e4-pawn is next.",
+        "bad": {
+         "Qh4": "Passive. White's knight takes the rook on h8 and you are simply worse.",
+         "Nxc2+": "White takes with the queen and your queen on g5 is still attacked."
+        }
+       },
+       "6...Qxe4+": {
+        "note": "Check. The e-file opens against the king, and the bishop that blocks it will be pinned."
+       },
+       "7...Nf3#": {
+        "note": "Mate. The bishop on e2 is pinned by the queen on e4, so it cannot capture the knight, and the king has no square."
+       }
+      },
+      "k": "C"
+     }
+    ],
+    "debrief": [
+     {
+      "k": "M",
+      "t": "5.Nxf7 forks the queen and the rook, but it takes the knight far from the defence of the kingside."
+     },
+     {
+      "k": "S",
+      "t": "White's kingside is thin: g2 is protected only by the rook, and the king is still on e1."
+     },
+     {
+      "k": "P",
+      "t": "The capture on g2 creates two new threats at once: the rook on h1 and a check on e4."
+     },
+     {
+      "k": "C",
+      "t": "Calculate to the end: 5...Qxg2 6.Rf1 Qxe4+ 7.Be2 Nf3# is mate, and other White replies lose even faster."
+     }
+    ],
+    "topicId": "mspc-positions",
+    "topic": "MSPC positions",
+    "lvl": 1,
+    "requiredTier": 0,
+    "chap": "mspc-free-club",
+    "repertoire": false,
+    "description": "You are Black. White just captured on f7 with the knight, attacking your queen and the rook on h8. Do not run yet.",
+    "ms_pc_breakdown": {
+     "M": "5.Nxf7 forks the queen and the rook, but it takes the knight far from the defence of the kingside.",
+     "S": "White's kingside is thin: g2 is protected only by the rook, and the king is still on e1.",
+     "P": "The capture on g2 creates two new threats at once: the rook on h1 and a check on e4.",
+     "C": "Calculate to the end: 5...Qxg2 6.Rf1 Qxe4+ 7.Be2 Nf3# is mate, and other White replies lose even faster."
+    },
+    "explanation": "Facing a threat, most players defend. MSPC asks you to first check what their move gave up, and here that is the weakest pawn on the board.",
+    "alarm_signal": "⚠️ ALARM SIGNAL / RED FLAG: When you see your queen attacked but your opponent's kingside is only held by one piece, instantly ask yourself if a counter-capture that attacks the rook is winning or necessary!",
+    "coaching_tip": "💡 Linked Course: The Blunder Bootcamp and MSPC System: P, counter-attack before you retreat. Remember: a threat against you is also a moment where the opponent's own position is loosened.",
+    "elo_insight": {
+     "tier": "Free · 800–1400",
+     "foundation": "Foundation: when your queen is attacked, look for a capture that attacks something bigger before you retreat.",
+     "advanced": "Sharper: a pinned piece cannot capture. Counting which defenders are pinned is half of calculating mating nets."
+    }
+   },
    {
     "id": "think-quiet-queen",
     "title": "The quiet queen move",
@@ -171,8 +545,8 @@
     ],
     "topicId": "mspc-positions",
     "topic": "MSPC positions",
-    "lvl": 1,
-    "requiredTier": 0,
+    "lvl": 2,
+    "requiredTier": 2,
     "description": "You're Black in the Caro-Kann. White just played 5.Qe2, a quiet move with a very loud idea.",
     "ms_pc_breakdown": {
      "M": "5.Qe2 put the queen on your king's file. That pinned e7, and e7 was the only guard of d6.",
@@ -187,7 +561,8 @@
      "tier": "Free · 0–800",
      "foundation": "Foundation: look at every check your opponent has before you move. One scan saves the game.",
      "advanced": "Sharper: when your king has no flight squares, solve it with the move that gives the queen a guard of the key square (...Ndf6), not with the most natural one."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "think-pawn-fork",
@@ -297,8 +672,8 @@
     ],
     "topicId": "mspc-positions",
     "topic": "MSPC positions",
-    "lvl": 1,
-    "requiredTier": 0,
+    "lvl": 2,
+    "requiredTier": 2,
     "description": "You are White in the Colle. Black released the tension with ...c4 and just played 9...b5 on the queenside.",
     "ms_pc_breakdown": {
      "M": "9...b5 was a queenside move. It didn't touch the centre and left the bishop and knight on the squares e5 attacks.",
@@ -313,7 +688,8 @@
      "tier": "Free · 0–800",
      "foundation": "Foundation: a pawn that attacks two pieces wins one of them. Look for it every time the centre closes.",
      "advanced": "Sharper: calculate Black's best answer (...Be7, exf6 Nxf6) so you know the fork really nets a piece for a pawn."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "think-smothered",
@@ -434,7 +810,10 @@
      "tier": "Free · 0–800",
      "foundation": "Foundation: a king with no flight squares is a mate waiting to happen. List your checks.",
      "advanced": "Sharper: with only one legal reply at each step there is no calculation cutoff, so verify the whole line before you give up material."
-    }
+    },
+    "repertoire": false,
+    "chap": "mspc-free-club",
+    "level": "800-1400"
    },
    {
     "id": "think-overload",
@@ -549,7 +928,10 @@
      "tier": "Free · 0–800",
      "foundation": "Foundation: always ask whether YOUR back rank has an escape square before you start an attack.",
      "advanced": "Sharper: queen value is irrelevant if the line ends in mate, so give the queen first and count the forced moves."
-    }
+    },
+    "repertoire": false,
+    "chap": "mspc-free-strong",
+    "level": "1400-1800"
    },
    {
     "id": "think-remove-guard",
@@ -678,7 +1060,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: three attackers against three defenders is not winning. Take a defender and the count changes.",
      "advanced": "Sharper: after the capture, calculate the recapture that hands the pawn back (...Nxd4? Bxd5!) and choose the version that keeps it (...Qxd4)."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "think-colle-fork-back",
@@ -814,7 +1197,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: read what their last move attacks before you follow your own plan.",
      "advanced": "Sharper: trade the one defender of h7 (the f6-knight) so that your queen and bishop point straight at the king."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "think-meran-b4",
@@ -934,7 +1318,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: always name the threat first (e5!), then look for the piece that holds it up.",
      "advanced": "Sharper: calculate 10.e5 bxc3! to see why White cannot simply ignore ...b4."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-adv-l2-bishop-out",
@@ -1088,7 +1473,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: develop the problem piece first; the order of your moves is the lesson.",
      "advanced": "Sharper: ...Nf6 is not available because of e5xf6, so route the knight via e7 to f5 and keep calculating the tactical point."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-adv-l3-regain-pawn",
@@ -1219,7 +1605,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: a pawn is not worth falling behind in development. Take it back with a developing move.",
      "advanced": "Sharper: check the follow-ups (...Qd7? and ...Rc8? allow b4), then take the pawn only when nothing else is hanging."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-adv-l4-pin-on-f3",
@@ -1359,7 +1746,8 @@
      "tier": "Advanced · 1600–2000",
      "foundation": "Foundation: develop with a threat. A move that develops AND pins is worth two moves.",
      "advanced": "Sharper: compare ...f6? (weakens e6 and the king) and ...a6? (too slow) before you commit to ...Bg4."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-adv-l5-trade-the-bishop",
@@ -1499,7 +1887,8 @@
      "tier": "Master · 2000+",
      "foundation": "Foundation: before every trade, picture the pawn structure after it.",
      "advanced": "Sharper: only fxe3 is playable for White, so follow up with ...Qb6 and ...Na5-c4 to attack the new weaknesses."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-tart-l2-exf6",
@@ -1647,7 +2036,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: doubled pawns are not always bad; ask which squares and files your pieces get.",
      "advanced": "Sharper: castle and play ...Re8 before ...Bg4, so that h3 becomes a target and White cannot disturb your king."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-tart-l3-be7",
@@ -1799,7 +2189,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: do not answer a check with a king move that loses castling.",
      "advanced": "Sharper: compare ...Be6? (Bxe6 fxe6 Qxe6+ loses a pawn) and ...Kf8? before choosing the bishop block."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-e4-l2-greek-gift",
@@ -1955,7 +2346,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: Bxh7+ only works when the three conditions are true. Count them every time.",
      "advanced": "Sharper: calculate the king walks (...Kg8? Qh5; ...Kh6? Nxe6+) before you start."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-e4-l3-queen-recapture",
@@ -2092,7 +2484,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: a healthy pawn structure is worth more than a quick-looking capture.",
      "advanced": "Sharper: check the other recaptures (gxf3? ruins your structure; Kh1? loses the exchange) before you settle on Qxf3."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-e4-l4-take-on-f6",
@@ -2226,7 +2619,8 @@
      "tier": "Advanced · 1600–2000",
      "foundation": "Foundation: capture, open the file, pile up on the backward pawn.",
      "advanced": "Sharper: the sacrifice 16.Bxh7+? Kxh7 17.exf6 Nxf6 leaves you a piece down, so patience wins here."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-e4-l5-blockade",
@@ -2378,7 +2772,8 @@
      "tier": "Master · 2000+",
      "foundation": "Foundation: against an isolated pawn, put a piece in front of it and add attackers.",
      "advanced": "Sharper: 19.Bxh7+? and 19.Qxd5? both fail immediately. A sacrifice only works when the attack is ready."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-nbd7-l2-rook-recapture",
@@ -2517,7 +2912,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: ask which recapture keeps your attacking pieces active.",
      "advanced": "Sharper: 12.Bxe4 is playable but dull, and 12.Qe2? does not recapture at all."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-nbd7-l3-wedge",
@@ -2669,7 +3065,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: 10.Nf3? blocks your own f-pawn and 10.Qc2? loses e5. Use the pawn.",
      "advanced": "Sharper: if Black plays ...f5, answer with exf6 en passant, which is essential."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-phoenix-l4-c4",
@@ -2806,7 +3203,8 @@
      "tier": "Advanced · 1600–2000",
      "foundation": "Foundation: a pawn lever against their centre often defends and attacks in one move.",
      "advanced": "Sharper: 16.Bb3 retreats and loses the grip, and 16.Ng5 allows ...Nxd5. Only c4 keeps everything together."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-phoenix-l5-bishop-c2",
@@ -2945,7 +3343,8 @@
      "tier": "Master · 2000+",
      "foundation": "Foundation: retreat to the square that still works, not to the nearest safe one.",
      "advanced": "Sharper: opposite-coloured bishops favour the attacker while queens and rooks are still on the board."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-meran-l2-the-break",
@@ -3082,7 +3481,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: prepare ...a6 first, then play ...c5 at the right moment.",
      "advanced": "Sharper: 10...b4? and 10...Nb6? give White the centre for free. After 11.d5 Qc7 12.dxe6 fxe6 the f-file is yours."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-moscow-l2-recapture-queen",
@@ -3231,7 +3631,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: do not rush: the bishop pair gets stronger when the board opens.",
      "advanced": "Sharper: 6...gxf6? damages the structure and 6...Qb6? loses a piece."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-meran-l3-bishop-takes-g3",
@@ -3365,7 +3766,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: do not try to calculate everything at the board, learn the pattern and the safety move.",
      "advanced": "Sharper: after 12...Bxg3 13.dxe6 Qc7 you are fine; 12...Nb6? and 12...Qb6? hand White the initiative."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-meran-l4-b4-counter",
@@ -3514,7 +3916,8 @@
      "tier": "Advanced · 1600–2000",
      "foundation": "Foundation: spot the fork first, then find the piece that makes it work.",
      "advanced": "Sharper: 13...Be7? loses material to 14.e5 and 13...c5? loses the b5-pawn. Only ...b4 holds the balance."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-meran-l5-deflect-then-c5",
@@ -3645,7 +4048,8 @@
      "tier": "Master · 2000+",
      "foundation": "Foundation: a piece on the rim does not protect the centre. Use that.",
      "advanced": "Sharper: 13...a5? is too slow and 13...bxa3? gives up the pressure. After 14.dxc5 Nxc5 you are fine."
-    }
+    },
+    "repertoire": true
    }
   ],
   "groups": [
@@ -3709,7 +4113,7 @@
    {
     "id": "mspc",
     "label": "Free MSPC course",
-    "url": "https://www.skool.com/lanckrietchess/classroom",
+    "url": "https://www.skool.com/lanckriet-chess-1924/classroom",
     "icon": "brain"
    },
    {
@@ -6204,6 +6608,21 @@
     "id": "eg-ch-basics",
     "module": "endgame",
     "title": "Laws and basic mates"
+   },
+   {
+    "id": "mspc-free-starter",
+    "module": "mspc",
+    "title": "Free MSPC basics: Starter (0–800)"
+   },
+   {
+    "id": "mspc-free-club",
+    "module": "mspc",
+    "title": "Free MSPC basics: Club (800–1400)"
+   },
+   {
+    "id": "mspc-free-strong",
+    "module": "mspc",
+    "title": "Free MSPC basics: Strong (1400+)"
    }
   ],
   "endgame": [

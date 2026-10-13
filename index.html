@@ -193,7 +193,7 @@ ul,ol{margin:0}
    scrollable panel with a fixed maximum height, and the page keeps room for its scrollbar so nothing shifts sideways. */
 html{scrollbar-gutter:stable}
 .trainer>.board-col{flex-shrink:0;width:100%;max-width:580px;justify-self:center;overflow-anchor:none}
-.trainer>.trainer-panel{overflow-anchor:none;overscroll-behavior:contain;overflow-y:auto;max-height:min(70vh,640px);scrollbar-gutter:stable}
+.trainer>.trainer-panel{overflow-anchor:none;overscroll-behavior-y:auto;overflow-y:auto;max-height:min(70vh,640px);scrollbar-gutter:stable}
 @media (min-width:960px){.trainer>.board-col{justify-self:start}.trainer>.trainer-panel{max-height:min(calc(100vh - 140px),640px)}}
 .trainer[data-split5-on]>.board-col{max-width:none}
 .trainer-panel .st-feedback{min-height:0}
@@ -1030,6 +1030,8 @@ a.cc-frame:hover{border-color:var(--accent)}
 .iq-mk-list li{display:flex;align-items:center;gap:8px;font-size:14px;padding:6px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--hair)}
 .iq-mk-list li .icon-btn{margin-left:auto}
 .bm-sep{padding:10px 14px 4px;list-style:none}
+.v17-h{font-size:18px;margin:0 0 4px}
+.bm-div{list-style:none;height:1px;margin:6px 12px;background:var(--hair)}
 .bm-sep small{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#94a3b8)}
 .iq-pd-lab{font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--fog)}
 .iq-pd-btns{display:flex;flex-wrap:wrap;gap:8px}
@@ -1396,7 +1398,7 @@ a.cc-frame:hover{border-color:var(--accent)}
 .ctx-menu button.is-danger{color:var(--miss)}
 .ctx-menu hr{border:0;border-top:1px solid var(--hair);margin:4px 2px}
 .lv39-tree-slot{margin-top:8px;padding:10px;border:1px solid var(--hair);border-radius:10px;max-height:320px;overflow:auto}
-.board-tree-pane{margin-top:10px;padding:12px;border:1px solid var(--hair);border-radius:12px;background:var(--surface);max-height:360px;overflow:auto;overscroll-behavior:contain;position:relative}
+.board-tree-pane{margin-top:10px;padding:12px;border:1px solid var(--hair);border-radius:12px;background:var(--surface);max-height:360px;overflow:auto;overscroll-behavior-y:auto;position:relative}
 /* v3.7: chapters straight from the data file */
 .chip-n{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--ink-2);border:1px solid var(--hair);color:var(--fog);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
 .chip[aria-pressed="true"] .chip-n{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -2410,7 +2412,7 @@ body.lc-focus .v7-clock.is-risk{display:none}
 .bt-chat-head b{font-size:15px}
 .bt-chat-head i{color:var(--accent);margin-right:6px}
 .bt-tier{font-size:12px;font-weight:700;color:var(--fog);border:1px solid var(--rule);border-radius:999px;padding:2px 10px}
-.bt-log{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:2px 2px 2px 0;overscroll-behavior:contain;scrollbar-gutter:stable}
+.bt-log{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:2px 2px 2px 0;overscroll-behavior-y:auto;scrollbar-gutter:stable}
 .bt-msg{display:grid;gap:6px;max-width:92%}
 .bt-msg.is-me{align-self:flex-end}
 .bt-bubble{padding:10px 13px;border-radius:14px;background:var(--ink-2);border:1px solid var(--hair);font-size:14.5px;line-height:1.5;overflow-wrap:anywhere}
@@ -2423,7 +2425,7 @@ body.lc-focus .v7-clock.is-risk{display:none}
 .bt-quick{display:flex;flex-wrap:wrap;gap:6px;flex:none}
 .bt-quick .chip{min-height:32px;padding:0 11px;font-size:13px}
 .bt-quick .chip[disabled]{opacity:.4;cursor:default}
-.bt-act{flex:none;max-height:58%;overflow-y:auto;padding-top:10px;border-top:1px solid var(--hair);overscroll-behavior:contain}
+.bt-act{flex:none;max-height:58%;overflow-y:auto;padding-top:10px;border-top:1px solid var(--hair);overscroll-behavior-y:auto}
 .bt-hint{font-size:14px;color:var(--fog);margin-bottom:8px}
 .bt-hint b{color:var(--chalk)}
 .bt-steps{display:flex;gap:6px;margin-bottom:10px}
@@ -2756,7 +2758,7 @@ h3.stu-h{font-size:15px;margin:16px 0 8px}
 .stu-result{margin-top:16px;display:grid;gap:10px}
 .stu-result video{width:100%;max-height:60vh;border-radius:12px;background:#000}
 .stu-tabs{margin-bottom:14px}
-.stu-prompt{height:300px;overflow-y:auto;border:1px solid var(--hair);border-radius:14px;background:var(--ink-2);padding:0 16px;margin-bottom:10px;scroll-behavior:auto;overscroll-behavior:contain}
+.stu-prompt{height:300px;overflow-y:auto;border:1px solid var(--hair);border-radius:14px;background:var(--ink-2);padding:0 16px;margin-bottom:10px;scroll-behavior:auto;overscroll-behavior-y:auto}
 .stu-prompt-in{font-family:var(--read);line-height:1.5;color:var(--chalk)}
 .stu-prompt-in p{margin:0 0 .8em}
 .stu-prompt-in .stu-lab{font-family:var(--ui);font-size:.5em;font-weight:700;color:var(--accent);margin:1.2em 0 .3em}
@@ -2900,6 +2902,57 @@ h3.stu-h{font-size:15px;margin:16px 0 8px}
 .hlb-empty{justify-content:center}
 .hlb-foot{list-style:none;display:flex;justify-content:center;padding-top:4px}
 @media (max-width:520px){.hlb-soc-row{order:5;flex-basis:100%;padding-left:38px}}
+
+/* v17 / Phase 1: role preview panel (admins only) */
+.rp{position:fixed;right:10px;top:var(--rp-top,72px);z-index:1100;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:calc(100vw - 20px)}
+.rp[hidden]{display:none}
+.rp-pill{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);background:var(--surface);color:var(--chalk);font-size:12.5px;font-weight:700;box-shadow:0 6px 20px rgba(2,6,23,.45);cursor:pointer}
+.rp-pill:hover,.rp-pill:focus-visible{border-color:var(--accent-line)}
+.rp.is-preview .rp-pill{border-color:#fbbf24;background:#3a2c08;color:#fde68a}
+.rp-caret{font-size:11px;opacity:.8}
+.rp-menu{width:min(340px,calc(100vw - 20px));max-height:calc(100vh - var(--rp-top,72px) - 24px);overflow:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:10px;box-shadow:0 16px 40px rgba(2,6,23,.6)}
+.rp-title{font-size:13px;font-weight:800;color:var(--chalk);margin:2px 4px 6px}
+.rp-cat{margin:10px 4px 4px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fog);font-weight:800}
+.rp-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--chalk);font-size:13.5px;font-weight:600;cursor:pointer}
+.rp-item i{width:16px;text-align:center;color:var(--fog)}
+.rp-item:hover,.rp-item:focus-visible{background:var(--raised)}
+.rp-item.is-on{border-color:var(--accent-line);background:var(--accent-soft)}
+.rp-item.is-on i{color:var(--accent)}
+.rp-reset{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:10px;border-radius:10px;border:1px solid #fbbf24;background:#fbbf24;color:#1c1400;font-weight:800;font-size:13.5px;cursor:pointer}
+.rp-note{margin:8px 4px 2px;font-size:11.5px;color:var(--fog)}
+
+.v71-tiers{display:grid;gap:10px;margin:14px 0}
+@media (min-width:640px){.v71-tiers{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.v71-tier{border:1px solid var(--hair);border-radius:14px;padding:14px;background:var(--surface)}
+.v71-tier header{display:grid;gap:2px;margin-bottom:6px}
+.v71-tier-price{font-size:20px;font-weight:800;color:var(--accent);margin:0 0 4px}
+
+/* v17 / Phase 7: scroll chaining. Inner frames pass the scroll to the page once they reach their own top or bottom. */
+.chat,.iq-log,.gm36-moves,.lv39-tree-slot,.tt40-notes,.report-box,.gp-done pre,.board-tree-pane,.trainer>.trainer-panel,.bt-log,.bt-act,.stu-prompt,#an-moves{overscroll-behavior-y:auto}
+
+/* v17 / Phase 12: profile dropdown */
+.pm-panel{position:absolute;top:calc(100% + 6px);right:8px;z-index:61;width:min(320px,calc(100vw - 16px));max-height:calc(100dvh - var(--head) - 16px);overflow:auto;overscroll-behavior:contain;background:var(--surface);border:1px solid var(--rule);border-radius:14px;padding:6px;box-shadow:0 18px 44px rgba(2,6,23,.6)}
+.pm-panel[hidden]{display:none}
+.pm-item{display:flex;align-items:center;gap:12px;width:100%;padding:11px 10px;border-radius:10px;border:0;background:transparent;color:var(--chalk);text-decoration:none;font:inherit;font-weight:600;font-size:14.5px;text-align:left;cursor:pointer}
+.pm-item i{width:18px;text-align:center;color:var(--fog)}
+.pm-item:hover,.pm-item:focus-visible{background:var(--raised)}
+.pm-item[aria-current="page"]{background:var(--accent-soft)}
+.pm-item[aria-current="page"] i{color:var(--accent)}
+.pm-div{height:1px;margin:6px 8px;background:var(--hair)}
+
+/* v17 / Phase 13: top-bar action buttons and the extra header height they need */
+.top-actions{display:flex;gap:8px;justify-content:center;align-items:center;height:36px;padding:0 12px;border-top:1px solid var(--hair)}
+.top-actions[hidden]{display:none}
+.ta-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:0;height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--accent);font:inherit;font-size:12.5px;font-weight:800;text-decoration:none;cursor:pointer;white-space:nowrap}
+.ta-btn span{overflow:hidden;text-overflow:ellipsis}
+.ta-btn:hover,.ta-btn:focus-visible{background:var(--accent);color:var(--accent-ink)}
+@media (max-width:420px){.top-actions{gap:6px;padding:0 8px}.ta-btn{padding:0 9px;font-size:12px;gap:5px}}
+:root{--head:134px}
+@media (min-width:900px){:root{--head:100px}}
+html.has-walk{--head:164px}
+@media (min-width:900px){html.has-walk{--head:130px}}
+.v6-sec{margin-bottom:28px}
+.v6-sec>h2{font-size:20px;margin:0 0 8px}
 </style>
 </head>
 <body>
@@ -2914,8 +2967,9 @@ h3.stu-h{font-size:15px;margin:16px 0 8px}
     <div class="tabs-wrap">
       <nav class="tabs" id="tabs" aria-label="Sections"></nav>
     </div>
-    <div class="topbar-right"><span id="admin-slot"></span><button class="profile-chip" id="profile-chip" type="button" aria-haspopup="dialog">Profile</button></div>
+    <div class="topbar-right"><span id="admin-slot"></span><button class="profile-chip" id="profile-chip" type="button" aria-haspopup="menu">Profile</button></div>
   </div>
+  <div class="top-actions" id="top-actions"></div>
   <div class="walk-strip" id="walk-strip" hidden></div>
 </header>
 <main id="view" class="view" tabindex="-1"></main>
@@ -2995,6 +3049,384 @@ h3.stu-h{font-size:15px;margin:16px 0 8px}
       numbers, lessons, positions, member keys) can now be edited inside the
       app with admin mode, and is published through content.json.
    ========================================================================== */
+/* v17 / Phase 4: the ONE place that knows the two valid Skool addresses. Every Skool link in the hub (CONFIG.links, the GitHub JSON
+   settings, admin drafts, level skoolUrl values) is passed through skoolCanon(), so the old /lanckrietchess slug can never come back
+   and cause a 404. community = the community home; classroom = the classroom (walkthrough, free course lessons). */
+const SKOOL_URLS = { community: 'https://www.skool.com/lanckriet-chess-1924', classroom: 'https://www.skool.com/lanckriet-chess-1924/classroom' };
+function skoolCanon(u) {
+  if (typeof u !== 'string') return u;
+  const t = u.trim();
+  let m = /^https?:\/\/(?:www\.)?skool\.com\/([^\/?#\s]+)([^\s]*)$/i.exec(t);
+  if (!m) return u;
+  const slug = m[1].toLowerCase(), rest = m[2] || '';
+  if (slug === 'lanckriet-chess-1924') return /^\/classroom(?:[\/?#]|$)/i.test(rest) && rest.length <= 10 ? SKOOL_URLS.classroom : t.replace(/^http:/i, 'https:');
+  if (slug === 'lanckrietchess' || slug === 'lanckriet-chess') return /^\/classroom(?:[\/?#]|$)/i.test(rest) ? SKOOL_URLS.classroom : SKOOL_URLS.community;
+  return t;
+}
+/* v17 / Phase 10: the rest of the Lichess puzzle themes (checkmate patterns, tactical motifs, attack and defence, endgames, phases).
+   Each one has a learn text and an alarm signal like the ten core themes. Only the ten core themes carry a trophy badge. */
+const TP_EXTRA = [
+ {
+  "id": "mate",
+  "label": "Checkmate (any)",
+  "cat": "mate",
+  "icon": "crown",
+  "short": "Every mating pattern, mixed",
+  "learn": "Mate is a king with no flight square, no capture and no block. List every check, then ask which one takes away the last escape.",
+  "signal": "When their king has few squares and several of your pieces point at it, list every check before you move."
+ },
+ {
+  "id": "mateIn3",
+  "label": "Mate in 3",
+  "cat": "mate",
+  "icon": "chess-king",
+  "short": "Three moves to the end",
+  "learn": "Start with the forcing moves: checks that leave one reply. Calculate each candidate until the king runs out of squares.",
+  "signal": "When you have a sequence of checks, count their replies after each: if there is only one, follow it to the end."
+ },
+ {
+  "id": "mateIn4",
+  "label": "Mate in 4",
+  "cat": "mate",
+  "icon": "chess-king",
+  "short": "A long forced attack",
+  "learn": "Long mates are a chain of forcing moves. Write the line down in your head and check every defence, including captures of your attacker.",
+  "signal": "When the attack keeps giving check, do not stop halfway: the reply you skip is the one that refutes you."
+ },
+ {
+  "id": "smotheredMate",
+  "label": "Smothered mate",
+  "cat": "mate",
+  "icon": "chess-knight",
+  "short": "The knight mates a boxed-in king",
+  "learn": "A knight checks a king whose own pieces take away every flight square. A queen sacrifice often forces the king into the corner first.",
+  "signal": "When their king sits in the corner behind its own pieces, look for a knight check."
+ },
+ {
+  "id": "anastasiaMate",
+  "label": "Anastasia’s mate",
+  "cat": "mate",
+  "icon": "chess-rook",
+  "short": "Knight and rook against the edge",
+  "learn": "A knight and a rook trap a king against the edge, with the king’s own piece blocking its escape.",
+  "signal": "When their king stands on the edge and a rook can reach its file, look for a knight that covers the last square."
+ },
+ {
+  "id": "arabianMate",
+  "label": "Arabian mate",
+  "cat": "mate",
+  "icon": "chess-rook",
+  "short": "Knight and rook in the corner",
+  "learn": "A rook and a knight mate a king in the corner: the knight protects the rook and covers the escape square.",
+  "signal": "When their king is in the corner and your rook and knight are close, check the corner mate."
+ },
+ {
+  "id": "bodenMate",
+  "label": "Boden’s mate",
+  "cat": "mate",
+  "icon": "chess-bishop",
+  "short": "Two bishops, crossing diagonals",
+  "learn": "Two bishops on crossing diagonals mate a king boxed in by its own pieces, often after a queen sacrifice that opens the lines.",
+  "signal": "When their king has castled long and has pieces around it, look at what two bishops can do together."
+ },
+ {
+  "id": "doubleBishopMate",
+  "label": "Double bishop mate",
+  "cat": "mate",
+  "icon": "chess-bishop",
+  "short": "Two bishops on adjacent diagonals",
+  "learn": "Two bishops on neighbouring diagonals mate a king on the edge. Each bishop covers the squares the other cannot.",
+  "signal": "When you hold both bishops and their king is near the edge, check the diagonals."
+ },
+ {
+  "id": "dovetailMate",
+  "label": "Dovetail mate",
+  "cat": "mate",
+  "icon": "chess-queen",
+  "short": "A queen next to a hemmed-in king",
+  "learn": "A queen delivers mate next to the king while the squares behind it are blocked by the king’s own pieces.",
+  "signal": "When their king is hemmed in by its own pieces and your queen can come adjacent, check the mate."
+ },
+ {
+  "id": "hookMate",
+  "label": "Hook mate",
+  "cat": "mate",
+  "icon": "chess-rook",
+  "short": "Rook, knight and pawn together",
+  "learn": "A rook mates, a knight protects it and a pawn takes away the last square. The three pieces work as one.",
+  "signal": "When a rook, a knight and a pawn all point at the same corner, count the squares that remain."
+ },
+ {
+  "id": "killBoxMate",
+  "label": "Kill box mate",
+  "cat": "mate",
+  "icon": "chess-rook",
+  "short": "Rook and queen box the king in",
+  "learn": "A rook protected by the queen mates a king that has no flight squares of its own.",
+  "signal": "When your queen and rook can sit next to their king, check whether they box it in."
+ },
+ {
+  "id": "doubleCheck",
+  "label": "Double check",
+  "cat": "tactics",
+  "icon": "bolt",
+  "short": "Two checks at once, the king must move",
+  "learn": "A double check comes from a discovery: only the king can answer it. That makes it a powerful way to force a king into a net.",
+  "signal": "When a move would uncover a check and also give check, list the king’s possible squares."
+ },
+ {
+  "id": "trappedPiece",
+  "label": "Trapped piece",
+  "cat": "tactics",
+  "icon": "lock",
+  "short": "A piece with nowhere to go",
+  "learn": "A trapped piece has no safe square. Attack it with something cheaper, or take away its last square.",
+  "signal": "When an enemy piece has gone deep into your side, count its safe squares."
+ },
+ {
+  "id": "attraction",
+  "label": "Attraction",
+  "cat": "tactics",
+  "icon": "magnet",
+  "short": "Lure a piece onto a bad square",
+  "learn": "Attraction (decoy) drags an enemy piece, often the king, onto a square where it can be hit. A sacrifice is usually the bait.",
+  "signal": "When a sacrifice would force their king or queen to capture, look at the square it lands on."
+ },
+ {
+  "id": "deflection",
+  "label": "Deflection",
+  "cat": "tactics",
+  "icon": "arrows-left-right",
+  "short": "Pull a defender away",
+  "learn": "A deflection forces a defender to leave its post, so the piece or square it guarded falls.",
+  "signal": "When one enemy piece guards two things, ask what happens if you force it to move."
+ },
+ {
+  "id": "clearance",
+  "label": "Clearance",
+  "cat": "tactics",
+  "icon": "broom",
+  "short": "Clear the line for another piece",
+  "learn": "A clearance moves a piece, often with tempo, to open a line or a square for another piece.",
+  "signal": "When your own piece blocks your best piece, ask which move clears it with a threat."
+ },
+ {
+  "id": "interference",
+  "label": "Interference",
+  "cat": "tactics",
+  "icon": "scissors",
+  "short": "Cut the connection between defenders",
+  "learn": "Interference puts a piece between two enemy pieces, so one cannot protect the other.",
+  "signal": "When two enemy pieces defend each other along a line, look for a square in between."
+ },
+ {
+  "id": "intermezzo",
+  "label": "In-between move (zwischenzug)",
+  "cat": "tactics",
+  "icon": "hourglass",
+  "short": "Insert a stronger move first",
+  "learn": "Before the obvious recapture, check for a move that creates a bigger threat and keeps the trade for later.",
+  "signal": "Before every recapture, ask if a check or a bigger threat comes first."
+ },
+ {
+  "id": "sacrifice",
+  "label": "Sacrifice",
+  "cat": "tactics",
+  "icon": "fire",
+  "short": "Give material to win more",
+  "learn": "A sacrifice is only good when the calculation ends in more than you gave. Count the forced replies to the end.",
+  "signal": "When a sacrifice opens their king, calculate every forcing reply before you commit."
+ },
+ {
+  "id": "xRayAttack",
+  "label": "X-ray attack",
+  "cat": "tactics",
+  "icon": "x-ray",
+  "short": "Attack through another piece",
+  "learn": "An x-ray attack uses a piece that looks through another one, so a trade on the middle square wins material.",
+  "signal": "When your piece lines up behind an enemy piece, count what happens after the trade."
+ },
+ {
+  "id": "quietMove",
+  "label": "Quiet move",
+  "cat": "tactics",
+  "icon": "volume-low",
+  "short": "A calm move that decides",
+  "learn": "A quiet move makes no capture and no check, but takes away the only defence or sets up an unstoppable threat.",
+  "signal": "When every forcing move fails, look for the calm move that improves your position and leaves the threat."
+ },
+ {
+  "id": "zugzwang",
+  "label": "Zugzwang",
+  "cat": "tactics",
+  "icon": "ban",
+  "short": "Every move makes it worse",
+  "learn": "In zugzwang the side to move would like to pass: any move loses something. Count the safe moves the opponent has left.",
+  "signal": "When their pieces have few safe moves, ask what happens if it is their move."
+ },
+ {
+  "id": "capturingDefender",
+  "label": "Capturing the defender",
+  "cat": "tactics",
+  "icon": "hand-fist",
+  "short": "Remove the guard",
+  "learn": "Take the piece that protects the target, and the target falls. Always count what the defender was guarding.",
+  "signal": "When a piece is well defended, attack the defender first."
+ },
+ {
+  "id": "exposedKing",
+  "label": "Exposed king",
+  "cat": "tactics",
+  "icon": "skull-crossbones",
+  "short": "A king without shelter",
+  "learn": "An exposed king invites checks and sacrifices. Bring more pieces to the attack than they have defenders.",
+  "signal": "When their king has lost its pawn cover, count attackers and defenders before you move."
+ },
+ {
+  "id": "advancedPawn",
+  "label": "Advanced pawn",
+  "cat": "tactics",
+  "icon": "up-long",
+  "short": "A pawn that is close to promotion",
+  "learn": "An advanced pawn ties pieces down and creates tactics around the promotion square. Count the tempi.",
+  "signal": "When a pawn stands on the sixth or seventh rank, check every square it attacks and the square in front of it."
+ },
+ {
+  "id": "promotion",
+  "label": "Promotion",
+  "cat": "tactics",
+  "icon": "chess-queen",
+  "short": "Race to the last rank",
+  "learn": "Promotion often decides the game. Count the moves for each pawn and check the checks on the way.",
+  "signal": "When a pawn can run, count its moves to promote and every check the opponent has meanwhile."
+ },
+ {
+  "id": "underPromotion",
+  "label": "Underpromotion",
+  "cat": "tactics",
+  "icon": "chess-knight",
+  "short": "The other piece is better",
+  "learn": "Sometimes a knight, rook or bishop is stronger than a queen: it avoids a stalemate or gives a decisive check.",
+  "signal": "When promoting to a queen stalemates or fails to check, test the knight."
+ },
+ {
+  "id": "kingsideAttack",
+  "label": "Kingside attack",
+  "cat": "attack",
+  "icon": "fire-flame-curved",
+  "short": "Attack the castled king",
+  "learn": "A kingside attack needs more pieces near the king than the defence has. Open a file, keep the initiative and count the forced lines.",
+  "signal": "When you have more pieces near their castled king than they have defenders, look for the break."
+ },
+ {
+  "id": "queensideAttack",
+  "label": "Queenside attack",
+  "cat": "attack",
+  "icon": "fire-flame-curved",
+  "short": "Attack the long-castled king",
+  "learn": "A queenside attack works because pawns are thinner there. Look at b- and c-file lines and the king’s squares.",
+  "signal": "When their king has castled long and your pieces face that wing, list your checks."
+ },
+ {
+  "id": "attackingF2F7",
+  "label": "Attacking f2 / f7",
+  "cat": "attack",
+  "icon": "crosshairs",
+  "short": "The weakest square next to the king",
+  "learn": "f2 and f7 are guarded only by the king at the start. A queen and bishop battery there creates quick threats.",
+  "signal": "When the square next to their king is guarded only by the king, count your attackers."
+ },
+ {
+  "id": "pawnEndgame",
+  "label": "Pawn endgame",
+  "cat": "endgame",
+  "icon": "chess-pawn",
+  "short": "Kings and pawns only",
+  "learn": "Pawn endgames are about opposition, key squares and tempo. Count every race exactly.",
+  "signal": "When only kings and pawns are left, count the tempi before you move."
+ },
+ {
+  "id": "rookEndgame",
+  "label": "Rook endgame",
+  "cat": "endgame",
+  "icon": "chess-rook",
+  "short": "The most common endgame",
+  "learn": "Rook endgames reward active rooks and the king cut off from the pawn. Know the Lucena and Philidor positions.",
+  "signal": "When there are rooks left, keep your rook active and cut the enemy king off."
+ },
+ {
+  "id": "bishopEndgame",
+  "label": "Bishop endgame",
+  "cat": "endgame",
+  "icon": "chess-bishop",
+  "short": "Colours matter",
+  "learn": "In bishop endgames the colour of the bishop and of the pawns decides what is possible.",
+  "signal": "When bishops remain, check the colours of the squares your pawns stand on."
+ },
+ {
+  "id": "knightEndgame",
+  "label": "Knight endgame",
+  "cat": "endgame",
+  "icon": "chess-knight",
+  "short": "Short-range pieces, exact counting",
+  "learn": "Knights are slow, so count the moves for every plan and keep the knight close to the pawns.",
+  "signal": "When knights remain, count how many moves it takes each knight to get where it must be."
+ },
+ {
+  "id": "queenEndgame",
+  "label": "Queen endgame",
+  "cat": "endgame",
+  "icon": "chess-queen",
+  "short": "Perpetual check and passed pawns",
+  "learn": "Queen endgames are full of checks. A passed pawn helps, but the king’s safety decides.",
+  "signal": "When queens remain, check for perpetual check before you push a pawn."
+ },
+ {
+  "id": "queenRookEndgame",
+  "label": "Queen and rook endgame",
+  "cat": "endgame",
+  "icon": "chess-queen",
+  "short": "Heavy pieces together",
+  "learn": "With queen and rook on the board, king safety and open files matter most.",
+  "signal": "When heavy pieces remain, protect your king first and then use the open file."
+ },
+ {
+  "id": "opening",
+  "label": "Opening",
+  "cat": "phase",
+  "icon": "door-open",
+  "short": "Tactics in the first moves",
+  "learn": "Opening tactics start from a normal position: a pin, a fork or a trap after a development move.",
+  "signal": "In the first ten moves, check what every developing move leaves undefended."
+ },
+ {
+  "id": "middlegame",
+  "label": "Middlegame",
+  "cat": "phase",
+  "icon": "chess-board",
+  "short": "Pieces still on the board",
+  "learn": "Middlegame tactics come from piece activity and king safety. List checks, captures and attacks first.",
+  "signal": "In the middlegame, list checks, captures and attacks for both sides before every move."
+ },
+ {
+  "id": "castling",
+  "label": "Castling",
+  "cat": "phase",
+  "icon": "chess-rook",
+  "short": "Castle at the right moment",
+  "learn": "Castling is a move too: it can remove your king from a pin or put your rook on the right file.",
+  "signal": "When castling would solve a problem or create a threat, check the rules and the squares."
+ },
+ {
+  "id": "enPassant",
+  "label": "En passant",
+  "cat": "phase",
+  "icon": "chess-pawn",
+  "short": "The special pawn capture",
+  "learn": "En passant is only possible directly after a double pawn move. It can open a file or win a pawn.",
+  "signal": "When their pawn just advanced two squares past yours, remember en passant."
+ }
+];
 const CONFIG = {
   version: '16.0.0',
 
@@ -3029,10 +3461,10 @@ const CONFIG = {
       { id: 'endgame', label: 'Endgame', icon: 'chess-pawn', badge: 'Endgame Finisher', short: 'Technique that converts',
         learn: 'Endgames are decided by king activity, pawn majorities and the opposition. Calculate exact tempo counts for pawn races and keep your king active.',
         signal: 'When the queens come off, bring the king to the centre first and count pawn tempi before you move a pawn.' },
-      { id: 'defense', label: 'Defense', icon: 'shield-halved', badge: 'Iron Defender', short: 'Find the only move',
+      { id: 'defense', angle: 'defensiveMove', cat: 'attack', label: 'Defense', icon: 'shield-halved', badge: 'Iron Defender', short: 'Find the only move',
         learn: 'In a defensive puzzle you must find the move that holds the position. List their threats first, then look for the move that answers all of them, often a quiet one.',
         signal: 'When you are worse, stop looking for your own attack: find their strongest threat and the one move that parries it.' }
-    ]
+    ].concat(TP_EXTRA)
   },
   coach: 'Kyenzo',
   peakRating: 2105,
@@ -3116,10 +3548,10 @@ const CONFIG = {
 
   /* Links. Replace the ones marked TODO with your real URLs. */
   links: {
-    skool: 'https://www.skool.com/lanckrietchess',              // TODO: free community
-    mspcCourse: 'https://www.skool.com/lanckrietchess/classroom', // TODO: direct link to the free MSPC System course
-    walkthrough: 'https://www.skool.com/lanckrietchess/classroom', // TODO: the free app walkthrough course in Skool (shortcut + Quick Tour button)
-    accelerator: 'https://www.skool.com/lanckrietchess/about',  // TODO: Tier 2 upgrade page inside Skool
+    skool: 'https://www.skool.com/lanckriet-chess-1924',              // free community (v17: one canonical address, see skoolCanon)
+    mspcCourse: 'https://www.skool.com/lanckriet-chess-1924/classroom', // classroom: the free MSPC System course
+    walkthrough: 'https://www.skool.com/lanckriet-chess-1924/classroom', // classroom: the free app walkthrough (shortcut + Quick Tour button)
+    accelerator: 'https://www.skool.com/lanckriet-chess-1924',  // community home: the Tier 2 upgrade lives here (the old /about address was a 404)
     mentorship: 'https://ig.me/m/lanckrietchess',               // TODO: Tier 3 application (form, Calendly or DM)
     salesBot: '',                                               // optional: an external sales assistant (Voiceflow, GPT...)
     instagramDM: 'https://ig.me/m/lanckrietchess',              // TODO: check handle
@@ -3491,8 +3923,8 @@ const COPY = {
   'think.courseTitle': ['Course card title', 'Think', 'The complete MSPC course is free on Skool'],
   'think.courseText': ['Course card text', 'Think', '{coach} teaches the whole system in a free course inside the lanckrietchess community: every step in depth, the mistakes that break it, and a daily routine that makes it automatic. It is the same system that took him from {start} to a {peak} peak.'],
   'think.courseCta': ['Course button', 'Think', 'Open the free MSPC course'],
-  'think.upsellTitle': ['Upgrade panel title', 'Think', 'Train MSPC inside your own repertoire'],
-  'think.upsellText': ['Upgrade panel text', 'Think', 'Members drill the positions their openings actually create, in the Colle-Koltanowski, the Caro-Kann and the Semi-Slav, plus a fresh random position from the repertoire every time.'],
+  'think.upsellTitle': ['Upgrade panel title', 'Think', 'Go deeper with the MSPC System Trainer'],
+  'think.upsellText': ['Upgrade panel text', 'Think', 'Levels 2 to 5 take the same four questions into harder positions, with sharper traps and longer calculation.'],
   'think.shuffleTitle': ['Shuffle Trainer title', 'Think', 'The Shuffle Trainer'],
   'think.shuffleText': ['Shuffle Trainer intro', 'Think', 'Arcade mode for muscle memory. Pick what to shuffle and which colour you play, then answer random positions from your courses from memory while the computer plays the other side. Every clean line builds your combo, and the lines you miss come back more often.'],
   'theory.openings.title': ['Openings title', 'Theory', 'Openings'],
@@ -3501,7 +3933,7 @@ const COPY = {
   'theory.middlegame.text': ['Middlegame intro', 'Theory', 'Five levels, from your first blunder check to grandmaster plans. Every chapter has a Learn lesson built on MSPC, a set of simple puzzles and a set of hard puzzles.'],
   'theory.endgame.title': ['Endgame title', 'Theory', 'Endgame'],
   'theory.endgame.text': ['Endgame intro', 'Theory', 'Five levels, from the laws of the game to grandmaster technique. Every theme has a Learn lesson built on MSPC, a set of simple puzzles and a set of hard puzzles.'],
-  'theory.puzzles.title': ['Puzzles title', 'Theory', 'Puzzles'],
+  'theory.puzzles.title': ['Puzzles title', 'Theory', 'Rated puzzles'],
   'theory.puzzles.text': ['Puzzles intro', 'Theory', 'Rated tactics from the Lichess puzzle database, matched to your Puzzle ELO. Solve it clean and your rating goes up; one wrong move and it goes down.'],
   'mg.freeTitle': ['Free zone title', 'Theory', 'Start here, free'],
   'mg.freeText': ['Free zone intro', 'Theory', 'Two bootcamps from the Skool community with a free lesson each, the structure drills and the plans for the free repertoire.'],
@@ -4118,7 +4550,7 @@ const Levels = (() => {
   function skool(u) {
     if (typeof u !== 'string') return '';
     u = u.trim();
-    return u.length <= 400 && /^https:\/\/([a-z0-9-]+\.)*skool\.com(\/[^\s"'<>\\]*)?$/i.test(u) ? u : '';
+    return u.length <= 400 && /^https:\/\/([a-z0-9-]+\.)*skool\.com(\/[^\s"'<>\\]*)?$/i.test(u) ? skoolCanon(u) : '';
   }
   /* The access words from before v3.9 (lock, tier, isFree, isPaid, skoolOnly,
      the v3.8 tierKey) are read in exactly one place: here, once, when an old
@@ -5542,9 +5974,9 @@ function openUnlock(lock, what) {
       (community ? 'free for members of the lanckrietchess community on Skool. Join, open the classroom and paste the community key here.'
         : mentor ? 'part of the Mentorship: private coaching with ' + esc(CONFIG.coach) + ', and every level of every course in this hub.'
         : 'part of the Accelerator: repertoire positions in the MSPC trainer, the full Colle-Koltanowski, Caro-Kann and Semi-Slav repertoires, every middlegame plan, the rook-endgame suite, the full Trim report and the Pro coach. You upgrade inside the Skool community.') + '</p>' +
-      '<div class="btn-row">' + (community ? '<a class="btn btn-primary" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">Join free on Skool</a>'
-        : mentor ? '<a class="btn btn-gold" href="' + esc(CONFIG.links.mentorship || CONFIG.links.skool) + '" target="_blank" rel="noopener">' + icon('crown') + ' Apply for the Mentorship</a><a class="btn btn-ghost" href="#upgrades" data-close>Which path fits me?</a>'
-        : '<a class="btn btn-gold" href="' + esc(CONFIG.links.accelerator) + '" target="_blank" rel="noopener">' + icon('crown') + ' Upgrade in Skool</a><a class="btn btn-ghost" href="#upgrades" data-close>Which path fits me?</a>') + '</div><div class="divider"></div>' +
+      '<div class="btn-row">' + (community ? '<a class="btn btn-primary" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener noreferrer">Join free on Skool</a>'
+        : mentor ? '<a class="btn btn-gold" href="' + esc(CONFIG.links.mentorship || CONFIG.links.skool) + '" target="_blank" rel="noopener noreferrer">' + icon('crown') + ' Apply for the Mentorship</a><a class="btn btn-ghost" href="#upgrades" data-close>Which path fits me?</a>'
+        : '<a class="btn btn-gold" href="' + esc(CONFIG.links.accelerator) + '" target="_blank" rel="noopener noreferrer">' + icon('crown') + ' Upgrade in Skool</a><a class="btn btn-ghost" href="#upgrades" data-close>Which path fits me?</a>') + '</div><div class="divider"></div>' +
       '<p class="small muted">Already a member? Activate with your Skool email, or paste your key.</p>' + tokenFormHTML('unlock'),
     onMount(s) { bindTokenForms(s.el, () => setTimeout(() => { s.close(); rerender(); }, 700)); }
   });
@@ -6944,8 +7376,18 @@ const Site = (() => {
     PUZZLE_BANK = (doc.bank && doc.bank.length ? doc.bank : (published && published.bank) || []).slice();
     keys = doc.keys.slice();
     V5Doc.apply(doc.v5);
+    fixSkoolLinks();
+  }
+  /* v17: a stale Skool address in the GitHub data file or in an admin draft is rewritten to the canonical one. */
+  function fixSkoolLinks() {
+    const L = CONFIG.links || (CONFIG.links = {});
+    ['skool', 'mspcCourse', 'walkthrough', 'accelerator', 'mentorship'].forEach((k) => { if (typeof L[k] === 'string' && /skool\.com/i.test(L[k])) L[k] = skoolCanon(L[k]); });
+    if (!L.skool || !/skool\.com/i.test(L.skool)) L.skool = SKOOL_URLS.community;
+    if (!L.walkthrough) L.walkthrough = SKOOL_URLS.classroom;
+    if (!L.mspcCourse) L.mspcCourse = SKOOL_URLS.classroom;
   }
   function init() {
+    fixSkoolLinks();
     defaults = { content: clone(CONTENT), config: clone(CONFIG) };
     if (Store.get(LS_OLD, null) !== null) Store.del(LS_OLD);
     const cached = cleanDoc(Store.get(LS_PUB, null));
@@ -7116,6 +7558,28 @@ const ADMIN_TOKEN = 'LANCKRIETCHESS_ADMIN_TOKEN';
 const Admin = (() => {
   let active = false;
   const prefs = Object.assign({ edit: true, preview: '', tier: 'free' }, Store.get('lc-admin-ui', {}) || {});
+  /* v17 / Phase 1: role impersonation. A front-end layer only: the sign-in, the admin token and every server permission stay exactly
+     as they are. While a preview role is active, Admin.active reads false, so every screen draws what that kind of account sees
+     (no edit bars, no admin shortcuts, real tier gates). Admin.real() is the true session and drives the floating control panel. */
+  const ROLE_KEY = 'lc-preview-role';
+  const ROLE_DEFS = [
+    { id: 'admin', cat: 'Admin', label: 'Admin (Volledig)', short: 'Admin', tier: '', b2b: '' },
+    { id: 'b2c-free', cat: 'B2C', label: 'B2C: Gratis', short: 'B2C Free', tier: 'free', b2b: '' },
+    { id: 'b2c-paid', cat: 'B2C', label: 'B2C: Betalend', short: 'B2C Paid', tier: 'vault', b2b: '' },
+    { id: 'b2b-free', cat: 'B2B', label: 'B2B: Gratis Tier', short: 'B2B Free', tier: 'free', b2b: 'free' },
+    { id: 'b2b-mid', cat: 'B2B', label: 'B2B: Mid-Tier (€50 / 1k - 10k subscribers)', short: 'B2B Mid', tier: 'vault', b2b: 'mid' },
+    { id: 'b2b-high', cat: 'B2B', label: 'B2B: High-Tier (10k - 1M+ subscribers)', short: 'B2B High', tier: 'vault', b2b: 'high' }
+  ];
+  const roleDef = (id) => ROLE_DEFS.filter((r) => r.id === id)[0] || null;
+  let prole = '';
+  try { const v = sessionStorage.getItem(ROLE_KEY); prole = roleDef(v) && v !== 'admin' ? v : ''; } catch (e) { prole = ''; }
+  const roleListeners = [];
+  const roleFire = () => { roleListeners.forEach((fn) => { try { fn(); } catch (e) { console.error(e); } }); };
+  function setRole(id) {
+    prole = roleDef(id) && id !== 'admin' ? id : '';
+    try { if (prole) sessionStorage.setItem(ROLE_KEY, prole); else sessionStorage.removeItem(ROLE_KEY); } catch (e) { /* the role then lasts until the page reloads */ }
+    roleFire();
+  }
   const LS_DRAFT = 'lc-admin-draft', LS_BOOK = 'lc-admin-keybook', LS_FAILS = 'lc-admin-fails', LS_LAST = 'lc-admin-otp-last';
   const cfg = () => CONFIG.admin || {};
   const configured = () => { const a = cfg(); return /^[0-9a-f]{64}$/.test(a.emailCheck || '') && String(a.salt || '').length >= 16 && String(a.secretBox || '').length > 30; };
@@ -7149,7 +7613,7 @@ const Admin = (() => {
       Store.set(ADMIN_TOKEN, Crypt.B64.enc(all));
     } catch (e) { toast('This browser can’t remember the admin session. You will sign in again next time.'); }
     active = true; Store.set(LS_FAILS, []);
-    Site.apply();
+    Site.apply(); roleFire();
   }
   async function restore() {
     if (!configured() || !Crypt.ok()) return false;
@@ -7160,12 +7624,12 @@ const Admin = (() => {
       if (!key) throw new Error('no session key');
       const all = Crypt.B64.dec(tok);
       const s = JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: all.slice(0, 12) }, key, all.slice(12))));
-      if (s && s.role === 'admin' && s.exp > Date.now() && s.dev === deviceId() && s.cfg === cfg().emailCheck.slice(0, 16)) { active = true; Site.apply(); return true; }
+      if (s && s.role === 'admin' && s.exp > Date.now() && s.dev === deviceId() && s.cfg === cfg().emailCheck.slice(0, 16)) { active = true; Site.apply(); roleFire(); return true; }
     } catch (e) { /* a token from another browser, or an expired one */ }
     Store.del(ADMIN_TOKEN);
     return false;
   }
-  function signOut() { active = false; Store.del(ADMIN_TOKEN); IDB.del('admin-session').catch(() => {}); Site.apply(); }
+  function signOut() { active = false; prole = ''; try { sessionStorage.removeItem(ROLE_KEY); } catch (e) { /* ignore */ } Store.del(ADMIN_TOKEN); IDB.del('admin-session').catch(() => {}); Site.apply(); roleFire(); }
   const draft = () => Site.cleanDoc(Store.get(LS_DRAFT, null));
   const ensureDraft = () => draft() || clone(Site.published() || Site.emptyDoc());
   function saveDraft(d) { d.updated = new Date().toISOString(); Store.set(LS_DRAFT, d); Site.apply(); }
@@ -7195,15 +7659,30 @@ const Admin = (() => {
     Store.set('lc-admin-ui', prefs);
   }
   return {
-    get active() { return active; },
+    get active() { return active && !prole; },
+    real: () => active,
+    viewingAs: () => (active ? prole : ''),
+    roles: () => ROLE_DEFS.slice(), roleDef, setRole, onRole: (fn) => { roleListeners.push(fn); },
     configured, isTrigger, locked, fail, checkEmail, checkCode, startSession, restore, signOut,
     draft, ensureDraft, saveDraft, persistDraft, discardDraft, dirty, keybook, saveKeybook, setPref, setEditTier,
     prefs: () => prefs,
     editTier: () => (prefs.tier === 'paid' ? 'paid' : 'free'),
-    editing: () => active && prefs.edit !== false,
-    preview: () => (active && prefs.preview && TIERS[prefs.preview] ? prefs.preview : '')
+    editing: () => active && !prole && prefs.edit !== false,
+    preview: () => (active && prole ? (roleDef(prole).tier || '') : (active && prefs.preview && TIERS[prefs.preview] ? prefs.preview : ''))
   };
 })();
+
+/* v17 / Phase 1: the one question every feature check can ask. For an admin it is the chosen preview role (or 'admin'); for everybody
+   else it is the real account status: b2c-free, b2c-paid, b2b-free, b2b-mid or b2b-high. */
+function getEffectiveRole() {
+  try {
+    if (Admin.real()) return Admin.viewingAs() || 'admin';
+    const biz = V71.studio().business, pt = V71.partnerTier();
+    if (biz) return 'b2b-' + (pt || 'free');
+    return App.rank() >= 2 ? 'b2c-paid' : 'b2c-free';
+  } catch (e) { return 'b2c-free'; }
+}
+window.getEffectiveRole = getEffectiveRole;
 
 /* ---------- CMS: the sheets admin mode opens ---------- */
 const CMS = (() => {
@@ -7391,7 +7870,7 @@ const CMS = (() => {
         list('Sources that were skipped', st.tried) +
         '<p class="form-msg' + (note ? ' is-good' : '') + '" id="sync-msg" aria-live="polite">' + esc(note || '') + '</p>' +
         '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-sync="now"' + (SyncLock.paused() ? ' disabled' : '') + '>' + icon('rotate') + ' Sync now</button><button type="button" class="btn btn-ghost btn-sm" data-sync="export">' + icon('file-export') + ' Export master JSON</button>' +
-          (Feed.pageUrl() ? '<a class="btn btn-ghost btn-sm" href="' + esc(Feed.pageUrl()) + '" target="_blank" rel="noopener">' + icon('code-branch') + ' Open the file on GitHub</a>' : '') + '</div>' +
+          (Feed.pageUrl() ? '<a class="btn btn-ghost btn-sm" href="' + esc(Feed.pageUrl()) + '" target="_blank" rel="noopener noreferrer">' + icon('code-branch') + ' Open the file on GitHub</a>' : '') + '</div>' +
         (Admin.draft() ? '<p class="small dim">Admin mode shows your draft. Players see the live data.</p>' : ''),
       onMount(s) {
         onBack(s);
@@ -10266,14 +10745,20 @@ const Onboard = (() => {
       el.hidden = false; root.classList.add('has-walk');
       return;
     }
-    el.className = 'walk-strip';
-    if (!w) { el.hidden = true; root.classList.remove('has-walk'); return; }
-    el.innerHTML = '<a class="walk-link" href="' + esc(w) + '" target="_blank" rel="noopener noreferrer">' + esc(label()) + '</a>' + ed('onb.shortcut');
-    el.hidden = false; root.classList.add('has-walk');
+    el.className = 'walk-strip'; el.hidden = true; el.innerHTML = ''; root.classList.remove('has-walk');   // v17: the walkthrough link is a top-bar button now, the strip is for the sponsor only
   }
-  function menuRow() {
+  /* v17 / Phase 13: the two always-visible buttons in the top bar */
+  function paintActions() {
+    const el = qs('#top-actions'), w = walkUrl();
+    if (!el) return;
+    let fb = false; try { fb = !!Feedback.accountBtn(); } catch (e) { fb = false; }
+    el.innerHTML = (w ? '<a class="ta-btn" href="' + esc(w) + '" target="_blank" rel="noopener noreferrer">' + icon('graduation-cap') + '<span>Free App Walkthrough</span></a>' : '') +
+      (fb ? '<button type="button" class="ta-btn" data-feedback-open>' + icon('comment-dots') + '<span>Send Feedback / Report Bugs</span></button>' : '');
+    el.hidden = !el.innerHTML;
+  }
+  function menuRow(text) {
     const w = walkUrl();
-    return w ? '<li role="none" class="bm-row"><a role="menuitem" class="bm-item bm-walk" href="' + esc(w) + '" target="_blank" rel="noopener noreferrer"><span>' + esc(label()) + '</span>' + icon('chevron-right', 'bm-ext') + '</a></li>' : '';
+    return w ? '<li role="none" class="bm-row"><a role="menuitem" class="bm-item bm-walk" href="' + esc(w) + '" target="_blank" rel="noopener noreferrer">' + icon('graduation-cap') + '<span>' + esc(text || label()) + '</span>' + icon('chevron-right', 'bm-ext') + '</a></li>' : '';
   }
   function accountLink() {
     const w = walkUrl();
@@ -10285,7 +10770,7 @@ const Onboard = (() => {
     setDay(n) { const d = new Date(); d.setDate(d.getDate() - Math.max(0, (+n || 1) - 1)); Store.set(KEY, dayKey(d)); try { rerender(); } catch (e) { /* ignore */ } return dayNumber(); },
     reset() { Store.set(KEY, dayKey(new Date())); try { rerender(); } catch (e) { /* ignore */ } return dayNumber(); }
   };
-  return { stamp, active, cardHTML, bind, paintStrip, menuRow, accountLink, api };
+  return { stamp, active, cardHTML, bind, paintStrip, paintActions, menuRow, accountLink, api };
 })();
 
 function mountHome(view) {
@@ -10367,12 +10852,18 @@ function makeRepertoireDrill(groupName) {
   }
   return null;
 }
+/* v17 / Phases 6 and 8: an MSPC position is either general or tied to an opening repertoire (flag "repertoire" in content.json; the
+   opening names are the fallback for older files). The general MSPC System Trainer shows only the general ones; the repertoire ones
+   are trained in the MSPC Repertoire Trainer, and stay paid. */
+const REP_PUZZLE_RE = /caro|colle|semi-slav|\bslav\b|meran|moscow/i;
+function isRepPuzzle(d) { return !!d && (d.repertoire === true || (d.repertoire !== false && REP_PUZZLE_RE.test(String(d.tag || '') + ' ' + String(d.topic || '')))); }
 function mountThink(view) {
   /* v3.9: the MSPC positions come in topics with the five levels. Level N
      is its own set of positions (not a longer version of the level below),
      with a hard gate on levels 2 to 5 and the ELO advice on every button. */
-  const allItems = CONTENT.think || [], pro = App.isPro(), dynOk = App.can('repertoireRandom');
+  const allItems = (CONTENT.think || []).filter((d) => !isRepPuzzle(d)), pro = App.isPro(), dynOk = false;
   const st = App.ui.lv || (App.ui.lv = {}), ui = App.ui.think || (App.ui.think = { topic: '', id: null });
+  if (ui.id === 'dyn') ui.id = null;                              // v17: no random repertoire position on this screen any more
   /* v6.3: MSPC positions sit in chapters; a chip row filters the topics below to one chapter. */
   const chs = Chapters.split('mspc', allItems, true), hasCh = chs.groups.some((g) => g.items.length), showCh = hasCh || Admin.editing();
   const fbThink = { id: 'mspc-positions', scope: 'think', title: 'MSPC positions' };
@@ -10388,12 +10879,8 @@ function mountThink(view) {
     '<div id="metrics-think">' + metricsHTML('think') + '</div>' +
     '<p class="track-label">' + icon('layer-group') + ' ' + esc(T('think.levels')) + ed('think.levels') + ' ' + manageBtn('think', 'Positions') + '</p>' + (showCh ? '<div class="chips" id="think-chapters" style="margin-bottom:8px"></div>' : '') + '<div class="chips" id="think-topics" style="margin-bottom:12px"></div>' +
     '<div class="lv39" id="think-levels"></div>' +
-    V34.hardToggle() + trainerShell('think-board', 'think-panel') + V34.repCard() +
-    '<section class="section">' + sectionHeadK('think.systemTitle', 'think.systemText') +
-      '<div class="pillars">' + MSPC.map((p) => '<article class="panel pillar"><div class="pillar-letter">' + p.k + '</div><h3>' + esc(p.name) + '</h3><p>' + esc(p.text) + '</p></article>').join('') + '</div>' +
-      '<p class="why-order">' + H('think.why') + ed('think.why') + '</p></section>' +
-    '<section class="section"><div class="panel course-card"><span class="badge-ico">' + icon('graduation-cap') + '</span><div><h3>' + esc(T('think.courseTitle')) + ed('think.courseTitle') + '</h3><p>' + H('think.courseText') + ed('think.courseText') + '</p></div>' +
-      '<a class="btn btn-primary" href="' + esc(CONFIG.links.mspcCourse || CONFIG.links.skool) + '" target="_blank" rel="noopener">' + esc(T('think.courseCta')) + ' ' + icon('arrow-up-right-from-square') + '</a></div></section>' +
+    V34.hardToggle() + trainerShell('think-board', 'think-panel') +
+    '' +
     (pro ? '' : '<section class="section"><div class="panel pad upsell"><div><h3>' + esc(T('think.upsellTitle')) + ed('think.upsellTitle') + '</h3><p>' + H('think.upsellText') + ed('think.upsellText') + '</p></div>' +
       '<button type="button" class="btn btn-gold" data-upsell>' + icon('crown') + ' Unlock Levels 2 to 5</button></div></section>');
   const board = Board(qs('#think-board', view), {});
@@ -10410,7 +10897,7 @@ function mountThink(view) {
   function chips() {
     chapChips();
     qs('#think-topics', view).innerHTML = topics.map((x) => '<button type="button" class="chip" data-topic="' + esc(x.key) + '" aria-pressed="' + (ui.id !== 'dyn' && t && x.key === t.key) + '">' + esc(x.title) + '</button>').join('') +
-      '<button type="button" class="chip" data-dyn aria-pressed="' + (ui.id === 'dyn') + '">' + (dynOk ? icon('shuffle') : lockIcon(gateLevel('repertoireRandom'))) + ' Random repertoire position</button>';
+      '';
   }
   function levels() {
     if (!t || ui.id === 'dyn') { levelsHost.hidden = true; levelsHost.innerHTML = ''; return; }
@@ -10480,16 +10967,9 @@ function mountThink(view) {
 }
 
 /* ---------- THINK: two modes, the MSPC trainer and the Shuffle Trainer ---------- */
-function thinkTabs(active) {
-  /* v6.1: Arena moved to the main bar and the Shuffle Trainer to each module: four modes are left, in a 2x2 matrix like Theory. */
-  if (active === 'leaderboard' || active === 'shuffle') return '';
-  const due = V36.srsDueCount();
-  const tabs = [['think', 'brain', 'MSPC trainer', 'Think every move through'], ['clinic', 'stethoscope', 'Blunder Clinic', 'Real blunders, explained with MSPC'], ['peer', 'user-group', 'Peer puzzles', 'Punish blunders from this hub'], ['srs', 'crosshairs', 'My mistakes', 'Spaced repetition of your misses']];
-  return '<nav class="theory-tabs grid2x2" aria-label="Think modes">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === active ? ' aria-current="page"' : '') + '>' + icon(t[1]) +
-    '<b>' + t[2] + (t[0] === 'srs' && due ? '<span class="tab-count" aria-label="' + due + ' due">' + due + '</span>' : '') + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' +
-    (active === 'think' ? '<a class="bt-think-link" href="#bot"><div><h3>' + icon('robot') + ' Test your framework against a bot</h3><p>Play Stockfish and run MSPC on every move. Think 15 to 30 minutes per position: the goal is no mistakes.</p></div><span class="btn btn-primary btn-sm">Play the bot ' + icon('arrow-right') + '</span></a>' : '') +
-    (active === 'think' ? v13Links() : '') + (active === 'think' ? shuffleBar('think') : '') + '<p class="v6-thinklink small"><a href="#account">Level, ranks, Skill Matrix and bounties</a></p>';
-}
+/* v17 / Phases 5, 8, 11: the Think-family pages no longer carry a row of links to each other. Every module is reached from the
+   Learn page or the main menu and stands on its own. (Kept as a function so existing callers keep working.) */
+function thinkTabs() { return ''; }
 function mountShufflePage(view) {
   view.innerHTML = cmsBar() + shuffleBack() + '<div id="shuffle-root"></div>' + gateNote('shuffle') + gateNote('shuffleAll');
   const root = qs('#shuffle-root', view);
@@ -10515,15 +10995,30 @@ const SHUFFLE_SCOPES = [
 ];
 /* Every playable line in the hub, in one shape: a start position, your side and
    the moves (or a king-and-pawn drill against the solved endgame table). */
-function shufflePool() {
+/* v17 / Phase 13: replaying every line of the hub to validate it took ~13 s on the real data and ran again on every call, which froze
+   the Skill Matrix. The verdict for one line only depends on its start position, side and moves, so it is remembered by exactly that.
+   shufflePool('openings', true) builds only the opening lines without replaying them (all the Skill Matrix needs; a Boss Fight still skips a line that does not replay). */
+const POOL_OK = new Map();
+function shufflePool(only, trust) {
   const out = [], seen = {};
   const add = (x) => {
     if (!x || !x.id || seen[x.id]) return;
+    if (only && x.scope !== only) return;
     if (x.kind === 'kpk') { if (!x.drill || !fenOk(x.drill.fen)) return; }
     else {
-      if (!fenOk(x.fen) || !x.moves || !x.moves.length) return;
-      const plies = buildDrillPlies(x.fen, x.moves, isStatic(x), x.side);
-      if (plies.length !== x.moves.length || !plies.some((p) => p.color === x.side)) return;
+      if (!x.fen || !x.moves || !x.moves.length) return;
+      const key = x.fen + '|' + x.side + '|' + (isStatic(x) ? 1 : 0) + '|' + x.moves.join(' ');
+      let ok = trust ? true : POOL_OK.get(key);
+      if (ok === undefined) {
+        ok = false;
+        if (fenOk(x.fen)) {
+          const plies = buildDrillPlies(x.fen, x.moves, isStatic(x), x.side);
+          ok = plies.length === x.moves.length && plies.some((p) => p.color === x.side);
+        }
+        POOL_OK.set(key, ok);
+        if (POOL_OK.size > 20000) POOL_OK.clear();
+      }
+      if (!ok) return;
     }
     seen[x.id] = 1; out.push(x);
   };
@@ -10545,6 +11040,7 @@ function shufflePool() {
   lessons(CONTENT.courses.middlegame, 'middlegame', 'c:blunder', T('mg.blunderTitle'));
   lessons(CONTENT.courses.antiblunder, 'middlegame', 'c:anti', T('mg.antiTitle'));
   (CONTENT.think || []).forEach((d) => {
+    if (isRepPuzzle(d)) return;                                   // v17: the MSPC shuffle is general positions only
     const st = (d.stages || []).filter((x) => x && x.type === 'line')[0];
     if (!st) return;
     add({ id: 'c:' + d.id, kind: 'line', scope: 'middlegame', course: 'c:mspc', courseName: 'MSPC positions', title: d.title, idea: d.brief || '', side: sideOf(d.fen), fen: d.fen, moves: pgnTokens(st.pgn), ann: st.ann || {}, mode: st.mode || d.mode, lvl: Levels.of(d), requiredTier: Levels.required(d), lastMove: lastMoveOf(d.lastMove), task: st.prompt || d.brief || '' });
@@ -10819,15 +11315,12 @@ function mountShuffle(root) {
 
 /* ---------- THEORY shell: three big section tabs and a header per section ---------- */
 function theoryHead(show) { const h = qs('#theory-head'); if (h) h.hidden = !show; }
-function puzzleSeg(mode) {
-  return '<nav class="seg tp-seg" aria-label="Puzzle modes"><a href="#puzzles"' + (mode === 'puzzles' ? ' aria-current="page"' : '') + '>' + icon('chart-line') + ' Rated puzzles</a><a href="#themes"' + (mode === 'themes' ? ' aria-current="page"' : '') + '>' + icon('puzzle-piece') + ' By theme</a></nav>';
-}
 function mountTheory(view, sub) {
+  /* v17 / Phases 9 and 10: Openings, Middlegame, Endgame and Puzzles are four standalone pages. No section switcher on top, no Shuffle bar,
+     and no link between the unrated theme puzzles (#themes) and the rated puzzles (#puzzles). The menus reach them. */
   const mode = sub;
   if (sub === 'themes') sub = 'puzzles';
-  const tabs = [['openings', 'chess-pawn', 'Openings', 'Repertoires and drills'], ['middlegame', 'chess-knight', 'Middlegame', 'Plans and bootcamps'], ['endgame', 'chess-king', 'Endgame', 'Technique that converts'], ['puzzles', 'puzzle-piece', 'Puzzles', 'Rated tactics, live']];
-  view.innerHTML = cmsBar() + '<nav class="theory-tabs grid2x2" aria-label="Theory sections">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === sub ? ' aria-current="page"' : '') + '>' + icon(t[1]) + '<b>' + t[2] + rankPill(t[0]) + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>' + shuffleBar(sub) +
-    (sub === 'puzzles' ? puzzleSeg(mode) : '') + '<div id="theory-head">' + pageHeadK('theory.' + sub + '.title', 'theory.' + sub + '.text') + '</div><div id="theory-root"></div>';
+  view.innerHTML = cmsBar() + '<div id="theory-head">' + (mode === 'themes' ? '' : pageHeadK('theory.' + sub + '.title', 'theory.' + sub + '.text')) + '</div><div id="theory-root"></div>';
   const root = qs('#theory-root', view);
   return (mode === 'themes' ? ThemePuzzles.mount : sub === 'openings' ? mountOpenings : sub === 'middlegame' ? mountMiddlegame : sub === 'puzzles' ? mountPuzzles : mountEndgame)(root);
 }
@@ -11690,8 +12183,8 @@ function listScreen(body, group, go) {
   body.innerHTML = (group.intro ? '<p class="muted" style="max-width:70ch;margin-bottom:10px">' + esc(group.intro) + '</p>' : '') +
     (group.lines.length ? '<p class="ch37-sum">' + icon('book-open') + ' <span><b>' + nCh + (nCh === 1 ? ' chapter' : ' chapters') + '</b>' +
       (nCh === 1 ? ' in five levels' : ', each in five levels') + ', from Free to Master. You play ' + colorName(group.side) + '.</span></p>' : '') +
-    '<div class="btn-row" style="margin-bottom:16px"><button type="button" class="btn btn-primary" data-act="mspc">' + icon('brain') + ' Start MSPC-drills</button>' +
-    '<button type="button" class="btn btn-ghost" data-act="explore">' + icon('sitemap') + ' Explore the tree</button>' +
+    '<div class="btn-row" style="margin-bottom:16px">' +
+    '<button type="button" class="btn btn-primary" data-act="explore">' + icon('sitemap') + ' Explore the tree</button>' +
     (() => { const mist = V36.mistakeLines(group.lines), pc = V36.peerCount(group.name); return '<button type="button" class="btn btn-ghost" data-act="mistakes"' + (mist.length ? '' : ' disabled title="No missed moves in this repertoire yet"') + '>' + icon('crosshairs') + ' Train only my mistakes' + (mist.length ? ' (' + mist.length + ')' : '') + '</button>' +
       (pc ? '<a class="btn btn-quiet" href="#peer" data-v36="peer-op" data-op="' + esc(group.name) + '">' + icon('user-group') + ' ' + pc + ' peer ' + (pc === 1 ? 'puzzle' : 'puzzles') + '</a>' : ''); })() +
     manageBtn('openings', 'Lines') + manageBtn('groups', 'Repertoires') + '</div>' +
@@ -13787,7 +14280,7 @@ function mountTrim(view) {
       actions.forEach((a) => {
         const b = document.createElement(a.href ? 'a' : 'button');
         b.className = 'btn btn-ghost btn-sm'; b.textContent = a.label;
-        if (a.href) { b.href = a.href; if (/^https?:/.test(a.href)) { b.target = '_blank'; b.rel = 'noopener'; } }
+        if (a.href) { b.href = a.href; if (/^https?:/.test(a.href)) { b.target = '_blank'; b.rel = 'noopener noreferrer'; } }
         else { b.type = 'button'; b.addEventListener('click', a.fn); }
         row.appendChild(b);
       });
@@ -13858,7 +14351,7 @@ function mountTrim(view) {
   }
   function openGpt() {
     const url = App.can('coachPaid') ? (CONFIG.coachBot.gptPro || CONFIG.coachBot.gptFree) : CONFIG.coachBot.gptFree;
-    if (url) window.open(url, '_blank', 'noopener');
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
     const extra = 'Current game: ' + (A.moves.length ? lineText(A.moves.map((m) => m.san), A.start) : 'none') + '\nPosition (FEN): ' + cur();
     copyText(coachBriefing(extra)).then((ok) => toast(url ? (ok ? 'Briefing copied. Paste it as your first message to the coach.' : 'Opening the coach…') : (ok ? 'Briefing copied. The coach bot link is not set up yet.' : 'The coach bot link is not set up yet.')));
   }
@@ -13958,14 +14451,14 @@ function upBotSection() {
   const hard = UpChat.on();
   return '<section class="section" id="up-bot"><div class="panel gateway"><div class="gateway-head"><h3>' + icon('comments') + ' ' + esc(T('up.botTitle')) + ed('up.botTitle') + '</h3><p>' + H('up.botText') + ed('up.botText') + '</p>' +
     (hard ? '' : (AI.forBot('sales') ? '<p class="bot-status">' + icon('circle', 'ai-dot') + ' AI assistant online. Tap an answer, or ask anything.</p>' : '') +
-      (CONFIG.links.salesBot ? '<div><a class="btn btn-ghost btn-sm" href="' + esc(CONFIG.links.salesBot) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Open the full assistant</a></div>' : '')) +
+      (CONFIG.links.salesBot ? '<div><a class="btn btn-ghost btn-sm" href="' + esc(CONFIG.links.salesBot) + '" target="_blank" rel="noopener noreferrer">' + icon('arrow-up-right-from-square') + ' Open the full assistant</a></div>' : '')) +
     (Admin.editing() ? '<div class="btn-row"><button type="button" class="cms-manage" data-cms-chat>' + icon('comments') + ' Edit the chat</button><button type="button" class="cms-manage" data-cms-popups>' + icon('window-restore') + ' Popup triggers</button>' +
       (hard ? '' : '<button type="button" class="cms-manage" data-cms-bots="sales">' + icon('robot') + ' Assistant instructions</button>') + '</div>' : '') + '</div>' +
     (hard ? UpChat.html() : '<div class="bot"><div class="chat" role="log" aria-live="polite"></div><div class="quick"></div><form class="chat-form" autocomplete="off"><input class="input" name="msg" maxlength="280" placeholder="Type a message…" aria-label="Message the assistant"><button class="btn btn-primary" type="submit" aria-label="Send">' + icon('paper-plane') + '</button></form></div>') +
     '</div></section>';
 }
 function mountUpgrades(view) {
-  const tier = App.access.tier, P = CONFIG.pricing, ext = (href) => (/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : '');
+  const tier = App.access.tier, P = CONFIG.pricing, ext = (href) => (/^https?:/.test(href) ? ' target="_blank" rel="noopener noreferrer"' : '');
   view.innerHTML = cmsBar() + pageHeadK('up.title', 'up.intro') +
     '<div class="btn-row"><button type="button" class="btn btn-primary" data-scroll="up-bot">' + icon('comments') + ' Find my path</button><button type="button" class="btn btn-ghost" data-scroll="up-access">' + icon('key') + ' I have a key</button></div>' +
     '<section class="section"><div class="pillars3">' + [['think', 'Think'], ['theory', 'Theory'], ['trim', 'Trim']].map((p) => '<article class="panel"><span class="k">' + p[1] + '</span><h3>' + esc(T('up.' + p[0] + 'Title')) + ed('up.' + p[0] + 'Title') + '</h3><p>' + H('up.' + p[0] + 'Text') + ed('up.' + p[0] + 'Text') + '</p></article>').join('') + '</div></section>' +
@@ -14049,7 +14542,7 @@ function SalesBot(host, opts) {
     if (!list.length) return;
     const el = document.createElement('div');
     el.className = 'msg msg-bot';
-    el.innerHTML = '<div class="msg-actions" style="margin-top:0">' + list.map((l) => '<a class="btn btn-ghost btn-sm" href="' + esc(l[1]) + '"' + (/^https?:/.test(l[1]) ? ' target="_blank" rel="noopener"' : '') + '>' + esc(l[0]) + '</a>').join('') + '</div>';
+    el.innerHTML = '<div class="msg-actions" style="margin-top:0">' + list.map((l) => '<a class="btn btn-ghost btn-sm" href="' + esc(l[1]) + '"' + (/^https?:/.test(l[1]) ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + esc(l[0]) + '</a>').join('') + '</div>';
     chat.appendChild(el); scroll();
   }
   function typing() {
@@ -14094,7 +14587,7 @@ function SalesBot(host, opts) {
     el.className = 'rec';
     el.innerHTML = '<h4>' + esc(R.title) + '</h4><p class="small" style="color:#cbd5e1">' + esc(R.text) + '</p><div class="btn-row">' + R.ctas.filter((c) => c[1]).map((c) => c[1] === '#apply'
       ? '<button type="button" class="btn btn-' + c[2] + ' btn-sm" data-fn-apply>' + esc(c[0]) + '</button>'
-      : '<a class="btn btn-' + c[2] + ' btn-sm" href="' + esc(c[1]) + '"' + (/^https?:/.test(c[1]) ? ' target="_blank" rel="noopener"' : '') + ' data-fn-cta="' + esc(route) + '">' + esc(c[0]) + '</a>').join('') + '</div>';
+      : '<a class="btn btn-' + c[2] + ' btn-sm" href="' + esc(c[1]) + '"' + (/^https?:/.test(c[1]) ? ' target="_blank" rel="noopener noreferrer"' : '') + ' data-fn-cta="' + esc(route) + '">' + esc(c[0]) + '</a>').join('') + '</div>';
     chat.appendChild(el); scroll();
   }
   function result() {
@@ -14302,7 +14795,7 @@ function initialsOf() { const n = (CONFIG.about && CONFIG.about.fullName) || CON
 function avatarHTML() {
   const A = CONFIG.about || {}, user = String(A.chesscomUsername || '').trim(), name = A.fullName || CONFIG.coach;
   const url = /^[A-Za-z0-9_-]{2,40}$/.test(user) ? 'https://www.chess.com/member/' + encodeURIComponent(user) : '';
-  const frame = url ? '<a class="cc-frame" id="about-avatar" href="' + esc(url) + '" target="_blank" rel="noopener" aria-label="' + esc(name) + ' on Chess.com">' + esc(initialsOf()) + '</a>'
+  const frame = url ? '<a class="cc-frame" id="about-avatar" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(name) + ' on Chess.com">' + esc(initialsOf()) + '</a>'
     : '<span class="cc-frame" id="about-avatar" role="img" aria-label="' + esc(name) + '">' + esc(initialsOf()) + '</span>';
   return '<figure class="cc-avatar">' + frame + '<figcaption class="cc-tag">' + icon('chess-pawn') + ' ' + esc(url ? '@' + user : 'Chess.com') + '</figcaption>' +
     (Admin.editing() ? '<button type="button" class="cms-edit cc-edit" data-cms-avatar aria-label="Change the profile image" title="Change the profile image">' + icon('camera') + '</button>' : '') + '</figure>';
@@ -14333,14 +14826,14 @@ function journeyHTML(chapters, you) {
 function mountAbout(view) {
   const A = CONFIG.about || {}, user = String(A.chesscomUsername || '').trim(), name = A.fullName || CONFIG.coach;
   const brand = (cls) => '<i class="fa-brands fa-' + cls + '" aria-hidden="true"></i>';
-  const link = (href, ico, title, sub) => (href ? '<a class="link-card" href="' + esc(href) + '"' + (/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : '') + '>' + ico + '<span>' + esc(title) + '<small>' + esc(sub) + '</small></span></a>' : '');
+  const link = (href, ico, title, sub) => (href ? '<a class="link-card" href="' + esc(href) + '"' + (/^https?:/.test(href) ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + ico + '<span>' + esc(title) + '<small>' + esc(sub) + '</small></span></a>' : '');
   const chesscom = /^[A-Za-z0-9_-]{2,40}$/.test(user) ? 'https://www.chess.com/member/' + encodeURIComponent(user) : '';
   const chapters = storyChapters();
   view.innerHTML = cmsBar() +
     '<section class="panel founder-card">' + avatarHTML() +
       '<div style="min-width:0"><h2>' + esc(name) + '</h2><ul class="creds">' + (CONTENT.credentials || []).map((c) => '<li>' + icon(/^[a-z0-9-]{2,40}$/.test(c.icon || '') ? c.icon : 'check') + '<span>' + esc(tok(c.text)) + '</span></li>').join('') + '</ul></div>' +
-      '<div class="founder-actions">' + (chesscom ? '<a class="btn btn-ghost btn-sm" href="' + esc(chesscom) + '" target="_blank" rel="noopener">' + icon('chess-pawn') + ' Chess.com profile</a>' : '') +
-        '<a class="btn btn-primary btn-sm" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">' + icon('users') + ' Join the community</a>' + manageBtn('credentials', 'Credentials') + settingsBtn('Name and numbers') + '</div></section>' +
+      '<div class="founder-actions">' + (chesscom ? '<a class="btn btn-ghost btn-sm" href="' + esc(chesscom) + '" target="_blank" rel="noopener noreferrer">' + icon('chess-pawn') + ' Chess.com profile</a>' : '') +
+        '<a class="btn btn-primary btn-sm" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener noreferrer">' + icon('users') + ' Join the community</a>' + manageBtn('credentials', 'Credentials') + settingsBtn('Name and numbers') + '</div></section>' +
     '<section class="about-hero section"><h1>' + esc(CONFIG.startRating) + ' <span>→</span> ' + esc(CONFIG.peakRating) + '</h1><p>' + H('about.intro') + ed('about.intro') + '</p></section>' +
     fastTrackHTML(chapters) +
     '<figure class="panel chart" style="margin-left:0;margin-right:0">' + ratingChart(chapters, V34.you()) + V34.youNote(chapters) + '</figure>' + V34.analyticsHTML() +
@@ -14353,12 +14846,15 @@ function mountAbout(view) {
     '<section class="section">' + sectionHead('Follow the journey') + '<div class="links">' +
       link(CONFIG.links.youtube, brand('youtube'), 'YouTube', '@lanckrietchess') + link(CONFIG.links.tiktok, brand('tiktok'), 'TikTok', 'Short lessons') +
       link(CONFIG.links.instagram, brand('instagram'), 'Instagram', 'Reels and DMs') + link(CONFIG.links.facebook, brand('facebook'), 'Facebook', 'Reels') +
-      link(chesscom, icon('chess-pawn'), 'Chess.com', user ? '@' + user : '') + link(CONFIG.links.skool, icon('users'), 'Skool community', 'Free bootcamps and the MSPC course') + link('#upgrades', icon('crown'), 'Upgrades', 'Accelerator and Mentorship') + link('#hall', icon('trophy'), 'Hall of Fame', 'Top creators and referrers') + link('#refer', icon('user-plus'), 'Refer a Friend', 'Train together, earn tokens') + '</div></section>' +
+      link(CONFIG.links.skool, icon('users'), 'Skool community', 'Free bootcamps and the MSPC course') + link('#upgrades', icon('crown'), 'Upgrades', 'Accelerator and Mentorship') + link('#hall', icon('trophy'), 'Hall of Fame', 'Top creators and referrers') + link('#refer', icon('user-plus'), 'Refer a Friend', 'Train together, earn tokens') +
+      '<a class="link-card" href="#partner" data-partner-tiers>' + icon('handshake') + '<span>Business Partners<small>Scale with our creator and B2B tiers</small></span></a></div></section>' +
     '<p class="small dim section">Chess pieces by Colin M. L. Burnett (CC BY-SA 3.0). Board by chessboard.js, rules by chess.js, analysis by Stockfish (GPLv3), running in your browser.</p>';
   loadAvatar(qs('#about-avatar', view));
   const fill = qs('[data-fast]', view);
   if (fill) requestAnimationFrame(() => requestAnimationFrame(() => { fill.style.width = '100%'; }));
-  return null;
+  const onTier = (e) => { const a = e.target.closest && e.target.closest('[data-partner-tiers]'); if (!a) return; e.preventDefault(); try { V71.tiersSheet(); } catch (x) { location.hash = '#partner'; } };
+  view.addEventListener('click', onTier);
+  return () => view.removeEventListener('click', onTier);
 }
 
 /* ---------- v5.3: the privacy policy page (#privacy) ----------
@@ -14386,8 +14882,8 @@ function mountPrivacy(view) {
     ids.map((i, n) => '<section class="panel pad priv-sec" id="priv-s' + i + '"><h2>' + (n + 1) + '. ' + esc(T('privacy.s' + i + '.title')) + ed('privacy.s' + i + '.title') + '</h2>' +
       '<div class="priv-body">' + privBlocks(T('privacy.s' + i + '.text')) + ed('privacy.s' + i + '.text') + '</div></section>').join('') +
     '<section class="panel pad priv-sec priv-contact" id="priv-contact"><h2>Contact</h2><div class="priv-body">' + privBlocks(T('privacy.contact')) + ed('privacy.contact') + '</div>' +
-      '<div class="btn-row" style="margin-top:14px">' + (L.instagramDM ? '<a class="btn btn-primary" href="' + esc(L.instagramDM) + '" target="_blank" rel="noopener">' + icon('paper-plane') + ' Message ' + esc(CONFIG.coach) + ' on Instagram</a>' : '') +
-      (L.skool ? '<a class="btn btn-ghost" href="' + esc(L.skool) + '" target="_blank" rel="noopener">' + icon('users') + ' Skool community</a>' : '') +
+      '<div class="btn-row" style="margin-top:14px">' + (L.instagramDM ? '<a class="btn btn-primary" href="' + esc(L.instagramDM) + '" target="_blank" rel="noopener noreferrer">' + icon('paper-plane') + ' Message ' + esc(CONFIG.coach) + ' on Instagram</a>' : '') +
+      (L.skool ? '<a class="btn btn-ghost" href="' + esc(L.skool) + '" target="_blank" rel="noopener noreferrer">' + icon('users') + ' Skool community</a>' : '') +
       '<button type="button" class="btn btn-ghost"' + Popups.attr('support', 'privacy') + '>' + icon('envelope') + ' Send a question</button></div></section>' +
     '<div class="btn-row" style="margin-top:22px"><a class="btn btn-quiet btn-sm" href="#home">' + icon('chevron-left') + ' Back to the hub</a></div></div>';
   function onClick(e) {
@@ -14414,7 +14910,7 @@ function refreshChip() {
   if (slot) slot.innerHTML = Admin.active ? '<button type="button" class="admin-chip' + (SyncLock.paused() ? ' is-paused' : '') + '" id="admin-chip" aria-label="Open the admin menu' + (SyncLock.paused() ? ' (sync is paused)' : '') + '">' + icon('pen-ruler') + '<span>' + (Admin.preview() ? 'Preview' : 'Admin') + (SyncLock.paused() ? ' · sync off' : '') + '</span>' + proofBadge() + '</button>' : '';
   try { Nav5.paintBiz(); } catch (e) { /* the Business menu can wait for the next redraw */ }
   try { const L = V6.level(), tb = qs('#topbar'); if (tb) tb.style.setProperty('--lvl', L.pct.toFixed(3)); } catch (e) { /* ranks load a moment later */ }
-  try { Onboard.paintStrip(); } catch (e) { /* the strip can wait for the next redraw */ }
+  try { Onboard.paintStrip(); Onboard.paintActions(); } catch (e) { /* the strip can wait for the next redraw */ }
 }
 function openProfile() {
   const p = App.profile, t = App.totals(), b = bracketOf(p.elo), tier = App.access.tier, token = Access.encodeProfile();
@@ -14429,7 +14925,7 @@ function openProfile() {
         tokenFormHTML('profile') + (tier !== 'free' ? '<button type="button" class="btn btn-quiet btn-sm" data-p="signout" style="justify-self:start">Remove membership from this device</button>' : '') + '</section>' +
       ((tier === 'free' || tier === 'community') && !Admin.active ? '<div class="divider"></div><section class="stack"><h3>Credits</h3><p class="small">' + Credits.balance() + ' credit' + (Credits.balance() === 1 ? '' : 's') + ' on this device' + (App.unlocks.length ? ', ' + App.unlocks.length + ' level' + (App.unlocks.length === 1 ? '' : 's') + ' unlocked with them' : '') + '. ' + CONFIG.credits.daily + ' free every day; unlock a locked level from its Level gate any time.</p>' +
         (TokenFlag.on() ? '<button type="button" class="btn btn-ghost btn-sm" data-p="buy-credits" style="justify-self:start">' + icon('coins') + ' Get more credits</button>' : TokenFlag.noteHTML()) + '</section>' : '') +
-      '<div class="divider"></div><section class="stack"><h3>Settings</h3>' + Onboard.accountLink() + Feedback.accountBtn() + '<label class="switch-row"><span>Sounds</span><input type="checkbox" data-p="sound"' + (App.settings.sound ? ' checked' : '') + '></label>' + V36.settingsHTML() + V6.settingsHTML() +
+      '<div class="divider"></div><section class="stack"><h3>Settings</h3><label class="switch-row"><span>Sounds</span><input type="checkbox" data-p="sound"' + (App.settings.sound ? ' checked' : '') + '></label>' + V36.settingsHTML() + V6.settingsHTML() +
         (installPrompt ? '<button type="button" class="btn btn-ghost btn-sm" data-p="install" style="justify-self:start">' + icon('download') + ' Install the app</button>' : '') +
         '<button type="button" class="btn btn-quiet btn-sm" data-p="reset" style="justify-self:start">' + icon('rotate') + ' Reset my progress</button></section>' +
       V33.profileSections() + V33.privacySection() + '<p class="small dim">Version ' + CONFIG.version + '. ' + esc(V33.storageNote()) + '</p>',
@@ -14856,7 +15352,7 @@ function askConsent(force) {
   openSheet({
     title: 'Help shape the next lessons', noFocus: true,
     html: '<p>' + esc(CONFIG.coach) + ' builds new lessons and videos from what players actually struggle with. Share anonymous training stats from this hub: which drills you miss, where your games leak (the positions and moves, never names) and what you ask the coach.</p>' +
-      '<p class="small muted">No name, no email, no member key: just a random number for this device. Switch it off in your profile at any time, and what was shared is deleted. <a href="#privacy" target="_blank" rel="noopener">Read the privacy policy</a>.</p>' +
+      '<p class="small muted">No name, no email, no member key: just a random number for this device. Switch it off in your profile at any time, and what was shared is deleted. <a href="#privacy" target="_blank" rel="noopener noreferrer">Read the privacy policy</a>.</p>' +
       '<div class="btn-row"><button class="btn btn-primary" type="button" data-share="1">Share anonymous stats</button><button class="btn btn-quiet" type="button" data-share="0">No thanks</button></div>',
     onMount(s) {
       s.el.addEventListener('click', (e) => {
@@ -14985,7 +15481,7 @@ function openReportSheet() {
     html: '<p class="muted">Paste it in a DM to ' + esc(CONFIG.coach) + ' on Skool. The first lines are for reading; the code at the end loads your numbers into his Insights.</p>' +
       '<div class="token-box report-box">' + esc(text) + '</div>' +
       '<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-rp="copy">' + icon('copy') + ' Copy report</button><button type="button" class="btn btn-ghost btn-sm" data-rp="file">' + icon('download') + ' Download</button>' +
-      '<a class="btn btn-ghost btn-sm" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Open Skool</a></div>',
+      '<a class="btn btn-ghost btn-sm" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener noreferrer">' + icon('arrow-up-right-from-square') + ' Open Skool</a></div>',
     onMount(s) {
       s.el.addEventListener('click', (e) => {
         const b = e.target.closest('[data-rp]');
@@ -15515,10 +16011,8 @@ function pickFolder(title, cb) {
     onMount(s) { s.el.addEventListener('click', (e) => { const b = e.target.closest('[data-pf]'); if (!b) return; s.close(); cb(b.getAttribute('data-pf')); }); }
   });
 }
-function trimTabs(active) {
-  const tabs = [['trim', 'magnifying-glass-chart', 'Game review', 'Stockfish and MSPC on your games'], ['games', 'box-archive', 'Game Vault', 'Your folders of games and mistakes'], ['brilliant', 'star', 'Brilliant moves', 'Your !! and ! moves, saved']];
-  return '<nav class="theory-tabs three" aria-label="Trim modes">' + tabs.map((t) => '<a class="theory-tab" href="#' + t[0] + '"' + (t[0] === active ? ' aria-current="page"' : '') + '>' + icon(t[1]) + '<b>' + t[2] + '</b><small>' + t[3] + '</small></a>').join('') + '</nav>';
-}
+/* v17 / Phase 11: Game review, Game Vault and Brilliant moves are standalone pages. The switcher row between them is gone. */
+function trimTabs() { return ''; }
 function ruleFields(r) {
   r = r || {};
   const sel = (name, opts, cur) => '<select class="input" name="' + name + '">' + opts.map((o) => '<option value="' + o[0] + '"' + ((cur || '') === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>').join('') + '</select>';
@@ -17341,7 +17835,7 @@ function TrimInterrogation(T) {
     h.innerHTML = '<section class="panel iq iq-done" aria-label="Interrogation summary"><div class="iq-head"><div><span class="iq-count">Interrogation complete</span><strong>' + found + ' of ' + n + ' better moves found</strong></div>' +
       '<button type="button" class="icon-btn" data-iq="close" aria-label="Close" title="Close">' + icon('xmark') + '</button></div>' +
       (n ? '<ul class="iq-sum">' + Q.verdicts.map((x) => '<li><b>' + esc(x.san) + '</b><span>' + esc(x.v === 'time' ? 'the clock' : x.v + ', ' + MSPC_NAME[x.v]) + '</span>' + icon(x.found ? 'circle-check' : 'circle-xmark') + '</li>').join('') + '</ul>' : '') + focus +
-      '<div class="btn-row">' + (A.vaultId && Vault.item(A.vaultId) ? '<a class="btn btn-primary btn-sm" href="#games" data-iq="vault">' + icon('crosshairs') + ' Train these in the Game Vault</a>' : '<button type="button" class="btn btn-primary btn-sm" data-iq="save">' + icon('box-archive') + ' Save to the Game Vault</button>') +
+      '<div class="btn-row">' + (A.vaultId && Vault.item(A.vaultId) ? '' : '<button type="button" class="btn btn-primary btn-sm" data-iq="save">' + icon('box-archive') + ' Save to the Game Vault</button>') +
       '<button type="button" class="btn btn-ghost btn-sm" data-iq="close">Back to the game</button></div></section>';
     if (n >= 2 && found === n) Celebrate.perfect('You found every better move.');
     V34.saveTrimSoon(T);
@@ -18026,7 +18520,7 @@ const Bridge = {
     const path = ch.module.title + (lesson && lesson.title !== ch.title ? ' › ' + ch.title : '');
     const text = open ? (ch.tier === 'vault' ? 'Already in your Accelerator. Watch it today, while this mistake is still fresh.' : (lesson && lesson.concept) || 'Open the lesson and train the pattern right after the game.')
       : this.pitch(ch, opts.k);
-    const btn = open ? '<a class="btn btn-primary btn-sm" href="' + esc(href) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + icon(ext ? 'arrow-up-right-from-square' : 'graduation-cap') + ' Open in the Lanckriet Chess menu</a>'
+    const btn = open ? '<a class="btn btn-primary btn-sm" href="' + esc(href) + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + icon(ext ? 'arrow-up-right-from-square' : 'graduation-cap') + ' Open in the Lanckriet Chess menu</a>'
       : '<button type="button" class="btn btn-gold btn-sm" data-bridge="' + esc(ch.id) + '">' + icon(ch.tier === 'vault' ? 'crown' : 'lock') + (ch.tier === 'vault' ? ' Unlock it with the Accelerator' : ' Get it with the community key') + '</button>';
     return '<div class="bridge' + (open ? '' : ' is-locked') + '">' + icon(open ? 'graduation-cap' : 'lock') + '<span class="bridge-path">' + (opts.lead ? esc(opts.lead) + ' ' : '') + esc(path) + '</span>' +
       '<b>' + esc(lesson ? lesson.title : ch.title) + '</b><p>' + esc(text) + '</p><div class="btn-row">' + btn + '</div></div>';
@@ -18434,7 +18928,7 @@ const V34 = {
     const top = Object.keys(refs).map((k) => refs[k]).sort((a, b) => b.w - a.w).slice(0, 2), br = mine.filter((it) => it.brill);
     let html = '';
     if (br.length) html += '<div><h3>Brilliant and great moves</h3><ol class="moments" style="margin-top:8px">' + br.map((it) => '<li class="moment"><span class="moment-k bm-glyph is-' + it.brill + '">' + (it.brill === 'brilliant' ? '!!' : '!') + '</span><div><strong>' + esc(moveLabel(it.num, it.color, it.san)) + '</strong>' +
-      '<p>' + esc(it.brill === 'brilliant' ? 'You gave material and Stockfish agrees it wins more. Saved in your Brilliant moves.' : 'The only move that kept your position, found in a real game. Saved in your Brilliant moves.') + '</p></div>' +
+      '<p>' + esc(it.brill === 'brilliant' ? 'You gave material and Stockfish agrees it wins more. Saved automatically.' : 'The only move that kept your position, found in a real game. Saved automatically.') + '</p></div>' +
       '<button type="button" class="btn btn-ghost btn-sm" data-v34-goto="' + it.i + '">Show</button></li>').join('') + '</ol></div>';
     if (top.length) html += '<div><h3>Where this is taught</h3><div class="bridges">' + top.map((x) => Bridge.html(x.ref, { k: x.k })).join('') + '</div></div>';
     return html;
@@ -18463,8 +18957,8 @@ const V34 = {
     const br = A.review.items.filter((it) => it.color === A.user && it.brill);
     if (br.length) {
       const top = br.filter((x) => x.brill === 'brilliant')[0] || br[0], lab = moveLabel(top.num, top.color, top.san);
-      setTimeout(() => { if (top.brill === 'brilliant') Celebrate.brilliant(lab + ' was brilliant. It’s saved in your Brilliant moves.'); else Celebrate.great(lab + ' was the only move. It’s saved in your Brilliant moves.'); }, 900);
-      T.bubble('You played ' + (br.length === 1 ? 'a standout move' : br.length + ' standout moves') + ' in this game: ' + br.map((it) => moveLabel(it.num, it.color, it.san) + (it.brill === 'brilliant' ? '!!' : '!')).join(', ') + '. Saved in your Brilliant moves.', 'bot', [{ label: 'Open my Brilliant moves', href: '#brilliant' }]);
+      setTimeout(() => { if (top.brill === 'brilliant') Celebrate.brilliant(lab + ' was brilliant.'); else Celebrate.great(lab + ' was the only move. It’s saved in your Brilliant moves.'); }, 900);
+      T.bubble('You played ' + (br.length === 1 ? 'a standout move' : br.length + ' standout moves') + ' in this game: ' + br.map((it) => moveLabel(it.num, it.color, it.san) + (it.brill === 'brilliant' ? '!!' : '!')).join(', ') + '. Saved automatically.', 'bot');
     }
     V34.paintQuota(T);
     V34.saveTrim(T);
@@ -18661,7 +19155,7 @@ function openAccounts() {
         if (a) return '<div class="acct"><div class="acct-head"><b>' + esc(name) + ': @' + esc(a.user) + '</b><button type="button" class="btn btn-quiet btn-sm" data-acct="change" data-site="' + site + '">Change username</button></div>' +
           '<p class="small">Put this code in the <b>Location</b> field of your ' + esc(name) + ' profile' + (site === 'lichess' ? ' (your bio works too)' : '') + ', save it, then tap Verify. You can remove it again afterwards.</p>' +
           '<span class="acct-code">' + esc(a.code) + '</span><div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-acct="copy" data-site="' + site + '">' + icon('copy') + ' Copy the code</button>' +
-          '<a class="btn btn-ghost btn-sm" href="' + (site === 'chesscom' ? 'https://www.chess.com/settings' : 'https://lichess.org/account/profile') + '" target="_blank" rel="noopener">' + icon('up-right-from-square') + ' ' + esc(name) + ' profile settings</a>' +
+          '<a class="btn btn-ghost btn-sm" href="' + (site === 'chesscom' ? 'https://www.chess.com/settings' : 'https://lichess.org/account/profile') + '" target="_blank" rel="noopener noreferrer">' + icon('up-right-from-square') + ' ' + esc(name) + ' profile settings</a>' +
           '<button type="button" class="btn btn-primary btn-sm" data-acct="verify" data-site="' + site + '">Verify</button></div></div>';
         return '<form class="acct" data-acct-form="' + site + '"><label class="field"><span class="field-label">' + esc(name) + ' username</span><div class="token-row"><input class="input" name="u" maxlength="30" autocapitalize="off" spellcheck="false" autocomplete="off" placeholder="your ' + esc(name) + ' name">' +
           '<button class="btn btn-ghost" type="submit">Get my code</button></div></label></form>';
@@ -18714,8 +19208,7 @@ function mountBrilliant(view) {
     view.innerHTML = cmsBar() + trimTabs('brilliant') + pageHead('Brilliant moves', esc('Every brilliant (!!) and great (!) move Stockfish found in your reviewed games, saved automatically. Replay them, share them, and remember what you can do.')) +
       (all.length ? '<div class="seg lb-seg" role="group" aria-label="Filter">' + segHTML('bf', [['all', 'All ' + all.length], ['brilliant', '!! Brilliant ' + nb], ['great', '! Great ' + (all.length - nb)]], ui.f) + '</div>' +
         '<div class="bm-grid"><section class="panel bm-show" id="bm-show" aria-live="polite"></section><ol class="bm-list" id="bm-list">' + (L.map(rowHTML).join('') || '<li class="muted">Nothing in this filter yet.</li>') + '</ol></div>'
-        : '<section class="panel pad"><h2 style="font-size:20px">No brilliant moves yet</h2><p class="muted" style="margin-top:6px">Review your games in Trim. When Stockfish finds a sound sacrifice (!!) or the only move that holds (!) in your play, it lands here with the game it came from.</p>' +
-          '<div class="btn-row" style="margin-top:12px"><a class="btn btn-primary" href="#trim">' + icon('magnifying-glass-chart') + ' Trim a game</a></div></section>');
+        : '<section class="panel pad"><h2 style="font-size:20px">No brilliant moves yet</h2><p class="muted" style="margin-top:6px">When Stockfish finds a sound sacrifice (!!) or the only move that holds (!) in your reviewed games, it lands here with the game it came from.</p></section>');
     if (ui.id) show(ui.id, false);
   }
   function play(x, sound) {
@@ -18827,9 +19320,28 @@ function mountMspcRep(view) {
   const groups = (CONTENT.groups || []).map((g) => g.name).filter((n) => (CONTENT.openings || []).some((o) => o.group === n && App.unlocked(o)));
   const ui = App.ui.mr || (App.ui.mr = { g: groups[0] || '', speed: true });
   if (groups.indexOf(ui.g) < 0) ui.g = groups[0] || '';
+  const momentsOf = (g) => { const k = String(g || '').toLowerCase().split(/[-\s]/)[0]; return k ? (CONTENT.think || []).filter((d) => isRepPuzzle(d) && String(d.tag + ' ' + d.topic).toLowerCase().indexOf(k) >= 0) : []; };
   view.innerHTML = head + '<div class="chips" id="mr-groups" style="margin-bottom:10px">' + groups.map((g) => '<button type="button" class="chip" data-mr-g="' + esc(g) + '" aria-pressed="' + (g === ui.g) + '">' + esc(g) + '</button>').join('') + '</div>' +
-    '<label class="hard-toggle"><input type="checkbox" data-mr-speed' + (ui.speed ? ' checked' : '') + '> Only ask M and P at the key moments</label>' + trainerShell('mr-board', 'mr-panel');
+    '<label class="hard-toggle"><input type="checkbox" data-mr-speed' + (ui.speed ? ' checked' : '') + '> Only ask M and P at the key moments</label>' + trainerShell('mr-board', 'mr-panel') +
+    '<section class="section" id="mr-moments"><h2 class="v17-h">Critical moments</h2><p class="muted small">Positions from your repertoire where one thought decides the game. Run all four MSPC steps.</p><div class="chips" id="mr-mchips"></div>' + trainerShell('mrp-board', 'mrp-panel') + '</section>';
   const board = Board(qs('#mr-board', view), {}), panel = qs('#mr-panel', view);
+  const pboard = Board(qs('#mrp-board', view), {});
+  qs('[data-flip="mrp-board"]', view).addEventListener('click', () => pboard.flip());
+  let prun = null, pcur = '';
+  function pstop() { if (prun) { prun.destroy(); prun = null; } pboard.setOnMove(null); pboard.setInteractive(null); pboard.clearMarks(); pboard.setArrows([]); }
+  function pchips() {
+    const list = momentsOf(ui.g), sec = qs('#mr-moments', view);
+    sec.hidden = !list.length;
+    qs('#mr-mchips', view).innerHTML = list.map((d) => '<button type="button" class="chip" data-mr-p="' + esc(d.id) + '" aria-pressed="' + (d.id === pcur) + '">' + esc(d.title) + '</button>').join('');
+  }
+  function prunOne(id) {
+    const d = (CONTENT.think || []).filter((x) => x.id === id)[0];
+    if (!d) return;
+    pstop(); pcur = id; pchips();
+    prun = StageRunner({ drill: d, board: pboard, host: qs('#mrp-panel', view), section: 'think', mspc: true, hard: false, onNext: () => { const l = momentsOf(ui.g), i = l.findIndex((x) => x.id === id); prunOne((l[i + 1] || l[0]).id); }, nextLabel: 'Next critical moment' });
+    prun.start();
+  }
+  pchips(); { const l0 = momentsOf(ui.g); if (l0.length) { pboard.setPosition(l0[0].fen, { animate: false }); } }
   qs('[data-flip="mr-board"]', view).addEventListener('click', () => board.flip());
   let S = null, timers = [];
   const later = (fn, ms) => timers.push(setTimeout(fn, ms));
@@ -18932,8 +19444,10 @@ function mountMspcRep(view) {
       '<div class="st-actions"><button type="button" class="btn btn-primary" data-mr="new">Next line</button><button type="button" class="btn btn-ghost" data-mr="again">This line again</button></div>';
   }
   function onClick(e) {
+    const pp = e.target.closest('[data-mr-p]');
+    if (pp) { prunOne(pp.getAttribute('data-mr-p')); return; }
     const g = e.target.closest('[data-mr-g]');
-    if (g) { ui.g = g.getAttribute('data-mr-g'); qsa('[data-mr-g]', view).forEach((b) => b.setAttribute('aria-pressed', String(b === g))); begin(); return; }
+    if (g) { ui.g = g.getAttribute('data-mr-g'); qsa('[data-mr-g]', view).forEach((b) => b.setAttribute('aria-pressed', String(b === g))); pstop(); pcur = ''; pchips(); begin(); return; }
     const n = e.target.closest('[data-mr-n]');
     if (n && S && S.q && S.q.stage === 'P') { answerP(+n.getAttribute('data-mr-n')); return; }
     const b = e.target.closest('[data-mr]');
@@ -18949,7 +19463,7 @@ function mountMspcRep(view) {
   view.addEventListener('click', onClick);
   view.addEventListener('change', onChange);
   begin();
-  return () => { timers.forEach(clearTimeout); S = null; view.removeEventListener('click', onClick); view.removeEventListener('change', onChange); board.destroy(); };
+  return () => { timers.forEach(clearTimeout); S = null; pstop(); view.removeEventListener('click', onClick); view.removeEventListener('change', onChange); board.destroy(); pboard.destroy(); };
 }
 
 /* ---------- Think > Leaderboard: volume and accuracy, and the Trim board ---------- */
@@ -19555,7 +20069,7 @@ const Badges = (() => {
     { id: 'ranked', cat: 'community', ico: 'ranking-star', name: 'Ranked', how: 'Get ranked on the weekly leaderboard.', goal: 1, cur: () => (v36State().ranked || Ranks.mine('week').ranked ? 1 : 0) },
     { id: 'verified', cat: 'community', ico: 'circle-check', name: 'Verified', how: 'Connect a verified Chess.com or Lichess account.', goal: 1, cur: () => (Elo.best() ? 1 : 0) },
     { id: 'featured', cat: 'community', ico: 'star', name: 'Featured', how: 'Get one of your games featured on the Games leaderboard.', goal: 1, cur: featured }
-  ].concat((CONFIG.themePuzzles.themes || []).map((t) => ({ id: 'tp-' + t.id, cat: 'puzzles', ico: t.icon, name: t.badge, how: 'Finish a ' + t.label + ' puzzle set.', goal: 1, cur: () => ThemePuzzles.sets(t.id) })), [
+  ].concat((CONFIG.themePuzzles.themes || []).filter((t) => t.badge).map((t) => ({ id: 'tp-' + t.id, cat: 'puzzles', ico: t.icon, name: t.badge, how: 'Finish a ' + t.label + ' puzzle set.', goal: 1, cur: () => ThemePuzzles.sets(t.id) })), [
     { id: 'tp-flawless', cat: 'puzzles', ico: 'gem', name: 'Flawless Set', how: 'Finish a themed puzzle set without a single miss.', goal: 1, cur: () => ThemePuzzles.flawlessSets() },
     { id: 'tp-streak10', cat: 'puzzles', ico: 'fire', name: 'Ten in a Row', how: '10 themed puzzles in a row, clean.', goal: 10, cur: () => ThemePuzzles.bestStreak() },
     { id: 'tp-deck10', cat: 'puzzles', ico: 'layer-group', name: 'Deck Cleaner', how: 'Clear 10 puzzles from your Mistake Deck.', goal: 10, cur: () => ThemePuzzles.cleared() },
@@ -19919,6 +20433,7 @@ function mountTrophies(view) {
       '<div class="tr36-steps" aria-label="Trophy levels">' + TROPHY.slice().reverse().map((x) => '<span class="tr36-step tr-' + x[0] + (n >= x[2] ? ' is-on' : '') + '" title="' + esc(x[1] + ': ' + x[2] + ' badges') + '">' + icon('trophy') + '<small>' + esc(x[1]) + '</small></span>').join('') + '</div></div>' +
       '<div class="tr36-rating"><span>Unlock rating</span><b>' + r.value + '</b><small>' + esc(r.label) + '</small></div></section>' +
     SysBadges.section() +
+    '<section class="section">' + sectionHead('Boss Fights, ranks and events') + '<div class="panel pad">' + V6.cabinetHTML() + '</div></section>' +
     (close.length ? '<section class="section">' + sectionHead('Closest to unlock') + '<ul class="bd36-grid">' + close.map(tile).join('') + '</ul></section>' : '') +
     BADGE_CATS.map((c) => '<section class="section">' + sectionHead(c[1]) + '<ul class="bd36-grid">' + rows.filter((x) => x.b.cat === c[0]).map(tile).join('') + '</ul></section>').join('') +
     '<p class="small dim" style="margin-top:28px">Badges live on this device with the rest of your progress. Your unlock rating is the higher of a verified Chess.com or Lichess rating and your hub rating, which moves with every rated puzzle.</p>';
@@ -19944,7 +20459,7 @@ function mountPeer(view) {
     '<b>' + esc(it.title || 'Punish the blunder') + '</b><small>' + esc([peerOpening(it), it.played ? 'played ' + it.played : ''].filter(Boolean).join(', ')) + (App.progress['peer:' + it.id] ? ' ' + icon('check') : '') + '</small>' + lockBadge(it) + tierPin(it, 'peer') + '</button>';
   view.innerHTML = cmsBar() + thinkTabs('peer') + pageHead('Peer puzzles', esc('Real blunders from players in this hub, with their name and rating. Find the move that makes them pay.') + ' ' + manageBtn('peer', 'Puzzles')) +
     (!all.length ? '<div class="panel pad empty36"><h2>No peer puzzles yet</h2><p class="muted">When ' + esc(CONFIG.coach) + ' approves blunders from real games in this hub, they land here with the player’s name and rating, sorted by opening and level.</p><div class="btn-row">' +
-        (Admin.active ? '<a class="btn btn-primary btn-sm" href="#review-queue">' + icon('inbox') + ' Open the Review Queue</a>' : '<a class="btn btn-primary btn-sm" href="#clinic">' + icon('stethoscope') + ' Blunder Clinic meanwhile</a>') + '</div></div>'
+        (Admin.active ? '<a class="btn btn-primary btn-sm" href="#review-queue">' + icon('inbox') + ' Open the Review Queue</a>' : '') + '</div></div>'
       : '<div class="chips pp36-ops" role="group" aria-label="Opening">' + [['', 'All openings']].concat(ops.map((o) => [o, o])).map((o) => '<button type="button" class="chip" data-pp-op="' + esc(o[0]) + '" aria-pressed="' + (ui.op === o[0]) + '">' + esc(o[1]) + '</button>').join('') + '</div>' +
         '<div class="seg pp36-lv" role="group" aria-label="Level">' + segHTML('pl', lvs, ui.lv) + '</div>' +
         (widened ? '<p class="small muted" style="margin:10px 0 0">Nothing at your level in this opening yet, so every level is shown.</p>' : '') +
@@ -20025,7 +20540,7 @@ function mountSrs(view) {
             '<button type="button" class="btn btn-ghost" data-srs="due"' + (due.length ? '' : ' disabled') + '>' + icon('clock-rotate-left') + ' Review due lines' + (due.length ? ' (' + due.length + ')' : '') + '</button></div>' +
           '<div id="srs-trainer"></div>' +
           '<section class="section">' + sectionHead('Open mistakes', 'A mistake leaves this list after two clean tries in a row, here or in any trainer.') +
-            (ps.length ? '<div class="rows">' + ps.slice(0, 80).map(row).join('') + '</div>' : '<div class="panel pad"><p class="muted">Nothing to fix' + (ui.scope === 'all' ? '' : ' here') + '. Miss a move in any trainer and it shows up in this list.</p><div class="btn-row" style="margin-top:12px"><a class="btn btn-ghost btn-sm" href="#openings">' + icon('chess-pawn') + ' Drill openings</a><a class="btn btn-ghost btn-sm" href="#peer">' + icon('user-group') + ' Peer puzzles</a></div></div>') +
+            (ps.length ? '<div class="rows">' + ps.slice(0, 80).map(row).join('') + '</div>' : '<div class="panel pad"><p class="muted">Nothing to fix' + (ui.scope === 'all' ? '' : ' here') + '. Miss a move in any trainer and it shows up in this list.</p></div>') +
           '</section>');
     /* v5.2: the panel with pop-up buttons while the same moves keep coming back, and the My mistakes rule. */
     if (on && ps.length) {
@@ -20126,7 +20641,7 @@ function mountGamesBoard(view) {
   const all = gamesAll().slice().sort((a, b) => (+b.accuracy || 0) - (+a.accuracy || 0)), gotd = gameOfDay();
   view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Arena · Leaderboard', esc('The Game of the Day and the most accurate games played by members of this hub, checked by ' + CONFIG.coach + ' and broken down with MSPC.') + ' ' + manageBtn('games', 'Games')) + V34.lbModes('games') +
     (!all.length ? '<div class="panel pad empty36"><h2>No featured games yet</h2><p class="muted">Played a clean game? Send the PGN to ' + esc(CONFIG.coach) + ' in the Skool community. The best games are featured here with an MSPC breakdown, and one of them becomes the Game of the Day.</p><div class="btn-row">' +
-        (Admin.active ? '<a class="btn btn-primary btn-sm" href="#review-queue">' + icon('inbox') + ' Open the Review Queue</a>' : '<a class="btn btn-primary btn-sm" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">' + icon('paper-plane') + ' Send a game on Skool</a>') + '</div></div>'
+        (Admin.active ? '<a class="btn btn-primary btn-sm" href="#review-queue">' + icon('inbox') + ' Open the Review Queue</a>' : '<a class="btn btn-primary btn-sm" href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener noreferrer">' + icon('paper-plane') + ' Send a game on Skool</a>') + '</div></div>'
       : '<section class="panel gm36" id="gm36" aria-live="polite"></section>' +
         '<section class="section">' + sectionHead('High accuracy games', 'Accuracy of the featured player’s own moves, measured by Stockfish.') +
           '<div class="seg lb-seg" role="group" aria-label="Level">' + segHTML('gbb', [['', 'All levels']].concat(['foundation', 'builder', 'climber', 'contender', 'expert'].map((b) => [b, BRACKET_LABEL[b]])), ui.b) + '</div>' +
@@ -21032,7 +21547,7 @@ function mountPuzzles(root) {
         (pz.themes.length ? '<div class="pz37-themes">' + pz.themes.map((t) => '<span>' + esc(themeWord(t)) + '</span>').join('') + '</div>' : '') : '') +
       '<div class="st-actions">' + (v.done
         ? '<button type="button" class="btn btn-primary" data-pzx="next">' + icon('forward') + ' Next puzzle</button><button type="button" class="btn btn-ghost" data-pzx="retry">' + icon('rotate-left') + ' Retry, unrated</button>' +
-          (pz.url ? '<a class="btn btn-quiet" href="' + esc(pz.url) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Open on Lichess</a>' : '')
+          (pz.url ? '<a class="btn btn-quiet" href="' + esc(pz.url) + '" target="_blank" rel="noopener noreferrer">' + icon('arrow-up-right-from-square') + ' Open on Lichess</a>' : '')
         : '<button type="button" class="btn btn-ghost btn-sm" data-pzx="hint"' + (v.yourTurn ? '' : ' disabled') + '>' + icon('lightbulb') + (v.hints ? ' Show the move' : ' Hint') + '</button>' +
           '<button type="button" class="btn btn-quiet btn-sm" data-pzx="solution"' + (v.started && !v.showing ? '' : ' disabled') + '>' + icon('eye') + ' View the solution</button>') + '</div>';
   }
@@ -21067,7 +21582,7 @@ function mountPuzzles(root) {
       '<div class="pz37-controls"><div class="seg pz37-seg" role="group" aria-label="Difficulty">' + PZ_ORDER.map((k) => '<button type="button" data-pzo="' + k + '" aria-pressed="' + (ui.off === k) + '">' + esc(PZ_OFF[k][0]) + ' <span class="pz37-off">' + pzOffLabel(k) + '</span></button>').join('') + '</div>' +
         '<p class="small muted" id="pz-target" aria-live="polite"></p></div>' +
       trainerShell('pz-board', 'pz-panel') +
-      '<p class="small dim pz37-credit">Puzzles from the <a href="https://database.lichess.org/#puzzles" target="_blank" rel="noopener">Lichess puzzle database</a> (CC0), served live by lichess.org. Your Puzzle ELO is kept on this device' + (Ranks.on() ? ' and on the Puzzles leaderboard once you join it' : '') + '. <a href="#leaderboard" data-pz-board>See the Puzzles leaderboard</a></p>';
+      '<p class="small dim pz37-credit">Puzzles from the <a href="https://database.lichess.org/#puzzles" target="_blank" rel="noopener noreferrer">Lichess puzzle database</a> (CC0), served live by lichess.org. Your Puzzle ELO is kept on this device' + (Ranks.on() ? ' and on the Puzzles leaderboard once you join it' : '') + '. <a href="#leaderboard" data-pz-board>See the Puzzles leaderboard</a></p>';
     board = Board(qs('#pz-board', root), {});
     qs('[data-flip="pz-board"]', root).addEventListener('click', () => board.flip());
     V36.hud('puzzles');
@@ -21129,7 +21644,7 @@ const PuzzleBoard = (() => {
 })();
 
 function mountPuzzleBoard(view) {
-  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Arena · Leaderboard', esc('The highest Puzzle ELOs in this hub. Every rated puzzle on Theory > Puzzles moves your rating: up for a clean solve, down for a wrong move.')) + V34.lbModes('puzzles') +
+  view.innerHTML = cmsBar() + thinkTabs('leaderboard') + pageHead('Arena · Leaderboard', esc('The highest Puzzle ELOs in this hub. Every rated puzzle in Ranked moves your rating: up for a clean solve, down for a wrong move.')) + V34.lbModes('puzzles') +
     '<div class="lb-grid"><section class="panel lb-me" id="pzb-me" aria-label="Your Puzzle ELO"></section><section class="panel lb-board" id="pzb-board" aria-label="Community board"></section></div>' +
     '<details class="panel pad lb-rules"><summary>How this board works</summary><p>Your Puzzle ELO starts where you put it and moves like a chess rating: solving a puzzle rated above you earns more, missing one rated below you costs more, and the first 30 puzzles move it faster. Each puzzle counts once; retries and puzzles you have seen before are unrated. A free hint doesn’t cost anything; showing the move or the solution counts as a miss.</p>' +
       '<p>You appear on the board after 5 rated puzzles. It ranks the current rating, with the peak next to it. The top three get the gold, silver and bronze trophy; everyone else shows the trophy their badges earned.</p></details>';
@@ -24038,7 +24553,7 @@ const V5Trim = {
       (hist.length >= 2 ? '<h3>' + icon('chart-line') + ' Your patterns</h3><p>Across your last ' + hist.length + ' interrogations, <b>' + esc(V5Trim.leakName(aggTop)) + '</b> broke ' + agg[aggTop] + ' times, in ' + inSessions + ' of them.' +
         (misTop ? ' Your most tagged miscalculation: “' + esc(misTop) + '” (' + mc[misTop] + '×).' : '') + '</p>' : '<p class="small muted">A few more interrogations and your patterns across games show up here.</p>') +
       (showMc ? '<div class="iq-bridge bridge iq5-mc">' + icon('comments') + '<p><b>' + esc(V5Trim.leakName(aggTop)) + '</b> keeps coming back. ' + esc(CONFIG.coach) + ' has a plan for exactly this leak.</p>' +
-        '<div class="btn-row"><a class="btn btn-gold btn-sm" data-iq5="mc" href="' + esc(V5Trim.mcUrl(S, aggTop)) + '" target="_blank" rel="noopener">' + icon('paper-plane') + ' Get the plan</a></div></div>' : '') +
+        '<div class="btn-row"><a class="btn btn-gold btn-sm" data-iq5="mc" href="' + esc(V5Trim.mcUrl(S, aggTop)) + '" target="_blank" rel="noopener noreferrer">' + icon('paper-plane') + ' Get the plan</a></div></div>' : '') +
       (App.can('coachChat') && AI.on() ? '<div class="iq5-ai" data-iq5-ai><button type="button" class="btn btn-ghost btn-sm" data-iq5="ai">' + icon('wand-magic-sparkles') + ' Ask the AI coach for my session conclusion</button></div>' : '') + '</div>';
     Q.v5data = { opening: ((A && A.opening) || {}).name || '', mistakes: vs.map((x) => ({ move: x.san, verdict: x.v, engine_step: x.eng || '', found_better: !!x.found })), this_session: by, all_sessions: agg, sessions: hist.length, top_miscalculation: misTop || '' };
     panel.insertAdjacentHTML('beforeend', Q.v5end);
@@ -24538,7 +25053,7 @@ const Funnel = (() => {
       chosen = true;
       if (!pv) { log('gp-a'); quiet(c.check.cooldownDays); }
       sheet.close();
-      if (c.a.url && !pv) window.open(c.a.url, '_blank', 'noopener');
+      if (c.a.url && !pv) window.open(c.a.url, '_blank', 'noopener,noreferrer');
       toast(pv ? 'Preview: Option A ' + (c.a.url ? 'opens ' + c.a.url : 'closes the pop-up') + '.' : 'The free path it is. Keep trimming your games.', 'good');
     }
     function toApply() {
@@ -24596,7 +25111,7 @@ const Funnel = (() => {
       setBody(sheet, 'Application sent', '<div class="gp-done"><span class="gp-done-ico">' + icon('circle-check') + '</span>' +
         '<p>' + (link ? 'Your application is on its way. Finish it in the form that ' + (w ? 'just opened' : 'opens with the button below') + ', so ' + esc(CONFIG.coach) + ' has everything he needs.' : esc(CONFIG.coach) + ' has your application and reads it himself.') + '</p>' +
         '<p class="small muted">Your reference: <b>' + esc(id) + '</b></p>' +
-        '<div class="btn-row">' + (link ? '<a class="btn btn-gold" href="' + esc(link) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Open the application form</a>' : '') +
+        '<div class="btn-row">' + (link ? '<a class="btn btn-gold" href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">' + icon('arrow-up-right-from-square') + ' Open the application form</a>' : '') +
         '<button type="button" class="btn btn-ghost" data-close>Close</button></div></div>');
     }
     sheet = openSheet({
@@ -24997,7 +25512,7 @@ const Popups = (() => {
           put({ contact }); log('pp-support-sent');
           qs('.sheet-body', sh.el).innerHTML = '<div class="gp-done"><span class="gp-done-ico">' + icon('circle-check') + '</span><p>' + esc(c.webhook ? fill(c.thanks, ctx) : 'Copy your question and send it to ' + CONFIG.coach + ' directly; this hub has no inbox connected yet.') + '</p>' +
             '<p class="small muted">Reference: <b>' + esc(payload.id) + '</b></p><div class="btn-row">' + (c.webhook ? '' : '<button type="button" class="btn btn-ghost" data-pp-copy>' + icon('copy') + ' Copy my question</button>') +
-            (dm ? '<a class="btn btn-ghost" href="' + esc(dm) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Message ' + esc(CONFIG.coach) + '</a>' : '') + '<button type="button" class="btn btn-quiet" data-close>Close</button></div></div>';
+            (dm ? '<a class="btn btn-ghost" href="' + esc(dm) + '" target="_blank" rel="noopener noreferrer">' + icon('arrow-up-right-from-square') + ' Message ' + esc(CONFIG.coach) + '</a>' : '') + '<button type="button" class="btn btn-quiet" data-close>Close</button></div></div>';
           const cp = qs('[data-pp-copy]', sh.el);
           if (cp) cp.addEventListener('click', () => { try { navigator.clipboard.writeText(msg).then(() => toast('Copied.', 'good')); } catch (x) { toast('Copy did not work here.'); } });
         });
@@ -25150,7 +25665,7 @@ const DayFunnel = (() => {
   function btnHTML(b, i) {
     if (!plain(b) || !b.label) return '';
     const cls = 'btn ' + (b.primary ? 'btn-primary' : 'btn-ghost'), url = b.url ? fill(b.url) : '';
-    if (url && httpsOk(url)) return '<a class="' + cls + '" href="' + esc(url) + '" target="_blank" rel="noopener" data-df-btn="' + i + '">' + esc(fill(b.label)) + '</a>';
+    if (url && httpsOk(url)) return '<a class="' + cls + '" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" data-df-btn="' + i + '">' + esc(fill(b.label)) + '</a>';
     if (b.hash && /^#[\w/-]{1,40}$/.test(b.hash)) return '<a class="' + cls + '" href="' + esc(b.hash) + '" data-df-btn="' + i + '">' + esc(fill(b.label)) + '</a>';
     return '<button type="button" class="' + cls + '" data-df-btn="' + i + '">' + esc(fill(b.label)) + '</button>';
   }
@@ -25440,7 +25955,7 @@ const UpChat = (() => {
       } else if (b.type === 'link') {
         const u = resolveLink(b.target);
         if (pv) toast('Preview: this button opens ' + (hasOwn(SHORT, b.target) ? SHORT[b.target] + (u ? '' : ' (no link set yet)') : b.target) + '.');
-        else if (/^https:\/\//i.test(u || '')) { const w = window.open(u, '_blank', 'noopener'); if (!w) location.href = u; }
+        else if (/^https:\/\//i.test(u || '')) { const w = window.open(u, '_blank', 'noopener,noreferrer'); if (!w) location.href = u; }
         else if (/^#/.test(u || '')) location.hash = u;
         else toast('That link is not set yet.');
       } else if (b.type === 'scroll') {
@@ -26440,7 +26955,7 @@ const Framework = (() => {
       '<p class="small muted">' + (p.hits ? 'Came back ' + p.hits + (p.hits === 1 ? ' time' : ' times') : 'Not seen in a game yet') + (p.clean ? ' \u00b7 avoided in ' + p.clean + (p.clean === 1 ? ' Learning Party' : ' Learning Parties') : '') + (p.streak ? ' \u00b7 clean streak ' + p.streak : '') + '</p>' +
       (solved && !p.arch ? '<p class="fw-solved">' + icon('circle-check') + ' Five clean games in a row. This one looks solved: mark it solved to free a slot.</p>' : '') +
       '<div class="btn-row">' + (p.arch ? '<button type="button" class="btn btn-ghost btn-sm" data-fw="restore" data-id="' + p.id + '">Bring back</button>'
-        : '<a class="btn btn-primary btn-sm" href="#puzzles">' + icon('puzzle-piece') + ' Puzzles</a><a class="btn btn-ghost btn-sm" href="' + esc(pt.hash) + '">' + icon('book-open') + ' Course</a><button type="button" class="btn btn-ghost btn-sm" data-fw="edit" data-id="' + p.id + '">Edit</button><button type="button" class="btn btn-ghost btn-sm" data-fw="solved" data-id="' + p.id + '">Solved</button>') +
+        : '<button type="button" class="btn btn-ghost btn-sm" data-fw="edit" data-id="' + p.id + '">Edit</button><button type="button" class="btn btn-ghost btn-sm" data-fw="solved" data-id="' + p.id + '">Solved</button>') +
       '<button type="button" class="icon-btn" data-fw="del" data-id="' + p.id + '" aria-label="Delete this working point" title="Delete">' + icon('trash-can') + '</button></div></article>';
   }
   const fmtDate = (d) => { try { return new Date(d + 'T00:00:00').toLocaleDateString('en', { day: 'numeric', month: 'short' }); } catch (e) { return d; } };
@@ -26613,7 +27128,7 @@ const Framework = (() => {
         (fp.length ? '<div class="fw-list">' + fp.map((x) => {
           const p = x.p, pt = patOf(p), real = !p.def;
           return '<article class="fw-pt"><header><span class="fw-badge">' + p.cat + '</span><div class="fw-pt-main"><b>' + esc(real ? p.text : pt.label) + '</b><small>' + x.min + ' minutes \u00b7 free basics: ' + esc(pt.course) + '</small></div></header>' +
-            '<div class="btn-row"><a class="btn btn-primary btn-sm" href="' + esc(pt.hash) + '">' + icon('play') + ' Start the free basics</a>' + (CONFIG.links.mspcCourse ? '<a class="btn btn-ghost btn-sm" href="' + esc(CONFIG.links.mspcCourse) + '" target="_blank" rel="noopener">Free MSPC course</a>' : '') +
+            '<div class="btn-row">' +
             (real && !p.basics ? '<button type="button" class="btn btn-ghost btn-sm" data-fw="basics" data-id="' + p.id + '">I finished the free basics</button>' : '') + (real && !p.stuck && !p.basics ? '<button type="button" class="btn btn-ghost btn-sm" data-fw="stuck" data-id="' + p.id + '">I am stuck</button>' : '') + '</div>' +
             (barrier(p) || (real && p.basics) ? '<div class="fw-fomo">' + icon('lock') + '<p>' + esc(CFG.text.fomo) + '</p><button type="button" class="btn btn-gold btn-sm" data-fw="unlock">' + icon('crown') + ' Unlock Tier 2</button></div>' : '') + '</article>';
         }).join('') + '</div>' + (lead ? '<p class="small muted">These come from your default framework. After a Trim review the coach adds your own working points here.</p>' : '')
@@ -26625,7 +27140,7 @@ const Framework = (() => {
     function blockHTML(b, d) {
       const p = byId(b.pid), k = KIND[b.t], pt = p ? patOf(p) : null, href = b.t === 'puzzles' ? '#puzzles' : b.t === 'course' && pt ? pt.hash : b.t === 'review' ? '#trim' : '';
       return '<article class="fw-blk k-' + b.t + (b.done ? ' is-done' : '') + '"><div class="fw-time-col"><b>' + hm(b.s) + '</b><small>' + b.len + ' min</small></div><div class="fw-blk-main"><b>' + icon(k[1]) + ' ' + k[0] + '</b><small>' + (p ? esc(p.text) : 'Working point removed') + (b.t === 'puzzles' ? ' \u00b7 ' + CFG.puzzleMult + '\u00d7 XP' : b.t === 'course' ? ' \u00b7 ' + CFG.courseMult + '\u00d7 XP' : '') + '</small>' +
-        '<div class="fw-cells" aria-hidden="true">' + Array.from({ length: b.len / 15 }, () => '<i></i>').join('') + '</div></div><div class="fw-blk-acts">' + (href ? '<a class="btn btn-ghost btn-sm" href="' + esc(href) + '">Start</a>' : '') +
+        '<div class="fw-cells" aria-hidden="true">' + Array.from({ length: b.len / 15 }, () => '<i></i>').join('') + '</div></div><div class="fw-blk-acts">' + 
         '<label class="fw-check"><input type="checkbox" data-fw-in="done" data-d="' + d + '" data-id="' + b.id + '"' + (b.done ? ' checked' : '') + '><span>Done</span></label><button type="button" class="icon-btn" data-fw="blk-del" data-d="' + d + '" data-id="' + b.id + '" aria-label="Remove block">' + icon('xmark') + '</button></div></article>';
     }
     function paidView() {
@@ -27829,7 +28344,7 @@ const V6 = (() => {
   }
   function matrix() {
     const byId = {};
-    shufflePool().forEach((x) => { if (x.scope === 'openings' && x.kind === 'line') byId[x.id] = x; });
+    shufflePool('openings', true).forEach((x) => { if (x.kind === 'line') byId[x.id] = x; });   // trusted: a boss fight skips lines that do not replay (userMoves = 0)
     const names = (CONTENT.groups || []).map((g) => g && g.name).filter(Boolean);
     (CONTENT.openings || []).forEach((o) => { if (o && o.group && names.indexOf(o.group) < 0) names.push(o.group); });
     return names.map((name) => {
@@ -27848,12 +28363,16 @@ const V6 = (() => {
   const tokensOk = () => { try { return Admin.active || Credits.balance() >= tokenCost(); } catch (e) { return false; } };
   const balText = () => { try { const b = Credits.balance(); return b === Infinity ? '∞' : String(b); } catch (e) { return '0'; } };
   function makeBoss(ch, mode, root, exit) {
-    const plan = C.bossPlan(ch.playable.map((x) => Object.assign({}, x, { userMoves: userMoves(x) })));
+    /* v17: only as many lines are replayed as the fight can use (the cap is C.CFG.boss.max moves), not the whole chapter */
+    const shuf = ch.playable.slice().sort(() => Math.random() - 0.5), usable = [];
+    let have = 0;
+    for (let k = 0; k < shuf.length && have < C.CFG.boss.max * 2; k++) { const um = userMoves(shuf[k]); usable.push(Object.assign({}, shuf[k], { userMoves: um })); have += um; }
+    const plan = C.bossPlan(usable);
     if (!plan.lines.length) return null;
     const b = { mode, ch, plan, i: 0, mistakes: 0, limit: C.mistakeLimit(plan.size, mode), correct: 0, size: plan.size, runner: null, board: null, attempt: null, over: '', frozen: false, seq: 0, view: null, alive: true, forgiven: 0, why: '' };
     const q = (sel) => qs(sel, root);
     const label = mode === 'strict' ? 'Strict Mode' : 'Hardcore';
-    root.innerHTML = '<section class="v6-boss"><div class="v6-boss-head"><button type="button" class="btn btn-quiet btn-sm" data-v6b="exit">' + icon('arrow-left') + ' Skill Matrix</button>' +
+    root.innerHTML = '<section class="v6-boss"><div class="v6-boss-head"><button type="button" class="btn btn-quiet btn-sm" data-v6b="exit">' + icon('arrow-left') + ' Campaign mode</button>' +
       '<div><p class="st-kicker">Boss Fight · ' + esc(label) + '</p><h2>' + esc(ch.title) + '</h2></div></div>' +
       '<div class="v6-boss-hud" data-v6-hud></div><div class="v6-second" data-v6-second hidden></div>' + trainerShell('boss-board', 'boss-panel') + '<div class="v6-boss-end" data-v6-end hidden></div></section>';
     b.board = Board(q('#boss-board'), {});
@@ -28037,7 +28556,7 @@ const V6 = (() => {
         '<div class="v6-chaps">' + g.chapters.map((c, i) => {
           const prev = g.chapters[i - 1], noTier = !c.playable.length;
           const act = c.locked ? '<small class="muted">Clear the Boss Fight of ' + esc(prev ? prev.title : 'the chapter before') + ' first.</small>'
-            : noTier ? '<a class="btn btn-gold btn-sm" href="#upgrades">' + icon('crown') + ' Needs a higher level</a>'
+            : noTier ? '<span class="v6-pill">' + icon('lock') + ' Needs a higher level</span>'
               : '<button type="button" class="btn ' + (c.cleared ? 'btn-ghost' : 'btn-primary') + ' btn-sm" data-v6b="boss" data-ch="' + esc(c.id) + '" data-mode="hardcore">' + icon('skull-crossbones') + ' Boss Fight</button>' +
                 (c.cleared ? '<button type="button" class="btn btn-ghost btn-sm" data-v6b="boss" data-ch="' + esc(c.id) + '" data-mode="strict">' + icon('crosshairs') + ' Strict Mode</button>' : '');
           return '<div class="v6-chap' + (c.locked ? ' is-locked' : '') + '"><div class="v6-chap-main"><b>' + esc(c.title) + '</b><small>' + c.items.length + (c.items.length === 1 ? ' line' : ' lines') + ', mastery ' + Math.round(c.mastery * 100) + '%' + (c.playable.length < c.items.length ? ', ' + c.playable.length + ' open on your plan' : '') + '</small>' + bar(c.mastery) + '</div>' +
@@ -28064,23 +28583,25 @@ const V6 = (() => {
       '<h3>Events</h3>' + (evs.length ? '<div class="v6-events">' + evs.map((e) => { const x = s.ev[e.id] || { p: 0, done: false }, ch = e.challenge; return '<div class="v6-event"><div><b>' + esc(e.title) + '</b><small>' + (e.end ? 'Until ' + esc(dateText(e.end)) : 'Open-ended') + (e.xpMult !== 1 ? ', XP ×' + e.xpMult : '') + '</small></div>' + (ch ? '<div class="v6-ev-ch"><span>' + esc(ch.title) + '</span>' + bar(x.p / ch.target) + '<small>' + (x.done ? 'Complete' : fmt(x.p) + ' / ' + fmt(ch.target)) + (ch.reward.tokens ? ', +' + ch.reward.tokens + ' tokens' : '') + '</small></div>' : '') + '</div>'; }).join('') + '</div>' : '<p class="muted small">No event is running.</p>');
   }
   function tabTrophies() {
-    const s = st(), by = { boss: 'Boss Fights', strict: 'Strict clears', event: 'Event badges', rank: 'Ranks', loyalty: 'Loyalty' }, fr = (() => { try { return Friends.list(); } catch (e) { return []; } })();
+    const s = st(), by = { boss: 'Boss Fights', strict: 'Strict clears', event: 'Event badges', rank: 'Ranks', loyalty: 'Loyalty' };
     const groups = Object.keys(by).map((k) => ({ k, items: s.trophies.filter((t) => t.kind === k) })).filter((g) => g.items.length);
-    let hub = 0; try { hub = Badges.count(); } catch (e) { hub = 0; }
-    return '<p class="muted small v6-lead">Milestones stay in your cabinet for good. Friends see your last three on your friend card.' + (hub ? ' The hub’s own badges (' + hub + ') are in the <a href="#trophies">trophy room</a>.' : '') + '</p>' +
-      (groups.length ? groups.map((g) => '<h3>' + by[g.k] + '</h3><ul class="v6-trophies">' + g.items.slice().reverse().map((t) => '<li><span class="v6-tro v6-tro-' + esc(t.kind) + '">' + icon(t.kind === 'event' ? 'ribbon' : t.kind === 'strict' ? 'crosshairs' : t.kind === 'rank' ? 'ranking-star' : t.kind === 'loyalty' ? 'medal' : 'skull-crossbones') + '</span><b>' + esc(t.name) + '</b><small>' + esc(dateText(t.t)) + '</small></li>').join('') + '</ul>').join('') : '<p class="muted">Nothing here yet. Clear a Boss Fight or finish an event challenge.</p>') +
-      '<h3>Friends</h3>' + (fr.length ? '<div class="v6-friends">' + fr.slice(0, 12).map((f) => '<div class="v6-friend"><b>' + esc(f.name) + '</b>' + friendLine(f) + '</div>').join('') + '</div>' : '<p class="muted small">Add friends on the <a href="#leaderboard">leaderboard</a> to compare ranks and trophies.</p>');
+    return '<p class="muted small v6-lead">Milestones stay in your cabinet for good. Friends see your last three on your friend card.</p>' +
+      (groups.length ? groups.map((g) => '<h3>' + by[g.k] + '</h3><ul class="v6-trophies">' + g.items.slice().reverse().map((t) => '<li><span class="v6-tro v6-tro-' + esc(t.kind) + '">' + icon(t.kind === 'event' ? 'ribbon' : t.kind === 'strict' ? 'crosshairs' : t.kind === 'rank' ? 'ranking-star' : t.kind === 'loyalty' ? 'medal' : 'skull-crossbones') + '</span><b>' + esc(t.name) + '</b><small>' + esc(dateText(t.t)) + '</small></li>').join('') + '</ul>').join('') : '<p class="muted">Nothing here yet. Clear a Boss Fight or finish an event challenge.</p>');
   }
   /* v6.1: the Account page: extra tabs (Friends, Ratings) are registered by addTab, the level and overall rank sit on top. */
   const EXT = [];
-  const profileTabs = () => [['overview', 'Overview']].concat(EXT.map((e) => [e.id, e.label]), [['matrix', 'Skill Matrix'], ['bounties', 'Bounties'], ['community', 'Community'], ['trophies', 'Trophies']]);
+  const profileTabs = () => [['overview', 'Overview']].concat(EXT.map((e) => [e.id, e.label]), [['ranked', 'Ranked'], ['community', 'Community']]);
   function hero(R) {
     const L = C.levelOf(st().total);
     return '<div class="v6-hero3"><div class="v6-tile lvl"><small>XP Level</small><b>' + L.level + '</b>' + bar(L.pct) + '<span>' + fmt(L.toNext) + ' XP to XP Level ' + (L.level + 1) + ' · ' + fmt(st().total) + ' XP. Never goes down.</span></div>' +
       '<div class="v6-tile"><small>Overall rank</small><b>' + esc(R.overall.name) + '</b><span>Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + '. Moves with your accuracy.</span></div></div>';
   }
-  function mountProfile(view) {
-    const t0 = App.ui.accTab || ''; App.ui.accTab = '';
+  const SUB_TITLES = { friends: 'Friends', ratings: 'My Rating / Connection', system: 'My MSPC System & Working Points', calendar: 'My Calendar', activity: 'My Activity', refer: 'Refer a Friend' };
+  /* v17 / Phases 13 and 14: this engine draws one clean page per module: My Account (the overview), a sub-page for each of Friends,
+     Rating, MSPC System, Calendar, Activity and Refer, the Ranked page (Campaign mode and Extra Challenges) and Community.
+     No tab strip, no shortcut cards, no link from one module to another. */
+  function mountProfile(view, forced) {
+    const t0 = forced || App.ui.accTab || ''; App.ui.accTab = '';
     const ui = { tab: profileTabs().some((t) => t[0] === t0) ? t0 : 'overview' };
     let extDispose = null;
     const R0 = () => ranks();
@@ -28088,15 +28609,17 @@ const V6 = (() => {
     const root = qs('#v6-page', view);
     function head(R) {
       const s = st();
-      return '<header class="v6-head">' + avatar(R) + '<div><h1>' + esc(App.profile.name || 'Your account') + '</h1><p class="muted">Overall ' + esc(R.overall.name) + ' · Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + ' · ' + fmt(s.total) + ' XP</p></div>' +
-        '<label class="switch-row v6-focus"><span>Focus Mode: ' + (s.focus ? 'ON' : 'OFF') + '<small class="field-hint" style="display:block">Hides timers, streak widgets and the flow chip. XP and multipliers keep running.</small></span><input type="checkbox" data-v6-focus' + (s.focus ? ' checked' : '') + '></label></header>' + hero(R) +
-        Onboard.accountLink() + Feedback.accountBtn() + '<nav class="seg v6-tabs" role="tablist" aria-label="Account sections">' + profileTabs().map((t) => '<button type="button" role="tab" data-v6t="' + t[0] + '" aria-pressed="' + (ui.tab === t[0]) + '">' + t[1] + '</button>').join('') + '</nav>';
+      if (ui.tab === 'overview') return '<header class="v6-head">' + avatar(R) + '<div><h1>' + esc(App.profile.name || 'My Account') + '</h1><p class="muted">Overall ' + esc(R.overall.name) + ' · Student ' + esc(R.student.name) + ' · Arena ' + esc(R.arena.name) + ' · ' + fmt(s.total) + ' XP</p></div>' +
+        '<label class="switch-row v6-focus"><span>Focus Mode: ' + (s.focus ? 'ON' : 'OFF') + '<small class="field-hint" style="display:block">Hides timers, streak widgets and the flow chip. XP and multipliers keep running.</small></span><input type="checkbox" data-v6-focus' + (s.focus ? ' checked' : '') + '></label></header>' + hero(R);
+      if (ui.tab === 'ranked') return '<header class="v6-head"><div><h1>Ranked</h1><p class="muted">Clear the chapters in order, then take on the extra challenges.</p></div></header>';
+      if (ui.tab === 'community') return '<header class="v6-head"><div><h1>Community</h1><p class="muted">Weekly goals and events that every player in the hub shares.</p></div></header>';
+      return '<header class="v6-head"><div><h1>' + esc(SUB_TITLES[ui.tab] || 'My Account') + '</h1></div></header>';
     }
     function paint() {
       if (boss) { boss.destroy(); }
       if (extDispose) { try { extDispose(); } catch (e) { /* gone */ } extDispose = null; }
       const R = R0(), ext = EXT.filter((e) => e.id === ui.tab)[0];
-      root.innerHTML = head(R) + '<div class="v6-body" id="v6-body">' + (ext ? '<div class="v6-ext" id="v6-ext"></div>' : ui.tab === 'matrix' ? tabMatrix() : ui.tab === 'bounties' ? tabBounties(R) : ui.tab === 'community' ? tabCommunity() : ui.tab === 'trophies' ? tabTrophies() : tabOverview(R)) + '</div>' + (isAdmin() ? '<p class="small muted v6-admin"><a href="#events">Open the Master Event Engine</a></p>' : '');
+      root.innerHTML = head(R) + '<div class="v6-body" id="v6-body">' + (ext ? '<div class="v6-ext" id="v6-ext"></div>' : ui.tab === 'ranked' ? '<section class="v6-sec"><h2>Campaign mode</h2>' + tabMatrix() + '</section><section class="v6-sec"><h2>Extra Challenges</h2>' + tabBounties(R) + '</section>' : ui.tab === 'community' ? tabCommunity() : tabOverview(R)) + '</div>';
       if (ext) { try { extDispose = ext.mount(qs('#v6-ext', root)) || null; } catch (e) { console.error(e); } }
     }
     function startBoss(chId, mode) {
@@ -28110,7 +28633,7 @@ const V6 = (() => {
       b.start(); scrollToEl(root);
     }
     paint();
-    sync().then((r) => { if (r && root.isConnected && !boss && (ui.tab === 'community' || ui.tab === 'overview')) { const y = window.scrollY; paint(); window.scrollTo(0, y); } });
+    sync().then((r) => { if (r && root.isConnected && !boss && (ui.tab === 'community' || ui.tab === 'overview' || ui.tab === 'ranked')) { const y = window.scrollY; paint(); window.scrollTo(0, y); } });
     const onClick = (e) => {
       const t = e.target.closest('[data-v6t]');
       if (t) { ui.tab = t.getAttribute('data-v6t'); paint(); return; }
@@ -28309,7 +28832,7 @@ const V6 = (() => {
     setInterval(() => { if (document.visibilityState === 'visible') sync(); }, 300000);
   }
   return {
-    boot, mountProfile, mountEvents, narrow, filterOptions, filterBar, tagHTML, budget, legend, card, cleanCard, friendLine, chip, settingsHTML,
+    boot, mountProfile, mountEvents, cabinetHTML: () => tabTrophies(), narrow, filterOptions, filterBar, tagHTML, budget, legend, card, cleanCard, friendLine, chip, settingsHTML,
     ctx(o) { if (o && (o.module || o.level)) { resetPos(); if (o.module) ctx.shuffle = o.module; if (o.level) ctx.level = Math.min(5, Math.max(1, Math.round(+o.level) || 1)); } },   // v8: resetPos first, so a booked hint lands on the old level
     state: st, ranks, level: () => C.levelOf(st().total), addTab: (t) => { if (t && t.id && !EXT.some((e) => e.id === t.id)) EXT.push(t); }, sync, events, payout, matrix, recordAnswer, undoMiss, puzzleElo, addXp, rescueState, buyRescue, Redeem: { offer: offerDesk, close: closeDesk },
     _t: { forceAdmin(v) { adminOverride = v; }, awardLoyalty, tokenOf, onScore, hintPress, makeBoss, resetPos, get pos() { return pos; }, get boss() { return boss; }, secondLeft, addXp, bountyEvent, eventProgress, trophy, benchNow, leakSets, shuffleCtx, setState(s) { S = s; }, ctxo: ctx }
@@ -28419,13 +28942,16 @@ const LogoMenu = (() => {
     const host = qs('#brand-menu');
     if (!host) return;
     const edit = Admin.editing(), list = items();
+    /* v17 / Phase 2: the menu keeps seven essentials, grouped with subtle dividers. Everything else is one tap away in the main navigation. */
+    const mrow = (href, ic, label) => '<li role="none" class="bm-row"><a role="menuitem" class="bm-item" href="' + href + '">' + icon(ic) + '<span>' + label + '</span>' + icon('chevron-right', 'bm-ext') + '</a></li>';
+    const mdiv = () => '<li role="separator" class="bm-div"></li>';
     const acts = (i) => '<span class="bm-edit">' + [['up', 'arrow-up', 'Move up'], ['down', 'arrow-down', 'Move down'], ['edit', 'pen', 'Edit'], ['del', 'trash', 'Remove']]
       .map((a) => '<button type="button" class="icon-btn" data-lm="' + a[0] + '" data-i="' + i + '" aria-label="' + a[2] + '" title="' + a[2] + '">' + icon(a[1]) + '</button>').join('') + '</span>';
     host.innerHTML = '<div class="bm-head"><b>lanckrietchess</b><small>Follow, watch and train with ' + esc(CONFIG.coach || 'Kyenzo') + '</small></div><ul class="bm-list" role="menu">' +
-      '<li role="none" class="bm-row"><a role="menuitem" class="bm-item" href="#home">' + icon('house') + '<span>Home</span>' + icon('chevron-right', 'bm-ext') + '</a></li>' +
-      Nav5.brandRows() + Onboard.menuRow() + Feedback.menuRow() + V71.menuRows() + (Nav5.on() ? '' : Studio.menuRow()) + '<li role="presentation" class="bm-sep"><small>Training shortcuts</small></li>' +
-      SHORTCUTS.map((x) => '<li role="none" class="bm-row"><a role="menuitem" class="bm-item" href="' + x[2] + '">' + icon(x[0]) + '<span>' + esc(x[1]) + '</span>' + icon('chevron-right', 'bm-ext') + '</a></li>').join('') +
-      '<li role="presentation" class="bm-sep"><small>Follow and connect</small></li>' +
+      mrow('#home', 'house', 'Home / Dashboard') + mrow('#about', 'user', 'About') + mdiv() +
+      Onboard.menuRow('School Walkthrough') + Feedback.menuRow('Send Feedback') + mdiv() +
+      (MOUNT.refer ? mrow('#refer', 'user-plus', 'Refer a Friend') : '') + (MOUNT.hall ? mrow('#hall', 'trophy', 'Hall of Fame') : '') + (MOUNT.refer || MOUNT.hall ? mdiv() : '') +
+      '<li role="presentation" class="bm-sep"><small>Follow &amp; Content</small></li>' +
       list.map((x, i) => { const ext = /^https:/i.test(x.url); return '<li role="none" class="bm-row"><a role="menuitem" class="bm-item" href="' + esc(x.url) + '"' + (ext ? ' target="_blank" rel="noopener noreferrer"' : '') + '>' + ico(x.icon) + '<span>' + esc(x.label) + '</span>' + icon(ext ? 'arrow-up-right-from-square' : 'chevron-right', 'bm-ext') + '</a>' + (edit ? acts(i) : '') + '</li>'; }).join('') + '</ul>' +
       (edit ? '<form class="bm-admin" data-lm-cmd autocomplete="off"><input class="input" name="c" maxlength="400" placeholder="add Name | https://…   ·   del Name   ·   edit Name | New | https://…" aria-label="Link command"><button class="btn btn-primary btn-sm" type="submit">Run</button></form>' +
         '<div class="bm-admin-row"><button type="button" class="btn btn-ghost btn-sm" data-lm="add" data-i="-1">' + icon('plus') + ' Add link</button><span class="small muted" data-lm-msg aria-live="polite"></span></div>' : '');
@@ -28785,7 +29311,7 @@ const RatingsTab = {
         b.disabled = true;
         const r = await Proof.submit(x);
         toast(r.sent ? 'Sent to ' + CONFIG.coach + '.' : 'Proof code copied. Send it to ' + CONFIG.coach + ' in a DM.', 'good');
-        if (!r.sent && CONFIG.links && LogoMenu.safeUrl(CONFIG.links.instagramDM)) window.open(CONFIG.links.instagramDM, '_blank', 'noopener');
+        if (!r.sent && CONFIG.links && LogoMenu.safeUrl(CONFIG.links.instagramDM)) window.open(CONFIG.links.instagramDM, '_blank', 'noopener,noreferrer');
         b.disabled = false;
       }
     }
@@ -29805,7 +30331,7 @@ const Activity = (() => {
     const note = b.status === 'live' ? '' : b.status === 'off' ? 'The database is not connected: this shows your friend codes only.' : b.status === 'sync-off' ? 'Syncing is off: this shows friend codes only. Switch syncing on for live streaks.' : b.status === 'not-installed' ? 'The activity tables are not installed in the database yet (run 004_activity.sql).' : 'Could not reach the database. This shows the last snapshot from each friend code.';
     return (note ? '<p class="small muted act-note">' + esc(note) + '</p>' : '') +
       (hasFriends ? '<div class="act-table-wrap"><table class="act-table"><thead><tr><th>#</th><th>Player</th><th>Streak</th><th>Active</th><th>14 days</th><th>Last</th></tr></thead><tbody>' + rows.concat(hidden).map(rowHTML).join('') + '</tbody></table></div>' :
-        '<p class="muted">No friends yet. Add a friend with their friend code and you will see how consistent they are. <a href="#friends">Open Friends</a></p>');
+        '<p class="muted">No friends yet. Add a friend with their friend code and you will see how consistent they are.</p>');
   }
 
   function mount(root) {
@@ -30057,7 +30583,7 @@ const BotTrainer = (() => {
 
   /* ---------- the screen ---------- */
   function mount(view) {
-    const head = cmsBar() + thinkTabs('bot') + '<p class="small" style="margin:-6px 0 10px"><a href="#think">' + icon('chevron-left') + ' MSPC trainer</a></p>' +
+    const head = cmsBar() +
       pageHead('Test your framework against a bot', esc('Play Stockfish and run MSPC on every move. Think long and deep: the goal is to make no mistakes.'));
     view.innerHTML = head + '<div class="bt" id="bt"><div id="bt-onb"></div><div class="bt-bar panel pad" id="bt-bar"></div>' + trainerShell('bt-board', 'bt-panel') + '</div>';
     const root = qs('#bt', view), panel = qs('#bt-panel', view), col = qs('.board-col', view);
@@ -30103,8 +30629,8 @@ const BotTrainer = (() => {
       let list = [];
       try { list = Framework.ranked().slice(0, 5); } catch (e) { list = []; }
       elWP.innerHTML = list.length
-        ? '<ul class="bt-wp-list">' + list.map((p) => '<li class="' + (S && S.wpIds[p.id] ? 'is-hit' : '') + '"><span class="bt-wp-cat">' + esc(p.cat) + '</span><span>' + esc(p.text) + '</span>' + (S && S.wpIds[p.id] ? '<small>came back this game</small>' : '') + '</li>').join('') + '</ul><p class="small muted"><a href="#system">Open my MSPC system</a></p>'
-        : '<p class="small muted">No working points yet. When you repeat a mistake here you can add it, and the coach will watch for it.</p><p class="small"><a href="#system">Open my MSPC system</a></p>';
+        ? '<ul class="bt-wp-list">' + list.map((p) => '<li class="' + (S && S.wpIds[p.id] ? 'is-hit' : '') + '"><span class="bt-wp-cat">' + esc(p.cat) + '</span><span>' + esc(p.text) + '</span>' + (S && S.wpIds[p.id] ? '<small>came back this game</small>' : '') + '</li>').join('') + '</ul>'
+        : '<p class="small muted">No working points yet. When you repeat a mistake here you can add it, and the coach will watch for it.</p>';
     }
 
     /* ----- top bar: strength, colour, new game, how it works ----- */
@@ -30842,9 +31368,9 @@ const Feedback = (() => {
 
   /* ---------- entry points ---------- */
   const LABEL = '💬 Send Feedback / Report Bug';
-  function menuRow() {
+  function menuRow(text) {
     if (!enabled()) return '';
-    return '<li role="none" class="bm-row"><button type="button" role="menuitem" class="bm-item bm-feedback" data-feedback-open><span>' + LABEL + '</span>' + icon('chevron-right', 'bm-ext') + '</button></li>';
+    return '<li role="none" class="bm-row"><button type="button" role="menuitem" class="bm-item bm-feedback" data-feedback-open>' + (text ? icon('comment-dots') : '') + '<span>' + (text ? esc(text) : LABEL) + '</span>' + icon('chevron-right', 'bm-ext') + '</button></li>';
   }
   function accountBtn() {
     return enabled() ? '<button type="button" class="btn btn-ghost btn-sm onb-acct" data-feedback-open>' + LABEL + '</button>' : '';
@@ -31471,6 +31997,10 @@ const BoardVision = (() => {
    ========================================================================== */
 const ThemePuzzles = (() => {
   const K = 'lc13-tp';
+  const TP_CATS = [['all', 'All themes'], ['mate', 'Checkmate patterns'], ['tactics', 'Tactical motifs'], ['attack', 'Attack and defence'], ['endgame', 'Endgames'], ['phase', 'Phases and special moves']];
+  const CORE_CAT = { mateIn1: 'mate', mateIn2: 'mate', backRankMate: 'mate', fork: 'tactics', pin: 'tactics', skewer: 'tactics', discoveredAttack: 'tactics', hangingPiece: 'tactics', endgame: 'endgame', defense: 'attack' };
+  const catOf = (t) => t.cat || CORE_CAT[t.id] || 'tactics';
+  const angleOf = (t) => (t && (t.angle || t.id)) || '';
   const cfg = () => CONFIG.themePuzzles || { themes: [] };
   const themes = () => cfg().themes || [];
   const theme = (id) => themes().filter((t) => t.id === id)[0] || null;
@@ -31495,7 +32025,7 @@ const ThemePuzzles = (() => {
     let fails = 0, why = '';
     while (out.length < size && fails < 8 && isLive()) {
       let res;
-      try { res = await fetchWithTimeout((cfg().api || 'https://lichess.org/api/puzzle/next') + '?angle=' + encodeURIComponent(id) + '&difficulty=' + diff, { credentials: 'omit', headers: { Accept: 'application/json' } }, 8000); }
+      try { res = await fetchWithTimeout((cfg().api || 'https://lichess.org/api/puzzle/next') + '?angle=' + encodeURIComponent(angleOf(theme(id))) + '&difficulty=' + diff, { credentials: 'omit', headers: { Accept: 'application/json' } }, 8000); }
       catch (e) { fails++; why = navigator.onLine === false ? 'offline' : 'network'; await sleep(600); continue; }
       if (res.status === 429) { why = 'rate'; break; }
       if (!res.ok) { fails++; why = 'http'; continue; }
@@ -31510,11 +32040,11 @@ const ThemePuzzles = (() => {
   }
 
   function mount(root) {
-    const ui = { screen: 'home', id: '', size: 5, diff: diffFor(), tab: 'themes' };
+    const ui = { screen: 'home', id: '', size: 5, diff: diffFor(), tab: 'themes', cat: 'all' };
     let board = null, runner = null, set = null, cur = null, token = 0, alive = true, busy = false;
     const T = () => theme(ui.id);
     const dots = () => '<div class="tp-dots" aria-hidden="true">' + set.puzzles.map((p, i) => '<i class="' + (set.rec[i] === true ? 'is-ok' : set.rec[i] === false ? 'is-miss' : i === set.i ? 'is-now' : '') + '"></i>').join('') + '</div>';
-    const lvl = () => '<div class="seg" role="group" aria-label="Difficulty">' + [['easier', 'Easier'], ['normal', 'Normal'], ['harder', 'Harder']].map((x) => '<button type="button" data-tp-diff="' + x[0] + '" aria-pressed="' + (ui.diff === x[0]) + '">' + x[1] + '</button>').join('') + '</div>';
+    const lvl = () => '<div class="seg" role="group" aria-label="Difficulty">' + [['easiest', 'Easiest'], ['easier', 'Easier'], ['normal', 'Normal'], ['harder', 'Harder'], ['hardest', 'Hardest']].map((x) => '<button type="button" data-tp-diff="' + x[0] + '" aria-pressed="' + (ui.diff === x[0]) + '">' + x[1] + '</button>').join('') + '</div>';
     const killRunner = () => { if (runner) { runner.destroy(); runner = null; } if (board) { board.destroy(); board = null; } cur = null; };
 
     /* ----- home: every theme, with its badge state ----- */
@@ -31524,12 +32054,13 @@ const ThemePuzzles = (() => {
       root.innerHTML = '<section class="panel pad tp-top"><div><h2>Practice by theme</h2><p class="muted">Pick a pattern, read the 20-second idea, then drill a set of live Lichess puzzles. Misses land in your Mistake Deck, so nothing you got wrong is lost.</p></div>' +
         '<div class="tp-facts"><span><b>' + st.streak + '</b><small>flawless streak</small></span><span><b>' + st.bestStreak + '</b><small>best streak</small></span><span><b>' + n + '</b><small>in Mistake Deck</small></span></div></section>' +
         '<div class="btn-row tp-deckrow"><button type="button" class="btn ' + (n ? 'btn-primary' : 'btn-ghost') + '" data-tp="deck"' + (n ? '' : ' disabled') + '>' + icon('layer-group') + ' Review my Mistake Deck' + (n ? ' (' + n + ')' : '') + '</button></div>' +
-        '<div class="tp-grid">' + themes().map((t) => {
+        '<div class="chips tp-cats" role="group" aria-label="Theme groups">' + TP_CATS.map((c) => '<button type="button" class="chip" data-tp-cat="' + c[0] + '" aria-pressed="' + (ui.cat === c[0]) + '">' + esc(c[1]) + '</button>').join('') + '</div>' +
+        '<div class="tp-grid">' + themes().filter((t) => ui.cat === 'all' || catOf(t) === ui.cat).map((t) => {
           const d = st.done[t.id] || {}, got = (+d.sets || 0) > 0;
           return '<button type="button" class="tp-card' + (got ? ' is-done' : '') + '" data-tp-theme="' + esc(t.id) + '"><span class="tp-ico">' + icon(t.icon) + '</span><b>' + esc(t.label) + '</b><small>' + esc(t.short) + '</small>' +
-            '<span class="tp-badge' + (got ? ' is-got' : '') + '">' + icon(got ? 'trophy' : 'lock') + ' ' + esc(t.badge) + (d.flawless ? ' · ' + d.flawless + ' flawless' : '') + '</span></button>';
+            (t.badge ? '<span class="tp-badge' + (got ? ' is-got' : '') + '">' + icon(got ? 'trophy' : 'lock') + ' ' + esc(t.badge) + (d.flawless ? ' · ' + d.flawless + ' flawless' : '') + '</span>' : '<span class="tp-badge' + (got ? ' is-got' : '') + '">' + (got ? d.sets + (d.sets === 1 ? ' set' : ' sets') + (d.flawless ? ' · ' + d.flawless + ' flawless' : '') : 'No sets yet') + '</span>') + '</button>';
         }).join('') + '</div>' +
-        '<p class="small dim pz37-credit">Puzzles from the <a href="https://database.lichess.org/#puzzles" target="_blank" rel="noopener">Lichess puzzle database</a> (CC0), served live by lichess.org. Practice puzzles are unrated and do not change your Puzzle ELO.</p>';
+        '<p class="small dim pz37-credit">Puzzles from the <a href="https://database.lichess.org/#puzzles" target="_blank" rel="noopener noreferrer">Lichess puzzle database</a> (CC0), served live by lichess.org. Practice puzzles are unrated and do not change your Puzzle ELO.</p>';
       ContinueBar.poke();
     }
 
@@ -31542,7 +32073,7 @@ const ThemePuzzles = (() => {
         '<div class="tp-signal">' + icon('triangle-exclamation') + '<p><b>Alarm signal.</b> ' + esc(t.signal) + '</p></div>' +
         '<div class="bv-opts"><span class="small muted">Set size</span><div class="seg" role="group">' + (cfg().setSizes || [5, 10]).map((n) => '<button type="button" data-tp-size="' + n + '" aria-pressed="' + (ui.size === n) + '">' + n + ' puzzles</button>').join('') + '</div>' +
         '<span class="small muted">Difficulty</span>' + lvl() + '</div>' +
-        '<p class="small muted">' + (d.sets ? d.sets + (d.sets === 1 ? ' set' : ' sets') + ' finished, ' + (d.flawless || 0) + ' flawless, best streak ' + (d.best || 0) + '.' : 'Finish one set to unlock the “' + esc(t.badge) + '” badge.') + '</p>' +
+        '<p class="small muted">' + (d.sets ? d.sets + (d.sets === 1 ? ' set' : ' sets') + ' finished, ' + (d.flawless || 0) + ' flawless, best streak ' + (d.best || 0) + '.' : (t.badge ? 'Finish one set to unlock the “' + esc(t.badge) + '” badge.' : 'Finish a set to start your record for this theme.')) + '</p>' +
         '<div class="st-actions"><button type="button" class="btn btn-primary" data-tp="start">' + icon('play') + ' Start the drill</button></div></section>';
       ContinueBar.poke();
     }
@@ -31616,7 +32147,7 @@ const ThemePuzzles = (() => {
         '<p class="tp-streak">' + icon('fire') + ' Flawless streak <b>' + st.streak + '</b> · best ' + st.bestStreak + '</p>' +
         (v.done && v.failed ? '<p class="small muted">' + (set.kind === 'deck' ? 'It stays in your Mistake Deck until you solve it cleanly.' : 'Saved to your Mistake Deck for a review.') + '</p>' : '') +
         '<div class="st-actions">' + (v.done
-          ? '<button type="button" class="btn btn-primary" data-tp="next">' + icon('forward') + ' ' + (last ? 'See my results' : 'Next puzzle') + '</button>' + (v.failed ? '<button type="button" class="btn btn-ghost" data-tp="retry">' + icon('rotate-left') + ' Retry</button>' : '') + (v.puzzle.url ? '<a class="btn btn-quiet btn-sm" href="' + esc(v.puzzle.url) + '" target="_blank" rel="noopener">' + icon('arrow-up-right-from-square') + ' Lichess</a>' : '')
+          ? '<button type="button" class="btn btn-primary" data-tp="next">' + icon('forward') + ' ' + (last ? 'See my results' : 'Next puzzle') + '</button>' + (v.failed ? '<button type="button" class="btn btn-ghost" data-tp="retry">' + icon('rotate-left') + ' Retry</button>' : '') + (v.puzzle.url ? '<a class="btn btn-quiet btn-sm" href="' + esc(v.puzzle.url) + '" target="_blank" rel="noopener noreferrer">' + icon('arrow-up-right-from-square') + ' Lichess</a>' : '')
           : '<button type="button" class="btn btn-ghost btn-sm" data-tp="hint"' + (v.yourTurn ? '' : ' disabled') + '>' + icon('lightbulb') + (v.hints ? ' Show the move' : ' Hint') + '</button><button type="button" class="btn btn-quiet btn-sm" data-tp="solution"' + (v.started && !v.showing ? '' : ' disabled') + '>' + icon('eye') + ' View the solution</button>') + '</div>';
     }
     function nextOrFinish() {
@@ -31634,7 +32165,7 @@ const ThemePuzzles = (() => {
         const first = !d.sets;
         d.sets++; if (flawless) d.flawless++; d.best = Math.max(d.best || 0, ok); d.last = Date.now();
         write(st); Badges.soon();
-        badgeLine = first ? '<p class="tp-win">' + icon('trophy') + ' Badge unlocked: <b>' + esc(t.badge) + '</b></p>' : '';
+        badgeLine = first && t.badge ? '<p class="tp-win">' + icon('trophy') + ' Badge unlocked: <b>' + esc(t.badge) + '</b></p>' : '';
       }
       root.innerHTML = '<section class="panel pad tp-sum"><p class="st-kicker">' + (set.kind === 'deck' ? 'Mistake Deck review' : esc(t.label) + ' · set complete') + '</p>' +
         '<h2 class="st-title">' + ok + ' of ' + n + ' solved clean' + (flawless ? ' · flawless!' : '') + '</h2>' + dots() + badgeLine +
@@ -31651,6 +32182,8 @@ const ThemePuzzles = (() => {
       if (th) { learn(th.getAttribute('data-tp-theme')); return; }
       const sz = e.target.closest('[data-tp-size]');
       if (sz) { ui.size = +sz.getAttribute('data-tp-size'); qsa('[data-tp-size]', root).forEach((b) => b.setAttribute('aria-pressed', String(b === sz))); return; }
+      const ct = e.target.closest('[data-tp-cat]');
+      if (ct) { ui.cat = ct.getAttribute('data-tp-cat'); home(); return; }
       const df = e.target.closest('[data-tp-diff]');
       if (df) { ui.diff = df.getAttribute('data-tp-diff'); qsa('[data-tp-diff]', root).forEach((b) => b.setAttribute('aria-pressed', String(b === df))); return; }
       const a = e.target.closest('[data-tp]');
@@ -31898,14 +32431,37 @@ const TABS = [
   { id: 'account', label: 'Account', icon: 'circle-user', routes: ['account', 'profile', 'events', 'trophies'] },
   { id: 'about', label: 'About', icon: 'user', routes: ['about'] }
 ];
-const ROUTE_TITLES = { vision: 'Board Vision', survival: 'the Survival challenges', themes: 'Themed puzzles', bot: 'the Bot Trainer', dex: 'the Chess Dex', account: 'your Account', profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
-const DOC_TITLES = { vision: 'Think: Board Vision & Fundamentals', survival: 'Think: Survival & Defense Challenges', themes: 'Theory: Puzzles by theme', bot: 'Think: Bot Deep-Thinking Trainer', dex: 'Chess Dex', account: 'Account', profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Theory: Puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
-const ALIASES = { 'board-vision': 'vision', fundamentals: 'vision', coordinates: 'vision', 'knight-path': 'vision', survive: 'survival', defense: 'survival', defence: 'survival', 'survival-mode': 'survival', conversion: 'survival', 'themed-puzzles': 'themes', 'puzzle-themes': 'themes', themes: 'themes', 'bot-trainer': 'bot', 'play-bot': 'bot', 'play-the-bot': 'bot', pokedex: 'dex', 'chess-dex': 'dex', mastery: 'dex', executive: 'profile', 'skill-matrix': 'profile', matrix: 'profile', bosses: 'profile', 'boss-fight': 'profile', bounties: 'profile', community: 'profile', 'event-engine': 'events', 'master-events': 'events', arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
+const ROUTE_TITLES = { ranked: 'Ranked', community: 'Community', learn: 'Learn', vision: 'Board Vision', survival: 'the Survival challenges', themes: 'Themed puzzles', bot: 'the Bot Trainer', dex: 'the Chess Dex', account: 'your Account', profile: 'your Profile', events: 'the Event Engine', puzzles: 'Puzzles', home: 'Home', think: 'the MSPC trainer', shuffle: 'the Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim', upgrades: 'Upgrades', about: 'About', leaderboard: 'the Leaderboard', games: 'the Game Vault', insights: 'Insights', clinic: 'the Blunder Clinic', 'mspc-rep': 'the MSPC Repertoire Trainer', brilliant: 'your Brilliant moves', 'vault-browser': 'the Vault and Mistake Browser', peer: 'Peer puzzles', srs: 'My mistakes', trophies: 'your trophy room', 'review-queue': 'the Review Queue', privacy: 'the privacy policy' };
+const DOC_TITLES = { ranked: 'Ranked: Campaign and Extra Challenges', community: 'Social: Community', learn: 'Learn', vision: 'Think: Board Vision & Fundamentals', survival: 'Think: Survival & Defense Challenges', themes: 'Theory: Puzzles by theme (unrated)', bot: 'Think: Bot Deep-Thinking Trainer', dex: 'Chess Dex', account: 'Account', profile: 'Profile and Skill Matrix', events: 'Master Event Engine', puzzles: 'Ranked: Rated puzzles', home: 'Training Hub', think: 'Think: MSPC trainer', shuffle: 'Think: Shuffle Trainer', openings: 'Openings', middlegame: 'Middlegame', endgame: 'Endgame', trim: 'Trim: game review', upgrades: 'Upgrades', about: 'About Kyenzo', leaderboard: 'Think: Leaderboard', games: 'Trim: Game Vault', clinic: 'Think: Blunder Clinic', 'mspc-rep': 'Think: MSPC Repertoire Trainer', brilliant: 'Trim: Brilliant moves', 'vault-browser': 'Vault and Mistake Browser', insights: 'Insights', peer: 'Think: Peer puzzles', srs: 'Think: My mistakes', trophies: 'Trophy room', 'review-queue': 'Review Queue', privacy: 'Privacy policy' };
+const ALIASES = { 'board-vision': 'vision', fundamentals: 'vision', coordinates: 'vision', 'knight-path': 'vision', survive: 'survival', defense: 'survival', defence: 'survival', 'survival-mode': 'survival', conversion: 'survival', 'themed-puzzles': 'themes', 'puzzle-themes': 'themes', themes: 'themes', 'bot-trainer': 'bot', 'play-bot': 'bot', 'play-the-bot': 'bot', pokedex: 'dex', 'chess-dex': 'dex', mastery: 'dex', executive: 'profile', 'skill-matrix': 'ranked', matrix: 'ranked', bosses: 'ranked', 'boss-fight': 'ranked', bounties: 'ranked', campaign: 'ranked', challenges: 'ranked', community: 'community', 'event-engine': 'events', 'master-events': 'events', arcade: 'shuffle', 'shuffle-trainer': 'shuffle', drill: 'shuffle', analyse: 'trim', analyze: 'trim', analysis: 'trim', review: 'trim', vault: 'upgrades', volt: 'upgrades', upgrade: 'upgrades', theory: 'openings', manual: 'home', mspc: 'think',
   arena: 'leaderboard', friends: 'leaderboard', tournament: 'leaderboard', tournaments: 'leaderboard',
   ranking: 'leaderboard', rankings: 'leaderboard', ranks: 'leaderboard', 'game-vault': 'games', gamevault: 'games', 'my-games': 'games', folders: 'games', stats: 'insights', brilliants: 'brilliant', brilliancies: 'brilliant', mistakes: 'vault-browser', 'mistake-browser': 'vault-browser', 'blunder-clinic': 'clinic', 'repertoire-trainer': 'mspc-rep',
   'peer-puzzles': 'peer', 'community-puzzles': 'peer', puzzle: 'puzzles', tactics: 'puzzles', 'lichess-puzzles': 'puzzles', 'rated-puzzles': 'puzzles', 'my-mistakes': 'srs', 'spaced-repetition': 'srs', repetition: 'srs', trophy: 'trophies', badges: 'trophies', achievements: 'trophies', queue: 'review-queue', 'admin-queue': 'review-queue',
   'privacy-policy': 'privacy', 'privacy-statement': 'privacy', privacybeleid: 'privacy', gdpr: 'privacy' };
+
+/* ==========================================================================
+   v17 / Phases 5 and 11: THE LEARN PAGE
+   One page that holds every learning module as a card. The modules themselves are standalone screens with no links to each other.
+   To add a module: add one line to LEARN_MODULES (and, if it has a page, a menu entry in Nav5).
+   ========================================================================== */
+const LEARN_MODULES = [
+  ['clinic', 'stethoscope', 'Blunder Clinic', 'Real blunders, explained step by step with MSPC.'],
+  ['peer', 'user-group', 'Peer puzzles', 'Punish blunders played by players in this hub.'],
+  ['srs', 'crosshairs', 'My mistakes', 'Your own misses come back until they stick.'],
+  ['bot', 'robot', 'Test your framework against a bot', 'Play Stockfish and run MSPC on every move.'],
+  ['vision', 'eye', 'Board Vision & Fundamentals', 'Coordinates, knight paths and legal moves.'],
+  ['survival', 'shield-halved', 'Survival & Defense Challenges', 'Hold the draw and convert the win against Stockfish.'],
+  ['shuffle', 'shuffle', 'MSPC Shuffle Trainer', 'Random MSPC positions, one after the other, for speed.']
+];
+function mountLearn(view) {
+  const due = (() => { try { return V36.srsDueCount(); } catch (e) { return 0; } })();
+  view.innerHTML = cmsBar() + '<header class="page-head"><h1>Learn</h1><p>Pick a module and train. Each one stands on its own.</p></header>' +
+    '<nav class="theory-tabs grid2x2" aria-label="Learn modules">' + LEARN_MODULES.map((m) => '<a class="theory-tab" href="#' + m[0] + '"' + (m[0] === 'shuffle' ? ' data-shuffle-mod="think"' : '') + '>' + icon(m[1]) +
+      '<b>' + esc(m[2]) + (m[0] === 'srs' && due ? '<span class="tab-count" aria-label="' + due + ' due">' + due + '</span>' : '') + '</b><small>' + esc(m[3]) + '</small></a>').join('') + '</nav>';
+  return null;
+}
 const MOUNT = {
+  learn: mountLearn,
   vision: BoardVision.mount, survival: Survival.mount, themes: (v) => mountTheory(v, 'themes'),
   dex: mountDex, bot: BotTrainer.mount, home: mountHome, think: mountThink, shuffle: mountShufflePage,
   openings: (v) => mountTheory(v, 'openings'), middlegame: (v) => mountTheory(v, 'middlegame'), endgame: (v) => mountTheory(v, 'endgame'), puzzles: (v) => mountTheory(v, 'puzzles'),
@@ -31914,7 +32470,8 @@ const MOUNT = {
   clinic: mountClinic, 'mspc-rep': mountMspcRep, brilliant: mountBrilliant, 'vault-browser': mountVaultBrowser,
   peer: (v) => { const d = mountPeer(v), p = V5Pool.mount(v); return () => { p(); if (typeof d === 'function') d(); }; }, srs: mountSrs, trophies: mountTrophies, 'review-queue': (v) => { const d = mountQueue(v); V5Peer.mountAdmin(v); V5Srv.mountAdmin(v); return d; },
   privacy: mountPrivacy,
-  profile: (v) => V6.mountProfile(v), account: (v) => V6.mountProfile(v), events: (v) => V6.mountEvents(v)
+  profile: (v) => V6.mountProfile(v), account: (v) => V6.mountProfile(v), events: (v) => V6.mountEvents(v),
+  ranked: (v) => V6.mountProfile(v, 'ranked'), community: (v) => V6.mountProfile(v, 'community')
 };
 let current = { route: null, dispose: null };
 let installPrompt = null;
@@ -31939,7 +32496,7 @@ function renderTabs(route) {
 }
 function renderFoot() {
   qs('#foot').innerHTML = '<span>© ' + new Date().getFullYear() + ' Kyenzo Lanckriet, lanckrietchess</span><span style="display:flex;gap:14px;flex-wrap:wrap">' +
-    '<a href="' + esc(CONFIG.links.youtube) + '" target="_blank" rel="noopener">YouTube</a><a href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener">Skool</a><a href="#upgrades">Upgrades</a><a href="#about">About</a><a href="#privacy">Privacy</a><span>v' + CONFIG.version + '</span></span>';
+    '<a href="' + esc(CONFIG.links.youtube) + '" target="_blank" rel="noopener noreferrer">YouTube</a><a href="' + esc(CONFIG.links.skool) + '" target="_blank" rel="noopener noreferrer">Skool</a><a href="#upgrades">Upgrades</a><a href="#about">About</a><a href="#privacy">Privacy</a><span>v' + CONFIG.version + '</span></span>';
 }
 function render() {
   Levels.fromHash();                                               // v3.9: #chapter/<id>/<level> and #topic/<id>/<level>
@@ -32026,7 +32583,7 @@ const V71 = (() => {
   const TIER_LABEL = { none: 'Standard / Student', free: 'Free Business Partner', paid: 'Paid Business Partner' };
   /* The owner / admin never gets partner prompts: the app is theirs and Lanckriet Chess is the house partner. The server enforces it too
      (lc7_admin_claim_owner marks this device's member as the owner; the player RPCs then answer owner_account). */
-  const isOwner = () => !!((me && me.is_owner) || (typeof Admin !== 'undefined' && Admin.active));
+  const isOwner = () => (typeof Admin !== 'undefined' && Admin.viewingAs() ? false : !!((me && me.is_owner) || (typeof Admin !== 'undefined' && Admin.real())));
   let claiming = false;
   async function claimOwner() {
     if (claiming || !ident || !TokenFlag.hasSession() || (me && me.is_owner)) return;
@@ -32309,7 +32866,7 @@ const V71 = (() => {
     openSheet({
       title: 'Community Legend', noFocus: true, cls: 'v71-sheet',
       html: '<p>You already own Full Pro Lifetime Access, so this key was not activated. It turned into something you can share:</p>' +
-        '<ul class="v71-list"><li><strong>' + keys.length + ' Beginner Keys</strong> (a ' + eur(10000) + ' value each) to give to friends, club members or followers.</li><li>The <strong>Community Legend</strong> badge on your profile.</li><li>A <strong>monthly VIP Q&amp;A / live game review</strong> invite' + (r.vip_invite_url ? ': <a href="' + esc(r.vip_invite_url) + '" target="_blank" rel="noopener">open the invite</a>' : '. The link will be shared with you.') + '</li></ul>' +
+        '<ul class="v71-list"><li><strong>' + keys.length + ' Beginner Keys</strong> (a ' + eur(10000) + ' value each) to give to friends, club members or followers.</li><li>The <strong>Community Legend</strong> badge on your profile.</li><li>A <strong>monthly VIP Q&amp;A / live game review</strong> invite' + (r.vip_invite_url ? ': <a href="' + esc(r.vip_invite_url) + '" target="_blank" rel="noopener noreferrer">open the invite</a>' : '. The link will be shared with you.') + '</li></ul>' +
         '<div class="v71-keys">' + keys.map((k) => '<code>' + esc(k) + '</code>').join('') + '</div>' +
         '<div class="btn-row"><button class="btn btn-primary" type="button" data-v71-copy="' + esc(keys.join('\n')) + '">' + icon('copy') + ' Copy all keys</button><button class="btn btn-quiet" type="button" data-close>Done</button></div>'
     });
@@ -32465,6 +33022,8 @@ const V71 = (() => {
     const paint = () => { if (!dead) view.innerHTML = partnerHTML(dash, catalog); };
     view.innerHTML = '<header class="page-head"><h1>Business / Partner</h1><p>Bring your community to the hub and earn Business Credits on every purchase they make.</p></header><div class="panel pad"><p class="muted">Loading…</p></div>';
     (async () => {
+      const pvr = Admin.viewingAs();                                  // v17: an admin previewing a role sees sample data and sends nothing
+      if (pvr) { if (/^b2b-/.test(pvr)) { dash = demoDash(pvr); catalog = demoCatalog(); } paint(); return; }
       if (!on()) { paint(); return; }
       await ensure(); await refreshMe(); if (dead) return;
       if (me && me.account_type === 'business') {
@@ -32477,6 +33036,7 @@ const V71 = (() => {
     const click = (e) => {
       const t = e.target.closest('[data-v71-ptab]');
       if (t) { pTab = t.getAttribute('data-v71-ptab'); paint(); if (pTab === 'keys') loadKeys(); if (pTab === 'toolkit') loadToolkit(); return; }
+      if (Admin.viewingAs() && e.target.closest('[data-v71-redeem],[data-v71-apply]')) { toast('Preview mode: nothing is sent or bought.'); return; }
       const r = e.target.closest('[data-v71-redeem]'); if (r) { redeemSheet(catalog.filter((x) => x.sku === r.getAttribute('data-v71-redeem'))[0], dash, reload); return; }
       if (e.target.closest('[data-v71-apply]')) applySheet(paint);
       if (e.target.closest('[data-v71-owner-admin]')) adminSheet();
@@ -32498,9 +33058,32 @@ const V71 = (() => {
     return '<div class="panel pad"><h2 class="v71-h">' + icon('crown') + ' You are the owner</h2><p class="muted">Lanckriet Chess is your own hub, so there is no partnership to apply for and no creator to choose. Members who do not pick a creator within 7 days are assigned to you automatically.</p>' +
       (Admin.active ? '<div class="btn-row"><button class="btn btn-primary" type="button" data-v71-owner-admin>' + icon('handshake') + ' Manage partners, tiers and the top banner</button></div>' : '<p class="small muted">Open Admin mode to manage partner tiers and the top banner.</p>') + '</div>';
   }
+  /* v17 / Phase 3: the partner tiers, opened from the About page. Copy is data-light on purpose: edit the strings here. */
+  function tiersSheet() {
+    const tier = (name, who, price, text) => '<article class="v71-tier"><header><b>' + name + '</b><span class="small muted">' + who + '</span></header><p class="v71-tier-price">' + price + '</p><p class="small muted">' + text + '</p></article>';
+    openSheet({
+      title: 'Become a Business Partner',
+      html: '<p class="muted">Scale with our creator and B2B tiers. Every approved partner gets a tracking link and a Creator Support Code, earns Business Credits on what the members they bring in spend, and can spend them in the Business Shop.</p>' +
+        '<div class="v71-tiers">' +
+        tier('Free Tier', 'Getting started', 'Free', 'Join the partner programme and start sharing your link.') +
+        tier('Mid-Tier', '1k to 10k subscribers', '€50', 'For creators with a growing audience.') +
+        tier('High-Tier', '10k to 1M+ subscribers', 'Custom terms', 'For established channels. Apply and we agree the details together.') + '</div>' +
+        '<div class="btn-row"><a class="btn btn-primary" href="#partner" data-close>' + icon('handshake') + ' Open the partner page</a><button class="btn btn-ghost" type="button" data-close>Close</button></div>'
+    });
+  }
+  /* v17: sample partner data for the admin's role preview. Nothing here is real and nothing is saved. */
+  const TIER_NAME = { free: 'the Free Tier', mid: 'the Mid-Tier (1k to 10k subscribers)', high: 'the High-Tier (10k to 1M+ subscribers)' };
+  function demoDash(role) {
+    const t = (Admin.roleDef(role) || {}).b2b || 'free', now = new Date().toISOString();
+    return { ok: true, preview: true, tierLabel: TIER_NAME[t] || TIER_NAME.free,
+      partner: { tracking_link: 'https://lanckrietchess-app.vercel.app/?ref=SAMPLE', code: 'SAMPLE', links: [], links_pending: [] },
+      bometer: { balance_cents: 12000, earned_cents: 24000, spent_cents: 12000, direct_pct: 30, support_pct: 10 }, followers: 42,
+      ledger: [{ delta_cents: 3000, reason: 'sample sale', note: 'Sample entry', created_at: now }], events: [], modules: [] };
+  }
+  const demoCatalog = () => [{ sku: 'sample-pro-key', label: 'Pro key (sample)', description: 'Sample shop item for the preview.', cost_cents: 5000 }, { sku: 'sample-giveaway', label: 'Giveaway pack (sample)', description: 'Sample shop item for the preview.', cost_cents: 20000 }];
   function partnerHTML(d, catalog) {
-    const head = '<header class="page-head"><h1>Business / Partner</h1><p>Bring your community to the hub and earn Business Credits on every purchase they make.</p></header>';
-    if (!on()) return head + '<div class="panel pad"><p class="muted">Online features are not connected yet.</p></div>';
+    const head = '<header class="page-head"><h1>Business / Partner</h1><p>Bring your community to the hub and earn Business Credits on every purchase they make.</p></header>' + (d && d.preview ? '<p class="v71-note">' + icon('eye') + ' Preview of ' + esc(d.tierLabel) + '. Sample data: nothing here is real or saved.</p>' : '');
+    if (!on() && !Admin.viewingAs()) return head + '<div class="panel pad"><p class="muted">Online features are not connected yet.</p></div>';
     if (isOwner()) return head + ownerHTML();   // v7.3: no partnership with yourself
     if (!d) {
       const sent = Store.get(K.app, null);
@@ -32742,10 +33325,11 @@ const V71 = (() => {
     setInterval(eloTick, 180000);
   }
   /* v14: what the Creator Studio needs to know about this account */
-  const studio = () => ({ business: !!(me && me.account_type === 'business') || isOwner(), refCode: cut((ident && ident.ref_code) || (me && me.ref_code) || '', 24), refLink: link(), name: playerName() });
+  const partnerTier = () => { const t = me && me.partner_tier; return t === 'high' ? 'high' : t === 'mid' || t === 'paid' ? 'mid' : t === 'free' ? 'free' : ''; };
+  const studio = () => ({ business: (Admin.viewingAs() ? /^b2b-/.test(Admin.viewingAs()) : (!!(me && me.account_type === 'business') || isOwner())), refCode: cut((ident && ident.ref_code) || (me && me.ref_code) || '', 24), refLink: link(), name: playerName() });
   /* v16: other modules call the lc7_/lc14_ functions as this member (registers the device first if needed) */
   const member = async (name, extra) => { if (!on()) return { ok: false, error: 'off' }; if (!(await ensure())) return { ok: false, error: 'no_identity' }; return A(name, extra); };
-  return { boot, studio, member, captureRef, hasBeginner, v6Events, noteXp, homeHTML, bindHome, menuRows, accessExtrasHTML, adminRow, adminSheet, refresh: refreshMe, version: VER,
+  return { boot, studio, partnerTier, tiersSheet, member, captureRef, hasBeginner, v6Events, noteXp, homeHTML, bindHome, menuRows, accessExtrasHTML, adminRow, adminSheet, refresh: refreshMe, version: VER,
     sponsor: () => sponsor, spIcons: SP_ICONS, loadSponsor, isOwner, creatorsHTML, bindCreators,
     _t: { eur, say, link, evs: () => evs } };
 })();
@@ -33642,6 +34226,135 @@ const Studio = (() => {
   return { boot, menuRow, version: VER, _t: { energyDb, autoThreshold, keepSegments, fenBoard, parseGame, fenKey, Guard, fill, labelFor } };
 })();
 
+
+/* ==========================================================================
+   v17 / Phase 1: ROLE PREVIEW PANEL (admins only)
+   A floating control, top right under the header, to switch the whole hub between the exact view of every account level and the
+   full Admin mode, for recording explainer videos. The choice lives in sessionStorage (it survives page changes, not a closed tab).
+   It changes nothing on the server and does not touch the admin sign-in: Admin.real() stays true the whole time.
+   Search "const RolePanel". The one question for feature checks is getEffectiveRole().
+   ========================================================================== */
+const RolePanel = (() => {
+  let open = false;
+  const root = () => qs('#rp-root');
+  function place() {
+    const r = root(), tb = qs('#topbar');
+    if (!r) return;
+    const top = tb ? Math.round(tb.getBoundingClientRect().bottom) : 64;
+    r.style.setProperty('--rp-top', (top + 8) + 'px');
+  }
+  function ensure() {
+    let r = root();
+    if (!r) {
+      r = document.createElement('div'); r.id = 'rp-root'; r.className = 'rp'; r.hidden = true;
+      document.body.appendChild(r);
+      r.addEventListener('click', (e) => {
+        if (e.target.closest('[data-rp-toggle]')) { open = !open; paint(); return; }
+        if (e.target.closest('[data-rp-reset]')) { choose('admin'); return; }
+        const b = e.target.closest('[data-rp]');
+        if (b) choose(b.getAttribute('data-rp'));
+      });
+      /* the panel redraws itself on every click, so the clicked node is already detached here: ask the event path, not the node */
+      document.addEventListener('click', (e) => { const path = e.composedPath ? e.composedPath() : []; if (open && path.indexOf(root()) < 0) { open = false; paint(); } });
+      document.addEventListener('keydown', (e) => { if (open && e.key === 'Escape') { open = false; paint(); const t = qs('[data-rp-toggle]'); if (t) t.focus(); } });
+      window.addEventListener('resize', place);
+    }
+    return r;
+  }
+  function choose(id) {
+    Admin.setRole(id === 'admin' ? '' : id);
+    try { Site.apply(); } catch (e) { console.error(e); }          // a player sees the published content, never the admin draft
+    open = false;
+    try { refreshChip(); } catch (e) { /* the chip repaints on the next redraw */ }
+    try { render(); } catch (e) { console.error(e); }
+    paint();
+    const d = Admin.roleDef(id);
+    try { toast(id === 'admin' || !d ? 'Back in Admin mode.' : 'Previewing as ' + d.label + '. Your real permissions did not change.', 'good'); } catch (e) { /* toast is optional */ }
+  }
+  function paint() {
+    const r = ensure();
+    if (!Admin.real()) { r.hidden = true; r.innerHTML = ''; return; }
+    place();
+    const cur = Admin.viewingAs(), d = Admin.roleDef(cur || 'admin'), roles = Admin.roles();
+    const group = (cat) => '<p class="rp-cat" role="presentation">' + esc(cat) + '</p>' + roles.filter((x) => x.cat === cat).map((x) =>
+      '<button type="button" role="menuitemradio" aria-checked="' + ((cur || 'admin') === x.id) + '" class="rp-item' + ((cur || 'admin') === x.id ? ' is-on' : '') + '" data-rp="' + esc(x.id) + '">' + icon((cur || 'admin') === x.id ? 'circle-dot' : 'circle') + '<span>' + esc(x.label) + '</span></button>').join('');
+    r.hidden = false;
+    r.className = 'rp' + (cur ? ' is-preview' : '');
+    r.innerHTML = '<button type="button" class="rp-pill" data-rp-toggle aria-haspopup="menu" aria-expanded="' + open + '" aria-label="' + esc(cur ? 'Previewing as ' + d.label + '. Open the role menu.' : 'Admin view. Open the role menu to preview another account level.') + '">' +
+        icon(cur ? 'eye' : 'user-shield') + '<span>' + (cur ? 'Viewing as: ' + esc(d.short) : 'Admin') + '</span>' + icon('chevron-down', 'rp-caret') + '</button>' +
+      (open ? '<div class="rp-menu" role="menu" aria-label="Preview role"><p class="rp-title">View the hub as</p>' + group('Admin') + group('B2C') + group('B2B') +
+        (cur ? '<button type="button" class="rp-reset" data-rp-reset>' + icon('rotate-left') + ' Reset naar Admin Mode</button>' : '') +
+        '<p class="rp-note">Preview only. Your real admin rights do not change.</p></div>' : '');
+  }
+  function boot() { Admin.onRole(() => { paint(); }); paint(); }
+  return { boot, paint };
+})();
+
+
+/* ==========================================================================
+   v17 / Phase 12: THE PROFILE DROPDOWN (top right)
+   The profile chip opens a short menu: My Account, My Membership & Upgrades, My Calendar, My MSPC System & Working Points,
+   My Activity, My Rating / Connection, My Trophy Room, and Settings at the bottom (the old Profile and settings sheet).
+   This replaces the "Plan" menu. To add an entry: add one line to PM_ITEMS.
+   ========================================================================== */
+const PM_ITEMS = [
+  ['#account', 'circle-user', 'My Account'],
+  ['#upgrades', 'crown', 'My Membership & Upgrades'],
+  ['#calendar', 'calendar-days', 'My Calendar'],
+  ['#system', 'diagram-project', 'My MSPC System & Working Points'],
+  ['#activity', 'fire', 'My Activity'],
+  ['#ratings', 'chart-line', 'My Rating / Connection'],
+  ['#trophies', 'medal', 'My Trophy Room']
+];
+const ProfileMenu = (() => {
+  let open = false;
+  const chip = () => qs('#profile-chip');
+  const panel = () => {
+    let el = qs('#pm-panel');
+    if (!el) { el = document.createElement('div'); el.id = 'pm-panel'; el.className = 'pm-panel'; el.setAttribute('role', 'menu'); el.setAttribute('aria-label', 'Your account'); el.hidden = true; (qs('#topbar') || document.body).appendChild(el); }
+    return el;
+  };
+  function hashNow() { let h = ''; try { h = decodeURIComponent((location.hash || '').replace(/^#/, '')).toLowerCase(); } catch (e) { h = ''; } return h.split('/')[0]; }
+  function paint() {
+    const el = panel(), h = hashNow();
+    el.innerHTML = PM_ITEMS.map((x) => '<a role="menuitem" class="pm-item" href="' + x[0] + '"' + (h === x[0].slice(1) ? ' aria-current="page"' : '') + '>' + icon(x[1]) + '<span>' + esc(x[2]) + '</span></a>').join('') +
+      '<div class="pm-div" role="separator"></div><button type="button" role="menuitem" class="pm-item" data-pm-settings>' + icon('gear') + '<span>Settings</span></button>';
+  }
+  function set(v, focus) {
+    open = v; const el = panel(), c = chip();
+    if (v) { try { Nav5.close(); } catch (e) { /* nav not built yet */ } paint(); }
+    el.hidden = !v;
+    if (c) c.setAttribute('aria-expanded', String(v));
+    if (v && focus) { const f = qs('.pm-item', el); if (f) f.focus(); }
+  }
+  function boot() {
+    const c = chip();
+    if (!c) return;
+    c.setAttribute('aria-haspopup', 'menu'); c.setAttribute('aria-expanded', 'false'); c.setAttribute('aria-controls', 'pm-panel');
+    c.addEventListener('click', (e) => { e.preventDefault(); set(!open, e.detail === 0); });
+    document.addEventListener('click', (e) => {
+      if (!open) return;
+      const path = e.composedPath ? e.composedPath() : [];
+      if (path.indexOf(panel()) >= 0) {
+        if (e.target.closest && e.target.closest('[data-pm-settings]')) { set(false); try { openProfile(); } catch (x) { /* the sheet is optional */ } }
+        else if (e.target.closest && e.target.closest('a.pm-item')) set(false);
+        return;
+      }
+      if (path.indexOf(c) < 0) set(false);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (!open) return;
+      const list = qsa('.pm-item', panel()), i = list.indexOf(document.activeElement);
+      if (e.key === 'Escape') { e.preventDefault(); set(false); try { c.focus(); } catch (x) { /* ignore */ } }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); (list[i + 1] || list[0]).focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); (i > 0 ? list[i - 1] : list[list.length - 1]).focus(); }
+    });
+    window.addEventListener('hashchange', () => set(false));
+    window.addEventListener('resize', () => set(false));
+  }
+  return { boot, close: () => set(false), isOpen: () => open };
+})();
+
 /* ==========================================================================
    v15.0.0: FIVE DROPDOWN NAVIGATION
    The eight top-bar tabs become five menus: 3T, Ranked, Learn, Plan, Social.
@@ -33675,6 +34388,7 @@ const Nav5 = (() => {
         I('#openings', 'book-open', 'Openings', 'Repertoire courses and drills'),
         I('#middlegame', 'chess-knight', 'Middlegame', 'Plans, structures and bootcamps'),
         I('#endgame', 'chess-pawn', 'Endgame', 'Technique that converts'),
+        I('#themes', 'bullseye', 'Puzzles', 'Unrated practice by theme, motif and checkmate pattern'),
         I('#guest', 'book-bookmark', 'Guest repertoires', 'Courses from independent creators, unlocked with a key', { when: has('guest') })] },
       { title: 'Trim', items: [
         I('#trim', 'scissors', 'Game review', 'Find the exact moves that cost you rating'),
@@ -33684,33 +34398,28 @@ const Nav5 = (() => {
     { id: 'ranked', label: 'Ranked', icon: 'trophy', title: 'Arenas, rated puzzles and your standing', sections: [
       { title: '', items: [
         I('#leaderboard', 'trophy', 'Arena and leaderboards', 'Weekly tournaments, rankings and prizes', { featured: true }),
-        I('#shuffle', 'shuffle', 'Shuffle trainers', 'Mix a whole module into one run'),
+        I('#ranked', 'route', 'Campaign and Extra Challenges', 'Skill Matrix chapters, Boss Fights and bounties'),
         I('#puzzles', 'puzzle-piece', 'Rated puzzles', 'Puzzle rating, streaks and rating changes'),
-        I('#themes', 'bullseye', 'Puzzles by theme', 'Forks, pins, mates and more, set by set'),
         I('#dex', 'layer-group', 'Chess Dex', 'Collect and master every line'),
         I('#events', 'bolt', 'Master events', 'Boost events and challenges')] }] },
-    { id: 'learn', label: 'Learn', icon: 'graduation-cap', title: 'Board skills, the bot and the mistake vault', sections: [
+    { id: 'learn', label: 'Learn', icon: 'graduation-cap', title: 'Every learning module in one place', sections: [
+      { title: '', items: [
+        I('#learn', 'graduation-cap', 'Learn overview', 'All learning modules on one page', { featured: true })] },
       { title: 'Board skills', items: [
-        I('#vision', 'eye', 'Board Vision', 'Coordinates, knight paths and legal moves'),
-        I('#survival', 'shield-halved', 'Survival and defense', 'Hold the draw, convert the win')] },
+        I('#vision', 'eye', 'Board Vision & Fundamentals', 'Coordinates, knight paths and legal moves'),
+        I('#survival', 'shield-halved', 'Survival & Defense Challenges', 'Hold the draw, convert the win')] },
       { title: 'Play and think', items: [
-        I('#bot', 'robot', 'Bot Deep-Thinking Trainer', 'Play Stockfish at your level, think before you move')] },
+        I('#bot', 'robot', 'Test your framework against a bot', 'Play Stockfish at your level, think before you move'),
+        I('#shuffle', 'shuffle', 'MSPC Shuffle Trainer', 'Random MSPC positions, one after the other', { routes: ['shuffle'] })] },
       { title: 'Mistake vault', items: [
         I('#clinic', 'kit-medical', 'Blunder Clinic', 'Fix the blunders players keep making'),
+        I('#peer', 'people-group', 'Peer puzzles', 'Punish blunders played in this hub'),
         I('#srs', 'rotate', 'My mistakes', 'Repeat your own errors until they stick'),
         I('#vault-browser', 'magnifying-glass', 'Mistake browser', 'Search the vault of student mistakes')] }] },
-    { id: 'plan', label: 'Plan', icon: 'calendar-days', title: 'Your account, your week and your framework', sections: [
-      { title: '', items: [
-        I('#account', 'circle-user', 'My account', 'Profile, ranks and XP', { routes: ['account', 'profile'] }),
-        I('#upgrades', 'crown', 'Membership and upgrades', 'Compare levels and enter your key'),
-        I('#calendar', 'calendar-days', 'Training calendar', 'Plan your week', { routes: [] }),
-        I('#system', 'diagram-project', 'MSPC system and working points', 'Your personal framework', { routes: [] }),
-        I('#activity', 'fire', 'Activity', 'Streaks and your training heatmap', { routes: [] }),
-        I('#ratings', 'chart-line', 'Linked ratings', 'Chess.com and Lichess progress', { routes: [] }),
-        I('#trophies', 'medal', 'Trophy room', 'Badges and achievements')] }] },
     { id: 'social', label: 'Social', icon: 'users', title: 'Friends, community and referrals', sections: [
       { title: '', items: [
         I('#friends', 'user-group', 'Friends', 'Add friends and compare progress', { routes: [] }),
+        I('#community', 'earth-europe', 'Community', 'Weekly goals, buffs and events for everyone'),
         I('#peer', 'people-group', 'Community puzzles', 'Puzzles built from other players’ blunders'),
         I('#hall', 'award', 'Hall of Fame', 'Top referrers and creators', { when: has('hall') }),
         I('#refer', 'user-plus', 'Refer a friend', 'Your link, rewards and milestones', { when: has('refer'), routes: ['refer'] })] }] }
@@ -34511,12 +35220,13 @@ function boot() {
   try { C6.migrate(); } catch (e) { /* old progress stays where it is */ }
   const expired = Access.recheck();
   refreshChip(); renderFoot();
-  qs('#profile-chip').addEventListener('click', openProfile);
+  try { ProfileMenu.boot(); } catch (e) { console.error(e); }       // v17: the profile chip is a dropdown (the old sheet is Settings)
   document.addEventListener('click', CMS.onClick, true);
   window.addEventListener('hashchange', render);
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installPrompt = e; });
   try { Studio.boot(); } catch (e) { console.error(e); }
   try { GuestHub.boot(); } catch (e) { console.error(e); }          // v16: Guest Creator Repertoires routes
+  try { RolePanel.boot(); } catch (e) { console.error(e); }       // v17: admin-only role preview panel
   try { Nav5.boot(); } catch (e) { console.error(e); }            // v15: five dropdown navigation, before the first render          // v14: Creator Studio route, registered before the first render so #studio opens on a direct load
   render();
   const lost = (why) => {
