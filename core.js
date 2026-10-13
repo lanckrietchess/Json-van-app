@@ -1,10 +1,28 @@
 /* ==========================================================================
-   v6 EXECUTIVE LAYER, part 1: the engine.
-   Pure functions, no DOM, no storage: everything here is a rule or a
-   formula, so it can be tested on its own. Part 2 (the screens and the
-   hooks into the trainers) calls it.
+   v6 EXECUTIVE LAYER, part 1: the engine + Cloud & Local Sync Layer
+   Pure functions, no DOM (except storage/sync): everything here is a rule or a
+   formula, combined with IndexedDB and Supabase backup for update safety.
    Tuning knobs: V6Core.CFG.
    ========================================================================== */
+
+// Importeer Supabase client (zorg dat supabase-js beschikbaar is in je project)
+import { createClient } from '@supabase/supabase-js';
+
+// --- SUPABASE CONFIGURATIE ---
+// Vervang deze placeholders met jouw echte Supabase URL en Anon Key
+const SUPABASE_URL = 'JOUW_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'JOUW_SUPABASE_ANON_KEY';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// --- INDEXEDDB SETUP (Lokale Snelle Opslag) ---
+const dbPromise = indexedDB.open('LanckrietChessDB', 1, {
+  upgrade(db) {
+    if (!db.objectStoreNames.contains('studentData')) {
+      db.createObjectStore('studentData');
+    }
+  },
+});
+
 const V6Core = (() => {
   const clampN = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
   const num = (v, d) => (v !== null && v !== undefined && v !== '' && Number.isFinite(+v) ? +v : d);
@@ -105,7 +123,7 @@ const V6Core = (() => {
     now = num(now, Date.now());
     const s = Object.assign(flowNew(), f), R = CFG.redeem;
     const had = s.count;
-    s.protect = !s.protect && had >= R.minCount ? { count: had, got: 0, until: now + R.windowMs } : null;   // a second miss inside the window cancels it
+    s.protect = !s.protect && had >= R.minCount ? { count: had, got: 0, until: now + R.windowMs } : null;
     s.count = 0;
     return { flow: s, lost: had, protectedUntil: s.protect ? s.protect.until : 0 };
   }
@@ -116,8 +134,8 @@ const V6Core = (() => {
   const hgLimit = (module) => CFG.hourglass.limit[module] || 30;
   function hgMult(module, mode, elapsedMs) {
     const H = CFG.hourglass, full = H.mult[module] || 1.3, lim = hgLimit(module) * 1000 + H.grace, t = num(elapsedMs, Infinity);
-    if (mode === 'hard') return t <= lim ? full : 1;                        // pre-commitment: the full multiplier, only inside the limit
-    return t <= lim * H.reactive ? r2(1 + (full - 1) / 2) : 1;                // reactive: half the bonus for lightning intuition
+    if (mode === 'hard') return t <= lim ? full : 1;
+    return t <= lim * H.reactive ? r2(1 + (full - 1) / 2) : 1;
   }
   /* ---------- hints ---------- */
   const hintPenalty = (tier) => CFG.hint.penalty[clampN(Math.round(num(tier, 0)), 0, 3)];
@@ -145,7 +163,6 @@ const V6Core = (() => {
   const secondLimit = (paid) => (paid ? CFG.second.paid : CFG.second.free);
   const secondLeft = (state, paid, day) => Math.max(0, secondLimit(paid) - (state && state.day === day ? num(state.used, 0) : 0));
   /* ---------- Skill Matrix and Boss Fights ---------- */
-  /* chapters in order; a chapter opens when the Boss Fight of the one before it is cleared. */
   function chapterStatuses(chapters, completed) {
     const done = completed || {};
     let prevOk = true;
@@ -156,16 +173,15 @@ const V6Core = (() => {
       return st;
     });
   }
-  /* A Boss Fight is a shuffle of the chapter's open lines: 12 to 60 of your own correct moves. */
   function bossPlan(lines, rnd) {
     const B = CFG.boss, r = rnd || Math.random, pool = lines.filter((l) => l && l.userMoves > 0);
     if (!pool.length) return { lines: [], size: 0 };
     const order = pool.map((l) => ({ l, k: r() })).sort((a, b) => a.k - b.k).map((x) => x.l);
     const out = [];
     let size = 0, guard = 0;
-    while (size < B.min && guard++ < 400) { const l = order[out.length % order.length]; out.push(l); size += l.userMoves; }   // short chapters repeat their lines
+    while (size < B.min && guard++ < 400) { const l = order[out.length % order.length]; out.push(l); size += l.userMoves; }
     if (size < B.min) return { lines: [], size: 0 };
-    for (let k = 0; k < order.length && size < B.max; k++) {                                                                  // long chapters bring the rest, up to the cap
+    for (let k = 0; k < order.length && size < B.max; k++) {
       const l = order[k];
       if (out.indexOf(l) >= 0) continue;
       if (size + l.userMoves > B.max) continue;
@@ -181,7 +197,6 @@ const V6Core = (() => {
   }
   /* ---------- bounties ---------- */
   function hashStr(s) { let h = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
-  /* weakest modules first; ties go to the module the player has trained least */
   function weakest(mr, studentExact) {
     return CFG.modules.slice().sort((a, b) => ((mr[a] ? mr[a].exact : 0) - (mr[b] ? mr[b].exact : 0)) || (CFG.modules.indexOf(a) - CFG.modules.indexOf(b)));
   }
@@ -199,7 +214,6 @@ const V6Core = (() => {
       mk('xp', 'xp', '', 150, 'Earn 150 XP', { xp: 0, tokens: 1 })
     ];
   }
-  /* ev: { type: 'correct'|'xp'|'boss', module, n, flow } -> the list of bounties that just completed */
   function bountyBump(items, ev) {
     const fin = [];
     (items || []).forEach((b) => {
@@ -220,18 +234,16 @@ const V6Core = (() => {
     return { pct: Math.min(1, p), phase, mult };
   }
   const benchBuff = (phase, mine, min) => (phase && phase.mult > 1 && num(mine, 0) >= num(min, CFG.bench.minContribution) ? phase.mult : 1);
-  /* ---------- Arena rating after a settled week ---------- */
   function arenaUpdate(rating, rank, players) {
     const A = CFG.arenaRating, r = num(rating, A.start), n = Math.max(1, Math.round(num(players, 1))), k = clampN(Math.round(num(rank, n)), 1, n);
     const p = n > 1 ? 1 - (k - 1) / (n - 1) : 0.5, weight = clampN(n / 8, 0.25, 1);
     return clampN(Math.round(r + (p - 0.5) * 2 * A.maxWeek * weight), A.floor, A.cap);
   }
-  /* ---------- events from the Master Event Engine ---------- */
   function eventActive(e, now) { return !!e && e.on !== false && num(e.start, 0) <= now && (!num(e.end, 0) || now < e.end); }
   function activeEvents(list, now) { return (Array.isArray(list) ? list : []).filter((e) => eventActive(e, num(now, Date.now()))); }
   const eventMult = (list, now) => activeEvents(list, now).reduce((m, e) => m * clampN(num(e.xpMult, 1), 0.5, 5), 1);
-  /* ---------- Shuffle Trainer filters ---------- */
-  /* ctx: { progress, now, decay (days), mistakes(id), leak: { M: {id: 1}, ... } } */
+  
+  /* ---------- Trainer filters & Smart Mix ---------- */
   function filterLines(pool, mode, ctx) {
     const c = ctx || {}, now = num(c.now, Date.now()), decay = (num(c.decay, CFG.decayDays)) * 864e5, P = c.progress || {};
     if (mode === 'notseen') return pool.filter((x) => !P[x.id]);
@@ -240,7 +252,6 @@ const V6Core = (() => {
     if (/^leak:[MSPC]$/.test(mode)) { const set = (c.leak || {})[mode.slice(5)] || {}; return pool.filter((x) => set[x.id]); }
     return pool;
   }
-  /* The ideal mix: first what is fading or went wrong, then what you have never seen, then the weakest rest. */
   function smartMix(pool, ctx, n, rnd) {
     const r = rnd || Math.random, size = Math.max(1, Math.min(pool.length, num(n, 30))), P = (ctx || {}).progress || {};
     const take = (list, k, used) => { const out = []; for (const x of list) { if (out.length >= k) break; if (!used[x.id]) { used[x.id] = 1; out.push(x); } } return out; };
@@ -253,6 +264,7 @@ const V6Core = (() => {
     if (out.length < size) out.push.apply(out, take(pool.slice().sort(() => r() - 0.5), size - out.length, used));
     return out;
   }
+
   /* ---------- game review icons ---------- */
   const ICONS = {
     brilliant: ['!!', 'Brilliant', 'A sacrifice that Stockfish confirms wins more.'],
@@ -264,7 +276,6 @@ const V6Core = (() => {
     blunder: ['??', 'Blunder', 'Throws the game away.'],
     missed: ['⟳', 'Missed chance', 'The opponent slipped; this move did not take it.']
   };
-  /* it/prev: review items ({ cls, loss, before, color, brill }); win: cp (white's view) -> win percent for the side to move */
   function missedOpportunity(it, prev, win) {
     const M = CFG.missOpp;
     if (!it || !prev || prev.color === it.color) return false;
@@ -284,14 +295,67 @@ const V6Core = (() => {
     else if (it.cls === 'good') k = 'good';
     return k ? { k, glyph: ICONS[k][0], name: ICONS[k][1], text: ICONS[k][2] } : null;
   }
-  /* ---------- the standing line of a player, for the friend card ---------- */
   function cardLine(o) {
     return { r: String(o.student || '').slice(0, 14), a: String(o.arena || '').slice(0, 10), x: Math.max(0, Math.round(num(o.xp, 0))), t: (Array.isArray(o.trophies) ? o.trophies : []).slice(-3).map((t) => String(t).slice(0, 24)) };
   }
   const winPct = (cp) => 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * clampN(cp, -3000, 3000))) - 1);
 
-  return { CFG, rankOf, moduleRanks, studentRank, arenaRank, overallRank, balancer, flowMult, flowName, flowNew, flowHit, flowMiss, dayBoost, nextDayBoost, hgLimit, hgMult,
+  /* ---------- INDEXEDDB & SUPABASE SYNC METHODS ---------- */
+  async function getLocalData(key) {
+    const db = await dbPromise;
+    return new Promise((resolve) => {
+      const tx = db.transaction('studentData', 'readonly');
+      const store = tx.objectStore('studentData');
+      const request = store.get(key);
+      request.onsuccess = () => resolve(request.result);
+    });
+  }
+
+  async function saveAndSyncData(userId, email, key, data) {
+    const db = await dbPromise;
+    const tx = db.transaction('studentData', 'readwrite');
+    tx.objectStore('studentData').put(data, key);
+
+    const { error } = await supabase
+      .from('student_states')
+      .upsert({ 
+        user_id: userId, 
+        email: email, 
+        [key]: data, 
+        updated_at: new Date() 
+      }, { onConflict: 'user_id' });
+
+    if (error) console.error('Sync error to Supabase:', error);
+  }
+
+  async function restoreOrFetchData(userId, key) {
+    let localData = await getLocalData(key);
+
+    if (!localData) {
+      console.log('Lokale opslag leeg (mogelijk na update), data ophalen uit Supabase...');
+      const { data, error } = await supabase
+        .from('student_states')
+        .select(key)
+        .eq('user_id', userId)
+        .single();
+
+      if (data && data[key]) {
+        localData = data[key];
+        const db = await dbPromise;
+        const tx = db.transaction('studentData', 'readwrite');
+        tx.objectStore('studentData').put(localData, key);
+      }
+    }
+    return localData;
+  }
+
+  // Exporteer alle methoden inclusief de nieuwe sync-tools
+  return { 
+    CFG, rankOf, moduleRanks, studentRank, arenaRank, overallRank, balancer, flowMult, flowName, flowNew, flowHit, flowMiss, dayBoost, nextDayBoost, hgLimit, hgMult,
     hintPenalty, hintRank, puzzleBase, baseFor, xp, secondLimit, secondLeft, chapterStatuses, bossPlan, mistakeLimit, hashStr, weakest, rollBounties, bountyBump,
-    benchPhase, benchBuff, arenaUpdate, eventActive, activeEvents, eventMult, filterLines, smartMix, ICONS, missedOpportunity, reviewIcon, cardLine, winPct, clampN, num };
+    benchPhase, benchBuff, arenaUpdate, eventActive, activeEvents, eventMult, filterLines, smartMix, ICONS, missedOpportunity, reviewIcon, cardLine, winPct, clampN, num,
+    getLocalData, saveAndSyncData, restoreOrFetchData 
+  };
 })();
+
 if (typeof module !== 'undefined' && module.exports) module.exports = V6Core;
