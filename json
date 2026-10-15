@@ -1,7 +1,7 @@
 {
  "app": "lanckrietchess-hub",
  "schema": 1,
- "updated": "2026-10-11T11:22:49.935Z",
+ "updated": "2026-10-15T17:58:01.679Z",
  "copy": {
   "onb.title": "Feeling overwhelmed? Take the 3-minute Quick Tour",
   "onb.subtitle": "Get a clear walkthrough of all features, training tools, and how to get the most out of your chess training.",
@@ -40,14 +40,12 @@
   "privacy.contact": "Questions about your data, or a request to see, correct or delete it? Message {coach} directly. He answers himself. Please mention your username in the hub so he can find your entries."
  },
  "settings": {
-  "curriculum": "# The MSPC System [free] | mspc\n## M, Move: read their last move | M, threat, check, hanging\n- What did their move change? | Every move attacks, defends or prepares something. Name it before you choose your own move.\n- The threat scan | Before every move: which checks, captures and attacks does your opponent have now?\n## S, Specifics: what this position is about | S, loose, hanging, structure, king, plan\n- Loose pieces drop off | An undefended piece is a target. Count the defenders of every piece before you move.\n- What the structure asks for | The pawn structure tells you where to play: the break, the outpost, the weak square.\n## P, Priorities: checks, captures, attacks | P, forcing, check, capture, fork, pin, skewer, mate\n- Checks, captures and attacks for both sides | List your forcing moves, then theirs. Forcing moves first, quiet moves after.\n- Take the initiative | A forcing move that gains time beats a quiet move that only reacts.\n## C, Calculation: to the end | C, calculation, sacrifice, mate\n- Calculate to the end | Follow every forcing line until the position is quiet, including their best reply.\n- The calculation cutoff | Do not stop halfway out of fear or hope: the reply you skipped is the one that beats you.\n\n# Blunder Bootcamp [community] | tactics\n## Free material: count before you move [free] | S, hanging, loose, capture | #middlegame\n## The fork: one move, two targets | P, fork, forcing | #middlegame\n## The back rank | M, mate, back-rank, king | #middlegame\n## Pins and skewers | P, pin, skewer | #middlegame\n\n# Anti-Blunder Bootcamp [community] | blunder\n## Read their threat first [free] | M, threat, check | #middlegame\n## The blunder check | M, C, hanging, loose | #middlegame\n\n# Colle-Koltanowski repertoire [vault] | colle\n## Speedcourse, 800 to 1200 [free] | colle, opening, trap | #openings\n- The setup and the e4 break | d4, Nf3, e3, Bd3, c3 and Nbd2, then e3-e4 at the right moment.\n- Punish ...c4: the e5 fork | When Black closes the centre with ...c4, e4-e5 hits two pieces at once.\n## Intermediate, 1200 to 1600 | colle, opening, middlegame, plan\n## Advanced, 1600+: the Koltanowski and the 9.b4 Phoenix | colle, opening\n## Model games | colle, middlegame, plan, structure\n\n# Caro-Kann repertoire [vault] | caro-kann\n## Advance with 3...c5 [free] | caro-kann, opening | #openings\n## Classical and the 5.Qe2 trap [free] | caro-kann, opening, trap | #openings\n## The full repertoire against every White try | caro-kann, opening, middlegame, plan\n\n# Semi-Slav repertoire [vault] | semi-slav, slav\n## The Semi-Slav setup [free] | semi-slav, opening | #openings\n## Meran: ...dxc4 and ...b5 | semi-slav, opening, middlegame\n## Moscow: 5...h6 6.Bxf6 Qxf6 | semi-slav, opening\n## 1...c6 against the London and the Catalan | london, catalan, opening\n\n# MSPC Middlegame Suite [vault] | middlegame\n## Structure plans from your repertoire | middlegame, plan, structure, S | #middlegame\n## White: Colle-Koltanowski structures (e5 outpost, rook lift, Greek gift, isolani, bishop pair, Phoenix) | middlegame, plan, structure, S | #middlegame\n## Black: Caro-Kann structures (Advance, Tartakower, Panov, Exchange) | middlegame, plan, structure, S | #middlegame\n## Black: Slav and Semi-Slav structures (Meran, Moscow, doubled g-pawns, Exchange Slav, Anti-Moscow gambit) | middlegame, plan, structure, S | #middlegame\n## Both chairs: hanging pawns (you hold them, you attack them) | middlegame, plan, structure | #middlegame\n## Attack the king | middlegame, king, sacrifice, mate, C\n## Convert a winning position | middlegame, C, calculation\n\n# Endgame Suite [vault] | endgame\n## Laws that decide endgames [free] | endgame, basics | #endgame\n- The laws that decide endgames (level 1) | Level 1. Before technique, know when a game is already over: stalemate, dead position, repetition, the 50-move rule, flag-fall and the free choice of promotion piece.\n## Winconditions: the two ways endgames end [free] | endgame, basics | #endgame\n- Winconditions: the two ways endgames end (level 1) | Level 1. Every endgame ends with exactly one of two mechanisms: a Mate Wincondition or a Passer Wincondition. Everything else is a lever that helps you create, execute or deny one.\n- The Endgame Scan and the Conversion Ladder (level 2) | Level 2. A five-step scan tells you what to do whenever the position changes character, and a four-rung ladder shows how every won endgame is converted.\n- Wincondition denial: the defender's mirror (level 3) | Level 3. The defender has seven ways to deny a Wincondition: blockade, elimination, theoretical draw, fortress, stalemate, perpetual check and a counter-Wincondition.\n- Anchor positions and zones (level 4) | Level 4. Theory is a map of targets: steer toward winning anchors and away from drawn ones, and know the zones where the defending king must stand.\n- The Wincondition switch (level 5) | Level 5. The strongest technique combines both Winconditions: a passer drags defenders to passive squares, then a mating threat strikes the stripped king, or the reverse.\n## Basic mates and mating technique [free] | endgame, basics | #endgame\n- Basic mates: queen, rook and the ladder (level 1) | Level 1. The lone king is always mated on the edge. Learn to shrink the box without giving stalemate.\n- Advanced mates and the Troitzky line (level 4) | Level 4. Bishop and knight, two bishops and two knights against a pawn are theoretical results you must be able to execute.\n## Core principles and vocabulary [free] | endgame, basics | #endgame\n- Core principles, typical errors and vocabulary (level 1) | Level 1. Once the queens are off the king becomes a fighting piece. These principles, the common errors and the vocabulary carry through every later level.\n## The rule of the square and first passed pawns [free] | endgame, pawn-endgame | #endgame\n- The rule of the square and your first passed pawns (level 1) | Level 1. A defending king that stands inside the pawn's square, or steps into it, catches the pawn. Rook pawns, the corner and the king in front of the pawn complete the foundation.\n## Opposition, key squares and tempo | endgame, pawn-endgame | #endgame\n- Opposition and key squares (level 2) | Level 2. Opposition is the tool, key squares are the goal: it decides every king-and-pawn ending.\n- Triangulation, shouldering and the Réti manoeuvre (level 3) | Level 3. Tempo is the currency of pawn endings: triangulate to hand over the move, shoulder the enemy king away and use diagonal king walks.\n- Corresponding squares and mined squares (level 4) | Level 4. Opposition is the simplest case of corresponding squares; some squares are mines where the side that steps on them loses.\n- Tempo parity, routes and domination (level 5) | Level 5. Tempo parity is global: count every spare move on the board, think in routes instead of single moves and take every square from a minor piece.\n## Passed pawns, majorities and races | endgame, pawn-endgame | #endgame\n- Outside, protected and separated passed pawns (level 2) | Level 2. A passed pawn is a Passer Wincondition: used as a decoy it drags the enemy king away, and in a race the details decide.\n- Breakthroughs, majorities, tempi and rook pawns (level 3) | Level 3. Three pawns against three can create a passer by force; majorities, reserve tempi and the rook pawn decide the rest.\n- Outside versus protected passers and the queening race (level 4) | Level 4. Calculate, do not quote slogans: compare how long the outside passer distracts the king with how long the protected passer ties it down.\n- Passed pawns and majorities at master level (level 5) | Level 5. Advance your passers when it gains space or ties the opponent down, blockade theirs early, and use the majority on the wing the kings left.\n## Rook endings | endgame, rook-endgame | #endgame\n- Lucena and Philidor (level 2) | Level 2. Two positions decide a huge share of rook endings: Lucena wins by building a bridge, Philidor draws with the third-rank defence.\n- The practical rook ending (level 3) | Level 3. Rook endings are the most common and the most drawish: activity first, short side and long side, and exact checking distance.\n- The rook canon: Rule of Five, Vančura and the g7/h7 rule (level 4) | Level 4. The great rook-ending positions are anchors: know exactly when they draw and when they lose.\n- The grandmaster layer of rook endings (level 5) | Level 5. Activity can outweigh two pawns: the side that completes its triangle of active rook, active king and passer first usually wins.\n## Queen endings | endgame, queen-endgame | #endgame\n- Queen versus a pawn on the seventh (level 2) | Level 2. A queen usually stops a pawn on the seventh, but against bishop and rook pawns the stalemate tricks save the defender.\n- Queen endings: winning zone, fortresses and cross-checks (level 4) | Level 4. The queen beats most pawns and the rook, but stalemate tricks, fortresses and perpetual check are the defender's resources.\n- Queen and heavy-piece endings at master level (level 5) | Level 5. Queen endings are races of passers and checks; trust the position rather than the piece myth.\n## Bishops, knights and the blockade | endgame, minor-piece-endgame | #endgame\n- The wrong bishop and minor pieces against passed pawns (level 2) | Level 2. A bishop with a rook pawn only wins if it controls the promotion square, and minor pieces stop passers in different ways.\n- Good bishop, bad bishop, bishop versus knight and the blockade (level 3) | Level 3. Pawns on the bishop's colour make it bad; knights love closed positions and blockade squares; knight endings behave like pawn endings.\n- Knight, bishop and pawn endings (level 4) | Level 4. Rook pawns are the knight's nightmare, bishops need a diagonal across the pawn's path, and a knight can give itself up for the last pawn.\n- Knight versus bad bishop and bishop versus knight (level 5) | Level 5. A knight against a bad bishop generates Winconditions by itself; with pawns on both wings, create a passer on one wing and invade on the other.\n## Opposite-coloured bishops | endgame, minor-piece-endgame | #endgame\n- Opposite-coloured bishops (level 3) | Level 3. Alone, opposite-coloured bishops are drawish even a pawn or two down; with rooks or queens they favour the attacker.\n- Opposite-coloured bishops: the winning recipe (level 5) | Level 5. To win with opposite-coloured bishops you need two passers far apart; connected passers must reach the sixth rank.\n## Rook versus minor pieces and material balance | endgame, minor-piece-endgame | #endgame\n- Rook versus a minor piece: the corner decides (level 3) | Level 3. Without pawns a rook usually cannot beat a minor piece: the defender has to run to the right corner.\n- Pawnless endings: 2B v N, R+B v R, queen v minor pieces (level 4) | Level 4. Tablebases overturned old verdicts: two bishops beat a knight, queen beats two bishops, but the 50-move rule can rescue the defender.\n- Material by the numbers and up the exchange (level 5) | Level 5. Database numbers: bishop and knight are equal on average, the bishop pair is worth about half a pawn, rooks gain value as pawns disappear.\n## Conversion, fortresses and exchanging | endgame, strategy | #endgame\n- Converting an extra pawn (Tier 1 checklist) (level 2) | Level 2. Winning a pawn is step one of three: win it, turn it into a passer, escort it home. Calculate every trade into a pawn ending.\n- Two weaknesses, do not hurry and the pawn-ending test (Tier 2 checklist) (level 3) | Level 3. One weakness can be defended, two cannot. When the opponent has no counterplay, improve every piece first.\n- Fortresses, stalemate architecture and the 50-move horizon (Tier 3A checklist) (level 4) | Level 4. A fortress is a setup the attacker cannot break; stalemate can be a designed defence; theory and the 50-move rule can disagree.\n- The art of exchanging (Tier 3B checklist) (level 5) | Level 5. Trade the defender's best piece, keep your best attacker, convert into the endgame type that magnifies your advantage and know what each exchange does.\n## Planning, prophylaxis and the king | endgame, strategy | #endgame\n- Planning, prophylaxis and the king (level 5) | Level 5. Picture the ideal setup first, ask what the opponent wants, improve your worst piece and restrict before you attack.\n## Transformations and structure-born endgames | endgame, strategy | #endgame\n- Transformations and structure-born endgames (level 5) | Level 5. Turn a static advantage into a dynamic one at the right moment, and know which endgames your middlegame structures leave behind.\n## Fortress and anti-fortress | endgame, strategy | #endgame\n- Fortress and anti-fortress (level 5) | Level 5. Test for fortresses before you simplify, know the warning signs and the toolkit for breaking them.\n## Grandmaster technique | endgame, strategy | #endgame\n- Grandmaster technique (level 5) | Level 5. Maximum problems for the opponent, minimum risk for you; repeat once, never three times; know tablebase metrics and build a personal anchor library.\n",
-  "links": {
-   "skool": "https://www.skool.com/lanckriet-chess-1924"
+  "about": {
+   "chesscomUsername": "Lanckrietchess_YT"
   },
-  "pricing": {
-   "mentorship": {
-    "cap": 1
-   }
+  "curriculum": "# The MSPC System [free] | mspc\n## M, Move: read their last move | M, threat, check, hanging\n- What did their move change? | Every move attacks, defends or prepares something. Name it before you choose your own move.\n- The threat scan | Before every move: which checks, captures and attacks does your opponent have now?\n## S, Specifics: what this position is about | S, loose, hanging, structure, king, plan\n- Loose pieces drop off | An undefended piece is a target. Count the defenders of every piece before you move.\n- What the structure asks for | The pawn structure tells you where to play: the break, the outpost, the weak square.\n## P, Priorities: checks, captures, attacks | P, forcing, check, capture, fork, pin, skewer, mate\n- Checks, captures and attacks for both sides | List your forcing moves, then theirs. Forcing moves first, quiet moves after.\n- Take the initiative | A forcing move that gains time beats a quiet move that only reacts.\n## C, Calculation: to the end | C, calculation, sacrifice, mate\n- Calculate to the end | Follow every forcing line until the position is quiet, including their best reply.\n- The calculation cutoff | Do not stop halfway out of fear or hope: the reply you skipped is the one that beats you.\n\n# Blunder Bootcamp [community] | tactics\n## Free material: count before you move [free] | S, hanging, loose, capture | #middlegame\n## The fork: one move, two targets | P, fork, forcing | #middlegame\n## The back rank | M, mate, back-rank, king | #middlegame\n## Pins and skewers | P, pin, skewer | #middlegame\n\n# Anti-Blunder Bootcamp [community] | blunder\n## Read their threat first [free] | M, threat, check | #middlegame\n## The blunder check | M, C, hanging, loose | #middlegame\n\n# Colle-Koltanowski repertoire [vault] | colle\n## Speedcourse, 800 to 1200 [free] | colle, opening, trap | #openings\n- The setup and the e4 break | d4, Nf3, e3, Bd3, c3 and Nbd2, then e3-e4 at the right moment.\n- Punish ...c4: the e5 fork | When Black closes the centre with ...c4, e4-e5 hits two pieces at once.\n## Intermediate, 1200 to 1600 | colle, opening, middlegame, plan\n## Advanced, 1600+: the Koltanowski and the 9.b4 Phoenix | colle, opening\n## Model games | colle, middlegame, plan, structure\n\n# Caro-Kann repertoire [vault] | caro-kann\n## Advance with 3...c5 [free] | caro-kann, opening | #openings\n## Classical and the 5.Qe2 trap [free] | caro-kann, opening, trap | #openings\n## The full repertoire against every White try | caro-kann, opening, middlegame, plan\n\n# Semi-Slav repertoire [vault] | semi-slav, slav\n## The Semi-Slav setup [free] | semi-slav, opening | #openings\n## Meran: ...dxc4 and ...b5 | semi-slav, opening, middlegame\n## Moscow: 5...h6 6.Bxf6 Qxf6 | semi-slav, opening\n## 1...c6 against the London and the Catalan | london, catalan, opening\n\n# MSPC Middlegame Suite [vault] | middlegame\n## Structure plans from your repertoire | middlegame, plan, structure, S | #middlegame\n## White: Colle-Koltanowski structures (e5 outpost, rook lift, Greek gift, isolani, bishop pair, Phoenix) | middlegame, plan, structure, S | #middlegame\n## Black: Caro-Kann structures (Advance, Tartakower, Panov, Exchange) | middlegame, plan, structure, S | #middlegame\n## Black: Slav and Semi-Slav structures (Meran, Moscow, doubled g-pawns, Exchange Slav, Anti-Moscow gambit) | middlegame, plan, structure, S | #middlegame\n## Both chairs: hanging pawns (you hold them, you attack them) | middlegame, plan, structure | #middlegame\n## Attack the king | middlegame, king, sacrifice, mate, C\n## Convert a winning position | middlegame, C, calculation\n\n# Endgame Suite [vault] | endgame\n## Laws that decide endgames [free] | endgame, basics | #endgame\n- The laws that decide endgames (level 1) | Level 1. Before technique, know when a game is already over: stalemate, dead position, repetition, the 50-move rule, flag-fall and the free choice of promotion piece.\n## Winconditions: the two ways endgames end [free] | endgame, basics | #endgame\n- Winconditions: the two ways endgames end (level 1) | Level 1. Every endgame ends with exactly one of two mechanisms: a Mate Wincondition or a Passer Wincondition. Everything else is a lever that helps you create, execute or deny one.\n- The Endgame Scan and the Conversion Ladder (level 2) | Level 2. A five-step scan tells you what to do whenever the position changes character, and a four-rung ladder shows how every won endgame is converted.\n- Wincondition denial: the defender's mirror (level 3) | Level 3. The defender has seven ways to deny a Wincondition: blockade, elimination, theoretical draw, fortress, stalemate, perpetual check and a counter-Wincondition.\n- Anchor positions and zones (level 4) | Level 4. Theory is a map of targets: steer toward winning anchors and away from drawn ones, and know the zones where the defending king must stand.\n- The Wincondition switch (level 5) | Level 5. The strongest technique combines both Winconditions: a passer drags defenders to passive squares, then a mating threat strikes the stripped king, or the reverse.\n## Basic mates and mating technique [free] | endgame, basics | #endgame\n- Basic mates: queen, rook and the ladder (level 1) | Level 1. The lone king is always mated on the edge. Learn to shrink the box without giving stalemate.\n- Advanced mates and the Troitzky line (level 4) | Level 4. Bishop and knight, two bishops and two knights against a pawn are theoretical results you must be able to execute.\n## Core principles and vocabulary [free] | endgame, basics | #endgame\n- Core principles, typical errors and vocabulary (level 1) | Level 1. Once the queens are off the king becomes a fighting piece. These principles, the common errors and the vocabulary carry through every later level.\n## The rule of the square and first passed pawns [free] | endgame, pawn-endgame | #endgame\n- The rule of the square and your first passed pawns (level 1) | Level 1. A defending king that stands inside the pawn's square, or steps into it, catches the pawn. Rook pawns, the corner and the king in front of the pawn complete the foundation.\n## Opposition, key squares and tempo | endgame, pawn-endgame | #endgame\n- Opposition and key squares (level 2) | Level 2. Opposition is the tool, key squares are the goal: it decides every king-and-pawn ending.\n- Triangulation, shouldering and the Réti manoeuvre (level 3) | Level 3. Tempo is the currency of pawn endings: triangulate to hand over the move, shoulder the enemy king away and use diagonal king walks.\n- Corresponding squares and mined squares (level 4) | Level 4. Opposition is the simplest case of corresponding squares; some squares are mines where the side that steps on them loses.\n- Tempo parity, routes and domination (level 5) | Level 5. Tempo parity is global: count every spare move on the board, think in routes instead of single moves and take every square from a minor piece.\n## Passed pawns, majorities and races | endgame, pawn-endgame | #endgame\n- Outside, protected and separated passed pawns (level 2) | Level 2. A passed pawn is a Passer Wincondition: used as a decoy it drags the enemy king away, and in a race the details decide.\n- Breakthroughs, majorities, tempi and rook pawns (level 3) | Level 3. Three pawns against three can create a passer by force; majorities, reserve tempi and the rook pawn decide the rest.\n- Outside versus protected passers and the queening race (level 4) | Level 4. Calculate, do not quote slogans: compare how long the outside passer distracts the king with how long the protected passer ties it down.\n- Passed pawns and majorities at master level (level 5) | Level 5. Advance your passers when it gains space or ties the opponent down, blockade theirs early, and use the majority on the wing the kings left.\n## Rook endings | endgame, rook-endgame | #endgame\n- Lucena and Philidor (level 2) | Level 2. Two positions decide a huge share of rook endings: Lucena wins by building a bridge, Philidor draws with the third-rank defence.\n- The practical rook ending (level 3) | Level 3. Rook endings are the most common and the most drawish: activity first, short side and long side, and exact checking distance.\n- The rook canon: Rule of Five, Vančura and the g7/h7 rule (level 4) | Level 4. The great rook-ending positions are anchors: know exactly when they draw and when they lose.\n- The grandmaster layer of rook endings (level 5) | Level 5. Activity can outweigh two pawns: the side that completes its triangle of active rook, active king and passer first usually wins.\n## Queen endings | endgame, queen-endgame | #endgame\n- Queen versus a pawn on the seventh (level 2) | Level 2. A queen usually stops a pawn on the seventh, but against bishop and rook pawns the stalemate tricks save the defender.\n- Queen endings: winning zone, fortresses and cross-checks (level 4) | Level 4. The queen beats most pawns and the rook, but stalemate tricks, fortresses and perpetual check are the defender's resources.\n- Queen and heavy-piece endings at master level (level 5) | Level 5. Queen endings are races of passers and checks; trust the position rather than the piece myth.\n## Bishops, knights and the blockade | endgame, minor-piece-endgame | #endgame\n- The wrong bishop and minor pieces against passed pawns (level 2) | Level 2. A bishop with a rook pawn only wins if it controls the promotion square, and minor pieces stop passers in different ways.\n- Good bishop, bad bishop, bishop versus knight and the blockade (level 3) | Level 3. Pawns on the bishop's colour make it bad; knights love closed positions and blockade squares; knight endings behave like pawn endings.\n- Knight, bishop and pawn endings (level 4) | Level 4. Rook pawns are the knight's nightmare, bishops need a diagonal across the pawn's path, and a knight can give itself up for the last pawn.\n- Knight versus bad bishop and bishop versus knight (level 5) | Level 5. A knight against a bad bishop generates Winconditions by itself; with pawns on both wings, create a passer on one wing and invade on the other.\n## Opposite-coloured bishops | endgame, minor-piece-endgame | #endgame\n- Opposite-coloured bishops (level 3) | Level 3. Alone, opposite-coloured bishops are drawish even a pawn or two down; with rooks or queens they favour the attacker.\n- Opposite-coloured bishops: the winning recipe (level 5) | Level 5. To win with opposite-coloured bishops you need two passers far apart; connected passers must reach the sixth rank.\n## Rook versus minor pieces and material balance | endgame, minor-piece-endgame | #endgame\n- Rook versus a minor piece: the corner decides (level 3) | Level 3. Without pawns a rook usually cannot beat a minor piece: the defender has to run to the right corner.\n- Pawnless endings: 2B v N, R+B v R, queen v minor pieces (level 4) | Level 4. Tablebases overturned old verdicts: two bishops beat a knight, queen beats two bishops, but the 50-move rule can rescue the defender.\n- Material by the numbers and up the exchange (level 5) | Level 5. Database numbers: bishop and knight are equal on average, the bishop pair is worth about half a pawn, rooks gain value as pawns disappear.\n## Conversion, fortresses and exchanging | endgame, strategy | #endgame\n- Converting an extra pawn (Tier 1 checklist) (level 2) | Level 2. Winning a pawn is step one of three: win it, turn it into a passer, escort it home. Calculate every trade into a pawn ending.\n- Two weaknesses, do not hurry and the pawn-ending test (Tier 2 checklist) (level 3) | Level 3. One weakness can be defended, two cannot. When the opponent has no counterplay, improve every piece first.\n- Fortresses, stalemate architecture and the 50-move horizon (Tier 3A checklist) (level 4) | Level 4. A fortress is a setup the attacker cannot break; stalemate can be a designed defence; theory and the 50-move rule can disagree.\n- The art of exchanging (Tier 3B checklist) (level 5) | Level 5. Trade the defender's best piece, keep your best attacker, convert into the endgame type that magnifies your advantage and know what each exchange does.\n## Planning, prophylaxis and the king | endgame, strategy | #endgame\n- Planning, prophylaxis and the king (level 5) | Level 5. Picture the ideal setup first, ask what the opponent wants, improve your worst piece and restrict before you attack.\n## Transformations and structure-born endgames | endgame, strategy | #endgame\n- Transformations and structure-born endgames (level 5) | Level 5. Turn a static advantage into a dynamic one at the right moment, and know which endgames your middlegame structures leave behind.\n## Fortress and anti-fortress | endgame, strategy | #endgame\n- Fortress and anti-fortress (level 5) | Level 5. Test for fortresses before you simplify, know the warning signs and the toolkit for breaking them.\n## Grandmaster technique | endgame, strategy | #endgame\n- Grandmaster technique (level 5) | Level 5. Maximum problems for the opponent, minimum risk for you; repeat once, never three times; know tablebase metrics and build a personal anchor library.\n",
+  "onboarding": {
+   "videoUrl": "https://youtu.be/DLJhUD0R7Wg"
   },
   "systemBadges": {
    "launch": "2026-10-10"
@@ -55,6 +53,380 @@
  },
  "lists": {
   "think": [
+   {
+    "id": "think-free-legal",
+    "title": "The queen that was not a gift",
+    "tag": "Free MSPC basics",
+    "level": "0-800",
+    "fen": "rn1qkbnr/ppp2p1p/3p2p1/4N3/2B1P3/2N5/PPPP1PPP/R1BbK2R w KQkq - 0 6",
+    "orientation": "w",
+    "lastMove": [
+     "g4",
+     "d1"
+    ],
+    "brief": "Black just captured your queen with ...Bxd1. Before you recapture, ask what that capture left behind.",
+    "stages": [
+     {
+      "type": "mcq",
+      "prompt": "Black took your queen with ...Bxd1. What did that capture leave behind?",
+      "options": [
+       {
+        "text": "The f7-pawn is attacked twice, by your bishop and your knight, and defended only by the king.",
+        "correct": true,
+        "why": "Yes. Taking the queen pulled the bishop away from the kingside, and f7 is now a weak square with too few defenders."
+       },
+       {
+        "text": "Nothing: Black is simply a queen up and you must recapture.",
+        "correct": false,
+        "why": "The recapture can wait. Read what their move changed on the board before you decide."
+       },
+       {
+        "text": "Black now threatens ...Bxc2 to win more material.",
+        "correct": false,
+        "why": "It is a threat, but a slow one. When your opponent has no time, your own forcing moves come first."
+       }
+      ],
+      "k": "M"
+     },
+     {
+      "type": "tap",
+      "prompt": "Tap the square that both your bishop on c4 and your knight on e5 attack.",
+      "answer": [
+       "f7"
+      ],
+      "hint": "Follow the diagonal from c4 towards the black king.",
+      "explain": "f7. Two attackers, one defender: the king alone cannot hold it, and the king is also the piece you want to drive out.",
+      "k": "S"
+     },
+     {
+      "type": "mcq",
+      "prompt": "Which of your checks, captures and attacks do you calculate first?",
+      "options": [
+       {
+        "text": "Bxf7+, a check that forces the king to move.",
+        "correct": true,
+        "why": "Checks first. This one leaves Black exactly one legal reply, so you can calculate it to the very end."
+       },
+       {
+        "text": "Nxf7, a capture that forks the queen and the rook.",
+        "correct": false,
+        "why": "It looks tempting, but it lets Black catch their breath: your king is still on e1 and Black is a queen up. Check the checks first."
+       },
+       {
+        "text": "Kxd1, winning the bishop back.",
+        "correct": false,
+        "why": "That recovers material but gives away the attack. When a forced mate is on the board, material can wait."
+       }
+      ],
+      "k": "P"
+     },
+     {
+      "type": "line",
+      "prompt": "Find the mate. Black's reply comes automatically.",
+      "pgn": "6.Bxf7+ Ke7 7.Nd5#",
+      "ann": {
+       "6.Bxf7+": {
+        "note": "Check. The knight on e5 protects the bishop, so the king cannot take it and has only one square: e7.",
+        "bad": {
+         "Nxf7": "Black is a queen up and this lets them organise a defence. Play the check first.",
+         "Kxd1": "Greedy in the wrong direction: you win a bishop and lose the attack."
+        }
+       },
+       "7.Nd5#": {
+        "note": "Mate. The knight checks from d5, the king has no flight squares, and nothing can capture the knight or block."
+       }
+      },
+      "k": "C"
+     }
+    ],
+    "debrief": [
+     {
+      "k": "M",
+      "t": "Black grabbed the queen with ...Bxd1 and in doing so left f7 under double attack."
+     },
+     {
+      "k": "S",
+      "t": "The black king has no way out: e7 is the only square, and your pieces already cover everything else."
+     },
+     {
+      "k": "P",
+      "t": "The check on f7 comes before any capture: it limits Black to one reply."
+     },
+     {
+      "k": "C",
+      "t": "Calculate the line to the end: 6.Bxf7+ Ke7 7.Nd5# is forced, so you can give up the queen with confidence."
+     }
+    ],
+    "topicId": "mspc-positions",
+    "topic": "MSPC positions",
+    "lvl": 1,
+    "requiredTier": 0,
+    "chap": "mspc-free-starter",
+    "repertoire": false,
+    "description": "Black just captured your queen with ...Bxd1. Before you recapture, ask what that capture left behind.",
+    "ms_pc_breakdown": {
+     "M": "Black grabbed the queen with ...Bxd1 and in doing so left f7 under double attack.",
+     "S": "The black king has no way out: e7 is the only square, and your pieces already cover everything else.",
+     "P": "The check on f7 comes before any capture: it limits Black to one reply.",
+     "C": "Calculate the line to the end: 6.Bxf7+ Ke7 7.Nd5# is forced, so you can give up the queen with confidence."
+    },
+    "explanation": "It is natural to want your queen back. The lesson of this position is the order: read their move, find the weak square, list your checks, and only then think about material.",
+    "alarm_signal": "⚠️ ALARM SIGNAL / RED FLAG: When you see your opponent grab material while their king still sits in the centre, instantly ask yourself if a check against the weakest square, usually f7 or f2, is winning or necessary!",
+    "coaching_tip": "💡 Linked Course: The Blunder Bootcamp and MSPC System: P, checks first. Remember: a forced line of checks needs no defence from you, only a calculation that reaches the end.",
+    "elo_insight": {
+     "tier": "Free · 0–800",
+     "foundation": "Foundation: when your opponent takes something big, look at what the capture left undefended before you recapture.",
+     "advanced": "Sharper: a sacrifice is only a sacrifice if the forced line ends in mate. Count every legal reply before you believe it."
+    }
+   },
+   {
+    "id": "think-free-scholar",
+    "title": "The move that ignored f7",
+    "tag": "Free MSPC basics",
+    "level": "0-800",
+    "fen": "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+    "orientation": "w",
+    "lastMove": [
+     "g8",
+     "f6"
+    ],
+    "brief": "Black just developed with 3...Nf6. Does that move deal with the threat on f7?",
+    "stages": [
+     {
+      "type": "mcq",
+      "prompt": "Black just played 3...Nf6. What did that move forget?",
+      "options": [
+       {
+        "text": "Nothing defends f7 except the king, and your queen and bishop both aim at it.",
+        "correct": true,
+        "why": "Exactly. Developing a piece felt natural, but f7 is still attacked twice and defended once."
+       },
+       {
+        "text": "It attacks your queen, so you have to move it.",
+        "correct": false,
+        "why": "The knight does attack your queen on h5, but that is a threat to answer with a better move, not a retreat. Look at what you can do first."
+       },
+       {
+        "text": "It opens the f-file for Black's rook.",
+        "correct": false,
+        "why": "Not yet: the rook is still in the corner. Read the squares around the black king instead."
+       }
+      ],
+      "k": "M"
+     },
+     {
+      "type": "tap",
+      "prompt": "Tap the weakest square in Black's position.",
+      "answer": [
+       "f7"
+      ],
+      "hint": "Your bishop on c4 looks along a diagonal at the black king.",
+      "explain": "f7. It is guarded only by the king, and your queen and bishop both hit it.",
+      "k": "S"
+     },
+     {
+      "type": "mcq",
+      "prompt": "Which check, capture or attack do you calculate first?",
+      "options": [
+       {
+        "text": "Qxf7#, a capture that is also check.",
+        "correct": true,
+        "why": "Checks and captures at once. After Qxf7 the king has no square and nothing can capture the queen: mate."
+       },
+       {
+        "text": "Qxe5+, a capture with check.",
+        "correct": false,
+        "why": "It wins a pawn, but it lets Black play ...Nxe5 and you lose your queen. Always look at who can capture back."
+       },
+       {
+        "text": "Qxf6, taking the knight.",
+        "correct": false,
+        "why": "That gives your queen for a knight after ...gxf6 or ...Qxf6. A mate was available."
+       }
+      ],
+      "k": "P"
+     },
+     {
+      "type": "line",
+      "prompt": "Deliver the mate.",
+      "pgn": "4.Qxf7#",
+      "ann": {
+       "4.Qxf7#": {
+        "note": "Checkmate. The king cannot capture a queen protected by the bishop, and e7, d8 and e8 are covered or blocked."
+       }
+      },
+      "k": "C"
+     }
+    ],
+    "debrief": [
+     {
+      "k": "M",
+      "t": "3...Nf6 developed a piece but did nothing about f7, which is attacked twice."
+     },
+     {
+      "k": "S",
+      "t": "Black's king has no spare square: the queen, bishop and rook around it block its own escape."
+     },
+     {
+      "k": "P",
+      "t": "Capture with check beats every quiet move: Qxf7 is mate."
+     },
+     {
+      "k": "C",
+      "t": "One move deep, but still verify: the queen is protected, the king has no square, nothing can take."
+     }
+    ],
+    "topicId": "mspc-positions",
+    "topic": "MSPC positions",
+    "lvl": 1,
+    "requiredTier": 0,
+    "chap": "mspc-free-starter",
+    "repertoire": false,
+    "description": "Black just developed with 3...Nf6. Does that move deal with the threat on f7?",
+    "ms_pc_breakdown": {
+     "M": "3...Nf6 developed a piece but did nothing about f7, which is attacked twice.",
+     "S": "Black's king has no spare square: the queen, bishop and rook around it block its own escape.",
+     "P": "Capture with check beats every quiet move: Qxf7 is mate.",
+     "C": "One move deep, but still verify: the queen is protected, the king has no square, nothing can take."
+    },
+    "explanation": "Many players develop automatically and forget the weak square. MSPC asks one question first: what does their last move leave undefended?",
+    "alarm_signal": "⚠️ ALARM SIGNAL / RED FLAG: When you see an enemy king with a pawn on f7 or f2 that only the king defends, instantly ask yourself if a queen and bishop battery on that square is winning or necessary!",
+    "coaching_tip": "💡 Linked Course: The Blunder Bootcamp and MSPC System: M, what did their move change? Remember: every move changes what is protected, so check the protectors of the king's neighbours.",
+    "elo_insight": {
+     "tier": "Free · 0–800",
+     "foundation": "Foundation: before you move, count attackers and defenders of the squares next to the enemy king.",
+     "advanced": "Sharper: when a capture is also check, ask who can capture back before you celebrate."
+    }
+   },
+   {
+    "id": "think-free-blackburne",
+    "title": "The knight that took too much",
+    "tag": "Free MSPC basics",
+    "level": "800-1400",
+    "fen": "r1b1kbnr/pppp1Npp/8/6q1/2BnP3/8/PPPP1PPP/RNBQK2R b KQkq - 0 5",
+    "orientation": "b",
+    "lastMove": [
+     "e5",
+     "f7"
+    ],
+    "brief": "You are Black. White just captured on f7 with the knight, attacking your queen and the rook on h8. Do not run yet.",
+    "stages": [
+     {
+      "type": "mcq",
+      "prompt": "White just played Nxf7, hitting your queen and rook. What did that capture overlook?",
+      "options": [
+       {
+        "text": "The g2-pawn: it is only protected by the rook, and your queen can take it with tempo.",
+        "correct": true,
+        "why": "Yes. The knight went hunting and left the kingside weak. Your queen is attacked, but it can attack back with more."
+       },
+       {
+        "text": "Nothing: your queen is attacked, so you must move it to safety.",
+        "correct": false,
+        "why": "The reflex to save the queen is exactly what MSPC slows down. First list your own checks, captures and attacks."
+       },
+       {
+        "text": "It leaves the knight on f7 undefended, so you can simply take it.",
+        "correct": false,
+        "why": "The knight is protected by the bishop on c4, so the king cannot capture it. Check what protects it before you plan around it."
+       }
+      ],
+      "k": "M"
+     },
+     {
+      "type": "tap",
+      "prompt": "Tap the square where your queen can capture with tempo.",
+      "answer": [
+       "g2"
+      ],
+      "hint": "Look down the g-file from your queen: what is on the other side of g2?",
+      "explain": "g2. Capturing there attacks the rook on h1 and keeps the e4-pawn hanging with check.",
+      "k": "S"
+     },
+     {
+      "type": "mcq",
+      "prompt": "Which capture or attack do you calculate first?",
+      "options": [
+       {
+        "text": "Qxg2, attacking the rook on h1 and eyeing e4 with check.",
+        "correct": true,
+        "why": "A capture that creates two new threats. White cannot meet both."
+       },
+       {
+        "text": "Qh4, attacking the e4-pawn.",
+        "correct": false,
+        "why": "It moves the queen out of the attack, but Nxh8 wins your rook and you have gained nothing."
+       },
+       {
+        "text": "Nxc2+, forking the king and the rook on a1.",
+        "correct": false,
+        "why": "It is a fork, but White simply takes with the queen, and your own queen is still hanging on g5."
+       }
+      ],
+      "k": "P"
+     },
+     {
+      "type": "line",
+      "prompt": "Play the combination. White's replies come automatically.",
+      "pgn": "5...Qxg2 6.Rf1 Qxe4+ 7.Be2 Nf3#",
+      "ann": {
+       "5...Qxg2": {
+        "note": "The queen takes with tempo: the rook on h1 is attacked and the e4-pawn is next.",
+        "bad": {
+         "Qh4": "Passive. White's knight takes the rook on h8 and you are simply worse.",
+         "Nxc2+": "White takes with the queen and your queen on g5 is still attacked."
+        }
+       },
+       "6...Qxe4+": {
+        "note": "Check. The e-file opens against the king, and the bishop that blocks it will be pinned."
+       },
+       "7...Nf3#": {
+        "note": "Mate. The bishop on e2 is pinned by the queen on e4, so it cannot capture the knight, and the king has no square."
+       }
+      },
+      "k": "C"
+     }
+    ],
+    "debrief": [
+     {
+      "k": "M",
+      "t": "5.Nxf7 forks the queen and the rook, but it takes the knight far from the defence of the kingside."
+     },
+     {
+      "k": "S",
+      "t": "White's kingside is thin: g2 is protected only by the rook, and the king is still on e1."
+     },
+     {
+      "k": "P",
+      "t": "The capture on g2 creates two new threats at once: the rook on h1 and a check on e4."
+     },
+     {
+      "k": "C",
+      "t": "Calculate to the end: 5...Qxg2 6.Rf1 Qxe4+ 7.Be2 Nf3# is mate, and other White replies lose even faster."
+     }
+    ],
+    "topicId": "mspc-positions",
+    "topic": "MSPC positions",
+    "lvl": 1,
+    "requiredTier": 0,
+    "chap": "mspc-free-club",
+    "repertoire": false,
+    "description": "You are Black. White just captured on f7 with the knight, attacking your queen and the rook on h8. Do not run yet.",
+    "ms_pc_breakdown": {
+     "M": "5.Nxf7 forks the queen and the rook, but it takes the knight far from the defence of the kingside.",
+     "S": "White's kingside is thin: g2 is protected only by the rook, and the king is still on e1.",
+     "P": "The capture on g2 creates two new threats at once: the rook on h1 and a check on e4.",
+     "C": "Calculate to the end: 5...Qxg2 6.Rf1 Qxe4+ 7.Be2 Nf3# is mate, and other White replies lose even faster."
+    },
+    "explanation": "Facing a threat, most players defend. MSPC asks you to first check what their move gave up, and here that is the weakest pawn on the board.",
+    "alarm_signal": "⚠️ ALARM SIGNAL / RED FLAG: When you see your queen attacked but your opponent's kingside is only held by one piece, instantly ask yourself if a counter-capture that attacks the rook is winning or necessary!",
+    "coaching_tip": "💡 Linked Course: The Blunder Bootcamp and MSPC System: P, counter-attack before you retreat. Remember: a threat against you is also a moment where the opponent's own position is loosened.",
+    "elo_insight": {
+     "tier": "Free · 800–1400",
+     "foundation": "Foundation: when your queen is attacked, look for a capture that attacks something bigger before you retreat.",
+     "advanced": "Sharper: a pinned piece cannot capture. Counting which defenders are pinned is half of calculating mating nets."
+    }
+   },
    {
     "id": "think-quiet-queen",
     "title": "The quiet queen move",
@@ -167,8 +539,8 @@
     ],
     "topicId": "mspc-positions",
     "topic": "MSPC positions",
-    "lvl": 1,
-    "requiredTier": 0,
+    "lvl": 2,
+    "requiredTier": 2,
     "description": "You're Black in the Caro-Kann. White just played 5.Qe2, a quiet move with a very loud idea.",
     "ms_pc_breakdown": {
      "M": "5.Qe2 put the queen on your king's file. That pinned e7, and e7 was the only guard of d6.",
@@ -183,7 +555,8 @@
      "tier": "Free · 0–800",
      "foundation": "Foundation: look at every check your opponent has before you move. One scan saves the game.",
      "advanced": "Sharper: when your king has no flight squares, solve it with the move that gives the queen a guard of the key square (...Ndf6), not with the most natural one."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "think-pawn-fork",
@@ -293,8 +666,8 @@
     ],
     "topicId": "mspc-positions",
     "topic": "MSPC positions",
-    "lvl": 1,
-    "requiredTier": 0,
+    "lvl": 2,
+    "requiredTier": 2,
     "description": "You are White in the Colle. Black released the tension with ...c4 and just played 9...b5 on the queenside.",
     "ms_pc_breakdown": {
      "M": "9...b5 was a queenside move. It didn't touch the centre and left the bishop and knight on the squares e5 attacks.",
@@ -309,7 +682,8 @@
      "tier": "Free · 0–800",
      "foundation": "Foundation: a pawn that attacks two pieces wins one of them. Look for it every time the centre closes.",
      "advanced": "Sharper: calculate Black's best answer (...Be7, exf6 Nxf6) so you know the fork really nets a piece for a pawn."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "think-smothered",
@@ -430,7 +804,10 @@
      "tier": "Free · 0–800",
      "foundation": "Foundation: a king with no flight squares is a mate waiting to happen. List your checks.",
      "advanced": "Sharper: with only one legal reply at each step there is no calculation cutoff, so verify the whole line before you give up material."
-    }
+    },
+    "repertoire": false,
+    "chap": "mspc-free-club",
+    "level": "800-1400"
    },
    {
     "id": "think-overload",
@@ -545,7 +922,10 @@
      "tier": "Free · 0–800",
      "foundation": "Foundation: always ask whether YOUR back rank has an escape square before you start an attack.",
      "advanced": "Sharper: queen value is irrelevant if the line ends in mate, so give the queen first and count the forced moves."
-    }
+    },
+    "repertoire": false,
+    "chap": "mspc-free-strong",
+    "level": "1400-1800"
    },
    {
     "id": "think-remove-guard",
@@ -674,7 +1054,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: three attackers against three defenders is not winning. Take a defender and the count changes.",
      "advanced": "Sharper: after the capture, calculate the recapture that hands the pawn back (...Nxd4? Bxd5!) and choose the version that keeps it (...Qxd4)."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "think-colle-fork-back",
@@ -810,7 +1191,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: read what their last move attacks before you follow your own plan.",
      "advanced": "Sharper: trade the one defender of h7 (the f6-knight) so that your queen and bishop point straight at the king."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "think-meran-b4",
@@ -930,7 +1312,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: always name the threat first (e5!), then look for the piece that holds it up.",
      "advanced": "Sharper: calculate 10.e5 bxc3! to see why White cannot simply ignore ...b4."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-adv-l2-bishop-out",
@@ -1084,7 +1467,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: develop the problem piece first; the order of your moves is the lesson.",
      "advanced": "Sharper: ...Nf6 is not available because of e5xf6, so route the knight via e7 to f5 and keep calculating the tactical point."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-adv-l3-regain-pawn",
@@ -1215,7 +1599,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: a pawn is not worth falling behind in development. Take it back with a developing move.",
      "advanced": "Sharper: check the follow-ups (...Qd7? and ...Rc8? allow b4), then take the pawn only when nothing else is hanging."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-adv-l4-pin-on-f3",
@@ -1355,7 +1740,8 @@
      "tier": "Advanced · 1600–2000",
      "foundation": "Foundation: develop with a threat. A move that develops AND pins is worth two moves.",
      "advanced": "Sharper: compare ...f6? (weakens e6 and the king) and ...a6? (too slow) before you commit to ...Bg4."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-adv-l5-trade-the-bishop",
@@ -1495,7 +1881,8 @@
      "tier": "Master · 2000+",
      "foundation": "Foundation: before every trade, picture the pawn structure after it.",
      "advanced": "Sharper: only fxe3 is playable for White, so follow up with ...Qb6 and ...Na5-c4 to attack the new weaknesses."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-tart-l2-exf6",
@@ -1643,7 +2030,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: doubled pawns are not always bad; ask which squares and files your pieces get.",
      "advanced": "Sharper: castle and play ...Re8 before ...Bg4, so that h3 becomes a target and White cannot disturb your king."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-caro-tart-l3-be7",
@@ -1795,7 +2183,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: do not answer a check with a king move that loses castling.",
      "advanced": "Sharper: compare ...Be6? (Bxe6 fxe6 Qxe6+ loses a pawn) and ...Kf8? before choosing the bishop block."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-e4-l2-greek-gift",
@@ -1951,7 +2340,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: Bxh7+ only works when the three conditions are true. Count them every time.",
      "advanced": "Sharper: calculate the king walks (...Kg8? Qh5; ...Kh6? Nxe6+) before you start."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-e4-l3-queen-recapture",
@@ -2088,7 +2478,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: a healthy pawn structure is worth more than a quick-looking capture.",
      "advanced": "Sharper: check the other recaptures (gxf3? ruins your structure; Kh1? loses the exchange) before you settle on Qxf3."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-e4-l4-take-on-f6",
@@ -2222,7 +2613,8 @@
      "tier": "Advanced · 1600–2000",
      "foundation": "Foundation: capture, open the file, pile up on the backward pawn.",
      "advanced": "Sharper: the sacrifice 16.Bxh7+? Kxh7 17.exf6 Nxf6 leaves you a piece down, so patience wins here."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-e4-l5-blockade",
@@ -2374,7 +2766,8 @@
      "tier": "Master · 2000+",
      "foundation": "Foundation: against an isolated pawn, put a piece in front of it and add attackers.",
      "advanced": "Sharper: 19.Bxh7+? and 19.Qxd5? both fail immediately. A sacrifice only works when the attack is ready."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-nbd7-l2-rook-recapture",
@@ -2513,7 +2906,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: ask which recapture keeps your attacking pieces active.",
      "advanced": "Sharper: 12.Bxe4 is playable but dull, and 12.Qe2? does not recapture at all."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-nbd7-l3-wedge",
@@ -2665,7 +3059,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: 10.Nf3? blocks your own f-pawn and 10.Qc2? loses e5. Use the pawn.",
      "advanced": "Sharper: if Black plays ...f5, answer with exf6 en passant, which is essential."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-phoenix-l4-c4",
@@ -2802,7 +3197,8 @@
      "tier": "Advanced · 1600–2000",
      "foundation": "Foundation: a pawn lever against their centre often defends and attacks in one move.",
      "advanced": "Sharper: 16.Bb3 retreats and loses the grip, and 16.Ng5 allows ...Nxd5. Only c4 keeps everything together."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-colle-phoenix-l5-bishop-c2",
@@ -2941,7 +3337,8 @@
      "tier": "Master · 2000+",
      "foundation": "Foundation: retreat to the square that still works, not to the nearest safe one.",
      "advanced": "Sharper: opposite-coloured bishops favour the attacker while queens and rooks are still on the board."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-meran-l2-the-break",
@@ -3078,7 +3475,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: prepare ...a6 first, then play ...c5 at the right moment.",
      "advanced": "Sharper: 10...b4? and 10...Nb6? give White the centre for free. After 11.d5 Qc7 12.dxe6 fxe6 the f-file is yours."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-moscow-l2-recapture-queen",
@@ -3227,7 +3625,8 @@
      "tier": "Beginner · 800–1200",
      "foundation": "Foundation: do not rush: the bishop pair gets stronger when the board opens.",
      "advanced": "Sharper: 6...gxf6? damages the structure and 6...Qb6? loses a piece."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-meran-l3-bishop-takes-g3",
@@ -3361,7 +3760,8 @@
      "tier": "Intermediate · 1200–1600",
      "foundation": "Foundation: do not try to calculate everything at the board, learn the pattern and the safety move.",
      "advanced": "Sharper: after 12...Bxg3 13.dxe6 Qc7 you are fine; 12...Nb6? and 12...Qb6? hand White the initiative."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-meran-l4-b4-counter",
@@ -3510,7 +3910,8 @@
      "tier": "Advanced · 1600–2000",
      "foundation": "Foundation: spot the fork first, then find the piece that makes it work.",
      "advanced": "Sharper: 13...Be7? loses material to 14.e5 and 13...c5? loses the b5-pawn. Only ...b4 holds the balance."
-    }
+    },
+    "repertoire": true
    },
    {
     "id": "mspc-slav-meran-l5-deflect-then-c5",
@@ -3641,7 +4042,8 @@
      "tier": "Master · 2000+",
      "foundation": "Foundation: a piece on the rim does not protect the centre. Use that.",
      "advanced": "Sharper: 13...a5? is too slow and 13...bxa3? gives up the pressure. After 14.dxc5 Nxc5 you are fine."
-    }
+    },
+    "repertoire": true
    }
   ],
   "groups": [
@@ -26633,6 +27035,21 @@
     "id": "eg-ch-basics",
     "module": "endgame",
     "title": "Laws and basic mates"
+   },
+   {
+    "id": "mspc-free-starter",
+    "module": "mspc",
+    "title": "Free MSPC basics: Starter (0–800)"
+   },
+   {
+    "id": "mspc-free-club",
+    "module": "mspc",
+    "title": "Free MSPC basics: Club (800–1400)"
+   },
+   {
+    "id": "mspc-free-strong",
+    "module": "mspc",
+    "title": "Free MSPC basics: Strong (1400+)"
    }
   ],
   "logoLinks": [
@@ -26669,7 +27086,7 @@
    {
     "id": "mspc",
     "label": "Free MSPC course",
-    "url": "https://www.skool.com/lanckrietchess/classroom",
+    "url": "https://www.skool.com/lanckriet-chess-1924/classroom",
     "icon": "brain"
    },
    {
@@ -52073,6 +52490,162 @@
   }
  ],
  "v5": {
+  "survival": [
+   {
+    "id": "sv-squeeze-1",
+    "mode": "survive",
+    "title": "Out-pressed in a middlegame",
+    "brief": "You are a little worse and Stockfish is pressing. Nothing is lost yet: every move you make has to answer a threat, not start a plan.",
+    "tip": "List their checks, captures and threats before every move. If you cannot find one, improve your worst piece.",
+    "fen": "r1br2k1/pp2qpbp/4p1p1/3n4/3p4/1Q1P2PP/PP2PPB1/1NR1K1NR w K - 0 14",
+    "moves": 14,
+    "floorCp": -400,
+    "goal": "hold",
+    "goalCp": 350,
+    "level": "l1600",
+    "tier": 1
+   },
+   {
+    "id": "sv-squeeze-2",
+    "mode": "survive",
+    "title": "The queenside squeeze",
+    "brief": "A cramped position against a stronger opponent. Keep your pieces defended and avoid pawn grabs.",
+    "tip": "When you are worse, trade the pieces that attack you, not the ones that defend you.",
+    "fen": "rr4k1/ppqb1pp1/2np1n1p/PB1p4/Q1Pp4/R3P2P/1P1NNPP1/4K2R w K - 0 15",
+    "moves": 14,
+    "floorCp": -400,
+    "goal": "hold",
+    "goalCp": 350,
+    "level": "l1600",
+    "tier": 2
+   },
+   {
+    "id": "sv-squeeze-3",
+    "mode": "survive",
+    "title": "Held back in the centre",
+    "brief": "Your opponent has more space and the better pieces. Hold the centre together and keep your king safe.",
+    "tip": "Find their best plan first. Then make the move that makes that plan harder, even if it looks passive.",
+    "fen": "rbbq1rk1/pp3ppp/5n2/3pp3/8/1N1B4/PPP2PPP/R1BQ1RK1 w - - 0 13",
+    "moves": 16,
+    "floorCp": -400,
+    "goal": "hold",
+    "goalCp": 350,
+    "level": "l2000",
+    "tier": 3
+   },
+   {
+    "id": "sv-squeeze-4",
+    "mode": "survive",
+    "title": "The uncomfortable king",
+    "brief": "Your king is not yet safe and Stockfish is happy to keep it that way. Survive 16 moves.",
+    "tip": "Before moving, ask where their pieces want to go next and take that square away.",
+    "fen": "r3k2r/pp1bqppp/1bn5/4p3/4n3/1N2B3/PPPQ1PPP/R3KBNR w KQkq - 10 14",
+    "moves": 16,
+    "floorCp": -400,
+    "goal": "hold",
+    "goalCp": 350,
+    "level": "max",
+    "tier": 4
+   },
+   {
+    "id": "dr-philidor",
+    "mode": "draw",
+    "title": "Philidor: hold the rook ending",
+    "brief": "White has an extra pawn on e5. Keep your rook on the sixth rank until the pawn moves, then switch to checking from behind.",
+    "tip": "Rook on the sixth rank until the pawn advances, then check from behind. The king stays near e8.",
+    "fen": "4k3/8/7r/3KP3/8/8/8/R7 b - - 0 1",
+    "moves": 16,
+    "floorCp": -150,
+    "goal": "hold",
+    "goalCp": 350,
+    "level": "max",
+    "tier": 1
+   },
+   {
+    "id": "dr-queen-pawn",
+    "mode": "draw",
+    "title": "Queen against a rook pawn",
+    "brief": "Your pawn on a2 is one step from queening, but White’s queen is faster. Only one move holds the draw here, and it relies on stalemate.",
+    "tip": "Against a queen, a pawn on the seventh with the king close by can force stalemate. Find the move that does not lose at once.",
+    "fen": "8/8/8/3Q4/8/2K5/p7/1k6 b - - 0 1",
+    "moves": 12,
+    "floorCp": -150,
+    "goal": "hold",
+    "goalCp": 350,
+    "level": "max",
+    "tier": 2
+   },
+   {
+    "id": "cv-kq-mate",
+    "mode": "convert",
+    "title": "Queen and king against king",
+    "brief": "Checkmate with a queen and king. Box the king in with queen moves a knight’s distance away, then bring your king up.",
+    "tip": "Never give stalemate: leave the enemy king one square until the last move.",
+    "fen": "8/8/8/3k4/8/8/8/Q3K3 w - - 0 1",
+    "moves": 14,
+    "floorCp": 300,
+    "goal": "mate",
+    "goalCp": 350,
+    "level": "l800",
+    "tier": 1
+   },
+   {
+    "id": "cv-kr-mate",
+    "mode": "convert",
+    "title": "Rook and king against king",
+    "brief": "Checkmate with a rook and king. Cut the king off along a rank, bring your king to meet it, and use the rook to mate on the edge.",
+    "tip": "Use the opposition: kings face each other with one square between, then a rook check finishes.",
+    "fen": "8/8/8/8/3k4/8/8/R3K3 w - - 0 1",
+    "moves": 18,
+    "floorCp": 300,
+    "goal": "mate",
+    "goalCp": 350,
+    "level": "l1200",
+    "tier": 2
+   },
+   {
+    "id": "cv-lucena",
+    "mode": "convert",
+    "title": "The Lucena position",
+    "brief": "You have an extra pawn on the seventh, but your king is in front of it. Build the bridge with your rook and shield your king from the checks.",
+    "tip": "Rook to the fourth rank is the bridge: when the checks come, step the king out and block with the rook.",
+    "fen": "3K4/3P1k2/8/8/8/8/r7/2R5 w - - 0 1",
+    "moves": 15,
+    "floorCp": 200,
+    "goal": "promote",
+    "goalCp": 350,
+    "level": "max",
+    "tier": 3
+   },
+   {
+    "id": "cv-grow-1",
+    "mode": "convert",
+    "title": "Make the extra edge count",
+    "brief": "You are clearly better. Do not rush: trade pieces, remove their counterplay and grow the advantage to a clearly winning +3.5.",
+    "tip": "When you are better, trade the active enemy pieces and keep your king safe.",
+    "fen": "5rk1/rbppqpp1/np3n1p/p3p3/2PPP3/2P2NP1/P4PBP/1RBQ1RK1 w - - 1 13",
+    "moves": 16,
+    "floorCp": 60,
+    "goal": "eval",
+    "goalCp": 350,
+    "level": "l1600",
+    "tier": 3
+   },
+   {
+    "id": "cv-grow-2",
+    "mode": "convert",
+    "title": "Convert the better position",
+    "brief": "The evaluation is in your favour but the position is still full of pieces. Find the safest route to a decisive edge.",
+    "tip": "A better position is won with the safest moves, not the cleverest ones.",
+    "fen": "r1b2knr/pp1pb2p/2q2p2/2p1p3/P3N2N/3P2P1/1PP2P1P/R1BQK2R w KQ - 2 13",
+    "moves": 16,
+    "floorCp": 60,
+    "goal": "eval",
+    "goalCp": 350,
+    "level": "l2000",
+    "tier": 4
+   }
+  ],
   "framework": {
    "letters": {
     "S": {
@@ -52095,6 +52668,288 @@
      "No threat"
     ]
    }
+  },
+  "dayFunnel": {
+   "enabled": true,
+   "dismissAdvances": true,
+   "youtube": {
+    "subscribers": 0,
+    "threshold": 1000,
+    "channelUrl": "",
+    "videos": [
+     {
+      "title": "The MSPC System in ten minutes",
+      "url": "https://www.youtube.com/@lanckrietchess"
+     }
+    ]
+   },
+   "steps": [
+    {
+     "id": "feedback",
+     "on": true,
+     "audience": "all",
+     "title": "How do you like the hub so far?",
+     "body": "One tap tells {coach} what to build next.",
+     "fields": [
+      {
+       "id": "rating",
+       "type": "rating",
+       "label": "Your rating",
+       "max": 5
+      },
+      {
+       "id": "best",
+       "type": "text",
+       "label": "What do you like most? (optional)",
+       "max": 200,
+       "placeholder": "For example: the Trim review"
+      }
+     ],
+     "submit": "Send",
+     "skip": "Not now",
+     "thanks": "Thank you, that helps a lot.",
+     "reward": 1
+    },
+    {
+     "id": "youtube",
+     "on": true,
+     "audience": "all",
+     "variants": {
+      "below": {
+       "title": "Help the channel grow",
+       "body": "Every subscriber helps {coach} publish more free chess lessons. Subscribe, then claim your token.",
+       "buttons": [
+        {
+         "label": "Subscribe on YouTube",
+         "url": "{channelUrl}",
+         "reward": 2,
+         "primary": true
+        },
+        {
+         "label": "I already subscribed",
+         "reward": 2
+        }
+       ]
+      },
+      "above": {
+       "title": "A video for your level",
+       "body": "{videoTitle}. One lesson, picked for this week. Watch it and claim a token.",
+       "buttons": [
+        {
+         "label": "Watch on YouTube",
+         "url": "{videoUrl}",
+         "reward": 1,
+         "primary": true
+        }
+       ]
+      }
+     },
+     "skip": "Not now",
+     "thanks": "Token added. Enjoy."
+    },
+    {
+     "id": "tiktok-facebook",
+     "on": true,
+     "audience": "all",
+     "title": "Short lessons, wherever you scroll",
+     "body": "Pick the one you use: daily tactics on TikTok, longer breakdowns on Facebook.",
+     "buttons": [
+      {
+       "label": "TikTok",
+       "url": "{tiktok}",
+       "reward": 1,
+       "primary": true
+      },
+      {
+       "label": "Facebook",
+       "url": "{facebook}",
+       "reward": 1
+      }
+     ],
+     "skip": "Not now",
+     "thanks": "Token added."
+    },
+    {
+     "id": "community",
+     "on": true,
+     "audience": "all",
+     "title": "Train with other ambitious players",
+     "body": "The Skool community is where {coach} shares the free bootcamps, answers questions and posts new lessons first.",
+     "buttons": [
+      {
+       "label": "Open the community",
+       "url": "{skool}",
+       "reward": 1,
+       "primary": true
+      }
+     ],
+     "skip": "Not now",
+     "thanks": "See you in there."
+    },
+    {
+     "id": "instagram",
+     "on": true,
+     "audience": "all",
+     "title": "More chess in your feed",
+     "body": "Follow on Instagram and tap “Interested” on a reel. Your For You page then shows more chess, and {coach} posts the quick tips there first.",
+     "buttons": [
+      {
+       "label": "Follow on Instagram",
+       "url": "{instagram}",
+       "reward": 1,
+       "primary": true
+      }
+     ],
+     "skip": "Not now",
+     "thanks": "Token added."
+    },
+    {
+     "id": "about-you",
+     "on": true,
+     "audience": "all",
+     "title": "A bit about you",
+     "body": "So {coach} can make lessons that fit you. Every question is optional.",
+     "fields": [
+      {
+       "id": "age",
+       "type": "choice",
+       "label": "Your age",
+       "options": [
+        "Under 16",
+        "16–20",
+        "21–30",
+        "31–45",
+        "46+",
+        "Prefer not to say"
+       ],
+       "optional": true
+      },
+      {
+       "id": "years",
+       "type": "choice",
+       "label": "How long have you played chess?",
+       "options": [
+        "Under 1 year",
+        "1–3 years",
+        "3–10 years",
+        "10+ years"
+       ],
+       "optional": true
+      },
+      {
+       "id": "where",
+       "type": "choice",
+       "label": "Where do you play most?",
+       "options": [
+        "Chess.com",
+        "Lichess",
+        "Both",
+        "Over the board"
+       ],
+       "optional": true
+      }
+     ],
+     "submit": "Send",
+     "skip": "Not now",
+     "thanks": "Thanks. That is all I need.",
+     "reward": 1
+    },
+    {
+     "id": "goals",
+     "on": true,
+     "audience": "all",
+     "title": "Where do you want to be in a month?",
+     "body": "How do you see your improvement over the next month?",
+     "fields": [
+      {
+       "id": "goal",
+       "type": "choice",
+       "label": "My main goal",
+       "options": [
+        "Stop blundering pieces",
+        "Find a plan in the middlegame",
+        "Know my openings properly",
+        "Convert won endgames",
+        "Gain 100+ rating"
+       ]
+      },
+      {
+       "id": "vision",
+       "type": "text",
+       "label": "In your own words (optional)",
+       "max": 240,
+       "placeholder": "In a month I want to…"
+      }
+     ],
+     "submit": "Send",
+     "skip": "Not now",
+     "thanks": "Got it. A plan works backwards from that goal.",
+     "reward": 1
+    }
+   ]
+  },
+  "popupHub": {
+   "enabled": true,
+   "popups": [
+    {
+     "id": "wp-recurring",
+     "on": true,
+     "name": "Recurring working point: ask",
+     "trigger": "wp.recurring",
+     "title": "This one keeps coming back",
+     "body": "We noticed “{point}” is a recurring working point for you. Do you want more structured support to finally eliminate this mistake?",
+     "buttons": [
+      {
+       "label": "Yes, show me",
+       "action": "next",
+       "target": "wp-support"
+      },
+      {
+       "label": "Not now",
+       "action": "close",
+       "target": ""
+      }
+     ],
+     "audience": "free",
+     "cooldownHours": 72,
+     "maxShows": 3,
+     "webhook": ""
+    },
+    {
+     "id": "wp-support",
+     "on": true,
+     "name": "Recurring working point: support type",
+     "trigger": "chain",
+     "title": "What kind of support do you prefer?",
+     "body": "Pick the route that fits how you like to learn. You can always change your mind later.",
+     "buttons": [
+      {
+       "label": "Self-Study Vault",
+       "action": "route",
+       "target": "#upgrades"
+      },
+      {
+       "label": "Automated Roadmap",
+       "action": "route",
+       "target": "#system"
+      },
+      {
+       "label": "1-on-1 Mentorship",
+       "action": "builtin",
+       "target": "growthC"
+      },
+      {
+       "label": "Not right now",
+       "action": "close",
+       "target": ""
+      }
+     ],
+     "audience": "free",
+     "cooldownHours": 0,
+     "maxShows": 0,
+     "webhook": ""
+    }
+   ]
   }
  }
 }
