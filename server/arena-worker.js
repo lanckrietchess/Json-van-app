@@ -22,15 +22,19 @@
    chat for members at or above the coachChat level, within daily limits.
    Free players get no freeform AI. Secrets: ADMIN_TOKEN, PID_SALT and
    ANTHROPIC_API_KEY (optional MEMBER_KEYS for keys kept off GitHub).
+   v9 (VERSION 5): server-enforced tokens in two pockets (daily: Free 1 / Pro 10 / VIP unlimited, resets 00:00 UTC;
+   bonus: earned or bought, never resets, spent second), HTTP 403 when both are empty, and the Tier 3 auto-sync
+   routes. See the v9 section above the default export. New D1 tables: schema_v9_tokens_sync.sql.
+   New vars: SUPABASE_URL, SUPABASE_ANON_KEY, TOKENS_*, SYNC_BACKFILL_DAYS.
    ========================================================================== */
-const VERSION = 4, MAX_BODY = 98304, DAY = 864e5;
+const VERSION = 5, MAX_BODY = 98304, DAY = 864e5;
 const FEN = /^([pnbrqkPNBRQK1-8]{1,8}\/){7}[pnbrqkPNBRQK1-8]{1,8} [wb] (-|[KQkq]{1,4}) (-|[a-h][36]) \d{1,3} \d{1,4}$/;
 const SAN = /^(?:O-O(?:-O)?|[KQRBN][a-h]?[1-8]?x?[a-h][1-8]|[a-h](?:x[a-h])?[1-8](?:=[QRBN])?)[+#]?$/;
 const WEEK = /^\d{4}-W\d{2}$/, PID = /^[a-z0-9]{8,24}$/, DEVICE = /^[A-Za-z0-9_-]{8,80}$/;
 const METRICS = ['mspc', 'trim', 'all'], STATUS = ['queued', 'live', 'rejected', 'done'];
 
 const now = () => Date.now();
-const err = (reason, status) => Object.assign(new Error(reason), { reason, status: status || 400 });
+const err = (reason, status, extra) => Object.assign(new Error(reason), { reason, status: status || 400, extra });
 const str = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n) : '');
 const int = (v, lo, hi) => (v === null || v === undefined || v === '' || !Number.isFinite(+v) ? null : Math.min(hi, Math.max(lo, Math.round(+v))));
 
@@ -408,23 +412,21 @@ const ACTIONS = {
       system = coachBot ? coachSystem(doc, b.vars, b.context, own) : adminSystem(doc, bot, own, b.vars, b.context);
       cap = int(env.AI_DAILY_ADMIN, 1, 100000) || 300; maxTokens = int(env.MAX_TOKENS_ADMIN, 64, 8000) || 1600;
     } else if (coachBot) {                                            // members, from the coachChat level up
-      if (me.banned) return { ok: false, reason: 'revoked' };
-      const m = await member(env, b);
-      if (!m.entry) return { ok: false, reason: m.reason };
+      if (me.banned) throw err('revoked', 403);
+      const t = await tierOf(env, b, me);                              // resolved here from the licence key, never from the client's word
+      if (t.name === 'free') throw err(t.reason && t.reason !== 'unverified' ? t.reason : 'invalid', 403, { tier: 'free' });
       const gate = doc && doc.gates && Object.prototype.hasOwnProperty.call(LOCK_RANK, doc.gates.coachChat) ? doc.gates.coachChat : 'vault';
-      if (TIER_RANK[m.entry.tier] < LOCK_RANK[gate]) return { ok: false, reason: 'tier' };
-      const bound = await bind(env, m.hash, me.pid, m.proven);        // a typed key can claim this device; a bare hash must already be bound
-      if (bound !== 'ok') return { ok: false, reason: bound };
+      if (TIER_RANK[t.id] < LOCK_RANK[gate]) throw err('tier', 403, { tier: t.name });
       system = coachSystem(doc, b.vars, b.context, '');
-      cap = m.entry.tier === 'mentor' ? int(env.AI_DAILY_MENTOR, 1, 100000) || 150 : int(env.AI_DAILY, 1, 100000) || 60;
+      cap = t.id === 'mentor' ? int(env.AI_DAILY_MENTOR, 1, 100000) || 150 : int(env.AI_DAILY, 1, 100000) || 60;
       maxTokens = int(env.MAX_TOKENS, 64, 4000) || 700;
-    } else return { ok: false, reason: 'bot_off' };                  // e.g. the sales assistant: no freeform AI for free players
+    } else throw err('bot_off', 403);                                  // e.g. the sales assistant: no freeform AI for free players
     const messages = cleanMessages(b.messages);
     if (!messages.length) return { ok: false, reason: 'empty' };
     const day = today(), mine = await env.DB.prepare('SELECT n FROM ai_usage WHERE day = ? AND pid = ?').bind(day, me.pid).first();
-    if (mine && mine.n >= cap) return { ok: false, reason: 'limit' };
+    if (mine && mine.n >= cap) throw err('limit', 403, { limit: cap });
     const all = await env.DB.prepare('SELECT SUM(n) AS n FROM ai_usage WHERE day = ?').bind(day).first();
-    if (all && all.n >= (int(env.AI_DAILY_TOTAL, 1, 10000000) || 2000)) return { ok: false, reason: 'busy' };
+    if (all && all.n >= (int(env.AI_DAILY_TOTAL, 1, 10000000) || 2000)) throw err('busy', 503);
     const r = await askClaude(env, system, messages, maxTokens);
     if (!r.text) return { ok: false, reason: r.reason };
     await env.DB.prepare('INSERT INTO ai_usage (day, pid, n, input, output) VALUES (?, ?, 1, ?, ?) ON CONFLICT (day, pid) DO UPDATE SET n = ai_usage.n + 1, input = ai_usage.input + excluded.input, output = ai_usage.output + excluded.output')
@@ -1047,11 +1049,391 @@ const V6_ACTIONS = {
 };
 Object.assign(ACTIONS, V6_ACTIONS);
 
+
+/* ==========================================================================
+   v9: server-enforced daily tokens and the Tier 3 auto-sync engine
+
+   Tokens. Two pockets per owner, both counted here and nowhere else:
+     DAILY   Free 1 (TOKENS_FREE), Pro 10 (TOKENS_PRO), VIP unlimited (shown as
+             "Unlimited"; TOKENS_VIP_CAP is a hidden cost fuse). Resets at 00:00 UTC.
+     BONUS   earned or bought tokens. They never reset, and are spent only when the
+             daily pocket is empty, so buying never wastes the daily tokens.
+     Earned tokens are reported by the hub (token_grant, idempotent per ref, capped per
+     day and per network because the server cannot see a bounty being completed);
+     purchases are refused from the hub until a store receipt is checked server-side;
+     the admin can add or remove tokens (a5_token_grant). A paid owner is the licence (so two devices share one pool and
+     clearing storage resets nothing); a free owner is the device (pid), with
+     a per-network fuse (TOKENS_FREE_IP_CAP) against storage-clearing scripts.
+     The tier is resolved HERE from the licence key, never from what the
+     client says: first the Supabase licence (lc_license_status), then the
+     legacy key list of content.json / MEMBER_KEYS.
+     token_spend answers HTTP 403 { reason: 'token_limit' } when the pool is
+     used up. The same game reviewed twice on one day costs one token.
+
+   Auto-sync (VIP only). The server never runs an engine. It stores the linked
+   usernames, fetches new games from the public Chess.com / Lichess APIs
+   (cached, newest first, de-duplicated across devices), and stores one small
+   stats row per scanned game for the macro audit. The hub scans the games
+   with its own Stockfish and keeps positions and PGNs on the device.
+   ========================================================================== */
+const TIER_NAMES = { free: 'free', community: 'free', vault: 'pro', mentor: 'vip' }, TIER_LABELS = { free: 'Free', pro: 'Pro', vip: 'VIP' };
+const envInt = (v, lo, hi, d) => { const n = int(v, lo, hi); return n === null ? d : n; };
+const nextMidnight = () => { const d = new Date(now()); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1); };
+const KEY_JUNK = /[\u0000-\u0020\u007f\u200b-\u200d\ufeff]/g;
+
+/* The Supabase licence for a key on this device. Cached five minutes; when Supabase is
+   unreachable the last good answer (up to 24 hours old) is kept, so a Supabase outage
+   never drops paying members to the free limits. */
+const SB_CACHE = new Map();
+async function supaLicence(env, key, device) {
+  const url = String(env.SUPABASE_URL || '').trim().replace(/\/+$/, ''), anon = String(env.SUPABASE_ANON_KEY || '').trim();
+  if (!/^https:\/\/[a-z0-9.-]+$/i.test(url) || !anon) return null;
+  const ck = key + '|' + device, hit = SB_CACHE.get(ck), t = now();
+  if (hit && t - hit.at < 3e5) return hit.v;
+  let v = null;
+  try {
+    const r = await fetch(url + '/rest/v1/rpc/lc_license_status', {
+      method: 'POST', headers: { apikey: anon, Authorization: 'Bearer ' + anon, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ p_key: key, p_device: device }), signal: AbortSignal.timeout(6000)
+    });
+    const j = r.ok ? await r.json().catch(() => null) : null;
+    if (j && typeof j === 'object') v = j.ok === true && (+j.tier === 2 || +j.tier === 3) ? { id: +j.tier === 3 ? 'mentor' : 'vault' } : { id: 'free', reason: str(String(j.error || 'invalid'), 30) };
+  } catch (e) { /* kept below */ }
+  if (!v) return hit && t - hit.at < 864e5 ? hit.v : null;
+  if (SB_CACHE.size > 500) SB_CACHE.clear();
+  SB_CACHE.set(ck, { at: t, v });
+  return v;
+}
+/* { id, name, owner, keyPresented, reason }. id is the legacy tier id (free, community, vault, mentor). */
+async function tierOf(env, b, me) {
+  if (isAdmin(env, { token: b.secret })) return { id: 'mentor', name: 'vip', owner: 'adm:' + me.pid.slice(0, 12), keyPresented: false, admin: true };
+  const raw = typeof b.token === 'string' ? b.token.replace(KEY_JUNK, '') : '', presented = !!raw || (typeof b.hash === 'string' && HEX64.test(b.hash));
+  let reason = presented ? 'unverified' : '';
+  if (raw && KEYTOKEN.test(raw)) {
+    const key = raw.toUpperCase(), s = await supaLicence(env, key, String(b.device || ''));
+    if (s && s.id !== 'free') return { id: s.id, name: TIER_NAMES[s.id], owner: 'lic:' + (await hashKey(key)).slice(0, 20), keyPresented: true };
+    if (s && s.reason) reason = s.reason;
+  }
+  if (presented) {
+    const m = await member(env, b);
+    if (m.entry && TIER_RANK[m.entry.tier] > 0) {
+      if (await bind(env, m.hash, me.pid, m.proven) === 'ok') return { id: m.entry.tier, name: TIER_NAMES[m.entry.tier], owner: 'lic:' + m.hash.slice(0, 20), keyPresented: true };
+      reason = 'unbound';
+    } else if (m.reason && m.reason !== 'invalid') reason = m.reason;
+  }
+  return { id: 'free', name: 'free', owner: me.pid, keyPresented: presented, reason };
+}
+function limitsOf(env, name) {
+  if (name === 'vip') return { limit: envInt(env.TOKENS_VIP_CAP, 1, 100000, 500), unlimited: true };
+  if (name === 'pro') return { limit: envInt(env.TOKENS_PRO, 1, 1000, 10), unlimited: false };
+  return { limit: envInt(env.TOKENS_FREE, 0, 100, 1), unlimited: false };
+}
+function tokenView(env, t, used, bonus) {
+  const L = limitsOf(env, t.name);
+  return { day: today(), tier: t.name, label: TIER_LABELS[t.name], unlimited: L.unlimited, limit: L.unlimited ? null : L.limit, used, left: L.unlimited ? null : Math.max(0, L.limit - used), bonus: bonus || 0, resetsAt: nextMidnight(),
+    verified: !(t.keyPresented && t.name === 'free'), reason: t.keyPresented && t.name === 'free' ? str(t.reason || 'unverified', 30) : '' };
+}
+async function tokenUsed(env, owner) {
+  const r = await env.DB.prepare('SELECT n FROM token_ledger WHERE owner = ? AND day = ?').bind(owner, today()).first();
+  return r ? r.n : 0;
+}
+async function bonusOf(env, owner) {
+  const r = await env.DB.prepare('SELECT n FROM token_bonus WHERE owner = ?').bind(owner).first();
+  return r ? r.n : 0;
+}
+/* Bonus tokens earned while the player was Free belong to the player (pid). When the player gets a
+   licence they move to the licence once (one transaction), so an upgrade never strands them. */
+async function adoptBonus(env, t, me) {
+  if (t.owner === me.pid || t.owner.indexOf('lic:') !== 0) return;
+  const mine = await env.DB.prepare('SELECT n FROM token_bonus WHERE owner = ?').bind(me.pid).first();
+  if (!mine || mine.n < 1) return;
+  await env.DB.batch([
+    env.DB.prepare('INSERT INTO token_bonus (owner, n, updated) SELECT ?, n, ? FROM token_bonus WHERE owner = ? ON CONFLICT (owner) DO UPDATE SET n = token_bonus.n + excluded.n, updated = excluded.updated').bind(t.owner, now(), me.pid),
+    env.DB.prepare('DELETE FROM token_bonus WHERE owner = ?').bind(me.pid)
+  ]);
+}
+/* Adds n to the owner's day total only when the total stays within max. Atomic: one statement. */
+async function guardedAdd(env, owner, n, max) {
+  if (n > max) return null;
+  const r = await env.DB.prepare('INSERT INTO token_ledger (owner, day, n, updated) VALUES (?, ?, ?, ?) ON CONFLICT (owner, day) DO UPDATE SET n = token_ledger.n + ?, updated = ? WHERE token_ledger.n + ? <= ? RETURNING n')
+    .bind(owner, today(), n, now(), n, now(), n, max).first();
+  return r ? r.n : null;
+}
+
+/* One token: today's pocket first; the bonus pocket only when today's is used up. 'daily', 'bonus' or null. */
+async function takeOne(env, t, L, ipOwner, ctx) {
+  if (L.limit > 0 && (await guardedAdd(env, t.owner, 1, L.limit)) !== null) {
+    if (!ipOwner || (await guardedAdd(env, ipOwner, 1, envInt(env.TOKENS_FREE_IP_CAP, 1, 10000, 20))) !== null) return 'daily';
+    ctx.fused = true;
+    await env.DB.prepare('UPDATE token_ledger SET n = MAX(0, n - 1) WHERE owner = ? AND day = ?').bind(t.owner, today()).run();   // the network fuse refused: the daily token goes back
+  }
+  const r = await env.DB.prepare('UPDATE token_bonus SET n = n - 1, updated = ? WHERE owner = ? AND n >= 1 RETURNING n').bind(now(), t.owner).first();
+  return r ? 'bonus' : null;
+}
+async function giveBack(env, t, taken, ipOwner) {
+  const d = taken.filter((x) => x === 'daily').length, k = taken.length - d, day = today();
+  if (d) await env.DB.prepare('UPDATE token_ledger SET n = MAX(0, n - ?) WHERE owner = ? AND day = ?').bind(d, t.owner, day).run();
+  if (d && ipOwner) await env.DB.prepare('UPDATE token_ledger SET n = MAX(0, n - ?) WHERE owner = ? AND day = ?').bind(d, ipOwner, day).run();
+  if (k) await env.DB.prepare('UPDATE token_bonus SET n = n + ?, updated = ? WHERE owner = ?').bind(k, now(), t.owner).run();
+}
+
+const SYNC_SITES = { chesscom: 1, lichess: 1 }, SYNC_GID = /^[cl]:[A-Za-z0-9_-]{4,24}$/, SYNC_TC = ['bullet', 'blitz', 'rapid', 'classical', 'daily'], SYNC_ROWS = 5000;
+const CC_DRAW = { agreed: 1, repetition: 1, stalemate: 1, insufficient: 1, '50move': 1, timevsinsufficient: 1 };
+async function vipOf(env, b) {
+  const me = await touch(env, b);
+  if (me.banned) throw err('revoked', 403);
+  const t = await tierOf(env, b, me);
+  if (t.name !== 'vip') throw err('tier', 403, { need: 'vip', tier: t.name });
+  return { me, t, owner: t.owner };
+}
+async function jfetch(url, ttl, ndjson) {
+  try {
+    const r = await fetch(url, { headers: { Accept: ndjson ? 'application/x-ndjson' : 'application/json', 'User-Agent': 'lanckriet-arena/' + VERSION }, signal: AbortSignal.timeout(15000), cf: ttl ? { cacheTtl: ttl, cacheEverything: true } : undefined });
+    if (r.status === 404 || r.status === 410) return { _missing: true };
+    if (r.status === 429) return { _busy: true };
+    if (!r.ok) return null;
+    return ndjson ? await r.text() : await r.json();
+  } catch (e) { return null; }
+}
+async function seenGids(env, owner, gids) {
+  const out = new Set();
+  for (let i = 0; i < gids.length; i += 90) {
+    const ids = gids.slice(i, i + 90);
+    if (!ids.length) break;
+    (await env.DB.prepare('SELECT gid FROM sync_games WHERE owner = ? AND gid IN (' + ids.map(() => '?').join(',') + ')').bind(owner, ...ids).all()).results.forEach((r) => out.add(r.gid));
+  }
+  return out;
+}
+function ccGame(g, user) {
+  if (!g || typeof g.pgn !== 'string' || !g.pgn || (g.rules && g.rules !== 'chess') || !g.white || !g.black) return null;
+  const me = String(g.white.username || '').toLowerCase() === user ? g.white : String(g.black.username || '').toLowerCase() === user ? g.black : null;
+  if (!me) return null;
+  const opp = me === g.white ? g.black : g.white, id = String(g.url || '').split('/').pop(), t = Math.round(+g.end_time * 1000);
+  if (!/^[A-Za-z0-9_-]{4,24}$/.test(id) || !Number.isFinite(t)) return null;
+  return { gid: 'c:' + id, site: 'chesscom', t, url: /^https:\/\/www\.chess\.com\//.test(String(g.url)) ? String(g.url) : '', pgn: g.pgn.slice(0, 30000), color: me === g.white ? 'w' : 'b',
+    result: me.result === 'win' ? 'win' : CC_DRAW[me.result] ? 'draw' : 'loss', tc: SYNC_TC.indexOf(g.time_class) >= 0 ? g.time_class : 'rapid', rated: !!g.rated, me: { rating: int(me.rating, 100, 4000) }, opp: { rating: int(opp.rating, 100, 4000) } };
+}
+function liGame(g, user) {
+  if (!g || !g.id || (g.variant && g.variant !== 'standard') || /^(created|started|aborted|noStart|unknownFinish)$/.test(String(g.status || '')) || typeof g.pgn !== 'string' || !g.pgn) return null;
+  const w = g.players && g.players.white, k = g.players && g.players.black;
+  if (!w || !k || !w.user || !k.user) return null;                                   // games against the computer have no user
+  const me = String(w.user.name || '').toLowerCase() === user ? w : String(k.user.name || '').toLowerCase() === user ? k : null;
+  if (!me || !/^[A-Za-z0-9_-]{4,24}$/.test(String(g.id))) return null;
+  const opp = me === w ? k : w, color = me === w ? 'w' : 'b', t = Math.round(+g.createdAt);
+  if (!Number.isFinite(t)) return null;
+  const sp = String(g.speed || ''), tc = sp === 'ultraBullet' ? 'bullet' : sp === 'correspondence' ? 'daily' : SYNC_TC.indexOf(sp) >= 0 ? sp : 'rapid';
+  return { gid: 'l:' + g.id, site: 'lichess', t, url: 'https://lichess.org/' + g.id, pgn: g.pgn.slice(0, 30000), color, result: !g.winner ? 'draw' : (g.winner === 'white') === (color === 'w') ? 'win' : 'loss', tc, rated: !!g.rated, me: { rating: int(me.rating, 100, 4000) }, opp: { rating: int(opp.rating, 100, 4000) } };
+}
+/* Newest first. before is inclusive (the hub skips games it already has), since is the backfill horizon. */
+async function ccPage(env, owner, user, since, before, limit) {
+  const u = encodeURIComponent(user.toLowerCase()), arch = await jfetch('https://api.chess.com/pub/player/' + u + '/games/archives', 1800);
+  if (!arch || arch._busy) return { error: 'busy' };
+  if (arch._missing) return { error: 'not-found' };
+  const months = (Array.isArray(arch.archives) ? arch.archives : []).map((url) => { const m = /^https:\/\/api\.chess\.com\/pub\/player\/[\w-]+\/games\/(\d{4})\/(\d{2})$/.exec(String(url)); return m ? { url, start: Date.UTC(+m[1], +m[2] - 1, 1), end: Date.UTC(+m[1], +m[2], 1) } : null; })
+    .filter((m) => m && m.end > since && m.start <= before).sort((a, c) => c.start - a.start);
+  let out = [], fetched = 0, i = 0;
+  for (; i < months.length && fetched < 3; i++, fetched++) {
+    const m = months[i], j = await jfetch(m.url, m.end > now() ? 120 : 3600);
+    if (!j || j._busy) return { error: 'busy' };
+    const list = (j.games || []).map((g) => ccGame(g, user.toLowerCase())).filter((g) => g && g.t >= since && g.t <= before);
+    const seen = await seenGids(env, owner, list.map((g) => g.gid));
+    out = out.concat(list.filter((g) => !seen.has(g.gid)).sort((a, c) => c.t - a.t));
+    if (out.length >= limit) { out = out.slice(0, limit); return { games: out, next: out[out.length - 1].t, done: false }; }
+  }
+  if (i < months.length) return { games: out, next: months[i - 1].start - 1, done: false };
+  return { games: out, next: 0, done: true };
+}
+async function liPage(env, owner, user, since, before, limit) {
+  const max = Math.min(60, limit * 3), q = '?since=' + since + '&until=' + (before + 1) + '&max=' + max + '&pgnInJson=true&opening=false&clocks=false&evals=false';
+  const txt = await jfetch('https://lichess.org/api/games/user/' + encodeURIComponent(user) + q, 0, true);
+  if (txt === null || (txt && txt._busy)) return { error: 'busy' };
+  if (txt._missing) return { error: 'not-found' };
+  const lines = String(txt).split('\n').map((l) => { try { return l.trim() ? JSON.parse(l) : null; } catch (e) { return null; } }).filter(Boolean);
+  const list = lines.map((g) => liGame(g, user.toLowerCase())).filter(Boolean), seen = await seenGids(env, owner, list.map((g) => g.gid));
+  let out = list.filter((g) => !seen.has(g.gid)).sort((a, c) => c.t - a.t);
+  if (out.length > limit) { out = out.slice(0, limit); return { games: out, next: out[out.length - 1].t, done: false }; }
+  if (lines.length >= max) { const last = lines[lines.length - 1]; return { games: out, next: Math.round(+last.createdAt) - 1 || 0, done: false }; }
+  return { games: out, next: 0, done: true };
+}
+const n0 = (v, hi) => int(v, 0, hi || 99) || 0;
+function cleanSyncRow(x, t0) {
+  if (!x || typeof x !== 'object' || !SYNC_GID.test(String(x.gid || ''))) return null;
+  const t = Math.round(+x.t);
+  if (!Number.isFinite(t) || t < t0 - 800 * DAY || t > t0 + 5 * 60000) return null;
+  return { gid: String(x.gid), t, color: x.color === 'b' ? 'b' : 'w', result: /^(win|draw|loss)$/.test(String(x.result)) ? String(x.result) : 'draw', opening: str(x.opening, 60), tc: SYNC_TC.indexOf(x.tc) >= 0 ? x.tc : 'rapid',
+    rating: int(x.rating, 100, 4000), opp: int(x.opp, 100, 4000), acc: int(x.acc, 0, 100), bl: n0(x.bl), mi: n0(x.mi), ia: n0(x.ia), br: n0(x.br), gr: n0(x.gr), plies: n0(x.plies, 700),
+    ph_o: n0(x.ph_o), ph_m: n0(x.ph_m), ph_e: n0(x.ph_e), k_m: n0(x.k_m), k_s: n0(x.k_s), k_p: n0(x.k_p), k_c: n0(x.k_c) };
+}
+/* The macro audit: everything the Tier 3 page shows, computed from the per-game rows. */
+function macroAudit(rows, days) {
+  const r1 = (x) => Math.round(x * 10) / 10, r0 = Math.round, avg = (a, f) => { const v = a.map(f).filter((x) => x !== null && x !== undefined); return v.length ? r1(v.reduce((s, x) => s + x, 0) / v.length) : null; };
+  const sum = (a, f) => a.reduce((s, r) => s + (+f(r) || 0), 0), pct = (a, b) => (b ? r0((a / b) * 100) : 0), per = (a, n) => (n ? Math.round((a / n) * 100) / 100 : 0);
+  const stat = (a) => ({ games: a.length, winRate: pct(a.filter((r) => r.result === 'win').length, a.length), drawRate: pct(a.filter((r) => r.result === 'draw').length, a.length), acc: avg(a, (r) => r.acc), blPerGame: per(sum(a, (r) => r.bl), a.length), miPerGame: per(sum(a, (r) => r.mi), a.length) });
+  const n = rows.length, phase = { opening: sum(rows, (r) => r.ph_o), middlegame: sum(rows, (r) => r.ph_m), endgame: sum(rows, (r) => r.ph_e) }, pt = phase.opening + phase.middlegame + phase.endgame;
+  const mspc = { M: sum(rows, (r) => r.k_m), S: sum(rows, (r) => r.k_s), P: sum(rows, (r) => r.k_p), C: sum(rows, (r) => r.k_c) }, mt = mspc.M + mspc.S + mspc.P + mspc.C;
+  const wk = {};
+  rows.forEach((r) => { (wk[isoWeek(r.t)] = wk[isoWeek(r.t)] || []).push(r); });
+  const weekly = Object.keys(wk).sort().slice(-12).map((k) => { const a = wk[k].slice().sort((x, y) => x.t - y.t), s = stat(a); return { wk: k, games: s.games, acc: s.acc, blPerGame: s.blPerGame, winRate: s.winRate, rating: (a.filter((r) => r.rating).pop() || {}).rating || null }; });
+  const tc = {};
+  SYNC_TC.forEach((k) => { const a = rows.filter((r) => r.tc === k); if (a.length) tc[k] = stat(a); });
+  const op = {};
+  rows.forEach((r) => { const k = r.color + '|' + (r.opening || 'Unknown'); (op[k] = op[k] || []).push(r); });
+  const openings = Object.keys(op).map((k) => Object.assign({ name: k.slice(2), color: k[0] }, stat(op[k]))).map((o) => Object.assign(o, { flawsPerGame: r1(o.blPerGame + o.miPerGame) }));
+  const rating = {};
+  [['chesscom', 'c:'], ['lichess', 'l:']].forEach(([site, p]) => {
+    const a = rows.filter((r) => r.gid.indexOf(p) === 0 && r.rating).sort((x, y) => x.t - y.t);
+    if (a.length) rating[site] = { first: a[0].rating, last: a[a.length - 1].rating, delta: a[a.length - 1].rating - a[0].rating, peak: Math.max.apply(null, a.map((r) => r.rating)), games: a.length };
+  });
+  return { days, totals: Object.assign(stat(rows), { brilliant: sum(rows, (r) => r.br), great: sum(rows, (r) => r.gr), inaccPerGame: per(sum(rows, (r) => r.ia), n), plies: per(sum(rows, (r) => r.plies), n) }),
+    weekly, phase: { opening: pct(phase.opening, pt), middlegame: pct(phase.middlegame, pt), endgame: pct(phase.endgame, pt), flaws: pt }, mspc: { M: pct(mspc.M, mt), S: pct(mspc.S, mt), P: pct(mspc.P, mt), C: pct(mspc.C, mt), flaws: mt },
+    color: { w: stat(rows.filter((r) => r.color === 'w')), b: stat(rows.filter((r) => r.color === 'b')) }, tc,
+    openings: openings.slice().sort((a, c) => c.games - a.games || (a.name < c.name ? -1 : 1)).slice(0, 8),
+    worstOpenings: openings.filter((o) => o.games >= 3).sort((a, c) => c.flawsPerGame - a.flawsPerGame).slice(0, 4), rating };
+}
+
+const V9_ACTIONS = {
+  /* Both pockets for this player; the hub's counter and the "Unlimited" badge read this. */
+  async token_state(b, env) {
+    const me = await touch(env, b);
+    await quota(env, me.pid, 'tokstate', 1, 3000);
+    const t = await tierOf(env, b, me);
+    await adoptBonus(env, t, me);
+    return { pid: me.pid, state: tokenView(env, t, await tokenUsed(env, t.owner), await bonusOf(env, t.owner)) };
+  },
+  /* One token for one review (kind trim or interrogation, the ref is the game) or n tokens for a wallet spend.
+     Daily pocket first, bonus pocket second. The same ref on the same day is never charged twice.
+     Both pockets empty: HTTP 403 token_limit. */
+  async token_spend(b, env) {
+    const me = await touch(env, b);
+    if (me.banned) throw err('revoked', 403);
+    const kind = ['trim', 'interrogation', 'wallet'].indexOf(b.kind) >= 0 ? b.kind : 'trim', ref = String(b.ref || '');
+    if (!/^[\w:|.-]{1,120}$/.test(ref)) throw err('bad_input');
+    await quota(env, me.pid, 'tokcall', 1, 2000);
+    const t = await tierOf(env, b, me);
+    await adoptBonus(env, t, me);
+    const owner = t.owner, L = limitsOf(env, t.name), cost = kind === 'wallet' ? int(b.n, 1, 10) || 1 : 1, day = today(), ctx = { fused: false };
+    const view = async () => tokenView(env, t, await tokenUsed(env, owner), await bonusOf(env, owner));
+    const log = await env.DB.prepare('INSERT OR IGNORE INTO token_spend (owner, day, ref, kind, t) VALUES (?, ?, ?, ?, ?)').bind(owner, day, ref, kind, now()).run();
+    if (!log.meta.changes) return { charged: false, state: await view() };                                          // already paid today
+    const ipOwner = t.name === 'free' && b.__ip ? 'ip:' + (await hashId(env, 'ip|' + b.__ip, 12)) : '';            // per-network fuse, free players only
+    const taken = [];
+    for (let i = 0; i < cost; i++) { const s = await takeOne(env, t, L, ipOwner, ctx); if (!s) break; taken.push(s); }
+    if (taken.length < cost) {
+      await giveBack(env, t, taken, ipOwner);
+      await env.DB.prepare('DELETE FROM token_spend WHERE owner = ? AND day = ? AND ref = ?').bind(owner, day, ref).run();
+      throw err('token_limit', 403, { tier: t.name, scope: ctx.fused ? 'network' : 'daily', state: await view() });
+    }
+    const fromBonus = taken.filter((x) => x === 'bonus').length;
+    return { charged: true, fromDaily: cost - fromBonus, fromBonus, state: await view() };
+  },
+  /* Earned tokens go to the bonus pocket. The hub reports them (a bounty is completed on the device, the
+     server cannot see it), so they are idempotent per ref and capped per day and per network (free players).
+     Over the cap: HTTP 429 earn_cap, the hub keeps the grant and tries again after midnight UTC. */
+  async token_grant(b, env) {
+    const me = await touch(env, b);
+    if (me.banned) throw err('revoked', 403);
+    const n = int(b.n, 1, 100), ref = String(b.ref || ''), src = /^[a-z0-9_-]{1,20}$/.test(String(b.source || '')) ? String(b.source) : 'earn';
+    if (!n || !/^[\w:|.-]{1,120}$/.test(ref)) throw err('bad_input');
+    await quota(env, me.pid, 'tokgrant', 1, 400);
+    const t = await tierOf(env, b, me);
+    await adoptBonus(env, t, me);
+    const owner = t.owner, view = async () => tokenView(env, t, await tokenUsed(env, owner), await bonusOf(env, owner)), day = today();
+    if (src === 'purchase' && !t.admin) throw err('purchase_unverified', 403, { state: await view() });             // a purchase must be confirmed with the store on the server, never by the hub
+    const log = await env.DB.prepare('INSERT OR IGNORE INTO token_grant_log (owner, ref, src, n, t) VALUES (?, ?, ?, ?, ?)').bind(owner, ref, src, n, now()).run();
+    if (!log.meta.changes) return { granted: false, state: await view() };
+    const undo = async (reason, status, took) => {
+      for (const o of took) await env.DB.prepare('UPDATE token_ledger SET n = MAX(0, n - ?) WHERE owner = ? AND day = ?').bind(n, o, day).run();
+      await env.DB.prepare('DELETE FROM token_grant_log WHERE owner = ? AND ref = ?').bind(owner, ref).run();
+      throw err(reason, status, { state: await view() });
+    };
+    if (!t.admin) {
+      if ((await guardedAdd(env, 'earn:' + owner, n, envInt(env.TOKENS_EARN_DAY_CAP, 1, 100000, 20))) === null) await undo('earn_cap', 429, []);
+      if (t.name === 'free' && b.__ip) {
+        const ipOwner = 'ipearn:' + (await hashId(env, 'ip|' + b.__ip, 12));
+        if ((await guardedAdd(env, ipOwner, n, envInt(env.TOKENS_EARN_IP_CAP, 1, 100000, 60))) === null) await undo('earn_cap', 429, ['earn:' + owner]);
+      }
+    }
+    const r = await env.DB.prepare('INSERT INTO token_bonus (owner, n, updated) VALUES (?, ?, ?) ON CONFLICT (owner) DO UPDATE SET n = token_bonus.n + ?, updated = ? WHERE token_bonus.n + ? <= 100000 RETURNING n').bind(owner, n, now(), n, now(), n).first();
+    if (!r) await undo('bonus_full', 400, t.admin ? [] : ['earn:' + owner]);
+    return { granted: true, n, state: await view() };
+  },
+  /* Admin (ADMIN_TOKEN): add or remove bonus tokens for a licence (key) or a player (pid). */
+  async a5_token_grant(b, env) {
+    needAdmin(env, b);
+    const key = typeof b.key === 'string' ? b.key.replace(KEY_JUNK, '') : '';
+    let owner = '';
+    if (key && KEYTOKEN.test(key)) owner = 'lic:' + (await hashKey(key)).slice(0, 20);
+    else if (PID.test(String(b.pid || ''))) owner = String(b.pid);
+    else throw err('bad_input');
+    const n = int(b.n, -10000, 10000);
+    if (!n) throw err('bad_input');
+    const r = await env.DB.prepare('INSERT INTO token_bonus (owner, n, updated) VALUES (?, MAX(0, ?), ?) ON CONFLICT (owner) DO UPDATE SET n = MAX(0, token_bonus.n + ?), updated = ? RETURNING n').bind(owner, n, now(), n, now()).first();
+    return { owner, bonus: r.n };
+  },
+
+  /* ----- Tier 3 auto-sync ----- */
+  async sync_profile(b, env) {
+    const { me, owner } = await vipOf(env, b), op = ['list', 'save', 'remove'].indexOf(b.op) >= 0 ? b.op : 'list', DB = env.DB;
+    if (op !== 'list') {
+      const site = String(b.site || '');
+      if (!SYNC_SITES[site]) throw err('bad_input');
+      if (op === 'remove') await DB.prepare('DELETE FROM sync_accounts WHERE owner = ? AND site = ?').bind(owner, site).run();
+      else {
+        await quota(env, me.pid, 'syncprofile', 1, 40);
+        const user = String(b.user || '').trim();
+        if (!/^[A-Za-z0-9_-]{2,30}$/.test(user)) throw err('bad_input');
+        const p = await eloFetch(env, site, user);
+        if (!p) throw err('busy', 503);
+        if (p.missing) return { ok: false, reason: 'not-found' };
+        const old = await DB.prepare('SELECT uname, since FROM sync_accounts WHERE owner = ? AND site = ?').bind(owner, site).first(), t = now();
+        const since = old && String(old.uname).toLowerCase() === p.user.toLowerCase() ? old.since : t - envInt(env.SYNC_BACKFILL_DAYS, 1, 365, 30) * DAY;
+        await DB.prepare('INSERT INTO sync_accounts (owner, site, uname, since, last_run, updated) VALUES (?, ?, ?, ?, 0, ?) ON CONFLICT (owner, site) DO UPDATE SET uname = excluded.uname, since = excluded.since, updated = excluded.updated').bind(owner, site, p.user, since, t).run();
+      }
+    }
+    const accounts = (await DB.prepare('SELECT site, uname, since, last_run FROM sync_accounts WHERE owner = ?').bind(owner).all()).results;
+    const total = await DB.prepare('SELECT COUNT(*) AS n, MAX(t) AS newest FROM sync_games WHERE owner = ?').bind(owner).first();
+    return { pid: me.pid, accounts, games: (total && total.n) || 0, newest: (total && total.newest) || 0 };
+  },
+  async sync_fetch(b, env) {
+    const { me, owner } = await vipOf(env, b), site = String(b.site || '');
+    if (!SYNC_SITES[site]) throw err('bad_input');
+    await quota(env, me.pid, 'syncfetch', 1, 400);
+    const acc = await env.DB.prepare('SELECT uname, since FROM sync_accounts WHERE owner = ? AND site = ?').bind(owner, site).first();
+    if (!acc) throw err('no_account');
+    const before = int(b.before, 1, 4e12) || now() + 6e4, limit = int(b.limit, 1, 25) || 10;
+    const r = site === 'chesscom' ? await ccPage(env, owner, acc.uname, acc.since, before, limit) : await liPage(env, owner, acc.uname, acc.since, before, limit);
+    if (r.error) throw err(r.error, r.error === 'busy' ? 503 : 404);
+    return { pid: me.pid, site, games: r.games, next: r.next, done: !!r.done };
+  },
+  async sync_ack(b, env) {
+    const { me, owner } = await vipOf(env, b), site = String(b.site || ''), DB = env.DB, t0 = now();
+    if (!SYNC_SITES[site]) throw err('bad_input');
+    await quota(env, me.pid, 'syncack', 1, 400);
+    const rows = (Array.isArray(b.results) ? b.results : []).slice(0, 60).map((x) => cleanSyncRow(x, t0)).filter(Boolean);
+    if (rows.length) await DB.batch(rows.map((x) => DB.prepare('INSERT OR REPLACE INTO sync_games (owner, gid, t, color, result, opening, tc, rating, opp, acc, bl, mi, ia, br, gr, plies, ph_o, ph_m, ph_e, k_m, k_s, k_p, k_c) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .bind(owner, x.gid, x.t, x.color, x.result, x.opening, x.tc, x.rating, x.opp, x.acc, x.bl, x.mi, x.ia, x.br, x.gr, x.plies, x.ph_o, x.ph_m, x.ph_e, x.k_m, x.k_s, x.k_p, x.k_c)));
+    await DB.prepare('DELETE FROM sync_games WHERE owner = ? AND rowid IN (SELECT rowid FROM sync_games WHERE owner = ? ORDER BY t DESC LIMIT -1 OFFSET ?)').bind(owner, owner, SYNC_ROWS).run();
+    const newest = int(b.newest, 0, t0 + 6e4);
+    await DB.prepare('UPDATE sync_accounts SET last_run = ?, updated = ?, since = CASE WHEN ? = 1 AND ? > since THEN ? ELSE since END WHERE owner = ? AND site = ?')
+      .bind(t0, t0, b.complete === true ? 1 : 0, newest ? newest - DAY : 0, newest ? newest - DAY : 0, owner, site).run();   // a finished pass moves the horizon forward; de-duplication covers the overlap
+    const total = await DB.prepare('SELECT COUNT(*) AS n FROM sync_games WHERE owner = ?').bind(owner).first();
+    return { pid: me.pid, saved: rows.length, games: (total && total.n) || 0 };
+  },
+  async sync_stats(b, env) {
+    const { me, owner } = await vipOf(env, b), days = [0, 7, 30, 90, 365].indexOf(+b.days) >= 0 ? +b.days : 90;
+    await quota(env, me.pid, 'syncstats', 1, 600);
+    const rows = (await env.DB.prepare('SELECT gid, t, color, result, opening, tc, rating, opp, acc, bl, mi, ia, br, gr, plies, ph_o, ph_m, ph_e, k_m, k_s, k_p, k_c FROM sync_games WHERE owner = ? AND t >= ? ORDER BY t DESC LIMIT ?')
+      .bind(owner, days ? now() - days * DAY : 0, SYNC_ROWS).all()).results;
+    return { pid: me.pid, audit: macroAudit(rows, days) };
+  }
+};
+Object.assign(ACTIONS, V9_ACTIONS);
+
 export default {
   async fetch(request, env) {
     const h = cors(env, request.headers.get('Origin') || '');
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: h });
-    if (request.method !== 'POST') return json({ ok: true, service: 'lanckriet-arena', version: VERSION, week: isoWeek(now()) }, 200, h);
+    if (request.method !== 'POST') return json({ ok: true, service: 'lanckriet-arena', version: VERSION, week: isoWeek(now()), licences: !!(env.SUPABASE_URL && env.SUPABASE_ANON_KEY), tokens: { free: envInt(env.TOKENS_FREE, 0, 100, 1), pro: envInt(env.TOKENS_PRO, 1, 1000, 10) } }, 200, h);
     let b;
     try {
       const text = await request.text();
@@ -1065,7 +1447,7 @@ export default {
     try { return json(Object.assign({ ok: true }, await fn(b, env)), 200, h); }
     catch (e) {
       if (!e || !e.reason) console.error(e);
-      return json({ ok: false, reason: (e && e.reason) || 'server' }, (e && e.status) || 500, h);
+      return json(Object.assign({}, (e && e.extra) || {}, { ok: false, reason: (e && e.reason) || 'server' }), (e && e.status) || 500, h);
     }
   },
   /* Cron (wrangler.toml): settle finished weeks, clear old quota rows. */
@@ -1073,6 +1455,10 @@ export default {
     ctx.waitUntil((async () => {
       await settleDue(env, true);
       await env.DB.prepare('DELETE FROM quota WHERE day < ?').bind(new Date(now() - 3 * DAY).toISOString().slice(0, 10)).run();
+      const d3 = new Date(now() - 3 * DAY).toISOString().slice(0, 10);
+      await env.DB.prepare('DELETE FROM token_ledger WHERE day < ?').bind(d3).run();
+      await env.DB.prepare('DELETE FROM token_spend WHERE day < ?').bind(d3).run();
+      await env.DB.prepare('DELETE FROM token_grant_log WHERE t < ?').bind(now() - 120 * DAY).run();
       await env.DB.prepare('DELETE FROM ai_usage WHERE day < ?').bind(new Date(now() - 180 * DAY).toISOString().slice(0, 10)).run();
       await communityCron(env);
     })());

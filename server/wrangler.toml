@@ -24,5 +24,24 @@ AI_DAILY_TOTAL = "2000"
 # Devices per member key.
 MAX_DEVICES = "1"
 
+# --- v9: tiers, server-enforced daily tokens, Tier 3 auto-sync ---------------------------------
+# The Worker checks every licence itself (it never trusts the tier the browser claims). This is the
+# same Supabase project and PUBLIC anon key that index.html already ships; the licence check is the
+# lc_license_status function. If these two are missing, every paying member is treated as Free.
+SUPABASE_URL = "https://wllljllajadiwjdsageu.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsbGxqbGxhamFkaXdqZHNhZ2V1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4ODAyOTUsImV4cCI6MjEwNjQ1NjI5NX0.dTLGb1e9zr74vYvGX6hypkrtSPMHZK7Necu2GIBJcOo"
+# Tokens per UTC day: Free, Pro. VIP is unlimited in the app; TOKENS_VIP_CAP is a hidden cost fuse.
+TOKENS_FREE = "1"
+TOKENS_PRO = "10"
+TOKENS_VIP_CAP = "500"
+# Free players only: most tokens one network (IP) can hand out per day. Stops clear-storage scripts.
+TOKENS_FREE_IP_CAP = "20"
+# Bonus pocket (earned tokens). The hub reports them, so they are capped: most a player can earn per UTC day,
+# and, for Free players, most one network (IP) can earn per day. A capped grant waits and is paid after midnight UTC.
+TOKENS_EARN_DAY_CAP = "20"
+TOKENS_EARN_IP_CAP = "60"
+# How many days of games the first Tier 3 sync pass looks back.
+SYNC_BACKFILL_DAYS = "30"
+
 [triggers]
 crons = ["0 */6 * * *"]
