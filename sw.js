@@ -12,6 +12,7 @@
    static    /icons/* and the manifest: cache-first, the ?v= in the URL is the cache key
    libs      version-pinned third-party files (cdnjs, jsDelivr @x.y.z, /engine/*): cache-first in a separate cache that survives
              releases, so a release never re-downloads jQuery, chess.js or the 7 MB Stockfish engine
+   coach     lc-coach-*: the page's saved voice clips; the cleanup above leaves them alone
    never     content.json, /json, GitHub, Supabase, the Arena server, Lichess, fonts: not touched by this worker */
 'use strict';
 const V = new URL(self.location.href).searchParams.get('v') || 'dev';
@@ -32,7 +33,8 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keep = new Set([SHELL_CACHE, LIB_CACHE]);
-    await Promise.all((await caches.keys()).filter((k) => !keep.has(k)).map((k) => caches.delete(k)));
+    /* lc-coach-*: Coach Lanckriet's saved voice clips (written by the page, not by this worker). They survive releases so a clip is never paid for twice. */
+    await Promise.all((await caches.keys()).filter((k) => !keep.has(k) && !k.startsWith('lc-coach-')).map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
 });
