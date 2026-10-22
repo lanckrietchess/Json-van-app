@@ -1,0 +1,14 @@
+{
+  "name": "lanckrietchess-real-browser-tests",
+  "private": true,
+  "description": "Static libraries, fonts, icons and the Stockfish 19 build that the test site serves locally, so the real app can run in a real browser without a network.",
+  "dependencies": {
+    "stockfish": "19.0.0",
+    "jquery": "3.7.1",
+    "chess.js": "0.10.3",
+    "@chrisoakman/chessboardjs": "1.0.0",
+    "@fortawesome/fontawesome-free": "6.5.2",
+    "@fontsource/schibsted-grotesk": "*",
+    "@fontsource/newsreader": "*"
+  }
+}

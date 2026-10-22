@@ -33,8 +33,9 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keep = new Set([SHELL_CACHE, LIB_CACHE]);
-    /* lc-coach-*: Coach Lanckriet's saved voice clips (written by the page, not by this worker). They survive releases so a clip is never paid for twice. */
-    await Promise.all((await caches.keys()).filter((k) => !keep.has(k) && !k.startsWith('lc-coach-')).map((k) => caches.delete(k)));
+    /* lc-coach-*: Coach Lanckriet's saved voice clips (written by the page, not by this worker). They survive releases so a clip is never paid for twice.
+       lc-notes-*: the saved MSPC move notes (written by the page) so they work offline and survive releases. */
+    await Promise.all((await caches.keys()).filter((k) => !keep.has(k) && !k.startsWith('lc-coach-') && !k.startsWith('lc-notes-')).map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
 });

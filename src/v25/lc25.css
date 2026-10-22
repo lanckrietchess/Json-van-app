@@ -1,0 +1,64 @@
+/* v25 layer (hub 9.3.0). Base stays #0f172a; the new cards use the deeper #0a0e17 with a glass edge. */
+:root{--lc25-bg:#0a0e17;--lc25-glass:rgba(10,14,23,.78);--lc25-edge:rgba(56,189,248,.28);--lc25-gold:#fbbf24}
+/* sticky just under the app's fixed header (its own --head variable), so the countdown, Stay here and Analyze previous are always in reach, wherever the member has scrolled */
+.lc25-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 6px;padding:6px 0;position:sticky;top:var(--head,134px);z-index:30;background:linear-gradient(to bottom,var(--ink) 72%,rgba(0,0,0,0))}
+.lc25-chip{display:inline-flex;gap:6px;align-items:center}
+.lc25-chip[aria-pressed="true"]{border-color:var(--accent,#38bdf8);color:var(--accent,#38bdf8);background:rgba(56,189,248,.1)}
+.lc25-chip[aria-pressed="false"]{opacity:.8}
+.lc25-count{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--fog,#94a3b8);animation:lc25-in .25s ease-out}
+.lc25-card{background:var(--lc25-glass);border:1px solid var(--lc25-edge);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 8px 30px rgba(0,0,0,.25)}
+.lc25-race{display:grid;gap:8px}
+.lc25-gbar i{background:var(--lc25-gold)!important}
+.lc25-coach{display:flex;gap:12px;align-items:flex-start;margin:0 0 10px;padding:12px 14px;border:1px solid var(--lc25-edge);border-radius:14px;background:var(--lc25-glass)}
+.lc25-av{flex:0 0 auto;display:inline-flex;animation:lc25-pop .5s cubic-bezier(.2,1.4,.4,1) both}
+.lc25-say{min-width:0;display:grid;gap:4px}
+.lc25-say p{margin:0;line-height:1.5}
+.lc25-say b{color:var(--accent,#38bdf8);font-size:13px;letter-spacing:.02em}
+.lc25-pb{width:min(100%,330px);margin:8px auto}
+.lc25-mini{width:min(100%,260px)}
+.lc25-fb{min-height:1.4em;margin:6px 0;line-height:1.45}
+.lc25-ok{color:#4ade80}
+.lc25-pn{margin:0;text-align:center}
+.lc25-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.lc25-h{margin:10px 0 4px;font-size:17px}
+.lc25-friend{margin:6px 0;padding:8px 10px;border-radius:10px;border:1px dashed var(--lc25-edge);font-size:14px}
+.lc25-pop{display:grid;justify-items:center;gap:2px;margin:4px 0 10px;text-align:center;animation:lc25-pop .55s cubic-bezier(.2,1.4,.4,1) both}
+.lc25-pop svg{width:44px;height:44px;color:var(--lc25-gold)}
+.lc25-pop h2{margin:4px 0 0}
+.lc25-pop p{margin:0;color:var(--lc25-gold);font-size:18px}
+/* background-image, not background: the sheet keeps its solid colour (a real browser showed the page through it) */
+.lc25-level{background-image:radial-gradient(120% 80% at 50% 0%,rgba(251,191,36,.12),transparent 60%)}
+@keyframes lc25-in{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes lc25-pop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.lc25-av,.lc25-pop,.lc25-count{animation:none}}
+.mspc25{margin:8px 0 0;padding:8px 10px;border:1px solid var(--lc25-edge);border-radius:12px;background:var(--lc25-glass)}
+.mspc25 summary{cursor:pointer;display:flex;gap:6px;align-items:center;flex-wrap:wrap;list-style:none}
+.mspc25 summary::-webkit-details-marker{display:none}
+.mspc25-r{margin-left:auto;font-size:12px;color:var(--fog,#94a3b8)}
+.mspc25 p{margin:6px 0 0;line-height:1.45}
+.mspc25-w{font-weight:600}
+.mspc25-row b{color:var(--accent,#38bdf8);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.fold25w{display:block}
+.fold25w p{margin-bottom:2px}
+.fold25-b{background:none;border:0;padding:4px 0;font:inherit;font-weight:700;font-size:14px;color:var(--accent,#38bdf8);cursor:pointer;min-height:32px}
+.fold25-b:hover{text-decoration:underline}
+/* the coach peeks over the popup's corner: out of the card's two-column grid, so the glyph and the text keep their places */
+.cele-card{position:relative}
+.cele-av{position:absolute!important;left:-8px;top:-14px;z-index:2;border:2px solid #0b1222;border-radius:50%;background:#0b1222;box-shadow:0 4px 14px rgba(0,0,0,.45)}
+.cele-av svg,.cele-av img{border-radius:50%;display:block}
+/* solid, not glass: it sits on top of page text */
+.lc25-wait{position:fixed;left:10px;right:10px;bottom:10px;margin:0 auto;max-width:400px;z-index:45;box-shadow:0 14px 44px rgba(0,0,0,.55);background:var(--surface,#101828);-webkit-backdrop-filter:none;backdrop-filter:none}
+.lc25-wait .lc25-pb{width:min(100%,250px)}
+.lc25-wait-x{position:absolute;top:6px;right:6px}
+/* Tech theme: only variables change, so no screen changes its layout. Contrast is checked against the classic values (tests/theme_contrast.test.js). */
+/* --dim (the muted grey text) was 2.7 to 3.8:1 in the classic theme, below the 4.5:1 minimum; this value is 4.6 to 5.8:1 on every tech surface */
+html[data-lc25-theme="tech"]{--ink:#0a0e17;--ink-2:#06090f;--surface:#101828;--raised:#16223a;--rule:#2b3a55;--dim:#7e8c9f;--hair:rgba(125,160,210,.17);--accent-soft:rgba(56,189,248,.15);--accent-line:rgba(56,189,248,.5)}
+html[data-lc25-theme="tech"] body{background-image:radial-gradient(120% 55% at 50% -12%,rgba(56,189,248,.07),transparent 62%);background-repeat:no-repeat}
+/* a celebration popup never intercepts taps on the page underneath (it dismisses itself after about two seconds) */
+.cele .cele-card{pointer-events:none}
+/* English file picker (shown instead of the browser's own, which speaks the phone's language) */
+.lc25-file-native{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;max-height:1px!important;margin:-1px!important;padding:0!important;border:0!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;opacity:0!important;line-height:0!important}
+.lc25-fileui{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lc25-filebtn{cursor:pointer}
+.lc25-file-native:focus-visible+.lc25-fileui .lc25-filebtn{outline:2px solid var(--accent,#38bdf8);outline-offset:2px}
+
