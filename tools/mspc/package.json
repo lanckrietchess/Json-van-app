@@ -1,0 +1,16 @@
+{
+  "name": "lanckrietchess-mspc-notes",
+  "private": true,
+  "type": "module",
+  "description": "Offline builder for mspc-notes.json. Reads content.json, writes notes. Nothing here ships in the app.",
+  "scripts": {
+    "test": "node mspc.test.mjs && node audit.test.mjs",
+    "build": "node build-notes.mjs ../../content.json --out ./out",
+    "verify": "node verify-notes.mjs ../../content.json ./out/mspc-notes.json",
+    "audit": "node audit-puzzles.mjs ../../content.json --out ./out"
+  },
+  "dependencies": {
+    "chess.js": "0.10.3",
+    "stockfish": "16.0.0"
+  }
+}

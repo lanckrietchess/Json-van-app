@@ -1,27 +1,22 @@
-# Tests
+# Tests (simulated browser and logic)
 
-Regression suites for the hub and the Arena server. They run offline: the CDN libraries come from `tests/vendor`, the course data from `tests/fixtures` (snapshots of Kyenzo's content), and the Claude API is simulated.
+Everything here runs in Node with jsdom: fast, no browser needed. The tests that need a real browser are in `../browser/`.
 
-## Setup (once)
+    npm install                      # jsdom, chess.js and the engine used by two checks
+    export CONTENT=/path/to/content.json   # your course JSON (used by the boot scripts)
+    node logic.test.js               # pure logic: alternative verdicts, flashcards, ghost, challenge links, recap, redemption pick, tilt rule/parsers (29)
+    node dom.test.js                 # the LC25 module against a DOM: Auto-Advance, flashcards, alt-check, Penalty Box + built-in puzzle pool, ghost, rival link,
+                                     # MSPC notes, long-text fold, tilt poll, celebration queue, wait puzzle, tech theme, ALL-ENGLISH module (76)
+    node flow.test.js                # onboarding to redemption end to end, XP, quest, popups, error paths (13)
+    node sw.test.js                  # sw.js activate keeps the shell, libraries, coach clips and notes (1)
+    node language.test.js            # static guard: no locale-less date calls, no-translate flags, no Dutch strings in code/content/notes (6)
+    node shorten_keys.test.js        # the short-texts tool and the app compute the same key for all 682 real texts (2)
+    node audit_logic.test.js         # the puzzle-audit tool and the app judge a move identically on 20,000 random inputs (2)
+    node theme_contrast.test.js      # the tech theme never makes text harder to read; muted text reaches WCAG AA (2)
 
-- Python 3.10+: `pip install playwright` then `python -m playwright install chromium`
-- Node.js 22.5 or newer, for the server suites (they use Node's built-in SQLite as a stand-in for Cloudflare D1)
+    # the REAL index.html booted in jsdom with your real content (each prints a JSON list of steps and errors)
+    node boot_flow.js ../index.html    node boot_routes.js ../index.html    node boot_runners.js ../index.html    node boot_admin.js ../index.html
+    node boot_notes.js ../index.html   node boot_tilt.js ../index.html      node boot_final.js ../index.html
 
-## Run
-
-- `python tests/run.py` runs everything and ends with ALL SUITES PASSED.
-- `python tests/run.py mspc arena` runs only those suites.
-- Full output of each suite: `tests/.run/<suite>.log`. Screenshots: `tests/shots/`.
-
-| Suite | What it proves |
-|---|---|
-| unit | the Arena server, action by action: boards, caps, settlement, friends, puzzles, member keys, AI limits, per-IP limits, and the 17 community actions (scores checked against the hub's own lcScore) (Node only) |
-| mspc | no multiple choice left; interactive M, S, P and C steps; the Blunder Clinic; resizable panels; Trim board taps; fixed coach answers |
-| arena | tournament counting, friend codes (and hostile ones), Chess.com follows, punishing a friend's blunder, weekly payout, share links, peer staging, Trim macro check and conclusion, ManyChat bridge, admin |
-| formats | admin settings load from an admin-published file, from a hand-made data file with a `v5` section, and defaults without one |
-| server | three devices on one local Arena server: live board, fresh friend cards, community puzzles, admin queue, bans, connection test |
-| ai | member unlock, the Pro coach through a simulated Claude API (exact request checked), one device per key, free players never use AI, admin tools, AI session conclusion |
-| members | members who unlocked before the server existed keep access and get tied to their key quietly |
-| community | the classic community protocol on a local Arena server: two devices (desktop and phone) on the score and volume boards, a Chess.com account verified from a (mocked) public profile, the coach's Insights from anonymous stats, hiding a player |
-
-The browser suites print labelled results; `tests/run.py` holds the lines a correct build must print. When behaviour changes on purpose, update those expectations in the same commit.
+jsdom cannot see layout, overlays, taps, fonts, offline behaviour or native controls. Those are covered by `../browser/` (24 real-Firefox tests).
+The notes generator and puzzle audit tests are in `../tools/mspc` (`npm test`, plus `verify-notes.mjs`).

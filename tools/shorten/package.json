@@ -1,0 +1,11 @@
+{
+  "name": "lanckrietchess-short-texts",
+  "private": true,
+  "type": "module",
+  "description": "Optional: writes short-texts.json (punchy rewrites of long course texts) with the Anthropic API. Nothing here ships in the app.",
+  "scripts": {
+    "test": "node shorten.test.mjs",
+    "dry": "node shorten-texts.mjs ../../content.json --dry",
+    "build": "node shorten-texts.mjs ../../content.json --out ./out"
+  }
+}
