@@ -18,6 +18,7 @@
 const V = new URL(self.location.href).searchParams.get('v') || 'dev';
 const SHELL_CACHE = 'lc-shell-' + V;
 const LIB_CACHE = 'lc-lib-v1';
+const ASSET_CACHE = 'lc-assets-v1';   /* coach photos, help.json, help audio: opens from cache, refreshes in the background */
 const SCOPE = new URL(self.registration.scope).pathname;               // "/" in production
 const SHELL = ['index.html', 'manifest.webmanifest?v=' + V, 'icons/icon-192.png?v=' + V, 'icons/icon-512.png?v=' + V, 'icons/icon-maskable-512.png?v=' + V, 'icons/apple-touch-icon.png?v=' + V];
 
@@ -35,7 +36,7 @@ self.addEventListener('activate', (event) => {
     const keep = new Set([SHELL_CACHE, LIB_CACHE]);
     /* lc-coach-*: Coach Lanckriet's saved voice clips (written by the page, not by this worker). They survive releases so a clip is never paid for twice.
        lc-notes-*: the saved MSPC move notes (written by the page) so they work offline and survive releases. */
-    await Promise.all((await caches.keys()).filter((k) => !keep.has(k) && !k.startsWith('lc-coach-') && !k.startsWith('lc-notes-')).map((k) => caches.delete(k)));
+    await Promise.all((await caches.keys()).filter((k) => !keep.has(k) && !k.startsWith('lc-coach-') && !k.startsWith('lc-notes-') && !k.startsWith('lc-assets-')).map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
 });
@@ -68,6 +69,17 @@ async function page(event) {
     { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
 
+async function assetSwr(event, request) {
+  const cache = await caches.open(ASSET_CACHE);
+  const hit = await cache.match(request);
+  const net = fetch(request).then(async (res) => {
+    if (cacheable(res)) await cache.put(request, res.clone()).catch(() => {});   /* a 404 is never stored */
+    return res;
+  }).catch(() => null);
+  if (hit) { event.waitUntil(net); return hit; }
+  return (await net) || new Response('', { status: 504 });
+}
+
 const pinnedLib = (u) =>
   u.hostname === 'cdnjs.cloudflare.com' ||
   (u.hostname === 'cdn.jsdelivr.net' && /@\d+\.\d+\.\d+/.test(u.pathname));
@@ -79,6 +91,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin === self.location.origin) {
     const p = url.pathname;
     if (request.mode === 'navigate' && (p === SCOPE || p === SCOPE + 'index.html')) { event.respondWith(page(event)); return; }
+    if (p.startsWith(SCOPE + 'assets/')) { event.respondWith(assetSwr(event, request)); return; }
     if (p.startsWith(SCOPE + 'engine/')) { event.respondWith(cacheFirst(request, LIB_CACHE)); return; }
     if (p.startsWith(SCOPE + 'icons/') || p === SCOPE + 'manifest.webmanifest') { event.respondWith(cacheFirst(request, SHELL_CACHE)); return; }
     return;                                                                   // content.json, /json, sw.js, anything else: network
