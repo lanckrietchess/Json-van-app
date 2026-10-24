@@ -477,13 +477,9 @@ html[data-lc25-theme="tech"] body{background-image:radial-gradient(120% 55% at 5
 .topbar::after{display:none!important}
 :root{--head:152px}
 html.has-walk{--head:182px}
-html.has-hero{--head:188px}
-html.has-walk.has-hero{--head:218px}
 @media (min-width:900px){
   :root{--head:118px}
   html.has-walk{--head:148px}
-  html.has-hero{--head:154px}
-  html.has-walk.has-hero{--head:184px}
 }
 .lc30-xp{display:flex;align-items:center;gap:8px;height:18px;max-width:1180px;margin:0 auto;padding:0 12px;border-top:1px solid var(--hair)}
 @media (min-width:900px){.lc30-xp{padding:0 24px}}
@@ -548,40 +544,48 @@ body.lc30-l0{--head:56px}
 .lc30-tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 .lc30-tbl td,.lc30-tbl th{padding:8px 6px;border-bottom:1px solid var(--hair);text-align:left;vertical-align:top}
 .lc30-msg{white-space:pre-wrap;overflow-wrap:anywhere}
-/* hero bar: INSIDE the fixed header, directly under the navigation and the level row, one line high (36 px = what --head reserves) */
-.lc30-hero{box-sizing:border-box;height:36px;display:flex;align-items:center;padding:0 12px;border-top:1px solid var(--hair);overflow:hidden}
-@media (min-width:900px){.lc30-hero{padding:0 24px}}
-.lc30-banner{display:flex;align-items:center;gap:10px;width:100%;max-width:1180px;margin:0 auto;min-width:0}
-.lc30-card{display:flex;align-items:center;gap:10px;flex:1;min-width:0;height:28px;padding:0 10px;border:1px solid var(--hair);border-radius:999px;background:var(--ink-2);color:var(--chalk);text-decoration:none}
+/* promo / stream slot: ONE reference inside the top navigation row.
+   phone:   brand | promo | profile   (tabs on the second row)
+   desktop: brand | tabs | promo | profile */
+html.has-hero .topbar-inner{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"brand promo chip" "tabs tabs tabs"}
+html.has-hero .brand{min-width:0}
+html.has-hero .brand-name{font-size:14px}
+/* on a phone the wordmark gives way to the LIVE sign: the logo mark stays */
+@media (max-width:699px){html.has-live .brand-name{display:none}}
+@media (min-width:900px){
+  html.has-hero .topbar-inner{grid-template-columns:auto minmax(0,1fr) minmax(130px,320px) auto;grid-template-areas:"brand tabs promo chip"}
+  html.has-hero .brand-name{font-size:17px}
+}
+.lc30-hero{grid-area:promo;min-width:0;display:flex;align-items:center;justify-content:center;height:100%}
+.lc30-card{display:flex;align-items:center;gap:8px;max-width:100%;min-width:0;height:34px;padding:0 12px 0 8px;border:1px solid var(--hair);border-radius:999px;background:var(--ink-2);color:var(--chalk);text-decoration:none}
 .lc30-card:hover,.lc30-card:focus-visible{border-color:var(--accent-line)}
 .lc30-card.is-partner{border-color:rgba(251,191,36,.45)}
-.lc30-ico{flex:none;width:18px;display:grid;place-items:center;color:var(--accent);font-size:13px}
-.lc30-txt{display:flex;align-items:baseline;gap:8px;min-width:0;flex:1;white-space:nowrap;overflow:hidden}
-.lc30-txt small{flex:none;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fog)}
-.lc30-txt b{flex:0 1 auto;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis}
-.lc30-txt span{flex:1;min-width:0;font-size:12px;color:var(--fog);overflow:hidden;text-overflow:ellipsis}
-@media (max-width:560px){.lc30-txt span{display:none}}
-.lc30-card>i{flex:none;font-size:11px;color:var(--fog)}
-.lc30-dots{display:flex;flex:none;align-items:center}
-.lc30-dots button{width:18px;height:28px;padding:0;border:0;background:0 0;cursor:pointer;display:grid;place-items:center}
-.lc30-dots button i{display:block;width:6px;height:6px;border-radius:50%;background:rgba(148,163,184,.4)}
-.lc30-dots button[aria-current="true"] i{background:var(--accent)}
-/* live: the whole bar turns red and glows. The red dot is its own item, centred on the text line. */
-.lc30-live{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:1180px;margin:0 auto;height:28px;padding:0 12px;border-radius:999px;border:1px solid rgba(251,113,133,.75);background:linear-gradient(180deg,rgba(251,113,133,.25),rgba(190,18,60,.32));color:#fff;text-decoration:none;white-space:nowrap;overflow:hidden;box-shadow:0 0 0 0 rgba(251,113,133,.5);animation:lc30-glow 1.8s ease-in-out infinite}
-.lc30-live small{flex:none;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+.lc30-ico{flex:none;width:20px;display:grid;place-items:center;color:var(--accent);font-size:14px}
+.lc30-txt{display:flex;align-items:baseline;gap:8px;min-width:0;white-space:nowrap;overflow:hidden}
+.lc30-txt b{flex:0 0 auto;font-size:13px}
+.lc30-txt span{min-width:0;font-size:12px;color:var(--fog);overflow:hidden;text-overflow:ellipsis}
+@media (max-width:1099px){.lc30-txt span{display:none}}
+/* live: the slot turns red and glows. The red dot is its own item, centred on the text. */
+.lc30-live{display:flex;align-items:center;justify-content:center;gap:6px;max-width:100%;min-width:0;min-height:36px;padding:2px 10px;border-radius:14px;border:1px solid rgba(251,113,133,.75);background:linear-gradient(180deg,rgba(251,113,133,.25),rgba(190,18,60,.32));color:#fff;text-decoration:none;box-shadow:0 0 0 0 rgba(251,113,133,.5);animation:lc30-glow 1.8s ease-in-out infinite}
 .lc30-live:hover,.lc30-live:focus-visible{border-color:#fff}
-.lc30-liverow{display:inline-flex;align-items:center;gap:6px;min-width:0;font-size:clamp(11px,3.3vw,14px);line-height:1}
-.lc30-liverow b{font-weight:900;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis}
-.lc30-dot{display:inline-flex;align-items:center;justify-content:center;flex:none;width:1.15em;height:1.15em;font-size:1em;line-height:1}
+.lc30-liverow{display:inline-flex;align-items:center;gap:6px;min-width:0;font-size:clamp(10px,2.9vw,13px);line-height:1.1}
+.lc30-liverow b{font-weight:900;letter-spacing:.02em;text-align:left}
+.lc30-dot{display:inline-flex;align-items:center;justify-content:center;flex:none;width:1.2em;height:1.2em;font-size:1em;line-height:1}
+@media (min-width:700px){.lc30-liverow{font-size:13px;white-space:nowrap}}
 @keyframes lc30-glow{0%,100%{box-shadow:0 0 0 0 rgba(251,113,133,.45)}50%{box-shadow:0 0 0 5px rgba(251,113,133,0)}}
 @media (prefers-reduced-motion:reduce){.lc30-live{animation:none}}
 body.lc30-l0 #lc30-hero{display:none!important}
+/* the red "new" badge on the trophy is gone for good */
+.chip-trophy .dot36,.dot36{display:none!important}
+/* modal steps slide in softly (the box is rebuilt on each step, so the animation replays) */
+.lc30-ask-box{animation:lc30-in .22s ease-out both}
+@keyframes lc30-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.lc30-ask-box{animation:none}}
 .lc30-step{margin:0;font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
 .lc30-opt.is-skip{background:0 0;border-style:dashed;color:var(--fog);text-align:center}
 .lc30-stat-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--hair);font-size:13.5px}
 /* onboarding modal: scrolls inside itself on a short screen, never off it */
 .lc30-ask-box{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
-.lc30-plat{display:grid;gap:10px;margin:-4px 0 2px;padding:12px 14px;border:1px solid var(--accent-line);border-radius:var(--r);background:var(--accent-soft)}
 .lc30-opt.is-open{border-color:var(--accent-line)}
 .lc30-or{display:flex;align-items:center;gap:10px;color:var(--fog);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
 .lc30-or::before,.lc30-or::after{content:"";flex:1;height:1px;background:var(--hair)}
@@ -10940,7 +10944,7 @@ const LC30=(()=>{
     tier(){try{const t=Admin.preview()||App.access.tier;return{id:t,label:TIERS[t].label}}catch(e){return{id:"free",label:"Free"}}},
     tidy(){
       const chip=Q("#profile-chip");if(!chip)return;
-      QA(".chip-streak,.v6-chip.v6-lvl,.chip-tier",chip).forEach(n=>n.remove());
+      QA(".chip-streak,.v6-chip.v6-lvl,.chip-tier,.chip-trophy .dot36",chip).forEach(n=>n.remove());   /* .dot36 = the red "new" badge on the trophy */
       chip.setAttribute("aria-label","Your account menu");
     },
     paintXp(){
@@ -10988,51 +10992,57 @@ const LC30=(()=>{
     }
   };
 
-  /* ======================= 3b. hero slot ======================= */
+  /* ======================= 3b. promo / stream slot ======================= */
+  /* ONE reference, in the top navigation row between the nav tabs and the profile icon (inside .topbar-inner). While the admin is live it
+     says LANCKRIETCHESS IS LIVE. Otherwise it shows a single social link, and each time the member opens another page or view it moves on to the
+     next one. No carousel, no dots, no timer. Rented partner banners from the admin dashboard are part of the same rotation. */
   const hero={
-    data:null,idx:0,timer:null,paused:false,poll:null,
+    data:null,idx:0,lastKey:"",
     defaults(){
       const L=(typeof CONFIG!=="undefined"&&CONFIG.links)||{},o=[];
-      if(httpsOk(L.youtube))o.push({id:"d-yt",kind:"social",title:"Free chess lessons on YouTube",text:"New videos on how 2000+ players think",url:L.youtube,icon:"b:youtube"});
-      if(httpsOk(L.instagram))o.push({id:"d-ig",kind:"social",title:"Daily chess shorts on Instagram",text:"Short lessons you can use in your next game",url:L.instagram,icon:"b:instagram"});
-      o.push({id:"d-course",kind:"course",title:"Full repertoire courses",text:"Caro-Kann, Colle-Koltanowski and Semi-Slav",url:"#upgrades",icon:"book-open"});
-      o.push({id:"d-idea",kind:"course",title:"Monthly Creator Challenge",text:"Win 1 Month of Free VIP with an idea, proof or feedback",url:"#ideas",icon:"trophy"});
+      if(httpsOk(L.youtube))o.push({id:"d-yt",kind:"social",title:"YouTube",text:"Free chess lessons",url:L.youtube,icon:"b:youtube"});
+      if(httpsOk(L.instagram))o.push({id:"d-ig",kind:"social",title:"Instagram",text:"Daily chess shorts",url:L.instagram,icon:"b:instagram"});
+      if(httpsOk(L.tiktok))o.push({id:"d-tt",kind:"social",title:"TikTok",text:"Quick chess lessons",url:L.tiktok,icon:"b:tiktok"});
+      if(httpsOk(L.facebook))o.push({id:"d-fb",kind:"social",title:"Facebook",text:"Join the community",url:L.facebook,icon:"b:facebook"});
       return o;
     },
     sponsor(){try{const sp=V71.sponsor();if(sp&&sp.active&&sp.url&&httpsOk(sp.url))return{id:"d-sponsor",kind:"partner",title:String(sp.name||"Partner"),text:String(sp.text||""),url:sp.url,icon:"handshake"}}catch(e){}return null},
     banners(){
-      const srv=(hero.data&&Array.isArray(hero.data.banners)?hero.data.banners:[]).filter(b=>b&&b.title&&(!b.url||hrefOk(b.url)));
+      const srv=(hero.data&&Array.isArray(hero.data.banners)?hero.data.banners:[]).filter(b=>b&&b.title&&b.url&&hrefOk(b.url));
       const partners=srv.filter(b=>b.kind==="partner"||b.kind==="sponsor"),rest=srv.filter(b=>!(b.kind==="partner"||b.kind==="sponsor"));
       const sp=hero.sponsor();
       return partners.concat(sp&&!partners.length?[sp]:[]).concat(rest.length?rest:hero.defaults());
     },
     live(){return!!(hero.data&&hero.data.live)},
     liveUrl(){const u=hero.data&&hero.data.live_url;if(httpsOk(u))return u;try{return httpsOk(CONFIG.links.youtube)?CONFIG.links.youtube:"#live"}catch(e){return"#live"}},
-    /* the old sponsor strip is replaced by the hero banner, so the sponsor does not show twice */
+    /* the old sponsor strip is replaced by this slot, so the sponsor does not show twice */
     takesSponsor(){return true},
-    routeOk(route){return true},   /* the slot is on every screen; only Level 0 (isolated) hides it */
-    html(){
-      if(hero.live()){const u=hero.liveUrl(),ext=/^https:/i.test(u);return'<a class="lc30-live" href="'+E(u)+'"'+(ext?' target="_blank" rel="noopener noreferrer"':"")+'><span class="lc30-liverow"><span class="lc30-dot" aria-hidden="true">🔴</span> <b>LANCKRIETCHESS IS LIVE</b></span><small>Watch now</small></a>'}
-      const list=hero.banners();if(!list.length)return"";
-      hero.idx=hero.idx%list.length;const b=list[hero.idx],ext=/^https:/i.test(b.url||""),partner=b.kind==="partner"||b.kind==="sponsor";
-      const label=partner?"Partner":b.kind==="course"?"Hub":"Follow";
-      const card=(b.url?'<a class="lc30-card'+(partner?" is-partner":"")+'" href="'+E(b.url)+'"'+(ext?' target="_blank" rel="noopener noreferrer'+(partner?" sponsored":"")+'"':"")+">":'<div class="lc30-card">')+
-        '<span class="lc30-ico">'+ico(b.icon)+'</span><span class="lc30-txt"><small>'+label+"</small><b>"+E(b.title)+"</b>"+(b.text?"<span>"+E(b.text)+"</span>":"")+"</span>"+(b.url?ic(ext?"arrow-up-right-from-square":"chevron-right"):"")+(b.url?"</a>":"</div>");
-      const dots=list.length>1?'<div class="lc30-dots" role="group" aria-label="Choose a promotion">'+list.map((x,i)=>'<button type="button" data-lc30-dot="'+i+'" aria-label="Promotion '+(i+1)+'"'+(i===hero.idx?' aria-current="true"':"")+"><i></i></button>").join("")+"</div>":"";
-      return'<div class="lc30-banner">'+card+dots+"</div>";
+    routeOk(route){return true},   /* every screen; only Level 0 (isolated) hides it */
+    /* a new page or view = the next reference. The same view drawn again keeps its reference. */
+    advance(){
+      const key=(()=>{try{return String(current.route)+"|"+location.hash}catch(e){return location.hash}})();
+      if(key===hero.lastKey)return;hero.lastKey=key;
+      const n=hero.banners().length;if(!n)return;
+      const i=(+st().heroN||0)%n;hero.idx=i;put({heroN:(i+1)%n});
     },
-    /* the bar lives INSIDE the fixed header, under the navigation and the level row; html.has-hero makes --head reserve its 36 px */
-    flag(){document.documentElement.classList.toggle("has-hero",!!Q("#lc30-hero"))},
+    html(){
+      if(hero.live()){const u=hero.liveUrl(),ext=/^https:/i.test(u);return'<a class="lc30-live" href="'+E(u)+'"'+(ext?' target="_blank" rel="noopener noreferrer"':"")+'><span class="lc30-liverow"><span class="lc30-dot" aria-hidden="true">🔴</span> <b>LANCKRIETCHESS IS LIVE</b></span></a>'}
+      const list=hero.banners();if(!list.length)return"";
+      const b=list[hero.idx%list.length],ext=/^https:/i.test(b.url||""),partner=b.kind==="partner"||b.kind==="sponsor";
+      return'<a class="lc30-card'+(partner?" is-partner":"")+'" href="'+E(b.url)+'"'+(ext?' target="_blank" rel="noopener noreferrer'+(partner?" sponsored":"")+'"':"")+'><span class="lc30-ico">'+ico(b.icon)+'</span><span class="lc30-txt"><b>'+E(b.title)+"</b>"+(b.text?"<span>"+E(b.text)+"</span>":"")+"</span></a>";
+    },
+    /* html.has-hero switches the header grid to brand | promo | profile (phone) or brand | tabs | promo | profile (desktop) */
+    flag(){const h=document.documentElement.classList;h.toggle("has-hero",!!Q("#lc30-hero"));h.toggle("has-live",!!Q("#lc30-hero .lc30-live"))},
     mount(route){
-      const hd=Q("#topbar");if(!hd)return;let el=Q("#lc30-hero");
+      const inner=Q("#topbar .topbar-inner");if(!inner)return;let el=Q("#lc30-hero");
       if(document.body.classList.contains("lc30-l0")||!hero.routeOk(route)){if(el)el.remove();hero.flag();return}
-      if(!el){el=document.createElement("section");el.id="lc30-hero";el.className="lc30-hero";el.setAttribute("aria-label","Promotions");el.addEventListener("click",hero.click);el.addEventListener("mouseenter",()=>{hero.paused=true});el.addEventListener("mouseleave",()=>{hero.paused=false});el.addEventListener("focusin",()=>{hero.paused=true});el.addEventListener("focusout",()=>{hero.paused=false})}
-      const anchor=Q("#lc30-xp")||Q(".topbar-inner",hd);
-      if(el.parentNode!==hd||el.previousElementSibling!==anchor)anchor.insertAdjacentElement("afterend",el);
+      hero.advance();
+      if(!el){el=document.createElement("div");el.id="lc30-hero";el.className="lc30-hero";el.setAttribute("role","region");el.setAttribute("aria-label","Promotion")}
+      const right=Q(".topbar-right",inner);
+      if(right&&el.nextElementSibling!==right)right.insertAdjacentElement("beforebegin",el);else if(!right&&el.parentNode!==inner)inner.appendChild(el);
       hero.paint();
     },
     paint(){const el=Q("#lc30-hero");if(!el){hero.flag();return}const h=hero.html();if(!h){el.remove();hero.flag();return}el.innerHTML=h;hero.flag()},
-    click(e){const d=e.target.closest("[data-lc30-dot]");if(d){e.preventDefault();hero.idx=+d.getAttribute("data-lc30-dot")||0;hero.paint()}},
     async load(force){
       const c=rd(K_HERO,null);
       if(c&&c.d&&!hero.data)hero.data=c.d;
@@ -11042,7 +11052,6 @@ const LC30=(()=>{
     },
     start(){
       hero.load(false);
-      hero.timer=setInterval(()=>{if(hero.paused||document.hidden||hero.live())return;try{if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return}catch(e){}const n=hero.banners().length;if(n>1){hero.idx=(hero.idx+1)%n;hero.paint()}},CFG.hero.rotateMs);
       hero.poll=setInterval(()=>{if(!document.hidden)hero.load(true)},CFG.hero.livePollMs*5);
       document.addEventListener("visibilitychange",()=>{if(!document.hidden)hero.load(false)});
     }
@@ -11148,12 +11157,10 @@ const LC30=(()=>{
      source: social (+ detail = the platform), friend, ad, search. */
   const attribution={
     SOURCES:{social:"Creator / Social Media Platform",friend:"Recommended by a friend",ad:"Ad",search:"Search bar"},
-    DEFAULT_CREATOR:"lanckrietchess",
     PLATFORMS:{lanckrietchess:"Lanckriet Chess (Kyenzo)",youtube:"YouTube",instagram:"Instagram",tiktok:"TikTok",facebook:"Facebook",twitch:"Twitch",x:"X (Twitter)",other:"Another creator or platform"},
     save(source,detail){
       if(!attribution.SOURCES[source]||st().attr)return false;
-      if(source==="social"&&!attribution.PLATFORMS[detail])return false;
-      put({attr:Object.assign({source:source,at:Date.now(),sent:false},source==="social"?{detail:detail}:{})});attribution.send();return true;
+      put({attr:Object.assign({source:source,at:Date.now(),sent:false},detail&&attribution.PLATFORMS[detail]?{detail:detail}:{})});attribution.send();return true;
     },
     async send(){
       const s=st().attr;if(!s||s.sent||attribution.busy)return;attribution.busy=true;
@@ -11214,10 +11221,8 @@ const LC30=(()=>{
       const SITE={chesscom:["Chess.com","chess_com_username"],lichess:["Lichess","lichess_username"]};
       const box=h=>'<div class="lc30-ask-box" role="dialog" aria-modal="true" aria-labelledby="lc30-ask-t">'+h+"</div>";
       const step1=()=>{
-        const P=attribution.PLATFORMS;
         w.innerHTML=box('<p class="lc30-step">Step 1 of 2</p><h2 id="lc30-ask-t">How did you get here?</h2>'+
-          '<button type="button" class="lc30-opt" data-a="social" aria-expanded="false" aria-controls="lc30-plat"><b>Creator / Social Media Platform</b><small>For example YouTube, Instagram or TikTok.</small></button>'+
-          '<div class="lc30-plat" id="lc30-plat" hidden><label class="field"><span class="field-label">Which creator or platform?</span><select class="input" name="plat" data-plat aria-label="Which creator or platform?">'+Object.keys(P).map(k=>'<option value="'+k+'"'+(k===attribution.DEFAULT_CREATOR?" selected":"")+">"+E(P[k])+"</option>").join("")+'</select></label><button type="button" class="btn btn-primary" data-go>Continue</button></div>'+
+          '<button type="button" class="lc30-opt" data-a="social"><b>Creator / Social Media Platform</b><small>For example YouTube, Instagram or TikTok.</small></button>'+
           '<button type="button" class="lc30-opt" data-a="friend"><b>Recommended by a friend</b></button>'+
           '<button type="button" class="lc30-opt" data-a="ad"><b>Ad</b></button>'+
           '<button type="button" class="lc30-opt" data-a="search"><b>Search bar</b><small>Google, the Play Store or another search.</small></button>');
@@ -11235,12 +11240,7 @@ const LC30=(()=>{
       };
       w.addEventListener("click",e=>{
         const a=e.target.closest("[data-a]");
-        if(a){
-          const k=a.getAttribute("data-a");
-          if(k==="social"){const p=Q("#lc30-plat",w),open=p.hidden;p.hidden=!open;a.setAttribute("aria-expanded",String(open));a.classList.toggle("is-open",open);if(open){const sel=Q("[data-plat]",w);if(sel)sel.focus()}return}
-          attribution.save(k);step2();return;
-        }
-        if(e.target.closest("[data-go]")){const v=Q("[data-plat]",w).value;if(v&&attribution.save("social",v))step2();return}
+        if(a){attribution.save(a.getAttribute("data-a"));step2();return}
         const b=e.target.closest("[data-c]");if(!b)return;const c=b.getAttribute("data-c");
         if(c==="rules"){l0.set({choice:"rules",at:Date.now()});w.remove();location.hash="#level0";try{window.dispatchEvent(new HashChangeEvent("hashchange"))}catch(x){}return}
         if(c==="skip"){l0.set({choice:"know",via:"skip",at:Date.now()});w.remove()}
