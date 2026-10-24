@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/stream", "destination": "/index.html" }
+  ]
+}
