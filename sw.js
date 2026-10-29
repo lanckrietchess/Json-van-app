@@ -7,7 +7,7 @@
    install   precache the app shell into the NEW cache, skipWaiting()
    activate  delete every cache except the current shell cache and the library cache, then clients.claim(); index.html reloads
              once when the new worker takes over (see the registration code in index.html)
-   page      "/" and "/index.html": stale-while-revalidate. The installed app opens instantly from the cache, and a conditional
+   page      "/app.html" (the app; "/" is the landing page and is never touched): stale-while-revalidate. The installed app opens instantly from the cache, and a conditional
              request (ETag, usually a 304) refreshes the copy in the background.
    static    /icons/* and the manifest: cache-first, the ?v= in the URL is the cache key
    libs      version-pinned third-party files (cdnjs, jsDelivr @x.y.z, /engine/*): cache-first in a separate cache that survives
@@ -20,7 +20,7 @@ const SHELL_CACHE = 'lc-shell-' + V;
 const LIB_CACHE = 'lc-lib-v1';
 const ASSET_CACHE = 'lc-assets-v1';   /* coach photos, help.json, help audio: opens from cache, refreshes in the background */
 const SCOPE = new URL(self.registration.scope).pathname;               // "/" in production
-const SHELL = ['index.html', 'manifest.webmanifest?v=' + V, 'icons/icon-192.png?v=' + V, 'icons/icon-512.png?v=' + V, 'icons/icon-maskable-512.png?v=' + V, 'icons/apple-touch-icon.png?v=' + V];
+const SHELL = ['app.html', 'manifest.webmanifest?v=' + V, 'icons/icon-192.png?v=' + V, 'icons/icon-512.png?v=' + V, 'icons/icon-maskable-512.png?v=' + V, 'icons/apple-touch-icon.png?v=' + V];
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -58,14 +58,14 @@ async function cacheFirst(request, cacheName) {
 
 async function page(event) {
   const cache = await caches.open(SHELL_CACHE);
-  const hit = await cache.match('index.html');
-  const refresh = fetch('index.html', { cache: 'no-cache' }).then(async (res) => {   // conditional request: a 304 costs almost nothing
-    if (cacheable(res)) await cache.put('index.html', res.clone());
+  const hit = await cache.match('app.html');
+  const refresh = fetch('app.html', { cache: 'no-cache' }).then(async (res) => {   // conditional request: a 304 costs almost nothing
+    if (cacheable(res)) await cache.put('app.html', res.clone());
     return res;
   }).catch(() => null);
   if (hit) { event.waitUntil(refresh); return hit; }
   const fresh = await refresh;
-  return fresh || new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title><body style="font:16px system-ui;background:#0f172a;color:#e2e8f0;padding:2rem"><p>You are offline. Open the Training Hub once with a connection and it will work offline afterwards.</p>',
+  return fresh || new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title><body style="font:16px system-ui;background:#0f172a;color:#e2e8f0;padding:2rem"><p>You are offline. Open the app once with a connection and it will work offline afterwards.</p>',
     { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
 
@@ -90,7 +90,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin === self.location.origin) {
     const p = url.pathname;
-    if (request.mode === 'navigate' && (p === SCOPE || p === SCOPE + 'index.html')) { event.respondWith(page(event)); return; }
+    if (request.mode === 'navigate' && p === SCOPE + 'app.html') { event.respondWith(page(event)); return; }   // the APP. "/" is the landing page and always comes from the network
     if (p.startsWith(SCOPE + 'assets/')) { event.respondWith(assetSwr(event, request)); return; }
     if (p.startsWith(SCOPE + 'engine/')) { event.respondWith(cacheFirst(request, LIB_CACHE)); return; }
     if (p.startsWith(SCOPE + 'icons/') || p === SCOPE + 'manifest.webmanifest') { event.respondWith(cacheFirst(request, SHELL_CACHE)); return; }

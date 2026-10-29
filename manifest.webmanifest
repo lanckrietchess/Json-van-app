@@ -1,24 +1,93 @@
 {
-  "id": "/",
+  "id": "/app.html",
   "name": "Lanckriet Chess Training Hub",
   "short_name": "Lanckriet Chess",
-  "description": "Train the way you actually lose games: MSPC thinking drills, Caro-Kann, Colle and Semi-Slav repertoires, middlegame plans, endgames and Stockfish game review.",
-  "start_url": "/?source=pwa",
+  "description": "Your 2100+ ELO personal chess coach in your pocket. MSPC thinking drills, Triple-T game review, Caro-Kann, Colle and Semi-Slav repertoires, middlegame plans, endgames and Stockfish analysis of your own games.",
+  "start_url": "/app.html?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "lang": "en",
   "dir": "ltr",
-  "categories": ["education", "games"],
+  "categories": [
+    "education",
+    "games"
+  ],
   "icons": [
-    { "src": "/icons/icon-192.png?v=9.13.0", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png?v=9.13.0", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-maskable-512.png?v=9.13.0", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icons/icon-192.png?v=9.14.0",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png?v=9.14.0",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png?v=9.14.0",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Refer a Friend", "short_name": "Refer", "url": "/#refer", "icons": [{ "src": "/icons/icon-192.png?v=9.13.0", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "Hall of Fame", "short_name": "Hall of Fame", "url": "/#hall", "icons": [{ "src": "/icons/icon-192.png?v=9.13.0", "sizes": "192x192", "type": "image/png" }] }
+    {
+      "name": "Train my MSPC",
+      "short_name": "Train",
+      "url": "/app.html?source=pwa#think",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png?v=9.14.0",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Review a game",
+      "short_name": "Trim",
+      "url": "/app.html?source=pwa#trim",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png?v=9.14.0",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Upgrade",
+      "short_name": "Upgrade",
+      "url": "/app.html?source=pwa#upgrades",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png?v=9.14.0",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Refer a Friend",
+      "short_name": "Refer",
+      "url": "/app.html?source=pwa#refer",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png?v=9.14.0",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "display_override": [
+    "standalone",
+    "minimal-ui"
   ]
 }
