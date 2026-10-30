@@ -71,6 +71,7 @@ section{padding:64px 0}section.alt{background:var(--bg2);border-block:1px solid 
 .vs .card h3{margin-bottom:.2rem}.big-num{font-size:clamp(2.2rem,6vw,3.2rem);font-weight:900;line-height:1.05}
 .vs ul{padding-left:1.1rem;margin:.6rem 0 0}.vs li{margin:.3rem 0}
 .no{color:var(--bad)}.yes{color:var(--good)}
+.vs-urgency{margin-top:.9rem;padding:.7rem .85rem;border:1px solid rgba(251,191,36,.5);border-radius:10px;background:rgba(251,191,36,.08)}.vs-urgency[hidden]{display:none}.vs-urgency p{margin:.3rem 0;font-weight:600}.vs-urgency p.small{font-weight:500}
 .proof{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:22px}
 .pcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
 .pcard .gain{font-size:2.4rem;font-weight:900;color:var(--good);line-height:1}.pcard .gain small{font-size:.85rem;color:var(--mute);font-weight:500}
@@ -182,6 +183,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       <article class="card hl">
         <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">From €399<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p>
         <ul><li class="yes">Instant, 24/7, right after your game</li><li class="yes" id="vs-hours">A year of Pro costs about as much as a few private lessons</li><li class="yes">The same MSPC and Triple-T frameworks, applied to your own games</li></ul>
+        <div class="vs-urgency" id="vs-urgency" hidden><p>🔒 Lock in your rate: your price stays the same for as long as you keep your subscription active</p><p>⚡ Limited spots remaining for the current cohort</p><p class="small mute">This is the yearly launch rate. Monthly plans have no launch discount.</p></div>
       </article>
     </div>
     <div class="cta-row"><a class="btn gold big" href="#pricing">See the plans</a></div>
@@ -392,6 +394,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     $("g-price").textContent=eur(p.gift||p.base)+" for one year";
     var t=p.tranche||4,py=p.yearly[t-1]||p.base;
     $("vs-price").innerHTML="From "+esc(eur(py))+'<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>';
+    var vu=$("vs-urgency"),lf=p.left&&p.left[t-1];if(vu)vu.hidden=t>=4||(lf!=null&&lf<=0); /* only while launch spots really exist */
     $("vs-hours").textContent="A year of Pro costs the same as "+Math.max(1,Math.ceil(py/8000))+" hours of private coaching";
     (p.packs||[]).forEach(function(k){var b=document.querySelector('[data-pack="'+k.id+'"]');if(b){b.querySelector("b").textContent=k.tokens.toLocaleString("en-GB")+" tokens";b.querySelector("span").textContent=eur(k.cents)}});
     if(typeof p.portal==="string"&&/^https:\/\//.test(p.portal)){$("portal").href=p.portal;$("portal-row").className="small mute"}

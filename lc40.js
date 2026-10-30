@@ -1,4 +1,3 @@
-/*@@module lc40*/
 const LC40=(()=>{
   "use strict";
   /* LC40: (1) the avatar asks guests to sign in (Google first), (2) a quiet "save your progress" hint, (3) level-up / upgrade pop-ups wait until the exercise is done. */
@@ -63,9 +62,8 @@ const LC40=(()=>{
   function authHTML(){
     return'<div class="lc39-gate lc40-gate"><p>Sign in to save your progress, keep your membership on every device and unlock Social. It takes about 20 seconds.</p>'
       +'<button type="button" class="btn btn-primary lc39-google" data-lc39-google>Sign in with Google</button>'
-      +'<p class="small muted lc39-or">or get a 6-digit code by email</p>'
-      +'<form data-lc39-mail class="lc39-row"><input class="input" name="email" type="email" required autocomplete="email" placeholder="you@example.com" aria-label="Email address"><button type="submit" class="btn btn-ghost">Send me a code</button></form>'
-      +'<form data-lc39-code class="lc39-row" hidden><input class="input" name="code" inputmode="numeric" maxlength="8" autocomplete="one-time-code" placeholder="6-digit code" aria-label="Code from your email"><button type="submit" class="btn btn-primary">Confirm</button></form>'
+      +'<p class="small muted lc39-or">or get a sign-in link by email</p>'
+      +'<form data-lc39-mail class="lc39-row"><input class="input" name="email" type="email" required autocomplete="email" placeholder="you@example.com" aria-label="Email address"><button type="submit" class="btn btn-ghost">Email me a sign-in link</button></form>'
       +'<p class="form-msg" data-lc39-gmsg aria-live="polite"></p>'
       +'<button type="button" class="btn btn-quiet lc40-guest" data-close data-lc40-guest>Continue as guest</button></div>';
   }
@@ -130,4 +128,3 @@ const LC40=(()=>{
   }
   return{init:init,afterRender:afterRender,hold:hold,complete:complete,busy:busy,flush:flush,_t:{queue:()=>queue.slice(),classify:classify,openAuth:openAuth,paintNudge:paintNudge}};
 })();
-/*@@end lc40*/
