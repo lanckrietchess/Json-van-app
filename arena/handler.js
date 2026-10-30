@@ -9,10 +9,10 @@ import { makeDB } from './db.js';
    VOICE_CHARS_TOTAL is the daily fuse on NEW audio for everybody. Clips are stored in the database (about 0.8 MB per 1,100 characters at this
    format), so the worst case per day is TOTAL / 1100 * 0.8 MB: 100,000 characters is at most about 73 MB a day. Raise it only with the database size in mind. */
 export const DEFAULTS = {
-  ALLOWED_ORIGINS: 'https://lanckrietchess-app.vercel.app',
+  ALLOWED_ORIGINS: 'https://www.lanckrietchess.com,https://lanckrietchess-app.vercel.app',   // the live site and the Vercel address; a Supabase secret named ALLOWED_ORIGINS overrides this, so keep the two in step
   CONTENT_URL: 'https://raw.githubusercontent.com/lanckrietchess/Json-van-app/main/content.json',
   MAX_PUZZLES: '3000', MODEL: 'claude-haiku-4-5-20251001', MAX_TOKENS: '700', AI_DAILY: '60', AI_DAILY_MENTOR: '150', AI_DAILY_TOTAL: '2000', MAX_DEVICES: '3',
-  TOKENS_FREE: '1', TOKENS_PRO: '10', TOKENS_VIP_CAP: '500', TOKENS_FREE_IP_CAP: '20', TOKENS_EARN_DAY_CAP: '20', TOKENS_EARN_IP_CAP: '60', SYNC_BACKFILL_DAYS: '30',
+  TOKENS_FREE: '1', TOKENS_PRO: '10', TOKENS_VIP_MONTH: '500', TOKENS_VIP_CAP: '500', TOKENS_FREE_IP_CAP: '20', TOKENS_EARN_DAY_CAP: '20', TOKENS_EARN_IP_CAP: '60', SYNC_BACKFILL_DAYS: '30',
   VOICE_MODEL: 'eleven_flash_v2_5', VOICE_FORMAT: 'mp3_44100_64', VOICE_CHARS_FREE: '1500', VOICE_CHARS_PRO: '20000', VOICE_CHARS_VIP: '60000', VOICE_CHARS_FREE_IP: '6000', VOICE_CHARS_TOTAL: '100000'
 };
 
