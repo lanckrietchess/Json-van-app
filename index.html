@@ -19,6 +19,7 @@
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
+<meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
 <meta name="lc-sb-url" content="https://wllljllajadiwjdsageu.supabase.co">
 <meta name="lc-sb-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsbGxqbGxhamFkaXdqZHNhZ2V1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4ODAyOTUsImV4cCI6MjEwNjQ1NjI5NX0.dTLGb1e9zr74vYvGX6hypkrtSPMHZK7Necu2GIBJcOo">
 <meta name="lc-app" content="/app.html">
@@ -94,16 +95,29 @@ details{background:var(--card);border:1px solid var(--line);border-radius:14px;p
 details p{margin:.2rem 0 1rem;color:#cbd5e1}
 footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);font-size:.92rem}footer a{color:var(--mute)}
 .hide{display:none!important}
+
+.brand{display:inline-flex;align-items:center;gap:10px}.brand img{width:34px;height:34px;border-radius:9px;display:block}
+.btn.bw{background:#000;color:#fff;border:1.5px solid #fff}.btn.bw:hover{background:#fff;color:#000}
+.promo{display:inline-block;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.5);color:#fde68a;border-radius:12px;padding:9px 14px;font-weight:700;font-size:.95rem;margin:0 0 14px}
+.fomo{background:var(--card);border:1px solid rgba(251,191,36,.55);border-radius:var(--r);padding:16px 18px;margin:0 0 16px}
+.fomo b.n{color:var(--gold)}.fomo .bar{height:10px}.fomo p{margin:.25rem 0}
+.offer{font-size:clamp(1.15rem,3vw,1.5rem);font-weight:800;margin:.4rem 0 1rem}.offer s{color:var(--mute);font-weight:500}
+.walk{position:relative;width:100%;aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:#000;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.walk iframe,.walk video,.walk .play{position:absolute;inset:0;width:100%;height:100%;border:0}
+.walk .play{display:grid;place-items:center;background:#0b1222 center/cover no-repeat;border:0;cursor:pointer;color:#fff;font:inherit}
+.walk .play span{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:var(--blue);color:#06202e;font-size:1.8rem;padding-left:5px;box-shadow:0 0 0 8px rgba(56,189,248,.25)}
+.walk .cap{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-weight:700;font-size:.95rem;text-align:left}
+.hide{display:none!important}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="/">♞ Lanckriet Chess</a>
+    <a class="brand" href="/"><img src="/icons/icon-192.png" width="34" height="34" alt="" id="brand-img"><span>Lanckriet Chess</span></a>
     <nav aria-label="Main">
       <a href="#how">How it works</a><a href="#proof">Results</a><a href="#install">Install</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
-      <a class="btn primary" data-app href="/app.html">Launch the app</a>
+      <a class="btn bw" data-app href="/app.html">Launch the app</a>
     </nav>
   </div>
 </header>
@@ -112,12 +126,12 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 <section class="hero" aria-labelledby="h-hero">
   <div class="wrap grid">
     <div>
-      <span class="eyebrow">Stop guessing why you lose</span>
+      <div id="promo" class="promo hide" role="status" aria-live="polite"></div><br><span class="eyebrow">Stop guessing why you lose</span>
       <h1 id="h-hero">A <span style="color:var(--blue)">2100+ ELO coach</span> in your pocket.</h1>
       <p class="lead">Built on the <b>MSPC system</b> and the <b>Triple-T method</b> behind a climb from 355 to 2105 in 2 years and 10 months. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
       <div class="cta-row">
-        <a class="btn primary big" data-app href="/app.html">Launch the app</a>
-        <a class="btn big" href="#install">Install it on my device</a>
+        <a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a>
+        <a class="btn bw big" data-app href="/app.html">Launch the app</a>
       </div>
       <p class="small mute">No store, no download queue. Works on Android, iPhone, Windows and Mac. Download the app and let it scan your last 10 games.</p>
       <div class="chips" aria-label="Credentials">
@@ -126,16 +140,19 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
         <span class="chip"><b>+630</b> ELO in 2 months, proof-of-concept student</span>
       </div>
     </div>
-    <div class="coach" aria-label="What the coach does">
+    <div id="hero-side"><div class="walk hide" id="walk-hero"></div>
+    <div class="coach" id="coach-card" aria-label="What the coach does">
       <div class="who"><span class="dot" aria-hidden="true">♞</span><span>Coach Lanckriet</span></div>
       <div class="msg"><b>M · Move.</b> What did your opponent just change? A threat? A new weakness?</div>
       <div class="msg"><b>S · Specifics.</b> What does this position and this phase of the game ask of you?</div>
       <div class="msg"><b>P · Priorities.</b> Checks, captures, attacks. What do you play first?</div>
       <div class="msg"><b>C · Calculation.</b> Verify the line until it is clear. Then play it.</div>
       <p class="small mute" style="margin-top:12px">One habit, four questions. It catches the move before you play it.</p>
-    </div>
+    </div></div>
   </div>
 </section>
+
+<section class="alt hide" id="walkthrough" aria-labelledby="h-walk"><div class="wrap"><span class="eyebrow">See it in action</span><h2 id="h-walk">Watch the walkthrough</h2><p class="lead">Three minutes: how the Hub finds the mistakes that cost you rating.</p><div class="walk" id="walk-sec" style="max-width:820px;margin-top:18px"></div></div></section>
 
 <section id="how" aria-labelledby="h-how">
   <div class="wrap">
@@ -218,6 +235,8 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <h2 id="h-pricing">Pick your plan. Secure checkout with Stripe.</h2>
     <div id="status" class="banner hide" role="status" aria-live="polite"></div>
     <p class="lead">Use the email address you sign in with in the app. Your membership switches on there by itself after you sign in.</p>
+    <p class="offer hide" id="offer"></p>
+    <div class="fomo hide" id="fomo" role="status" aria-live="polite"><p><b>Founding Member spots</b></p><div class="bar" aria-hidden="true"><i id="fomo-bar" style="width:0"></i></div><p id="fomo-text"></p><p class="small mute" id="fomo-vip"></p></div>
     <div class="panel" id="ladder" aria-label="Launch prices" style="margin:14px 0">
       <h3 style="margin-bottom:.3rem">Yearly launch prices</h3>
       <p class="small mute">The first members get the lowest price. A launch price is yours for as long as your subscription stays active: Founding Members keep it for life as long as they do not cancel.</p>
@@ -231,7 +250,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
         <h3 id="h-pro">Pro</h3><span class="tag" id="y-tag">Yearly</span>
         <div class="price" id="y-price">…</div><div class="bar hide" id="y-bar"><i></i></div>
         <p class="small mute" id="y-left"></p><p class="small mute" id="y-lock">Billed once a year. Cancel any time.</p>
-        <p class="small">Every repertoire, middlegame plan and endgame lesson. The full Trim report. The Pro coach. All courses included.</p>
+        <p class="small">The whole library: every repertoire (Colle-Koltanowski, Caro-Kann, Semi-Slav), the full Masterclass and Opening Vault, middlegame plans and endgames. The full Trim report and the 24/7 AI coach.</p><p class="small"><b>10 tokens a day</b> (about 300 a month). They refresh every day: use them or lose them.</p>
         <div class="row"><button class="btn primary" type="button" data-plan="yearly" data-tier="2" id="b-yearly">Upgrade to Pro, yearly</button></div>
         <div class="price" id="m-price" style="font-size:1.4rem;margin-top:1rem">…</div>
         <div class="row"><button class="btn" type="button" data-plan="monthly" data-tier="2" id="b-monthly">Pro, monthly</button></div>
@@ -240,14 +259,14 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
         <h3 id="h-vip">VIP</h3><span class="tag" id="vy-tag">Yearly</span>
         <div class="price" id="vy-price">…</div><div class="bar hide" id="vy-bar"><i></i></div>
         <p class="small mute" id="vy-left"></p><p class="small mute">Billed once a year. Cancel any time.</p>
-        <p class="small">Exactly the same as Pro, for members who want to contribute extra. The same Founding and Early Adopter prices for the first 100 and the next 100 VIP members.</p>
+        <p class="small"><b>Everything in Pro</b>, plus your tokens upfront: <b>500 tokens credited at once each month</b> (monthly plan), or <b>7,000 tokens at once</b> (yearly plan). Spend them whenever you like: 20 game analyses one day, 5 the next.</p><p class="small">Plus a blue profile banner, the <b>Lanckriet Chess Student</b> title, and priority in live streams and the community. The same Founding and Early Adopter prices for the first 100 and the next 100 VIP members.</p>
         <div class="row"><button class="btn gold" type="button" data-plan="yearly" data-tier="3" id="b-vip-yearly">Become VIP, yearly</button></div>
         <div class="price" id="vm-price" style="font-size:1.4rem;margin-top:1rem">…</div>
         <div class="row"><button class="btn" type="button" data-plan="monthly" data-tier="3" id="b-vip-monthly">VIP, monthly</button></div>
       </article>
       <article class="card" aria-labelledby="h-free">
         <h3 id="h-free">Free</h3><div class="price">€0</div>
-        <p class="small">Start with the MSPC drills and a first game review. See what it finds in your games, then decide.</p>
+        <p class="small">Start with the MSPC drills and a first game review, 1 token a day (3 a day in your first week). See what it finds in your games, then decide.</p>
         <div class="row"><a class="btn" data-app href="/app.html">Launch the app</a></div>
       </article>
     </div>
@@ -279,9 +298,8 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 <section class="alt" id="faq" aria-labelledby="h-faq">
   <div class="wrap">
     <h2 id="h-faq">Questions</h2>
-    <details><summary>Do I need to download anything from a store?</summary><p>No. Lanckriet Chess is a web app. Open it in your browser, then add it to your home screen or desktop in one tap. It then opens full screen with its own icon.</p></details>
     <details><summary>Which devices does it work on?</summary><p>Android, iPhone and iPad, Windows and Mac. Any modern browser (Chrome, Edge, Safari, Firefox) can run it. Installing is available in Chrome, Edge, Safari and most Android browsers.</p></details>
-    <details><summary>What is the difference between Pro and VIP?</summary><p>Nothing in the app: VIP has exactly the same benefits and the same Founding and Early Adopter price tranches as Pro. It is for members who want to contribute extra to the project.</p></details>
+    <details open><summary>What is the difference between Pro and VIP?</summary><p><b>Pro</b> gives you the whole library (every repertoire, the Masterclass and the Opening Vault), the MSPC drills, the full Trim report and the 24/7 AI coach. You get <b>10 tokens a day</b>, about 300 a month. Tokens refresh every day, so unused ones are lost.</p><p><b>VIP</b> is everything in Pro, with your tokens credited upfront: <b>500 tokens at once each month</b> on the monthly plan, or <b>7,000 tokens at once</b> on the yearly plan, so you can analyse 20 games one day and 5 the next. VIP also gives you a blue profile banner, the <b>Lanckriet Chess Student</b> title, and priority in live streams and the community.</p></details>
     <details><summary>How do I cancel?</summary><p>Use the subscription link in the pricing section, or message @lanckrietchess on Instagram. A subscription stays active until the end of the period you paid for.</p></details>
     <details><summary>How does my membership switch on after I pay?</summary><p>Sign in to the app with the same email address you used here. Pro or VIP, and any tokens, switch on by themselves.</p></details>
     <details><summary>What happens to my data?</summary><p>You can delete your account and the data linked to it any time: in the app under Account, or on the <a href="/delete-account.html">account deletion page</a>.</p></details>
@@ -349,9 +367,22 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       html+="<li><b>"+esc(NAMES[i])+"</b>: "+pct+"% off, "+esc(eur(p.yearly[i-1]))+" a year"+esc(BADGE[i])+" · "+(left==null?"":esc(left+" places left"))+esc(state)+"</li>"}
     html+="<li><b>Full price</b>: "+esc(eur(p.base))+" a year"+(cur===4?" (now)":"")+"</li>";box.innerHTML=html;
   }
+
+  /* 3b. launch offer and the scarcity counter: every number comes from the live pricing call, nothing is made up */
+  function offer(p){
+    var t=p.tranche||4,promo=$("promo"),fomo=$("fomo"),of=$("offer");
+    if(t>=4){[promo,fomo,of].forEach(function(e){if(e)e.className+=" hide"});return}
+    var cap=(p.caps&&p.caps[t-1])||100,left=p.left&&p.left[t-1],price=p.yearly[t-1],pct=(p.discountPct&&p.discountPct[t-1])||0;
+    var who=t===1?"Founding Member":t===2?"Early Adopter":"Launch";
+    if(promo){promo.className="promo";promo.textContent=(t===1?"🔥 Founding Member Special: ":t===2?"🎉 The 100 Founding Member spots are taken. Early Adopter: ":"Launch rate: ")+pct+"% off the yearly plan."+(left!=null?" Only "+left+" of "+cap+" spots left.":"")}
+    if(of){of.className="offer";of.innerHTML=(t===1?"First 100 Founding Members":t===2?"Next 100 Early Adopters":"Launch rate")+": "+esc(eur(price))+" a year <s>"+esc(eur(p.base))+" a year</s><br><span class=\"small mute\" style=\"font-weight:500\">Your price stays the same for as long as your subscription stays active.</span>"}
+    if(fomo&&left!=null){fomo.className="fomo";$("fomo-bar").style.width=Math.max(4,Math.round((1-left/cap)*100))+"%";
+      $("fomo-text").innerHTML="<b class=\"n\">"+left+" of "+cap+"</b> "+esc(who)+" spots left at this price."+(left<=cap/2?" Spots are filling up fast.":"");
+      var v=p.vip,vl=v&&v.left&&v.left[(v.tranche||t)-1];$("fomo-vip").textContent=v&&vl!=null?"VIP: "+vl+" spots left at "+eur(v.yearly[(v.tranche||t)-1])+" a year (or "+eur(v.monthly)+" a month).":""}
+  }
   post("pricing",{}).then(function(p){
     if(!p||!p.ok){["y-price","m-price","vy-price","vm-price","g-price"].forEach(function(id){$(id).textContent="See at checkout"});return}
-    tierBlock(p,"");tierBlock(p.vip,"v");ladder(p);
+    tierBlock(p,"");tierBlock(p.vip,"v");ladder(p);try{offer(p)}catch(e){}
     $("g-price").textContent=eur(p.gift||p.base)+" for one year";
     var t=p.tranche||4,py=p.yearly[t-1]||p.base;
     $("vs-price").innerHTML="From "+esc(eur(py))+'<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>';
@@ -387,6 +418,29 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   if(paid==="cancel"){st.textContent="Checkout was cancelled. Nothing was charged.";st.className="banner bad"}
   else if(/^cs_[A-Za-z0-9_]{8,200}$/.test(paid||"")){st.innerHTML="Thank you! Your payment is received. Open the app and sign in with the same email address you used here: your membership or tokens switch on by themselves. If you bought a gift, your friend signs in with their own email address. <a href=\"/app.html\">Launch the app</a>";st.className="banner good"}
   if(paid){document.getElementById("pricing").scrollIntoView()}
+
+
+  /* 3c. the walkthrough video: its address is set in the app in admin mode and read here; the first week it replaces the coach card in the hero */
+  function parseVideo(u){var x;try{x=new URL(u)}catch(e){return null}var h=x.hostname.replace(/^www\./,"").toLowerCase(),p=x.pathname,id="",m;
+    if(h==="youtu.be")id=p.slice(1);else if(h==="youtube.com"||h==="m.youtube.com"||h==="youtube-nocookie.com")id=p==="/watch"?(x.searchParams.get("v")||""):((m=/^\/(?:embed|shorts|live)\/([\w-]{11})/.exec(p))?m[1]:"");
+    if(/^[\w-]{11}$/.test(id))return{t:"yt",id:id,src:"https://www.youtube-nocookie.com/embed/"+id+"?rel=0&modestbranding=1&playsinline=1&autoplay=1"};
+    if(h==="vimeo.com"||h==="player.vimeo.com"){m=/(\d{6,12})/.exec(p);if(m)return{t:"vm",src:"https://player.vimeo.com/video/"+m[1]+"?autoplay=1&playsinline=1"}}
+    if(/\.(mp4|webm)$/i.test(p))return{t:"file",src:u};return null}
+  function mountVideo(box,v){
+    if(v.t==="file"){box.innerHTML='<video controls playsinline preload="metadata" src="'+esc(v.src)+'"></video>';return}
+    var bg=v.t==="yt"?"background-image:url(https://i.ytimg.com/vi/"+v.id+"/hqdefault.jpg)":"";
+    box.innerHTML='<button type="button" class="play" data-play="'+esc(v.src)+'" style="'+bg+'" aria-label="Play the walkthrough video"><span aria-hidden="true">▶</span><b class="cap">Watch the walkthrough</b></button>'}
+  document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-play]");if(!b)return;var src=b.getAttribute("data-play");if(!/^https:\/\/(www\.youtube-nocookie\.com|player\.vimeo\.com)\//.test(src))return;b.parentNode.innerHTML='<iframe src="'+esc(src)+'" title="Walkthrough video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'});
+  function showVideo(url,updated){
+    var v=parseVideo(url);if(!v)return;
+    var fresh=updated>0&&Date.now()-updated<7*864e5,hero=$("walk-hero"),coach=$("coach-card"),sec=$("walkthrough");
+    if(fresh&&hero){mountVideo(hero,v);hero.className="walk";if(coach)coach.className+=" hide"}
+    else if(sec){mountVideo($("walk-sec"),v);sec.className="alt"}
+  }
+  var AR=meta("lc-arena").replace(/\/+$/,"");
+  if(AR)fetch(AR,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"video_get",app:"lanckrietchess-landing",device:device()})})
+    .then(function(r){return r.json()}).then(function(j){if(j&&j.ok&&typeof j.url==="string"&&/^https:\/\//.test(j.url))showVideo(j.url,+j.updated||0)}).catch(function(){});
+  var bi=$("brand-img");if(bi)bi.addEventListener("error",function(){bi.replaceWith(document.createTextNode("♞ "))});
 
   /* 4. verified student results: only members the owner switched on, first name, ratings and graph */
   function graph(points,joined){
