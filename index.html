@@ -239,7 +239,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <div class="fomo hide" id="fomo" role="status" aria-live="polite"><p><b>Founding Member spots</b></p><div class="bar" aria-hidden="true"><i id="fomo-bar" style="width:0"></i></div><p id="fomo-text"></p><p class="small mute" id="fomo-vip"></p></div>
     <div class="panel" id="ladder" aria-label="Launch prices" style="margin:14px 0">
       <h3 style="margin-bottom:.3rem">Yearly launch prices</h3>
-      <p class="small mute">The first members get the lowest price. A launch price is yours for as long as your subscription stays active: Founding Members keep it for life as long as they do not cancel.</p>
+      <p class="small mute">The first members get the lowest price. A launch price is yours for as long as your subscription stays active: Founding Members keep it for as long as they do not cancel.</p>
       <ol class="steps" id="ladder-rows" style="padding-left:1.1rem"></ol>
     </div>
     <label for="buyer">Your email</label>
@@ -269,6 +269,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
         <p class="small">Start with the MSPC drills and a first game review, 1 token a day (3 a day in your first week). See what it finds in your games, then decide.</p>
         <div class="row"><a class="btn" data-app href="/app.html">Launch the app</a></div>
       </article>
+    </div>
+    <div class="panel" id="lock-guarantee" style="margin:16px 0;border-color:rgba(251,191,36,.5)">
+      <b style="color:var(--gold)">Launch Price Guarantee</b>
+      <p class="small" style="margin:.35rem 0 0">Your yearly launch rate is locked in for as long as your subscription stays active: the price on your first invoice is the price on every renewal. Cancel, and the launch rate ends. Monthly plans have no launch discount.</p>
     </div>
     <p class="small mute">Courses are part of the subscription, they are not sold one by one. Payment is handled by Stripe. We never see your card. Taxes, if any, are shown at checkout.</p>
 
@@ -353,8 +357,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   var NAMES={1:"Founding Member rate",2:"Early Adopter rate",3:"Launch rate"},BADGE={1:" + Founding Member badge",2:" + Early Adopter badge",3:""};
   function tierBlock(p,pre){
     if(!p)return;var t=p.tranche||4,price=p.yearly[t-1]||p.base;
+    if(pre===""){var lg=$("lock-guarantee");if(lg)lg.hidden=t>=4}
     $(pre+"y-price").textContent=eur(price)+" / year";
     if(t<4){var s=document.createElement("s");s.textContent=eur(p.base);$(pre+"y-price").appendChild(s);
+      var pct=Math.round((1-price/p.base)*100);if(pct>0){var bd=document.createElement("span");bd.className="tag";bd.style.cssText="margin-left:8px;background:rgba(251,191,36,.2);color:var(--gold);vertical-align:middle";bd.textContent=pct+"% off";$(pre+"y-price").appendChild(bd)}
       $(pre+"y-tag").textContent=NAMES[t];
       var cap=(p.caps&&p.caps[t-1])||100,left=p.left&&p.left[t-1];
       if(left!=null){$(pre+"y-left").textContent=left+" of "+cap+" places left at this price.";$(pre+"y-bar").className="bar";$(pre+"y-bar").firstChild.style.width=Math.max(4,Math.round((1-left/cap)*100))+"%"}
