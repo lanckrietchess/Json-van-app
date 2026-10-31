@@ -109,24 +109,42 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 .walk .play span{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:var(--blue);color:#06202e;font-size:1.8rem;padding-left:5px;box-shadow:0 0 0 8px rgba(56,189,248,.25)}
 .walk .cap{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-weight:700;font-size:.95rem;text-align:left}
 .hide{display:none!important}
-.fm-hero{margin:0 0 20px;padding:18px 20px 20px;border:3px solid var(--gold);border-radius:20px;background:linear-gradient(135deg,rgba(251,191,36,.22),rgba(251,191,36,.05));box-shadow:0 0 0 6px rgba(251,191,36,.10),0 18px 50px rgba(251,191,36,.12);position:relative;overflow:hidden}
-.fm-tag{display:inline-block;font-weight:900;letter-spacing:.12em;font-size:.95rem;color:#0f172a;background:var(--gold);padding:6px 14px;border-radius:999px;animation:fmpulse 1.8s ease-in-out infinite}
-.fm-prices{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:.6rem 0 .1rem}
-.fm-old{font-size:clamp(1.8rem,7vw,3rem);font-weight:900;color:#f87171;text-decoration:line-through;text-decoration-thickness:.14em;text-decoration-color:#ef4444;opacity:.95}
-.fm-new{font-size:clamp(3.2rem,15vw,6.8rem);font-weight:900;color:var(--gold);line-height:.95;letter-spacing:-.03em}
-.fm-per{font-weight:800;opacity:.8}
-.fm-pct{display:inline-block;margin:.5rem 0 .3rem;font-size:clamp(1.5rem,6vw,2.5rem);font-weight:900;background:var(--gold);color:#0f172a;padding:.1em .5em;border-radius:14px;transform:rotate(-2deg);animation:fmpulse 1.8s ease-in-out infinite}
-@keyframes fmpulse{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.05) rotate(-2deg)}}
-@media (prefers-reduced-motion:reduce){.fm-tag,.fm-pct{animation:none}}
-.fm-sub{font-weight:700;margin:.2rem 0 .8rem}.fm-hero .bar{height:14px}
-.fm-left{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;margin:.5rem 0}.fm-left b{color:var(--gold);font-size:1.5em}
-.fm-next{margin:.2rem 0 .9rem}.fm-hero .btn{min-height:50px}
+.fm-hero{width:100%;background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(56,189,248,.07));border-bottom:1px solid rgba(251,191,36,.35)}
+.fm-in{max-width:1180px;margin:0 auto;padding:12px 20px 6px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 28px}
+.fm-l{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fm-tag{font-weight:800;letter-spacing:.09em;font-size:.78rem;text-transform:uppercase;color:var(--gold)}
+.fm-pct{font-weight:700;font-size:.78rem;padding:3px 11px;border:1px solid rgba(251,191,36,.55);border-radius:999px;color:#fde68a;margin:0}
+.fm-m{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.fm-old{font-size:1.15rem;font-weight:700;color:var(--mute);text-decoration:line-through;text-decoration-thickness:.1em}
+.fm-new{font-size:1.9rem;font-weight:900;color:#fff;line-height:1}
+.fm-per{color:var(--mute);font-weight:600;font-size:.9rem}
+.fm-r{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fm-spots{font-size:.92rem;font-weight:700;margin:0}.fm-spots b{color:var(--gold)}
+.fm-barw{width:130px;margin:0}.fm-hero .bar{height:8px;margin:0}
+.fm-hero .btn{min-height:44px;padding-top:9px;padding-bottom:9px}
+.fm-copy{max-width:1180px;margin:0 auto;padding:0 20px 12px;font-size:.86rem;color:var(--mute);line-height:1.45}.fm-copy b{color:#e2e8f0}
+.fm-dbg{max-width:1180px;margin:0 auto;padding:0 20px 8px;font-size:.78rem;color:#fca5a5}
 #promo{display:none!important}
+.vs-old{font-size:.5em;color:var(--mute);text-decoration:line-through;text-decoration-thickness:.1em;margin-right:.35em;font-weight:700}.vs-badge{margin:.3rem 0 0;font-size:.82rem;font-weight:700;color:#fde68a}
 .vs.has3{grid-template-columns:1fr 1fr 1fr}@media (max-width:900px){.vs.has3{grid-template-columns:1fr}}.vs .card[hidden]{display:none}
+.acct-ov{position:fixed;inset:0;background:rgba(2,6,23,.74);display:grid;place-items:center;z-index:200;padding:16px}
+.acct-box{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:440px;width:100%;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.acct-box h3{margin:0 0 .4rem;font-size:1.3rem}.acct-box p{margin:.4rem 0}.acct-box input{width:100%;min-height:46px;margin:.5rem 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1222;color:inherit;font:inherit}
+.acct-box .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:.6rem}.acct-box .btn{min-height:46px}.acct-msg{min-height:1.2em;font-size:.9rem}.acct-msg.bad{color:#fca5a5}
+.msgline .btn{min-height:44px;margin-left:6px}.msgline small{opacity:.85}
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
+<aside id="fm-hero" class="fm-hero hide" role="status" aria-live="polite">
+  <div class="fm-in">
+    <div class="fm-l"><span class="fm-tag" id="fm-tag">Founding Member rate</span><span class="fm-pct" id="fm-pct">50% off</span></div>
+    <div class="fm-m"><s class="fm-old" id="fm-old">€399 / year</s><span class="fm-new" id="fm-new">€199.50</span><span class="fm-per">/ year</span></div>
+    <div class="fm-r"><p class="fm-spots hide" id="fm-leftwrap"><b id="fm-left"></b> <span id="fm-left-t"></span></p><div class="bar fm-barw hide" id="fm-barwrap" aria-hidden="true"><i id="fm-bar" style="width:0"></i></div><a class="btn gold" href="#pricing">See the Pro plan</a></div>
+  </div>
+  <p class="fm-copy"><b>This launch rate is for the Pro plan only</b> (billed yearly). <span id="fm-sub"></span> <b>The Free plan is always available</b>: start with level 1 of everything, no card needed. Nobody has to upgrade to use the app.</p>
+  <p class="fm-dbg hide" id="fm-debug"></p>
+</aside>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="/"><img src="/icons/icon-192.png" width="34" height="34" alt="" id="brand-img"><span>Lanckriet Chess</span></a>
@@ -141,7 +159,6 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 <section class="hero" aria-labelledby="h-hero">
   <div class="wrap grid">
     <div>
-      <div id="fm-hero" class="fm-hero hide" role="status" aria-live="polite"><span class="fm-tag" id="fm-tag">🔥 FOUNDING MEMBER</span><div class="fm-prices"><s class="fm-old" id="fm-old">€399</s><span class="fm-new" id="fm-new">€199.50</span><span class="fm-per">/ year</span></div><p class="fm-pct" id="fm-pct">50% OFF</p><p class="fm-sub" id="fm-sub"></p><div class="bar hide" id="fm-barwrap" aria-hidden="true"><i id="fm-bar" style="width:0"></i></div><p class="fm-left hide" id="fm-leftwrap">⏳ <b id="fm-left"></b> <span id="fm-left-t"></span></p><p class="fm-next" id="fm-next"></p><a class="btn gold big" href="#pricing">Claim my launch price</a></div>
       <div id="promo" class="promo hide" role="status" aria-live="polite"></div><br><span class="eyebrow">Stop guessing why you lose</span>
       <h1 id="h-hero">A <span style="color:var(--blue)">2100+ ELO coach</span> in your pocket.</h1>
       <p class="lead">Built on the <b>MSPC system</b> and the <b>Triple-T method</b> behind a climb from 355 to 2105 in 2 years and 10 months. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
@@ -201,7 +218,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
         <p class="small mute">Typical yearly prices of premium memberships at the big chess sites. They vary by site, plan and country.</p>
       </article>
       <article class="card hl">
-        <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">From €399<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p>
+        <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">From €399<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p><p class="vs-badge" id="vs-badge" hidden></p>
         <ul><li class="yes">Instant, 24/7, right after your game</li><li class="yes" id="vs-hours">A year of Pro costs about as much as a few private lessons</li><li class="yes">The same MSPC and Triple-T frameworks, applied to your own games</li></ul>
         <div class="vs-urgency" id="vs-urgency" hidden><p>🔒 Lock in your rate: your price stays the same for as long as you keep your subscription active</p><p>⚡ Limited spots remaining for the current cohort</p><p class="small mute">This is the yearly launch rate. Monthly plans have no launch discount.</p></div>
       </article>
@@ -338,7 +355,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a> · <a data-app href="/app.html">Launch the app</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.20.1</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.20.3</p></footer>
 
 <script>
 "use strict";
@@ -366,11 +383,22 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   Array.prototype.forEach.call(document.querySelectorAll("[data-app]"),function(a){if(ref&&/^[A-Za-z0-9-]{3,24}$/.test(ref)){var u=a.getAttribute("href");a.setAttribute("href",u+(u.indexOf("?")<0?"?":"&")+"ref="+encodeURIComponent(ref))}});
 
   /* 3. prices and checkout */
-  function post(path,body){
+  function post0(path,body,hdr){
     var ctl=typeof AbortController==="function"?new AbortController():null,t=ctl?setTimeout(function(){ctl.abort()},15000):null;
-    return fetch(API+"/"+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body||{}),signal:ctl?ctl.signal:undefined})
+    return fetch(API+"/"+path,{method:"POST",headers:Object.assign({"Content-Type":"application/json"},hdr||{}),body:JSON.stringify(body||{}),signal:ctl?ctl.signal:undefined})
       .then(function(r){return r.json().catch(function(){return{}}).then(function(j){j.status=r.status;return j})})
       .catch(function(){return{ok:false,reason:"network",status:0}}).then(function(j){if(t)clearTimeout(t);return j});
+  }
+  function lcMeta(n){var m=document.querySelector('meta[name="'+n+'"]');return m?m.getAttribute("content")||"":""}
+  function post(path,body){
+    return post0(path,body).then(function(j){
+      window.__lcDbg=window.__lcDbg||[];window.__lcDbg.push(path+": status "+(j&&j.status)+(j&&(j.reason||j.error)?" ("+(j.reason||j.error)+")":""));
+      if(j&&(j.status===0||j.status===401||j.status===403)){
+        var k=lcMeta("lc-sb-key");
+        if(k)return post0(path,body,{"Authorization":"Bearer "+k,"apikey":k}).then(function(j2){window.__lcDbg.push(path+" with key: status "+(j2&&j2.status));return j2&&j2.status===200?j2:j});
+      }
+      return j;
+    });
   }
   var WHY={network:"No connection. Nothing was charged. Try again.",slow_down:"Too many tries. Wait a minute and try again.",not_configured:"Checkout is not open yet. Please try again soon.",bad_email:"That email address does not look right.",bad_recipient:"Your friend’s email address does not look right.",bad_pack:"That pack is not available."};
   function say(id,text,cls){var e=$(id);e.textContent=text||"";e.className="msgline"+(cls?" "+cls:"")}
@@ -413,53 +441,110 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     tierBlock(p,"");tierBlock(p.vip,"v");ladder(p);try{offer(p)}catch(e){}
     $("g-price").textContent=eur(p.gift||p.base)+" for one year";
     var t=p.tranche||4,py=p.yearly[t-1]||p.base;
-    $("vs-price").innerHTML="From "+esc(eur(py))+'<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>';
+    $("vs-price").innerHTML=t<4?'<s class="vs-old">'+esc(eur(p.base))+'</s>'+esc(eur(py))+'<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>':"From "+esc(eur(py))+'<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>';
+    var vb=$("vs-badge");if(vb){if(t<4){vb.textContent="Pro, billed yearly · "+(((p.discountPct&&p.discountPct[t-1])||Math.round((1-py/p.base)*100))+"% off the regular price");vb.hidden=false}else vb.hidden=true}
     var vu=$("vs-urgency"),lf=p.left&&p.left[t-1];if(vu)vu.hidden=t>=4||(lf!=null&&lf<=0); /* only while launch spots really exist */
     $("vs-hours").textContent="A year of Pro costs the same as "+Math.max(1,Math.ceil(py/8000))+" hours of private coaching";
     (p.packs||[]).forEach(function(k){var b=document.querySelector('[data-pack="'+k.id+'"]');if(b){b.querySelector("b").textContent=k.tokens.toLocaleString("en-GB")+" tokens";b.querySelector("span").textContent=eur(k.cents)}});
     if(typeof p.portal==="string"&&/^https:\/\//.test(p.portal)){$("portal").href=p.portal;$("portal-row").className="small mute"}
   });
-  /* 3c. the big launch banner: numbers come from the live pricing call; shown with a plain fallback the moment the call fails, and upgraded when a retry works */
-  var FMN=["🔥 FOUNDING MEMBER","🎉 EARLY ADOPTER","LAUNCH RATE"],fmLive=false;
+  /* 3c. the launch banner: every number comes from the live pricing call; a plain fallback shows at once if the call fails and is replaced when a retry works */
+  var FMN=["Founding Member rate","Early Adopter rate","Launch rate"],fmLive=false,PCT=[50,25,10];
   function fmHero(p){
     var box=$("fm-hero");if(!box)return;var t=p.tranche||4;fmLive=true;
     if(t>=4){box.className="fm-hero hide";return}
-    var cap=(p.caps&&p.caps[t-1])||100,left=p.left&&p.left[t-1],pct=(p.discountPct&&p.discountPct[t-1])||0,price=p.yearly[t-1];
+    var cap=(p.caps&&p.caps[t-1])||100,left=p.left&&p.left[t-1],price=p.yearly[t-1],pct=(p.discountPct&&p.discountPct[t-1])||Math.round((1-price/p.base)*100);
     if(left!=null&&left<=0){box.className="fm-hero hide";return}
-    $("fm-tag").textContent=FMN[t-1]||"LAUNCH RATE";$("fm-old").textContent=eur(p.base);$("fm-new").textContent=eur(price);$("fm-pct").textContent=pct+"% OFF";
-    var nx=t<=3&&p.yearly[t]?" After these spots the price goes to "+eur(p.yearly[t])+".":"";
-    $("fm-sub").textContent="Your price stays the same for as long as your subscription stays active."+nx;
-    if(left!=null){$("fm-left").textContent=left;$("fm-left-t").textContent="of "+cap+" spots left at this price";$("fm-bar").style.width=Math.max(4,Math.round((1-left/cap)*100))+"%";$("fm-leftwrap").className="fm-left";$("fm-barwrap").className="bar"}
-    $("fm-next").textContent=t===1?"The next 100 members get 25% off, then 10%. After that: full price.":t===2?"The next 100 members get 10% off. After that: full price.":"After these spots the full price applies.";
+    $("fm-tag").textContent=FMN[t-1]||"Launch rate";$("fm-pct").textContent=pct+"% off";
+    $("fm-old").textContent=eur(p.base)+" / year";$("fm-new").textContent=eur(price);
+    $("fm-sub").textContent=t===1?"The next 100 members get 25% off, then 10%. Your price stays the same for as long as your subscription stays active.":t===2?"The next 100 members get 10% off. Your price stays the same for as long as your subscription stays active.":"Your price stays the same for as long as your subscription stays active.";
+    if(left!=null){$("fm-left").textContent=left+" of "+cap;$("fm-left-t").textContent="spots left at this price";$("fm-bar").style.width=Math.max(4,Math.round((1-left/cap)*100))+"%";$("fm-leftwrap").className="fm-spots";$("fm-barwrap").className="bar fm-barw"}
     box.className="fm-hero";
     var pr=$("vs-premium"),vg=$("vs-grid");if(pr&&vg&&t<=2){pr.hidden=false;vg.className="vs has3"}
   }
+  function fmDebug(){if(!/[?&]debug/.test(location.search))return;var d=$("fm-debug");if(d){d.className="fm-dbg";d.textContent="Pricing call: "+(window.__lcDbg||[]).join(" | ")}}
   function fmFallback(){
     var box=$("fm-hero");if(!box||fmLive)return;
-    $("fm-tag").textContent="🔥 FOUNDING MEMBER RATE";$("fm-pct").textContent="50% OFF";
-    $("fm-sub").textContent="For the first 100 members, on the yearly plan. Your exact rate and the spots left are confirmed at checkout.";
-    $("fm-next").textContent="The next 100 members get 25% off, then 10%.";box.className="fm-hero";
+    $("fm-tag").textContent="Founding Member rate";$("fm-pct").textContent="50% off";$("fm-old").textContent="€399 / year";$("fm-new").textContent="€199.50";
+    $("fm-sub").textContent="The first 100 members get this rate; the next 100 get 25% off, then 10%. Your exact rate and the spots left are confirmed at checkout.";
+    box.className="fm-hero";
+    var vp=$("vs-price");if(vp&&!fmLive)vp.innerHTML='<s class="vs-old">€399</s>€199.50<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>';
+    var vb=$("vs-badge");if(vb&&!fmLive){vb.textContent="Pro, billed yearly · Founding Member rate, 50% off";vb.hidden=false}
   }
-  (function fmLoad(n){post("pricing",{}).then(function(p){if(p&&p.ok&&p.yearly){try{fmHero(p)}catch(e){}return}fmFallback();if(n<4){setTimeout(function(){fmLoad(n+1)},1500*(n+1))}})})(0);
+  (function fmLoad(n){post("pricing",{}).then(function(p){if(p&&p.ok&&p.yearly){try{fmHero(p)}catch(e){}fmDebug();return}fmFallback();fmDebug();if(n<4){setTimeout(function(){fmLoad(n+1)},1500*(n+1))}})})(0);
   var busy=false;
+  var DEBUG=/[?&]debug/.test(location.search),lastGo=null;
+  function sayHTML(id,h,cls){var e=$(id);if(!e)return;e.innerHTML=h||"";e.className="msgline"+(cls?" "+cls:"")}
+  /* why did the checkout not open? visitors get a plain sentence, ?debug shows the cause (CORS / ALLOWED_ORIGINS, JWT, keys, offline) */
+  function diagnose(r){
+    var st=r&&r.status,why=r&&(r.reason||r.error),sorry="Nothing was charged.";
+    if(st===401||st===403)return Promise.resolve({u:"Checkout is not reachable right now. "+sorry,o:"The stripe function answered "+st+": it refuses calls without a login. Deploy it with: supabase functions deploy stripe --no-verify-jwt"});
+    if(st===404)return Promise.resolve({u:"Checkout is not reachable right now. "+sorry,o:"The stripe function or this route was not found (404). Deploy the stripe function."});
+    if(why==="not_configured"||why==="stripe_not_configured"||why==="no_stripe")return Promise.resolve({u:"Checkout is not open yet. "+sorry+" Please try again soon.",o:"The stripe function says it is not configured: set the Stripe secret key and price settings as Supabase secrets, then redeploy."});
+    if(st===0||why==="network"){
+      if(typeof navigator!=="undefined"&&navigator.onLine===false)return Promise.resolve({u:"You seem to be offline. Check your connection and try again. "+sorry,o:"The browser reports no network."});
+      return fetch(API+"/pricing",{method:"GET",mode:"no-cors"}).then(function(){return true},function(){return false}).then(function(reach){
+        return reach?{u:"We could not reach secure checkout from here. "+sorry,o:"The function is reachable but the browser blocked the answer (CORS). Set the secret ALLOWED_ORIGINS on the stripe function to include "+location.origin+" (and the Vercel address) and redeploy it."}
+                    :{u:"We could not reach secure checkout. "+sorry,o:"The stripe function cannot be reached at all: it is not deployed, the project is paused, or the address in this page is wrong."}});
+    }
+    return Promise.resolve({u:"Checkout could not start. "+sorry+" Please try again.",o:"The stripe function answered "+(st||"?")+(why?" ("+why+")":"")+". Check its logs in the Supabase dashboard."});
+  }
   function go(path,body,btn,msgId){
     if(busy)return;busy=true;var old=btn.innerHTML;btn.disabled=true;btn.textContent="Opening secure checkout…";say(msgId,"");
     post(path,body).then(function(r){
       busy=false;
       if(r&&r.ok&&typeof r.url==="string"&&/^https:\/\/[a-z0-9.-]+\.stripe\.com\//i.test(r.url)){location.href=r.url;return}
-      btn.disabled=false;btn.innerHTML=old;say(msgId,WHY[r&&r.reason]||"Checkout could not start. Nothing was charged. Please try again.","bad");
+      btn.disabled=false;btn.innerHTML=old;
+      diagnose(r).then(function(d){
+        try{console.warn("checkout failed:",d.o)}catch(e){}
+        sayHTML(msgId,esc(d.u)+' <button type="button" class="btn bw" data-retry>Try again</button><br><small>'+(DEBUG?"Owner: "+esc(d.o):"Still stuck? Send a DM to @lanckrietchess on Instagram.")+"</small>","bad");
+        lastGo=function(){go(path,body,btn,msgId)};
+      });
     });
+  }
+  document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("[data-retry]")&&lastGo){e.preventDefault();lastGo()}});
+  /* 3d. before Stripe the buyer needs an account. Known account = straight to checkout; otherwise one tap creates it (sign-in link by email) and goes on to Stripe with that exact email */
+  function sbHdr(){var k=meta("lc-sb-key");return{"Content-Type":"application/json","apikey":k,"Authorization":"Bearer "+k}}
+  function accountExists(em){
+    var u=meta("lc-sb-url").replace(/\/+$/,"");if(!u||!meta("lc-sb-key"))return Promise.resolve(null);
+    return fetch(u+"/rest/v1/rpc/lc43_account_exists",{method:"POST",headers:sbHdr(),body:JSON.stringify({p_email:em})})
+      .then(function(r){return r.json().catch(function(){return null}).then(function(j){return r.status===200&&j&&j.ok===true&&typeof j.exists==="boolean"?j.exists:null})})
+      .catch(function(){return null});
+  }
+  function createAccount(em){
+    var u=meta("lc-sb-url").replace(/\/+$/,"");if(!u||!meta("lc-sb-key"))return Promise.resolve(false);
+    return fetch(u+"/auth/v1/otp?redirect_to="+encodeURIComponent(location.origin+(meta("lc-app")||"/app.html")),{method:"POST",headers:sbHdr(),body:JSON.stringify({email:em,create_user:true})})
+      .then(function(r){return r.status===200}).catch(function(){return false});
+  }
+  function closeAcct(){var o=$("acct-ov");if(o)o.remove()}
+  function acctModal(em,ex,run){
+    closeAcct();
+    var neutral=ex===true?false:ex===null&&!!em,ov=document.createElement("div");
+    ov.id="acct-ov";ov.className="acct-ov";ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");ov.setAttribute("aria-labelledby","acct-h");
+    ov.innerHTML='<div class="acct-box"><h3 id="acct-h">'+(neutral?"Confirm your account first.":"No account found yet.")+'</h3><p>'+(neutral?"First, confirm your account to secure your membership. If you already have one, nothing changes.":"First, create your account to secure your membership.")+'</p>'
+      +'<input id="acct-em" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Email address" value="'+esc(em)+'"><p class="small mute">We email you a sign-in link and a 6-digit code so you can open the app right after paying. Use this same email at checkout.</p><p class="acct-msg" id="acct-msg" aria-live="polite"></p>'
+      +'<div class="row"><button type="button" class="btn gold" id="acct-go">Create account &amp; proceed</button><button type="button" class="btn bw" id="acct-x">Cancel</button></div></div>';
+    document.body.appendChild(ov);var inp=$("acct-em");if(inp&&!em)inp.focus();
+    ov.addEventListener("click",function(e){if(e.target===ov||e.target.id==="acct-x")closeAcct()});
+    document.addEventListener("keydown",function k(e){if(!$("acct-ov")){document.removeEventListener("keydown",k);return}if(e.key==="Escape"){closeAcct();document.removeEventListener("keydown",k)}});
+    $("acct-go").addEventListener("click",function(){
+      var v=($("acct-em").value||"").trim().toLowerCase(),m=$("acct-msg");
+      if(!EMAIL.test(v)){m.textContent=WHY.bad_email;m.className="acct-msg bad";return}
+      this.disabled=true;m.textContent="Creating your account…";m.className="acct-msg";$("buyer").value=v;
+      createAccount(v).then(function(){closeAcct();run(v)});
+    });
+  }
+  function guard(run){
+    var raw=($("buyer").value||"").trim().toLowerCase(),em=email();
+    if(!em){acctModal(raw,null,run);return}
+    accountExists(em).then(function(ex){if(ex===true){run(em);return}acctModal(em,ex,run)});
   }
   function email(){var em=$("buyer").value.trim().toLowerCase();return EMAIL.test(em)?em:""}
   document.addEventListener("click",function(e){
     var b=e.target.closest&&e.target.closest("[data-plan]");
-    if(b){var em=email();
-      if(!em){say("pro-msg","Enter the email you sign in with in the app, so your membership can switch on there.","bad");$("buyer").focus();$("buyer").scrollIntoView({block:"center"});return}
-      go("subscribe",{plan:b.getAttribute("data-plan"),tier:+b.getAttribute("data-tier")||2,email:em,ret:"support",device:device()},b,"pro-msg");return}
+    if(b){guard(function(em){go("subscribe",{plan:b.getAttribute("data-plan"),tier:+b.getAttribute("data-tier")||2,email:em,ret:"support",device:device()},b,"pro-msg")});return}
     var k=e.target.closest&&e.target.closest("[data-pack]");
-    if(k){var em2=email();
-      if(!em2){say("tok-msg","Enter your email above first: your tokens are added to that account when you sign in.","bad");$("buyer").focus();$("buyer").scrollIntoView({block:"center"});return}
-      go("tokens",{pack:k.getAttribute("data-pack"),email:em2,ret:"support"},k,"tok-msg");return}
+    if(k){guard(function(em2){go("tokens",{pack:k.getAttribute("data-pack"),email:em2,ret:"support"},k,"tok-msg")});return}
     if(e.target.id==="b-gift"){var to=$("g-to").value.trim().toLowerCase(),from=$("g-from").value.trim().toLowerCase();
       if(!EMAIL.test(to)){say("gift-msg",WHY.bad_recipient,"bad");$("g-to").focus();return}
       if(from&&!EMAIL.test(from)){say("gift-msg",WHY.bad_email,"bad");return}
