@@ -1,8 +1,9 @@
 const LC42=(()=>{
   "use strict";
   /* LC42: the first-time path, one road, no choices.
-     Level 1: ONE mistake of the latest game (shown the moment it is found) -> "Analyze the whole game" (Trim starts by itself); the 9 other recent
-              games are fetched and scanned in the background -> a finished Trim = Level 2.
+     Level 1: ONE mistake of the latest game, shown the moment it is found, on the app's own board: the person tries to find the better move. While they
+              try, the Trim review of that game already runs by itself behind the card. When they are done they walk on to the full Trim (no waiting);
+              only now the 9 other recent games are fetched and scanned in the background. A finished Trim review = Level 2.
      Level 2: overview of the leaks across the games + personal working points -> MSPC System: tap the ? and listen to Coach Lanckriet to the end = Level 3.
      Level 3: Game Library opens -> tap the ? on Trim and listen to the end -> trim one of the other games yourself = Level 4 (the normal quests continue).
      One saved state (Store lc42-onb). Steps: tease, first, sys, libq, second, done. */
@@ -24,13 +25,13 @@ const LC42=(()=>{
   const engineBusy=()=>{const h=hashNow();return h==="trim"?(reviewing()||Date.now()-lastTouch<8000):ENGINE.has(h)};
 
   /* ---------- state ---------- */
-  const blank=()=>({step:"",site:"",user:"",g1:null,base:null,base2:null,at:0,since:0,imported:0,scan:{done:0,tot:0,leaks:{},fin:false},pts:false});
+  const blank=()=>({step:"",site:"",user:"",g1:null,base:null,base2:null,quiz:false,at:0,since:0,imported:0,scan:{done:0,tot:0,leaks:{},fin:false},pts:false});
   const st=()=>Object.assign(blank(),rd(KEY,{})||{});
   const put=p=>{const s=Object.assign(st(),p);wr(KEY,s);return s};
-  const owns=()=>!admin()&&OWN.test(st().step);
+  const owns=()=>OWN.test(st().step);
   const quest=()=>rd("lc19-sw",null);
   const levelNow=()=>{const q=quest();return q&&q.on?(+q.level||1):5};
-  const eligible=()=>{try{const q=quest();return !admin()&&!!q&&q.on===true&&(+q.level||1)===1&&!st().step}catch(e){return false}};
+  const eligible=()=>!OWN.test(st().step);
   const trimCount=()=>{try{const s=Store.get("lc-hub-trim-stats-v1",{})||{};return Object.keys(s.games||{}).length}catch(e){return 0}};
   const mistakeCount=()=>{try{return MistakeLog.all().length}catch(e){return 0}};
   const xpNow=()=>{try{return LC26.sync.snapshot().xp||0}catch(e){return 0}};
@@ -50,10 +51,20 @@ const LC42=(()=>{
   /* ---------- 0. entry: right after the first-run questions and the Chess.com / Lichess connection ---------- */
   function begin(h){
     try{
-      if(!eligible())return false;
-      const site=h&&h.cc?"chesscom":h&&h.li?"lichess":"",user=String(h&&(h.cc||h.li)||"");
+      const cur=st().step;
+      if(OWN.test(cur)){if(cur==="tease")setTimeout(()=>{try{teaser()}catch(e){}},350);return true}   /* already on the road */
+      let user=String(h&&(h.cc||h.li)||""),site=h&&h.cc?"chesscom":h&&h.li?"lichess":"";
+      if(!user){
+        const tryS=x=>{try{const a=Elo.acct(x);return a&&a.user?String(a.user):""}catch(e){return ""}};
+        const p=(()=>{try{return App.profile||{}}catch(e){return {}}})();
+        if(p.chess_com_username||tryS("chesscom")){site="chesscom";user=String(p.chess_com_username||tryS("chesscom"))}
+        else if(p.lichess_username||tryS("lichess")){site="lichess";user=String(p.lichess_username||tryS("lichess"))}
+      }
       if(!site||!user)return false;
-      put({step:"tease",site:site,user:user,at:Date.now(),since:Date.now(),scan:blank().scan,pts:false});
+      /* the road needs the quest levels: switch them on for a member who has no real progress yet (also a returning tester) */
+      try{const q=quest();if((!q||!q.on)&&xpNow()<300){wr("lc19-sw",{on:true,level:1,base:xpNow(),t0:Date.now()});try{LC19.quest._t.decorate()}catch(e){}}else if(q&&q.on&&(+q.level||1)>1&&xpNow()<300){wr("lc19-sw",Object.assign({},q,{level:1,base:xpNow()}))}}catch(e){}
+      try{Store.set(KG,[])}catch(e){}
+      put(Object.assign(blank(),{step:"tease",site:site,user:user,at:Date.now(),since:Date.now()}));
       setTimeout(()=>{try{teaser()}catch(e){console.error("lc42",e)}},350);
       poll();
       return true;
@@ -93,53 +104,85 @@ const LC42=(()=>{
     }
     return{none:true};
   }
+  let cur=null;
+  function quizEnd(){
+    const s=st();if(s.quiz)return;
+    put({quiz:true});
+    importRest();                                   /* only now: the 9 other games, while the person goes through the Trim */
+    setTimeout(()=>{try{scanRest()}catch(e){}},1500);
+    paint(hashNow());
+  }
+  /* the Trim of the game runs behind the card, so there is nothing to wait for afterwards */
+  function startBackground(gg){
+    try{App.ui.trimLoad={pgn:gg.pgn,id:null,user:gg.color,review:false}}catch(e){}
+    put({step:"first",g1:gg,base:{t:trimCount(),m:mistakeCount()},quiz:false,since:Date.now()});
+    location.hash="#trim";
+    autoReview();poll();
+  }
+  function card(el,g,r){
+    const w=g.color==="w",fen=r.fen,best=r.bestUci||"",bestSan=r.bestSan||"the best move";
+    el.innerHTML='<p class="lc39-qwh">Your first mistake: move '+r.no+'.</p><p>You played <b>'+E(r.played.san)+'</b>. It cost you about '+(Math.round(r.loss/10)/10)+' pawns of advantage. Can you find something better from here?</p>'
+      +'<div data-lc42-board class="lc25-pb"></div><p data-lc42-fb aria-live="polite" class="lc25-fb"></p><p class="small muted">Hint: what was your opponent threatening, and what changed on the board? That is the M in MSPC.</p>'
+      +'<div class="btn-row" data-lc42-act><button type="button" class="btn btn-ghost btn-sm" data-lc42-show>Show me</button></div>'+saveBlock();
+    const fb=t=>{const x=Q("[data-lc42-fb]",el);if(x)x.innerHTML=t},act=Q("[data-lc42-act]",el);
+    let board=null,tries=0,finished=false;
+    const fin=msg=>{if(finished)return;finished=true;try{board.setInteractive(null)}catch(e){}fb(msg);act.innerHTML='<button type="button" class="btn btn-primary lc42-full" data-lc42-full>Analyze the whole game</button>'};
+    const reveal=()=>{try{board.setArrows([{from:best.slice(0,2),to:best.slice(2,4),kind:"best"}])}catch(e){}fin("The move was <b>"+E(bestSan)+"</b>. Ask yourself the MSPC questions before every move and you save this game.")};
+    cur={reveal:reveal};
+    if(!best){fin("The engine preferred another move here. Let us look at the whole game.");return}
+    try{
+      board=Board(Q("[data-lc42-board]",el),{fen:fen,orientation:w?"white":"black",onMove:m=>{
+        if(finished)return;
+        if((m.from+m.to).toLowerCase()===best.slice(0,4).toLowerCase()){try{board.setPosition(fen)}catch(e){}fin("<b>That is the move.</b> "+E(bestSan));return}
+        let ok=null;try{ok=new Chess(fen).move({from:m.from,to:m.to,promotion:m.promotion||"q"})}catch(e){}
+        try{board.setPosition(fen)}catch(e){}
+        if(!ok)return;
+        tries++;try{board.shake&&board.shake()}catch(e){}
+        if(tries>=3)reveal();else fb("That still loses ground. Check their threat first, then try again ("+(3-tries)+" left).");
+      }});
+      board.setInteractive(g.color);
+    }catch(e){reveal()}
+  }
   async function teaser(){
     if(typeof openSheet!=="function")return;
     const s0=st();if(s0.step!=="tease")return;
     let alive=true;
     const sh=openSheet({title:"Your first win",cls:"lc42-sheet lc42-tease",noFocus:true,
       html:'<p data-lc42-tmsg>Reading your latest game…</p><div class="lc39-prog"><span data-lc42-prog></span></div><p class="small muted">This takes a few seconds. Your first mistake shows up as soon as I find it.</p>'+saveBlock(),
-      onClose:()=>{alive=false}});
+      onClose:()=>{alive=false;if(st().step==="first")quizEnd()}});
     const el=sh&&sh.el;if(!el)return;
     const stop=t=>{el.innerHTML='<p>'+E(t)+'</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc42-abort data-close>Continue</button></div>'};
-    importRest();
     let g=null;
     try{const gs=await LC39._t.games(s0.site,s0.user,1);g=gs&&gs[0]}catch(e){}
     if(!alive||!el.isConnected)return;
     if(!g||!g.pgn){stop("I could not load a recent game for "+s0.user+". You can check the username later in your account. Continue.");return}
-    put({g1:{pgn:String(g.pgn).slice(0,60000),color:g.color==="b"?"b":"w"}});
+    const gg={pgn:String(g.pgn).slice(0,60000),color:g.color==="b"?"b":"w"};
+    put({g1:gg});
     let r=null;
     try{r=await firstMistake(g,p=>{const b=Q("[data-lc42-prog]",el);if(b)b.style.width=Math.round(p*100)+"%"},()=>alive&&el.isConnected)}
     catch(e){if(alive&&el.isConnected)stop("Stockfish could not start on this device, so I cannot scan your game. Continue.");return}
     if(!alive||!el.isConnected||!r)return;
-    let html;
-    if(r.none){html='<p class="lc39-qwh">Clean game.</p><p>No big blunder in your latest game. Nice. Now let me show you the whole picture.</p><div class="btn-row"><button type="button" class="btn btn-primary lc42-full" data-lc42-full>Analyze the whole game</button></div>'}
-    else{html=LC39._t.turnHTML(r,g.color==="b")}
-    el.innerHTML=html+saveBlock();
-    const fx=el.querySelector("[data-lc39-fix]");if(fx)fx.remove();     /* one road: no side paths */
-    try{scanRest()}catch(e){}                                              /* the engine is free while they read: scan the other games */
+    if(r.none){el.innerHTML='<p class="lc39-qwh">Clean game.</p><p>No big blunder in your latest game. Nice. Now let me show you the whole picture.</p><div class="btn-row"><button type="button" class="btn btn-primary lc42-full" data-lc42-full>Analyze the whole game</button></div>'+saveBlock()}
+    else card(el,g,r);
+    startBackground(gg);
   }
 
-  /* ---------- 2. "Analyze the whole game": Trim starts by itself ---------- */
+  /* ---------- 2. "Analyze the whole game": the Trim is already running ---------- */
   function autoReview(){
     let n=0;const t=setInterval(()=>{
-      if(++n>45||hashNow()!=="trim"){clearInterval(t);return}
+      if(++n>60||hashNow()!=="trim"){clearInterval(t);return}
       const rv=Q('[data-act="review"]'),mv=Q("#an-moves");
       if(rv&&!rv.disabled&&mv&&mv.children.length&&!reviewing()){clearInterval(t);rv.click()}
     },400);
   }
+  /* other callers (the old quick-win card of LC39) just open Trim with the game and start the review */
   function startFirst(g){
     g=g||{};
     const s=st();
     const gg=g.pgn?{pgn:String(g.pgn).slice(0,60000),color:g.color==="b"?"b":"w"}:s.g1;
     if(!gg||!gg.pgn)return false;
     try{App.ui.trimLoad={pgn:gg.pgn,id:null,user:gg.color,review:false}}catch(e){}
-    if(s.step==="tease"){
-      put({step:"first",g1:gg,base:{t:trimCount(),m:mistakeCount()},since:Date.now()});
-      importRest();poll();
-    }
-    location.hash="#trim";
-    autoReview();
+    location.hash="#trim";autoReview();
     return true;
   }
   /* the other recent games, fetched while the person is busy with the first one */
@@ -245,7 +288,7 @@ const LC42=(()=>{
   function tick(){
     const s=st();
     if(!OWN.test(s.step)){clearInterval(pt);return}
-    if(s.step==="first"&&s.base&&(trimCount()>s.base.t||mistakeCount()>s.base.m))return firstDone();
+    if(s.step==="first"&&s.quiz&&s.base&&(trimCount()>s.base.t||mistakeCount()>s.base.m))return firstDone();
     if(s.step==="second"&&s.base2&&(trimCount()>s.base2.t||mistakeCount()>s.base2.m))return secondDone();
     paint(hashNow());
   }
@@ -274,7 +317,7 @@ const LC42=(()=>{
     const skipOn=id=>Date.now()-(s.since||0)>90000&&helpSeen(id);
     const skip=id=>skipOn(id)?'<button type="button" class="btn btn-quiet" data-lc42-skiplisten="'+id+'">I could not hear it: continue</button>':"";
     if(s.step==="tease")return{k:"tease",t:"<b>Your first quick win is waiting.</b> One mistake from your latest game.",b:'<button type="button" class="btn btn-primary" data-lc42-tease>Show me</button>'};
-    if(s.step==="first")return route==="trim"?{k:"first",t:"<b>Level 1: your Trim is running.</b> When it is done you reach Level 2.",b:""}:{k:"first2",t:"<b>Next:</b> finish the Trim of your game. It opens Level 2.",b:go("trim","Back to my Trim")};
+    if(s.step==="first")return route==="trim"?{k:"first"+(s.quiz?1:0),t:s.quiz?"<b>Level 1: your Trim.</b> Walk through your mistakes. When the review is done you reach Level 2.":"<b>Your Trim is already running.</b> First find the better move on the card.",b:""}:{k:"first2",t:"<b>Next:</b> finish the Trim of your game. It opens Level 2.",b:go("trim","Back to my Trim")};
     if(s.step==="sys")return{k:"sys"+route+(skipOn("system")?1:0),t:"<b>Level 2: your MSPC System.</b> Open it, tap the <b>?</b> and listen to Coach Lanckriet to the end. Then look around: the working points for your rating and your personal ones are in there.",b:go("system","Open my MSPC System")+skip("system")};
     if(s.step==="libq")return{k:"libq"+route+(skipOn("trim")?1:0),t:"<b>Level 3: your Game Library.</b> Tap the <b>?</b> on this page and listen to Coach Lanckriet to the end.",b:go("trim","Open the Game Library")+skip("trim")};
     if(s.step==="second")return{k:"second"+route,t:"<b>Last step to Level 4.</b> Pick one of your other games in the Library and run the full Trim yourself.",b:go("trim","Open the Game Library")};
@@ -287,7 +330,7 @@ const LC42=(()=>{
       /* the Game Library opens at Level 3 */
       const lib=Q("#lc39-lib",v);if(lib)lib.style.display=(owns()&&levelNow()<3)?"none":"";
       const on=Q("#lc42-strip",v);
-      const want=!admin()&&OWN.test(s.step)&&ROUTES.has(route)&&!Q(".trainer",v)?stripHTML(s,route):null;
+      const want=OWN.test(s.step)&&ROUTES.has(route)&&!Q(".trainer",v)?stripHTML(s,route):null;
       if(!want){if(on)on.remove();return}
       if(on&&on.getAttribute("data-sig")===want.k)return;
       if(on)on.remove();
@@ -299,18 +342,20 @@ const LC42=(()=>{
   function onClick(e){
     const t=e.target&&e.target.closest?e.target:null;if(!t)return;
     const full=t.closest("[data-lc42-full]");
-    if(full&&st().step==="tease"){e.preventDefault();e.stopPropagation();const sh=full.closest(".sheet-wrap"),c=sh&&sh.querySelector("[data-close]");if(c)c.click();startFirst();return}
+    if(full&&OWN.test(st().step)){
+      e.preventDefault();e.stopPropagation();
+      const sh=full.closest(".sheet-wrap"),c=sh&&sh.querySelector("[data-close]");
+      quizEnd();if(c)c.click();else{try{const x=sh&&sh.querySelector("[data-lc42-closer]");if(x)x.click()}catch(x){}}
+      if(hashNow()!=="trim"){location.hash="#trim";autoReview()}
+      return;
+    }
+    if(t.closest("[data-lc42-show]")){e.preventDefault();if(cur)cur.reveal();return}
     const go=t.closest("[data-lc42-go]");
     if(go){e.preventDefault();const to=go.getAttribute("data-lc42-go"),sh=go.closest(".sheet-wrap"),c=sh&&sh.querySelector("[data-close]");if(c)c.click();location.hash="#"+to;return}
     if(t.closest("[data-lc42-tease]")){e.preventDefault();teaser();return}
     const sl=t.closest("[data-lc42-skiplisten]");
     if(sl){e.preventDefault();onListened(sl.getAttribute("data-lc42-skiplisten"));return}
-    if(t.closest("[data-lc42-abort]")){abort();return}
-    const th=t.closest(".lc42-tease");
-    if(th){
-      const sb=t.closest("[data-lc39-show]");
-      if(sb){e.preventDefault();e.stopPropagation();const a=Q("[data-lc39-ans]",th);if(a)a.hidden=false;sb.hidden=true}
-    }
+    if(t.closest("[data-lc42-abort]")){abort()}
   }
 
   let obs=null;
