@@ -109,6 +109,14 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 .walk .play span{display:grid;place-items:center;width:72px;height:72px;border-radius:50%;background:var(--blue);color:#06202e;font-size:1.8rem;padding-left:5px;box-shadow:0 0 0 8px rgba(56,189,248,.25)}
 .walk .cap{position:absolute;left:0;right:0;bottom:0;padding:10px 14px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-weight:700;font-size:.95rem;text-align:left}
 .hide{display:none!important}
+.fm-hero{margin:0 0 18px;padding:18px 20px;border:2px solid var(--gold);border-radius:18px;background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(251,191,36,.04));box-shadow:0 0 0 6px rgba(251,191,36,.08)}
+.fm-tag{display:inline-block;font-weight:900;letter-spacing:.12em;font-size:.95rem;color:#0f172a;background:var(--gold);padding:5px 12px;border-radius:999px}
+.fm-pct{font-size:clamp(3rem,13vw,6rem);font-weight:900;line-height:.95;margin:.35rem 0 .2rem;color:var(--gold);letter-spacing:-.02em}
+.fm-sub{font-weight:700;margin:.2rem 0 .8rem}.fm-hero .bar{height:12px}
+.fm-left{font-size:clamp(1.3rem,4.5vw,2rem);font-weight:900;margin:.5rem 0}.fm-left b{color:var(--gold);font-size:1.4em}
+.fm-next{margin:.2rem 0 .9rem}.fm-hero .btn{min-height:48px}
+#promo{display:none!important}
+.vs.has3{grid-template-columns:1fr 1fr 1fr}@media (max-width:900px){.vs.has3{grid-template-columns:1fr}}.vs .card[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -127,6 +135,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 <section class="hero" aria-labelledby="h-hero">
   <div class="wrap grid">
     <div>
+      <div id="fm-hero" class="fm-hero hide" role="status" aria-live="polite"><span class="fm-tag" id="fm-tag">FOUNDING MEMBER</span><p class="fm-pct" id="fm-pct">50% OFF</p><p class="fm-sub" id="fm-sub"></p><div class="bar hide" id="fm-barwrap" aria-hidden="true"><i id="fm-bar" style="width:0"></i></div><p class="fm-left hide" id="fm-leftwrap"><b id="fm-left"></b> <span id="fm-left-t"></span></p><p class="fm-next" id="fm-next"></p><a class="btn gold big" href="#pricing">Claim my launch price</a></div>
       <div id="promo" class="promo hide" role="status" aria-live="polite"></div><br><span class="eyebrow">Stop guessing why you lose</span>
       <h1 id="h-hero">A <span style="color:var(--blue)">2100+ ELO coach</span> in your pocket.</h1>
       <p class="lead">Built on the <b>MSPC system</b> and the <b>Triple-T method</b> behind a climb from 355 to 2105 in 2 years and 10 months. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
@@ -175,10 +184,15 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <span class="eyebrow">The contrast</span>
     <h2 id="h-contrast">A coach at this level charges €50 to €100+ an hour. This one is awake at 2 a.m.</h2>
     <p class="mute small">Titled coaches typically charge from about €50 to well over €100 an hour. We compare with €80.</p>
-    <div class="vs">
+    <div class="vs" id="vs-grid">
       <article class="card">
         <h3>Private coaching</h3><p class="big-num">€80<small class="mute" style="font-size:1rem;font-weight:500"> / hour</small></p>
         <ul class="mute"><li class="no">Fixed lesson slots, weekly at best</li><li class="no">Ten lessons already cost <b>€800</b></li><li class="no">Feedback arrives days after the game</li></ul>
+      </article>
+      <article class="card" id="vs-premium" hidden>
+        <h3>Premium chess-site membership</h3><p class="big-num">€100–€140<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p>
+        <ul class="mute"><li class="no">Mostly puzzles, lessons and game review</li><li class="no">Made for everyone, not for your own habits</li><li class="no">No coach that tracks your working points between games</li></ul>
+        <p class="small mute">Typical yearly prices of premium memberships at the big chess sites. They vary by site, plan and country.</p>
       </article>
       <article class="card hl">
         <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">From €399<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p>
@@ -399,6 +413,27 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     (p.packs||[]).forEach(function(k){var b=document.querySelector('[data-pack="'+k.id+'"]');if(b){b.querySelector("b").textContent=k.tokens.toLocaleString("en-GB")+" tokens";b.querySelector("span").textContent=eur(k.cents)}});
     if(typeof p.portal==="string"&&/^https:\/\//.test(p.portal)){$("portal").href=p.portal;$("portal-row").className="small mute"}
   });
+  /* 3c. the big launch banner: every number comes from the live pricing call; retried, and a plain fallback if the call keeps failing */
+  var FMN=["FOUNDING MEMBER","EARLY ADOPTER","LAUNCH RATE"];
+  function fmHero(p){
+    var box=$("fm-hero");if(!box)return;var t=p.tranche||4;
+    if(t>=4){box.className="fm-hero hide";return}
+    var cap=(p.caps&&p.caps[t-1])||100,left=p.left&&p.left[t-1],pct=(p.discountPct&&p.discountPct[t-1])||0,price=p.yearly[t-1];
+    if(left!=null&&left<=0){box.className="fm-hero hide";return}
+    $("fm-tag").textContent=FMN[t-1]||"LAUNCH RATE";$("fm-pct").textContent=pct+"% OFF";
+    $("fm-sub").textContent=eur(price)+" a year instead of "+eur(p.base)+". Your price stays the same for as long as your subscription stays active.";
+    if(left!=null){$("fm-left").textContent=left;$("fm-left-t").textContent="of "+cap+" spots left at this price";$("fm-bar").style.width=Math.max(4,Math.round((1-left/cap)*100))+"%";$("fm-leftwrap").className="fm-left";$("fm-barwrap").className="bar"}
+    $("fm-next").textContent=t===1?"The next 100 members get 25% off, then 10%. After that: full price.":t===2?"The next 100 members get 10% off. After that: full price.":"After these spots the full price applies.";
+    box.className="fm-hero";
+    var pr=$("vs-premium"),vg=$("vs-grid");if(pr&&vg&&t<=2){pr.hidden=false;vg.className="vs has3"}
+  }
+  function fmFallback(){
+    var box=$("fm-hero");if(!box)return;
+    $("fm-tag").textContent="LAUNCH PRICING";$("fm-pct").textContent="UP TO 50% OFF";
+    $("fm-sub").textContent="The first 100 members get the Founding Member rate on the yearly plan, the next 100 get 25% off, then 10%. Your exact rate and the spots left are confirmed at checkout.";
+    $("fm-next").textContent="";box.className="fm-hero";
+  }
+  (function fmLoad(n){post("pricing",{}).then(function(p){if(p&&p.ok&&p.yearly){try{fmHero(p)}catch(e){}return}if(n<3){setTimeout(function(){fmLoad(n+1)},1500*(n+1));return}fmFallback()})})(0);
   var busy=false;
   function go(path,body,btn,msgId){
     if(busy)return;busy=true;var old=btn.innerHTML;btn.disabled=true;btn.textContent="Opening secure checkout…";say(msgId,"");
