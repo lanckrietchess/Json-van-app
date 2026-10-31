@@ -103,6 +103,7 @@ const LC43=(()=>{
   async function pay(em){
     last=()=>pay(em);
     busy(true);setMsg("Opening secure checkout…","");
+    try{const u=await LC44.urlFor("yearly",2,em);if(u){try{LC36.support.go(u)}catch(e){location.href=u}return}}catch(e){}
     let r=null;
     try{
       let dev="";try{dev=String(deviceId()).slice(0,64)}catch(e){}

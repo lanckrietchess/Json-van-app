@@ -132,6 +132,11 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 .acct-box h3{margin:0 0 .4rem;font-size:1.3rem}.acct-box p{margin:.4rem 0}.acct-box input{width:100%;min-height:46px;margin:.5rem 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1222;color:inherit;font:inherit}
 .acct-box .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:.6rem}.acct-box .btn{min-height:46px}.acct-msg{min-height:1.2em;font-size:.9rem}.acct-msg.bad{color:#fca5a5}
 .msgline .btn{min-height:44px;margin-left:6px}.msgline small{opacity:.85}
+.pr{cursor:pointer;display:grid;gap:6px;text-align:left}.pr:focus-visible{outline:2px solid var(--gold);outline-offset:3px}.pr:hover{border-color:rgba(56,189,248,.6)}
+.pr-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.pr-badge{font-weight:800;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px;border:1px solid rgba(251,191,36,.55);color:#fde68a}
+.pr-ver{font-size:.78rem;font-weight:700;color:var(--good)}.pr-name{margin:0}.pr-elo{margin:0;font-size:1.5rem;font-weight:900;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.pr-elo i{font-style:normal;opacity:.6;font-size:1rem}.pr-elo em{font-style:normal;color:var(--good);font-size:1rem}
+.pr-open{font-weight:700;color:#38bdf8;font-size:.9rem}.pr-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:.6rem 0}.pr-tiles div{background:#0b1222;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}.pr-tiles b{display:block;font-size:1.15rem}.pr-tiles small{opacity:.75}
+@media (max-width:480px){.pr-tiles{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
@@ -202,6 +207,19 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   </div>
 </section>
 
+<section id="proof" aria-labelledby="h-proof">
+  <div class="wrap">
+    <span class="eyebrow">Proven results</span>
+    <h2 id="h-proof">Proven results: real ratings, checked.</h2>
+    <p class="lead">Every member card below shows a real Chess.com or Lichess rating, from the first rating to today. A card only appears because the member allowed it, and Kyenzo checks it first. Tap a card to open the rating chart and the training behind it.</p>
+    <div class="proof" id="proof-list" aria-live="polite">
+      <article class="pcard"><span class="tag pro">Founder</span><p class="gain">355 → 2105 <small>Rapid rating</small></p><p class="mute small">Kyenzo started at 355 on 27 Nov 2023 and reached 2105 on Chess.com in 2 years and 10 months. 3,616 rapid games, 99.9th percentile.</p></article>
+      <article class="pcard"><span class="tag pro">Proof of concept</span><p class="gain">+630 <small>ELO in 2 months</small></p><p class="mute small">The first student to run the full MSPC system. More verified graphs appear here as members allow it.</p></article>
+    </div>
+    <p class="small mute" id="proof-note">Verified results load from the app's own data.</p>
+  </div>
+</section>
+
 <section class="alt" id="price-contrast" aria-labelledby="h-contrast">
   <div class="wrap">
     <span class="eyebrow">The contrast</span>
@@ -227,18 +245,6 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   </div>
 </section>
 
-<section id="proof" aria-labelledby="h-proof">
-  <div class="wrap">
-    <span class="eyebrow">Real results</span>
-    <h2 id="h-proof">Rating graphs, not promises.</h2>
-    <p class="lead">Every member result below is a real Chess.com or Lichess rating, shown only because the member allowed it. Kyenzo checks each one before it appears here. Tap a card to see the account data behind it.</p>
-    <div class="proof" id="proof-list" aria-live="polite">
-      <article class="pcard"><span class="tag pro">Founder</span><p class="gain">355 → 2105 <small>Rapid rating</small></p><p class="mute small">Kyenzo started at 355 on 27 Nov 2023 and reached 2105 on Chess.com in 2 years and 10 months. 3,616 rapid games, 99.9th percentile.</p></article>
-      <article class="pcard"><span class="tag pro">Proof of concept</span><p class="gain">+630 <small>ELO in 2 months</small></p><p class="mute small">The first student to run the full MSPC system. More verified graphs appear here as members allow it.</p></article>
-    </div>
-    <p class="small mute" id="proof-note">Verified results load from the app's own data.</p>
-  </div>
-</section>
 
 <section class="alt" id="install" aria-labelledby="h-install">
   <div class="wrap">
@@ -318,10 +324,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <h3 id="tokens" style="margin-top:42px">Token packs</h3>
     <p class="mute">Tokens pay for deep game analyses and the coach. Bought once, no subscription. They are added to your account when you sign in with the email above.</p>
     <div class="packs">
-      <button type="button" class="btn pack" data-pack="t3"><b>3 tokens</b><span>€1</span></button>
-      <button type="button" class="btn pack" data-pack="t100"><b>100 tokens</b><span>€10</span></button>
-      <button type="button" class="btn pack" data-pack="t300"><b>300 tokens</b><span>€20</span></button>
-      <button type="button" class="btn pack" data-pack="t1000"><b>1,000 tokens</b><span>€50</span></button>
+      <button type="button" class="btn pack" data-pack="t3"><b>3 tokens</b><span>€1.00</span></button>
+      <button type="button" class="btn pack" data-pack="t100"><b>100 tokens</b><span>€10.00</span></button>
+      <button type="button" class="btn pack" data-pack="t300"><b>300 tokens</b><span>€19.99</span></button>
+      <button type="button" class="btn pack" data-pack="t1000"><b>1,000 tokens</b><span>€49.99</span></button>
     </div>
     <p class="msgline" id="tok-msg" aria-live="polite"></p>
 
@@ -355,7 +361,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a> · <a data-app href="/app.html">Launch the app</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.20.3</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.20.4</p></footer>
 
 <script>
 "use strict";
@@ -445,13 +451,13 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     var vb=$("vs-badge");if(vb){if(t<4){vb.textContent="Pro, billed yearly · "+(((p.discountPct&&p.discountPct[t-1])||Math.round((1-py/p.base)*100))+"% off the regular price");vb.hidden=false}else vb.hidden=true}
     var vu=$("vs-urgency"),lf=p.left&&p.left[t-1];if(vu)vu.hidden=t>=4||(lf!=null&&lf<=0); /* only while launch spots really exist */
     $("vs-hours").textContent="A year of Pro costs the same as "+Math.max(1,Math.ceil(py/8000))+" hours of private coaching";
-    (p.packs||[]).forEach(function(k){var b=document.querySelector('[data-pack="'+k.id+'"]');if(b){b.querySelector("b").textContent=k.tokens.toLocaleString("en-GB")+" tokens";b.querySelector("span").textContent=eur(k.cents)}});
+    
     if(typeof p.portal==="string"&&/^https:\/\//.test(p.portal)){$("portal").href=p.portal;$("portal-row").className="small mute"}
   });
   /* 3c. the launch banner: every number comes from the live pricing call; a plain fallback shows at once if the call fails and is replaced when a retry works */
   var FMN=["Founding Member rate","Early Adopter rate","Launch rate"],fmLive=false,PCT=[50,25,10];
   function fmHero(p){
-    var box=$("fm-hero");if(!box)return;var t=p.tranche||4;fmLive=true;
+    var box=$("fm-hero");if(!box)return;var t=p.tranche||4;fmLive=true;window.__lcP=p;
     if(t>=4){box.className="fm-hero hide";return}
     var cap=(p.caps&&p.caps[t-1])||100,left=p.left&&p.left[t-1],price=p.yearly[t-1],pct=(p.discountPct&&p.discountPct[t-1])||Math.round((1-price/p.base)*100);
     if(left!=null&&left<=0){box.className="fm-hero hide";return}
@@ -472,6 +478,26 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     var vb=$("vs-badge");if(vb&&!fmLive){vb.textContent="Pro, billed yearly · Founding Member rate, 50% off";vb.hidden=false}
   }
   (function fmLoad(n){post("pricing",{}).then(function(p){if(p&&p.ok&&p.yearly){try{fmHero(p)}catch(e){}fmDebug();return}fmFallback();fmDebug();if(n<4){setTimeout(function(){fmLoad(n+1)},1500*(n+1))}})})(0);
+  /* 3e. Stripe Payment Links (9.20.4). The yearly links carry the FOUNDING price: when the live pricing says that tier is no longer open, the old per-checkout price is used instead, so nobody is charged the wrong amount. */
+  var LINKS={pro:{yearly:"https://buy.stripe.com/28EaEX99TaUccZqe5N28800",monthly:"https://buy.stripe.com/cNi3cv99T6DW0cE6Dl28801"},vip:{yearly:"https://buy.stripe.com/dRmeVdeud8M44sU0eX28803",monthly:"https://buy.stripe.com/4gMcN5dq94vO5wY2n528804"}};
+  var PACKL={t3:"https://buy.stripe.com/14A28reud9Q80cE9Px28805",t100:"https://buy.stripe.com/eVq8wPbi16DW9Ne7Hp28806",t300:"https://buy.stripe.com/bJe8wP99TfasbVmaTB28807",t1000:"https://buy.stripe.com/9B67sLcm5e6o8JaaTB28808"};
+  function linkOk(u){return/^https:\/\/buy\.stripe\.com\/[A-Za-z0-9]+$/.test(u||"")}
+  function navTo(u){window.__lastNav=u;location.href=u}
+  function withMail(u,em){return u+(em?"?prefilled_email="+encodeURIComponent(em):"")}
+  function getP(){if(window.__lcP)return Promise.resolve(window.__lcP);return post("pricing",{}).then(function(p){return p&&p.ok&&p.yearly?(window.__lcP=p):null})}
+  function payPlan(b,em){
+    var plan=b.getAttribute("data-plan")==="monthly"?"monthly":"yearly",tier=+b.getAttribute("data-tier")===3?3:2,u=LINKS[tier===3?"vip":"pro"][plan];
+    var dyn=function(){go("subscribe",{plan:plan,tier:tier,email:em,ret:"support",device:device()},b,"pro-msg")};
+    if(!linkOk(u)){dyn();return}
+    if(plan==="monthly"){navTo(withMail(u,em));return}
+    var old=b.innerHTML;b.disabled=true;b.textContent="Opening secure checkout…";
+    getP().then(function(p){
+      var x=p?(tier===3?p.vip:p):null,open=!x||((x.tranche||4)<=1&&(x.left==null||x.left[0]==null||x.left[0]>0));
+      if(open){navTo(withMail(u,em));return}
+      b.disabled=false;b.innerHTML=old;dyn();
+    });
+  }
+  function payPack(k,em){var u=PACKL[k.getAttribute("data-pack")];if(linkOk(u))navTo(withMail(u,em));else go("tokens",{pack:k.getAttribute("data-pack"),email:em,ret:"support"},k,"tok-msg")}
   var busy=false;
   var DEBUG=/[?&]debug/.test(location.search),lastGo=null;
   function sayHTML(id,h,cls){var e=$(id);if(!e)return;e.innerHTML=h||"";e.className="msgline"+(cls?" "+cls:"")}
@@ -542,9 +568,9 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   function email(){var em=$("buyer").value.trim().toLowerCase();return EMAIL.test(em)?em:""}
   document.addEventListener("click",function(e){
     var b=e.target.closest&&e.target.closest("[data-plan]");
-    if(b){guard(function(em){go("subscribe",{plan:b.getAttribute("data-plan"),tier:+b.getAttribute("data-tier")||2,email:em,ret:"support",device:device()},b,"pro-msg")});return}
+    if(b){guard(function(em){payPlan(b,em)});return}
     var k=e.target.closest&&e.target.closest("[data-pack]");
-    if(k){guard(function(em2){go("tokens",{pack:k.getAttribute("data-pack"),email:em2,ret:"support"},k,"tok-msg")});return}
+    if(k){guard(function(em2){payPack(k,em2)});return}
     if(e.target.id==="b-gift"){var to=$("g-to").value.trim().toLowerCase(),from=$("g-from").value.trim().toLowerCase();
       if(!EMAIL.test(to)){say("gift-msg",WHY.bad_recipient,"bad");$("g-to").focus();return}
       if(from&&!EMAIL.test(from)){say("gift-msg",WHY.bad_email,"bad");return}
@@ -588,12 +614,31 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   }
   var proofRows=[];
   function rpc(name,args){return fetch(SB+"/rest/v1/rpc/"+name,{method:"POST",headers:{"Content-Type":"application/json",apikey:KEY,Authorization:"Bearer "+KEY},body:JSON.stringify(args||{})}).then(function(r){return r.ok?r.json():null}).catch(function(){return null})}
-  rpc("lc36_proof_public",{p_surface:"web"}).then(function(res){
-    var rows=res&&res.ok&&Array.isArray(res.rows)?res.rows:[];if(!rows.length)return;proofRows=rows;
-    var html=rows.slice(0,6).map(function(r){
-      var plan=r.plan==="vip"?"VIP":r.plan==="pro"?"Pro":"Free";
-      return'<article class="pcard"><span class="tag '+(r.plan==="vip"?"vip":r.plan==="pro"?"pro":"")+'">'+esc(plan)+" member</span><p><b>"+esc(r.first_name||"Member")+'</b> <span class="small mute">on '+(r.site==="lichess"?"Lichess":"Chess.com")+'</span></p><p class="gain">+'+(+r.gain||0)+' <small>rating in '+(+r.days||0)+' days</small></p><p class="small mute">'+(+r.start||0)+" to "+(+r.now||0)+"</p>"+graph(r.points,Date.parse(r.joined_at))+'<div class="row"><button type="button" class="btn" data-detail="'+esc(r.ref)+'">Account data</button></div></article>'}).join("");
-    $("proof-list").insertAdjacentHTML("afterbegin",html);$("proof-note").textContent="Member results are shown because the member allowed it, and checked by Kyenzo."});
+  var PUBLIC_LAUNCH=Date.parse("2026-11-01T00:00:00Z");   /* members who joined before the public launch are Beta Testers (change this date if needed) */
+  function fdate(s){var d=Date.parse(s);return d?new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}):""}
+  /* the badge: the server's own value if it sends one, else Beta Tester (joined before the launch), else Founding Member while that tier is still the live one, else the plan */
+  function badgeOf(r){
+    var b=String(r.badge||"").toLowerCase();if(/found/.test(b))return"Founding Member";if(/beta/.test(b))return"Beta Tester";
+    var j=Date.parse(r.joined_at);if(j&&j<PUBLIC_LAUNCH)return"Beta Tester";
+    var P=window.__lcP,x=P?(r.plan==="vip"?P.vip:P):null;
+    if((r.plan==="pro"||r.plan==="vip")&&x&&(x.tranche||4)===1)return"Founding Member";
+    return r.plan==="vip"?"VIP member":r.plan==="pro"?"Pro member":"Member";
+  }
+  function pcard(r){
+    var site=r.site==="lichess"?"Lichess":"Chess.com",g=+r.gain||0;
+    return'<article class="pcard pr" tabindex="0" role="button" data-detail="'+esc(r.ref)+'" aria-label="Open the stats of '+esc(r.first_name||"this member")+'"><div class="pr-top"><span class="pr-badge">'+esc(badgeOf(r))+'</span><span class="pr-ver" title="A real '+site+' rating, allowed by the member and checked by Kyenzo">✓ Verified rating</span></div>'
+      +'<p class="pr-name"><b>'+esc(r.first_name||"Member")+'</b> <span class="small mute">on '+site+'</span></p>'
+      +'<p class="pr-elo"><span>'+(+r.start||0)+'</span><i>→</i><span>'+(+r.now||0)+'</span><em>'+(g>=0?"+":"")+g+'</em></p>'
+      +'<p class="small mute">Initial ELO to current ELO · joined '+esc(fdate(r.joined_at))+'</p>'+graph(r.points,Date.parse(r.joined_at))+'<span class="pr-open">View stats →</span></article>';
+  }
+  getP().then(function(){return rpc("lc36_proof_public",{p_surface:"web"})}).then(function(res){
+    var rows=res&&res.ok&&Array.isArray(res.rows)?res.rows:[];
+    if(!rows.length){$("proof-note").textContent="Member results appear here as soon as members allow it and Kyenzo has checked them.";return}
+    proofRows=rows;
+    $("proof-list").insertAdjacentHTML("afterbegin",rows.slice(0,6).map(pcard).join(""));
+    $("proof-note").textContent="Member results are shown because the member allowed it, and checked by Kyenzo.";
+  });
+  document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target&&e.target.classList&&e.target.classList.contains("pr")){e.preventDefault();e.target.click()}});
   /* the account data behind a card, in a dialog */
   var last=null;
   function closeDlg(){var d=$("dlg");if(d){d.remove();document.body.style.overflow="";if(last&&last.focus)last.focus()}}
@@ -611,10 +656,14 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       if(!r||!r.ok){inner.innerHTML='<p>This result is no longer shown.</p><div class="row"><button class="btn" data-close-dlg>Close</button></div>';return}
       var c=r.card||{},xp=r.xp||{},pr=(r.tools&&r.tools.progress)||{},pz=pr.puzzles||{},op=pr.openings||{},l30=pr.last_30_days||{};
       var n=function(v){return(+v||0).toLocaleString("en-GB")},acc=function(o){return o&&+o.tries?Math.round(+o.correct/+o.tries*100)+"% correct":""};
-      inner.innerHTML='<h3 style="margin-top:0">'+esc(c.first_name||"Member")+' <span class="small mute">on '+(c.site==="lichess"?"Lichess":"Chess.com")+"</span></h3>"+graph(c.points,Date.parse(c.joined_at))+
-        '<p class="gain" style="font-size:1.8rem;font-weight:900;color:var(--good);margin:.2rem 0">+'+(+c.gain||0)+' <small class="mute" style="font-size:.85rem;font-weight:500">rating in '+(+c.days||0)+" days ("+(+c.start||0)+" to "+(+c.now||0)+")</small></p>"+
-        '<h4 style="margin:.8rem 0 .2rem">Training in the app</h4><ul class="small" style="padding-left:1.1rem;margin:.2rem 0"><li>Puzzles: '+n(pz.tries)+" "+esc(acc(pz))+"</li><li>Opening drills: "+n(op.tries)+" "+esc(acc(op))+"</li><li>Last 30 days: "+n(l30.puzzles)+" puzzles, "+n(l30.mspc)+" MSPC drills</li><li>XP: think "+n(xp.think)+", openings "+n(xp.openings)+", middlegame "+n(xp.middlegame)+", endgame "+n(xp.endgame)+", puzzles "+n(xp.puzzles)+"</li></ul>"+
-        '<p class="small mute">Only counters. No game content, no email.</p><div class="row"><button class="btn primary" data-close-dlg>Close</button></div>';
+      var NAMES={think:"MSPC thinking drills",openings:"Openings",middlegame:"Middlegame",endgame:"Endgames",puzzles:"Puzzles"},best="",bv=0;
+      Object.keys(NAMES).forEach(function(k){if((+xp[k]||0)>bv){bv=+xp[k];best=NAMES[k]}});
+      var card=proofRows.filter(function(q){return q.ref===ref})[0]||{},g=+c.gain||0;
+      inner.innerHTML='<h3 style="margin-top:0">'+esc(c.first_name||"Member")+' <span class="small mute">on '+(c.site==="lichess"?"Lichess":"Chess.com")+'</span></h3><p style="margin:.2rem 0"><span class="pr-badge">'+esc(badgeOf(Object.assign({},card,c)))+'</span> <span class="pr-ver">✓ Verified rating</span></p>'
+        +'<div class="pr-tiles"><div><b>'+(+c.start||0)+'</b><small>Initial ELO</small></div><div><b>'+(+c.now||0)+'</b><small>Current ELO</small></div><div><b>'+(g>=0?"+":"")+g+'</b><small>Rating gained</small></div><div><b>'+(+c.days||0)+'</b><small>Days active</small></div></div>'
+        +'<p class="small mute" style="margin:0 0 .4rem">Joined '+esc(fdate(c.joined_at))+'. Rating progress:</p>'+graph(c.points,Date.parse(c.joined_at))
+        +'<h4 style="margin:.8rem 0 .2rem">Main training focus'+(best?': '+esc(best):'')+'</h4><ul class="small" style="padding-left:1.1rem;margin:.2rem 0"><li>Puzzles: '+n(pz.tries)+" "+esc(acc(pz))+"</li><li>Opening drills: "+n(op.tries)+" "+esc(acc(op))+"</li><li>Last 30 days: "+n(l30.puzzles)+" puzzles, "+n(l30.mspc)+" MSPC drills</li><li>XP: think "+n(xp.think)+", openings "+n(xp.openings)+", middlegame "+n(xp.middlegame)+", endgame "+n(xp.endgame)+", puzzles "+n(xp.puzzles)+"</li></ul>"
+        +'<p class="small mute">Only counters. No game content, no email. A member\'s working points are private and are not shown.</p><div class="row"><button class="btn primary" data-close-dlg>Close</button></div>';
       var cb=inner.querySelector("[data-close-dlg]");if(cb)cb.focus();
     });
   });
