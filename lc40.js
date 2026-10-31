@@ -64,6 +64,7 @@ const LC40=(()=>{
       +'<button type="button" class="btn btn-primary lc39-google" data-lc39-google>Sign in with Google</button>'
       +'<p class="small muted lc39-or">or get a sign-in link by email</p>'
       +'<form data-lc39-mail class="lc39-row"><input class="input" name="email" type="email" required autocomplete="email" placeholder="you@example.com" aria-label="Email address"><button type="submit" class="btn btn-ghost">Email me a sign-in link</button></form>'
+      +LC26.sync.codeForm("lc39")
       +'<p class="form-msg" data-lc39-gmsg aria-live="polite"></p>'
       +'<button type="button" class="btn btn-quiet lc40-guest" data-close data-lc40-guest>Continue as guest</button></div>';
   }
