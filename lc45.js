@@ -12,6 +12,7 @@ const LC45=(()=>{
   const E=s=>{try{return esc(s)}catch(e){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}};
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
   const real=()=>{try{return !!Admin.real()}catch(e){return false}};
+  const hardAdmin=()=>{try{return !!Admin.real()&&!Admin.soft()&&!Admin.viewingAs()}catch(e){return false}};
   const admin=()=>{try{return !!Admin.active}catch(e){return false}};
   const paid=()=>{try{return App.rank()>=2}catch(e){return false}};
   const sess=()=>{try{return LC26.sync.session()}catch(e){return null}};
@@ -59,16 +60,13 @@ const LC45=(()=>{
   let pass=false;
   function onChip(e){
     const t=e.target&&e.target.closest?e.target:null;if(!t||!t.closest("#profile-chip")||pass)return;
-    /* 9.20.8: everyone (guests too) goes to My Account; the dropdown is the caret next to the chip */
-    e.preventDefault();e.stopImmediatePropagation();
-    location.hash="#account";
+    /* 9.20.9: the chip opens the dropdown (no caret any more); My Account is the avatar circle at the top of the dropdown */
+    return;
   }
-  function ensureCaret(){
-    const chip=Q("#profile-chip");if(!chip||Q("#pm-caret"))return;
-    const b=document.createElement("button");b.type="button";b.id="pm-caret";b.className="pm-caret";b.setAttribute("aria-haspopup","menu");b.setAttribute("aria-label","Open the menu");b.innerHTML="▾";
-    chip.insertAdjacentElement("afterend",b);
-    b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();pass=true;try{chip.click()}finally{pass=false}});
-  }
+  function ensureCaret(){const c=Q("#pm-caret");if(c)c.remove()}
+  function goAccount(){location.hash="#account";const c=Q("#profile-chip");if(c&&c.getAttribute("aria-expanded")==="true"){try{c.click()}catch(x){}}}
+  function accClick(e){const a=e.target&&e.target.closest?e.target.closest("#pm-panel .lc39-pmav"):null;if(!a)return;e.preventDefault();e.stopPropagation();goAccount()}
+  function accKey(e){if(e.key!=="Enter"&&e.key!==" ")return;const a=e.target&&e.target.closest?e.target.closest("#pm-panel .lc39-pmav"):null;if(!a)return;e.preventDefault();goAccount()}
 
   /* ---------- 2 + 3. the dropdown ---------- */
   let busy=false;
@@ -76,28 +74,19 @@ const LC45=(()=>{
   function viewValue(){try{const r=Admin.viewingAs();if(r)return"role:"+r;const p=Admin.preview();return p?"tier:"+p:""}catch(e){return""}}
   function adminBlock(p,anchor){
     let blk=Q(".lc45-adm",p);
-    if(real()){
-      const cur=viewValue();
-      const roles=(()=>{try{return Admin.roles().filter(r=>r.id!=="admin")}catch(e){return[]}})();
-      const html='<label class="small muted" for="lc45-view">Admin: view the app as</label><select class="input" id="lc45-view" data-lc45-view>'
-        +VIEW.map(v=>'<option value="'+v[0]+'"'+(cur===v[0]?" selected":"")+'>'+E(v[1])+'</option>').join("")
-        +roles.map(r=>'<option value="role:'+E(r.id)+'"'+(cur==="role:"+r.id?" selected":"")+'>'+E(r.label)+'</option>').join("")
-        +'</select><div class="btn-row"><button type="button" class="btn btn-quiet btn-sm" data-lc45-adminmenu>Admin menu</button></div>';
-      if(!blk){blk=document.createElement("div");blk.className="lc45-adm";blk.innerHTML=html;anchor.after(blk)}
-      else if(blk.getAttribute("data-cur")!==cur){blk.innerHTML=html}
-      blk.setAttribute("data-cur",cur);
-    }else{
-      let known=false;try{known=typeof ADMIN_TOKEN!=="undefined"&&!!Store.get(ADMIN_TOKEN,null)}catch(e){}
-      const o30=typeof LC49!=="undefined"&&LC49.on30();
-      const html=(o30?'<button type="button" class="pm-item" data-lc49-open>Admin: view the app as…</button>':'')+((known||o30)?'<button type="button" class="pm-item" data-lc45-gate>Admin sign-in (edit content)</button>':'');
-      if(html&&!blk){blk=document.createElement("div");blk.className="lc45-adm";blk.innerHTML=html;anchor.after(blk)}
-      else if(!html&&blk)blk.remove();
-    }
+    const act=typeof LC49!=="undefined"&&LC49.active();
+    let known=false;try{known=typeof ADMIN_TOKEN!=="undefined"&&!!Store.get(ADMIN_TOKEN,null)}catch(e){}
+    /* in admin mode ONE row opens the view-as control (Admin view or POV of every subscription); content editing needs the authenticator sign-in */
+    const html=act?'<button type="button" class="pm-item" data-lc49-open>Admin: view the app as…</button>'+(LC49.soft()?'<button type="button" class="pm-item" data-lc45-gate>Admin sign-in (edit content)</button>':'<button type="button" class="pm-item" data-lc45-adminmenu>Admin menu</button>'):(known?'<button type="button" class="pm-item" data-lc45-gate>Admin sign-in</button>':'');
+    if(html&&!blk){blk=document.createElement("div");blk.className="lc45-adm";blk.innerHTML=html;blk.setAttribute("data-h",String(html.length));anchor.after(blk)}
+    else if(html&&blk&&blk.getAttribute("data-h")!==String(html.length)){blk.innerHTML=html;blk.setAttribute("data-h",String(html.length))}
+    else if(!html&&blk)blk.remove();
   }
   function tidy(){
     const p=Q("#pm-panel");if(!p||busy)return;busy=true;
     try{
       QA('a.pm-item[href="#account"]',p).forEach(a=>a.remove());
+      {const av=Q(".lc39-pmav",p);if(av&&!av.hasAttribute("data-lc45-acc")){av.setAttribute("data-lc45-acc","1");av.setAttribute("role","link");av.setAttribute("tabindex","0");av.setAttribute("aria-label","Open My Account");av.title="Open My Account";av.insertAdjacentHTML("beforeend",'<span class="lc45-acc-hint">My Account ›</span>')}}
       const head=Q(".lc30-pmhead",p)||null,up=Q('a.pm-item[href="#upgrades"]',p),sug=Q(".lc37-sug",p);
       let anchor=head;
       if(up){up.classList.add("pm-primary");if(anchor){if(anchor.nextElementSibling!==up)anchor.after(up)}else if(p.firstElementChild!==up)p.insertBefore(up,p.firstChild);anchor=up}
@@ -161,7 +150,7 @@ const LC45=(()=>{
   let bannerSeq=0;
   async function paintBanner(route){
     const seq=++bannerSeq,old=Q("#lc45-banner");
-    const on=route!=="upgrades"&&!(()=>{try{return LC40.busy()}catch(e){return false}})()&&!real()&&!paid()&&!dismissed()&&!(()=>{try{return LC42.owns()}catch(e){return false}})();
+    const on=route!=="upgrades"&&!(()=>{try{return LC40.busy()}catch(e){return false}})()&&!hardAdmin()&&!paid()&&!dismissed()&&!(()=>{try{return LC42.owns()}catch(e){return false}})();
     if(!on){if(old)old.remove();return}
     const host=Q("#top-actions");if(!host){return}
     let open=true;try{open=await LC44._t.foundingOpen(2)}catch(e){open=true}
@@ -235,7 +224,7 @@ const LC45=(()=>{
   }
   function css(){
     if(Q("#lc45-css"))return;const s=document.createElement("style");s.id="lc45-css";
-    s.textContent='.pm-caret{min-width:44px;min-height:44px;border:0;background:transparent;color:inherit;font-size:1.1rem;cursor:pointer;border-radius:10px}.pm-caret:hover{background:rgba(148,163,184,.15)}'
+    s.textContent='.lc39-pmav[data-lc45-acc]{cursor:pointer;border-radius:10px}.lc39-pmav[data-lc45-acc]:hover,.lc39-pmav[data-lc45-acc]:focus-visible{background:rgba(148,163,184,.14)}.lc45-acc-hint{margin-left:auto;font-size:12px;font-weight:800;color:var(--accent);white-space:nowrap}.pm-caret{min-width:44px;min-height:44px;border:0;background:transparent;color:inherit;font-size:1.1rem;cursor:pointer;border-radius:10px}.pm-caret:hover{background:rgba(148,163,184,.15)}'
     +'#pm-panel .pm-primary{background:rgba(56,189,248,.14);color:#38bdf8;font-weight:800}.lc45-adm{display:grid;gap:6px;padding:8px 12px;border-top:1px dashed rgba(148,163,184,.3);border-bottom:1px dashed rgba(148,163,184,.3)}.lc45-adm .input{min-height:44px}'
     +'.lc45-banner{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 0;padding:10px 12px;border:1px solid rgba(251,191,36,.45);border-radius:14px;background:linear-gradient(90deg,rgba(251,191,36,.12),rgba(56,189,248,.07))}'
     +'.lc45-bt{flex:1 1 220px;font-weight:700}.lc45-banner .btn{min-height:44px}.lc45-x{min-width:44px;min-height:44px;background:none;border:0;color:inherit;cursor:pointer;font-size:1.5rem;line-height:1}'
@@ -249,7 +238,7 @@ const LC45=(()=>{
     try{
       css();
       try{const i=PM_ITEMS.findIndex(x=>x[0]==="#account");if(i>=0)PM_ITEMS.splice(i,1)}catch(e){}
-      document.addEventListener("click",onChip,true);
+      document.addEventListener("click",onChip,true);document.addEventListener("click",accClick,true);document.addEventListener("keydown",accKey,true);
       document.addEventListener("click",panelClick,true);
       document.addEventListener("click",bannerClick,true);
       try{const og=LC36.support.go;if(typeof og==="function"&&!og.__lc45){const f=function(u){mark();return og.apply(this,arguments)};f.__lc45=true;LC36.support.go=f}}catch(e){}
