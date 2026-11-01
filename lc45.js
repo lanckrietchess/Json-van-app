@@ -31,13 +31,13 @@ const LC45=(()=>{
   function coachAv(emo,size,inten){
     size=size||40;
     /* the official pictures (assets/images/coach/{emotion}/{intensity}.png) with their fallback chain */
-    try{if(typeof LC48!=="undefined"){const n=inten==null?(INT[emo]||5):inten;return LC48.coach.img(emo||"neutral",n,size,"lc45-av").replace('data-lc48="1"','data-lc48="1" data-lc45-emo="'+E(emo||"neutral")+'" data-lc45-int="'+E(n)+'"')}}catch(e){}
+    try{if(typeof LC48!=="undefined"){const n=inten==null?(INT[emo]||5):inten;return LC48.coach.img(emo||"neutral",n,size,"lc45-av",'data-lc45-emo="'+E(emo||"neutral")+'" data-lc45-int="'+E(n)+'"')}}catch(e){}
     const u=avUrl(emo);
     if(u)return'<img class="lc45-av" data-lc45-emo="'+E(emo||"neutral")+'" src="'+E(u)+'" alt="Coach Lanckriet" width="'+size+'" height="'+size+'" referrerpolicy="no-referrer">';
     let h="";try{h=LC19.coach.avatar(size)||""}catch(e){}
     return'<span class="lc45-av lc45-av-ph" data-lc45-emo="'+E(emo||"neutral")+'" style="width:'+size+'px;height:'+size+'px">'+(h||"♞")+'</span>';
   }
-  const warm=emo=>{try{const p=LC29.avatar.get(emo);if(p&&p.then)p.then(()=>setTimeout(refreshAv,50)).catch(()=>{})}catch(e){}};
+  const warm=emo=>{};   /* 9.24.0: the pictures come from LC48; there is nothing remote to warm up */
   function refreshAv(){QA("[data-lc45-emo]:not([data-lc48])").forEach(el=>{const emo=el.getAttribute("data-lc45-emo"),u=avUrl(emo);if(el.tagName==="IMG"){if(u&&el.getAttribute("src")!==u)el.setAttribute("src",u)}else if(u){const w=el.style.width||"40px";el.outerHTML=coachAv(emo,parseInt(w,10)||40)}})}
   /* the guided-flow sheets (LC42 path, LC43 upgrade pop-up) get a coach row with the right expression */
   function emoFor(sh){
