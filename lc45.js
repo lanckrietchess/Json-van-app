@@ -26,20 +26,24 @@ const LC45=(()=>{
     if(!u){try{const c=CONFIG&&CONFIG.coachAvatar;if(typeof c==="string"&&/^https:\/\//.test(c))u=c}catch(e){}}
     return u;
   }
-  function coachAv(emo,size){
-    size=size||40;const u=avUrl(emo);
+  const INT={happy:10,neutral:5,thinking:5,serious:8,tough_love:7,skeptical:5};
+  function coachAv(emo,size,inten){
+    size=size||40;
+    /* the official pictures (assets/images/coach/{emotion}/{intensity}.png) with their fallback chain */
+    try{if(typeof LC48!=="undefined"){const n=inten==null?(INT[emo]||5):inten;return LC48.coach.img(emo||"neutral",n,size,"lc45-av").replace('data-lc48="1"','data-lc48="1" data-lc45-emo="'+E(emo||"neutral")+'" data-lc45-int="'+E(n)+'"')}}catch(e){}
+    const u=avUrl(emo);
     if(u)return'<img class="lc45-av" data-lc45-emo="'+E(emo||"neutral")+'" src="'+E(u)+'" alt="Coach Lanckriet" width="'+size+'" height="'+size+'" referrerpolicy="no-referrer">';
     let h="";try{h=LC19.coach.avatar(size)||""}catch(e){}
     return'<span class="lc45-av lc45-av-ph" data-lc45-emo="'+E(emo||"neutral")+'" style="width:'+size+'px;height:'+size+'px">'+(h||"♞")+'</span>';
   }
   const warm=emo=>{try{const p=LC29.avatar.get(emo);if(p&&p.then)p.then(()=>setTimeout(refreshAv,50)).catch(()=>{})}catch(e){}};
-  function refreshAv(){QA("[data-lc45-emo]").forEach(el=>{const emo=el.getAttribute("data-lc45-emo"),u=avUrl(emo);if(el.tagName==="IMG"){if(u&&el.getAttribute("src")!==u)el.setAttribute("src",u)}else if(u){const w=el.style.width||"40px";el.outerHTML=coachAv(emo,parseInt(w,10)||40)}})}
+  function refreshAv(){QA("[data-lc45-emo]:not([data-lc48])").forEach(el=>{const emo=el.getAttribute("data-lc45-emo"),u=avUrl(emo);if(el.tagName==="IMG"){if(u&&el.getAttribute("src")!==u)el.setAttribute("src",u)}else if(u){const w=el.style.width||"40px";el.outerHTML=coachAv(emo,parseInt(w,10)||40)}})}
   /* the guided-flow sheets (LC42 path, LC43 upgrade pop-up) get a coach row with the right expression */
   function emoFor(sh){
     const t=sh.textContent||"";
     if(sh.classList.contains("lc42-tease")){if(/That is the move/.test(t))return"happy";if(/still loses ground/.test(t))return"skeptical";if(/Clean game/.test(t))return"happy";return"thinking"}
     if(/Level \d unlocked/.test(t))return"happy";
-    if(sh.classList.contains("lc43-sheet"))return"happy";
+    if(sh.classList.contains("lc43-sheet"))return"neutral";
     return"neutral";
   }
   function decorate(){
@@ -55,7 +59,7 @@ const LC45=(()=>{
   let pass=false;
   function onChip(e){
     const t=e.target&&e.target.closest?e.target:null;if(!t||!t.closest("#profile-chip")||pass)return;
-    if(!sess()&&!real())return;                         /* guests: the sign-in sheet of LC40 */
+    /* 9.20.8: everyone (guests too) goes to My Account; the dropdown is the caret next to the chip */
     e.preventDefault();e.stopImmediatePropagation();
     location.hash="#account";
   }
@@ -84,8 +88,10 @@ const LC45=(()=>{
       blk.setAttribute("data-cur",cur);
     }else{
       let known=false;try{known=typeof ADMIN_TOKEN!=="undefined"&&!!Store.get(ADMIN_TOKEN,null)}catch(e){}
-      if(known&&!blk){blk=document.createElement("div");blk.className="lc45-adm";blk.innerHTML='<button type="button" class="pm-item" data-lc45-gate>Admin sign-in</button>';anchor.after(blk)}
-      else if(!known&&blk)blk.remove();
+      const o30=typeof LC49!=="undefined"&&LC49.on30();
+      const html=(o30?'<button type="button" class="pm-item" data-lc49-open>Admin: view the app as…</button>':'')+((known||o30)?'<button type="button" class="pm-item" data-lc45-gate>Admin sign-in (edit content)</button>':'');
+      if(html&&!blk){blk=document.createElement("div");blk.className="lc45-adm";blk.innerHTML=html;anchor.after(blk)}
+      else if(!html&&blk)blk.remove();
     }
   }
   function tidy(){
@@ -101,8 +107,8 @@ const LC45=(()=>{
       if(anchor)adminBlock(p,anchor);
       /* Creator Studio, in admin mode, right under the MSPC System */
       const sys=Q('a.pm-item[href="#system"]',p),has=Q('a.pm-item[href="#studio"]',p);
-      if(admin()&&sys&&!has){const a=document.createElement("a");a.setAttribute("role","menuitem");a.className="pm-item";a.href="#studio";a.innerHTML=(()=>{try{return icon("video")}catch(e){return""}})()+"<span>Creator Studio</span>";sys.after(a)}
-      else if(!admin()&&has)has.remove();
+      if((admin()||(typeof LC49!=="undefined"&&LC49.owner()))&&sys&&!has){const a=document.createElement("a");a.setAttribute("role","menuitem");a.className="pm-item";a.href="#studio";a.innerHTML=(()=>{try{return icon("video")}catch(e){return""}})()+"<span>Creator Studio</span>";sys.after(a)}
+      else if(!(admin()||(typeof LC49!=="undefined"&&LC49.owner()))&&has)has.remove();
     }finally{busy=false}
   }
   let pmObs=null;
@@ -136,6 +142,18 @@ const LC45=(()=>{
     pill.innerHTML='<span>Viewing as <b>'+E(label)+'</b></span><button type="button" class="btn btn-primary btn-sm" data-lc45-exit>Back to Admin</button>';
   }
 
+  /* a guest who taps the avatar lands on My Account: the first thing there is a way to sign in */
+  function paintAccount(){
+    try{
+      const v=Q("#view"),on=Q("#lc45-signin");
+      if(hashNow()!=="account"||sess()||real()){if(on)on.remove();return}
+      if(!v||on)return;
+      const a=document.createElement("section");a.id="lc45-signin";a.className="panel pad lc45-signin";
+      a.innerHTML='<h3>Save your progress</h3><p class="small muted">Sign in so your membership, tokens and progress follow you to every device.</p><div class="lc39-gate"><button type="button" class="btn btn-primary lc39-google" data-lc39-google>Sign in with Google</button><p class="small muted lc39-or">or with your email</p><form data-lc39-mail class="lc39-row"><input class="input" name="email" type="email" required autocomplete="email" placeholder="you@example.com" aria-label="Email address"><button type="submit" class="btn btn-ghost">Email me a sign-in link</button></form>'+LC26.sync.codeForm("lc39")+'<p class="form-msg" data-lc39-gmsg aria-live="polite"></p></div>';
+      v.insertBefore(a,v.firstChild);
+    }catch(e){}
+  }
+
   /* ---------- 4. the conversion banner ---------- */
   const BK="lc45-ban";
   const dismissed=()=>{const b=rd(BK,null);return !!b&&(+b.until||0)>Date.now()};
@@ -143,7 +161,7 @@ const LC45=(()=>{
   let bannerSeq=0;
   async function paintBanner(route){
     const seq=++bannerSeq,old=Q("#lc45-banner");
-    const on=(route==="home"||route==="quests"||route==="")&&!real()&&!paid()&&!dismissed()&&!(()=>{try{return LC42.owns()}catch(e){return false}})();
+    const on=route!=="upgrades"&&!(()=>{try{return LC40.busy()}catch(e){return false}})()&&!real()&&!paid()&&!dismissed()&&!(()=>{try{return LC42.owns()}catch(e){return false}})();
     if(!on){if(old)old.remove();return}
     const host=Q("#top-actions");if(!host){return}
     let open=true;try{open=await LC44._t.foundingOpen(2)}catch(e){open=true}
@@ -151,7 +169,7 @@ const LC45=(()=>{
     const text=open?"Upgrade to Pro / VIP with Founding Member Discount":"Upgrade to Pro / VIP";
     let b=Q("#lc45-banner");
     if(!b){b=document.createElement("aside");b.id="lc45-banner";b.className="lc45-banner";b.setAttribute("role","note");host.insertAdjacentElement("afterend",b)}
-    b.innerHTML=coachAv("happy",40)+'<span class="lc45-bt">'+E(text)+'</span><button type="button" class="btn btn-primary" data-lc45-up>'+(open?"See the Founding rate":"See the plans")+'</button><button type="button" class="lc45-x" data-lc45-x aria-label="Dismiss for now">×</button>';
+    b.innerHTML=coachAv("neutral",40)+'<span class="lc45-bt">'+E(text)+'</span><button type="button" class="btn btn-primary" data-lc45-up>'+(open?"See the Founding rate":"See the plans")+'</button><button type="button" class="lc45-x" data-lc45-x aria-label="Dismiss for now">×</button>';
     warm("happy");
   }
   function bannerClick(e){
@@ -209,7 +227,7 @@ const LC45=(()=>{
   function afterRender(route){
     try{
       ensureCaret();watchPanel();paintPill();
-      const run=()=>{paintBanner(hashNow());decorate();tidy()};
+      const run=()=>{paintBanner(hashNow());paintAccount();decorate();tidy()};
       setTimeout(run,160);
       if(obs){try{obs.disconnect()}catch(e){}obs=null}
       if(typeof MutationObserver==="function"){let b=false;const m=obs=new MutationObserver(()=>{if(b)return;b=true;setTimeout(()=>{b=false;decorate();watchPanel()},150)});m.observe(document.body,{childList:true,subtree:true});setTimeout(()=>{try{m.disconnect()}catch(x){}if(obs===m)obs=null},8000)}
@@ -236,7 +254,7 @@ const LC45=(()=>{
       document.addEventListener("click",bannerClick,true);
       try{const og=LC36.support.go;if(typeof og==="function"&&!og.__lc45){const f=function(u){mark();return og.apply(this,arguments)};f.__lc45=true;LC36.support.go=f}}catch(e){}
       document.addEventListener("visibilitychange",backFromPay);window.addEventListener("focus",backFromPay);window.addEventListener("pageshow",backFromPay);
-      window.addEventListener("hashchange",()=>{openAdminGate();paintBanner(hashNow())});
+      window.addEventListener("hashchange",()=>{openAdminGate();paintBanner(hashNow());setTimeout(paintAccount,300)});
       window.addEventListener("lc39-signed-in",()=>{if(marked())setTimeout(claimNow,800)});
       if(/[?&]paid=/.test(location.hash||"")||/[?&]paid=/.test(location.search||"")){mark();setTimeout(claimNow,1200);backFromPay()}
       ensureCaret();watchPanel();paintPill();openAdminGate();

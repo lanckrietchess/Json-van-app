@@ -79,7 +79,7 @@ const LC40=(()=>{
     if(t.closest("#profile-chip")){
       if(skip){skip=false;return}
       if(sess()||admin())return;                       /* signed in: the normal account menu (My Account first) opens */
-      e.preventDefault();e.stopImmediatePropagation();fromChip=true;openAuth();
+      return;   /* 9.20.8: the avatar opens My Account for everyone (LC45); signing in is a card on that page */
     }
   }
 
