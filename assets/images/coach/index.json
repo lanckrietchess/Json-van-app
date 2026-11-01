@@ -1,0 +1,22 @@
+{
+ "happy": [
+  10
+ ],
+ "neutral": [
+  5
+ ],
+ "thinking": [
+  5
+ ],
+ "serious": [
+  8
+ ],
+ "tough_love": [
+  7
+ ],
+ "skeptical": [
+  5,
+  8
+ ],
+ "_default": "default.png"
+}
