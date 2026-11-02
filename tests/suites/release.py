@@ -13,6 +13,12 @@ out('old address left in app/landing/stripe defaults', [_src.count('https://lanc
 out('landing [launch links, manifest link, install buttons]', [_land.count('Launch the app'), bool(_re.search(r'<link rel="manifest" href="/manifest\.webmanifest\?v=9\.26\.0">', _land)), _land.count('data-install href="/app.html?install=1"')])
 out('manifest [id, start_url, scope]', [_re.search(r'"id": "([^"]+)"', _man).group(1), _re.search(r'"start_url": "([^"]+)"', _man).group(1), _re.search(r'"scope": "([^"]+)"', _man).group(1)])
 out('reset target', _re.search(r'var TARGET = "([^"]+)"', _reset).group(1))
+import json as _json, subprocess as _sp
+_al = _json.load(open(REPO + '/.well-known/assetlinks.json', encoding='utf-8'))
+out('assetlinks [relation, package]', [_al[0]['relation'][0], _al[0]['target']['package_name']])
+for _t in ['tests/sw.test.js', 'tests/sw.test.mjs', 'tests/stripe.test.mjs']:
+    _r = _sp.run(['node', _t], cwd=REPO, capture_output=True, text=True, timeout=120)
+    out('node ' + _t, (_r.stdout.strip().splitlines() or ['no output'])[-1] + ('' if _r.returncode == 0 else ' (exit ' + str(_r.returncode) + ')'))
 out('studio [silence default, auto subtitles button]', [_re.search(r'thr:-45,minSil:([.\d]+),', _src).group(1), 'id:"lc33-auto",text:autoState.busy?"Stop writing subtitles":"Auto English subtitles"' in _src])
 with sync_playwright() as p:
     br = p.chromium.launch()

@@ -45,6 +45,8 @@ const eqSecret = (a, b) => { const x = Buffer.from(String(a || '')), y = Buffer.
 
 export function makeStripeHandler(sql, env, fetchImpl) {
   const E = Object.assign({ APP_URL: DEFAULT_ORIGIN + '/app.html', SUPPORT_URL: DEFAULT_ORIGIN + '/', ALLOWED_ORIGINS: OWN_ORIGINS.join(','), STRIPE_COUNTRY: 'BE', STRIPE_API_BASE: 'https://api.stripe.com' }, env);
+  /* 9.26.0: a secret that still points at the old address is moved to the live one, so a buyer never lands on a dead page after paying */
+  ['APP_URL', 'SUPPORT_URL'].forEach((k) => { if (E[k]) E[k] = String(E[k]).replace(/^https:\/\/lanckrietchess-app\.vercel\.app(?=[/?#]|$)/i, DEFAULT_ORIGIN); });
   const DB = makeDB(sql), doFetch = fetchImpl || fetch, hits = new Map();
   const origins = String(E.ALLOWED_ORIGINS).split(',').map((s) => s.trim()).filter(Boolean).concat(OWN_ORIGINS);
   const cors = (req) => { const o = req.headers.get('origin'); return o && origins.indexOf(o) >= 0 ? { 'access-control-allow-origin': o, 'access-control-allow-headers': 'content-type', 'access-control-allow-methods': 'POST, OPTIONS', vary: 'origin' } : { vary: 'origin' }; };

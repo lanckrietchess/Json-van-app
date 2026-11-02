@@ -14,6 +14,7 @@ EXPECT = {
   'release': [r"versions \[CONFIG\.version, assetVersion, sw, version\.json\]: \['9\.26\.0', '9\.26\.0', 'sw\.js\?v=9\.26\.0', '\{\"build\":\"9\.26\.0\"\}'\]",
               r"old address left in app/landing/stripe defaults: \[0, 0, 1\]", r"landing \[launch links, manifest link, install buttons\]: \[0, True, 5\]",
               r"manifest \[id, start_url, scope\]: \['/app\.html', '/app\.html\?source=pwa', '/app\.html'\]", r"reset target: https://lanckrietchesstrainerhub\.vercel\.app/app\.html\?fresh=1793615024470",
+              r"assetlinks \[relation, package\]: \['delegate_permission/common\.handle_all_urls', 'com\.lanckrietchess\.app'\]", r"node tests/sw\.test\.js: 14 passed", r"node tests/sw\.test\.mjs: 10 passed, 0 failed", r"node tests/stripe\.test\.mjs: 12 passed, 0 failed",
               r"studio \[silence default, auto subtitles button\]: \['\.8', True\]", r"landing install click \[prompted, still on landing, message\]: \[1, True, 'Installing",
               r"landing phone \[overflow-x\]: 0", r"no prompt available: the button opens: /app\.html\?install=1", r"app \[CONFIG\.version, footer shows, SiteURL production\]: \['9\.26\.0', 'v9\.26\.0', 'https://lanckrietchesstrainerhub\.vercel\.app/'\]",
               r"preview check \[live, old live, per-commit link, localhost\]: \[False, False, True, False\]", r"service worker \[script, controls the page, caches\]: \['/sw\.js\?v=9\.26\.0', True, \[[^\]]*'lc-shell-nf1-9\.26\.0'[^\]]*\]\]",
