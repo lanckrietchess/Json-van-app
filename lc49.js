@@ -18,7 +18,9 @@ const LC49=(()=>{
   const on30=()=>{try{return !!(LC30.admin&&LC30.admin.on())}catch(e){return false}};
   const soft=()=>{try{return !!Admin.soft()}catch(e){return false}};
   const hard=()=>{try{return !!Admin.real()&&!Admin.soft()}catch(e){return false}};
-  const ownerAccount=()=>email()===ADMIN_EMAIL||on30();
+  /* 9.26.0: Gmail ignores dots and +tags, so l.anckrietchess+x@gmail.com is the same owner mailbox (display only: the server still checks every admin action) */
+  const gmail=e=>{e=String(e||"").trim().toLowerCase();const m=e.match(/^([^@+]+)(?:\+[^@]*)?@(?:gmail|googlemail)\.com$/);return m?m[1].replace(/\./g,"")+"@gmail.com":e};
+  const ownerAccount=()=>(!!email()&&gmail(email())===gmail(ADMIN_EMAIL))||on30();
   const pov=()=>{try{return Admin.viewingAs()||""}catch(e){return""}};
   const active=()=>soft()||hard();
   const owner=()=>!pov()&&(ownerAccount()||hard());   /* "may use the owner's tools right now": false while looking through someone else's eyes */

@@ -142,6 +142,9 @@ const LC52=(()=>{
   }
 
   /* ---------- 3. owner tools ---------- */
+  /* 9.26.0: the live addresses. Only OTHER *.vercel.app hosts (Vercel's per-commit and per-branch links) are frozen previews. */
+  const LIVE_HOSTS=["lanckrietchesstrainerhub.vercel.app","lanckrietchess-app.vercel.app","lanckrietchess.com","www.lanckrietchess.com"];
+  const isPreviewHost=h=>/\.vercel\.app$/i.test(String(h||""))&&LIVE_HOSTS.indexOf(String(h).toLowerCase())<0;
   function hardReset(){
     const done=()=>{location.replace(location.pathname+"?fresh="+Date.now()+(location.hash||""))};
     try{
@@ -155,22 +158,22 @@ const LC52=(()=>{
     let remote="";
     try{const r=await fetch("version.json?ts="+Date.now(),{cache:"no-store"});if(r.ok){const j=await r.json();remote=String(j&&j.build||"")}}catch(e){}
     const mine=ver(),host=location.hostname;
-    const preview=/\.vercel\.app$/.test(host)&&host!=="lanckrietchess-app.vercel.app";
+    const preview=isPreviewHost(host);
     let html='<p>This page runs build <b>'+E(mine)+'</b> from <b>'+E(host)+'</b>.</p>';
     if(!remote)html+='<p class="small muted">The server did not answer with the newest build number. Check your connection.</p>';
     else if(remote!==mine)html+='<p><b>Build '+E(remote)+' is on the server.</b> You are looking at an older copy kept by this browser.</p>';
     else html+='<p>That is the newest build on the server.</p>';
-    if(preview)html+='<p class="lc52-warn"><b>This is a frozen preview link</b>, not your live site. A preview never changes after it was built. Open <a href="https://www.lanckrietchess.com/app.html">www.lanckrietchess.com/app.html</a>.</p>';
+    if(preview)html+='<p class="lc52-warn"><b>This is a frozen preview link</b>, not your live site. A preview never changes after it was built. Open <a href="https://lanckrietchesstrainerhub.vercel.app/app.html">lanckrietchesstrainerhub.vercel.app/app.html</a>.</p>';
     html+='<div class="btn-row"><button type="button" class="btn btn-primary" data-lc52-reset>Load the newest build now</button><button type="button" class="btn btn-quiet" data-close>Close</button></div>';
     openSheet({title:"Which build is this?",cls:"lc52-sheet",noFocus:true,html:html,onMount(s){s.el.addEventListener("click",e=>{if(e.target.closest&&e.target.closest("[data-lc52-reset]")){e.preventDefault();hardReset()}})}});
   }
   function previewBar(){
     try{
       const host=location.hostname;
-      if(!(/\.vercel\.app$/.test(host)&&host!=="lanckrietchess-app.vercel.app"))return;
+      if(!isPreviewHost(host))return;
       if(Q("#lc52-prev"))return;
       const b=document.createElement("div");b.id="lc52-prev";b.className="lc52-prev";b.setAttribute("role","alert");
-      b.innerHTML='<b>Frozen preview link.</b> This copy never updates. Open <a href="https://www.lanckrietchess.com/app.html">www.lanckrietchess.com/app.html</a> for the live app.';
+      b.innerHTML='<b>Frozen preview link.</b> This copy never updates. Open <a href="https://lanckrietchesstrainerhub.vercel.app/app.html">lanckrietchesstrainerhub.vercel.app/app.html</a> for the live app.';
       document.body.insertBefore(b,document.body.firstChild);
     }catch(e){}
   }
@@ -221,5 +224,5 @@ const LC52=(()=>{
       document.addEventListener("click",pvHide,true);
     }catch(e){console.error("lc52",e)}
   }
-  return{init:init,afterRender:afterRender,replay:replay,checkUpdate:checkUpdate,hardReset:hardReset,openLatest:openLatest,firstTimeish:firstTimeish,replaying:replaying,sparkSVG:sparkSVG,fenAt:fenAt,paintSparks:paintSparks,_t:{boardPreview:boardPreview,seriesFor:seriesFor}};
+  return{init:init,afterRender:afterRender,replay:replay,checkUpdate:checkUpdate,hardReset:hardReset,openLatest:openLatest,firstTimeish:firstTimeish,replaying:replaying,sparkSVG:sparkSVG,fenAt:fenAt,paintSparks:paintSparks,_t:{boardPreview:boardPreview,seriesFor:seriesFor,isPreviewHost:isPreviewHost}};
 })();

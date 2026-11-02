@@ -1,27 +1,36 @@
-/* Lanckrietchess Training Hub: service worker.
+/* Lanckriet Chess Training Hub: service worker (build 9.26.0, "network-first").
 
-   ONE version number. index.html registers this file as sw.js?v=X.Y.Z (CONFIG.pwa.serviceWorker). The worker reads that ?v= and
-   names its cache after it, so a release is: bump X.Y.Z in three places (CONFIG.pwa.serviceWorker + CONFIG.assetVersion in
-   index.html, the ?v= on the manifest and icon links) and in manifest.webmanifest. Nothing in this file needs editing.
+   ONE version number. app.html registers this file as sw.js?v=X.Y.Z (CONFIG.pwa.serviceWorker). The worker reads that ?v= and names its
+   cache after it. A release is: bump X.Y.Z in app.html (CONFIG.pwa.serviceWorker, CONFIG.assetVersion, CONFIG.version, the ?v= on the
+   manifest and icon links), in index.html (the ?v= links), in manifest.webmanifest and in version.json. Nothing in this file needs editing.
 
-   install   precache the app shell into the NEW cache, skipWaiting()
-   activate  delete every cache except the current shell cache and the library cache, then clients.claim(); index.html reloads
-             once when the new worker takes over (see the registration code in index.html)
-   page      "/app.html" (the app; "/" is the landing page and is never touched): stale-while-revalidate. The installed app opens instantly from the cache, and a conditional
-             request (ETag, usually a 304) refreshes the copy in the background.
-   static    /icons/* and the manifest: cache-first, the ?v= in the URL is the cache key
-   libs      version-pinned third-party files (cdnjs, jsDelivr @x.y.z, /engine/*): cache-first in a separate cache that survives
-             releases, so a release never re-downloads jQuery, chess.js or the 7 MB Stockfish engine
-   coach     lc-coach-*: the page's saved voice clips; the cleanup above leaves them alone
-   push      server-sent Web Push: shows the coach's message (title, body, same-site link) and opens the app on tap. Needs a server that sends pushes
-             (VAPID keys + a table of subscriptions); until then this code simply never runs.
-   never     content.json, /json, GitHub, Supabase, the Arena server, Lichess, fonts: not touched by this worker */
+   Why network-first: until 9.25.0 the installed app opened app.html from the cache (stale-while-revalidate), so after a release people
+   kept seeing the previous build until the second launch, and a stuck worker could hold an old build for days. Now:
+
+   page      "/app.html" (any query: ?fresh=, ?source=pwa, ?ref=): ALWAYS asks Vercel first (a conditional request, so an unchanged
+             build costs a 304). The cached copy is only used when there is no connection, or when the network has not answered
+             within 8 seconds (the fresh copy is still stored for the next launch). "/" (the landing page) is never touched.
+   install   precaches the app shell into the NEW cache, skipWaiting(): a new worker never waits behind an old one.
+   activate  deletes EVERY cache except this build's shell, the pinned libraries, the asset cache and the page's own saved data
+             (lc-coach-*: paid voice clips, lc-notes-*: saved MSPC notes), then clients.claim().
+             app.html reloads once when the new worker takes over (see the registration code in app.html).
+   static    /icons/* and the manifest: cache-first, the ?v= in the URL is the cache key.
+   libs      version-pinned third-party files (cdnjs, jsDelivr @x.y.z, /engine/*): cache-first in a cache that survives releases,
+             so a release never re-downloads jQuery, chess.js or the 7 MB Stockfish engine.
+   assets    /assets/*: coach photos, help.json, help audio: opens from cache, refreshed in the background every time.
+   push      server-sent Web Push: shows the coach's message (title, body, same-site link) and opens the app on tap.
+   never     content.json, /json, version.json, sw.js, reset.html, GitHub, Supabase, the Arena server, Lichess, fonts. */
 'use strict';
 const V = new URL(self.location.href).searchParams.get('v') || 'dev';
-const SHELL_CACHE = 'lc-shell-' + V;
+const GEN = 'nf1';                                    /* network-first generation: a new name, so no shell cache from before 9.26.0 survives */
+const SHELL_CACHE = 'lc-shell-' + GEN + '-' + V;
 const LIB_CACHE = 'lc-lib-v1';
-const ASSET_CACHE = 'lc-assets-v1';   /* coach photos, help.json, help audio: opens from cache, refreshes in the background */
+const ASSET_CACHE = 'lc-assets-v1';
+const KEEP = new Set([SHELL_CACHE, LIB_CACHE, ASSET_CACHE]);
+const KEEP_PREFIX = ['lc-coach-', 'lc-notes-'];       /* written by the page, not by this worker: user data, never thrown away */
 const SCOPE = new URL(self.registration.scope).pathname;               // "/" in production
+const APP = SCOPE + 'app.html';
+const NET_TIMEOUT_MS = 8000;
 const SHELL = ['app.html', 'manifest.webmanifest?v=' + V, 'icons/icon-192.png?v=' + V, 'icons/icon-512.png?v=' + V, 'icons/icon-maskable-512.png?v=' + V, 'icons/apple-touch-icon.png?v=' + V];
 
 self.addEventListener('install', (event) => {
@@ -35,10 +44,8 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
-    const keep = new Set([SHELL_CACHE, LIB_CACHE]);
-    /* lc-coach-*: Coach Lanckriet's saved voice clips (written by the page, not by this worker). They survive releases so a clip is never paid for twice.
-       lc-notes-*: the saved MSPC move notes (written by the page) so they work offline and survive releases. */
-    await Promise.all((await caches.keys()).filter((k) => !keep.has(k) && !k.startsWith('lc-coach-') && !k.startsWith('lc-notes-') && !k.startsWith('lc-assets-')).map((k) => caches.delete(k)));
+    const old = (await caches.keys()).filter((k) => !KEEP.has(k) && !KEEP_PREFIX.some((p) => k.startsWith(p)));
+    await Promise.all(old.map((k) => caches.delete(k)));
     await self.clients.claim();
   })());
 });
@@ -47,7 +54,7 @@ self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
-const cacheable = (res) => res && res.ok && (res.type === 'basic' || res.type === 'cors');
+const cacheable = (res) => res && res.ok && (res.type === 'basic' || res.type === 'cors' || res.type === 'default');
 
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
@@ -58,17 +65,25 @@ async function cacheFirst(request, cacheName) {
   return res;
 }
 
+const OFFLINE = '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title><body style="font:16px system-ui;background:#0f172a;color:#e2e8f0;padding:2rem"><p>You are offline. Open the app once with a connection and it will work offline afterwards.</p>';
+
+/* the app page: network first, cache only as a fallback */
 async function page(event) {
   const cache = await caches.open(SHELL_CACHE);
-  const hit = await cache.match('app.html');
-  const refresh = fetch('app.html', { cache: 'no-cache' }).then(async (res) => {   // conditional request: a 304 costs almost nothing
-    if (cacheable(res)) await cache.put('app.html', res.clone());
-    return res;
+  const net = fetch('app.html', { cache: 'no-cache' }).then(async (res) => {   // conditional request: a 304 costs almost nothing
+    if (cacheable(res)) await cache.put('app.html', res.clone()).catch(() => {});
+    return res && res.ok ? res : null;
   }).catch(() => null);
-  if (hit) { event.waitUntil(refresh); return hit; }
-  const fresh = await refresh;
-  return fresh || new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title><body style="font:16px system-ui;background:#0f172a;color:#e2e8f0;padding:2rem"><p>You are offline. Open the app once with a connection and it will work offline afterwards.</p>',
-    { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+  event.waitUntil(net.then(() => {}));                                          // the fresh copy is always stored, even after a timeout
+  let timer;
+  const late = new Promise((resolve) => { timer = setTimeout(() => resolve('late'), NET_TIMEOUT_MS); });
+  const first = await Promise.race([net, late]);
+  clearTimeout(timer);
+  if (first && first !== 'late') return first;
+  const hit = await cache.match('app.html');
+  if (hit) return hit;
+  const fresh = first === 'late' ? await net : null;                           // nothing cached yet: wait for the network after all
+  return fresh || new Response(OFFLINE, { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
 }
 
 async function assetSwr(event, request) {
@@ -79,7 +94,8 @@ async function assetSwr(event, request) {
     return res;
   }).catch(() => null);
   if (hit) { event.waitUntil(net); return hit; }
-  return (await net) || new Response('', { status: 504 });
+  const res = await net;
+  return res || new Response('', { status: 504 });
 }
 
 const pinnedLib = (u) =>
@@ -92,19 +108,19 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin === self.location.origin) {
     const p = url.pathname;
-    if (request.mode === 'navigate' && p === SCOPE + 'app.html') { event.respondWith(page(event)); return; }   // the APP. "/" is the landing page and always comes from the network
+    if (request.mode === 'navigate' && p === APP) { event.respondWith(page(event)); return; }   // the APP. "/" is the landing page and always comes from the network
     if (p.startsWith(SCOPE + 'assets/')) { event.respondWith(assetSwr(event, request)); return; }
     if (p.startsWith(SCOPE + 'engine/')) { event.respondWith(cacheFirst(request, LIB_CACHE)); return; }
     if (p.startsWith(SCOPE + 'icons/') || p === SCOPE + 'manifest.webmanifest') { event.respondWith(cacheFirst(request, SHELL_CACHE)); return; }
-    return;                                                                   // content.json, /json, sw.js, anything else: network
+    return;                                                                   // content.json, /json, sw.js, version.json, reset.html, anything else: network
   }
   if (pinnedLib(url)) event.respondWith(cacheFirst(request, LIB_CACHE));
 });
 
-/* ---- Web Push (coach messages, e.g. after a game). The server sends JSON {title, body, url, tag}. Only same-site links are followed. ---- */
+/* ---- Web Push (coach messages, e.g. after a game). The server sends JSON {title, body, url, tag}. Only same-site links to the app are followed. ---- */
 const safeUrl = (u) => {
-  try { const x = new URL(String(u || ''), self.registration.scope); if (x.origin === self.location.origin && x.pathname === SCOPE + 'app.html') return x.pathname + x.search + x.hash; } catch (e) {}
-  return SCOPE + 'app.html';
+  try { const x = new URL(String(u || ''), self.registration.scope); if (x.origin === self.location.origin && x.pathname === APP) return x.pathname + x.search + x.hash; } catch (e) {}
+  return APP;
 };
 
 self.addEventListener('push', (event) => {

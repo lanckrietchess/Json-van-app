@@ -7,7 +7,7 @@
 <title>Loading the newest version…</title>
 <style>
   html, body { height: 100%; margin: 0; background: #0f172a; color: #e2e8f0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-  main { min-height: 100%; display: grid; place-items: center; text-align: center; padding: 24px; }
+  main { min-height: 100%; display: grid; place-items: center; text-align: center; padding: 24px; box-sizing: border-box; }
   h1 { font-size: 1.2rem; margin: 0 0 8px; }
   p { margin: 6px 0; color: #94a3b8; }
   a { color: #38bdf8; text-decoration: none; }
@@ -19,55 +19,48 @@
   <div>
     <h1 id="t">Loading the newest version…</h1>
     <p id="s">Clearing the old copy kept by this browser. Your progress is not touched.</p>
-    <p><a id="go" href="https://lanckrietchesstrainerhub.vercel.app/app.html" hidden>Open the app</a></p>
+    <p><a id="go" href="https://lanckrietchesstrainerhub.vercel.app/app.html?fresh=1793615024470" hidden>Open the app</a></p>
   </div>
 </main>
 <script>
-(function(){
+/* reset.html (build 9.26.0): the cache wiper. It removes every service worker of this site and every Cache Storage entry, then opens the live app.
+   It never touches localStorage or IndexedDB: progress, XP, settings and the sign-in stay. This page is never cached (vercel.json) and the
+   service worker never answers it, so it always works, even when an old worker is stuck. */
+(function () {
+  var TARGET = "https://lanckrietchesstrainerhub.vercel.app/app.html?fresh=1793615024470";
   var done = false;
-  var targetUrl = "https://lanckrietchesstrainerhub.vercel.app/app.html?fresh=" + Date.now();
-  
-  function go(){
-    if(done) return;
+
+  function go() {
+    if (done) return;
     done = true;
     document.getElementById("t").textContent = "Done. Opening the newest version…";
-    location.replace(targetUrl);
+    location.replace(TARGET);
   }
-  
-  function fail(){
+
+  function fail() {
     document.getElementById("s").textContent = "Could not finish automatically. Close all tabs of the app and open it again.";
     var a = document.getElementById("go");
     a.hidden = false;
-    a.href = targetUrl;
   }
-  
+
   try {
     var jobs = [];
-    // 1. Unregister alle Service Workers die de oude v17 vasthouden
+    /* 1. unregister every service worker of this site (also old builds at other scopes) */
     if ("serviceWorker" in navigator && navigator.serviceWorker.getRegistrations) {
-      jobs.push(navigator.serviceWorker.getRegistrations().then(function(rs){
-        return Promise.all(rs.map(function(r){ return r.unregister(); }));
+      jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+        return Promise.all(rs.map(function (r) { return r.unregister(); }));
       }));
     }
-    // 2. Wis alle browser caches
+    /* 2. delete every cache in Cache Storage */
     if (window.caches && caches.keys) {
-      jobs.push(caches.keys().then(function(ks){
-        return Promise.all(ks.map(function(k){ return caches.delete(k); }));
+      jobs.push(caches.keys().then(function (ks) {
+        return Promise.all(ks.map(function (k) { return caches.delete(k); }));
       }));
     }
-    
-    Promise.all(jobs).then(function(){ 
-      setTimeout(go, 400); 
-    }, function(){ 
-      setTimeout(go, 400); 
-    });
-    
-    setTimeout(function(){ 
-      if(!done) fail(); 
-    }, 8000);
-    
-  } catch(e) { 
-    fail(); 
+    Promise.all(jobs).then(function () { setTimeout(go, 400); }, function () { setTimeout(go, 400); });
+    setTimeout(function () { if (!done) fail(); }, 8000);
+  } catch (e) {
+    fail();
   }
 })();
 </script>
