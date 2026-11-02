@@ -73,9 +73,9 @@ const LC42=(()=>{
   }
 
   /* ---------- 1. the teaser: ONE mistake, shown the moment it is found ---------- */
-  const saveBlock=()=>{
+  const saveBlock=open=>{
     try{if(LC26.sync.session())return""}catch(e){return""}
-    return'<details class="lc42-save"><summary>Save my progress (optional)</summary><div class="lc39-gate"><button type="button" class="btn btn-primary lc39-google" data-lc39-google>Sign in with Google</button><p class="small muted lc39-or">or with your email</p>'
+    return'<details class="lc42-save"'+(open?' open':'')+'><summary>Save my progress'+(open?'':' (optional)')+'</summary><div class="lc39-gate"><button type="button" class="btn btn-primary lc39-google" data-lc39-google>Sign in with Google</button><p class="small muted lc39-or">or with your email</p>'
       +'<form data-lc39-mail class="lc39-row"><input class="input" name="email" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Email address"><button type="submit" class="btn btn-ghost">Email me a link or code</button></form>'
       +LC26.sync.codeForm("lc39")+'<p class="form-msg" data-lc39-gmsg aria-live="polite"></p></div></details>';
   };
@@ -99,7 +99,10 @@ const LC42=(()=>{
         const before=w?ev[p]:-ev[p],after=w?ev[i]:-ev[i],loss=before-after;
         if(loss>=150&&before>-500){
           const bu=best[p]||"";
-          return{ply:p,loss:loss,before:before,after:after,played:pm,fen:fens[p],bestUci:bu,bestSan:bu?(Engine.uciToSan(fens[p],bu)||bu):"",no:Math.floor(p/2)+1};
+          const ol=p>0?hist[p-1]:null,ru=best[i]||"";                                  /* the opponent's last move and the best reply to the move that was played */
+          let rcap=null;try{if(ru)rcap=(new Chess(fens[i]).move({from:ru.slice(0,2),to:ru.slice(2,4),promotion:ru[4]||"q"})||{}).captured||null}catch(e){}
+          return{ply:p,loss:loss,before:before,after:after,played:pm,fen:fens[p],bestUci:bu,bestSan:bu?(Engine.uciToSan(fens[p],bu)||bu):"",no:Math.floor(p/2)+1,
+            oppLast:ol?ol.san:"",replyUci:ru,replySan:ru?(Engine.uciToSan(fens[i],ru)||""):"",replyCap:rcap};
         }
       }
     }
@@ -120,28 +123,75 @@ const LC42=(()=>{
     location.hash="#trim";
     autoReview();poll();
   }
+  const PN={p:"pawn",n:"knight",b:"bishop",r:"rook",q:"queen",k:"king"};
+  const THINKK={
+    M:"Start every move with the M of MSPC: what did my opponent's last move change, and what does it threaten?",
+    S:"After the M, scan the specifics: which of my pieces are loose or undefended, and which squares are weak?",
+    P:"Before you decide, list your checks, captures and attacks (the P of MSPC). The strongest move is very often one of them.",
+    C:"Calculate their best reply to your move (the C of MSPC). If you only look at your own idea, you miss what they play next."};
+  const NEXTK={
+    M:"say out loud what your opponent's last move changed before you touch a piece.",
+    S:"before every move, check whether any of your pieces is loose.",
+    P:"write down your checks, captures and attacks first, then choose.",
+    C:"look one move further: what is their best reply?"};
+  /* what went wrong, in the app's own MSPC words (M / S / P / C) */
+  function why(r){
+    const bs=r.bestSan||"",ps=r.played.san,rs=r.replySan||"";
+    if(r.replyCap&&rs){
+      if(r.replyCap!=="p")return{k:"S",d:"After "+ps+", your "+(PN[r.replyCap]||"piece")+" was left loose and "+rs+" simply took it."};
+      return{k:"S",d:"After "+ps+", "+rs+" wins a pawn."};
+    }
+    if(/[x+#]/.test(ps)&&rs)return{k:"C",d:ps+" started a forcing line that does not work. "+rs+" was the reply you needed to calculate."};
+    if(/[x+#]/.test(bs))return{k:"P",d:bs+" was a "+(/[+#]/.test(bs)?"check":"capture")+" that gained more, and you played a quieter move first."};
+    if(r.oppLast)return{k:"M",d:"Your opponent's last move ("+r.oppLast+") changed the position. "+ps+" did not deal with it"+(rs?", and "+rs+" followed.":".")};
+    return{k:"S",d:ps+" did not fit what the position asked for."+(bs?" "+bs+" did.":"")};
+  }
   function card(el,g,r){
-    const w=g.color==="w",fen=r.fen,best=r.bestUci||"",bestSan=r.bestSan||"the best move";
-    el.innerHTML='<p class="lc39-qwh">Your first mistake: move '+r.no+'.</p><p>You played <b>'+E(r.played.san)+'</b>. It cost you about '+(Math.round(r.loss/10)/10)+' pawns of advantage. Can you find something better from here?</p>'
-      +'<div data-lc42-board class="lc25-pb"></div><p data-lc42-fb aria-live="polite" class="lc25-fb"></p><p class="small muted">Hint: what was your opponent threatening, and what changed on the board? That is the M in MSPC.</p>'
-      +'<div class="btn-row" data-lc42-act><button type="button" class="btn btn-ghost btn-sm" data-lc42-show>Show me</button></div>'+saveBlock();
-    const fb=t=>{const x=Q("[data-lc42-fb]",el);if(x)x.innerHTML=t},act=Q("[data-lc42-act]",el);
+    const w=g.color==="w",fen=r.fen,best=r.bestUci||"",bestSan=r.bestSan||"the best move",ps=r.played.san,y=why(r);
+    const pawns=x=>(Math.round(x/10)/10).toFixed(1);
+    el.innerHTML='<div class="lc52-card">'
+      +'<p class="lc52-kick">Your first quick win · move '+r.no+'</p>'
+      +'<h3 class="lc52-h">You played <b>'+E(ps)+'</b>. It cost you about '+pawns(r.loss)+' pawns.</h3>'
+      +'<p class="lc52-lead">What were you thinking here? Look at the position, then move a piece on the board to try a better move.'+(r.oppLast?' Your opponent had just played <b>'+E(r.oppLast)+'</b>.':'')+'</p>'
+      +'<div class="lc52-boardwrap"><div data-lc42-board class="lc25-pb lc52-board"></div></div>'
+      +'<p data-lc42-fb aria-live="polite" class="lc52-fb"></p>'
+      +'<div class="lc52-why" data-lc52-why hidden></div>'
+      +'<div class="btn-row lc52-act" data-lc42-act><button type="button" class="btn btn-primary" data-lc42-show>Show me the better move</button><button type="button" class="btn btn-ghost lc42-full" data-lc42-full>Analyze whole game</button></div>'
+      +'<p class="small muted lc52-bg">Your whole game is being imported and trimmed in the background. There is nothing to do for that.</p></div>';
+    const fb=t=>{const x=Q("[data-lc42-fb]",el);if(x)x.innerHTML=t};
+    const showWhy=()=>{
+      const box=Q("[data-lc52-why]",el);if(!box)return;
+      const bk=/#/.test(bestSan)?"gives checkmate":/\+/.test(bestSan)?"gives check":/x/.test(bestSan)?"is a capture":"is a quiet move";
+      box.innerHTML='<h4>What went wrong</h4><p>'+E(y.d)+'</p>'
+        +'<h4>The better move: '+E(bestSan)+'</h4><p>'+E(bestSan)+' '+bk+'. Before your move you were about '+pawns(r.before)+' pawns better; after '+E(ps)+' you were about '+pawns(r.after)+'.</p>'
+        +'<h4>How you could have found it</h4><p>'+E(THINKK[y.k])+'</p>'
+        +'<p class="lc52-next"><b>In your next game:</b> '+E(NEXTK[y.k])+'</p>';
+      box.hidden=false;
+    };
     let board=null,tries=0,finished=false;
-    const fin=msg=>{if(finished)return;finished=true;try{board.setInteractive(null)}catch(e){}fb(msg);act.innerHTML='<button type="button" class="btn btn-primary lc42-full" data-lc42-full>Analyze the whole game</button>'};
-    const reveal=()=>{try{board.setArrows([{from:best.slice(0,2),to:best.slice(2,4),kind:"best"}])}catch(e){}fin("The move was <b>"+E(bestSan)+"</b>. Ask yourself the MSPC questions before every move and you save this game.")};
+    const fin=msg=>{
+      if(finished)return;finished=true;try{board.setInteractive(null)}catch(e){}
+      fb(msg);showWhy();
+      const sh=Q("[data-lc42-show]",el);if(sh){sh.disabled=true;sh.textContent="Better move shown"}
+    };
+    const arrowBest=()=>{try{board.setArrows([{from:best.slice(0,2),to:best.slice(2,4),kind:"best"}])}catch(e){}};
+    const reveal=()=>{arrowBest();fin("The better move was <b>"+E(bestSan)+"</b>. The explanation below shows why.")};
     cur={reveal:reveal};
-    if(!best){fin("The engine preferred another move here. Let us look at the whole game.");return}
+    if(!best){fin("The engine preferred another move here. The explanation below shows what happened.");return}
     try{
       board=Board(Q("[data-lc42-board]",el),{fen:fen,orientation:w?"white":"black",onMove:m=>{
         if(finished)return;
-        if((m.from+m.to).toLowerCase()===best.slice(0,4).toLowerCase()){try{board.setPosition(fen)}catch(e){}fin("<b>That is the move.</b> "+E(bestSan));return}
+        if((m.from+m.to).toLowerCase()===best.slice(0,4).toLowerCase()){try{board.setPosition(fen)}catch(e){}arrowBest();fin("<b>That is the move.</b> "+E(bestSan)+" is better than "+E(ps)+". Well found.");return}
         let ok=null;try{ok=new Chess(fen).move({from:m.from,to:m.to,promotion:m.promotion||"q"})}catch(e){}
         try{board.setPosition(fen)}catch(e){}
         if(!ok)return;
         tries++;try{board.shake&&board.shake()}catch(e){}
-        if(tries>=3)reveal();else fb("That still loses ground. Check their threat first, then try again ("+(3-tries)+" left).");
+        if(ok.san===ps){fb("That is the move you played. Try something else.");return}
+        if(tries>=3){reveal();return}
+        fb("<b>"+E(ok.san)+"</b> does not keep your advantage"+(r.oppLast?". Look at <b>"+E(r.oppLast)+"</b> first: what does it attack?":".")+" Try again ("+(3-tries)+" left) or press Show me the better move.");
       }});
       board.setInteractive(g.color);
+      try{board.setArrows([{from:r.played.from,to:r.played.to,kind:"bad"}])}catch(e){}      /* the move you played, in red */
     }catch(e){reveal()}
   }
   async function teaser(){
@@ -210,6 +260,10 @@ const LC42=(()=>{
     refreshOv();
     if(i>=s.scan.tot&&s.step!=="tease"&&s.step!=="first")addPoints();
   }
+  /* every scanned game keeps its evaluation graph for the Game Library */
+  function saveSeries(x,items){
+    try{if(!(items&&items.series&&items.series.length))return;const all=rd(KG,[])||[],k=all.findIndex(y=>y&&y.pgn&&y.pgn.slice(0,200)===x.pgn.slice(0,200));if(k>=0){all[k].ev=items.series;wr(KG,all)}}catch(e){}
+  }
   async function scanRest(){
     if(scanning)return;
     const s0=st();if(s0.scan&&s0.scan.fin)return;
@@ -228,7 +282,7 @@ const LC42=(()=>{
         try{
           if(!(await Engine.load()))throw new Error("engine");
           const g=S.parseGame(x.pgn);
-          if(g){g.color=x.color;items=await S.analyseGame(g,()=>{},()=>engineBusy())}
+          if(g){g.color=x.color;items=await S.analyseGame(g,()=>{},()=>engineBusy());saveSeries(x,items)}
         }catch(e){
           if(/cancelled|superseded/.test(String(e&&e.message))&&tries++<40){await sleep(2500);continue}
           if(/engine/.test(String(e&&e.message)))break;
@@ -265,7 +319,7 @@ const LC42=(()=>{
     const b=ovBody();
     try{
       openSheet({title:"Level 2",cls:"lc25-sheet lc25-level lc42-sheet",noFocus:true,
-        html:'<div class="lc25-pop"><h2>Level 2 unlocked</h2><p><b>+'+XP+' XP</b></p></div><p>Your first full Trim is done. This is where you lose the most points:</p><ul class="lc42-ov" data-lc42-ovlist>'+b.rows+'</ul><p class="small muted" data-lc42-ovstat>'+E(b.status)+'</p><p>I saved your top leaks as personal working points. Next: open your MSPC System. It also shows the working points that fit your rating.</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc42-go="system">Open my MSPC System</button><button type="button" class="btn btn-quiet" data-close>Later</button></div>'});
+        html:'<div class="lc25-pop"><h2>Level 2 unlocked</h2><p><b>+'+XP+' XP</b></p></div><p><b>Well done.</b> Your first full Trim is finished, and I imported your recent games and checked them too. This is where you lose the most points:</p><ul class="lc42-ov" data-lc42-ovlist>'+b.rows+'</ul><p class="small muted" data-lc42-ovstat>'+E(b.status)+'</p><p>I saved your top leaks as personal working points. To <b>remember your results</b> and keep giving you personal feedback, add your email:</p>'+saveBlock(true)+'<p>Next: open your MSPC System. It also shows the working points that fit your rating.</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc42-go="system">Open my MSPC System</button><button type="button" class="btn btn-quiet" data-close>Later</button></div>'});
     }catch(e){}
   }
 
@@ -333,7 +387,7 @@ const LC42=(()=>{
       const v=Q("#view");if(!v)return;
       const s=st();
       /* the Game Library opens at Level 3 */
-      const lib=Q("#lc39-lib",v);if(lib)lib.style.display=(owns()&&levelNow()<3)?"none":"";
+      const lib=Q("#lc39-lib",v);if(lib)lib.style.display="";
       const on=Q("#lc42-strip",v);
       const want=OWN.test(s.step)&&ROUTES.has(route)&&!Q(".trainer",v)?stripHTML(s,route):null;
       if(!want){if(on)on.remove();return}

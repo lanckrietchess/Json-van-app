@@ -1,6 +1,6 @@
 const LC50=(()=>{
   "use strict";
-  /* LC50 (build 9.24.1):
+  /* LC50 (build 9.25.0):
      1. batch: connecting Chess.com / Lichess no longer asks "Do you want to analyse your last 10 games?". The games are fetched silently (cached for the Trim library);
         the first-time path (LC42) does its own silent import: the first game is trimmed behind the quick win, "Analyze the whole game" opens it already loaded,
         and the other 9 games are fetched while that analysis runs.
@@ -21,7 +21,7 @@ const LC50=(()=>{
   let preP=null,preK="";
   const pkey=(site,user)=>(site==="lichess"||site==="li"?"lichess":"chesscom")+":"+String(user||"").toLowerCase();
   const xp=()=>{try{return LC26.sync.snapshot().xp||0}catch(e){return 0}};
-  const firstTime=()=>{try{const o=rd("lc42-onb",{})||{};if(o.step==="done")return false}catch(e){}return xp()<300};   /* the same line LC42 uses for "no real progress yet" */
+  const firstTime=()=>{try{const o=rd("lc42-onb",{})||{};if(o.step==="done")return false}catch(e){}return !!rd("lc52-replay",0)||(()=>{try{return !!LC49.ownerAccount()}catch(e){return false}})()||xp()<300};   /* the same line LC42 uses for "no real progress yet" */
   function preReady(site,user){
     const p=rd(PRE,null);
     return p&&p.k===pkey(site,user)&&p.r&&p.g&&p.g.pgn&&Date.now()-(+p.at||0)<PRE_TTL?p:null;

@@ -1,6 +1,6 @@
 const LC49=(()=>{
   "use strict";
-  /* LC49 (build 9.24.1): owner admin mode.
+  /* LC49 (build 9.25.0): owner admin mode.
      Sign in with the admin e-mail and the app is in admin mode by itself ("soft" admin: the same Admin machinery the authenticator sign-in uses, without
      content editing). It is display only: every real admin action is still checked by the server, and publishing content still needs the authenticator
      sign-in (button "Edit content" in the sheet).
@@ -81,14 +81,25 @@ const LC49=(()=>{
   /* the dropdown under the button */
   let menu=null;
   let menuFor="";
+  const howMode=()=>rd("lc49-how","pov")==="adm"?"adm":"pov";
   function closeMenu(){if(menu){menu.remove();menu=null}menuFor="";["#lc49-admin","#lc49-float"].forEach(id=>{const b=Q(id);if(b)b.setAttribute("aria-expanded","false")})}
   function openMenu(anchor){
     const b=anchor&&anchor.getBoundingClientRect?anchor:(Q("#lc49-float")||Q("#lc49-admin"));if(!b)return;
     if(menu){const same=menuFor===b.id;closeMenu();if(same)return}
     const cur_=modeNow(),r=b.getBoundingClientRect();menuFor=b.id;
     menu=document.createElement("div");menu.id="lc49-menu";menu.className="lc49-menu";menu.setAttribute("role","menu");menu.setAttribute("aria-label","Switch mode");
+    const sel=cur();
+    const SUBS=[["free","Free player","b2c-free","free"],["member","Free member","b2c-member","community"],["pro","Pro member","b2c-paid","vault"],["vip","VIP member","b2c-vip","mentor"],["bfree","Business partner · Free tier","b2b-free",""],["bmid","Business partner · Mid-tier","b2b-mid",""],["bhigh","Business partner · High-tier","b2b-high",""]];
+    const how=howMode();
+    const subBtn=x=>{const key=how==="adm"?(x[3]?"adm:"+x[3]:""):"pov:"+x[2],on=key&&sel===key,dis=!key;
+      return'<button type="button" class="lc49-sub'+(on?" is-on":"")+'" data-lc49-sub="'+(key||"")+'"'+(dis?' disabled title="A business partner has no admin view: use POV"':"")+' aria-pressed="'+(!!on)+'">'+x[1]+'</button>'};
     menu.innerHTML=MODES.map(m=>'<button type="button" role="menuitemradio" aria-checked="'+(m.id===cur_)+'" class="lc49-mi'+(m.id===cur_?" is-on":"")+'" data-lc49-mode="'+m.id+'">'+(()=>{try{return icon(m.icon)}catch(e){return""}})()+'<span><b>'+m.title+'</b><small>'+m.sub+'</small></span>'+(m.id===cur_?'<i class="lc49-tick" aria-hidden="true">✓</i>':"")+'</button>').join("")
-      +'<button type="button" role="menuitem" class="lc49-mi lc49-more" data-lc49-open><span><b>All views and subscriptions…</b><small>Free, Member, Pro, VIP, Business tiers, Admin or POV</small></span></button>';
+      +'<div class="lc49-h">Look at the app as one subscription</div>'
+      +'<div class="lc49-seg" role="group" aria-label="How to look"><button type="button" data-lc49-how="pov" aria-pressed="'+(how==="pov")+'">POV (exactly what they see)</button><button type="button" data-lc49-how="adm" aria-pressed="'+(how==="adm")+'">Admin view (tools stay on)</button></div>'
+      +'<div class="lc49-subs">'+SUBS.map(subBtn).join("")+'</div>'
+      +'<div class="lc49-h">Tools</div>'
+      +'<button type="button" class="lc49-mi lc49-tool" data-lc52-replay><span><b>Replay the onboarding</b><small>Start the first-run road again as a new member</small></span></button>'
+      +'<button type="button" class="lc49-mi lc49-tool" data-lc52-update><span><b>Which build is this?</b><small>Build '+(()=>{try{return CONFIG.assetVersion}catch(e){return"?"}})()+' · check for a newer one</small></span></button>';
     document.body.appendChild(menu);
     const up=r.top>window.innerHeight/2;                         /* the bottom-right widget opens upwards, the top-bar button downwards */
     if(up)menu.style.bottom=Math.max(8,Math.round(window.innerHeight-r.top+6))+"px";else menu.style.top=Math.round(r.bottom+6)+"px";
@@ -147,7 +158,8 @@ const LC49=(()=>{
       if(!active()){if(b)b.remove();document.body.classList.remove("lc49-on");return}
       document.body.classList.add("lc49-on");
       const right=Q(".topbar-right");if(!right)return;
-      if(!b){b=document.createElement("button");b.type="button";b.id="lc49-admin";b.className="lc49-admin";b.setAttribute("aria-haspopup","menu");
+      if(Q("#admin-chip")){if(b)b.remove();return}                /* the app's own Admin / Preview pill is on screen: it opens this menu, one pill only */
+      if(!b){b=document.createElement("button");b.type="button";b.id="lc49-admin";b.className="admin-chip lc49-admin";b.setAttribute("aria-haspopup","menu");
         const slot=Q("#lc30-admin-slot");if(slot&&slot.parentNode===right)slot.insertAdjacentElement("afterend",b);else right.insertBefore(b,right.firstChild)}
       const pv=!!pov();b.classList.toggle("is-pov",pv);
       b.setAttribute("aria-label","Admin: view the app as ("+label()+")");
@@ -158,13 +170,19 @@ const LC49=(()=>{
   }
   function onClick(e){
     const t=e.target&&e.target.closest?e.target:null;if(!t)return;
+    const hw=t.closest("[data-lc49-how]");
+    if(hw){e.preventDefault();e.stopPropagation();wr("lc49-how",hw.getAttribute("data-lc49-how"));const a=menuFor?Q("#"+menuFor):null;closeMenu();if(a)openMenu(a);return}
+    const sb=t.closest("[data-lc49-sub]");
+    if(sb&&sb.getAttribute("data-lc49-sub")){e.preventDefault();e.stopPropagation();choose(sb.getAttribute("data-lc49-sub"));closeMenu();paintBtn();return}
+    if(t.closest("[data-lc52-replay]")){e.preventDefault();e.stopPropagation();closeMenu();try{LC52.replay()}catch(x){console.error(x)}return}
+    if(t.closest("[data-lc52-update]")){e.preventDefault();e.stopPropagation();closeMenu();try{LC52.checkUpdate()}catch(x){console.error(x)}return}
     const mi=t.closest("[data-lc49-mode]");
     if(mi){e.preventDefault();e.stopPropagation();setMode(mi.getAttribute("data-lc49-mode"));return}
     if(t.closest("#lc49-admin")){e.preventDefault();e.stopPropagation();openMenu(t.closest("#lc49-admin"));return}
     if(t.closest("#lc49-float")){e.preventDefault();e.stopPropagation();openMenu(t.closest("#lc49-float"));return}
     if(t.closest("[data-lc49-open]")){e.preventDefault();e.stopPropagation();closeMenu();open();return}
     if(menu&&!t.closest("#lc49-menu"))closeMenu();
-    if(soft()&&t.closest("#admin-chip")){e.preventDefault();e.stopImmediatePropagation();open()}   /* the old Admin chip would open the editing menu, which needs the authenticator */
+    if(soft()&&t.closest("#admin-chip")){e.preventDefault();e.stopImmediatePropagation();openMenu(t.closest("#admin-chip"));return}   /* the old Admin chip would open the editing menu, which needs the authenticator */
   }
   /* the recording workflow: silences are removed automatically after each recording (set once; the switch in the Studio still works) */
   function studioDefaults(){
@@ -177,6 +195,9 @@ const LC49=(()=>{
     +'.lc49-admin.is-pov{background:#fbbf24;color:#1c1400;border-color:#fbbf24}'
     +'.lc49{display:grid;gap:10px}.lc49 h4{margin:.4rem 0 0}.lc49 h4 small{font-weight:600;color:var(--fog)}.lc49-views{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.lc49 .btn,.lc49-sheet .btn{min-height:44px}'
     +'.lc49-caret{font-style:normal;font-size:.9em;opacity:.85}'
+    +'.lc49-h{padding:10px 12px 4px;font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--fog)}.lc49-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 6px}.lc49-seg button{min-height:44px;border-radius:10px;border:1px solid var(--rule);background:transparent;color:var(--chalk);font-size:12.5px;font-weight:700;cursor:pointer}.lc49-seg button[aria-pressed=true]{background:rgba(56,189,248,.16);border-color:#38bdf8;color:#7dd3fc}'
+    +'.lc49-subs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px}.lc49-sub{min-height:44px;padding:6px 8px;border-radius:10px;border:1px solid var(--rule);background:transparent;color:var(--chalk);font-size:12.5px;font-weight:700;cursor:pointer;text-align:left}.lc49-sub.is-on{border-color:rgba(251,191,36,.7);background:rgba(251,191,36,.14);color:#fde68a}.lc49-sub:disabled{opacity:.4;cursor:not-allowed}.lc49-tool small{color:var(--fog)}'
+    +'.lc49-menu{max-height:min(86vh,640px);overflow:auto}'
     +'.lc49-float{position:fixed;right:12px;bottom:calc(var(--lc49-b,12px) + env(safe-area-inset-bottom,0px));z-index:55;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:0;height:28px;padding:0 12px;border-radius:999px;border:1px solid rgba(251,191,36,.6);background:#2a2208;color:#fde68a;font:inherit;font-size:12.5px;font-weight:800;line-height:1;cursor:pointer;white-space:nowrap;box-shadow:0 6px 18px rgba(2,6,23,.5)}'
     +'.lc49-float::before{content:"";position:absolute;inset:-8px}'
     +'.lc49-float.is-pov{background:#fbbf24;color:#1c1400;border-color:#fbbf24}'

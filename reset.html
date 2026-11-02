@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Loading the newest version…</title>
+<style>html,body{height:100%;margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}main{min-height:100%;display:grid;place-items:center;text-align:center;padding:24px}h1{font-size:1.2rem;margin:0 0 8px}p{margin:6px 0;color:#94a3b8}a{color:#38bdf8}</style></head>
+<body><main><div><h1 id="t">Loading the newest version…</h1><p id="s">Clearing the old copy kept by this browser. Your progress is not touched.</p><p><a id="go" href="/app.html" hidden>Open the app</a></p></div></main>
+<script>
+/* reset.html: a page that cannot be cached by the app's service worker. It removes the service workers and the caches of THIS site and opens the app again.
+   It never touches localStorage (your progress, your sign-in). Open it once: https://www.lanckrietchess.com/reset.html */
+(function(){
+  var done=false;
+  function go(){if(done)return;done=true;document.getElementById("t").textContent="Done. Opening the newest version…";location.replace("/app.html?fresh="+Date.now())}
+  function fail(){document.getElementById("s").textContent="Could not finish automatically. Close all tabs of the app and open it again.";var a=document.getElementById("go");a.hidden=false;a.href="/app.html?fresh="+Date.now()}
+  try{
+    var jobs=[];
+    if("serviceWorker" in navigator&&navigator.serviceWorker.getRegistrations){jobs.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister()}))}))}
+    if(window.caches&&caches.keys){jobs.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k)}))}))}
+    Promise.all(jobs).then(function(){setTimeout(go,300)},function(){setTimeout(go,300)});
+    setTimeout(function(){if(!done)fail()},8000);
+  }catch(e){fail()}
+})();
+</script></body></html>
