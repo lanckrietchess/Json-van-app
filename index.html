@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.27.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.28.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.27.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.27.0">
-<!-- 9.27.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.27.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.28.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.28.0">
+<!-- 9.28.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
+<link rel="manifest" href="/manifest.webmanifest?v=9.28.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -362,7 +362,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.27.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.28.0</p></footer>
 
 <script>
 "use strict";
@@ -389,7 +389,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   document.addEventListener("keydown",function(e){var t=e.target.closest&&e.target.closest("[data-tab]");if(!t||(e.key!=="ArrowRight"&&e.key!=="ArrowLeft"))return;var ids=["android","ios","windows","mac"],i=ids.indexOf(t.getAttribute("data-tab"));i=(i+(e.key==="ArrowRight"?1:ids.length-1))%ids.length;tab(ids[i]);$("t-"+ids[i]).focus()});
   Array.prototype.forEach.call(document.querySelectorAll("[data-app]"),function(a){if(ref&&/^[A-Za-z0-9-]{3,24}$/.test(ref)){var u=a.getAttribute("href");a.setAttribute("href",u+(u.indexOf("?")<0?"?":"&")+"ref="+encodeURIComponent(ref))}});
 
-  /* 2b. (9.27.0) one-click install: every "Install" button opens the browser's own install prompt (Chrome, Edge and Samsung Internet on Android,
+  /* 2b. (9.28.0) one-click install: every "Install" button opens the browser's own install prompt (Chrome, Edge and Samsung Internet on Android,
      Windows, Mac and ChromeOS). The page links the app's manifest, so the installed app opens /app.html. The buttons keep their link
      (/app.html?install=1) as the fallback: iPhone and iPad, Firefox, and the in-app browsers of Instagram, TikTok and Facebook have no install
      prompt, so there the app opens and shows its own install guide. A click with a modifier key (new tab) is never intercepted. */

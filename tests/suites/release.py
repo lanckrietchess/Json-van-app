@@ -1,4 +1,4 @@
-# release (9.27.0): the cache fix, the landing page install, the live address, the owner switch and the Studio additions.
+# release (9.28.0): the cache fix, the landing page install, the live address, the owner switch and the Studio additions.
 # Runs against app.html (the app) and index.html (the landing page), the way they are deployed.
 import re as _re
 APP = 'http://127.0.0.1:8765/app.html'
@@ -10,7 +10,7 @@ _reset = open(REPO + '/reset.html', encoding='utf-8').read()
 # static checks: one version, the live address, no v17
 out('versions [CONFIG.version, assetVersion, sw, version.json]', [_re.search(r'const CONFIG=\{version:"([^"]+)"', _src).group(1), _re.search(r'assetVersion:"([^"]+)"', _src).group(1), _re.search(r'serviceWorker:"(sw\.js\?v=[^"]+)"', _src).group(1), open(REPO + '/version.json').read().strip()])
 out('old address left in app/landing/stripe defaults', [_src.count('https://lanckrietchess-app.vercel.app'), _land.count('lanckrietchess-app.vercel.app'), open(REPO + '/functions/stripe/stripe.js').read().count("DEFAULT_ORIGIN = 'https://lanckrietchesstrainerhub.vercel.app'")])
-out('landing [launch links, manifest link, install buttons]', [_land.count('Launch the app'), bool(_re.search(r'<link rel="manifest" href="/manifest\.webmanifest\?v=9\.27\.0">', _land)), _land.count('data-install href="/app.html?install=1"')])
+out('landing [launch links, manifest link, install buttons]', [_land.count('Launch the app'), bool(_re.search(r'<link rel="manifest" href="/manifest\.webmanifest\?v=9\.28\.0">', _land)), _land.count('data-install href="/app.html?install=1"')])
 out('manifest [id, start_url, scope]', [_re.search(r'"id": "([^"]+)"', _man).group(1), _re.search(r'"start_url": "([^"]+)"', _man).group(1), _re.search(r'"scope": "([^"]+)"', _man).group(1)])
 out('reset target', _re.search(r'var TARGET = "([^"]+)"', _reset).group(1))
 import json as _json, subprocess as _sp
@@ -42,7 +42,7 @@ with sync_playwright() as p:
     c = mkctx(br, 1280, 900); pg = c.new_page(); watch(pg, 'app')
     pg.goto('http://127.0.0.1:8765/version.json'); pg.evaluate("caches.open('lc-shell-9.25.0').then(c => c.put('app.html', new Response('OLD BUILD')))")   # what a 9.25.0 install has on the phone
     pg.goto(APP + '#home'); pg.wait_for_timeout(1500)
-    out('app [CONFIG.version, footer shows, SiteURL production]', pg.evaluate("[CONFIG.version, (document.body.innerText.match(/v9\\.27\\.0|v17\\.0\\.0/) || [''])[0], SiteURL.production()]"))
+    out('app [CONFIG.version, footer shows, SiteURL production]', pg.evaluate("[CONFIG.version, (document.body.innerText.match(new RegExp('v' + CONFIG.version.replace(/\\./g, '\\\\.') + '|v17\\\\.0\\\\.0')) || [''])[0], SiteURL.production()]"))
     out('preview check [live, old live, per-commit link, localhost]', pg.evaluate("['lanckrietchesstrainerhub.vercel.app','lanckrietchess-app.vercel.app','json-van-app-git-x-lanckrietchess.vercel.app','127.0.0.1'].map(h => LC52._t.isPreviewHost(h))"))
     pg.wait_for_function("navigator.serviceWorker.controller !== null || navigator.serviceWorker.getRegistration().then(r => r && r.active)", timeout=20000)
     pg.wait_for_timeout(1500)
@@ -92,7 +92,7 @@ with sync_playwright() as p:
     out('auto subtitles [first two lines, max 8 words, inside the clip]', [[l['t'] for l in res['lines']][:2], max(len(l['t'].split()) for l in res['lines']), all(0 <= l['s'] < l['e'] <= 4.5 for l in res['lines'])])
     c.close(); br.close()
 
-# 5. (9.27.0) value first: connect -> review -> email -> MSPC -> Library; Library buttons; review badges; LC80 without the leak question; owner tiers
+# 5. (9.28.0) value first: connect -> review -> email -> MSPC -> Library; Library buttons; review badges; LC80 without the leak question; owner tiers
 import json as _json2
 _FX = _json2.load(open(FIX + '/chesscom.json', encoding='utf-8'))
 def _cc(route):
@@ -185,6 +185,34 @@ with sync_playwright() as p:
     pg2.click('#lc49-float'); pg2.wait_for_selector('#lc49-menu .lc53-tiers', timeout=5000); pg2.click('#lc49-menu [data-lc53-tier="pro"]'); pg2.wait_for_timeout(800)
     out('owner switcher in a POV view [reachable, not covered]', pg2.evaluate("(() => { const f = document.getElementById('lc49-float'); if (!f) return [false, false]; const r = f.getBoundingClientRect(), top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return [true, !!(top && (top === f || f.contains(top)))]; })()"))
     c.close()
+    br.close()
+
+# 6. (9.28.0) Creator Studio: the record button is always on screen and records; settings fold away; scenes; subtitle placement
+_SR = "(() => { const h = [...document.querySelectorAll('*')].find(e => e.shadowRoot && e.shadowRoot.getElementById('stage')); return h ? h.shadowRoot : null; })()"
+def _st(pg, js): return pg.evaluate("(() => { const R = " + _SR + "; if (!R) return 'no studio'; " + js + " })()")
+with sync_playwright() as p:
+    br = p.chromium.launch(args=['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'])
+    for w, hh, mob, tag in [(390, 844, True, 'phone'), (1280, 800, False, 'desktop')]:
+        c = mkctx(br, w, hh, mob); c.grant_permissions(['camera', 'microphone'], origin='http://127.0.0.1:8765'); pg = c.new_page(); watch(pg, 'studio-' + tag)
+        pg.goto('http://127.0.0.1:8765/version.json'); pg.evaluate("localStorage.setItem('lc26-auth', JSON.stringify({ access_token: 'x', refresh_token: '', exp: Date.now() + 36e5, email: 'lanckrietchess@gmail.com' }))")
+        pg.goto(APP + '#studio'); pg.wait_for_function("!!(" + _SR + ")", timeout=30000); pg.wait_for_timeout(2500)
+        pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())")
+        _st(pg, "const b = [...R.querySelectorAll('*')].find(x => x.textContent.trim().startsWith('Short / Reel') && x.closest('button,[role=button]')); if (b) b.closest('button,[role=button]').click(); return 1"); pg.wait_for_timeout(1200)
+        pg.evaluate("window.scrollTo(0, document.body.scrollHeight)"); pg.wait_for_timeout(400)   # the page scrolled: the Studio header is out of sight, the button is not
+        pg.evaluate("document.querySelectorAll('.toast').forEach(t => t.remove())")
+        out('studio ' + tag + ' record button [label, height, inside the screen, nothing on top]', _st(pg, "const b = R.getElementById('lc54-rec'); if (!b) return 'none'; const r = b.getBoundingClientRect(); const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return [b.textContent, Math.round(r.height), r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, !!top && top.shadowRoot === R]"))
+        out('studio ' + tag + ' settings [folded by default, opens, folds again]', [_st(pg, "return R.getElementById('stage').parentNode.parentNode.classList.contains('lc54-min')"),
+            (_st(pg, "R.getElementById('lc54-set').click(); return 1") and _st(pg, "const c = R.getElementById('stage').parentNode.parentNode; return !c.classList.contains('lc54-min') && R.querySelector('.stage-tools').getClientRects().length > 0 && R.getElementById('lc54-subs').getClientRects().length > 0")),
+            (_st(pg, "R.getElementById('lc54-set').click(); return 1") and _st(pg, "return R.querySelector('.stage-tools').getClientRects().length === 0"))])
+        if tag == 'phone':
+            _st(pg, "R.getElementById('lc54-rec').click(); return 1"); pg.wait_for_timeout(6000)
+            rec = _st(pg, "return [R.getElementById('lc54-rec').textContent, R.getElementById('lc54-time').textContent !== '00:00', R.getElementById('lc54-pause').hidden]")
+            _st(pg, "R.getElementById('lc54-rec').click(); return 1"); pg.wait_for_timeout(4000)
+            out('studio recording [while recording: Stop, timer runs, pause shown], [after: Record, Export shown, takes]', [rec, _st(pg, "return [R.getElementById('lc54-rec').textContent, !R.getElementById('lc54-export').hidden]")])
+            out('studio scenes [saved, board off, loaded back]', pg.evaluate("(() => { const S = window.LanckrietStudio.lc54; S.save('Board and camera'); const before = S.scenes().map(s => s.name); const R = " + _SR + "; const cb = R.getElementById('lt-board'); cb.click(); const off = !cb.checked; S.load('Board and camera'); return [before, off, R.getElementById('lt-board').checked]; })()"))
+            out('studio subtitles [position, size saved for Render edit]', _st(pg, "const r = R.getElementById('lc54-capy'); r.value = '30'; r.dispatchEvent(new Event('input')); const s = R.getElementById('lc54-caps'); s.value = 'l'; s.dispatchEvent(new Event('change')); const c = window.LanckrietStudio.lc33.settings(); return [c.capY, c.capSize]"))
+            pg.screenshot(path=SHOTS + '/studio-phone.png')
+        c.close()
     br.close()
 bad = [e for e in errs if 'PAGEERROR' in e]
 print('ERRORS', len(bad)); [print(' ', e[:300]) for e in bad][:8]
