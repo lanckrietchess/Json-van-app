@@ -1,5 +1,5 @@
 import fs from 'node:fs'; import vm from 'node:vm';
-const code = fs.readFileSync('/home/claude/lc29/src/sw.js', 'utf8');
+const code = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
 const stores = {}; const handlers = {};
 const mkCache = (n) => (stores[n] ||= new Map());
 const caches = { open: async (n) => { const m = mkCache(n); return { match: async (r) => m.get(typeof r === 'string' ? r : r.url), put: async (r, res) => { m.set(typeof r === 'string' ? r : r.url, res); }, add: async () => {} }; }, keys: async () => Object.keys(stores), delete: async (k) => delete stores[k] };
@@ -20,7 +20,7 @@ r = ev('https://app.test/assets/images/coach/happy/happy_9.png'); res = await r.
 ok(mkCache('lc-assets-v1').size === 1, 'a 404 is never stored');
 r = ev('https://app.test/content.json'); ok(r.out === undefined, 'content.json is still not touched by the worker');
 r = ev('https://app.test/assets/audio/help/a.mp3', { headers: new Headers({ range: 'bytes=0-' }) }); ok(r.out === undefined, 'range requests (streaming audio) still go straight to the network');
-mkCache('lc-old-9.6.0'); mkCache('lc-coach-v1'); mkCache('lc-lib-v1'); mkCache('lc-shell-9.7.0');
+mkCache('lc-old-9.6.0'); mkCache('lc-coach-v1'); mkCache('lc-lib-v1'); mkCache('lc-shell-9.7.0'); mkCache('lc-shell-nf1-9.7.0');
 let done; await new Promise((res2) => { handlers.activate({ waitUntil: (p) => p.then(res2) }); });
 ok(!stores['lc-old-9.6.0'] && stores['lc-assets-v1'] && stores['lc-coach-v1'] && stores['lc-lib-v1'], 'a release deletes old caches but keeps lc-assets, lc-coach and lc-lib');
 console.log(`${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);

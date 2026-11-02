@@ -5,11 +5,15 @@
                    /admin      admin secret: create_account, onboard_link, refresh
                    /webhook    Stripe only, verified with STRIPE_WEBHOOK_SECRET
    Secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, ADMIN_TOKEN. Optional: APP_URL, ALLOWED_ORIGINS, MIN_DONATION_CENTS (300), MAX_DONATION_CENTS (50000),
-   STRIPE_COUNTRY (BE), STRIPE_API_BASE (tests). No Deno-only APIs: the Node tests run exactly this file. */
+   STRIPE_COUNTRY (BE), STRIPE_API_BASE (tests). No Deno-only APIs: the Node tests run exactly this file.
+   Entry point: index.ts (Deno.serve). Deploy all three files together: index.ts, stripe.js, db.js. */
 import { makeDB } from './db.js';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-const DEFAULT_ORIGIN = 'https://lanckrietchess-app.vercel.app';
+/* 9.26.0: ONE production address (the default for APP_URL and SUPPORT_URL), and the owner's own sites are always allowed to call this function,
+   whatever ALLOWED_ORIGINS says, so a stale secret can never block payments on the live site. */
+const DEFAULT_ORIGIN = 'https://lanckrietchesstrainerhub.vercel.app';
+const OWN_ORIGINS = ['https://lanckrietchesstrainerhub.vercel.app', 'https://www.lanckrietchess.com', 'https://lanckrietchess.com', 'https://lanckrietchess-app.vercel.app'];
 const now = () => Date.now();
 const num = (v, d) => (Number.isFinite(+v) && +v > 0 ? Math.floor(+v) : d);
 const clean = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n);
@@ -40,9 +44,9 @@ export function verifySignature(raw, header, secret, nowMs, tolSec) {
 const eqSecret = (a, b) => { const x = Buffer.from(String(a || '')), y = Buffer.from(String(b || '')); return y.length >= 16 && x.length === y.length && timingSafeEqual(x, y); };
 
 export function makeStripeHandler(sql, env, fetchImpl) {
-  const E = Object.assign({ APP_URL: DEFAULT_ORIGIN + '/app.html', SUPPORT_URL: DEFAULT_ORIGIN + '/', ALLOWED_ORIGINS: DEFAULT_ORIGIN, STRIPE_COUNTRY: 'BE', STRIPE_API_BASE: 'https://api.stripe.com' }, env);
+  const E = Object.assign({ APP_URL: DEFAULT_ORIGIN + '/app.html', SUPPORT_URL: DEFAULT_ORIGIN + '/', ALLOWED_ORIGINS: OWN_ORIGINS.join(','), STRIPE_COUNTRY: 'BE', STRIPE_API_BASE: 'https://api.stripe.com' }, env);
   const DB = makeDB(sql), doFetch = fetchImpl || fetch, hits = new Map();
-  const origins = String(E.ALLOWED_ORIGINS).split(',').map((s) => s.trim()).filter(Boolean);
+  const origins = String(E.ALLOWED_ORIGINS).split(',').map((s) => s.trim()).filter(Boolean).concat(OWN_ORIGINS);
   const cors = (req) => { const o = req.headers.get('origin'); return o && origins.indexOf(o) >= 0 ? { 'access-control-allow-origin': o, 'access-control-allow-headers': 'content-type', 'access-control-allow-methods': 'POST, OPTIONS', vary: 'origin' } : { vary: 'origin' }; };
   const json = (o, status, h) => new Response(JSON.stringify(o), { status: status || 200, headers: Object.assign({ 'content-type': 'application/json' }, h || {}) });
   const limited = (ip) => { const t = now(), a = (hits.get(ip) || []).filter((x) => t - x < 6e4); a.push(t); hits.set(ip, a); if (hits.size > 5000) hits.clear(); return a.length > 10; };
@@ -87,8 +91,9 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       holdMs: Math.max(31, num(E.HOLD_MINUTES, 35)) * 6e4, graceMs: num(E.LICENSE_GRACE_DAYS, 2) * 864e5, dailyTokens: num(E.PRO_DAILY_TOKENS, 10)
     };
   };
-  /* LC36: VIP (Tier 3) = the same product and the same Founding / Early Adopter tranches per 100 buyers as Pro, counted separately, at a higher price.
-     The defaults are 2x the Pro prices (VIP_YEARLY_BASE_CENTS, VIP_TRANCHE1_CENTS, VIP_TRANCHE2_CENTS, VIP_MONTHLY_CENTS override them). */
+  /* LC39 text: VIP (Tier 3) = everything in Pro (the whole library) plus tokens credited upfront (500 a month, 7,000 a year), the Lanckriet Chess Student title
+     with a blue profile border, and priority in streams and the community. Same Founding / Early Adopter tranches per 100 buyers as Pro, counted separately.
+     Defaults: 599 a year, 59 a month (VIP_YEARLY_BASE_CENTS, VIP_TRANCHE1_CENTS, VIP_TRANCHE2_CENTS, VIP_MONTHLY_CENTS override them). */
   const PV = () => { const p = P34(), base = num(E.VIP_YEARLY_BASE_CENTS, 59900); return Object.assign({}, p, { base, monthly: num(E.VIP_MONTHLY_CENTS, 5900), prices: ladder(base, 'VIP_TRANCHE') }); };
   const PT = (tier) => (tier === 3 ? PV() : P34());
   /* token packs: fixed here, never taken from the browser */
@@ -139,7 +144,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       success_url: returnUrls(body.ret).ok, cancel_url: returnUrls(body.ret).no, expires_at: Math.floor((t0 + p.holdMs) / 1000),
       automatic_tax: tax ? { enabled: true } : undefined, subscription_data: { metadata: meta },
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: amount, tax_behavior: tax ? 'inclusive' : undefined, recurring: { interval: plan === 'yearly' ? 'year' : 'month' },
-        product_data: { name: 'Lanckriet Chess ' + (tier === 3 ? 'VIP' : 'Pro') + ', ' + (plan === 'yearly' ? 'yearly' : 'monthly') + (tranche ? ' (' + names[tranche] + ')' : ''), description: tranche && tranche < 4 ? 'Your ' + names[tranche] + ' stays the same for as long as your subscription stays active.' : undefined } } }] };
+        product_data: { name: 'Lanckriet Chess ' + (tier === 3 ? 'VIP' : 'Pro') + ', ' + (plan === 'yearly' ? 'yearly' : 'monthly') + (tranche ? ' (' + names[tranche] + ')' : ''), description: (tier === 3 ? 'Everything in Pro, plus your tokens credited upfront (500 a month, or 7,000 on the yearly plan), the Lanckriet Chess Student title, a blue profile border and priority in live streams and the community.' : 'The whole library, the 24/7 AI coach and 10 tokens a day, refreshed daily.') + (tranche && tranche < 4 ? ' Your ' + names[tranche] + ' stays the same for as long as your subscription stays active.' : '') } } }] };
     let sess;
     try { sess = await stripe('POST', 'checkout/sessions', form); }
     catch (e) { await DB.prepare('DELETE FROM arena.lc34_pro_sales WHERE session_id = ?').bind(tmp).run(); throw e; }
@@ -194,6 +199,17 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (!pack || !EMAIL34.test(email)) { console.error('LC36: token pack without a valid pack or email ' + o.id); return; }
     await DB.prepare('INSERT INTO public.lc36_token_credits (email, tokens, pack, amount_cents, session_id) VALUES (?, ?, ?, ?, ?) ON CONFLICT (session_id) DO NOTHING').bind(email, pack.tokens, m.pack, pack.cents, o.id).run();   /* the pack size comes from the table above, not from the metadata */
   }
+  /* LC39 vipCredit: VIP gets its tokens upfront: TOKENS_VIP_MONTH (500) for every paid month, VIP_YEAR_TOKENS (7,000) for every paid year. They wait in
+     lc36_token_credits under the buyer's email and move to the wallet at sign-in, like the token packs. The key is the checkout / invoice id: one row per payment. */
+  async function vipCredit(sale, email, ref) {
+    try {
+      if (!sale || Number(sale.tier) !== 3 || !ref) return;
+      const em = String(email || sale.email || '').toLowerCase(), yearly = sale.plan === 'yearly';
+      if (!EMAIL34.test(em)) { console.error('LC39: VIP credit without a valid email ' + ref); return; }
+      await DB.prepare('INSERT INTO public.lc36_token_credits (email, tokens, pack, amount_cents, session_id) VALUES (?, ?, ?, ?, ?) ON CONFLICT (session_id) DO NOTHING')
+        .bind(em, yearly ? num(E.VIP_YEAR_TOKENS, 7000) : num(E.TOKENS_VIP_MONTH, 500), yearly ? 'vip_year' : 'vip_month', 0, ref).run();
+    } catch (e) { console.error('LC39: VIP credit failed for ' + ref + ': ' + (e && e.message)); }
+  }
   const saleView = (r) => ({ plan: r.plan, vip: r.tier === 3, tranche: r.tranche, founding: r.tranche === 1, early: r.tranche === 1 || r.tranche === 2, locked_cents: r.amount_cents });
   async function claim(body, ip) {
     if (readLimited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
@@ -223,6 +239,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       if (e && (e.code === '23505' || /duplicate key/i.test(String(e.message)))) await DB.prepare("UPDATE arena.lc34_pro_sales SET status = 'paid', slot = NULL, paid_at = ?, email = ?, subscription_id = ?, customer_id = ? WHERE session_id = ?").bind(now(), email, o.subscription || null, o.customer || null, o.id).run();
       else throw e;
     }
+    await vipCredit(sale, email, o.id);
     if (sale.license_key) return;
     const until = licenseUntil(sale), flags = { source: 'stripe', plan: sale.plan, vip: sale.tier === 3, tranche: sale.tranche || 0, founding: sale.tranche === 1, early: sale.tranche === 1 || sale.tranche === 2, locked_cents: sale.amount_cents, session: o.id };
     const lic = await DB.prepare('SELECT license_key FROM public._lc_create_license(?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)')
@@ -240,6 +257,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       const subId = o.subscription || (o.parent && o.parent.subscription_details && o.parent.subscription_details.subscription) || '';
       const sale = subId && await DB.prepare("SELECT * FROM arena.lc34_pro_sales WHERE subscription_id = ? AND status = 'paid'").bind(subId).first();
       if (!sale) return false;
+      if (o.billing_reason === 'subscription_cycle') await vipCredit(sale, sale.email, o.id);   /* the first invoice is credited by the checkout event */
       const end = o.lines && o.lines.data && o.lines.data[0] && o.lines.data[0].period && o.lines.data[0].period.end;
       if (sale.license_key && end) {
         const until = licenseUntil(sale, end * 1000);
@@ -252,6 +270,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       const sale = await DB.prepare("SELECT * FROM arena.lc34_pro_sales WHERE customer_id = ? AND status = 'paid' ORDER BY paid_at DESC LIMIT 1").bind(o.customer).first();
       if (!sale) return false;
       await DB.prepare("UPDATE arena.lc34_pro_sales SET status = 'refunded' WHERE session_id = ?").bind(sale.session_id).run();
+      try { await DB.prepare('DELETE FROM public.lc36_token_credits WHERE session_id = ? AND claimed_at IS NULL').bind(sale.session_id).run(); } catch (e) { console.error('LC39: could not remove the unclaimed VIP credit: ' + (e && e.message)); }
       if (sale.license_key) {
         try { await DB.prepare("UPDATE public.licenses SET revoked = true, status = 'revoked' WHERE upper(license_key) = upper(?)").bind(sale.license_key).run(); }
         catch (e) { await DB.prepare('UPDATE public.licenses SET revoked = true WHERE upper(license_key) = upper(?)').bind(sale.license_key).run(); }

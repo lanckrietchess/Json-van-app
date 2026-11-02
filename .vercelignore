@@ -1,5 +1,34 @@
-# Keep the server code, the tests and the notes off the public site.
+# Keep the server code, the tests, the build scripts and the notes off the public site.
+# The site itself is: index.html (landing), app.html (the app), reset.html, privacy.html, delete-account.html, sw.js,
+# manifest.webmanifest, version.json, content.json, json, mspc-notes.json, puzzle-alts.json, short-texts.json, icons/, assets/, engine/.
 server/
+server-lc34/
+server-lc35/
+functions/
+arena/
+sql/
 tests/
-CLAUDE.md
-HANDOFF.md
+browser/
+build/
+tools/
+scripts/
+lc31-tests/
+lc32-tests/
+lc34-tests/
+lc35-tests/
+# loose build sources and patch scripts (the app has every module inline in app.html)
+/arena.js
+/core.js
+/handler.js
+/hub-worker.js
+/ui.js
+/links.js
+/worker_v6.js
+/lc[0-9]*.js
+/lc[0-9]*.css
+/v6.css
+/*.py
+/*.sql
+/*.mjs
+/*.md
+vercel.json.example

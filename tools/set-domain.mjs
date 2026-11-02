@@ -6,7 +6,7 @@
      functions/stripe/stripe.js (DEFAULT_ORIGIN: the default for APP_URL, SUPPORT_URL and ALLOWED_ORIGINS).
    It prints the two things it cannot do for you: the database setting and the Supabase Auth setting. Nothing is written outside the folder. */
 import fs from 'node:fs'; import path from 'node:path'; import { fileURLToPath } from 'node:url';
-const OLD = 'https://lanckrietchess-app.vercel.app';
+const OLD = 'https://lanckrietchesstrainerhub.vercel.app';   /* the live address since 9.26.0 */
 const next = String(process.argv[2] || '').replace(/\/+$/, '');
 if (!/^https:\/\/[a-z0-9.-]+$/i.test(next)) { console.error('Usage: node set-domain.mjs https://yourdomain.com [folder]   (https, no path)'); process.exit(1); }
 const root = path.resolve(process.argv[3] || path.join(path.dirname(fileURLToPath(import.meta.url)), '..'));

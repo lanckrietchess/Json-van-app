@@ -11,6 +11,13 @@ prints. Exit code 1 when anything fails. Screenshots land in tests/shots/."""
 import os, re, sys, subprocess, shutil
 TESTS = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(TESTS)
 EXPECT = {
+  'release': [r"versions \[CONFIG\.version, assetVersion, sw, version\.json\]: \['9\.26\.0', '9\.26\.0', 'sw\.js\?v=9\.26\.0', '\{\"build\":\"9\.26\.0\"\}'\]",
+              r"old address left in app/landing/stripe defaults: \[0, 0, 1\]", r"landing \[launch links, manifest link, install buttons\]: \[0, True, 5\]",
+              r"manifest \[id, start_url, scope\]: \['/app\.html', '/app\.html\?source=pwa', '/app\.html'\]", r"reset target: https://lanckrietchesstrainerhub\.vercel\.app/app\.html\?fresh=1793615024470",
+              r"studio \[silence default, auto subtitles button\]: \['\.8', True\]", r"landing install click \[prompted, still on landing, message\]: \[1, True, 'Installing",
+              r"landing phone \[overflow-x\]: 0", r"no prompt available: the button opens: /app\.html\?install=1", r"app \[CONFIG\.version, footer shows, SiteURL production\]: \['9\.26\.0', 'v9\.26\.0', 'https://lanckrietchesstrainerhub\.vercel\.app/'\]",
+              r"preview check \[live, old live, per-commit link, localhost\]: \[False, False, True, False\]", r"service worker \[script, controls the page, caches\]: \['/sw\.js\?v=9\.26\.0', True, \[[^\]]*'lc-shell-nf1-9\.26\.0'[^\]]*\]\]",
+              r"old 9\.25\.0 shell cache deleted: True", r"network-first: the page is the newest build: 9\.26\.0", r"owner \[owner account, admin on, switcher, label\]: \[True, True, True, 'Admin Mode", r"auto subtitles \[ok, on device, captions, track not mic, busy after, players left\]: \[True, True, [23], \['audio', False\], False, 0\]", r"auto subtitles \[first two lines, max 8 words, inside the clip\]: \[\['Every move starts with the opponent', 'what did their last move'\], [1-8], True\]"],
   'mspc': [r"\[multiple-choice buttons, interactive steps\]: \[0, 1\]", r"M, after tapping \w\d: Correct", r"S \(tap stage from the file\): Correct", r"P, check: Correct",
            r"after dragging 170px left \[columns, session, board px\]: \['\d+px \d+px', '\{\"trainer\":0\.\d+\}', \d+\]", r"phone \[handle hidden, inline columns, overflow-x\]: \[True, '', 0\]",
            r"clinic S, wrong phase: Not that phase", r"clinic C, Ndf6: Correct", r"clinic miscalc \[feedback, struggles, log\]: \['Tagged: .*\['calc'\], 1\]",
@@ -40,7 +47,7 @@ EXPECT = {
                 r"B sees the ELO board: .*#1 KY KyenzoTest 2105", r"admin insights: Last 30 days, from players who share anonymous stats\. 2 on the leaderboard\. 1 Players 1 Drills finished 25% First-try accuracy 1 Coach questions",
                 r"admin insights \[players on the board, question\]: \[True, True\]", r"admin insights, wrong token: The worker refused the admin secret\.", r"admin hides Bram: Bram \(hidden\), Anna", r"A board after the admin hid Bram: Anna / 1"],
 }
-ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community']
+ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community', 'release']
 NEEDS_NODE = {'unit', 'server', 'ai', 'members', 'community'}
 def node_ok():
     try: v = subprocess.run(['node', '--version'], capture_output=True, text=True).stdout.strip().lstrip('v').split('.'); return (int(v[0]), int(v[1])) >= (22, 5)

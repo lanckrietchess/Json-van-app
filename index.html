@@ -10,13 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchess-app.vercel.app/icons/icon-512.png?v=9.25.0">
-<meta property="og:url" content="https://lanckrietchess-app.vercel.app/">
-<link rel="canonical" href="https://lanckrietchess-app.vercel.app/">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.26.0">
+<meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
+<link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.25.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.25.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.26.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.26.0">
+<!-- 9.26.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
+<link rel="manifest" href="/manifest.webmanifest?v=9.26.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -155,7 +157,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <a class="brand" href="/"><img src="/icons/icon-192.png" width="34" height="34" alt="" id="brand-img"><span>Lanckriet Chess</span></a>
     <nav aria-label="Main">
       <a href="#how">How it works</a><a href="#proof">Results</a><a href="#install">Install</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
-      <a class="btn bw" data-app href="/app.html?v=9.25.0">Launch the app</a>
+      <a class="btn bw" data-app data-install href="/app.html?install=1">Install the app</a>
     </nav>
   </div>
 </header>
@@ -168,8 +170,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       <h1 id="h-hero">A <span style="color:var(--blue)">2100+ ELO coach</span> in your pocket.</h1>
       <p class="lead">Built on the <b>MSPC system</b> and the <b>Triple-T method</b> behind a climb from 355 to 2105 in 2 years and 10 months. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
       <div class="cta-row">
-        <a class="btn primary big" data-app data-install href="/app.html?install=1&v=9.25.0">Install on my device</a>
-        <a class="btn bw big" data-app href="/app.html?v=9.25.0">Launch the app</a>
+        <a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a>
       </div>
       <p class="small mute">No store, no download queue. Works on Android, iPhone, Windows and Mac. Download the app and let it scan your last 10 games.</p>
       <div class="chips" aria-label="Credentials">
@@ -203,7 +204,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       <article class="card"><span class="letter">T</span><h3>Theory</h3><p class="mute">Streamlined repertoires you can actually remember: Colle-Koltanowski, Caro-Kann and Semi-Slav, with middlegame plans and endgames.</p></article>
       <article class="card"><span class="letter">T</span><h3>Trim</h3><p class="mute">Your last games, analysed with Stockfish and sorted by the exact leak that costs you points. Then a plan, not a lecture.</p></article>
     </div>
-    <div class="cta-row"><a class="btn primary" data-app href="/app.html?v=9.25.0">Let it scan my last 10 games</a></div>
+    <div class="cta-row"><a class="btn primary" data-app data-install href="/app.html?install=1">Install it and scan my last 10 games</a></div>
   </div>
 </section>
 
@@ -251,7 +252,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <span class="eyebrow">Get the app</span>
     <h2 id="h-install">On your home screen in one minute. No store.</h2>
     <p class="lead">It is a web app that behaves like a real one: full screen, its own icon, works offline after the first visit, and updates itself.</p>
-    <div class="cta-row"><a class="btn primary big" data-app data-install href="/app.html?install=1&v=9.25.0">Open the app and install it</a></div>
+    <div class="cta-row"><a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a></div>
     <div class="tabs" role="tablist" aria-label="Choose your device">
       <button class="tab" role="tab" id="t-android" aria-controls="p-android" aria-selected="false" data-tab="android">Android</button>
       <button class="tab" role="tab" id="t-ios" aria-controls="p-ios" aria-selected="false" data-tab="ios">iPhone / iPad</button>
@@ -259,17 +260,17 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       <button class="tab" role="tab" id="t-mac" aria-controls="p-mac" aria-selected="false" data-tab="mac">Mac</button>
     </div>
     <div class="panel" role="tabpanel" id="p-android" aria-labelledby="t-android" hidden>
-      <ol class="steps"><li>Tap <b>Open the app and install it</b> above, in Chrome or another Android browser.</li><li>Tap <b>Install</b> when the sheet appears. Or open the <b>⋮ menu</b> and choose <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Launch Lanckriet Chess from your home screen.</li></ol>
+      <ol class="steps"><li>Tap <b>Install on my device</b> above, in Chrome or another Android browser.</li><li>Tap <b>Install</b> in the prompt that appears. Or open the <b>⋮ menu</b> and choose <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Launch Lanckriet Chess from your home screen.</li></ol>
     </div>
     <div class="panel" role="tabpanel" id="p-ios" aria-labelledby="t-ios" hidden>
-      <ol class="steps"><li>Open this page in <b>Safari</b> and tap <b>Open the app and install it</b>.</li><li>Tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. Launch Lanckriet Chess from your home screen.</li></ol>
+      <ol class="steps"><li>Open this page in <b>Safari</b> and tap <b>Install on my device</b>.</li><li>Tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. Launch Lanckriet Chess from your home screen.</li></ol>
       <p class="small mute">Other iPhone browsers can also add it from their Share menu on iOS 16.4 and newer.</p>
     </div>
     <div class="panel" role="tabpanel" id="p-windows" aria-labelledby="t-windows" hidden>
-      <ol class="steps"><li>Use <b>Chrome</b> or <b>Edge</b>. Tap <b>Open the app and install it</b> above.</li><li>Click <b>Install</b> in the sheet, or click the <b>install icon</b> at the right of the address bar.</li><li>Launch it from your desktop, taskbar or Start menu.</li></ol>
+      <ol class="steps"><li>Use <b>Chrome</b> or <b>Edge</b>. Tap <b>Install on my device</b> above.</li><li>Click <b>Install</b> in the prompt, or click the <b>install icon</b> at the right of the address bar.</li><li>Launch it from your desktop, taskbar or Start menu.</li></ol>
     </div>
     <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="t-mac" hidden>
-      <ol class="steps"><li><b>Chrome or Edge:</b> open the app and click <b>Install</b> (or the install icon in the address bar).</li><li><b>Safari:</b> open the app, then <b>File</b> menu, <b>Add to Dock</b>.</li><li>Launch it from your Dock or Launchpad.</li></ol>
+      <ol class="steps"><li><b>Chrome or Edge:</b> click <b>Install on my device</b> above, then <b>Install</b> (or the install icon in the address bar).</li><li><b>Safari:</b> open the app, then <b>File</b> menu, <b>Add to Dock</b>.</li><li>Launch it from your Dock or Launchpad.</li></ol>
     </div>
   </div>
 </section>
@@ -312,7 +313,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       <article class="card" aria-labelledby="h-free">
         <h3 id="h-free">Free</h3><div class="price">€0</div>
         <p class="small">Start with the MSPC drills and a first game review, 1 token a day (3 a day in your first week). See what it finds in your games, then decide.</p>
-        <div class="row"><a class="btn" data-app href="/app.html?v=9.25.0">Launch the app</a></div>
+        <div class="row"><a class="btn" data-app data-install href="/app.html?install=1">Install free</a></div>
       </article>
     </div>
     <div class="panel" id="lock-guarantee" style="margin:16px 0;border-color:rgba(251,191,36,.5)">
@@ -359,9 +360,9 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 <footer>
   <div class="wrap">
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
-    <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a> · <a data-app href="/app.html?v=9.25.0">Launch the app</a></p>
+    <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.25.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.26.0</p></footer>
 
 <script>
 "use strict";
@@ -387,6 +388,38 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   document.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest("[data-tab]");if(t)tab(t.getAttribute("data-tab"))});
   document.addEventListener("keydown",function(e){var t=e.target.closest&&e.target.closest("[data-tab]");if(!t||(e.key!=="ArrowRight"&&e.key!=="ArrowLeft"))return;var ids=["android","ios","windows","mac"],i=ids.indexOf(t.getAttribute("data-tab"));i=(i+(e.key==="ArrowRight"?1:ids.length-1))%ids.length;tab(ids[i]);$("t-"+ids[i]).focus()});
   Array.prototype.forEach.call(document.querySelectorAll("[data-app]"),function(a){if(ref&&/^[A-Za-z0-9-]{3,24}$/.test(ref)){var u=a.getAttribute("href");a.setAttribute("href",u+(u.indexOf("?")<0?"?":"&")+"ref="+encodeURIComponent(ref))}});
+
+  /* 2b. (9.26.0) one-click install: every "Install" button opens the browser's own install prompt (Chrome, Edge and Samsung Internet on Android,
+     Windows, Mac and ChromeOS). The page links the app's manifest, so the installed app opens /app.html. The buttons keep their link
+     (/app.html?install=1) as the fallback: iPhone and iPad, Firefox, and the in-app browsers of Instagram, TikTok and Facebook have no install
+     prompt, so there the app opens and shows its own install guide. A click with a modifier key (new tab) is never intercepted. */
+  var bip=null;
+  function instMsg(text){
+    var m=$("lc-inst");
+    if(!m){m=document.createElement("div");m.id="lc-inst";m.setAttribute("role","status");m.setAttribute("aria-live","polite");
+      m.style.cssText="position:fixed;left:16px;right:16px;bottom:16px;z-index:60;max-width:520px;margin:0 auto;padding:12px 16px;border-radius:12px;background:#1e293b;border:1px solid rgba(56,189,248,.5);color:#e2e8f0;font-size:.95rem;box-shadow:0 10px 30px rgba(0,0,0,.4)";
+      document.body.appendChild(m)}
+    m.textContent=text;m.hidden=false;clearTimeout(instMsg.t);instMsg.t=setTimeout(function(){m.hidden=true},9000);
+  }
+  window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();bip=e;document.documentElement.classList.add("can-install")});
+  window.addEventListener("appinstalled",function(){bip=null;document.documentElement.classList.remove("can-install");instMsg("Installed. Open Lanckriet Chess from your home screen or app list.")});
+  function promptNow(){
+    var ev=bip;bip=null;document.documentElement.classList.remove("can-install");
+    try{ev.prompt();ev.userChoice.then(function(c){
+      if(c&&c.outcome==="accepted")instMsg("Installing… Open Lanckriet Chess from your home screen or app list.");
+      else instMsg("No problem. Tap Install on my device any time.");
+    },function(){})}catch(err){}
+  }
+  function waitPrompt(ms){return new Promise(function(res){if(bip)return res(true);var t=setTimeout(function(){res(!!bip)},ms);window.addEventListener("beforeinstallprompt",function(){clearTimeout(t);setTimeout(function(){res(true)},0)},{once:true})})}
+  document.addEventListener("click",function(e){
+    var a=e.target.closest&&e.target.closest("[data-install]");
+    if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    if(bip){e.preventDefault();promptNow();return}
+    if("onbeforeinstallprompt" in window&&!a.__lcWaited){          /* Chromium: the prompt can arrive a moment after the page loads */
+      e.preventDefault();a.__lcWaited=true;
+      waitPrompt(1500).then(function(ok){if(ok&&bip)promptNow();else location.href=a.href});
+    }
+  });
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -588,7 +621,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   });
   var paid=new URLSearchParams(location.search).get("paid"),st=$("status");
   if(paid==="cancel"){st.textContent="Checkout was cancelled. Nothing was charged.";st.className="banner bad"}
-  else if(/^cs_[A-Za-z0-9_]{8,200}$/.test(paid||"")){st.innerHTML="Thank you! Your payment is received. Open the app and sign in with the same email address you used here: your membership or tokens switch on by themselves. If you bought a gift, your friend signs in with their own email address. <a href=\"/app.html\">Launch the app</a>";st.className="banner good"}
+  else if(/^cs_[A-Za-z0-9_]{8,200}$/.test(paid||"")){st.innerHTML="Thank you! Your payment is received. Open the app and sign in with the same email address you used here: your membership or tokens switch on by themselves. If you bought a gift, your friend signs in with their own email address. <a href=\"/app.html\">Open the app and sign in</a>";st.className="banner good"}
   if(paid){document.getElementById("pricing").scrollIntoView()}
 
 
