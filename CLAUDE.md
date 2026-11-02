@@ -12,6 +12,8 @@ Chess training web app by Kyenzo (lanckrietchess, certified chess coach), live a
 - Free players never cause AI calls. AI answers are for paid members only, through the Arena server.
 - No secrets in the repo. ADMIN_TOKEN, ANTHROPIC_API_KEY and PID_SALT live in Cloudflare (`wrangler secret put`); `server/admin-token.txt` is git-ignored.
 - UI copy is English, short and plain, in Kyenzo's coaching voice. Keep the existing tone. The founder text shows a 2105 peak rating.
+- Owner tools are permanent: the floating mode switcher (`LC49`, bottom right) and its "Test as Owner / Pro / Free" switch (`LC53`) are never removed or covered in a UI cleanup. The owner account is `lanckrietchess@gmail.com`; the release suite checks both.
+- Value first: no email or sign-in ask before a person's first finished game review. `LC53` asks once, after the review and the lesson, then guides to the MSPC Framework, the coach's `?` and the Game Library.
 
 ## Layout
 
