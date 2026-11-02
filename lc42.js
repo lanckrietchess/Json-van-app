@@ -61,6 +61,7 @@ const LC42=(()=>{
         else if(p.lichess_username||tryS("lichess")){site="lichess";user=String(p.lichess_username||tryS("lichess"))}
       }
       if(!site||!user)return false;
+      try{if(typeof LC50!=="undefined")LC50.pre.start(site,user)}catch(e){}
       /* the road needs the quest levels: switch them on for a member who has no real progress yet (also a returning tester) */
       try{const q=quest();if((!q||!q.on)&&xpNow()<300){wr("lc19-sw",{on:true,level:1,base:xpNow(),t0:Date.now()});try{LC19.quest._t.decorate()}catch(e){}}else if(q&&q.on&&(+q.level||1)>1&&xpNow()<300){wr("lc19-sw",Object.assign({},q,{level:1,base:xpNow()}))}}catch(e){}
       try{Store.set(KG,[])}catch(e){}
@@ -146,12 +147,16 @@ const LC42=(()=>{
   async function teaser(){
     if(typeof openSheet!=="function")return;
     const s0=st();if(s0.step!=="tease")return;
-    let alive=true;
+    let alive=true,ready=null;
+    try{ready=LC50.pre.ready(s0.site,s0.user)}catch(e){}        /* the first mistake was found while the first-run questions were going: no loading screen */
     const sh=openSheet({title:"Your first win",cls:"lc42-sheet lc42-tease",noFocus:true,
-      html:'<p data-lc42-tmsg>Reading your latest game…</p><div class="lc39-prog"><span data-lc42-prog></span></div><p class="small muted">This takes a few seconds. Your first mistake shows up as soon as I find it.</p>'+saveBlock(),
+      html:ready?'':'<p data-lc42-tmsg>Reading your latest game…</p><div class="lc39-prog"><span data-lc42-prog></span></div><p class="small muted">This takes a few seconds. Your first mistake shows up as soon as I find it.</p>'+saveBlock(),
       onClose:()=>{alive=false;if(st().step==="first")quizEnd()}});
     const el=sh&&sh.el;if(!el)return;
     const stop=t=>{el.innerHTML='<p>'+E(t)+'</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc42-abort data-close>Continue</button></div>'};
+    const finish=(g,r)=>{const gg={pgn:String(g.pgn).slice(0,60000),color:g.color==="b"?"b":"w"};put({g1:gg});if(r&&r.none)el.innerHTML='<p class="lc39-qwh">Clean game.</p><p>No big blunder in your latest game. Nice. Now let me show you the whole picture.</p><div class="btn-row"><button type="button" class="btn btn-primary lc42-full" data-lc42-full>Analyze the whole game</button></div>'+saveBlock();else card(el,g,r);startBackground(gg)};
+    if(ready){finish(ready.g,ready.r);return}
+    try{const w=await LC50.pre.wait(s0.site,s0.user);if(w&&w.g&&w.r&&alive&&el.isConnected){finish(w.g,w.r);return}}catch(e){}    /* a scan that is already running: wait for it, do not start a second one */
     let g=null;
     try{const gs=await LC39._t.games(s0.site,s0.user,1);g=gs&&gs[0]}catch(e){}
     if(!alive||!el.isConnected)return;

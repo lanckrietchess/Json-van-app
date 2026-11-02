@@ -1,12 +1,14 @@
 const LC50=(()=>{
   "use strict";
-  /* LC50 (build 9.24.0):
+  /* LC50 (build 9.24.1):
      1. batch: connecting Chess.com / Lichess no longer asks "Do you want to analyse your last 10 games?". The games are fetched silently (cached for the Trim library);
         the first-time path (LC42) does its own silent import: the first game is trimmed behind the quick win, "Analyze the whole game" opens it already loaded,
         and the other 9 games are fetched while that analysis runs.
      2. profile: what makes a guest "not new" travels with the account: onboarding done, the Chess.com / Lichess names, the first-time-path result and the achievements.
         It is stored in the member's own Supabase user record (user_metadata.lc, written with their own token), read right after sign-in on any device,
         and merged without ever overwriting what is on this device. A signed-in member on a new device is never put through the first-run questions again.
+     0. pre: the first game of a brand-new member is fetched and scanned for its first big mistake the moment the Chess.com / Lichess name is known (during the
+        first-run questions), so the teaser card appears at once with the fix, without a loading screen (see pre below).
      3. metrics: the Admin dashboard (Data Briefing) can start fresh from now, filter by date range, and leaves test and owner accounts out. */
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
   const E=s=>{try{return esc(s)}catch(e){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}};
@@ -14,11 +16,52 @@ const LC50=(()=>{
   const sess=()=>{try{return LC26.sync.session()}catch(e){return null}};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
+  /* ---------- 0. the first game, ready before the person gets there ---------- */
+  const PRE="lc50-pre",PRE_TTL=2*36e5;
+  let preP=null,preK="";
+  const pkey=(site,user)=>(site==="lichess"||site==="li"?"lichess":"chesscom")+":"+String(user||"").toLowerCase();
+  const xp=()=>{try{return LC26.sync.snapshot().xp||0}catch(e){return 0}};
+  const firstTime=()=>{try{const o=rd("lc42-onb",{})||{};if(o.step==="done")return false}catch(e){}return xp()<300};   /* the same line LC42 uses for "no real progress yet" */
+  function preReady(site,user){
+    const p=rd(PRE,null);
+    return p&&p.k===pkey(site,user)&&p.r&&p.g&&p.g.pgn&&Date.now()-(+p.at||0)<PRE_TTL?p:null;
+  }
+  function preStart(site,user){
+    try{
+      site=site==="lichess"||site==="li"?"lichess":"chesscom";user=String(user||"").trim();
+      if(!user||typeof LC42==="undefined"||typeof LC39==="undefined")return null;
+      const k=pkey(site,user);
+      if(preReady(site,user))return Promise.resolve(preReady(site,user));
+      if(preP&&preK===k)return preP;
+      if(!firstTime())return null;
+      preK=k;
+      preP=(async()=>{
+        try{
+          const gs=await LC39._t.games(site,user,1),g=gs&&gs[0];
+          if(!g||!g.pgn)return null;
+          const fm=(LC42._t&&LC42._t.firstMistake)||LC42.firstMistake;if(typeof fm!=="function")return null;
+          const r=await fm(g,()=>{},()=>true);       /* the same scan the teaser does: depth 10, first big mistake of the latest game */
+          if(!r)return null;
+          const rec={k:k,at:Date.now(),g:{pgn:String(g.pgn).slice(0,60000),color:g.color==="b"?"b":"w",res:g.res||"",opp:g.opp||"",t:+g.t||0},r:r};
+          wr(PRE,rec);return rec;
+        }catch(e){return null}
+      })();
+      preP.then(()=>{if(preK===k)preP=null},()=>{preP=null});
+      return preP;
+    }catch(e){return null}
+  }
+  /* a scan that is still running: the teaser waits for it instead of starting its own */
+  async function preWait(site,user){
+    try{if(preP&&preK===pkey(site,user)){const r=await preP;return r||null}}catch(e){}
+    return null;
+  }
+
   /* ---------- 1. silent import instead of the "analyse your last 10 games?" question ---------- */
   const BK="lc50-batch";
   async function silent(site,user){
     try{
       site=site==="lichess"||site==="li"?"lichess":"chesscom";user=String(user||"").trim();if(!user)return false;
+      try{preStart(site,user)}catch(e){}                                           /* a new member: find the first mistake NOW, while the first-run questions are still going */
       try{if(typeof LC42!=="undefined"&&LC42.owns())return false}catch(e){}       /* the first-time path imports by itself */
       const k=site+":"+user.toLowerCase(),b=rd(BK,{})||{};
       if(b[k]&&Date.now()-b[k]<6*36e5)return false;                               /* once per 6 hours per account */
@@ -245,9 +288,11 @@ const LC50=(()=>{
     try{
       css();wrapGate();wrapFetchProfile();
       if(sess())setTimeout(()=>{adoptNow()},1200);
+      /* a reload in the middle of the first-run path: the scan starts again at once */
+      setTimeout(()=>{try{const o=rd("lc42-onb",{})||{};if(o.step==="tease"&&o.user)preStart(o.site,o.user)}catch(e){}},600);
       document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")save(false)});
       window.addEventListener("lc39-signed-in",()=>{adoptP=null;adoptNow()});
     }catch(e){console.error("lc50",e)}
   }
-  return{init:init,afterRender:afterRender,batch:{silent:silent},profile:{collect:collect,apply:apply,save:save,adopt:adoptNow,fetchMeta:fetchMeta},metrics:{mount:mountMetrics},_t:{stripTools:stripTools,mergeBag:mergeBag,sig:sig}};
+  return{init:init,afterRender:afterRender,pre:{start:preStart,ready:preReady,wait:preWait,firstTime:firstTime},batch:{silent:silent},profile:{collect:collect,apply:apply,save:save,adopt:adoptNow,fetchMeta:fetchMeta},metrics:{mount:mountMetrics},_t:{stripTools:stripTools,mergeBag:mergeBag,sig:sig}};
 })();
