@@ -13,6 +13,8 @@
    libs      version-pinned third-party files (cdnjs, jsDelivr @x.y.z, /engine/*): cache-first in a separate cache that survives
              releases, so a release never re-downloads jQuery, chess.js or the 7 MB Stockfish engine
    coach     lc-coach-*: the page's saved voice clips; the cleanup above leaves them alone
+   push      server-sent Web Push: shows the coach's message (title, body, same-site link) and opens the app on tap. Needs a server that sends pushes
+             (VAPID keys + a table of subscriptions); until then this code simply never runs.
    never     content.json, /json, GitHub, Supabase, the Arena server, Lichess, fonts: not touched by this worker */
 'use strict';
 const V = new URL(self.location.href).searchParams.get('v') || 'dev';
@@ -97,4 +99,35 @@ self.addEventListener('fetch', (event) => {
     return;                                                                   // content.json, /json, sw.js, anything else: network
   }
   if (pinnedLib(url)) event.respondWith(cacheFirst(request, LIB_CACHE));
+});
+
+/* ---- Web Push (coach messages, e.g. after a game). The server sends JSON {title, body, url, tag}. Only same-site links are followed. ---- */
+const safeUrl = (u) => {
+  try { const x = new URL(String(u || ''), self.registration.scope); if (x.origin === self.location.origin && x.pathname === SCOPE + 'app.html') return x.pathname + x.search + x.hash; } catch (e) {}
+  return SCOPE + 'app.html';
+};
+
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { body: event.data ? event.data.text() : '' }; }
+  const icon = new URL('icons/icon-192.png', self.registration.scope).href;
+  event.waitUntil(self.registration.showNotification(String(d.title || 'Coach Lanckriet').slice(0, 80), {
+    body: String(d.body || '').slice(0, 200), icon: icon, badge: icon, tag: String(d.tag || 'lc-coach').slice(0, 40), data: { url: safeUrl(d.url) }
+  }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || safeUrl('');
+  event.waitUntil((async () => {
+    const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of all) {
+      if (new URL(c.url).origin === self.location.origin && 'focus' in c) {
+        await c.focus();
+        if ('navigate' in c) { try { await c.navigate(url); } catch (e) {} }
+        return;
+      }
+    }
+    await self.clients.openWindow(url);
+  })());
 });
