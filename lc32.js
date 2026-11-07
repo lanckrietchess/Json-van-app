@@ -106,7 +106,7 @@ const LC32=(()=>{
       ["viral","I peaked at 2105 on Chess.com. This is the mistake I still see in almost every 800 game."],
       ["viral","You don't lose games because you're bad at tactics. You lose them in this one moment."],
       ["viral","Pause. What is your opponent threatening here?"],
-      ["viral","This free habit gained a student +630 ELO in 2 months."],
+      ["viral","This free habit gained a student +630 ELO in 6 weeks."],
       ["viral","3 things strong players check before every move (you skip step 1)."],
       ["viral","Nobody told me this opening trap until I was 1500."],
       ["formula","Stop doing [mistake] if you want to reach [rating]."],

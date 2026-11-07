@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.28.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.32.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.28.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.28.0">
-<!-- 9.28.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.28.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.32.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.32.0">
+<!-- 9.32.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
+<link rel="manifest" href="/manifest.webmanifest?v=9.32.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -139,19 +139,11 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 .pr-ver{font-size:.78rem;font-weight:700;color:var(--good)}.pr-name{margin:0}.pr-elo{margin:0;font-size:1.5rem;font-weight:900;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.pr-elo i{font-style:normal;opacity:.6;font-size:1rem}.pr-elo em{font-style:normal;color:var(--good);font-size:1rem}
 .pr-open{font-weight:700;color:#38bdf8;font-size:.9rem}.pr-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:.6rem 0}.pr-tiles div{background:#0b1222;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}.pr-tiles b{display:block;font-size:1.15rem}.pr-tiles small{opacity:.75}
 @media (max-width:480px){.pr-tiles{grid-template-columns:repeat(2,1fr)}}
-</style>
+.love{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:16px}.love-card{margin:0;padding:18px;position:relative}.love-card blockquote{margin:0 0 12px;font-size:1.02rem;line-height:1.55}.love-card figcaption{font-size:.88rem;color:var(--mute,#94a3b8)}.love-card .pk{color:#fbbf24;font-weight:800}.pgain{display:inline-block;margin:0 0 8px;padding:3px 10px;border-radius:999px;border:1px solid rgba(251,191,36,.5);color:#fbbf24;font-weight:800;font-size:.85rem}.pq-quote{margin:8px 0 0;font-size:.95rem;line-height:1.5}.fm-hero{position:relative;margin-top:16px;border-radius:14px}</style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
-<aside id="fm-hero" class="fm-hero hide" role="status" aria-live="polite">
-  <div class="fm-in">
-    <div class="fm-l"><span class="fm-tag" id="fm-tag">Founding Member rate</span><span class="fm-pct" id="fm-pct">50% off</span></div>
-    <div class="fm-m"><s class="fm-old" id="fm-old">€399 / year</s><span class="fm-new" id="fm-new">€199.50</span><span class="fm-per">/ year</span></div>
-    <div class="fm-r"><p class="fm-spots hide" id="fm-leftwrap"><b id="fm-left"></b> <span id="fm-left-t"></span></p><div class="bar fm-barw hide" id="fm-barwrap" aria-hidden="true"><i id="fm-bar" style="width:0"></i></div><a class="btn gold" href="#pricing">See the Pro plan</a></div>
-  </div>
-  <p class="fm-copy"><b>This launch rate is for the Pro plan only</b> (billed yearly). <span id="fm-sub"></span> <b>The Free plan is always available</b>: start with level 1 of everything, no card needed. Nobody has to upgrade to use the app.</p>
-  <p class="fm-dbg hide" id="fm-debug"></p>
-</aside>
+
 <header class="top">
   <div class="wrap">
     <a class="brand" href="/"><img src="/icons/icon-192.png" width="34" height="34" alt="" id="brand-img"><span>Lanckriet Chess</span></a>
@@ -168,7 +160,8 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <div>
       <div id="promo" class="promo hide" role="status" aria-live="polite"></div><br><span class="eyebrow">Stop guessing why you lose</span>
       <h1 id="h-hero">A <span style="color:var(--blue)">2100+ ELO coach</span> in your pocket.</h1>
-      <p class="lead">Built on the <b>MSPC system</b> and the <b>Triple-T method</b> behind a climb from 355 to 2105 in 2 years and 10 months. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
+      <p class="lead">Get the exact systems that took me from <b>355 to 2105 ELO</b>, built directly into a training hub that already gained my student <b>+630 ELO in just 6 weeks</b>. Guided step by step by your own personal coach.</p>
+      <p class="mute">Built on the <b>MSPC system</b> and the <b>Triple-T method</b>. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
       <div class="cta-row">
         <a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a>
       </div>
@@ -176,7 +169,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       <div class="chips" aria-label="Credentials">
         <span class="chip"><b>355 → 2105</b> Rapid on Chess.com in 2 years and 10 months</span>
         <span class="chip">Top <b>0.1%</b> worldwide (99.9th percentile)</span>
-        <span class="chip"><b>+630</b> ELO in 2 months, proof-of-concept student</span>
+        <span class="chip"><b>+630</b> ELO in 6 weeks, proof-of-concept student</span>
       </div>
     </div>
     <div id="hero-side"><div class="walk hide" id="walk-hero"></div>
@@ -193,40 +186,54 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 
 <section class="alt hide" id="walkthrough" aria-labelledby="h-walk"><div class="wrap"><span class="eyebrow">See it in action</span><h2 id="h-walk">Watch the walkthrough</h2><p class="lead">Three minutes: how the Hub finds the mistakes that cost you rating.</p><div class="walk" id="walk-sec" style="max-width:820px;margin-top:18px"></div></div></section>
 
-<section id="how" aria-labelledby="h-how">
+<section id="love" class="hide" aria-labelledby="h-love">
   <div class="wrap">
-    <span class="eyebrow">The method</span>
-    <h2 id="h-how">Two systems. One goal: fewer blunders, more rating.</h2>
-    <p class="lead">Most players study openings and keep losing the same way. The Hub trains the habit that decides games, then shows you the proof in your own games.</p>
-    <div class="cards">
-      <article class="card"><span class="letter">M</span><h3>MSPC thinking</h3><p class="mute">Move, Specifics, Priorities, Calculation. A fixed routine for every decision, drilled until it is automatic.</p></article>
-      <article class="card"><span class="letter">T</span><h3>Think</h3><p class="mute">The first T of Triple-T: the MSPC habit that removes mental chaos and cuts blunders.</p></article>
-      <article class="card"><span class="letter">T</span><h3>Theory</h3><p class="mute">Streamlined repertoires you can actually remember: Colle-Koltanowski, Caro-Kann and Semi-Slav, with middlegame plans and endgames.</p></article>
-      <article class="card"><span class="letter">T</span><h3>Trim</h3><p class="mute">Your last games, analysed with Stockfish and sorted by the exact leak that costs you points. Then a plan, not a lecture.</p></article>
-    </div>
-    <div class="cta-row"><a class="btn primary" data-app data-install href="/app.html?install=1">Install it and scan my last 10 games</a></div>
+    <span class="eyebrow">Wall of Love</span>
+    <h2 id="h-love">What members say</h2>
+    <p class="mute small">Real messages from members. Each one is shown because the member allowed it, and Kyenzo has read and approved it first.</p>
+    <div class="love" id="love-list" aria-live="polite"></div>
   </div>
 </section>
 
 <section id="proof" aria-labelledby="h-proof">
   <div class="wrap">
-    <span class="eyebrow">Proven results</span>
-    <h2 id="h-proof">Proven results: real ratings, checked.</h2>
-    <p class="lead">Every member card below shows a real Chess.com or Lichess rating, from the first rating to today. A card only appears because the member allowed it, and Kyenzo checks it first. Tap a card to open the rating chart and the training behind it.</p>
+    <span class="eyebrow">The Proof Queue</span>
+    <h2 id="h-proof">Live results: what members gained, checked.</h2>
+    <p class="lead">Ranked by proof: members with a verified result <b>and</b> a message come first, then verified results, then messages. The number shown is the <b>Peak Gain</b>: the highest rise since the member joined, read from their public Chess.com or Lichess rating by our server. A card only appears because the member allowed it, and Kyenzo checks it first. Tap a card to open the rating chart.</p>
     <div class="proof" id="proof-list" aria-live="polite">
       <article class="pcard"><span class="tag pro">Founder</span><p class="gain">355 → 2105 <small>Rapid rating</small></p><p class="mute small">Kyenzo started at 355 on 27 Nov 2023 and reached 2105 on Chess.com in 2 years and 10 months. 3,616 rapid games, 99.9th percentile.</p></article>
-      <article class="pcard"><span class="tag pro">Proof of concept</span><p class="gain">+630 <small>ELO in 2 months</small></p><p class="mute small">The first student to run the full MSPC system. More verified graphs appear here as members allow it.</p></article>
+      <article class="pcard"><span class="tag pro">Proof of concept</span><p class="gain">+630 <small>ELO in 6 weeks</small></p><p class="mute small">The first student to run the full MSPC system. More verified graphs appear here as members allow it.</p></article>
     </div>
     <p class="small mute" id="proof-note">Verified results load from the app's own data.</p>
+  </div>
+</section>
+
+<section id="how" aria-labelledby="h-how">
+  <div class="wrap">
+    <span class="eyebrow">The method</span>
+    <h2 id="h-how">Think the same way every time. Know the right theory. Trim your mistakes away.</h2>
+    <p class="lead">Rating does not stall because you lack talent. It stalls because your thinking changes from move to move, your theory has holes, and the same mistakes come back game after game. The Hub fixes all three, in a fixed order.</p>
+    <div class="cards">
+      <article class="card"><span class="letter">M</span><h3>One system for every decision</h3><p class="mute">MSPC: Move, Specifics, Priorities, Calculation. The same four questions in the same order on every move. When you think the same way every time, blunders have nowhere to hide.</p></article>
+      <article class="card"><span class="letter">T</span><h3>Think and Theory</h3><p class="mute">Think drills MSPC on real positions until it is automatic. Theory gives you the right repertoires and plans (Colle-Koltanowski, Caro-Kann, Semi-Slav) plus middlegame and endgame lessons, so you always know what a position wants.</p></article>
+      <article class="card"><span class="letter">T</span><h3>Trim</h3><p class="mute">Your own games analysed with Stockfish and sorted by the exact leak that costs you points. Then a plan, not a lecture, and the Working Points fill themselves from your own mistakes.</p></article>
+    </div>
+    <p class="lead" style="margin-top:18px"><b>Put those three together and the things that keep players stuck, random thinking, patchy theory and repeated mistakes, disappear one by one.</b> This is exactly how a 355 became a 2105.</p>
+    <p class="small mute">Nothing here is a promise of a rating: the results above are real, checked, and ranked by what members actually gained.</p>
+    <div class="cta-row"><a class="btn primary" data-app data-install href="/app.html?install=1">Install it and scan my last 10 games</a></div>
   </div>
 </section>
 
 <section class="alt" id="price-contrast" aria-labelledby="h-contrast">
   <div class="wrap">
     <span class="eyebrow">The contrast</span>
-    <h2 id="h-contrast">A coach at this level charges €50 to €100+ an hour. This one is awake at 2 a.m.</h2>
-    <p class="mute small">Titled coaches typically charge from about €50 to well over €100 an hour. We compare with €80.</p>
+    <h2 id="h-contrast">Here is what the market gives you. And here is everything you get.</h2>
+    <p class="mute small">Typical prices of video-course academies and private coaching. They vary by provider and country, so the examples are anonymous on purpose. Titled coaches typically charge from about €50 to well over €100 an hour; we compare with €80.</p>
     <div class="vs" id="vs-grid">
+      <article class="card">
+        <h3>A typical video academy</h3><p class="big-num">€20+<small class="mute" style="font-size:1rem;font-weight:500"> / month</small></p>
+        <ul class="mute"><li class="no">Mostly video lessons to watch</li><li class="no">The same course for everybody</li><li class="no">Nothing that reads your own games</li><li class="no">Extras and coaching sold separately</li></ul>
+      </article>
       <article class="card">
         <h3>Private coaching</h3><p class="big-num">€80<small class="mute" style="font-size:1rem;font-weight:500"> / hour</small></p>
         <ul class="mute"><li class="no">Fixed lesson slots, weekly at best</li><li class="no">Ten lessons already cost <b>€800</b></li><li class="no">Feedback arrives days after the game</li></ul>
@@ -238,40 +245,21 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       </article>
       <article class="card hl">
         <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">From €399<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p><p class="vs-badge" id="vs-badge" hidden></p>
-        <ul><li class="yes">Instant, 24/7, right after your game</li><li class="yes" id="vs-hours">A year of Pro costs about as much as a few private lessons</li><li class="yes">The same MSPC and Triple-T frameworks, applied to your own games</li></ul>
+        <ul><li class="yes" id="vs-hours">A year of Pro costs about as much as a few private lessons</li><li class="yes">The complete app, installed on your phone like any app</li><li class="yes">MSPC Think trainer: drills for every decision, with instant feedback</li><li class="yes">The MSPC framework wizard for any position, plus Working Points that fill themselves from your own games</li><li class="yes">Streamlined repertoires with Learn mode: Colle-Koltanowski, Caro-Kann and Semi-Slav</li><li class="yes">Opening trainer with one-tap <b>Train my repertoire</b> and mistake review</li><li class="yes">Middlegame masterclass: 38 lessons from the basics to grandmaster ideas</li><li class="yes">Endgame course: 42 lessons and over 200 positions</li><li class="yes"><b>Instant Play</b>: one tap into the right drill for your rating</li><li class="yes">Ultimate Shuffle trainer: random positions from everything you studied</li><li class="yes">Trim: your last games analysed by Stockfish, with an evaluation graph per game</li><li class="yes">Blunder Bootcamp: play the bot and get stopped at your mistakes</li><li class="yes"><b>FEN scanner</b>: photograph a position from a book and analyse it on the board</li><li class="yes">Gamification: XP, levels, streaks, achievements and quests, so one more level always feels easy</li><li class="yes">Brilliant-moves feed from your own games</li><li class="yes"><b>Token loops</b>: daily tokens, a bonus at every 100 ELO you gain, and catch-up tokens if you join high</li><li class="yes">24/7 AI coach that asks the right questions (Pro)</li><li class="yes">Coach Lanckriet's voice on the lessons</li><li class="yes">Your progress synced across all your devices</li><li class="yes">No ads</li></ul>
         <div class="vs-urgency" id="vs-urgency" hidden><p>🔒 Lock in your rate: your price stays the same for as long as you keep your subscription active</p><p>⚡ Limited spots remaining for the current cohort</p><p class="small mute">This is the yearly launch rate. Monthly plans have no launch discount.</p></div>
       </article>
     </div>
-    <div class="cta-row"><a class="btn gold big" href="#pricing">See the plans</a></div>
+    <p id="ds-founding" class="hide" style="margin-top:14px"><b>Founding Member rate: €199.50 a year</b> (about €16.60 a month, billed yearly), under €0.55 a day, for everything above. Your launch price stays the same for as long as your subscription stays active.</p>
+    <aside id="fm-hero" class="fm-hero hide" role="status" aria-live="polite">
+  <div class="fm-in">
+    <div class="fm-l"><span class="fm-tag" id="fm-tag">Founding Member rate</span><span class="fm-pct" id="fm-pct">50% off</span></div>
+    <div class="fm-m"><s class="fm-old" id="fm-old">€399 / year</s><span class="fm-new" id="fm-new">€199.50</span><span class="fm-per">/ year</span></div>
+    <div class="fm-r"><p class="fm-spots hide" id="fm-leftwrap"><b id="fm-left"></b> <span id="fm-left-t"></span></p><div class="bar fm-barw hide" id="fm-barwrap" aria-hidden="true"><i id="fm-bar" style="width:0"></i></div><a class="btn gold" href="#pricing">See the Pro plan</a></div>
   </div>
-</section>
-
-
-<section class="alt" id="install" aria-labelledby="h-install">
-  <div class="wrap">
-    <span class="eyebrow">Get the app</span>
-    <h2 id="h-install">On your home screen in one minute. No store.</h2>
-    <p class="lead">It is a web app that behaves like a real one: full screen, its own icon, works offline after the first visit, and updates itself.</p>
-    <div class="cta-row"><a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a></div>
-    <div class="tabs" role="tablist" aria-label="Choose your device">
-      <button class="tab" role="tab" id="t-android" aria-controls="p-android" aria-selected="false" data-tab="android">Android</button>
-      <button class="tab" role="tab" id="t-ios" aria-controls="p-ios" aria-selected="false" data-tab="ios">iPhone / iPad</button>
-      <button class="tab" role="tab" id="t-windows" aria-controls="p-windows" aria-selected="false" data-tab="windows">Windows</button>
-      <button class="tab" role="tab" id="t-mac" aria-controls="p-mac" aria-selected="false" data-tab="mac">Mac</button>
-    </div>
-    <div class="panel" role="tabpanel" id="p-android" aria-labelledby="t-android" hidden>
-      <ol class="steps"><li>Tap <b>Install on my device</b> above, in Chrome or another Android browser.</li><li>Tap <b>Install</b> in the prompt that appears. Or open the <b>⋮ menu</b> and choose <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Launch Lanckriet Chess from your home screen.</li></ol>
-    </div>
-    <div class="panel" role="tabpanel" id="p-ios" aria-labelledby="t-ios" hidden>
-      <ol class="steps"><li>Open this page in <b>Safari</b> and tap <b>Install on my device</b>.</li><li>Tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. Launch Lanckriet Chess from your home screen.</li></ol>
-      <p class="small mute">Other iPhone browsers can also add it from their Share menu on iOS 16.4 and newer.</p>
-    </div>
-    <div class="panel" role="tabpanel" id="p-windows" aria-labelledby="t-windows" hidden>
-      <ol class="steps"><li>Use <b>Chrome</b> or <b>Edge</b>. Tap <b>Install on my device</b> above.</li><li>Click <b>Install</b> in the prompt, or click the <b>install icon</b> at the right of the address bar.</li><li>Launch it from your desktop, taskbar or Start menu.</li></ol>
-    </div>
-    <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="t-mac" hidden>
-      <ol class="steps"><li><b>Chrome or Edge:</b> click <b>Install on my device</b> above, then <b>Install</b> (or the install icon in the address bar).</li><li><b>Safari:</b> open the app, then <b>File</b> menu, <b>Add to Dock</b>.</li><li>Launch it from your Dock or Launchpad.</li></ol>
-    </div>
+  <p class="fm-copy"><b>This launch rate is for the Pro plan only</b> (billed yearly). <span id="fm-sub"></span> <b>The Free plan is always available</b>: start with level 1 of everything, no card needed. Nobody has to upgrade to use the app.</p>
+  <p class="fm-dbg hide" id="fm-debug"></p>
+</aside>
+    <div class="cta-row"><a class="btn gold big" href="#pricing">See the plans</a></div>
   </div>
 </section>
 
@@ -345,6 +333,34 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   </div>
 </section>
 
+<section class="alt" id="install" aria-labelledby="h-install">
+  <div class="wrap">
+    <span class="eyebrow">Get the app</span>
+    <h2 id="h-install">On your home screen in one minute. No store.</h2>
+    <p class="lead">It is a web app that behaves like a real one: full screen, its own icon, works offline after the first visit, and updates itself.</p>
+    <div class="cta-row"><a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a></div>
+    <div class="tabs" role="tablist" aria-label="Choose your device">
+      <button class="tab" role="tab" id="t-android" aria-controls="p-android" aria-selected="false" data-tab="android">Android</button>
+      <button class="tab" role="tab" id="t-ios" aria-controls="p-ios" aria-selected="false" data-tab="ios">iPhone / iPad</button>
+      <button class="tab" role="tab" id="t-windows" aria-controls="p-windows" aria-selected="false" data-tab="windows">Windows</button>
+      <button class="tab" role="tab" id="t-mac" aria-controls="p-mac" aria-selected="false" data-tab="mac">Mac</button>
+    </div>
+    <div class="panel" role="tabpanel" id="p-android" aria-labelledby="t-android" hidden>
+      <ol class="steps"><li>Tap <b>Install on my device</b> above, in Chrome or another Android browser.</li><li>Tap <b>Install</b> in the prompt that appears. Or open the <b>⋮ menu</b> and choose <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Launch Lanckriet Chess from your home screen.</li></ol>
+    </div>
+    <div class="panel" role="tabpanel" id="p-ios" aria-labelledby="t-ios" hidden>
+      <ol class="steps"><li>Open this page in <b>Safari</b> and tap <b>Install on my device</b>.</li><li>Tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. Launch Lanckriet Chess from your home screen.</li></ol>
+      <p class="small mute">Other iPhone browsers can also add it from their Share menu on iOS 16.4 and newer.</p>
+    </div>
+    <div class="panel" role="tabpanel" id="p-windows" aria-labelledby="t-windows" hidden>
+      <ol class="steps"><li>Use <b>Chrome</b> or <b>Edge</b>. Tap <b>Install on my device</b> above.</li><li>Click <b>Install</b> in the prompt, or click the <b>install icon</b> at the right of the address bar.</li><li>Launch it from your desktop, taskbar or Start menu.</li></ol>
+    </div>
+    <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="t-mac" hidden>
+      <ol class="steps"><li><b>Chrome or Edge:</b> click <b>Install on my device</b> above, then <b>Install</b> (or the install icon in the address bar).</li><li><b>Safari:</b> open the app, then <b>File</b> menu, <b>Add to Dock</b>.</li><li>Launch it from your Dock or Launchpad.</li></ol>
+    </div>
+  </div>
+</section>
+
 <section class="alt" id="faq" aria-labelledby="h-faq">
   <div class="wrap">
     <h2 id="h-faq">Questions</h2>
@@ -362,7 +378,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.28.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.32.0</p></footer>
 
 <script>
 "use strict";
@@ -389,7 +405,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
   document.addEventListener("keydown",function(e){var t=e.target.closest&&e.target.closest("[data-tab]");if(!t||(e.key!=="ArrowRight"&&e.key!=="ArrowLeft"))return;var ids=["android","ios","windows","mac"],i=ids.indexOf(t.getAttribute("data-tab"));i=(i+(e.key==="ArrowRight"?1:ids.length-1))%ids.length;tab(ids[i]);$("t-"+ids[i]).focus()});
   Array.prototype.forEach.call(document.querySelectorAll("[data-app]"),function(a){if(ref&&/^[A-Za-z0-9-]{3,24}$/.test(ref)){var u=a.getAttribute("href");a.setAttribute("href",u+(u.indexOf("?")<0?"?":"&")+"ref="+encodeURIComponent(ref))}});
 
-  /* 2b. (9.28.0) one-click install: every "Install" button opens the browser's own install prompt (Chrome, Edge and Samsung Internet on Android,
+  /* 2b. (9.32.0) one-click install: every "Install" button opens the browser's own install prompt (Chrome, Edge and Samsung Internet on Android,
      Windows, Mac and ChromeOS). The page links the app's manifest, so the installed app opens /app.html. The buttons keep their link
      (/app.html?install=1) as the fallback: iPhone and iPad, Firefox, and the in-app browsers of Instagram, TikTok and Facebook have no install
      prompt, so there the app opens and shows its own install guide. A click with a modifier key (new tab) is never intercepted. */
@@ -509,6 +525,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     $("fm-sub").textContent=t===1?"The next 100 members get 25% off, then 10%. Your price stays the same for as long as your subscription stays active.":t===2?"The next 100 members get 10% off. Your price stays the same for as long as your subscription stays active.":"Your price stays the same for as long as your subscription stays active.";
     if(left!=null){$("fm-left").textContent=left+" of "+cap;$("fm-left-t").textContent="spots left at this price";$("fm-bar").style.width=Math.max(4,Math.round((1-left/cap)*100))+"%";$("fm-leftwrap").className="fm-spots";$("fm-barwrap").className="bar fm-barw"}
     box.className="fm-hero";
+    var ds=$("ds-founding");if(ds)ds.className=t===1?"":"hide";
     var pr=$("vs-premium"),vg=$("vs-grid");if(pr&&vg&&t<=2){pr.hidden=false;vg.className="vs has3"}
   }
   function fmDebug(){if(!/[?&]debug/.test(location.search))return;var d=$("fm-debug");if(d){d.className="fm-dbg";d.textContent="Pricing call: "+(window.__lcDbg||[]).join(" | ")}}
@@ -679,12 +696,29 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       +'<p class="pr-elo"><span>'+(+r.start||0)+'</span><i>→</i><span>'+(+r.now||0)+'</span><em>'+(g>=0?"+":"")+g+'</em></p>'
       +'<p class="small mute">Initial ELO to current ELO · joined '+esc(fdate(r.joined_at))+'</p>'+graph(r.points,Date.parse(r.joined_at))+'<span class="pr-open">View stats →</span></article>';
   }
-  getP().then(function(){return rpc("lc36_proof_public",{p_surface:"web"})}).then(function(res){
-    var rows=res&&res.ok&&Array.isArray(res.rows)?res.rows:[];
-    if(!rows.length){$("proof-note").textContent="Member results appear here as soon as members allow it and Kyenzo has checked them.";return}
+  function wcard(r){
+    var site=r.site==="lichess"?"Lichess":"Chess.com",g=+r.gain||0,d=+r.days||0;
+    return'<article class="pcard pr wr" data-kind="'+r.kind+'"><div class="pr-top"><span class="pr-badge">Peak gain</span><span class="pr-ver" title="The rating is read from the member\'s public '+site+' profile by our server, and checked by Kyenzo">✓ Verified rating</span></div>'
+      +'<p class="pgain">+'+g+' ELO</p><p class="pr-name"><b>'+esc(r.first_name||"Member")+'</b> <span class="small mute">on '+site+'</span></p>'
+      +'<p class="pr-elo"><span>'+(+r.start||0)+'</span><i>→</i><span>'+(+r.peak||0)+'</span></p><p class="small mute">Start to peak'+(d?' · over '+d+(d===1?' day':' days'):'')+'</p>'
+      +(r.message?'<p class="pq-quote">“'+esc(r.message)+'”</p>':'')+'</article>';
+  }
+  function qcard(r){return'<article class="pcard pr wr" data-kind="3"><div class="pr-top"><span class="pr-badge">Member</span></div><p class="pq-quote">“'+esc(r.message||"")+'”</p><p class="small mute"><b>'+esc(r.first_name||"Member")+'</b></p></article>'}
+  function lcard(r){return'<figure class="card love-card"><blockquote>“'+esc(r.message)+'”</blockquote><figcaption><b>'+esc(r.first_name||"Member")+'</b>'+(r.kind<=2&&+r.gain>0?' · <span class="pk">+'+(+r.gain)+' ELO peak gain</span>':'')+'</figcaption></figure>'}
+  /* The Proof Queue is ranked: 1) message + verified result, 2) verified result, 3) message only. Within a tier the biggest Peak Gain first.
+     Older verified cards (the owner's star list) count as tier 2 unless the same member is already in the new list. */
+  Promise.all([getP().then(function(){return rpc("lc36_proof_public",{p_surface:"web"})}),rpc("lc59_wall_public",{})]).then(function(a){
+    var res=a[0],wall=a[1]&&a[1].ok&&Array.isArray(a[1].rows)?a[1].rows.slice().sort(function(x,y){return x.kind-y.kind||(+y.gain||0)-(+x.gain||0)}):[],rows=res&&res.ok&&Array.isArray(res.rows)?res.rows:[];
+    var msgs=wall.filter(function(r){return r.message}).slice(0,9);
+    if(msgs.length){var lv=$("love");if(lv){lv.classList.remove("hide");$("love-list").innerHTML=msgs.map(lcard).join("")}}
+    var seen={},items=[];
+    wall.forEach(function(r){if(r.kind<=2)seen[String(r.first_name||"").toLowerCase()+"|"+r.site]=1;items.push({k:r.kind,g:+r.gain||0,h:r.kind===3?qcard(r):wcard(r)})});
+    rows.forEach(function(r){if(seen[String(r.first_name||"").toLowerCase()+"|"+r.site])return;items.push({k:2,g:+r.gain||0,h:pcard(r)})});
+    if(!items.length){$("proof-note").textContent="Member results appear here as soon as members allow it and Kyenzo has checked them.";return}
     proofRows=rows;
-    $("proof-list").insertAdjacentHTML("afterbegin",rows.slice(0,6).map(pcard).join(""));
-    $("proof-note").textContent="Member results are shown because the member allowed it, and checked by Kyenzo.";
+    items.sort(function(x,y){return x.k-y.k||y.g-x.g});
+    $("proof-list").insertAdjacentHTML("afterbegin",items.slice(0,12).map(function(x){return x.h}).join(""));
+    $("proof-note").textContent="Results and messages are shown because the member allowed it, and checked by Kyenzo.";
   });
   document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target&&e.target.classList&&e.target.classList.contains("pr")){e.preventDefault();e.target.click()}});
   /* the account data behind a card, in a dialog */

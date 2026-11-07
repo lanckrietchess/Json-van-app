@@ -1,4 +1,4 @@
-# release (9.28.0): the cache fix, the landing page install, the live address, the owner switch and the Studio additions.
+# release (9.32.0, then 9.31.0, 9.30.0, 9.29.0 and 9.28.0 before): the cache fix, the landing page install, the live address, the owner switch and the Studio additions.
 # Runs against app.html (the app) and index.html (the landing page), the way they are deployed.
 import re as _re
 APP = 'http://127.0.0.1:8765/app.html'
@@ -10,7 +10,7 @@ _reset = open(REPO + '/reset.html', encoding='utf-8').read()
 # static checks: one version, the live address, no v17
 out('versions [CONFIG.version, assetVersion, sw, version.json]', [_re.search(r'const CONFIG=\{version:"([^"]+)"', _src).group(1), _re.search(r'assetVersion:"([^"]+)"', _src).group(1), _re.search(r'serviceWorker:"(sw\.js\?v=[^"]+)"', _src).group(1), open(REPO + '/version.json').read().strip()])
 out('old address left in app/landing/stripe defaults', [_src.count('https://lanckrietchess-app.vercel.app'), _land.count('lanckrietchess-app.vercel.app'), open(REPO + '/functions/stripe/stripe.js').read().count("DEFAULT_ORIGIN = 'https://lanckrietchesstrainerhub.vercel.app'")])
-out('landing [launch links, manifest link, install buttons]', [_land.count('Launch the app'), bool(_re.search(r'<link rel="manifest" href="/manifest\.webmanifest\?v=9\.28\.0">', _land)), _land.count('data-install href="/app.html?install=1"')])
+out('landing [launch links, manifest link, install buttons]', [_land.count('Launch the app'), bool(_re.search(r'<link rel="manifest" href="/manifest\.webmanifest\?v=9\.32\.0">', _land)), _land.count('data-install href="/app.html?install=1"')])
 out('manifest [id, start_url, scope]', [_re.search(r'"id": "([^"]+)"', _man).group(1), _re.search(r'"start_url": "([^"]+)"', _man).group(1), _re.search(r'"scope": "([^"]+)"', _man).group(1)])
 out('reset target', _re.search(r'var TARGET = "([^"]+)"', _reset).group(1))
 import json as _json, subprocess as _sp

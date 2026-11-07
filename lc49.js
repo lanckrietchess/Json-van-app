@@ -101,7 +101,8 @@ const LC49=(()=>{
       +'<div class="lc49-subs">'+SUBS.map(subBtn).join("")+'</div>'
       +'<div class="lc49-h">Tools</div>'
       +'<button type="button" class="lc49-mi lc49-tool" data-lc52-replay><span><b>Replay the onboarding</b><small>Start the first-run road again as a new member</small></span></button>'
-      +'<button type="button" class="lc49-mi lc49-tool" data-lc52-update><span><b>Which build is this?</b><small>Build '+(()=>{try{return CONFIG.assetVersion}catch(e){return"?"}})()+' · check for a newer one</small></span></button>';
+      +'<button type="button" class="lc49-mi lc49-tool" data-lc52-update><span><b>Which build is this?</b><small>Build '+(()=>{try{return CONFIG.assetVersion}catch(e){return"?"}})()+' · check for a newer one</small></span></button>'
+      +'<button type="button" class="lc49-mi lc49-tool" data-lc59-admin><span><b>Student proofs and messages</b><small>Approve results and messages for the landing page</small></span></button>';
     document.body.appendChild(menu);
     const up=r.top>window.innerHeight/2;                         /* the bottom-right widget opens upwards, the top-bar button downwards */
     if(up)menu.style.bottom=Math.max(8,Math.round(window.innerHeight-r.top+6))+"px";else menu.style.top=Math.round(r.bottom+6)+"px";
@@ -177,6 +178,7 @@ const LC49=(()=>{
     const sb=t.closest("[data-lc49-sub]");
     if(sb&&sb.getAttribute("data-lc49-sub")){e.preventDefault();e.stopPropagation();choose(sb.getAttribute("data-lc49-sub"));closeMenu();paintBtn();return}
     if(t.closest("[data-lc52-replay]")){e.preventDefault();e.stopPropagation();closeMenu();try{LC52.replay()}catch(x){console.error(x)}return}
+    if(t.closest("[data-lc59-admin]")){e.preventDefault();e.stopPropagation();closeMenu();try{LC59.openAdmin()}catch(x){console.error(x)}return}
     if(t.closest("[data-lc52-update]")){e.preventDefault();e.stopPropagation();closeMenu();try{LC52.checkUpdate()}catch(x){console.error(x)}return}
     const mi=t.closest("[data-lc49-mode]");
     if(mi){e.preventDefault();e.stopPropagation();setMode(mi.getAttribute("data-lc49-mode"));return}

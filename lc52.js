@@ -104,7 +104,7 @@ const LC52=(()=>{
         const ev=seriesFor(g);
         sp.setAttribute("data-done","1");
         if(ev){sp.innerHTML=sparkSVG(ev);sp.setAttribute("data-lc52-ev",ev.join(","));sp.title="Evaluation during the game. Move over it to see the position."}
-        else sp.innerHTML='<small class="muted">no graph yet</small>';
+        else sp.innerHTML='<small class="muted">'+((window.__lc58&&window.__lc58.running)?"Analysing…":"no graph yet")+'</small>';
       });
     }catch(e){}
   }
