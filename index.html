@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.33.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.34.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.33.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.33.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.34.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.34.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.33.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.34.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -139,7 +139,20 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 .pr-ver{font-size:.78rem;font-weight:700;color:var(--good)}.pr-name{margin:0}.pr-elo{margin:0;font-size:1.5rem;font-weight:900;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.pr-elo i{font-style:normal;opacity:.6;font-size:1rem}.pr-elo em{font-style:normal;color:var(--good);font-size:1rem}
 .pr-open{font-weight:700;color:#38bdf8;font-size:.9rem}.pr-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:.6rem 0}.pr-tiles div{background:#0b1222;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}.pr-tiles b{display:block;font-size:1.15rem}.pr-tiles small{opacity:.75}
 @media (max-width:480px){.pr-tiles{grid-template-columns:repeat(2,1fr)}}
-.love{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:16px}.love-card{margin:0;padding:18px;position:relative}.love-card blockquote{margin:0 0 12px;font-size:1.02rem;line-height:1.55}.love-card figcaption{font-size:.88rem;color:var(--mute,#94a3b8)}.love-card .pk{color:#fbbf24;font-weight:800}.pgain{display:inline-block;margin:0 0 8px;padding:3px 10px;border-radius:999px;border:1px solid rgba(251,191,36,.5);color:#fbbf24;font-weight:800;font-size:.85rem}.pq-quote{margin:8px 0 0;font-size:.95rem;line-height:1.5}.fm-hero{position:relative;margin-top:16px;border-radius:14px}</style>
+.love{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:16px}.love-card{margin:0;padding:18px;position:relative}.love-card blockquote{margin:0 0 12px;font-size:1.02rem;line-height:1.55}.love-card figcaption{font-size:.88rem;color:var(--mute,#94a3b8)}.love-card .pk{color:#fbbf24;font-weight:800}.pgain{display:inline-block;margin:0 0 8px;padding:3px 10px;border-radius:999px;border:1px solid rgba(251,191,36,.5);color:#fbbf24;font-weight:800;font-size:.85rem}.pq-quote{margin:8px 0 0;font-size:.95rem;line-height:1.5}.fm-hero{position:relative;margin-top:16px;border-radius:14px}
+/* 9.34.0: mission hero, member counter, story, flip cards, price in small units */
+h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
+.mcount{margin:14px 0 6px;max-width:460px}.mcount .mc-top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.mcount b{font-size:1.6rem;color:var(--gold);font-variant-numeric:tabular-nums}.mcount span{color:var(--mute);font-size:.95rem}
+.story{margin:14px 0;border:1px solid var(--line);border-radius:var(--r);background:var(--card2);padding:0 16px}.story summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700;color:var(--blue)}.story-t p{margin:0 0 .7rem;color:var(--text)}
+#walk-hero{margin:14px 0}
+.cards .card.wide{grid-column:1/-1}
+.flip{position:relative;perspective:1200px;cursor:pointer;padding:0;background:none;border:0;min-height:300px}.flip .fside{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .55s ease;overflow:auto}
+.flip .back{transform:rotateY(180deg);border-color:rgba(248,113,113,.55);background:linear-gradient(160deg,#2a1620,var(--card))}.flip .back li{margin:.45rem 0}
+.flip[aria-pressed=true] .front{transform:rotateY(-180deg)}.flip[aria-pressed=true] .back{transform:rotateY(0)}
+.flip:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:var(--r)}.flip-hint{margin:.8rem 0 0;color:var(--blue);font-size:.85rem;font-weight:700}
+@media (prefers-reduced-motion:reduce){.flip .fside{transition:none}}
+.micro{margin:.2rem 0 .3rem;color:var(--gold);font-size:.98rem}.micro b{font-size:1.15rem}
+</style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
@@ -158,9 +171,17 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
 <section class="hero" aria-labelledby="h-hero">
   <div class="wrap grid">
     <div>
-      <div id="promo" class="promo hide" role="status" aria-live="polite"></div><br><span class="eyebrow">Stop guessing why you lose</span>
-      <h1 id="h-hero">A <span style="color:var(--blue)">2100+ ELO coach</span> in your pocket.</h1>
+      <div id="promo" class="promo hide" role="status" aria-live="polite"></div><br><span class="eyebrow" data-lc-key="hero_sub">Stop guessing why you lose. A 2100+ ELO coach in your pocket.</span>
+      <h1 id="h-hero" class="mission" data-lc-key="hero_title">My goal is to save <span style="color:var(--blue)">20,000 people</span> out of the lies and chaos by the end of 2027.</h1>
+      <div class="mcount hide" id="mcount" role="status" aria-live="polite"><div class="mc-top"><b id="mc-n">0</b><span>of 20,000 players have started</span></div><div class="bar" aria-hidden="true"><i id="mc-bar" style="width:0"></i></div></div>
       <p class="lead">Get the exact systems that took me from <b>355 to 2105 ELO</b>, built directly into a training hub that already gained my student <b>+630 ELO in just 6 weeks</b>. Guided step by step by your own personal coach.</p>
+      <details class="story" id="story" open><summary>Why I built this</summary><div class="story-t" id="story-t" data-lc-key="story">
+        <p>I started at <b>355</b>. Like everybody, I drowned in advice: watch this course, grind these puzzles, memorise that opening, never memorise openings. It all contradicted itself.</p>
+        <p>I got stuck around <b>500</b>. Not because I lacked talent, but because I thought differently on every move and kept repeating the same mistakes.</p>
+        <p>The turning point came when I stopped collecting tips and built my own systems: one fixed way to think (MSPC), the right theory for my level, and cutting my own mistakes out of my games (Trim).</p>
+        <p>With those systems I climbed to <b>2105</b> in 2 years and 10 months. This app is those systems, so you do not have to lose three years finding them yourself.</p>
+      </div></details>
+      <div class="walk hide" id="walk-hero"></div>
       <p class="mute">Built on the <b>MSPC system</b> and the <b>Triple-T method</b>. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
       <div class="cta-row">
         <a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a>
@@ -172,7 +193,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
         <span class="chip"><b>+630</b> ELO in 6 weeks, proof-of-concept student</span>
       </div>
     </div>
-    <div id="hero-side"><div class="walk hide" id="walk-hero"></div>
+    <div id="hero-side">
     <div class="coach" id="coach-card" aria-label="What the coach does">
       <div class="who"><span class="dot" aria-hidden="true">♞</span><span>Coach Lanckriet</span></div>
       <div class="msg"><b>M · Move.</b> What did your opponent just change? A threat? A new weakness?</div>
@@ -223,9 +244,10 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <h2 id="h-how">Think the same way every time. Know the right theory. Trim your mistakes away.</h2>
     <p class="lead">Rating does not stall because you lack talent. It stalls because your thinking changes from move to move, your theory has holes, and the same mistakes come back game after game. The Hub fixes all three, in a fixed order.</p>
     <div class="cards">
-      <article class="card"><span class="letter">M</span><h3>One system for every decision</h3><p class="mute">MSPC: Move, Specifics, Priorities, Calculation. The same four questions in the same order on every move. When you think the same way every time, blunders have nowhere to hide.</p></article>
-      <article class="card"><span class="letter">T</span><h3>Think and Theory</h3><p class="mute">Think drills MSPC on real positions until it is automatic. Theory gives you the right repertoires and plans (Colle-Koltanowski, Caro-Kann, Semi-Slav) plus middlegame and endgame lessons, so you always know what a position wants.</p></article>
-      <article class="card"><span class="letter">T</span><h3>Trim</h3><p class="mute">Your own games analysed with Stockfish and sorted by the exact leak that costs you points. Then a plan, not a lecture, and the Working Points fill themselves from your own mistakes.</p></article>
+      <article class="card wide"><span class="letter">M</span><h3>One system for every decision</h3><p class="mute">MSPC: Move, Specifics, Priorities, Calculation. The same four questions in the same order on every move. When you think the same way every time, blunders have nowhere to hide.</p></article>
+      <article class="card"><span class="letter">T</span><h3>Think</h3><p class="mute">Build your own fixed thinking system with MSPC: Move, Specifics, Priorities, Calculation. The same routine before every move, drilled on real positions until it runs by itself.</p></article>
+      <article class="card"><span class="letter">T</span><h3>Theory</h3><p class="mute">Not the “stop memorising openings” advice. The <b>right</b> theory at the <b>right</b> level: from about 800 to 1200 the Colle-Koltanowski, Caro-Kann and Semi-Slav, plus middlegame structures and plans and endgame technique.</p></article>
+      <article class="card"><span class="letter">T</span><h3>Trim</h3><p class="mute">Full analysis of your own games that cuts away the blunders, the bad habits and the leaks, and turns them into Working Points.</p></article>
     </div>
     <p class="lead" style="margin-top:18px"><b>Put those three together and the things that keep players stuck, random thinking, patchy theory and repeated mistakes, disappear one by one.</b> This is exactly how a 355 became a 2105.</p>
     <p class="small mute">Nothing here is a promise of a rating: the results above are real, checked, and ranked by what members actually gained.</p>
@@ -239,18 +261,21 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <h2 id="h-contrast">Here is what the market gives you. And here is everything you get.</h2>
     <p class="mute small">Typical prices of video-course academies and private coaching. They vary by provider and country, so the examples are anonymous on purpose. Titled coaches typically charge from about €50 to well over €100 an hour; we compare with €80.</p>
     <div class="vs" id="vs-grid">
-      <article class="card">
-        <h3>A typical video academy</h3><p class="big-num">€20+<small class="mute" style="font-size:1rem;font-weight:500"> / month</small></p>
-        <ul class="mute"><li class="no">Mostly video lessons to watch</li><li class="no">The same course for everybody</li><li class="no">Nothing that reads your own games</li><li class="no">Extras and coaching sold separately</li></ul>
+      <article class="card flip" tabindex="0" role="button" aria-pressed="false" aria-label="A typical video academy: tap to see why it falls short">
+        <div class="fside front"><h3>A typical video academy</h3><p class="big-num">€20+<small class="mute" style="font-size:1rem;font-weight:500"> / month</small></p>
+        <ul class="mute"><li class="no">Mostly video lessons to watch</li><li class="no">The same course for everybody</li><li class="no">Nothing that reads your own games</li><li class="no">Extras and coaching sold separately</li></ul><p class="flip-hint">Tap to see why ↻</p></div>
+        <div class="fside back"><h3>Why it falls short</h3><ul><li>You watch someone else think. Nothing trains how <b>you</b> decide at the board.</li><li>Nobody looks at your games, so the same mistake comes back next week.</li><li>More content is not a system: one more course often adds to the chaos.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
       </article>
-      <article class="card">
-        <h3>Private coaching</h3><p class="big-num">€80<small class="mute" style="font-size:1rem;font-weight:500"> / hour</small></p>
-        <ul class="mute"><li class="no">Fixed lesson slots, weekly at best</li><li class="no">Ten lessons already cost <b>€800</b></li><li class="no">Feedback arrives days after the game</li></ul>
+      <article class="card flip" tabindex="0" role="button" aria-pressed="false" aria-label="Private coaching: tap to see why it falls short">
+        <div class="fside front"><h3>Private coaching</h3><p class="big-num">€80<small class="mute" style="font-size:1rem;font-weight:500"> / hour</small></p>
+        <ul class="mute"><li class="no">Fixed lesson slots, weekly at best</li><li class="no">Ten lessons already cost <b>€800</b></li><li class="no">Feedback arrives days after the game</li></ul><p class="flip-hint">Tap to see why ↻</p></div>
+        <div class="fside back"><h3>Why it falls short</h3><ul><li>Good coaching works, but at €80 an hour most players get one lesson a week at most.</li><li>Between lessons you play alone, with the same habits.</li><li>A year of weekly lessons costs over €4,000.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
       </article>
-      <article class="card" id="vs-premium" hidden>
-        <h3>Premium chess-site membership</h3><p class="big-num">€100–€140<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p>
+      <article class="card flip" id="vs-premium" hidden tabindex="0" role="button" aria-pressed="false" aria-label="Premium chess-site membership: tap to see why it falls short">
+        <div class="fside front"><h3>Premium chess-site membership</h3><p class="big-num">€100–€140<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p>
         <ul class="mute"><li class="no">Mostly puzzles, lessons and game review</li><li class="no">Made for everyone, not for your own habits</li><li class="no">No coach that tracks your working points between games</li></ul>
-        <p class="small mute">Typical yearly prices of premium memberships at the big chess sites. They vary by site, plan and country.</p>
+        <p class="small mute">Typical yearly prices of premium memberships at the big chess sites. They vary by site, plan and country.</p><p class="flip-hint">Tap to see why ↻</p></div>
+        <div class="fside back"><h3>Why it falls short</h3><ul><li>Endless puzzles and lessons, but no fixed way of thinking: the Puzzle Addict trap.</li><li>Game review tells you <b>what</b> went wrong, not which habit to fix next.</li><li>Nothing makes you slow down before the move that loses.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
       </article>
       <article class="card hl">
         <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">From €399<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p><p class="vs-badge" id="vs-badge" hidden></p>
@@ -258,7 +283,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
         <div class="vs-urgency" id="vs-urgency" hidden><p>🔒 Lock in your rate: your price stays the same for as long as you keep your subscription active</p><p>⚡ Limited spots remaining for the current cohort</p><p class="small mute">This is the yearly launch rate. Monthly plans have no launch discount.</p></div>
       </article>
     </div>
-    <p id="ds-founding" class="hide" style="margin-top:14px"><b>Founding Member rate: €199.50 a year</b> (about €16.60 a month, billed yearly), under €0.55 a day, for everything above. Your launch price stays the same for as long as your subscription stays active.</p>
+    <p id="ds-founding" class="hide" style="margin-top:14px"><b>Founding Member rate: <span data-micro="year">€199.50 a year</span></b> (<span data-micro="month">about €16.63 a month</span>, billed yearly), <span data-micro="day">only €0.55 a day</span>, for everything above. Your launch price stays the same for as long as your subscription stays active.</p>
     <aside id="fm-hero" class="fm-hero hide" role="status" aria-live="polite">
   <div class="fm-in">
     <div class="fm-l"><span class="fm-tag" id="fm-tag">Founding Member rate</span><span class="fm-pct" id="fm-pct">50% off</span></div>
@@ -291,7 +316,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <div class="cards" id="plans">
       <article class="card hl" aria-labelledby="h-pro">
         <h3 id="h-pro">Pro</h3><span class="tag" id="y-tag">Yearly</span>
-        <div class="price" id="y-price">…</div><div class="bar hide" id="y-bar"><i></i></div>
+        <p class="micro hide" id="y-micro"></p><div class="price" id="y-price">…</div><div class="bar hide" id="y-bar"><i></i></div>
         <p class="small mute" id="y-left"></p><p class="small mute" id="y-lock">Billed once a year. Cancel any time.</p>
         <p class="small">The whole library: every repertoire (Colle-Koltanowski, Caro-Kann, Semi-Slav), the full Masterclass and Opening Vault, middlegame plans and endgames. The full Trim report and the 24/7 AI coach.</p><p class="small"><b>10 tokens a day</b> (about 300 a month). They refresh every day: use them or lose them.</p>
         <div class="row"><button class="btn primary" type="button" data-plan="yearly" data-tier="2" id="b-yearly">Upgrade to Pro, yearly</button></div>
@@ -387,7 +412,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.33.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.34.0</p></footer>
 
 <script>
 "use strict";
@@ -490,6 +515,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       if(left!=null){$(pre+"y-left").textContent=left+" of "+cap+" places left at this price.";$(pre+"y-bar").className="bar";$(pre+"y-bar").firstChild.style.width=Math.max(4,Math.round((1-left/cap)*100))+"%"}
       var lk=$(pre+"y-lock");if(lk)lk.textContent="Your price stays the same for as long as your subscription stays active. Billed once a year. Cancel any time."}
     $(pre+"m-price").textContent=eur(p.monthly)+" / month";
+    var mi=$(pre+"y-micro");if(mi&&price){mi.innerHTML="<b>≈ "+esc(eur(Math.ceil(price/12)))+" a month</b> (billed yearly) · only "+esc(eur(Math.ceil(price/365)))+" a day";mi.className="micro"}
   }
   function ladder(p){
     var box=$("ladder-rows");if(!box||!p||!p.yearly)return;var cur=p.tranche||4,html="";
@@ -534,7 +560,7 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     $("fm-sub").textContent=t===1?"The next 100 members get 25% off, then 10%. Your price stays the same for as long as your subscription stays active.":t===2?"The next 100 members get 10% off. Your price stays the same for as long as your subscription stays active.":"Your price stays the same for as long as your subscription stays active.";
     if(left!=null){$("fm-left").textContent=left+" of "+cap;$("fm-left-t").textContent="spots left at this price";$("fm-bar").style.width=Math.max(4,Math.round((1-left/cap)*100))+"%";$("fm-leftwrap").className="fm-spots";$("fm-barwrap").className="bar fm-barw"}
     box.className="fm-hero";
-    var ds=$("ds-founding");if(ds)ds.className=t===1?"":"hide";
+    var ds=$("ds-founding");if(ds){ds.className=t===1?"":"hide";var q=function(k,x){var e=ds.querySelector('[data-micro="'+k+'"]');if(e)e.textContent=x};q("year",eur(price)+" a year");q("month","about "+eur(Math.ceil(price/12))+" a month");q("day","only "+eur(Math.ceil(price/365))+" a day")}
     var pr=$("vs-premium"),vg=$("vs-grid");if(pr&&vg&&t<=2){pr.hidden=false;vg.className="vs has3"}
   }
   function fmDebug(){if(!/[?&]debug/.test(location.search))return;var d=$("fm-debug");if(d){d.className="fm-dbg";d.textContent="Pricing call: "+(window.__lcDbg||[]).join(" | ")}}
@@ -662,10 +688,12 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
     var bg=v.t==="yt"?"background-image:url(https://i.ytimg.com/vi/"+v.id+"/hqdefault.jpg)":"";
     box.innerHTML='<button type="button" class="play" data-play="'+esc(v.src)+'" style="'+bg+'" aria-label="Play the walkthrough video"><span aria-hidden="true">▶</span><b class="cap">Watch the walkthrough</b></button>'}
   document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-play]");if(!b)return;var src=b.getAttribute("data-play");if(!/^https:\/\/(www\.youtube-nocookie\.com|player\.vimeo\.com)\//.test(src))return;b.parentNode.innerHTML='<iframe src="'+esc(src)+'" title="Walkthrough video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'});
+  window.__lcShowVideo=function(url){var v=parseVideo(url),hero=$("walk-hero");if(!v||!hero||hero.className==="walk")return;mountVideo(hero,v);hero.className="walk";var sec=$("walkthrough");if(sec)sec.className="alt hide"};
   function showVideo(url,updated){
     var v=parseVideo(url);if(!v)return;
     var fresh=updated>0&&Date.now()-updated<7*864e5,hero=$("walk-hero"),coach=$("coach-card"),sec=$("walkthrough");
-    if(fresh&&hero){mountVideo(hero,v);hero.className="walk";if(coach)coach.className+=" hide"}
+    if(hero&&hero.className==="walk")return;
+    if(hero){mountVideo(hero,v);hero.className="walk"}
     else if(sec){mountVideo($("walk-sec"),v);sec.className="alt"}
   }
   var AR=meta("lc-arena").replace(/\/+$/,"");
@@ -775,6 +803,34 @@ footer{padding:36px 0 56px;border-top:1px solid var(--line);color:var(--mute);fo
       }).join("");
       sec.classList.remove("hide");
     }).catch(function(){});
+})();
+</script>
+
+<script>
+/* 9.34.0: flip cards, the member counter and the landing texts the owner edits in the app (lc69) */
+(function(){
+  function m(n){var e=document.querySelector('meta[name="'+n+'"]');return e?e.getAttribute("content")||"":""}
+  function esc(t){return String(t==null?"":t).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function flip(c){c.setAttribute("aria-pressed",c.getAttribute("aria-pressed")==="true"?"false":"true")}
+  document.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest(".flip");if(c&&!e.target.closest("a"))flip(c)});
+  document.addEventListener("keydown",function(e){var c=e.target.closest&&e.target.closest(".flip");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();flip(c)}});
+  /* the flip cards need the height of their longest side */
+  function size(){Array.prototype.forEach.call(document.querySelectorAll(".flip"),function(c){var h=0;Array.prototype.forEach.call(c.querySelectorAll(".fside"),function(s){var p=s.style.position;s.style.position="relative";h=Math.max(h,s.offsetHeight);s.style.position=p});if(h)c.style.minHeight=h+"px"})}
+  window.addEventListener("resize",function(){clearTimeout(size.t);size.t=setTimeout(size,150)});setTimeout(size,0);setTimeout(size,1500);
+  var u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");if(!u||!k)return;
+  function rpc(n){return fetch(u+"/rest/v1/rpc/"+n,{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:"{}"}).then(function(r){return r.ok?r.json():null}).catch(function(){return null})}
+  rpc("lc69_member_count").then(function(j){
+    if(!j||!j.ok||!(+j.members>=0))return;var n=+j.members,box=document.getElementById("mcount");if(!box)return;
+    document.getElementById("mc-n").textContent=n.toLocaleString("en-GB");document.getElementById("mc-bar").style.width=Math.max(1,Math.min(100,n/200))+"%";box.className="mcount";
+  });
+  rpc("lc69_landing_public").then(function(j){
+    if(!j||!j.ok||!j.values)return;var v=j.values;
+    var t=document.querySelector('[data-lc-key="hero_title"]');if(t&&v.hero_title)t.textContent=v.hero_title;
+    var s=document.querySelector('[data-lc-key="hero_sub"]');if(s&&v.hero_sub)s.textContent=v.hero_sub;
+    var st=document.querySelector('[data-lc-key="story"]');if(st&&v.story)st.innerHTML=String(v.story).split(/\n+/).filter(function(x){return x.trim()}).map(function(x){return"<p>"+esc(x)+"</p>"}).join("");
+    if(v.video&&window.__lcShowVideo)window.__lcShowVideo(v.video);
+    setTimeout(size,0);
+  });
 })();
 </script>
 </body>

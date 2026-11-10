@@ -77,7 +77,8 @@
       const h=g.history({verbose:true});if(h.length)last={from:h[h.length-1].from,to:h[h.length-1].to};
       const legal=u=>{const t=new Chess(g.fen());return!!t.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||"q"})};
       if(sol.length&&!legal(sol[0])){const u=sol.shift();const m=g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||"q"});if(!m)return null;last={from:m.from,to:m.to};if(!sol.length||!legal(sol[0]))return null}
-      return{fen:g.fen(),solution:sol,orient:g.turn()==="w"?"white":"black",side:g.turn(),rating:+j.puzzle.rating||0,themes:j.puzzle.themes||[],id:String(j.puzzle.id||""),last:last};
+      let lastSan="";try{const hh=g.history();lastSan=hh.length?hh[hh.length-1]:""}catch(e){}
+      return{fen:g.fen(),solution:sol,orient:g.turn()==="w"?"white":"black",side:g.turn(),rating:+j.puzzle.rating||0,themes:j.puzzle.themes||[],id:String(j.puzzle.id||""),last:last,lastSan:lastSan};
     }catch(e){return null}
   }
 
@@ -87,17 +88,37 @@
     ["S","Specifics","Which structure or feature matters here (tension, a closed centre, an outpost, king safety, a loose piece)?"],
     ["P","Priorities","Which checks, captures and attacks does each side have?"],
     ["C","Calculation","Which line did you calculate to the end, and what is their best reply?"]];
+  /* 9.34.0: with opts.ctx={board,fen,last,lastSan,onMove} the board is LIVE while the questions run: the student can play moves for both sides
+     (drag or tap), "Back to the puzzle position" restores it, and at step M the opponent's last move is marked (red arrow + highlighted squares).
+     When the four answers are in, the position and the board's own move handler are restored. Without ctx it is the plain text version. */
   function interrogate(host,opts){
-    opts=opts||{};let i=0;const ans=[];
+    opts=opts||{};let i=0;const ans=[];const cx=opts.ctx&&opts.ctx.board?opts.ctx:null;let x=null;
+    const mark=()=>{if(!cx)return;try{cx.board.setArrows(i===0&&cx.last?[{from:cx.last.from,to:cx.last.to,kind:"bad"}]:[])}catch(e){}};
+    const back=()=>{if(!cx)return;try{x=new Chess(cx.fen);cx.board.setPosition(cx.fen,{lastMove:cx.last||null});cx.board.setInteractive(x.turn());mark()}catch(e){}};
+    if(cx){
+      back();
+      try{cx.board.setOnMove(m=>{
+        try{
+          const r=x.move({from:m.from,to:m.to,promotion:m.promotion||"q"});
+          if(!r){cx.board.setPosition(x.fen());return}
+          cx.board.setArrows([]);cx.board.setPosition(x.fen(),{lastMove:{from:r.from,to:r.to}});cx.board.setInteractive(x.game_over()?null:x.turn());
+          const b=Q('[data-lc64="iq-back"]',host);if(b)b.hidden=false;
+        }catch(e){}
+      })}catch(e){}
+    }
+    const restore=()=>{if(!cx)return;try{cx.board.setArrows([]);cx.board.setPosition(cx.fen,{lastMove:cx.last||null});cx.board.setInteractive(null);cx.board.setOnMove(cx.onMove||null)}catch(e){}};
     return new Promise(resolve=>{
       const paint=()=>{
-        if(i>=QS.length){host.innerHTML="";resolve(ans);return}
+        if(i>=QS.length){host.innerHTML="";restore();resolve(ans);return}
         const q=QS[i];
         host.innerHTML='<div class="lc64-iq"><p class="small muted">'+esc(opts.lead||"Slow down. Answer the four MSPC questions.")+' · '+(i+1)+' of 4</p><h4>'+esc(q[1])+'</h4><p>'+esc(q[2])+' '+(()=>{try{return LC61.vbtn(q[2])}catch(e){return""}})()+'</p>'
+          +(cx?'<p class="small lc64-live">'+(i===0&&cx.last?'<b class="lc64-last">Their last move'+(cx.lastSan?': '+esc(cx.lastSan):'')+'</b> is marked in red on the board. ':'')+'The board is live: play moves for both sides to test your idea, then go back.</p>':'')
           +'<label class="field"><textarea rows="2" maxlength="240" data-lc64-a placeholder="One sentence is enough"></textarea></label>'
-          +'<div class="btn-row"><button type="button" class="btn btn-primary" data-lc64="iq-next">'+(i===3?"Done":"Next")+'</button></div></div>';
+          +'<div class="btn-row"><button type="button" class="btn btn-primary" data-lc64="iq-next">'+(i===3?"Done":"Next")+'</button>'+(cx?'<button type="button" class="btn btn-ghost" data-lc64="iq-back" hidden>Back to the puzzle position</button>':'')+'</div></div>';
         const b=Q('[data-lc64="iq-next"]',host);
-        b.addEventListener("click",()=>{ans.push({k:q[0],t:String(Q("[data-lc64-a]",host).value||"").trim()});i++;paint()});
+        b.addEventListener("click",()=>{ans.push({k:q[0],t:String(Q("[data-lc64-a]",host).value||"").trim()});i++;if(cx)back();paint()});
+        const bk=Q('[data-lc64="iq-back"]',host);if(bk)bk.addEventListener("click",()=>{back();bk.hidden=true});
+        mark();
       };
       paint();
     });
@@ -121,14 +142,16 @@
       +'<div data-lc64-board class="lc64-board"></div><div class="lc64-bar" data-lc64-bar><i></i></div><p data-lc64-msg aria-live="polite"></p><div data-lc64-iq></div><div class="btn-row" data-lc64-act></div>';
     const bhost=Q("[data-lc64-board]",host),msg=Q("[data-lc64-msg]",host),iq=Q("[data-lc64-iq]",host),act=Q("[data-lc64-act]",host),bar=Q("[data-lc64-bar] i",host);
     const board=Board(bhost,{fen:P.fen,orientation:P.orient,onMove:m=>move(m)});
-    cur={board:board,P:P};let step=0,done=false,timer=null,t0=0;
+    try{board.setLastMove(P.last||null)}catch(e){}
+    cur={board:board,P:P};let step=0,done=false,timer=null,t0=0,lastMv=P.last||null,lastSan=P.lastSan||"";
     const g=new Chess(P.fen);
     const uci=m=>m.from+m.to+(m.promotion||"");
     const stop=()=>{clearInterval(timer);timer=null};
     async function fail(why){
       if(done)return;done=true;stop();try{board.setInteractive(null)}catch(e){}
       msg.innerHTML=why;
-      const ans=await interrogate(iq,{lead:"Not this time. Before you see the answer:"});
+      const ans=await interrogate(iq,{lead:"Not this time. Before you see the answer:",ctx:{board:board,fen:g.fen(),last:lastMv,lastSan:lastSan,onMove:null}});
+      try{board.setPosition(P.fen,{lastMove:P.last||null})}catch(e){}
       reveal(ans,false);
     }
     function reveal(ans,ok){
@@ -148,7 +171,7 @@
         g.move({from:want.slice(0,2),to:want.slice(2,4),promotion:want[4]||"q"});step++;
         const reply=P.solution[step];
         if(!reply){done=true;board.setInteractive(null);board.setPosition(g.fen(),{lastMove:{from:want.slice(0,2),to:want.slice(2,4)}});reveal([],true);return}
-        await sleep(350);g.move({from:reply.slice(0,2),to:reply.slice(2,4),promotion:reply[4]||"q"});step++;
+        await sleep(350);const rm=g.move({from:reply.slice(0,2),to:reply.slice(2,4),promotion:reply[4]||"q"});step++;lastMv={from:reply.slice(0,2),to:reply.slice(2,4)};lastSan=rm?rm.san:"";
         board.setPosition(g.fen(),{lastMove:{from:reply.slice(0,2),to:reply.slice(2,4)}});
         if(step>=P.solution.length){done=true;board.setInteractive(null);reveal([],true);return}
         msg.textContent="Right. Keep going.";return;
@@ -165,8 +188,9 @@
       },100);
     }
     if(mode==="think"){
-      const ans=await interrogate(iq,{lead:"Think first. Answer these before you move:"});
-      iq.innerHTML="";msg.textContent="Now play your move. No clock.";board.setInteractive(P.side);bar.parentNode.style.display="none";
+      bar.parentNode.style.display="none";
+      const ans=await interrogate(iq,{lead:"Think first. Answer these before you move:",ctx:{board:board,fen:P.fen,last:P.last||null,lastSan:P.lastSan||"",onMove:m=>move(m)}});
+      iq.innerHTML="";msg.textContent="Now play your move. No clock.";board.setInteractive(P.side);
     }else begin();
     host.addEventListener("click",e=>{const a=e.target.closest("[data-lc64=\"again\"]");if(a){e.preventDefault();try{board.destroy()}catch(x){}openRankedInto(sh,mode)}});
   }
@@ -199,7 +223,7 @@
     host.innerHTML='<div data-lc64-board class="lc64-board"></div><p data-lc64-msg aria-live="polite"></p><div data-lc64-iq></div><div class="btn-row" data-lc64-act></div>';
     const bhost=Q("[data-lc64-board]",host),msg=Q("[data-lc64-msg]",host),iq=Q("[data-lc64-iq]",host),act=Q("[data-lc64-act]",host);
     const side=c.color==="b"?"b":"w";let done=false;
-    const board=Board(bhost,{fen:c.fen,orientation:side==="b"?"black":"white",onMove:m=>{
+    const onMv=m=>{
       if(done)return;done=true;try{board.setInteractive(null)}catch(e){}
       const ok=(m.from+m.to)===String(c.best).slice(0,4);caseDone(c.fen,ok);
       const al=LC61.detect(c.fen,side).filter(a=>a.id!=="loose")[0]||null;
@@ -207,8 +231,9 @@
       msg.innerHTML=(ok?"Correct, and that is the move you missed in the game. ":"The better move was <b>"+esc(c.bestSan||c.best)+"</b>. ")+(al?'Alarm Signal on the board: <b>'+esc(al.label)+'</b>. '+esc(al.say)+' ':'')
         +'<p class="lc64-next"><b>Action Step.</b> '+esc(actionOf(al?al.id:"",c.k||"S"))+'</p>';
       act.innerHTML='<button type="button" class="btn btn-primary" data-lc64="case-again">Another case</button>';
-    }});
-    const ans=await interrogate(iq,{lead:"Think first. Answer these before you move:"});
+    };
+    const board=Board(bhost,{fen:c.fen,orientation:side==="b"?"black":"white",onMove:onMv});
+    const ans=await interrogate(iq,{lead:"Think first. Answer these before you move:",ctx:{board:board,fen:c.fen,last:c.last||null,lastSan:"",onMove:onMv}});
     iq.innerHTML="";msg.textContent="Now play your move.";board.setInteractive(side);
     host.addEventListener("click",e=>{if(e.target.closest('[data-lc64="case-again"]')){e.preventDefault();try{board.destroy()}catch(x){}sh.close();openCase()}});
   }
@@ -444,5 +469,5 @@
     document.addEventListener("click",onDoc,true);
     let deb=0;new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{actionObserver();addOwnerRow()}catch(e){}},300)}).observe(document.body,{childList:true,subtree:true});
   }
-  return{init:init,afterRender:afterRender,puzzleFromJson:puzzleFromJson,liClosest:liClosest,interrogate:interrogate,openRanked:openRanked,openTrim:openTrim,buildPrompt:buildPrompt,caseOf:caseOf,nextGames:nextGames,nextGamesHTML:nextGamesHTML,top:topLetterAlarm,actionOf:actionOf,themeFor:themeFor,openCase:openCase,casePick:casePick,ACT:ACT,QS:QS,LNAME:LNAME,version:"9.33.0"};
+  return{init:init,afterRender:afterRender,puzzleFromJson:puzzleFromJson,liClosest:liClosest,interrogate:interrogate,openRanked:openRanked,openTrim:openTrim,buildPrompt:buildPrompt,caseOf:caseOf,nextGames:nextGames,nextGamesHTML:nextGamesHTML,top:topLetterAlarm,actionOf:actionOf,themeFor:themeFor,openCase:openCase,casePick:casePick,ACT:ACT,QS:QS,LNAME:LNAME,liOne:liOne,rating:rating,version:"9.34.0"};
 })(); /*@@end lc64*/
