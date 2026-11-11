@@ -10,7 +10,7 @@
       ]
     },
     {
-      "source": "/(app\\.html|index\\.html|sw\\.js|version\\.json|manifest\\.webmanifest|reset\\.html|content\\.json)",
+      "source": "/(app\\.html|index\\.html|sw\\.js|version\\.json|manifest\\.webmanifest|reset\\.html|content\\.json|l\\.html)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -48,6 +48,12 @@
           "value": "public, max-age=300"
         }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/l/:code",
+      "destination": "/l.html"
     }
   ]
 }

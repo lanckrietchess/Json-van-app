@@ -424,7 +424,7 @@
       +'<ol class="lc61-steps">'+steps.map(t=>'<li>'+esc(t)+'</li>').join("")+'</ol>'
       +(course?'<p class="small muted">★ Newest star: '+esc(course.label)+'</p><div class="btn-row"><a class="btn btn-primary" data-close href="'+esc(course.href)+'">Go to this course</a></div>':'<div class="btn-row"><a class="btn btn-primary" data-close href="#theory">Go to this course</a></div>')});
     try{faceInto(Q("[data-lc61-face]",sheet.el||document))}catch(e){}
-    wr("lc61-plan",{at:Date.now(),text:steps.join(" ")});
+    wr("lc61-plan",{at:Date.now(),text:steps.join(" "),steps:steps});
   }
   /* Coach Lanckriet's official pictures (LC48): the emotion that fits, else the first one the folder has */
   function coachImg(want,size){
@@ -446,9 +446,11 @@
     try{const m=rd(LK,{})||{};if(m[id]!==undefined)return+m[id]||0;return SmartSkip.done(id,"learn")?2:0}catch(e){return 2}
   }
   async function coachSay(){
-    const t=(rd("lc61-plan",{})||{}).text;if(!t)return;
-    if(await sayClip(t))return;
-    try{if("speechSynthesis" in window){const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";speechSynthesis.cancel();speechSynthesis.speak(u)}}catch(e){}
+    const pl=rd("lc61-plan",{})||{},parts=Array.isArray(pl.steps)&&pl.steps.length?pl.steps:(pl.text?[pl.text]:[]);if(!parts.length)return;
+    /* 9.37.0: ONLY Coach Lanckriet's recorded ElevenLabs voice, step by step; never the browser's own voice (it read English with a Dutch voice) */
+    try{if(typeof LC74!=="undefined"&&LC74.voice){await LC74.voice.say(parts);return}}catch(e){}
+    if(await sayClip(parts.join(" ")))return;
+    try{toast("Coach Lanckriet’s voice for this plan is not recorded yet.","")}catch(e){}
   }
 
   /* ---------- 7. the openings trainer: Instant Play one level under the rating, Auto-advance on ---------- */

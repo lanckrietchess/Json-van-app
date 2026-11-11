@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.36.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.37.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.36.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.36.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.37.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.37.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.36.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.37.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -152,7 +152,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .flip:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:var(--r)}.flip-hint{margin:.8rem 0 0;color:var(--blue);font-size:.85rem;font-weight:700}
 @media (prefers-reduced-motion:reduce){.flip .fside{transition:none}}
 .micro{margin:.2rem 0 .3rem;color:var(--gold);font-size:.98rem}.micro b{font-size:1.15rem}
-/* 9.36.0: mission banner, hook, Triple-T flow with MSPC under Think, balanced contrast */
+/* 9.37.0: mission banner, hook, Triple-T flow with MSPC under Think, balanced contrast */
 .mission-band{padding:22px 0;background:linear-gradient(90deg,rgba(56,189,248,.14),rgba(251,191,36,.10));border-bottom:1px solid rgba(56,189,248,.35)}
 .mission-band .mb-in{display:grid;grid-template-columns:1fr auto;gap:18px 28px;align-items:center}
 .mission-band h1.mission{margin:0;font-size:clamp(1.45rem,4.2vw,2.5rem)}
@@ -179,6 +179,13 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .vs2 li.no::before{content:"✕";position:absolute;left:0;color:var(--bad);font-weight:900}.vs2 li.yes::before{content:"✓";position:absolute;left:0;color:var(--good);font-weight:900}
 .vs-h4{margin:.9rem 0 .2rem;font-size:1rem;color:var(--good)}
 .vs2 li.no,.vs2 li.yes{color:var(--text)}
+
+/* 9.37.0 LC72: owner cards, screenshots, the owner's edit button */
+.shot{margin:14px 0 0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card2)}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:8px 12px;font-size:.85rem;color:var(--mute)}
+.shots{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,300px);gap:14px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}.shots .shot{margin:0;scroll-snap-align:start}
+.love-card .lshot,.pcard .lshot{display:block;width:100%;border-radius:10px;margin-top:10px;border:1px solid var(--line)}
+.pr-own{font-size:.75rem;color:var(--gold);font-weight:700}.pr-link{font-size:.82rem}
+.lc72-edit{position:fixed;right:14px;bottom:14px;z-index:150;min-height:44px;padding:0 16px;border-radius:999px;background:var(--gold);color:#241a00;font-weight:800;display:inline-flex;align-items:center;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 </style>
 </head>
 <body>
@@ -224,7 +231,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
         <span class="chip"><b>+630</b> ELO in 6 weeks, proof-of-concept student</span>
       </div>
     </div>
-    <div id="hero-side">
+    <div id="hero-side"><figure class="shot hide" id="shot-hero"></figure>
     <div class="walk hide" id="walk-hero"></div>
     <div class="coach" id="coach-card" aria-label="What the coach does">
       <div class="who"><span class="dot" aria-hidden="true">♞</span><span>Coach Lanckriet</span></div>
@@ -294,6 +301,8 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <div class="cta-row"><a class="btn primary" data-app data-install href="/app.html?install=1">Install it and scan my last 10 games</a></div>
   </div>
 </section>
+
+<section class="alt hide" id="inside" aria-labelledby="h-inside"><div class="wrap"><span class="eyebrow">Inside the app</span><h2 id="h-inside">What you train with, on your own phone</h2><div class="shots" id="inside-list"></div></div></section>
 
 <section class="alt" id="price-contrast" aria-labelledby="h-contrast">
   <div class="wrap">
@@ -410,7 +419,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 
     <h3 id="gift" style="margin-top:42px">Gift a friend</h3>
     <div class="panel">
-      <p class="mute">One year of Pro for someone else. Paid once, no renewal. Your friend signs in with their email address and Pro switches on.</p>
+      <p class="mute">One year of Pro for someone else, at the launch rate that is live now, or your own yearly rate if you are signed in and pay less. Paid once, no renewal. Your friend signs in with their email address and Pro switches on.</p>
       <div class="price" id="g-price">…</div>
       <label for="g-to">Your friend’s email</label><input id="g-to" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="friend@example.com">
       <label for="g-from">Your email (for the receipt, optional)</label><input id="g-from" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com">
@@ -466,7 +475,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.36.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.37.0</p></footer>
 
 <script>
 "use strict";
@@ -590,12 +599,12 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       $("fomo-text").innerHTML="<b class=\"n\">"+left+" of "+cap+"</b> "+esc(who)+" spots left at this price."+(left<=cap/2?" Spots are filling up fast.":"");
       var v=p.vip,vl=v&&v.left&&v.left[(v.tranche||t)-1];$("fomo-vip").textContent=v&&vl!=null?"VIP: "+vl+" spots left at "+eur(v.yearly[(v.tranche||t)-1])+" a year (or "+eur(v.monthly)+" a month).":""}
   }
-  /* 9.36.0: the official prices show at once (same numbers as the Payment Links); the live pricing call replaces them. Before, a failed call left "See at checkout". */
+  /* 9.37.0: the official prices show at once (same numbers as the Payment Links); the live pricing call replaces them. Before, a failed call left "See at checkout". */
   var FALLBACK={ok:true,fallback:true,tranche:1,base:39900,monthly:3900,gift:39900,yearly:[19950,29925,35910,39900],discountPct:[50,25,10],caps:[100,100,100],left:null,
     vip:{tranche:1,base:59900,monthly:5900,yearly:[29950,44925,53910,59900],discountPct:[50,25,10],caps:[100,100,100],left:null}};
   function paintPrices(p){
     tierBlock(p,"");tierBlock(p.vip,"v");ladder(p);
-    $("g-price").textContent=eur(p.gift||p.base)+" for one year";
+    var gp=$("g-price");if(gp&&!/your own rate/.test(gp.textContent))gp.textContent=eur(p.gift||p.base)+" for one year";
     var t=p.tranche||4,py=p.yearly[t-1]||p.base;
     $("vs-price").innerHTML=esc(eur(Math.ceil(py/12)))+'<small> per month (billed yearly)</small>';
     var vm=$("vs-micro");if(vm)vm.textContent="Only "+eur(Math.ceil(py/365))+" a day";
@@ -724,6 +733,9 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     accountExists(em).then(function(ex){if(ex===true){run(em);return}acctModal(em,ex,run)});
   }
   function email(){var em=$("buyer").value.trim().toLowerCase();return EMAIL.test(em)?em:""}
+  /* 9.37.0: a signed-in member (same site as the app) gets the gift at their own locked rate when it is lower */
+  function myTok(){try{var a=JSON.parse(localStorage.getItem("lc26-auth")||"null");return a&&a.access_token&&(!a.expires_at||a.expires_at*1000>Date.now())?a.access_token:""}catch(e){return""}}
+  (function(){var t=myTok();if(!t)return;post0("gift_quote",{token:t}).then(function(q){if(q&&q.ok&&q.why==="yours"&&+q.amount>0){var g=$("g-price");if(g)g.textContent=eur(q.amount)+" for one year · your own rate"}})})();
   document.addEventListener("click",function(e){
     var b=e.target.closest&&e.target.closest("[data-plan]");
     if(b){guard(function(em){payPlan(b,em)});return}
@@ -732,7 +744,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     if(e.target.id==="b-gift"){var to=$("g-to").value.trim().toLowerCase(),from=$("g-from").value.trim().toLowerCase();
       if(!EMAIL.test(to)){say("gift-msg",WHY.bad_recipient,"bad");$("g-to").focus();return}
       if(from&&!EMAIL.test(from)){say("gift-msg",WHY.bad_email,"bad");return}
-      go("gift",{to:to,email:from||undefined,ret:"support"},e.target,"gift-msg")}
+      go("gift",{to:to,email:from||undefined,ret:"support",token:myTok()||undefined},e.target,"gift-msg")}
   });
   var paid=new URLSearchParams(location.search).get("paid"),st=$("status");
   if(paid==="cancel"){st.textContent="Checkout was cancelled. Nothing was charged.";st.className="banner bad"}
@@ -807,13 +819,28 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   function lcard(r){return'<figure class="card love-card"><blockquote>“'+esc(r.message)+'”</blockquote><figcaption><b>'+esc(r.first_name||"Member")+'</b>'+(r.kind<=2&&+r.gain>0?' · <span class="pk">+'+(+r.gain)+' ELO peak gain</span>':'')+'</figcaption></figure>'}
   /* The Proof Queue is ranked: 1) message + verified result, 2) verified result, 3) message only. Within a tier the biggest Peak Gain first.
      Older verified cards (the owner's star list) count as tier 2 unless the same member is already in the new list. */
-  Promise.all([getP().then(function(){return rpc("lc36_proof_public",{p_surface:"web"})}),rpc("lc59_wall_public",{})]).then(function(a){
+  function ocard(r){return'<figure class="card love-card"><blockquote>“'+esc(r.body)+'”</blockquote><figcaption><b>'+esc(r.name||"Member")+'</b>'+(r.role?' · <span class="pk">'+esc(r.role)+'</span>':'')+'</figcaption>'+(r.shot?'<img class="lshot" src="'+esc(r.shot)+'" alt="" loading="lazy">':'')+'</figure>'}
+  function opcard(r){var site=r.site==="lichess"?"Lichess":r.site==="chesscom"?"Chess.com":"",g=(+r.peak||0)-(+r.start||0),d=+r.days||0;
+    return'<article class="pcard pr wr" data-kind="own"><div class="pr-top"><span class="pr-badge">'+(g>0?'Peak gain':'Member')+'</span><span class="pr-own">Shared by Kyenzo</span></div>'+(g>0?'<p class="pgain">+'+g+' ELO</p>':'')
+      +'<p class="pr-name"><b>'+esc(r.name||"Member")+'</b>'+(site?' <span class="small mute">on '+site+'</span>':'')+'</p>'+(r.start&&r.peak?'<p class="pr-elo"><span>'+(+r.start)+'</span><i>→</i><span>'+(+r.peak)+'</span></p><p class="small mute">Start to peak'+(d?' · over '+d+(d===1?' day':' days'):'')+'</p>':'')
+      +(r.role?'<p class="small mute">'+esc(r.role)+'</p>':'')+(r.body?'<p class="pq-quote">“'+esc(r.body)+'”</p>':'')+(r.shot?'<img class="lshot" src="'+esc(r.shot)+'" alt="" loading="lazy">':'')+(r.link?'<a class="pr-link" href="'+esc(r.link)+'" target="_blank" rel="noopener noreferrer">Check the public profile</a>':'')+'</article>'}
+  function shotHTML(x){return'<figure class="shot"><img src="'+esc(x.url)+'" alt="'+esc(x.caption||"Screenshot of the Lanckriet Chess app")+'" loading="lazy">'+(x.caption?'<figcaption>'+esc(x.caption)+'</figcaption>':'')+'</figure>'}
+  function paintShots(L){var C=L.cfg||{},sh=(L.shots||[]).filter(function(x){return/^https:\/\//.test(x.url)});if(C.shots_on===false||!sh.length)return;
+    var by=function(k){return sh.filter(function(x){return x.slot===k})};
+    var h=by("hero")[0],hs=$("shot-hero"),wk=$("walk-hero");if(h&&hs&&(!wk||wk.classList.contains("hide"))){hs.innerHTML=shotHTML(h).replace(/^<figure class="shot">|<\/figure>$/g,"");hs.classList.remove("hide");var cc=$("coach-card");if(cc)cc.classList.add("hide")}
+    var cards=document.querySelectorAll("#how .tt");["think","theory","trim"].forEach(function(k,i){var x=by(k)[0];if(x&&cards[i]&&!cards[i].querySelector(".shot"))cards[i].insertAdjacentHTML("beforeend",shotHTML(x))});
+    var g=by("gallery");if(g.length){$("inside-list").innerHTML=g.map(shotHTML).join("");$("inside").classList.remove("hide")}}
+  Promise.all([getP().then(function(){return rpc("lc36_proof_public",{p_surface:"web"})}),rpc("lc59_wall_public",{}),rpc("lc72_landing_public",{})]).then(function(a){
+    var L=a[2]&&a[2].ok?a[2]:{cfg:{},items:[],shots:[]},C=L.cfg||{},own=Array.isArray(L.items)?L.items:[];try{paintShots(L)}catch(e){}
     var res=a[0],wall=a[1]&&a[1].ok&&Array.isArray(a[1].rows)?a[1].rows.slice().sort(function(x,y){return x.kind-y.kind||(+y.gain||0)-(+x.gain||0)}):[],rows=res&&res.ok&&Array.isArray(res.rows)?res.rows:[];
-    var msgs=wall.filter(function(r){return r.message}).slice(0,9);
-    if(msgs.length){var lv=$("love");if(lv){lv.classList.remove("hide");$("love-list").innerHTML=msgs.map(lcard).join("")}}
+    var msgs=wall.filter(function(r){return r.message}).slice(0,9),ol=own.filter(function(x){return x.kind==="love"&&x.body});
+    if(C.love_on!==false&&(msgs.length||ol.length)){var lv=$("love");if(lv){lv.classList.remove("hide");$("love-list").innerHTML=ol.map(ocard).concat(msgs.map(lcard)).join("")}}
+    if(C.proof_on===false){var pq=$("proof");if(pq)pq.classList.add("hide");return}
+    if(C.builtin_on===false)Array.prototype.forEach.call(document.querySelectorAll("#proof-list > .pcard:not(.pr)"),function(x){x.remove()});
     var seen={},items=[];
     wall.forEach(function(r){if(r.kind<=2)seen[String(r.first_name||"").toLowerCase()+"|"+r.site]=1;items.push({k:r.kind,g:+r.gain||0,h:r.kind===3?qcard(r):wcard(r)})});
     rows.forEach(function(r){if(seen[String(r.first_name||"").toLowerCase()+"|"+r.site])return;items.push({k:2,g:+r.gain||0,h:pcard(r)})});
+    own.filter(function(x){return x.kind==="proof"}).forEach(function(x){items.push({k:x.pinned?0:x.body?1:2,g:(+x.peak||0)-(+x.start||0),h:opcard(x)})});
     if(!items.length){$("proof-note").textContent="Member results appear here as soon as members allow it and Kyenzo has checked them.";return}
     proofRows=rows;
     items.sort(function(x,y){return x.k-y.k||y.g-x.g});
@@ -880,7 +907,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   /* the flip cards need the height of their longest side */
   function size(){Array.prototype.forEach.call(document.querySelectorAll(".flip"),function(c){var h=0;Array.prototype.forEach.call(c.querySelectorAll(".fside"),function(s){var p=s.style.position;s.style.position="relative";h=Math.max(h,s.offsetHeight);s.style.position=p});if(h)c.style.minHeight=h+"px"})}
   window.addEventListener("resize",function(){clearTimeout(size.t);size.t=setTimeout(size,150)});setTimeout(size,0);setTimeout(size,1500);
-  /* 9.36.0: the counter is always visible; without a live number it says so instead of showing a made-up one */
+  /* 9.37.0: the counter is always visible; without a live number it says so instead of showing a made-up one */
   function mcFallback(){var n=document.getElementById("mc-n"),t=document.getElementById("mc-t");if(n&&n.textContent==="…"){n.textContent="";if(t)t.textContent="The first players have started. Be one of the 20,000."}}
   setTimeout(mcFallback,8000);
   var u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");if(!u||!k){mcFallback();return}
@@ -897,6 +924,26 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     if(v.video&&window.__lcShowVideo)window.__lcShowVideo(v.video);
     setTimeout(size,0);
   });
+})();
+</script>
+<script>
+/* 9.37.0 LC73: the first-touch source of this visitor (utm_*, ?ref=, ?src= from a /l/ short link), one landing visit per day, and the owner's Edit button.
+   Kept on this device only (localStorage "lc73-src"); the app links it to the account at sign-in (lc73_attach). */
+(function(){
+  function m(n){var e=document.querySelector('meta[name="'+n+'"]');return e?e.getAttribute("content")||"":""}
+  var P=new URLSearchParams(location.search),K="lc73-src",now=Date.now(),cur=null;try{cur=JSON.parse(localStorage.getItem(K)||"null")}catch(e){}
+  var cl=function(v,n){return String(v||"").toLowerCase().replace(/[^a-z0-9._-]/g,"").slice(0,n)};
+  var inc={code:cl(P.get("src"),24),utm_source:cl(P.get("utm_source"),40),utm_medium:cl(P.get("utm_medium"),40),utm_campaign:cl(P.get("utm_campaign"),60),ref:String(P.get("ref")||"").replace(/[^A-Za-z0-9_-]/g,"").slice(0,40)};
+  var has=!!(inc.code||inc.utm_source||inc.ref),dev=(cur&&cur.device)||("w-"+Math.random().toString(36).slice(2,12)+now.toString(36));
+  var empty=!cur||!(cur.code||cur.utm_source||cur.ref);
+  if(!cur||(has&&(empty||now-(+cur.at||0)>30*864e5))){cur={code:inc.code,utm_source:inc.utm_source,utm_medium:inc.utm_medium,utm_campaign:inc.utm_campaign,ref:inc.ref,device:dev,first_at:new Date().toISOString(),at:now}}
+  else if(inc.ref&&!cur.ref)cur.ref=inc.ref;
+  try{localStorage.setItem(K,JSON.stringify(cur))}catch(e){}
+  var u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key"),day=new Date().toISOString().slice(0,10);
+  if(u&&k&&!/preview=/.test(location.search)){var dk="lc73-land-day";var last="";try{last=localStorage.getItem(dk)||""}catch(e){}
+    if(last!==day){try{localStorage.setItem(dk,day)}catch(e){}fetch(u+"/rest/v1/rpc/lc73_hit",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:JSON.stringify({p:{kind:"landing",device:cur.device,code:cur.code||"",utm_source:cur.utm_source||""}})}).catch(function(){})}}
+  window.addEventListener("appinstalled",function(){if(u&&k)fetch(u+"/rest/v1/rpc/lc73_hit",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:JSON.stringify({p:{kind:"install",device:cur.device,code:cur.code||""}})}).catch(function(){})});
+  try{var a=JSON.parse(localStorage.getItem("lc26-auth")||"null");if(a&&String(a.email||"").toLowerCase()==="lanckrietchess@gmail.com"&&!/preview=/.test(location.search)){var b=document.createElement("a");b.className="lc72-edit";b.href="/app.html#landing-editor";b.textContent="✎ Edit this page";document.body.appendChild(b)}}catch(e){}
 })();
 </script>
 </body>

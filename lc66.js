@@ -59,9 +59,11 @@
     let list=[];try{list=(studioApi().lc54.scenes()||[]).slice(0,12)}catch(e){list=[]}
     box.innerHTML='<span>Scene:</span>'+(list.length?list.map(s=>'<button type="button" class="lc66-chip'+(s.name===curScene?" is-on":"")+'" data-lc66-scene="'+esc(s.name)+'">'+esc(s.name)+'</button>').join(""):'<span>none saved yet. Build one in Scene Builder and press Scenes, then Save.</span>');
   }
+  let prevTab="";
   function setTab(sr,id){
     id=OLD[id]||id;
     const t=TABS.filter(x=>x.id===id)[0]||TABS[0],lcs=Q("#lcs",sr);if(!lcs)return;
+    if(t.id==="library"){const cur=rd("lc66-tab","");if(cur&&cur!=="library")prevTab=cur}   /* 9.37.0: where "Back" in the Content Library returns to */
     TABS.forEach(x=>lcs.classList.remove("lc66-"+x.id));
     if(R[t.id])lcs.classList.add("lc66-"+t.id);
     QA(".lc66-opt",sr).forEach(b=>b.setAttribute("aria-checked",String(b.getAttribute("data-tab")===t.id)));
@@ -201,5 +203,7 @@
     css();document.addEventListener("click",onClick,true);
     let deb=0;new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{if(route()==="trim")jumpFirst();else{inject();paintStars()}}catch(e){}},300)}).observe(document.body,{childList:true,subtree:true});
   }
-  return{init:init,afterRender:afterRender,onGoto:onGoto,deviation:deviation,saveCase:saveCase,flagged:flagged,flag:flag,setTab:setTab,TABS:TABS,tabCss:tabCss,version:"9.35.0"};
+  /* 9.37.0: Back from the Content Library to the section you came from (the Edit tool when you came from there) */
+  function back(){const sr=studioRoot();if(!sr)return false;setTab(sr,prevTab&&prevTab!=="library"?prevTab:"edit");return true}
+  return{init:init,afterRender:afterRender,onGoto:onGoto,deviation:deviation,saveCase:saveCase,flagged:flagged,flag:flag,setTab:setTab,back:back,TABS:TABS,tabCss:tabCss,version:"9.37.0"};
 })(); /*@@end lc66*/

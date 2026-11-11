@@ -1,6 +1,8 @@
 /* ---------- LC35 (9.13.0): Creator Studio Content Hub, cloud export, Clip Archiver and variant remixer. Inside the Studio closure. ---------- */
 const LC35S_CSS=`
-#lc35-hub{position:absolute;inset:0;z-index:80;display:flex;flex-direction:column;background:rgba(7,9,12,.97);backdrop-filter:blur(10px)}
+#lc35-hub{position:fixed;inset:0;z-index:2147482000;display:flex;flex-direction:column;background:rgba(7,9,12,.985);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.lc35-top{position:sticky;top:0;z-index:2;background:rgba(7,9,12,.99)}
+#lc35-back,#lc35-home{min-height:44px;font-weight:700}
 #lc35-hub[hidden]{display:none}
 .lc35-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(0,229,255,.2)}
 .lc35-top h2{margin:0;font-size:18px;margin-right:auto}
@@ -136,7 +138,12 @@ const LC35S=(()=>{
     let v=$("#lc35-hub");if(v)return v;
     v=h("div",{id:"lc35-hub",hidden:true,role:"dialog","aria-modal":"true","aria-label":"Content hub"});$("#lcs").append(v);return v;
   }
-  function openHub(){H.open=true;const v=ensureView();v.hidden=false;paint();load()}
+  function openHub(){H.open=true;const v=ensureView();v.hidden=false;paint();load();try{v.scrollTop=0;const b=$("#lc35-body");if(b)b.scrollTop=0}catch(e){}
+    /* 9.37.0: the phone's back button and Esc close the hub instead of leaving the Studio */
+    try{if(!(history.state&&history.state.lc35hub))history.pushState(Object.assign({},history.state||{},{lc35hub:1}),"")}catch(e){}
+    if(!H.keys){H.keys=1;window.addEventListener("popstate",()=>{if(H.open)hubBack(true)});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&H.open)hubBack()})}}
+  function hubBack(fromPop){closeHub();try{if(!fromPop&&history.state&&history.state.lc35hub)history.back()}catch(e){}try{if(typeof LC66!=="undefined"&&LC66.back&&LC66.back())return}catch(e){}}
+  function hubHome(){hubBack();setTimeout(()=>{location.hash="#home"},60)}
   function closeHub(){H.open=false;const v=$("#lc35-hub");if(v)v.hidden=true}
   function chip(it,p){
     const st=it.platforms[p[0]]||"orange";
@@ -174,11 +181,11 @@ const LC35S=(()=>{
     const v=$("#lc35-hub");if(!v||v.hidden)return;
     v.textContent="";
     const u=H.usage,todo=H.items.reduce((n,i)=>n+PL.filter(p=>i.platforms[p[0]]==="orange").length,0);
-    v.append(h("div",{class:"lc35-top"},h("h2",{text:"Content hub"}),
+    v.append(h("div",{class:"lc35-top"},h("button",{type:"button",class:"btn sm",id:"lc35-back",text:"← Back to the Edit tool","aria-label":"Back to the Studio",onclick:()=>hubBack()}),h("button",{type:"button",class:"btn sm",id:"lc35-home",text:"Main menu",onclick:hubHome}),h("h2",{text:"Content Library"}),
       u?h("div",{class:"lc35-use","aria-label":"Cloud space used"},h("span",{text:u.items+" of "+u.maxItems+" projects · "+mb(u.bytes)+" of "+mb(u.maxBytes)}),h("i",{},h("b",{style:{width:Math.min(100,u.bytes/u.maxBytes*100)+"%"}}))):null,
       h("span",{class:"lc35-hint",text:todo?todo+" post"+(todo===1?"":"s")+" still to do":(H.items.length?"Everything is posted or skipped":"")}),
       h("button",{type:"button",class:"btn sm",id:"lc35-refresh",text:"Refresh",onclick:()=>load()}),
-      h("button",{type:"button",class:"btn sm",id:"lc35-close",text:"Close",onclick:closeHub})));
+      h("button",{type:"button",class:"btn sm",id:"lc35-close",text:"Close",onclick:()=>hubBack()})));
     const body=h("div",{class:"lc35-body",id:"lc35-body"});
     if(H.denied)body.append(h("div",{class:"lc35-empty",text:WHY.forbidden}));
     else if(H.loading&&!H.items.length)body.append(h("div",{class:"lc35-empty",text:"Loading your projects…"}));

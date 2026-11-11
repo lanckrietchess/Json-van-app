@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="lc-sb-url" content="https://wllljllajadiwjdsageu.supabase.co">
+<meta name="lc-sb-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndsbGxqbGxhamFkaXdqZHNhZ2V1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4ODAyOTUsImV4cCI6MjEwNjQ1NjI5NX0.dTLGb1e9zr74vYvGX6hypkrtSPMHZK7Necu2GIBJcOo">
+<title>Lanckriet Chess</title>
+<style>html,body{margin:0;height:100%;background:#0f172a;color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}main{min-height:100%;display:grid;place-items:center;text-align:center;padding:24px}a{color:#38bdf8}</style>
+</head>
+<body>
+<main><p>Opening Lanckriet Chess… <a id="go" href="/">Tap here if nothing happens</a></p></main>
+<script>
+/* 9.37.0 LC73: short links. /l/<code> (vercel.json rewrite) counts one click for the code and opens its destination with ?src=<code>;
+   the landing page and the app keep that source on this device and link it to the account at sign-in. */
+(function(){
+  function m(n){var e=document.querySelector('meta[name="'+n+'"]');return e?e.getAttribute("content")||"":""}
+  var code=String((location.pathname.match(/\/l\/([A-Za-z0-9-]{2,24})/)||[])[1]||"").toLowerCase(),u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");
+  var cur=null;try{cur=JSON.parse(localStorage.getItem("lc73-src")||"null")}catch(e){}
+  var dev=(cur&&cur.device)||("w-"+Math.random().toString(36).slice(2,12)+Date.now().toString(36));
+  if(!cur){try{localStorage.setItem("lc73-src",JSON.stringify({device:dev,at:Date.now()}))}catch(e){}}
+  function go(dest){dest=/^\/[A-Za-z0-9_.\/?=&#-]{0,200}$/.test(dest||"")?dest:"/";var h=dest.split("#"),q=h[0].indexOf("?")>=0?"&":"?";var to=h[0]+(code?q+"src="+encodeURIComponent(code):"")+(h[1]?"#"+h[1]:"");document.getElementById("go").href=to;location.replace(to)}
+  if(!code||!u||!k){go("/");return}
+  var done=false,t=setTimeout(function(){if(!done){done=true;go("/")}},2500);
+  fetch(u+"/rest/v1/rpc/lc73_link_open",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:JSON.stringify({p_code:code,p_device:dev})})
+    .then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(j){if(done)return;done=true;clearTimeout(t);go(j&&j.dest||"/")});
+})();
+</script>
+</body>
+</html>

@@ -59,6 +59,59 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (!res.ok) { console.error('Stripe ' + res.status + ' ' + path + ': ' + ((j && j.error && j.error.message) || '')); throw Object.assign(new Error('stripe_error'), { status: 502 }); }
     return j;
   }
+  /* ----- LC73 (9.37.0): the signed-in buyer, the saved Stripe customer and the referral discount ----- */
+  async function userEmail(token) {
+    const tok = clean(token, 4000);
+    if (!/^[A-Za-z0-9._-]{20,4000}$/.test(tok) || !E.SUPABASE_URL) return '';
+    try {
+      const r = await doFetch(String(E.SUPABASE_URL).replace(/\/+$/, '') + '/auth/v1/user', { headers: { apikey: E.SUPABASE_ANON_KEY || '', Authorization: 'Bearer ' + tok } });
+      if (!r.ok) return '';
+      const u = await r.json().catch(() => null), em = clean(u && u.email, 130).toLowerCase();
+      return EMAIL34.test(em) ? em : '';
+    } catch (e) { return ''; }
+  }
+  const q1 = async (query, ...a) => { try { return await DB.prepare(query).bind(...a).first(); } catch (e) { return null; } };
+  const run1 = async (query, ...a) => { try { await DB.prepare(query).bind(...a).run(); return true; } catch (e) { console.error('LC73: ' + (e && e.message)); return false; } };
+  async function customerOf(email) { const r = email ? await q1('SELECT customer_id FROM public.lc73_customers WHERE email = ?', email) : null; return r && /^cus_[A-Za-z0-9]+$/.test(r.customer_id) ? r.customer_id : ''; }
+  async function rememberCustomer(email, cus) { if (EMAIL34.test(email || '') && /^cus_[A-Za-z0-9]+$/.test(cus || '')) await run1('INSERT INTO public.lc73_customers (email, customer_id) VALUES (?, ?) ON CONFLICT (email) DO UPDATE SET customer_id = EXCLUDED.customer_id, updated_at = now()', email, cus); }
+  async function discountFor(email) { const r = email ? await q1('SELECT public.lc73_discount_for(?) AS k', email) : null; return r && (r.k === 'invitee' || r.k === 'referrer') ? r.k : ''; }
+  async function refCoupon() {
+    const id = clean(E.REFERRAL_COUPON || 'LC-REF10', 40);
+    try { await stripe('GET', 'coupons/' + encodeURIComponent(id)); return id; }
+    catch (e) { try { await stripe('POST', 'coupons', { id, percent_off: 10, duration: 'once', name: 'Friend referral: 10% off' }); return id; } catch (e2) { return ''; } }
+  }
+  /* adds the saved customer (their card is offered again: one tap) and the referral discount to a Checkout form; returns the discount kind used */
+  async function personalise(form, email, meta, allowDiscount) {
+    /* the card is remembered by Stripe automatically (Stripe keeps it, we only keep the customer id) and offered again next time: one tap */
+    const cus = await customerOf(email);
+    if (cus) { form.customer = cus; delete form.customer_email; form.saved_payment_method_options = { allow_redisplay_filters: ['always', 'limited', 'unspecified'] }; }
+    else if (form.mode === 'payment') form.customer_creation = 'always';
+    if (form.mode === 'payment') form.payment_intent_data = Object.assign({}, form.payment_intent_data || {}, { setup_future_usage: 'on_session' });
+    let kind = allowDiscount ? await discountFor(email) : '';
+    if (kind) { const c = await refCoupon(); if (c) { form.discounts = [{ coupon: c }]; meta.ref_disc = kind; meta.ref_email = email; } else kind = ''; }
+    return kind;
+  }
+  async function fixedCoupon(id, cents, name) {
+    try { await stripe('GET', 'coupons/' + encodeURIComponent(id)); return id; }
+    catch (e) { try { await stripe('POST', 'coupons', { id, amount_off: cents, currency: 'eur', duration: 'once', name }); return id; } catch (e2) { return ''; } }
+  }
+  /* LC73 routes: the 7-day trial (one per e-mail) and the rescue offer (after the first paid month of a trial) */
+  async function trial(body, ip) {
+    if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
+    const email = await userEmail(body.token);
+    if (!email) return { status: 401, body: { ok: false, reason: 'sign_in' } };
+    if (await q1('SELECT 1 AS ok FROM public.lc73_trials WHERE email = ?', email)) return { status: 409, body: { ok: false, reason: 'trial_used' } };
+    if (await q1("SELECT 1 AS ok FROM public.licenses WHERE lower(email) = ? AND tier >= 2 AND coalesce(revoked, false) = false AND expires_at > now()", email)) return { status: 409, body: { ok: false, reason: 'already_member' } };
+    return subscribe({ plan: 'monthly', tier: 2, email, ret: body.ret, device: body.device }, ip, { trial: true, email, meta: { trial: '1' } });
+  }
+  async function rescue(body, ip) {
+    if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
+    const email = await userEmail(body.token);
+    if (!email) return { status: 401, body: { ok: false, reason: 'sign_in' } };
+    const t = await q1('SELECT subscription_id FROM public.lc73_trials WHERE email = ? AND rescue_until > now() AND rescue_used = false ORDER BY started_at DESC LIMIT 1', email);
+    if (!t) return { status: 409, body: { ok: false, reason: 'no_offer' } };
+    return subscribe({ plan: 'yearly', tier: 2, email, ret: body.ret, device: body.device }, ip, { email, minus: num(E.RESCUE_CENTS, 3900), meta: { rescue: '1', cancel_sub: t.subscription_id || '' } });
+  }
   const creatorOf = (code) => DB.prepare('SELECT code, name, stripe_account, charges_enabled, payouts_enabled, fee_pct, status FROM arena.lc27_creators WHERE code = ?').bind(code).first();
 
   async function checkout(body, ip) {
@@ -109,7 +162,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const taken = [0, 0, 0], paid = [0, 0, 0];
     rows.forEach((r) => { taken[r.tranche - 1] += +r.n; if (r.status === 'paid') paid[r.tranche - 1] += +r.n; });
     const left = [0, 1, 2].map((i) => Math.max(0, p.caps[i] - taken[i])), tranche = left[0] > 0 ? 1 : left[1] > 0 ? 2 : left[2] > 0 ? 3 : 4;
-    return { ok: true, tier, tranche, left, sold: paid, caps: p.caps, yearly: [p.prices[0], p.prices[1], p.prices[2], p.base], base: p.base, monthly: p.monthly, gift: giftCents(), discountPct: p.prices.map((x) => Math.round((1 - x / p.base) * 100)) };
+    return { ok: true, tier, tranche, left, sold: paid, caps: p.caps, yearly: [p.prices[0], p.prices[1], p.prices[2], p.base], base: p.base, monthly: p.monthly, gift: tier === 2 ? Math.min(giftCents(), [p.prices[0], p.prices[1], p.prices[2], p.base][tranche - 1]) : giftCents(), discountPct: p.prices.map((x) => Math.round((1 - x / p.base) * 100)) };
   }
   async function takeSlot(tranche, cap, row) {
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -134,12 +187,14 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (email && !EMAIL34.test(email)) return { status: 400, body: { ok: false, reason: 'bad_email' } };
     await expireOpen();
     const tier = Number(body.tier) === 3 ? 3 : 2, p = PT(tier), t0 = now(), tmp = 'tmp_' + rnd(), row = { id: tmp, email, plan, tier, device: clean(body.device, 64), created: t0, expires: t0 + p.holdMs };
+    const opt = arguments[2] || {}, member = opt.email || await userEmail(body.token);
+    if (member && !email) row.email = member;
     let tranche = null, slot = null, amount = p.monthly;
     if (plan === 'yearly') {
       for (const t of [1, 2, 3]) { const s = await takeSlot(t, p.caps[t - 1], Object.assign({ amount: p.prices[t - 1] }, row)); if (s) { tranche = t; slot = s; amount = p.prices[t - 1]; break; } }
       if (!tranche) { tranche = 4; amount = p.base; await insertSale(Object.assign({ tranche: 4, amount }, row)); }
     } else await insertSale(Object.assign({ amount }, row));
-    const base = String(E.APP_URL), meta = { lc: 'pro', plan, tier, tranche: tranche || '', slot: slot || '', locked_cents: amount };
+    const base = String(E.APP_URL), meta = Object.assign({ lc: 'pro', plan, tier, tranche: tranche || '', slot: slot || '', locked_cents: amount }, opt.meta || {});
     const tax = String(E.STRIPE_TAX || '') === 'inclusive';
     const names = { 1: 'Founding Member rate', 2: 'Early Adopter rate', 3: 'Launch rate', 4: 'Standard rate' };
     const form = { mode: 'subscription', customer_email: email || undefined, client_reference_id: row.device || undefined, metadata: meta,
@@ -147,6 +202,17 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       automatic_tax: tax ? { enabled: true } : undefined, subscription_data: { metadata: meta },
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: amount, tax_behavior: tax ? 'inclusive' : undefined, recurring: { interval: plan === 'yearly' ? 'year' : 'month' },
         product_data: { name: 'Lanckriet Chess ' + (tier === 3 ? 'VIP' : 'Pro') + ', ' + (plan === 'yearly' ? 'yearly' : 'monthly') + (tranche ? ' (' + names[tranche] + ')' : ''), description: (tier === 3 ? 'Everything in Pro, plus your tokens credited upfront (500 a month, or 7,000 on the yearly plan), the Lanckriet Chess Student title, a blue profile border and priority in live streams and the community.' : 'The whole library, the 24/7 AI coach and 10 tokens a day, refreshed daily.') + (tranche && tranche < 4 ? ' Your ' + names[tranche] + ' stays the same for as long as your subscription stays active.' : '') } } }] };
+    if (opt.trial) {   /* LC73: 7 days at EUR 0 with the card on file, then the monthly price until cancelled; Checkout shows "7 days, then EUR 39.00 / month" */
+      form.payment_method_collection = 'always';
+      form.subscription_data.trial_period_days = 7;
+      form.subscription_data.trial_settings = { end_behavior: { missing_payment_method: 'cancel' } };
+      form.custom_text = { submit: { message: 'EUR 0 today. From day 8 Pro costs EUR ' + (amount / 100).toFixed(2) + ' a month until you cancel. Cancel any time before the trial ends (Account > Manage subscription) and nothing is charged. Pro starts right away, so payments after the trial are not refunded (you agreed to this in the app).' } };
+    }
+    if (opt.minus) {   /* LC73 rescue: a one-time EUR 39 off the first year; renewals are at the normal yearly rate */
+      const c = await fixedCoupon('LC-RESCUE39', opt.minus, 'Your first month counts toward the year');
+      if (c) form.discounts = [{ coupon: c }];
+      const cus = await customerOf(row.email); if (cus) { form.customer = cus; delete form.customer_email; }
+    } else await personalise(form, row.email, meta, plan === 'yearly' || !opt.trial);
     let sess;
     try { sess = await stripe('POST', 'checkout/sessions', form); }
     catch (e) { await DB.prepare('DELETE FROM arena.lc34_pro_sales WHERE session_id = ?').bind(tmp).run(); throw e; }
@@ -156,18 +222,32 @@ export function makeStripeHandler(sql, env, fetchImpl) {
   }
   /* ----- LC36: Gift a friend. One year of Pro, paid once, for another email address. No renewal. The recipient signs in with that address. ----- */
   const giftCents = () => num(E.GIFT_PRO_YEAR_CENTS, P34().base);
+  /* LC73 (9.37.0): a gift costs the yearly Pro rate that is live NOW (Founding / Early Adopter / launch), or the member's OWN locked yearly rate when that is lower.
+     The member is identified by their Supabase token (never by a typed e-mail, so nobody can borrow somebody else's Founding rate). A gift takes no launch spot. */
+  async function giftRate(body) {
+    const st = await pricingState(2), p = PT(2), live = st.yearly[(st.tranche || 4) - 1] || p.base;
+    let amount = Math.min(live, giftCents()), why = (st.tranche || 4) < 4 ? 'launch' : 'standard', tranche = st.tranche || 4;
+    const email = await userEmail(body && body.token);
+    if (email) {
+      let own = await q1("SELECT min(s.tranche) AS t FROM arena.lc34_pro_sales s WHERE lower(s.email) = ? AND s.status = 'paid' AND s.plan = 'yearly' AND s.tranche BETWEEN 1 AND 3 AND EXISTS (SELECT 1 FROM public.licenses l WHERE upper(l.license_key) = upper(s.license_key) AND coalesce(l.revoked, false) = false AND l.expires_at > now())", email);
+      let t = own && own.t ? +own.t : 0;
+      if (!t) { const pl = await q1("SELECT 1 AS ok FROM public.lc45_payment_events e WHERE lower(e.email) = ? AND e.product IN ('pro_yearly','vip_yearly') AND EXISTS (SELECT 1 FROM public.licenses l WHERE lower(l.email) = lower(e.email) AND l.tier >= 2 AND coalesce(l.revoked, false) = false AND l.expires_at > now()) LIMIT 1", email); if (pl) t = 1; }   /* the yearly Payment Links carry the Founding price */
+      if (t >= 1 && t <= 3 && p.prices[t - 1] < amount) { amount = p.prices[t - 1]; why = 'yours'; tranche = t; }
+    }
+    return { amount, why, tranche, signed_in: !!email };
+  }
   async function gift(body, ip) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
     const to = clean(body.to, 130).toLowerCase(), from = clean(body.email, 130).toLowerCase();
     if (!EMAIL34.test(to)) return { status: 400, body: { ok: false, reason: 'bad_recipient' } };
     if (from && !EMAIL34.test(from)) return { status: 400, body: { ok: false, reason: 'bad_email' } };
-    const amount = giftCents(), urls = returnUrls(body.ret), tax = String(E.STRIPE_TAX || '') === 'inclusive', meta = { lc: 'gift', to, plan: 'yearly' };
+    const rate = await giftRate(body), amount = rate.amount, urls = returnUrls(body.ret), tax = String(E.STRIPE_TAX || '') === 'inclusive', meta = { lc: 'gift', to, plan: 'yearly' };
     const form = { mode: 'payment', customer_email: from || undefined, metadata: meta, payment_intent_data: { metadata: meta }, success_url: urls.ok, cancel_url: urls.no,
       automatic_tax: tax ? { enabled: true } : undefined,
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: amount, tax_behavior: tax ? 'inclusive' : undefined,
-        product_data: { name: 'Gift: Lanckriet Chess Pro, 1 year', description: 'One year of Pro for ' + to + '. They sign in with this email address to switch it on. It does not renew.' } } }] };
+        product_data: { name: 'Gift: Lanckriet Chess Pro, 1 year' + (rate.why === 'yours' ? ' (your own rate)' : rate.why === 'launch' ? ' (launch rate)' : ''), description: 'One year of Pro for ' + to + '. They sign in with this email address to switch it on. It does not renew.' } } }] };
     const sess = await stripe('POST', 'checkout/sessions', form);
-    return { status: 200, body: { ok: true, url: sess.url, session: sess.id, amount_cents: amount } };
+    return { status: 200, body: { ok: true, url: sess.url, session: sess.id, amount_cents: amount, why: rate.why } };
   }
   async function giftPaid(o) {
     const m = o.metadata || {}, to = clean(m.to, 130).toLowerCase();
@@ -176,6 +256,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (have) return;   /* Stripe sent the event twice: one gift, one licence */
     const until = now() + 365 * 864e5, from = clean((o.customer_details && o.customer_details.email) || o.customer_email, 130).toLowerCase();
     const flags = { source: 'gift', plan: 'yearly', session: o.id, from };
+    if (from) await afterPaid(o, from);
     const lic = await DB.prepare('SELECT license_key FROM public._lc_create_license(?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)')
       .bind(to, 'gift', 'Pro gift (1 year)', 2, false, new Date(until).toISOString(), P34().dailyTokens, flags, 3).first();
     if (!lic || !lic.license_key) throw new Error('gift licence not created');   /* throwing makes Stripe retry the webhook */
@@ -192,14 +273,21 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       automatic_tax: tax ? { enabled: true } : undefined,
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: pack.cents, tax_behavior: tax ? 'inclusive' : undefined,
         product_data: { name: pack.tokens + ' Lanckriet Chess tokens', description: 'Tokens for deep game analyses and the coach. They are added to your account when you sign in to the Hub with ' + email + '.' } } }] };
+    await personalise(form, email, meta, true);
     const sess = await stripe('POST', 'checkout/sessions', form);
     return { status: 200, body: { ok: true, url: sess.url, session: sess.id, amount_cents: pack.cents, tokens: pack.tokens } };
+  }
+  async function afterPaid(o, email) {   /* LC73: remember the Stripe customer (their saved card is offered next time) and use up a referral discount */
+    const m = o.metadata || {};
+    if (o.customer) await rememberCustomer(email, o.customer);
+    if ((m.ref_disc === 'invitee' || m.ref_disc === 'referrer') && EMAIL34.test(m.ref_email || '')) await run1('SELECT public.lc73_discount_paid(?, ?, ?)', m.ref_email, m.ref_disc, o.id);
   }
   async function tokensPaid(o) {
     const m = o.metadata || {}, pack = Object.prototype.hasOwnProperty.call(PACKS, m.pack) ? PACKS[m.pack] : null;
     const email = clean(m.email || (o.customer_details && o.customer_details.email) || o.customer_email, 130).toLowerCase();
     if (!pack || !EMAIL34.test(email)) { console.error('LC36: token pack without a valid pack or email ' + o.id); return; }
-    await DB.prepare('INSERT INTO public.lc36_token_credits (email, tokens, pack, amount_cents, session_id) VALUES (?, ?, ?, ?, ?) ON CONFLICT (session_id) DO NOTHING').bind(email, pack.tokens, m.pack, pack.cents, o.id).run();   /* the pack size comes from the table above, not from the metadata */
+    await DB.prepare('INSERT INTO public.lc36_token_credits (email, tokens, pack, amount_cents, session_id) VALUES (?, ?, ?, ?, ?) ON CONFLICT (session_id) DO NOTHING').bind(email, pack.tokens, m.pack, o.amount_total != null ? o.amount_total : pack.cents, o.id).run();   /* the pack size comes from the table above, not from the metadata */
+    await afterPaid(o, email);
   }
   /* LC39 vipCredit: VIP gets its tokens upfront: TOKENS_VIP_MONTH (500) for every paid month, VIP_YEAR_TOKENS (7,000) for every paid year. They wait in
      lc36_token_credits under the buyer's email and move to the wallet at sign-in, like the token packs. The key is the checkout / invoice id: one row per payment. */
@@ -242,8 +330,19 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       else throw e;
     }
     await vipCredit(sale, email, o.id);
+    await afterPaid(o, email);
+    const m = o.metadata || {};
+    if (m.trial === '1') {
+      await run1('INSERT INTO public.lc73_trials (session_id, email, subscription_id, customer_id, trial_end) VALUES (?, ?, ?, ?, ?) ON CONFLICT (session_id) DO NOTHING', o.id, email, o.subscription || null, o.customer || null, new Date(now() + 7 * 864e5).toISOString());
+      await run1("INSERT INTO public.lc73_sub_events (kind, email, ref) VALUES ('trial_start', ?, ?) ON CONFLICT DO NOTHING", email, o.id);
+    }
+    if (m.rescue === '1') {
+      await run1('UPDATE public.lc73_trials SET rescue_used = true WHERE email = ?', email);
+      await run1("INSERT INTO public.lc73_sub_events (kind, email, amount_cents, ref) VALUES ('rescue', ?, ?, ?) ON CONFLICT DO NOTHING", email, o.amount_total || 0, o.id);
+      if (/^sub_[A-Za-z0-9]+$/.test(m.cancel_sub || '') && m.cancel_sub !== o.subscription) { try { await stripe('DELETE', 'subscriptions/' + m.cancel_sub); } catch (e) { console.error('LC73: could not cancel the monthly plan ' + m.cancel_sub); } }
+    }
     if (sale.license_key) return;
-    const until = licenseUntil(sale), flags = { source: 'stripe', plan: sale.plan, vip: sale.tier === 3, tranche: sale.tranche || 0, founding: sale.tranche === 1, early: sale.tranche === 1 || sale.tranche === 2, locked_cents: sale.amount_cents, session: o.id };
+    const until = m.trial === '1' ? now() + 8 * 864e5 + P34().graceMs : licenseUntil(sale), flags = { source: 'stripe', plan: sale.plan, vip: sale.tier === 3, tranche: sale.tranche || 0, founding: sale.tranche === 1, early: sale.tranche === 1 || sale.tranche === 2, locked_cents: sale.amount_cents, session: o.id };
     const lic = await DB.prepare('SELECT license_key FROM public._lc_create_license(?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)')
       .bind(email, 'stripe', (sale.tier === 3 ? 'VIP ' : 'Pro ') + sale.plan, 2, false, new Date(until).toISOString(), P34().dailyTokens, flags, 3).first();   /* an object, not a string: the driver encodes jsonb itself */
     if (!lic || !lic.license_key) throw new Error('licence not created');   /* throwing makes Stripe retry the webhook; nothing is lost */
@@ -253,13 +352,19 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const m = o.metadata || {};
     if (ev.type === 'checkout.session.completed' && m.lc === 'tokens') { if (o.mode === 'payment' && o.payment_status === 'paid') await tokensPaid(o); return true; }
     if (ev.type === 'checkout.session.completed' && m.lc === 'gift') { if (o.mode === 'payment' && o.payment_status === 'paid') await giftPaid(o); return true; }
-    if (ev.type === 'checkout.session.completed' && m.lc === 'pro') { if (o.mode === 'subscription' && o.payment_status === 'paid') await proPaid(o); return true; }
+    if (ev.type === 'checkout.session.completed' && m.lc === 'pro') { if (o.mode === 'subscription' && (o.payment_status === 'paid' || (m.trial === '1' && o.payment_status === 'no_payment_required'))) await proPaid(o); return true; }
+    if (ev.type === 'customer.subscription.deleted' && o.id) { await run1('UPDATE public.lc73_trials SET cancelled = true WHERE subscription_id = ? AND converted_at IS NULL', o.id); await run1("INSERT INTO public.lc73_sub_events (kind, ref) VALUES ('trial_cancel', ?) ON CONFLICT DO NOTHING", o.id); return false; }
     if (ev.type === 'checkout.session.expired' && m.lc === 'pro') { await DB.prepare("UPDATE arena.lc34_pro_sales SET status = 'expired' WHERE session_id = ? AND status = 'open'").bind(o.id).run(); return true; }
     if (ev.type === 'invoice.paid') {
       const subId = o.subscription || (o.parent && o.parent.subscription_details && o.parent.subscription_details.subscription) || '';
       const sale = subId && await DB.prepare("SELECT * FROM arena.lc34_pro_sales WHERE subscription_id = ? AND status = 'paid'").bind(subId).first();
       if (!sale) return false;
       if (o.billing_reason === 'subscription_cycle') await vipCredit(sale, sale.email, o.id);   /* the first invoice is credited by the checkout event */
+      if (+o.amount_paid > 0) {   /* LC73: the first paid invoice after a trial converts it and opens the rescue offer for 14 days; later ones are renewals */
+        const tr = await q1('SELECT session_id FROM public.lc73_trials WHERE subscription_id = ? AND converted_at IS NULL', subId);
+        if (tr) { await run1("UPDATE public.lc73_trials SET converted_at = now(), rescue_until = now() + interval '14 days' WHERE session_id = ?", tr.session_id); await run1("INSERT INTO public.lc73_sub_events (kind, email, amount_cents, ref) VALUES ('trial_convert', ?, ?, ?) ON CONFLICT DO NOTHING", sale.email || '', +o.amount_paid, o.id); }
+        else if (o.billing_reason === 'subscription_cycle') await run1("INSERT INTO public.lc73_sub_events (kind, email, amount_cents, ref) VALUES ('renewal', ?, ?, ?) ON CONFLICT DO NOTHING", sale.email || '', +o.amount_paid, o.id);
+      }
       const end = o.lines && o.lines.data && o.lines.data[0] && o.lines.data[0].period && o.lines.data[0].period.end;
       if (sale.license_key && end) {
         const until = licenseUntil(sale, end * 1000);
@@ -339,6 +444,9 @@ export function makeStripeHandler(sql, env, fetchImpl) {
         else if (path === 'subscribe') r = await subscribe(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'tokens') r = await tokensBuy(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'gift') r = await gift(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
+        else if (path === 'gift_quote') r = readLimited((req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim()) ? { status: 429, body: { ok: false, reason: 'slow_down' } } : { status: 200, body: Object.assign({ ok: true }, await giftRate(body)) };
+        else if (path === 'trial') r = await trial(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
+        else if (path === 'rescue') r = await rescue(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'pricing') r = readLimited((req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim()) ? { status: 429, body: { ok: false, reason: 'slow_down' } } : { status: 200, body: Object.assign(await pricingState(2), { vip: await pricingState(3), packs: Object.keys(PACKS).map((k) => ({ id: k, cents: PACKS[k].cents, tokens: PACKS[k].tokens })), portal: /^https:\/\/[^\s]{4,300}$/.test(String(E.BILLING_PORTAL_URL || '')) ? String(E.BILLING_PORTAL_URL) : '' }) };
         else if (path === 'claim') r = await claim(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'entitlement') r = await entitlement(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());

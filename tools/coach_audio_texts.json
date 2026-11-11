@@ -53,6 +53,17 @@
   "In your next 2 to 3 games, run Calculation on every move; as soon as the alarm “Loose piece” appears on the board, do this: Before you move, list your undefended pieces and theirs, then protect one of yours or attack one of theirs.",
   "In your next 2 to 3 games, run Calculation on every move; as soon as the alarm “Exposed king” appears on the board, do this: Before you open any line, count the attackers near your king. Add pawn cover or castle first.",
   "In your next 2 to 3 games, run Calculation on every move; as soon as the alarm “Advanced passed pawn” appears on the board, do this: Put a piece in front of their passed pawn right away, or start a counter-attack that is faster.",
-  "In your next 2 to 3 games, run Calculation on every move; as soon as the alarm “Opposite-side castling” appears on the board, do this: Count the tempi: your pawn storm against theirs. Then choose attack or defence for the next three moves."
+  "In your next 2 to 3 games, run Calculation on every move; as soon as the alarm “Opposite-side castling” appears on the board, do this: Count the tempi: your pawn storm against theirs. Then choose attack or defence for the next three moves.",
+  "That’s a classic delusional “don’t memorize your opening” trap. You actually need proper theory.",
+  "Theory is not memorising for its own sake: it is knowing what the position wants. Run M first: what did their move change?",
+  "You’re one step closer to full clarity.",
+  "Under 2000, every game feels like chaos. Above it, it is calm: you know what the position asks. Every clean line moves you there.",
+  "Classic Blitz-junkie move: hoping for tricks instead of calculating.",
+  "Blitz trains your hands, not your head. Under 2000 Rapid, play Rapid and run MSPC on every move.",
+  "Slow down. The routine is four questions, not one guess.",
+  "That miss is information. Name the step you skipped, then try again.",
+  "Review one of your own games in Trim so the app can find your first Working Point.",
+  "Play ONE sparring game with “Be My Sparring Partner”: I will wait for the alarm signal on the board and test whether you punish it.",
+  "Trim that game and write down, in one sentence, what should have warned you. That sentence is your next Working Point."
  ]
 }

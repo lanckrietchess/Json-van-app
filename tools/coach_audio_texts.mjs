@@ -17,5 +17,10 @@ Object.values(generic).forEach(t => texts.push(t));
 // the "next 2 to 3 games" orders: every letter x every alarm, and the version without an alarm
 const orders = (letter, id) => { const a = id && ALARM[id]; const act = ACT[id] || generic[letter]; return "In your next 2 to 3 games, run " + LNAME[letter] + " on every move; as soon as " + (a ? "the alarm “" + a.label + "”" : "an Alarm Signal") + " appears on the board, do this: " + act; };
 Object.keys(LNAME).forEach(l => { texts.push(orders(l, "")); Object.keys(ALARM).forEach(id => texts.push(orders(l, id))); });
+// 9.37.0: also the coach's micro-dialogues (LC69) and the fixed steps of "Make My Training Schedule" (LC61), voiced step by step
+const src69 = fs.readFileSync(root + "lc69.js", "utf8");
+const lines = src69.match(/const LINES=\{[\s\S]*?\]\};/);
+if (lines) { const L = new Function("return (" + lines[0].replace(/^const LINES=/, "").replace(/;$/, "") + ")")(); Object.values(L).forEach(a => a.forEach(t => texts.push(t))); }
+(src61.match(/steps\.push\("([^"+]+)"\)/g) || []).forEach(m => texts.push(m.slice(12, -2)));
 fs.writeFileSync(root + "tools/coach_audio_texts.json", JSON.stringify({ texts: [...new Set(texts)] }, null, 1));
 console.log([...new Set(texts)].length + " texts written");

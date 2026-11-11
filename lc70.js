@@ -123,6 +123,7 @@
       :adm&&shelf==="guest"?'<div class="btn-row lc70-owner"><button type="button" class="btn btn-ghost btn-sm" data-lc70="new-guest">'+ic("plus")+' Add a guest item yourself</button><button type="button" class="btn btn-ghost btn-sm" data-lc70="sales">'+ic("chart-simple")+" Sales per creator</button></div>":"";
     const chips=kinds.length>1?'<div class="lc70-filter" role="group" aria-label="Show">'+[["all","All"]].concat(kinds.map(k=>[k,KIND[k]+"s"])).map(x=>'<button type="button" class="lc70-f'+(f===x[0]?" is-on":"")+'" data-lc70="filter" data-f="'+x[0]+'" aria-pressed="'+(f===x[0])+'">'+esc(x[1])+"</button>").join("")+"</div>":"";
     const empty=shelf==="guest"?'<p class="muted">No guest items yet. Coaches and authors can submit theirs below.</p>':adm?'<p class="muted">Your shelf is empty. Add your first book, summary or video course.</p>':'<p class="muted">Kyenzo’s own books and courses appear here soon.</p>';
+    if(shelf==="kyenzo"&&typeof LC72!=="undefined"&&LC72.paintShelf){try{await LC72.paintShelf(host,Object.assign({},d,{items:list}),{cardHTML:cardHTML});if(chips)host.insertAdjacentHTML("afterbegin",chips);return}catch(e){console.error("lc72",e)}}   /* 9.37.0: two-part book pages with the token lock */
     const sp=shelf==="kyenzo"&&typeof LC71!=="undefined"?LC71.spot(items,d,cardHTML,adm):{id:"",html:""},list2=sp.id?list.filter(x=>x.id!==sp.id):list;
     host.innerHTML=bar+sp.html+chips+(list2.length?'<div class="lc70-grid">'+list2.map(it=>cardHTML(it,d)).join("")+"</div>":(sp.id?"":empty));
   }
@@ -415,5 +416,5 @@
       new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{ownerRows()}catch(e){}},120)}).observe(document.body,{childList:true});
     }catch(e){console.error("lc70",e)}
   }
-  return{init:init,afterRender:afterRender,catalog:catalog,paintShelf:paintShelf,openItem:openItem,ytId:ytId,toCents:toCents,cardHTML:cardHTML,version:"9.36.0"};
+  return{init:init,afterRender:afterRender,catalog:catalog,paintShelf:paintShelf,openItem:openItem,ytId:ytId,toCents:toCents,cardHTML:cardHTML,buyTokens:buyTokens,buyEuro:buyEuro,repaint:repaintAll,version:"9.37.0"};
 })(); /*@@end lc70*/

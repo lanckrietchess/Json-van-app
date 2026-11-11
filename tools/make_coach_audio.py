@@ -4,6 +4,10 @@ the "next 2 to 3 games" orders) once, in the owner's ElevenLabs voice. Python st
 
   python3 tools/make_coach_audio.py --dry          shows the number of clips and characters, nothing is sent
   python3 tools/make_coach_audio.py                makes the missing clips
+  python3 tools/make_coach_audio.py --extra coach_voice_extra.json
+                                                   (9.37.0) also voices the texts of the app's "Coach voice audit" list
+                                                   (owner menu > Coach voice audit > Download the list)
+  python3 tools/make_coach_audio.py --list         prints every text that would be voiced (read them before you pay)
 
 Needs a .env next to content.json with ELEVENLABS_API_KEY and ELEVENLABS_VOICE_ID (never upload it).
 Reads  tools/coach_audio_texts.json  (made by tools/coach_audio_texts.mjs from the app's own texts).
@@ -46,8 +50,17 @@ def speak(text, key, voice):
         return r.read()
 
 def main(argv):
-    dry = "--dry" in argv
+    dry = "--dry" in argv or "--list" in argv
     texts = json.load(open(os.path.join(HERE, "coach_audio_texts.json"), encoding="utf-8"))["texts"]
+    if "--extra" in argv:   # 9.37.0: the list the app collected (only texts without a name or number in them are worth voicing)
+        i = argv.index("--extra")
+        if i + 1 >= len(argv) or not os.path.exists(argv[i + 1]):
+            print("--extra needs a JSON file (the downloaded coach_voice_extra.json)"); return 2
+        ex = json.load(open(argv[i + 1], encoding="utf-8"))
+        ex = ex.get("texts", []) if isinstance(ex, dict) else ex
+        ex = [t for t in ex if isinstance(t, str) and 3 <= len(t.strip()) <= MAX_CHARS]
+        print("%d extra texts from %s" % (len(ex), argv[i + 1]))
+        texts = list(texts) + ex
     seen, todo = {}, []
     for t in texts:
         c = clean(t)
@@ -60,6 +73,9 @@ def main(argv):
             todo.append((h, c))
     chars = sum(len(c) for _, c in todo)
     print("%d texts, %d clips to make, %d characters" % (len(seen), len(todo), chars))
+    if "--list" in argv:
+        for h, c in todo:
+            print("  " + h + "  " + c)
     if dry or not todo:
         return 0
     load_env()
