@@ -313,11 +313,14 @@
   }
   function crowdHTML(o,pick){
     if(!o||!o.fen)return"";
-    return'<details class="lc61-crowd"><summary>What should have warned you here?</summary>'
-      +'<p class="small muted">Type the sign you missed, in one sentence. It goes to the coach\'s queue and the best ones join the library.</p>'
-      +'<label class="field"><textarea rows="2" maxlength="280" data-lc61-warn placeholder="e.g. Their knight was on e5 and I had no pawn left to chase it."></textarea></label>'
-      +'<button type="button" class="btn btn-ghost btn-sm" data-lc61="warn-send" data-fen="'+esc(o.fen)+'" data-san="'+esc(o.ps||"")+'" data-letter="'+esc(o.k||"")+'" data-alarm="'+esc(pick?pick.id:"")+'">Send to the queue</button>'
-      +'<span class="small" data-lc61-warn-out aria-live="polite"></span></details>';
+    /* 9.36.0: a dropdown with the approved answers of other players (LC71 loads them when it opens) and "Send one for approval myself" */
+    return'<details class="lc61-crowd" data-lc71-crowd data-fen="'+esc(o.fen)+'" data-alarm="'+esc(pick?pick.id:"")+'" data-letter="'+esc(o.k||"")+'"><summary>What should have warned you here? <small class="muted">Answers from other players</small></summary>'
+      +'<div data-lc71-list><p class="small muted">Loading…</p></div>'
+      +'<div class="lc71-own"><button type="button" class="btn btn-ghost btn-sm" data-lc71-own>Send one for approval myself</button><div data-lc71-ownbox hidden>'
+      +'<p class="small muted">Type the sign you missed, in one sentence. The coach approves it before other players see it.</p>'
+      +'<label class="field"><textarea rows="2" maxlength="280" data-lc61-warn aria-label="What should have warned you" placeholder="e.g. Their knight was on e5 and I had no pawn left to chase it."></textarea></label>'
+      +'<button type="button" class="btn btn-primary btn-sm" data-lc61="warn-send" data-fen="'+esc(o.fen)+'" data-san="'+esc(o.ps||"")+'" data-letter="'+esc(o.k||"")+'" data-alarm="'+esc(pick?pick.id:"")+'">Send for approval</button>'
+      +'<span class="small" data-lc61-warn-out aria-live="polite"></span></div></div></details>';
   }
   async function sendWarn(btn){
     const box=btn.closest("details"),ta=Q("[data-lc61-warn]",box),out=Q("[data-lc61-warn-out]",box);

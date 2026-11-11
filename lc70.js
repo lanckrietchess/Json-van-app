@@ -123,7 +123,8 @@
       :adm&&shelf==="guest"?'<div class="btn-row lc70-owner"><button type="button" class="btn btn-ghost btn-sm" data-lc70="new-guest">'+ic("plus")+' Add a guest item yourself</button><button type="button" class="btn btn-ghost btn-sm" data-lc70="sales">'+ic("chart-simple")+" Sales per creator</button></div>":"";
     const chips=kinds.length>1?'<div class="lc70-filter" role="group" aria-label="Show">'+[["all","All"]].concat(kinds.map(k=>[k,KIND[k]+"s"])).map(x=>'<button type="button" class="lc70-f'+(f===x[0]?" is-on":"")+'" data-lc70="filter" data-f="'+x[0]+'" aria-pressed="'+(f===x[0])+'">'+esc(x[1])+"</button>").join("")+"</div>":"";
     const empty=shelf==="guest"?'<p class="muted">No guest items yet. Coaches and authors can submit theirs below.</p>':adm?'<p class="muted">Your shelf is empty. Add your first book, summary or video course.</p>':'<p class="muted">Kyenzo’s own books and courses appear here soon.</p>';
-    host.innerHTML=bar+chips+(list.length?'<div class="lc70-grid">'+list.map(it=>cardHTML(it,d)).join("")+"</div>":empty);
+    const sp=shelf==="kyenzo"&&typeof LC71!=="undefined"?LC71.spot(items,d,cardHTML,adm):{id:"",html:""},list2=sp.id?list.filter(x=>x.id!==sp.id):list;
+    host.innerHTML=bar+sp.html+chips+(list2.length?'<div class="lc70-grid">'+list2.map(it=>cardHTML(it,d)).join("")+"</div>":(sp.id?"":empty));
   }
   function itemOf(id){
     let found=null;QA("[data-lc70-shelf]").forEach(h=>{const d=h.__d;if(!found&&d&&d.items)found=d.items.filter(x=>x.id===id)[0]||null});
@@ -140,9 +141,10 @@
     let html='<p class="small muted">'+esc(KIND[it.kind]||"")+(it.shelf==="guest"?" by "+esc(it.creator||"a guest creator"):"")+" · "+esc(accessLabel(d.access))+"</p>";
     if(d.ebook_url)html+='<p><a class="btn btn-primary" href="'+esc(d.ebook_url)+'" target="_blank" rel="noopener noreferrer">'+ic("book-open")+" Open the e-book</a></p><p class=\"small muted\">Please keep the file for yourself: it is licensed to your account.</p>";
     if(vids.length)html+='<div class="lc70-player"><iframe title="'+esc(vids[0].title)+'" src="https://www.youtube-nocookie.com/embed/'+ytId(vids[0].url)+'?rel=0" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>'
-      +'<ol class="lc70-lessons">'+vids.map((v,i)=>'<li><button type="button" class="lc70-lesson'+(i===0?" is-on":"")+'" data-yt="'+esc(ytId(v.url))+'" data-t="'+esc(v.title)+'">'+(i+1)+". "+esc(v.title)+"</button></li>").join("")+"</ol>";
+      +(typeof LC71!=="undefined"?LC71.lessonsHTML(d.videos,ytId):"");
+    else if(typeof LC71!=="undefined"&&LC71.hasPgn(d.videos))html+=LC71.lessonsHTML(d.videos,ytId);
     if(d.body)html+='<div class="lc70-text">'+String(d.body).split(/\n{2,}|\n/).filter(x=>x.trim()).map(p=>"<p>"+esc(p)+"</p>").join("")+"</div>";
-    if(!d.ebook_url&&!vids.length&&!d.body)html+='<p class="muted">Nothing is uploaded for this item yet.</p>';
+    if(!d.ebook_url&&!vids.length&&!d.body&&!(typeof LC71!=="undefined"&&LC71.hasPgn(d.videos)))html+='<p class="muted">Nothing is uploaded for this item yet.</p>';
     sheet(it.title,html,s=>{s.el.addEventListener("click",e=>{const b=e.target.closest("[data-yt]");if(!b)return;const f=Q(".lc70-player iframe",s.el);if(f){f.src="https://www.youtube-nocookie.com/embed/"+b.getAttribute("data-yt")+"?rel=0&autoplay=1";f.title=b.getAttribute("data-t")}QA(".lc70-lesson",s.el).forEach(x=>x.classList.toggle("is-on",x===b))})});
   }
 
@@ -222,7 +224,7 @@
     const load=id?rpc("lc70_admin_get",{p_id:id}):Promise.resolve({data:{ok:true,item:{shelf:shelf||"kyenzo",kind:"book",status:"draft"}}});
     load.then(r=>{
       const d=r.data||{};if(!d.ok){say(missing(r)?"Run the LC70 SQL first.":"Could not load it (are you signed in as the owner?).","bad");return}
-      const x=d.item,vids=(x.videos||[]).map(v=>v.title+" | "+v.url).join("\n");
+      const x=d.item,vids=(typeof LC71!=="undefined"?LC71.vidsText(x.videos):(x.videos||[]).map(v=>v.title+" | "+v.url).join("\n"));
       const inp=(n,l,v,ph,type)=>'<label class="field"><span class="field-label">'+l+'</span><input class="input" name="'+n+'" type="'+(type||"text")+'" value="'+esc(v)+'" placeholder="'+esc(ph||"")+'"></label>';
       const ta=(n,l,v,rows,ph)=>'<label class="field"><span class="field-label">'+l+'</span><textarea class="input" name="'+n+'" rows="'+rows+'" placeholder="'+esc(ph||"")+'">'+esc(v)+"</textarea></label>";
       const cb=(n,l,on)=>'<label class="lc70-check"><input type="checkbox" name="'+n+'"'+(on?" checked":"")+"> <span>"+l+"</span></label>";
@@ -241,7 +243,7 @@
         +cb("pro_included","Included with Pro while Pro is active (default for your courses)",x.pro_included===undefined?x.kind==="course":x.pro_included)+cb("vip_included","Included with VIP while VIP is active (guest items: only when agreed with the creator)",x.vip_included)
         +cb("vip_hardcover","VIP members can claim a free hardcover (you ship it)",x.vip_hardcover)+"</fieldset>"
         +'<fieldset class="lc70-fs"><legend>Content (only for people with access)</legend>'+inp("ebook_url","E-book download address (https://…)",val(x,"ebook_url"))+ta("body","Summary text",val(x,"body"),5)
-        +ta("videos","Video lessons, one per line: Title | unlisted YouTube link",vids,4,"Lesson 1: the idea | https://youtu.be/…")+"</fieldset>"
+        +ta("videos","Lessons, one per line: Title | unlisted YouTube link. Start a folder with ## Folder name. An opening for the trainer: PGN: Name | 1.e4 c6 2.d4 d5 … (write PGN black: for a Black repertoire)",vids,8,"## Chapter 1: the idea\nLesson 1 | https://youtu.be/…\nPGN black: Caro-Kann Advance | 1.e4 c6 2.d4 d5 3.e5 Bf5")+"</fieldset>"
         +'<p class="small muted">Stripe: give every Payment Link the metadata <b>lc_item</b> = <code data-lc70-idshow>'+esc(x.id||"(the id appears after saving)")+'</code>; for a printed book also <b>lc_format</b> = paperback or hardcover, and switch on “Collect customers’ addresses”. Prices here must match the links.</p>'
         +'<div class="btn-row"><button class="btn btn-primary" type="submit">Save</button></div><p class="form-msg" aria-live="polite"></p></form>',
         s=>{const form=Q(".lc70-form",s.el),msg=Q(".form-msg",form);
@@ -250,8 +252,8 @@
             if(!v("title")){msg.textContent="Give it a title.";return}
             if(links.length){msg.textContent="A Payment Link must look like https://buy.stripe.com/… ("+links.join(", ")+").";return}
             if(v("cover")&&!/^(https:\/\/|\/assets\/)/.test(v("cover"))){msg.textContent="The cover address must start with https:// or /assets/.";return}
-            const videos=v("videos").split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.lastIndexOf("|");return i>0?{title:l.slice(0,i).trim(),url:l.slice(i+1).trim()}:{title:"Lesson",url:l}});
-            const bad=videos.filter(x=>!ytId(x.url));if(bad.length){msg.textContent="These are not YouTube links: "+bad.map(x=>x.title).join(", ");return}
+            const videos=LC71.vidsParse(v("videos"));
+      const bad=videos.filter(x=>!x.pgn&&!ytId(x.url));if(bad.length){msg.textContent="These are not YouTube links: "+bad.map(x=>x.title).join(", ");return}
             const p={id:x.id||"",shelf:v("shelf"),kind:v("kind"),status:v("status"),title:v("title"),subtitle:v("subtitle"),author:v("author"),blurb:v("blurb"),cover:v("cover"),
               creator:v("creator"),creator_bio:v("creator_bio"),creator_email:v("creator_email"),tokens:v("tokens"),price_cents:toCents(v("price")),buy_link:v("buy_link"),
               paperback_cents:toCents(v("pb")),paperback_link:v("paperback_link"),hardcover_cents:toCents(v("hc")),hardcover_link:v("hardcover_link"),
@@ -413,5 +415,5 @@
       new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{ownerRows()}catch(e){}},120)}).observe(document.body,{childList:true});
     }catch(e){console.error("lc70",e)}
   }
-  return{init:init,afterRender:afterRender,catalog:catalog,paintShelf:paintShelf,openItem:openItem,ytId:ytId,toCents:toCents,cardHTML:cardHTML,version:"9.35.0"};
+  return{init:init,afterRender:afterRender,catalog:catalog,paintShelf:paintShelf,openItem:openItem,ytId:ytId,toCents:toCents,cardHTML:cardHTML,version:"9.36.0"};
 })(); /*@@end lc70*/

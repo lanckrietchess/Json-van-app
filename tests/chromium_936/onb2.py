@@ -1,0 +1,42 @@
+import importlib.util
+spec=importlib.util.spec_from_file_location('o','/home/claude/t/onb.py');o=importlib.util.module_from_spec(spec);spec.loader.exec_module(o)
+PGN=o.PGN;INIT=o.INIT
+async def run(pg,ctx,chk):
+    await pg.goto('http://localhost:8765/app.html#quests');await pg.wait_for_timeout(5000)
+    await pg.evaluate("document.querySelectorAll('.sheet-wrap,.lc30-ask').forEach(x=>x.remove());undefined;")
+    await pg.evaluate("(p)=>{window.__prev=0;new MutationObserver(()=>{const h=document.querySelector('[data-lc42-prev] .lc-board');if(h)window.__prev++}).observe(document.body,{childList:true,subtree:true});LC39._t.games=async()=>[{pgn:p,color:'w',opp:'opp',res:'0-1',t:1}];Store.set('lc42-onb',{step:'tease',site:'chesscom',user:'me',at:Date.now(),since:Date.now(),scan:{done:0,tot:0,leaks:{}}});LC42._t.teaser();}",PGN)
+    for i in range(20):
+        await pg.wait_for_timeout(500)
+        if await pg.evaluate("!!document.querySelector('.sheet-wrap .lc52-card')"): break
+    chk('live preview board was shown during the scan',await pg.evaluate("window.__prev>0"),await pg.evaluate("window.__prev"))
+    await pg.evaluate("document.querySelectorAll('.sheet-wrap,.lc30-ask').forEach(x=>x.remove());location.hash='#quests';undefined;")
+    await pg.wait_for_timeout(800)
+    await pg.evaluate("(p)=>{Store.set('lc42-onb',Object.assign({},Store.get('lc42-onb'),{step:'first',quiz:true,base:{t:0,m:0},g1:{pgn:p,color:'w'}}));App.ui.trimLoad={pgn:p,id:null,user:'w',review:false};location.hash='#trim'}",PGN)
+    await pg.wait_for_timeout(3500)
+    await pg.evaluate("document.querySelectorAll('.sheet-wrap,.lc30-ask').forEach(x=>x.remove());(document.querySelector('[data-act=\"review\"]')||{click(){}}).click();undefined;")
+    for i in range(50):
+        await pg.wait_for_timeout(2000)
+        if await pg.evaluate("!!document.querySelector('#lc42-claim')||(Store.get('lc42-onb')||{}).step!=='first'"): break
+    await pg.wait_for_timeout(2600)
+    st=await pg.evaluate("(()=>{const s=Store.get('lc42-onb')||{};return{step:s.step,ready2:!!s.ready2,claim:!!document.querySelector('#lc42-claim'),sheets:[...document.querySelectorAll('.sheet-wrap')].map(x=>x.innerText.slice(0,40))}})()")
+    chk('review done on Trim: no Level 2 pop-up, a Claim bar instead',st['step']=='first' and st['claim'] and not any('Level 2' in x for x in st['sheets']),st)
+    await pg.screenshot(path='/home/claude/w/shots/claim.png')
+    print(await pg.evaluate("(()=>({anyCard:!!document.querySelector('#lc66-coach'),gotos:document.querySelectorAll('[data-act=goto]').length}))()"))
+    await pg.evaluate("document.querySelectorAll('.sheet-wrap').forEach(x=>x.remove());(document.querySelector('#lc71-km [data-act=goto]')||{click(){}}).click();undefined;")
+    await pg.wait_for_timeout(1200)
+    print(await pg.evaluate("(()=>{const c=document.querySelector('#lc66-coach');return{anyCard:!!c,parent:c&&c.parentNode&&(c.parentNode.id||c.parentNode.className)}})()"))
+    lay=await pg.evaluate("(()=>{const a=document.querySelector('#coach'),b=document.querySelector('#lc71-coachbox'),mv=document.querySelector('#an-moves');return{boxInAside:!!(b&&a.contains(b)),card:!!(b&&b.querySelector('#lc66-coach')),km:!!(b&&b.querySelector('#lc71-km .lc71-kmnav')),asideAfterMoves:!!(mv&&a&&(mv.compareDocumentPosition(a)&4)),askHidden:[...document.querySelectorAll('#an-report button')].filter(x=>/Ask the coach about this game/.test(x.textContent)).every(x=>getComputedStyle(x).display==='none')}})()")
+    chk('Trim: one coach place with key moments + card',all(lay.values()),lay)
+    await pg.evaluate("LC30.authed=async(n,a)=>n==='lc71_warn_list'?{ok:true,rows:[{name:'Sam',text:'Their queen was already eyeing g2.',match:1}]}:{ok:true};const d=document.querySelector('#lc71-coachbox details[data-lc71-crowd]');if(d)d.open=true;undefined;")
+    await pg.wait_for_timeout(700)
+    w=await pg.evaluate("(()=>{const d=document.querySelector('details[data-lc71-crowd]');return d?d.innerText:null})()")
+    chk('warning dropdown: answers + Send one for approval myself',bool(w) and 'Sam' in w and 'Send one for approval myself' in w,w)
+    await pg.evaluate("(document.querySelector('[data-lc71-km=\"1\"]')||{click(){}}).click();undefined;");await pg.wait_for_timeout(300)
+    await pg.evaluate("(document.querySelector('[data-lc42-claim]')||{click(){}}).click();undefined;");await pg.wait_for_timeout(1500)
+    chk('Claim opens Level 2',await pg.evaluate("[...document.querySelectorAll('.sheet-wrap')].some(x=>/Level 2/.test(x.innerText))&&(Store.get('lc42-onb')||{}).step==='sys'"))
+    await pg.evaluate("document.querySelectorAll('.sheet-wrap').forEach(x=>x.remove());const b=document.querySelector('#lc71-coachbox');if(b)window.scrollTo(0,b.getBoundingClientRect().top+scrollY-70);undefined;")
+    await pg.wait_for_timeout(400)
+    await pg.screenshot(path='/home/claude/w/shots/trim_coach.png')
+    nb=await pg.evaluate("[...document.querySelectorAll('#lc71-km .lc71-kmnav .btn, .lc71-libtog, [data-lc71-own]')].map(b=>Math.round(b.getBoundingClientRect().height)).filter(h=>h>0)")
+    chk('new tap targets >= 44 px',all(h>=44 for h in nb) and len(nb)>0,nb)
+    sw=await pg.evaluate("document.documentElement.scrollWidth");chk('Trim no horizontal scroll',sw<=pg.viewport_size['width'],sw)

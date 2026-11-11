@@ -299,7 +299,7 @@
       if(opts.needPool&&!poolReady()){ld.textContent="Almost there: checking your last "+Math.max(1,poolLeft())+" lines…";waitT=setTimeout(proceed,200);return}
       alive=false;if(run)run.destroy();if(typeof opts.onDone==="function")opts.onDone();
     };
-    const skipRow=()=>{if(isOwner()&&!Q("[data-lc67='skip']",host)){const p=document.createElement("p");p.className="small";p.innerHTML='<button type="button" class="lc67-lnk" data-lc67="skip">Owner: skip the puzzle</button>';host.firstChild.appendChild(p)}};
+    const skipRow=()=>{if(!Q("[data-lc67='skip']",host)){const p=document.createElement("p");p.className="small lc67-skiprow";p.innerHTML=isOwner()?'<button type="button" class="lc67-lnk" data-lc67="skip">Owner: skip the puzzle</button>':'<button type="button" class="btn btn-quiet btn-sm" data-lc67="skip">Skip this puzzle</button> <span class="muted">Skipping breaks the daily ritual of a Ranked Student: your ritual streak does not count today.</span>';host.firstChild.appendChild(p)}};
     const onClick=e=>{if(e.target.closest&&e.target.closest("[data-lc67='skip']")){e.preventDefault();proceed()}};
     host.addEventListener("click",onClick);skipRow();
     (async()=>{
