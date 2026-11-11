@@ -1,0 +1,22 @@
+// LC70: the stripe-links webhook sells library items (run: node tests/links_library.test.mjs from the repo root)
+import { productFor, fulfil } from "../links.js";
+let pass = 0, fail = 0; const ok = (n, c) => { if (c) pass++; else { fail++; console.log("FAIL", n); } };
+const calls = [];
+const sql = (strings, ...vals) => { const q = strings.join("?"); calls.push({ q, vals });
+  if (/insert into public\.lc45_payment_events/.test(q)) return Promise.resolve([{ x: 1 }]);
+  if (/lc70_grant_paid|lc70_order_paid/.test(q)) return Promise.resolve([{ r: { ok: true } }]);
+  return Promise.resolve([]); };
+const p1 = productFor({ metadata: { lc_item: "caro-course" }, mode: "payment", amount_subtotal: 1000 }, {});
+ok("item wins over the 10 euro token-pack amount", p1 && p1.kind === "item" && p1.item === "caro-course" && p1.format === "");
+const p2 = productFor({ metadata: { lc_item: "mspc-book", lc_format: "Hardcover" } }, {});
+ok("printed format read", p2.format === "hardcover" && p2.name === "item:mspc-book:hardcover");
+ok("bad item id ignored", productFor({ metadata: { lc_item: "../x" }, mode: "payment", amount_subtotal: 1000 }, {}).kind === "pack");
+ok("plans still work", productFor({ metadata: { lc_plan: "pro_yearly" } }, {}).name === "pro_yearly");
+let r = await fulfil(sql, {}, { id: "cs_1", email: "a@b.be", prod: p1, amount: 4900, eventId: "ev1" });
+ok("digital item granted", r.ok && calls.some(c => /lc70_grant_paid/.test(c.q) && c.vals[1] === "caro-course"));
+ok("logged as kind pack, product item:", calls.some(c => /lc45_payment_events/.test(c.q) && c.vals.includes("pack") && c.vals.includes("item:caro-course")));
+calls.length = 0;
+r = await fulfil(sql, {}, { id: "cs_2", email: "a@b.be", prod: p2, amount: 3999, eventId: "ev2", ship: { name: "A B", address: { line1: "Zeedijk 1", postal_code: "8430", city: "Middelkerke", country: "BE" } } });
+ok("printed book becomes an order with the address", r.ok && calls.some(c => /lc70_order_paid/.test(c.q) && c.vals[2] === "hardcover" && /Zeedijk/.test(c.vals[5])));
+ok("no token credit for a book", !calls.some(c => /lc36_token_credits/.test(c.q)));
+console.log(pass + " passed, " + fail + " failed"); process.exit(fail ? 1 : 0);

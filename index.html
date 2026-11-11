@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.34.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.35.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.34.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.34.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.35.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.35.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.34.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.35.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -152,6 +152,33 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .flip:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:var(--r)}.flip-hint{margin:.8rem 0 0;color:var(--blue);font-size:.85rem;font-weight:700}
 @media (prefers-reduced-motion:reduce){.flip .fside{transition:none}}
 .micro{margin:.2rem 0 .3rem;color:var(--gold);font-size:.98rem}.micro b{font-size:1.15rem}
+/* 9.35.0: mission banner, hook, Triple-T flow with MSPC under Think, balanced contrast */
+.mission-band{padding:22px 0;background:linear-gradient(90deg,rgba(56,189,248,.14),rgba(251,191,36,.10));border-bottom:1px solid rgba(56,189,248,.35)}
+.mission-band .mb-in{display:grid;grid-template-columns:1fr auto;gap:18px 28px;align-items:center}
+.mission-band h1.mission{margin:0;font-size:clamp(1.45rem,4.2vw,2.5rem)}
+.mission-band .mcount{margin:0;min-width:230px;max-width:320px;background:rgba(15,23,42,.6);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+@media (max-width:760px){.mission-band .mb-in{grid-template-columns:1fr}.mission-band .mcount{max-width:none;min-width:0}}
+.hero .hook{font-size:clamp(1.5rem,4.6vw,2.4rem);margin:0 0 .4rem}
+.tt-flow{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:16px;margin-top:22px}
+@media (max-width:900px){.tt-flow{grid-template-columns:1fr}}
+.tt-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:6px}.tt-head h3{margin:0}
+.tt-n{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--blue);color:#06202e;font-weight:900}
+.tt-k{display:block;color:var(--gold);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.76rem}
+.tt-think{border-color:var(--blue)}
+.mspc-steps{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:8px}
+.mspc-steps li{display:flex;gap:10px;align-items:flex-start;background:#0f172a;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.mspc-steps li b{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(56,189,248,.16);color:var(--blue);font-weight:900}
+.mspc-steps strong{color:var(--text)}.mspc-steps span{color:#cbd5e1;font-size:.96rem}
+.vs2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px;align-items:stretch}
+@media (max-width:820px){.vs2{grid-template-columns:1fr}}
+.vs-col{display:flex;flex-direction:column;gap:14px}.vs-them .flip{flex:1 1 auto;min-height:220px}.vs-us .vs-main{flex:1 1 auto;display:flex;flex-direction:column}
+.vs-label{margin:0;font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}.vs-label.is-bad{color:var(--bad)}.vs-label.is-good{color:var(--good)}
+.vs-them .fside.front{border-color:rgba(248,113,113,.4);background:linear-gradient(160deg,rgba(127,29,29,.22),var(--card) 55%)}
+.vs2 h3{margin-bottom:.2rem}.vs2 .big-num small{font-size:1rem;font-weight:500;color:var(--mute)}.vs-them .big-num{font-size:clamp(1.8rem,5vw,2.4rem);color:#fca5a5}
+.vs2 ul{list-style:none;padding:0;margin:.6rem 0 0}.vs2 li{position:relative;padding-left:1.6rem;margin:.4rem 0}
+.vs2 li.no::before{content:"✕";position:absolute;left:0;color:var(--bad);font-weight:900}.vs2 li.yes::before{content:"✓";position:absolute;left:0;color:var(--good);font-weight:900}
+.vs-h4{margin:.9rem 0 .2rem;font-size:1rem;color:var(--good)}
+.vs2 li.no,.vs2 li.yes{color:var(--text)}
 </style>
 </head>
 <body>
@@ -168,18 +195,24 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 </header>
 
 <main id="main">
-<section class="hero" aria-labelledby="h-hero">
+<section class="mission-band" aria-labelledby="h-hero">
+  <div class="wrap mb-in">
+    <h1 id="h-hero" class="mission" data-lc-key="hero_title">My goal is to save <span style="color:var(--blue)">20,000 people</span> out of the lies and chaos by the end of 2027.</h1>
+    <div class="mcount" id="mcount" role="status" aria-live="polite"><div class="mc-top"><b id="mc-n">…</b><span id="mc-t">of 20,000 players have started</span></div><div class="bar" aria-hidden="true"><i id="mc-bar" style="width:1%"></i></div></div>
+  </div>
+</section>
+<section class="hero" aria-labelledby="h-hook">
   <div class="wrap grid">
     <div>
-      <div id="promo" class="promo hide" role="status" aria-live="polite"></div><br><span class="eyebrow" data-lc-key="hero_sub">Stop guessing why you lose. A 2100+ ELO coach in your pocket.</span>
-      <h1 id="h-hero" class="mission" data-lc-key="hero_title">My goal is to save <span style="color:var(--blue)">20,000 people</span> out of the lies and chaos by the end of 2027.</h1>
-      <div class="mcount hide" id="mcount" role="status" aria-live="polite"><div class="mc-top"><b id="mc-n">0</b><span>of 20,000 players have started</span></div><div class="bar" aria-hidden="true"><i id="mc-bar" style="width:0"></i></div></div>
+      <div id="promo" class="promo hide" role="status" aria-live="polite"></div>
+      <h2 id="h-hook" class="hook" data-lc-key="hero_sub">Stop guessing why you lose. A 2100+ ELO coach in your pocket.</h2>
       <p class="lead">Get the exact systems that took me from <b>355 to 2105 ELO</b>, built directly into a training hub that already gained my student <b>+630 ELO in just 6 weeks</b>. Guided step by step by your own personal coach.</p>
-      <details class="story" id="story" open><summary>Why I built this</summary><div class="story-t" id="story-t" data-lc-key="story">
-        <p>I started at <b>355</b>. Like everybody, I drowned in advice: watch this course, grind these puzzles, memorise that opening, never memorise openings. It all contradicted itself.</p>
-        <p>I got stuck around <b>500</b>. Not because I lacked talent, but because I thought differently on every move and kept repeating the same mistakes.</p>
-        <p>The turning point came when I stopped collecting tips and built my own systems: one fixed way to think (MSPC), the right theory for my level, and cutting my own mistakes out of my games (Trim).</p>
-        <p>With those systems I climbed to <b>2105</b> in 2 years and 10 months. This app is those systems, so you do not have to lose three years finding them yourself.</p>
+      <details class="story" id="story" open><summary>Why I’m 100% confident you will see results</summary><div class="story-t" id="story-t" data-lc-key="story">
+        <p>I started at <b>355 ELO</b>. Like everybody, I drowned in contradictory advice: watch this course, grind these puzzles, memorize that opening, never memorize openings. It all contradicted itself.</p>
+        <p>I got stuck around <b>500 ELO</b> — not because I lacked talent, but because I thought differently on every single move and kept repeating the exact same mistakes.</p>
+        <p>The turning point came when I stopped collecting tips and defined what improvement actually is: making better moves in the same types of positions. I sat down against bots, wrote every thought down in my notes, and engineered the <b>MSPC system</b>.</p>
+        <p>When I began coaching my best friends, I built improvement on three unshakeable pillars: <b>Think</b> correctly, have the proper <b>Theory</b>, and <b>Trim</b> your mistakes away. That became the <b>Triple-T method</b>.</p>
+        <p>By applying these exact systems, I climbed to <b>2105 ELO</b> in 2 years and 10 months. This Hub is those systems, built so you never have to spend years figuring it out alone.</p>
       </div></details>
       <div class="walk hide" id="walk-hero"></div>
       <p class="mute">Built on the <b>MSPC system</b> and the <b>Triple-T method</b>. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
@@ -243,11 +276,19 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <span class="eyebrow">The method</span>
     <h2 id="h-how">Think the same way every time. Know the right theory. Trim your mistakes away.</h2>
     <p class="lead">Rating does not stall because you lack talent. It stalls because your thinking changes from move to move, your theory has holes, and the same mistakes come back game after game. The Hub fixes all three, in a fixed order.</p>
-    <div class="cards">
-      <article class="card wide"><span class="letter">M</span><h3>One system for every decision</h3><p class="mute">MSPC: Move, Specifics, Priorities, Calculation. The same four questions in the same order on every move. When you think the same way every time, blunders have nowhere to hide.</p></article>
-      <article class="card"><span class="letter">T</span><h3>Think</h3><p class="mute">Build your own fixed thinking system with MSPC: Move, Specifics, Priorities, Calculation. The same routine before every move, drilled on real positions until it runs by itself.</p></article>
-      <article class="card"><span class="letter">T</span><h3>Theory</h3><p class="mute">Not the “stop memorising openings” advice. The <b>right</b> theory at the <b>right</b> level: from about 800 to 1200 the Colle-Koltanowski, Caro-Kann and Semi-Slav, plus middlegame structures and plans and endgame technique.</p></article>
-      <article class="card"><span class="letter">T</span><h3>Trim</h3><p class="mute">Full analysis of your own games that cuts away the blunders, the bad habits and the leaks, and turns them into Working Points.</p></article>
+    <div class="tt-flow" aria-label="The Triple-T method">
+      <article class="card tt tt-think"><div class="tt-head"><span class="tt-n">1</span><div><span class="tt-k">Think</span><h3>One fixed way to think: the MSPC system</h3></div></div>
+        <p class="mute">The first T is the engine of everything: the same four questions, in the same order, on every move. Drilled on real positions until it runs by itself.</p>
+        <ol class="mspc-steps">
+          <li><b>M</b><span><strong>Move.</strong> What did my opponent’s last move change? New threats, new weaknesses.</span></li>
+          <li><b>S</b><span><strong>Specifics.</strong> Notice the structure and the features of the position, then make a plan.</span></li>
+          <li><b>P</b><span><strong>Priorities.</strong> Checks, captures, attacks: the forcing moves first, for both sides.</span></li>
+          <li><b>C</b><span><strong>Calculation.</strong> Verify the line until it is clear. Then play it.</span></li>
+        </ol></article>
+      <article class="card tt"><div class="tt-head"><span class="tt-n">2</span><div><span class="tt-k">Theory</span><h3>The right theory for your level</h3></div></div>
+        <p class="mute">Not “stop memorising openings”. The <b>right</b> theory at the <b>right</b> level: from about 800 to 1200 the Colle-Koltanowski, Caro-Kann and Semi-Slav, plus middlegame structures and plans and endgame technique. Every line is read with MSPC.</p></article>
+      <article class="card tt"><div class="tt-head"><span class="tt-n">3</span><div><span class="tt-k">Trim</span><h3>Cut your own mistakes away</h3></div></div>
+        <p class="mute">Full analysis of your own games finds the blunders, bad habits and leaks, sorts them by MSPC step and turns them into Working Points you train until they stop coming back.</p></article>
     </div>
     <p class="lead" style="margin-top:18px"><b>Put those three together and the things that keep players stuck, random thinking, patchy theory and repeated mistakes, disappear one by one.</b> This is exactly how a 355 became a 2105.</p>
     <p class="small mute">Nothing here is a promise of a rating: the results above are real, checked, and ranked by what members actually gained.</p>
@@ -258,32 +299,46 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 <section class="alt" id="price-contrast" aria-labelledby="h-contrast">
   <div class="wrap">
     <span class="eyebrow">The contrast</span>
-    <h2 id="h-contrast">Here is what the market gives you. And here is everything you get.</h2>
-    <p class="mute small">Typical prices of video-course academies and private coaching. They vary by provider and country, so the examples are anonymous on purpose. Titled coaches typically charge from about €50 to well over €100 an hour; we compare with €80.</p>
-    <div class="vs" id="vs-grid">
-      <article class="card flip" tabindex="0" role="button" aria-pressed="false" aria-label="A typical video academy: tap to see why it falls short">
-        <div class="fside front"><h3>A typical video academy</h3><p class="big-num">€20+<small class="mute" style="font-size:1rem;font-weight:500"> / month</small></p>
-        <ul class="mute"><li class="no">Mostly video lessons to watch</li><li class="no">The same course for everybody</li><li class="no">Nothing that reads your own games</li><li class="no">Extras and coaching sold separately</li></ul><p class="flip-hint">Tap to see why ↻</p></div>
-        <div class="fside back"><h3>Why it falls short</h3><ul><li>You watch someone else think. Nothing trains how <b>you</b> decide at the board.</li><li>Nobody looks at your games, so the same mistake comes back next week.</li><li>More content is not a system: one more course often adds to the chaos.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
-      </article>
-      <article class="card flip" tabindex="0" role="button" aria-pressed="false" aria-label="Private coaching: tap to see why it falls short">
-        <div class="fside front"><h3>Private coaching</h3><p class="big-num">€80<small class="mute" style="font-size:1rem;font-weight:500"> / hour</small></p>
-        <ul class="mute"><li class="no">Fixed lesson slots, weekly at best</li><li class="no">Ten lessons already cost <b>€800</b></li><li class="no">Feedback arrives days after the game</li></ul><p class="flip-hint">Tap to see why ↻</p></div>
-        <div class="fside back"><h3>Why it falls short</h3><ul><li>Good coaching works, but at €80 an hour most players get one lesson a week at most.</li><li>Between lessons you play alone, with the same habits.</li><li>A year of weekly lessons costs over €4,000.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
-      </article>
-      <article class="card flip" id="vs-premium" hidden tabindex="0" role="button" aria-pressed="false" aria-label="Premium chess-site membership: tap to see why it falls short">
-        <div class="fside front"><h3>Premium chess-site membership</h3><p class="big-num">€100–€140<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p>
-        <ul class="mute"><li class="no">Mostly puzzles, lessons and game review</li><li class="no">Made for everyone, not for your own habits</li><li class="no">No coach that tracks your working points between games</li></ul>
-        <p class="small mute">Typical yearly prices of premium memberships at the big chess sites. They vary by site, plan and country.</p><p class="flip-hint">Tap to see why ↻</p></div>
-        <div class="fside back"><h3>Why it falls short</h3><ul><li>Endless puzzles and lessons, but no fixed way of thinking: the Puzzle Addict trap.</li><li>Game review tells you <b>what</b> went wrong, not which habit to fix next.</li><li>Nothing makes you slow down before the move that loses.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
-      </article>
-      <article class="card hl">
-        <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">From €399<small class="mute" style="font-size:1rem;font-weight:500"> / year</small></p><p class="vs-badge" id="vs-badge" hidden></p>
-        <ul><li class="yes" id="vs-hours">A year of Pro costs about as much as a few private lessons</li><li class="yes">The complete app, installed on your phone like any app</li><li class="yes">MSPC Think trainer: drills for every decision, with instant feedback</li><li class="yes">The MSPC framework wizard for any position, plus Working Points that fill themselves from your own games</li><li class="yes">Streamlined repertoires with Learn mode: Colle-Koltanowski, Caro-Kann and Semi-Slav</li><li class="yes">Opening trainer with one-tap <b>Train my repertoire</b> and mistake review</li><li class="yes">Middlegame masterclass: 38 lessons from the basics to grandmaster ideas</li><li class="yes">Endgame course: 42 lessons and over 200 positions</li><li class="yes"><b>Instant Play</b>: one tap into the right drill for your rating</li><li class="yes">Ultimate Shuffle trainer: random positions from everything you studied</li><li class="yes">Trim: your last games analysed by Stockfish, with an evaluation graph per game</li><li class="yes">Blunder Bootcamp: play the bot and get stopped at your mistakes</li><li class="yes"><b>FEN scanner</b>: photograph a position from a book and analyse it on the board</li><li class="yes">Gamification: XP, levels, streaks, achievements and quests, so one more level always feels easy</li><li class="yes">Brilliant-moves feed from your own games</li><li class="yes"><b>Token loops</b>: daily tokens, a bonus at every 100 ELO you gain, and catch-up tokens if you join high</li><li class="yes">24/7 AI coach that asks the right questions (Pro)</li><li class="yes">Coach Lanckriet's voice on the lessons</li><li class="yes">Your progress synced across all your devices</li><li class="yes">No ads</li></ul>
-        <div class="vs-urgency" id="vs-urgency" hidden><p>🔒 Lock in your rate: your price stays the same for as long as you keep your subscription active</p><p>⚡ Limited spots remaining for the current cohort</p><p class="small mute">This is the yearly launch rate. Monthly plans have no launch discount.</p></div>
-      </article>
+    <h2 id="h-contrast">The usual way costs more and changes less. Here is what changes for you.</h2>
+    <p class="mute small">Typical prices of video-course academies, private coaching and premium chess-site memberships. They vary by provider, plan and country, so the examples are anonymous on purpose. Titled coaches typically charge from about €50 to well over €100 an hour; we compare with €80.</p>
+    <div class="vs2" id="vs-grid">
+      <div class="vs-col vs-them">
+        <p class="vs-label is-bad">The usual way</p>
+        <article class="card flip" tabindex="0" role="button" aria-pressed="false" aria-label="A typical video academy: tap to see why it falls short">
+          <div class="fside front"><h3>A typical video academy</h3><p class="big-num">€20+<small> / month</small></p>
+          <ul><li class="no">You watch someone else think</li><li class="no">The same course for everybody</li><li class="no">Nobody looks at your own games</li></ul><p class="flip-hint">Tap to see why ↻</p></div>
+          <div class="fside back"><h3>Why it falls short</h3><ul><li>Nothing trains how <b>you</b> decide at the board.</li><li>The same mistake comes back next week.</li><li>One more course often adds to the chaos.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
+        </article>
+        <article class="card flip" tabindex="0" role="button" aria-pressed="false" aria-label="Private coaching: tap to see why it falls short">
+          <div class="fside front"><h3>Private coaching</h3><p class="big-num">€80<small> / hour</small></p>
+          <ul><li class="no">One lesson a week at best</li><li class="no">Ten lessons already cost <b>€800</b></li><li class="no">Feedback days after the game</li></ul><p class="flip-hint">Tap to see why ↻</p></div>
+          <div class="fside back"><h3>Why it falls short</h3><ul><li>Good coaching works, but few players can pay for more than one hour a week.</li><li>Between lessons you play alone, with the same habits.</li><li>A year of weekly lessons costs over €4,000.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
+        </article>
+        <article class="card flip" id="vs-premium" tabindex="0" role="button" aria-pressed="false" aria-label="Premium chess-site membership: tap to see why it falls short">
+          <div class="fside front"><h3>Premium chess-site membership</h3><p class="big-num">up to ~€140<small> / year</small></p>
+          <ul><li class="no">Mostly puzzles, lessons and engine game review</li><li class="no">Built for everyone, not for your habits</li><li class="no">It says <b>what</b> went wrong, not which habit to fix</li></ul>
+          <p class="small mute">Top-tier yearly memberships at the big chess sites. Prices vary by site, plan, country and device.</p><p class="flip-hint">Tap to see why ↻</p></div>
+          <div class="fside back"><h3>Why it falls short</h3><ul><li>Endless puzzles, but no fixed way of thinking: the Puzzle Addict trap.</li><li>Nobody tracks your Working Points between games.</li><li>Nothing makes you slow down before the move that loses.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
+        </article>
+      </div>
+      <div class="vs-col vs-us">
+        <p class="vs-label is-good">The Lanckriet way</p>
+        <article class="card hl vs-main">
+          <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">€199.50<small> / year</small></p><p class="micro" id="vs-micro"><b>€16.63 a month</b> (billed yearly)</p><p class="vs-badge" id="vs-badge" hidden></p>
+          <h4 class="vs-h4">What changes for you</h4>
+          <ul><li class="yes">You think the same way on every move, so the blunder gets caught <b>before</b> you play it.</li>
+          <li class="yes">You know which habit costs you the most rating, from your own games, and you fix that one first.</li>
+          <li class="yes">Your mistakes stop repeating: every lost game becomes a Working Point you train until it sticks.</li>
+          <li class="yes">Your openings make sense: you know the plan, not just the moves, at the level you play.</li>
+          <li class="yes">You convert won middlegames and endgames instead of letting them slip.</li>
+          <li class="yes">You train every day with a coach that answers at 2 a.m., not once a week.</li>
+          <li class="yes" id="vs-hours">A whole year costs about as much as three hours of private coaching.</li></ul>
+          <p class="small mute">The method and every trainer in one app on your phone. Results differ per person: nothing here is a promise of a rating.</p>
+          <div class="vs-urgency" id="vs-urgency" hidden><p>🔒 Lock in your rate: your price stays the same for as long as you keep your subscription active</p><p>⚡ Limited spots remaining for the current cohort</p><p class="small mute">This is the yearly launch rate. Monthly plans have no launch discount.</p></div>
+        </article>
+      </div>
     </div>
-    <p id="ds-founding" class="hide" style="margin-top:14px"><b>Founding Member rate: <span data-micro="year">€199.50 a year</span></b> (<span data-micro="month">about €16.63 a month</span>, billed yearly), <span data-micro="day">only €0.55 a day</span>, for everything above. Your launch price stays the same for as long as your subscription stays active.</p>
+    <p id="ds-founding" class="hide" style="margin-top:14px"><b>Founding Member rate: <span data-micro="year">€199.50 a year</span></b> (<span data-micro="month">€16.63 a month</span>, billed yearly), <span data-micro="day">only €0.55 a day</span>, for everything above. Your launch price stays the same for as long as your subscription stays active.</p>
     <aside id="fm-hero" class="fm-hero hide" role="status" aria-live="polite">
   <div class="fm-in">
     <div class="fm-l"><span class="fm-tag" id="fm-tag">Founding Member rate</span><span class="fm-pct" id="fm-pct">50% off</span></div>
@@ -325,7 +380,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       </article>
       <article class="card" aria-labelledby="h-vip">
         <h3 id="h-vip">VIP</h3><span class="tag" id="vy-tag">Yearly</span>
-        <div class="price" id="vy-price">…</div><div class="bar hide" id="vy-bar"><i></i></div>
+        <p class="micro hide" id="vy-micro"></p><div class="price" id="vy-price">…</div><div class="bar hide" id="vy-bar"><i></i></div>
         <p class="small mute" id="vy-left"></p><p class="small mute">Billed once a year. Cancel any time.</p>
         <p class="small"><b>Everything in Pro</b>, plus your tokens upfront: <b>500 tokens credited at once each month</b> (monthly plan), or <b>7,000 tokens at once</b> (yearly plan). Spend them whenever you like: 20 game analyses one day, 5 the next.</p><p class="small">Plus a blue profile banner, the <b>Lanckriet Chess Student</b> title, and priority in live streams and the community. The same Founding and Early Adopter prices for the first 100 and the next 100 VIP members.</p>
         <div class="row"><button class="btn gold" type="button" data-plan="yearly" data-tier="3" id="b-vip-yearly">Become VIP, yearly</button></div>
@@ -342,7 +397,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       <b style="color:var(--gold)">Launch Price Guarantee</b>
       <p class="small" style="margin:.35rem 0 0">Your yearly launch rate is locked in for as long as your subscription stays active: the price on your first invoice is the price on every renewal. Cancel, and the launch rate ends. Monthly plans have no launch discount.</p>
     </div>
-    <p class="small mute">Courses are part of the subscription, they are not sold one by one. Payment is handled by Stripe. We never see your card. Taxes, if any, are shown at checkout.</p>
+    <p class="small mute">Every course in Kyenzo’s library is included with Pro while Pro is active. Single books and courses can also be bought one by one in the app’s Books Vault. Payment is handled by Stripe. We never see your card. Taxes, if any, are shown at checkout.</p>
 
     <h3 id="tokens" style="margin-top:42px">Token packs</h3>
     <p class="mute">Tokens pay for deep game analyses and the coach. Bought once, no subscription. They are added to your account when you sign in with the email above.</p>
@@ -412,7 +467,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.34.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.35.0</p></footer>
 
 <script>
 "use strict";
@@ -515,7 +570,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       if(left!=null){$(pre+"y-left").textContent=left+" of "+cap+" places left at this price.";$(pre+"y-bar").className="bar";$(pre+"y-bar").firstChild.style.width=Math.max(4,Math.round((1-left/cap)*100))+"%"}
       var lk=$(pre+"y-lock");if(lk)lk.textContent="Your price stays the same for as long as your subscription stays active. Billed once a year. Cancel any time."}
     $(pre+"m-price").textContent=eur(p.monthly)+" / month";
-    var mi=$(pre+"y-micro");if(mi&&price){mi.innerHTML="<b>≈ "+esc(eur(Math.ceil(price/12)))+" a month</b> (billed yearly) · only "+esc(eur(Math.ceil(price/365)))+" a day";mi.className="micro"}
+    var mi=$(pre+"y-micro");if(mi&&price){mi.innerHTML="<b>"+esc(eur(Math.ceil(price/12)))+" a month</b> (billed yearly) · only "+esc(eur(Math.ceil(price/365)))+" a day";mi.className="micro"}
   }
   function ladder(p){
     var box=$("ladder-rows");if(!box||!p||!p.yearly)return;var cur=p.tranche||4,html="";
@@ -536,15 +591,25 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       $("fomo-text").innerHTML="<b class=\"n\">"+left+" of "+cap+"</b> "+esc(who)+" spots left at this price."+(left<=cap/2?" Spots are filling up fast.":"");
       var v=p.vip,vl=v&&v.left&&v.left[(v.tranche||t)-1];$("fomo-vip").textContent=v&&vl!=null?"VIP: "+vl+" spots left at "+eur(v.yearly[(v.tranche||t)-1])+" a year (or "+eur(v.monthly)+" a month).":""}
   }
-  pricingOnce().then(function(p){
-    if(!p||!p.ok){["y-price","m-price","vy-price","vm-price","g-price"].forEach(function(id){$(id).textContent="See at checkout"});return}
-    tierBlock(p,"");tierBlock(p.vip,"v");ladder(p);try{offer(p)}catch(e){}
+  /* 9.35.0: the official prices show at once (same numbers as the Payment Links); the live pricing call replaces them. Before, a failed call left "See at checkout". */
+  var FALLBACK={ok:true,fallback:true,tranche:1,base:39900,monthly:3900,gift:39900,yearly:[19950,29925,35910,39900],discountPct:[50,25,10],caps:[100,100,100],left:null,
+    vip:{tranche:1,base:59900,monthly:5900,yearly:[29950,44925,53910,59900],discountPct:[50,25,10],caps:[100,100,100],left:null}};
+  function paintPrices(p){
+    tierBlock(p,"");tierBlock(p.vip,"v");ladder(p);
     $("g-price").textContent=eur(p.gift||p.base)+" for one year";
     var t=p.tranche||4,py=p.yearly[t-1]||p.base;
-    $("vs-price").innerHTML=t<4?'<s class="vs-old">'+esc(eur(p.base))+'</s>'+esc(eur(py))+'<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>':"From "+esc(eur(py))+'<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>';
+    $("vs-price").innerHTML=(t<4?'<s class="vs-old">'+esc(eur(p.base))+'</s>':"")+esc(eur(py))+'<small> / year</small>';
+    var vm=$("vs-micro");if(vm)vm.innerHTML="<b>"+esc(eur(Math.ceil(py/12)))+" a month</b> (billed yearly) · only "+esc(eur(Math.ceil(py/365)))+" a day";
+    $("vs-hours").textContent="A whole year costs about as much as "+Math.max(1,Math.ceil(py/8000))+" hours of private coaching.";
+    if(p.fallback){["y-lock","vy-left"].forEach(function(id){var e=$(id);if(e&&!e.textContent)e.textContent="Your exact launch rate and the spots left are confirmed at checkout."})}
+  }
+  try{paintPrices(FALLBACK)}catch(e){}
+  pricingOnce().then(function(p){
+    if(!p||!p.ok){try{paintPrices(FALLBACK);var yl=$("y-lock");if(yl)yl.textContent="Your exact launch rate and the spots left are confirmed at checkout. Billed once a year. Cancel any time."}catch(e){}return}
+    paintPrices(p);try{offer(p)}catch(e){}
+    var t=p.tranche||4,py=p.yearly[t-1]||p.base;
     var vb=$("vs-badge");if(vb){if(t<4){vb.textContent="Pro, billed yearly · "+(((p.discountPct&&p.discountPct[t-1])||Math.round((1-py/p.base)*100))+"% off the regular price");vb.hidden=false}else vb.hidden=true}
     var vu=$("vs-urgency"),lf=p.left&&p.left[t-1];if(vu)vu.hidden=t>=4||(lf!=null&&lf<=0); /* only while launch spots really exist */
-    $("vs-hours").textContent="A year of Pro costs the same as "+Math.max(1,Math.ceil(py/8000))+" hours of private coaching";
     
     if(typeof p.portal==="string"&&/^https:\/\//.test(p.portal)){$("portal").href=p.portal;$("portal-row").className="small mute"}
   });
@@ -557,17 +622,16 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     if(left!=null&&left<=0){box.className="fm-hero hide";return}
     $("fm-tag").textContent=FMN[t-1]||"Launch rate";$("fm-pct").textContent=pct+"% off";
     $("fm-old").textContent=eur(p.base)+" / year";$("fm-new").textContent=eur(price);
-    $("fm-sub").textContent=t===1?"The next 100 members get 25% off, then 10%. Your price stays the same for as long as your subscription stays active.":t===2?"The next 100 members get 10% off. Your price stays the same for as long as your subscription stays active.":"Your price stays the same for as long as your subscription stays active.";
+    $("fm-sub").textContent=t===1?"The next 100 members get 25% off, then 10%. Your price stays the same for as long as your subscription stays active.":t===2?"The next 100 members get 10% off. Your price stays the same for as long as your subscription stays active.":"Your price stays the same for as long as your subscription stays active.";$("fm-sub").textContent=eur(Math.ceil(price/12))+" a month (billed yearly). "+$("fm-sub").textContent;
     if(left!=null){$("fm-left").textContent=left+" of "+cap;$("fm-left-t").textContent="spots left at this price";$("fm-bar").style.width=Math.max(4,Math.round((1-left/cap)*100))+"%";$("fm-leftwrap").className="fm-spots";$("fm-barwrap").className="bar fm-barw"}
     box.className="fm-hero";
-    var ds=$("ds-founding");if(ds){ds.className=t===1?"":"hide";var q=function(k,x){var e=ds.querySelector('[data-micro="'+k+'"]');if(e)e.textContent=x};q("year",eur(price)+" a year");q("month","about "+eur(Math.ceil(price/12))+" a month");q("day","only "+eur(Math.ceil(price/365))+" a day")}
-    var pr=$("vs-premium"),vg=$("vs-grid");if(pr&&vg&&t<=2){pr.hidden=false;vg.className="vs has3"}
+    var ds=$("ds-founding");if(ds){ds.className=t===1?"":"hide";var q=function(k,x){var e=ds.querySelector('[data-micro="'+k+'"]');if(e)e.textContent=x};q("year",eur(price)+" a year");q("month",eur(Math.ceil(price/12))+" a month");q("day","only "+eur(Math.ceil(price/365))+" a day")}
   }
   function fmDebug(){if(!/[?&]debug/.test(location.search))return;var d=$("fm-debug");if(d){d.className="fm-dbg";d.textContent="Pricing call: "+(window.__lcDbg||[]).join(" | ")}}
   function fmFallback(){
     var box=$("fm-hero");if(!box||fmLive)return;
     $("fm-tag").textContent="Founding Member rate";$("fm-pct").textContent="50% off";$("fm-old").textContent="€399 / year";$("fm-new").textContent="€199.50";
-    $("fm-sub").textContent="The first 100 members get this rate; the next 100 get 25% off, then 10%. Your exact rate and the spots left are confirmed at checkout.";
+    $("fm-sub").textContent="€16.63 a month (billed yearly). The first 100 members get this rate; the next 100 get 25% off, then 10%. Your exact rate and the spots left are confirmed at checkout.";
     box.className="fm-hero";
     var vp=$("vs-price");if(vp&&!fmLive)vp.innerHTML='<s class="vs-old">€399</s>€199.50<small class="mute" style="font-size:1rem;font-weight:500"> / year</small>';
     var vb=$("vs-badge");if(vb&&!fmLive){vb.textContent="Pro, billed yearly · Founding Member rate, 50% off";vb.hidden=false}
@@ -817,10 +881,13 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   /* the flip cards need the height of their longest side */
   function size(){Array.prototype.forEach.call(document.querySelectorAll(".flip"),function(c){var h=0;Array.prototype.forEach.call(c.querySelectorAll(".fside"),function(s){var p=s.style.position;s.style.position="relative";h=Math.max(h,s.offsetHeight);s.style.position=p});if(h)c.style.minHeight=h+"px"})}
   window.addEventListener("resize",function(){clearTimeout(size.t);size.t=setTimeout(size,150)});setTimeout(size,0);setTimeout(size,1500);
-  var u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");if(!u||!k)return;
+  /* 9.35.0: the counter is always visible; without a live number it says so instead of showing a made-up one */
+  function mcFallback(){var n=document.getElementById("mc-n"),t=document.getElementById("mc-t");if(n&&n.textContent==="…"){n.textContent="";if(t)t.textContent="The first players have started. Be one of the 20,000."}}
+  setTimeout(mcFallback,8000);
+  var u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");if(!u||!k){mcFallback();return}
   function rpc(n){return fetch(u+"/rest/v1/rpc/"+n,{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:"{}"}).then(function(r){return r.ok?r.json():null}).catch(function(){return null})}
   rpc("lc69_member_count").then(function(j){
-    if(!j||!j.ok||!(+j.members>=0))return;var n=+j.members,box=document.getElementById("mcount");if(!box)return;
+    if(!j||!j.ok||!(+j.members>=0)){mcFallback();return}var n=+j.members,box=document.getElementById("mcount");if(!box)return;
     document.getElementById("mc-n").textContent=n.toLocaleString("en-GB");document.getElementById("mc-bar").style.width=Math.max(1,Math.min(100,n/200))+"%";box.className="mcount";
   });
   rpc("lc69_landing_public").then(function(j){

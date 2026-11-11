@@ -1,6 +1,8 @@
 /*@@module lc66*/ const LC66=(()=>{
   "use strict";
-  /* LC66 (build 9.33.0): Creator Studio in 4 tabs, and the Trim jump with the Free / Pro coach card.
+  /* LC66 (build 9.33.0, Studio sections 9.35.0): Creator Studio in 5 sections behind one dropdown (Script Studio, Scene Builder, Content Shooting, Edit Studio,
+     Content Library) plus Free layout; Content Shooting lists the saved scenes as one-tap chips; Content Library opens the Content hub.
+     Before 9.35.0: Creator Studio in 4 tabs, and the Trim jump with the Free / Pro coach card.
      A. Studio tabs (no Studio code is moved): 1 Script & Ideas, 2 Scene Builder, 3 Record, 4 Edit & Export, plus "Free layout" (the old panel arrangement).
         A tab shows the right panels in a fixed arrangement through CSS inside the Studio's shadow root (nothing is saved to the member's own layout),
         and opens the panels that tab needs. On a phone (compact mode) the tab just opens the matching panel. Tab 2 has a watermark size slider
@@ -13,21 +15,30 @@
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
   const route=()=>String(location.hash||"").replace(/^#/,"").split(/[?&\/]/)[0];
 
-  /* ---------- A. Studio tabs ---------- */
+  /* ---------- A. Studio sections (9.35.0: one dropdown with five sections; 9.33.0 had four tabs) ---------- */
   const TABS=[
-    {id:"t1",label:"1 Script & Ideas",open:["script","library"]},
-    {id:"t2",label:"2 Scene Builder",open:["stage","camera","board"]},
-    {id:"t3",label:"3 Record",open:["stage","script"]},
-    {id:"t4",label:"4 Edit & Export",open:["takes"]},
-    {id:"free",label:"Free layout",open:[]}];
-  const TOP="46px",H="calc(100% - 52px)";
-  const R={ /* panel rectangles per tab: left, width, top, height */
-    t1:{script:["1%","57%",TOP,H],library:["60%","39%",TOP,H]},
-    t2:{stage:["1%","57%",TOP,H],camera:["60%","39%",TOP,"calc(50% - 28px)"],board:["60%","39%","calc(50% + 24px)","calc(50% - 30px)"]},
-    t3:{stage:["1%","72%",TOP,H],script:["75%","24%",TOP,H]},
-    t4:{takes:["1%","98%",TOP,H]}};
+    {id:"script",label:"Script Studio",note:"Write, paste or import your script",open:["script","library"]},
+    {id:"scenes",label:"Scene Builder",note:"Build and save record layouts: board, camera, watermark",open:["stage","camera","board"]},
+    {id:"shoot",label:"Content Shooting",note:"Pick a saved scene and record",open:["stage","script"]},
+    {id:"edit",label:"Edit Studio",note:"Cut takes, captions, export",open:["takes"]},
+    {id:"library",label:"Content Library",note:"Your saved projects: post, drag or export",open:["takes"]},
+    {id:"free",label:"Free layout",note:"Every panel where you left it",open:[]}];
+  const OLD={t1:"script",t2:"scenes",t3:"shoot",t4:"edit"};
+  const TOP="52px",H="calc(100% - 58px)";
+  const R={ /* panel rectangles per section: left, width, top, height */
+    script:{script:["1%","57%",TOP,H],library:["60%","39%",TOP,H]},
+    scenes:{stage:["1%","57%",TOP,H],camera:["60%","39%",TOP,"calc(50% - 30px)"],board:["60%","39%","calc(50% + 26px)","calc(50% - 32px)"]},
+    shoot:{stage:["1%","72%",TOP,H],script:["75%","24%",TOP,H]},
+    edit:{takes:["1%","98%",TOP,H]},
+    library:{takes:["1%","98%",TOP,H]}};
   function tabCss(){
-    let c=".lc66-tabs{position:absolute;top:6px;left:6px;right:6px;z-index:60;display:flex;gap:6px;flex-wrap:wrap;align-items:center}.lc66-tab{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(7,9,12,.9);color:#e5e7eb;font:700 13px/1 inherit;cursor:pointer}.lc66-tab[aria-selected=true]{background:#00E5FF;color:#001014;border-color:#00E5FF}.lc66-wm{display:inline-flex;gap:6px;align-items:center;color:#cbd5e1;font-size:12px;margin-left:8px}.lc66-wm input{width:120px}";
+    let c=".lc66-bar{position:absolute;top:6px;left:6px;right:6px;z-index:60;display:flex;gap:8px;flex-wrap:wrap;align-items:center}"
+      +".lc66-dd{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid #00E5FF;background:rgba(7,9,12,.94);color:#e5e7eb;font:700 14px/1 inherit;cursor:pointer;display:inline-flex;gap:8px;align-items:center}"
+      +".lc66-dd b{color:#00E5FF}.lc66-menu{position:absolute;top:50px;left:0;min-width:270px;max-width:calc(100vw - 24px);background:#0A0B0E;border:1px solid rgba(0,229,255,.35);border-radius:12px;padding:6px;box-shadow:0 12px 30px rgba(0,0,0,.5)}"
+      +".lc66-menu[hidden]{display:none}.lc66-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:44px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#e5e7eb;font:600 14px/1.2 inherit;text-align:left;cursor:pointer}"
+      +".lc66-opt small{color:#94a3b8;font-weight:500;font-size:12px}.lc66-opt:hover,.lc66-opt:focus-visible{background:rgba(0,229,255,.1)}.lc66-opt[aria-checked=true]{background:rgba(0,229,255,.16)}.lc66-opt[aria-checked=true]::after{content:'';}"
+      +".lc66-wm,.lc66-scn{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;color:#cbd5e1;font-size:12px}.lc66-wm input{width:120px}.lc66-wm[hidden],.lc66-scn[hidden]{display:none}"
+      +".lc66-chip{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(7,9,12,.9);color:#e5e7eb;font:600 12px/1 inherit;cursor:pointer}.lc66-chip.is-on{border-color:#00E5FF;color:#00E5FF}";
     TABS.forEach(t=>{
       if(!R[t.id])return;
       c+="#lcs.lc66-"+t.id+":not(.compact) .panel{display:none!important}";
@@ -42,36 +53,61 @@
     return host?host.shadowRoot:null;
   }
   function studioApi(){try{return window.LanckrietStudio||null}catch(e){return null}}
+  let curScene="";
+  function paintScenes(sr){
+    const box=Q(".lc66-scn",sr);if(!box)return;
+    let list=[];try{list=(studioApi().lc54.scenes()||[]).slice(0,12)}catch(e){list=[]}
+    box.innerHTML='<span>Scene:</span>'+(list.length?list.map(s=>'<button type="button" class="lc66-chip'+(s.name===curScene?" is-on":"")+'" data-lc66-scene="'+esc(s.name)+'">'+esc(s.name)+'</button>').join(""):'<span>none saved yet. Build one in Scene Builder and press Scenes, then Save.</span>');
+  }
   function setTab(sr,id){
+    id=OLD[id]||id;
     const t=TABS.filter(x=>x.id===id)[0]||TABS[0],lcs=Q("#lcs",sr);if(!lcs)return;
     TABS.forEach(x=>lcs.classList.remove("lc66-"+x.id));
     if(R[t.id])lcs.classList.add("lc66-"+t.id);
-    QA(".lc66-tab",sr).forEach(b=>b.setAttribute("aria-selected",String(b.getAttribute("data-tab")===t.id)));
-    const wm=Q(".lc66-wm",sr);if(wm)wm.hidden=t.id!=="t2";
+    QA(".lc66-opt",sr).forEach(b=>b.setAttribute("aria-checked",String(b.getAttribute("data-tab")===t.id)));
+    const dd=Q(".lc66-dd b",sr);if(dd)dd.textContent=t.label;
+    const wm=Q(".lc66-wm",sr);if(wm)wm.hidden=t.id!=="scenes";
+    const sc=Q(".lc66-scn",sr);if(sc){sc.hidden=t.id!=="shoot";if(t.id==="shoot")paintScenes(sr)}
     wr("lc66-tab",t.id);
     const api=studioApi(),L=api&&api._t&&api._t.Layout;
     try{
       if(L&&!L.compact)t.open.forEach(p=>{if(!L.isOpen(p))L.setOpen(p,true)});
       else if(L&&L.compact&&t.open[0]){const b=Q('.dock-btn[data-panel="'+t.open[0]+'"]',sr);if(b&&b.getAttribute("aria-pressed")!=="true")b.click()}
     }catch(e){}
+    try{if(t.id==="library")api.lc35.openHub();else if(api&&api.lc35&&api.lc35.state&&api.lc35.state.open)api.lc35.closeHub()}catch(e){}
     try{window.dispatchEvent(new Event("resize"))}catch(e){}
   }
   function inject(){
     const sr=studioRoot();if(!sr)return;
-    const canvas=Q("#canvas",sr)||Q("main.canvas",sr);if(!canvas||Q(".lc66-tabs",sr))return;
+    const canvas=Q("#canvas",sr)||Q("main.canvas",sr);if(!canvas||Q(".lc66-bar",sr))return;
     if(!Q("#lc66-css",sr)){const st=document.createElement("style");st.id="lc66-css";st.textContent=tabCss();sr.appendChild(st)}
-    const bar=document.createElement("div");bar.className="lc66-tabs";bar.setAttribute("role","tablist");
+    const bar=document.createElement("div");bar.className="lc66-bar";
     let free=false;try{free=studioApi()._t.Tier.id()==="free"}catch(e){}
-    bar.innerHTML=TABS.map(t=>'<button type="button" role="tab" class="lc66-tab" data-tab="'+t.id+'" aria-selected="false">'+esc(t.label)+'</button>').join("")
-      +'<label class="lc66-wm" hidden>Watermark size <input type="range" min="'+(free?100:60)+'" max="180" value="'+Math.round(100*(+rd("lc66-wm-scale",1)||1))+'" aria-label="Watermark size"></label>';
+    bar.innerHTML='<div style="position:relative"><button type="button" class="lc66-dd" aria-haspopup="menu" aria-expanded="false" aria-label="Studio section">☰ <b>Script Studio</b> ▾</button>'
+      +'<div class="lc66-menu" role="menu" hidden>'+TABS.map(t=>'<button type="button" role="menuitemradio" class="lc66-opt" data-tab="'+t.id+'" aria-checked="false">'+esc(t.label)+'<small>'+esc(t.note)+'</small></button>').join("")+'</div></div>'
+      +'<label class="lc66-wm" hidden>Watermark size <input type="range" min="'+(free?100:60)+'" max="180" value="'+Math.round(100*(+rd("lc66-wm-scale",1)||1))+'" aria-label="Watermark size"></label>'
+      +'<div class="lc66-scn" hidden></div>';
     canvas.appendChild(bar);
-    bar.addEventListener("click",e=>{const b=e.target.closest(".lc66-tab");if(b)setTab(sr,b.getAttribute("data-tab"))});
+    const dd=Q(".lc66-dd",bar),menu=Q(".lc66-menu",bar);
+    const show=v=>{menu.hidden=!v;dd.setAttribute("aria-expanded",String(v))};
+    bar.addEventListener("click",e=>{
+      if(e.target.closest(".lc66-dd")){show(menu.hidden);return}
+      const b=e.target.closest(".lc66-opt");if(b){show(false);setTab(sr,b.getAttribute("data-tab"));return}
+      const s=e.target.closest("[data-lc66-scene]");
+      if(s){const n=s.getAttribute("data-lc66-scene");let ok=false;try{ok=studioApi().lc54.load(n)}catch(x){ok=false}if(ok){curScene=n;paintScenes(sr);try{toast("Scene “"+n+"” loaded. Press the red Record button.","good")}catch(x){}}}
+    });
+    sr.addEventListener("click",e=>{if(!menu.hidden&&!e.composedPath().includes(bar))show(false)});
+    /* the record bar works from every section: Settings opens the Scene Builder, Record opens Content Shooting when the stage is hidden */
+    sr.addEventListener("click",e=>{const p=e.composedPath(),cur=rd("lc66-tab","script");
+      if(p.some(n=>n&&n.id==="lc54-set")&&!/^(scenes|shoot|free)$/.test(cur))setTab(sr,"scenes");
+      else if(p.some(n=>n&&n.id==="lc54-rec")&&!/^(scenes|shoot|free)$/.test(cur))setTab(sr,"shoot");},true);
+    bar.addEventListener("keydown",e=>{if(e.key==="Escape"&&!menu.hidden){show(false);dd.focus()}});
     bar.addEventListener("input",e=>{
       const r=e.target.closest("input[type=range]");if(!r)return;
       wr("lc66-wm-scale",Math.max(.6,Math.min(1.8,(+r.value||100)/100)));
       try{const B=studioApi().board;if(B&&B.onChange)B.onChange()}catch(x){}
     });
-    setTab(sr,rd("lc66-tab","t1"));
+    setTab(sr,rd("lc66-tab","script"));
   }
 
   /* ---------- B. Trim: jump to the first error, coach card ---------- */
@@ -165,5 +201,5 @@
     css();document.addEventListener("click",onClick,true);
     let deb=0;new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{if(route()==="trim")jumpFirst();else{inject();paintStars()}}catch(e){}},300)}).observe(document.body,{childList:true,subtree:true});
   }
-  return{init:init,afterRender:afterRender,onGoto:onGoto,deviation:deviation,saveCase:saveCase,flagged:flagged,flag:flag,setTab:setTab,TABS:TABS,tabCss:tabCss,version:"9.33.0"};
+  return{init:init,afterRender:afterRender,onGoto:onGoto,deviation:deviation,saveCase:saveCase,flagged:flagged,flag:flag,setTab:setTab,TABS:TABS,tabCss:tabCss,version:"9.35.0"};
 })(); /*@@end lc66*/

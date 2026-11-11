@@ -46,6 +46,9 @@ export function emailOf(s){
 export function productFor(s,env){
   const m=(s&&s.metadata)||{};
   const mp=String(m.lc_plan||"").toLowerCase(),mk=String(m.lc_pack||"").toLowerCase();
+  /* 9.35.0 (LC70 Library): a Payment Link with metadata lc_item=<item id> sells a library item; lc_format=paperback|hardcover makes it a printed book to ship */
+  const mi=String(m.lc_item||"").toLowerCase().trim();
+  if(/^[a-z0-9-]{3,48}$/.test(mi)){const f=String(m.lc_format||"").toLowerCase();return{kind:"item",item:mi,format:f==="paperback"||f==="hardcover"?f:"",name:"item:"+mi+(f==="paperback"||f==="hardcover"?":"+f:"")}}
   const byName={pro_yearly:AMOUNTS.subscription[19950],pro_monthly:AMOUNTS.subscription[3900],vip_yearly:AMOUNTS.subscription[29950],vip_monthly:AMOUNTS.subscription[5900]};
   if(byName[mp])return byName[mp];
   for(const k of Object.keys(AMOUNTS.payment)){const p=AMOUNTS.payment[k];if(p.pack===mk)return p}
@@ -74,15 +77,21 @@ const mark=(sql,id,status,err)=>sql`update public.lc45_payment_events set status
 
 /* fulfil one purchase (a Payment Link checkout, or a renewal invoice) */
 export async function fulfil(sql,env,o){
-  const {id,email,prod,amount,sub,customer,eventId,renewal}=o;
-  const fresh=await record(sql,{session_id:id,event_id:eventId,kind:prod.kind+(renewal?"_renewal":""),product:prod.pack||prod.name,email:email,amount:amount,sub:sub||null,customer:customer||null});
+  const {id,email,prod,amount,sub,customer,eventId,renewal}=o;   /* o.ship: Stripe shipping details for a printed book */
+  /* library items are logged with kind "pack" (the kinds the payment-events table already knows) and product "item:<id>" */
+  const fresh=await record(sql,{session_id:id,event_id:eventId,kind:(prod.kind==="item"?"pack":prod.kind)+(renewal?"_renewal":""),product:prod.pack||prod.name,email:email,amount:amount,sub:sub||null,customer:customer||null});
   if(!fresh){
     const st=await sql`select status from public.lc45_payment_events where session_id=${id}`;
     if(st[0]&&st[0].status==="done")return{ok:true,duplicate:true};
     /* received or needs_attention from an earlier try: run it again (the steps below are idempotent) */
   }
   try{
-    if(prod.kind==="pack"){
+    if(prod.kind==="item"){
+      const g=prod.format?await sql`select public.lc70_order_paid(${email},${prod.item},${prod.format},${id},${amount},${JSON.stringify(o.ship||{})}::jsonb) as r`
+                         :await sql`select public.lc70_grant_paid(${email},${prod.item},${id},${amount}) as r`;
+      const r=g[0]&&g[0].r;
+      if(!r||r.ok!==true){await mark(sql,id,"needs_attention","library: "+JSON.stringify(r||{}).slice(0,400));return{ok:false,error:"library_failed",detail:r}}
+    }else if(prod.kind==="pack"){
       await credit(sql,email,prod.tokens,prod.pack,amount,id);
     }else{
       const g=await sql`select public.lc45_grant_membership(${email},${prod.tier},${prod.plan},${id},${sub||null},${customer||null},${amount}) as r`;
@@ -117,7 +126,8 @@ export async function handle(req,ctx){
         await mark(sql,s.id,"needs_attention",!prod?"unknown product (amount "+(s.amount_subtotal||s.amount_total)+" "+s.mode+")":"no email on the session");
         return J({ok:true,needs_attention:true});
       }
-      const r=await fulfil(sql,env,{id:s.id,email:email,prod:prod,amount:Number(s.amount_subtotal||s.amount_total||0),sub:s.subscription,customer:s.customer,eventId:ev.id});
+      const sh=(s.collected_information&&s.collected_information.shipping_details)||s.shipping_details||null;
+      const r=await fulfil(sql,env,{id:s.id,email:email,prod:prod,amount:Number(s.amount_subtotal||s.amount_total||0),sub:s.subscription,customer:s.customer,eventId:ev.id,ship:sh});
       return J(Object.assign({ok:true},r));
     }
     if(type==="invoice.paid"){
