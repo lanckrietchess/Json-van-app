@@ -20,6 +20,7 @@
   var cur=null;try{cur=JSON.parse(localStorage.getItem("lc73-src")||"null")}catch(e){}
   var dev=(cur&&cur.device)||("w-"+Math.random().toString(36).slice(2,12)+Date.now().toString(36));
   if(!cur){try{localStorage.setItem("lc73-src",JSON.stringify({device:dev,at:Date.now()}))}catch(e){}}
+  try{document.cookie="lc73_src="+encodeURIComponent(JSON.stringify({code:code,device:dev,at:Date.now()}))+";max-age=2592000;path=/;SameSite=Lax;Secure"}catch(e){}
   function go(dest){dest=/^\/[A-Za-z0-9_.\/?=&#-]{0,200}$/.test(dest||"")?dest:"/";var h=dest.split("#"),q=h[0].indexOf("?")>=0?"&":"?";var to=h[0]+(code?q+"src="+encodeURIComponent(code):"")+(h[1]?"#"+h[1]:"");document.getElementById("go").href=to;location.replace(to)}
   if(!code||!u||!k){go("/");return}
   var done=false,t=setTimeout(function(){if(!done){done=true;go("/")}},2500);

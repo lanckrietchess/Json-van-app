@@ -244,7 +244,7 @@
         +cb("pro_included","Included with Pro while Pro is active (default for your courses)",x.pro_included===undefined?x.kind==="course":x.pro_included)+cb("vip_included","Included with VIP while VIP is active (guest items: only when agreed with the creator)",x.vip_included)
         +cb("vip_hardcover","VIP members can claim a free hardcover (you ship it)",x.vip_hardcover)+"</fieldset>"
         +'<fieldset class="lc70-fs"><legend>Content (only for people with access)</legend>'+inp("ebook_url","E-book download address (https://…)",val(x,"ebook_url"))+ta("body","Summary text",val(x,"body"),5)
-        +ta("videos","Lessons, one per line: Title | unlisted YouTube link. Start a folder with ## Folder name. An opening for the trainer: PGN: Name | 1.e4 c6 2.d4 d5 … (write PGN black: for a Black repertoire)",vids,8,"## Chapter 1: the idea\nLesson 1 | https://youtu.be/…\nPGN black: Caro-Kann Advance | 1.e4 c6 2.d4 d5 3.e5 Bf5")+"</fieldset>"
+        +ta("videos","Lessons, one per line: Title | unlisted YouTube link. Start a folder with ## Folder name. An opening for the trainer: PGN: Name | 1.e4 c6 2.d4 d5 … (write PGN black: for a Black repertoire). A text lesson: Text: Title | first paragraph // second paragraph",vids,8,"## Chapter 1: the idea\nLesson 1 | https://youtu.be/…\nPGN black: Caro-Kann Advance | 1.e4 c6 2.d4 d5 3.e5 Bf5")+"</fieldset>"
         +'<p class="small muted">Stripe: give every Payment Link the metadata <b>lc_item</b> = <code data-lc70-idshow>'+esc(x.id||"(the id appears after saving)")+'</code>; for a printed book also <b>lc_format</b> = paperback or hardcover, and switch on “Collect customers’ addresses”. Prices here must match the links.</p>'
         +'<div class="btn-row"><button class="btn btn-primary" type="submit">Save</button></div><p class="form-msg" aria-live="polite"></p></form>',
         s=>{const form=Q(".lc70-form",s.el),msg=Q(".form-msg",form);
@@ -416,5 +416,5 @@
       new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{ownerRows()}catch(e){}},120)}).observe(document.body,{childList:true});
     }catch(e){console.error("lc70",e)}
   }
-  return{init:init,afterRender:afterRender,catalog:catalog,paintShelf:paintShelf,openItem:openItem,ytId:ytId,toCents:toCents,cardHTML:cardHTML,buyTokens:buyTokens,buyEuro:buyEuro,repaint:repaintAll,version:"9.37.0"};
+  return{init:init,afterRender:afterRender,catalog:catalog,paintShelf:paintShelf,openItem:openItem,ytId:ytId,toCents:toCents,cardHTML:cardHTML,buyTokens:buyTokens,buyEuro:buyEuro,repaint:repaintAll,version:"9.38.0"};
 })(); /*@@end lc70*/

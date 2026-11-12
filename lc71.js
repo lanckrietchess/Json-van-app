@@ -191,6 +191,7 @@ const LC71=(()=>{
     (list||[]).forEach(v=>{
       const fo=String(v.folder||"");if(fo!==f){f=fo;if(fo)out.push("## "+fo)}
       if(v.pgn)out.push("PGN"+(v.side==="b"?" black":v.side==="w"?" white":"")+": "+v.title+" | "+String(v.pgn).replace(/\s+/g," "));
+      else if(v.text)out.push("Text: "+v.title+" | "+String(v.text).replace(/\n+/g," // "));   /* 9.38.0: text lessons, // = new paragraph */
       else out.push(v.title+" | "+v.url);
     });
     return out.join("\n");
@@ -203,6 +204,8 @@ const LC71=(()=>{
       if(m){const side=(m[1]||m[2]||"").toLowerCase(),rest=m[3],i=rest.indexOf("|");
         const title=i>0?rest.slice(0,i).trim():"Opening",pgn=(i>0?rest.slice(i+1):rest).trim();
         out.push({title:title||"Opening",pgn:pgn,folder:folder,side:side==="black"?"b":side==="white"?"w":""});return}
+      m=/^text\s*:\s*(.*)$/i.exec(l);
+      if(m){const rest=m[1],i=rest.indexOf("|");out.push({title:(i>0?rest.slice(0,i).trim():"Lesson")||"Lesson",text:(i>0?rest.slice(i+1):rest).split(/\s*\/\/\s*/).join("\n").trim(),folder:folder});return}
       const i=l.lastIndexOf("|");
       out.push(i>0?{title:l.slice(0,i).trim(),url:l.slice(i+1).trim(),folder:folder}:{title:"Lesson",url:l,folder:folder});
     });
@@ -217,6 +220,7 @@ const LC71=(()=>{
       if(fo!==f){if(open)h+="</ol></details>";f=fo;open=true;
         h+='<details class="lc71-folder" open><summary>'+ic("folder")+" "+E(fo||"Lessons")+"</summary><ol class=\"lc70-lessons lc71-ol\">"}
       if(v.pgn)h+='<li><button type="button" class="lc70-lesson lc71-pgn" data-lc71-pgn="'+idx+'">'+ic("chess-board")+" "+E(v.title)+' <small>Import into my opening trainer</small></button></li>';
+      else if(v.text)h+='<li><details class="lc71-txt"><summary class="lc70-lesson">'+ic("file-lines")+" "+E(v.title)+"</summary>"+String(v.text).split(/\n+/).filter(x=>x.trim()).map(x=>"<p>"+E(x)+"</p>").join("")+"</details></li>";
       else{const y=ytId(v.url);if(!y)return;h+='<li><button type="button" class="lc70-lesson'+(n===0?" is-on":"")+'" data-yt="'+E(y)+'" data-t="'+E(v.title)+'">'+(++n)+". "+E(v.title)+"</button></li>"}
     });
     if(open)h+="</ol></details>";
