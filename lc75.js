@@ -55,34 +55,84 @@ const LC75=(()=>{
     5:"Few cards / lead magnets: put one strong lead magnet (Woodpecker summary) right under the hero and in the welcome flow.",6:"Card holders who do not pay: use the coach chat in the trial week and the reminder; show one clear Pro benefit per day.",
     7:"Churn: send a coach message in week 3 and push the yearly plan; give buyers a reason to come back (next course).",8:"Upsells: offer the next course right after a lesson is finished and VIP to active Pro members.",
     9:"Referrals: show the 10% link after every milestone pop-up and in the coach chat."};
+  /* ---------- the Master Funnel Table: Step | TOTAL (live) | GOAL (editable) | Status; a channel filter on top ---------- */
+  const PCT=(a,b)=>pct(a,b);
+  function metricRows(R,days,ltv){
+    const avg=+R.paying?Math.round(+R.revenue/+R.paying):0;
+    return[
+      {lv:1,t:"Top-of-funnel views",s:"Typed in per day and channel",m:[
+        {id:"1.1",l:"Views",v:+R.views||0,g:"l1_views_day",u:"/day",scale:days,unit:""}]},
+      {lv:2,t:"Landing page clicks and CTR",s:"Through the /l/ short links",m:[
+        {id:"2.1",l:"Short-link clicks",v:+R.clicks||0},{id:"2.2",l:"CTR (clicks / views)",v:PCT(R.clicks,R.views),g:"l2_ctr",unit:"%"}]},
+      {lv:3,t:"Landing page visits",s:"Unique visitors",m:[
+        {id:"3.1",l:"Unique visitors",v:+R.visits||0},{id:"3.2",l:"Clicks that arrive",v:PCT(R.visits,R.clicks),g:"l3_click_visit",unit:"%"}]},
+      {lv:4,t:"App downloads and registrations",s:"Visitors who install and register",m:[
+        {id:"4.1",l:"Registrations",v:+R.signups||0},{id:"4.2",l:"App installs / opens",v:+R.installs||0},{id:"4.3",l:"Visitors who register",v:PCT(R.signups,R.visits),g:"l4_visit_signup",unit:"%"}]},
+      {lv:5,t:"Card capture / free products",s:"€0 trial with a card, or a lead magnet (Woodpecker…)",m:[
+        {id:"5.1",l:"Card or lead magnet",v:+R.cards||0},{id:"5.2",l:"Registrations that take it",v:PCT(R.cards,R.signups),g:"l5_signup_card",unit:"%"}]},
+      {lv:6,t:"Paying customers",s:"Card holders who pay, and the whole app",m:[
+        {id:"6.1",l:"Paying customers",v:+R.paying||0},{id:"6.2",l:"Card holders who pay",v:PCT(R.card_paid,R.cards),g:"l6_card_paid",unit:"%"},
+        {id:"6.3",l:"App conversion (paying / registrations)",v:PCT(R.paying,R.signups),g:"l6_app_conv",unit:"%"},
+        {id:"6.4",l:"Sales",v:+R.sales||0,g:"l6_sales_month",u:"/30 days",scale:days/30,unit:""},
+        {id:"6.5",l:"Revenue",v:+R.revenue||0,money:true},{id:"6.6",l:"Average spend per customer",v:avg,money:true},{id:"6.7",l:"LTV (all-time revenue / unique buyers)",v:ltv,money:true}]},
+      {lv:7,t:"Churn and repeat purchases",s:"Renewals against cancellations, 2nd and 3rd purchases",m:[
+        {id:"7.1",l:"Renewals",v:+R.renewals||0},{id:"7.2",l:"Lapsed (cancelled or not renewed)",v:+R.lapsed||0},
+        {id:"7.3",l:"Churn",v:PCT(R.lapsed,(+R.active||0)+(+R.lapsed||0)),g:"l7_churn",unit:"%"},{id:"7.4",l:"Buyers who bought again",v:PCT(R.repeat,R.buyers_all),g:"l7_repeat",unit:"%"}]},
+      {lv:8,t:"Upsells",s:"To a bigger plan, a course, or the Oops yearly switch",m:[
+        {id:"8.1",l:"Customers with an upsell",v:+R.upsell||0},{id:"8.2",l:"Upsell rate",v:PCT(R.upsell,R.buyers_all),g:"l8_upsell",unit:"%"},
+        {id:"8.3",l:"Tokens → course",v:+R.up_tok_course||0},{id:"8.4",l:"Pro → VIP",v:+R.up_pro_vip||0},{id:"8.5",l:"Oops yearly switch",v:+R.up_rescue||0}]},
+      {lv:9,t:"Referrals and advocacy",s:"Through the 10% link",m:[
+        {id:"9.1",l:"Registrations through a friend",v:+R.referred||0},{id:"9.2",l:"Members who referred someone",v:PCT(R.referrers,R.members_all),g:"l9_referrers",unit:"%"},
+        {id:"9.3",l:"Buyers who brought a buyer",v:PCT(R.buyer_buyer,R.buyers_all),g:"l9_buyer_buyer",unit:"%"},{id:"9.4",l:"10% discounts used",v:(+R.disc_invitee||0)+(+R.disc_referrer||0)}]}];
+  }
+  let CC={d:null,chan:rd("lc75-chan","all")};
   function mountCC(view){view.innerHTML='<section class="lc75-cc" data-lc75-cc><p class="muted">Loading…</p></section>';paintCC();return null}
   async function paintCC(){
     const host=Q("[data-lc75-cc]");if(!host)return;
     if(!sess()){host.innerHTML='<div class="panel pad"><h1>Funnel Command Center</h1><p>Sign in first.</p></div>';return}
+    host.innerHTML='<p class="muted">Loading the funnel…</p>';
     const r=await rpc("lc75_funnel",{p:rangeP()});const d=r.data||{};
     if(missing(r)){host.innerHTML='<div class="panel pad"><b>Run sql/20261113120000_lc75_command_center.sql (after the 9.37.0 file) first.</b></div>';return}
     if(!d.ok){host.innerHTML='<div class="panel pad"><h1>Funnel Command Center</h1><p class="muted">For the owner and business partners only.</p></div>';return}
-    const K=d.kpis||{},days=Math.max(1,+(d.range||{}).days||1),rows=d.rows||{},chans=["all"].concat((d.channels||[]).filter(c=>c!=="all").sort((a,b)=>(+(rows[b]||{}).signups||0)-(+(rows[a]||{}).signups||0)));
-    const L=levels(K,days),A=rows.all||{};
-    /* the biggest bottleneck: the KPI furthest below its target (All channels) */
-    let worst=null;L.forEach(l=>l.c(A).forEach(x=>{const k=x[2];if(!k||x[1]==null||!(+k.target>0))return;const ratio=k.kind==="max"?(+k.target)/Math.max(.1,x[1]):x[1]/(+k.target);if(ratio<1&&(!worst||ratio<worst.ratio))worst={ratio:ratio,l:l,x:x}}));
-    const ltv=+A.ltv_buyers?Math.round(+A.ltv_rev/+A.ltv_buyers):0,avg=+A.paying?Math.round(+A.revenue/+A.paying):0;
-    const cell=(l,c)=>{const R=rows[c]||{};return'<td><b>'+fmt(l.v(R))+"</b>"+(l.vl?"<small> "+l.vl+"</small>":"")+l.c(R).map(x=>CHIP(x[0],x[1],c==="all"||x[2]?x[2]:null,x[3])).join("")+"</td>"};
+    CC.d=d;renderCC();
+  }
+  function renderCC(){
+    const host=Q("[data-lc75-cc]"),d=CC.d;if(!host||!d)return;
+    const K=d.kpis||{},days=Math.max(1,+(d.range||{}).days||1),rows=d.rows||{},base=["tiktok","instagram","youtube","reddit","facebook","x","direct"];
+    const chans=["all"].concat(base.filter(c=>(d.channels||[]).indexOf(c)>=0||rows[c])).concat((d.channels||[]).filter(c=>c!=="all"&&base.indexOf(c)<0).sort());
+    if(chans.indexOf(CC.chan)<0)CC.chan="all";
+    const A=rows.all||{},ltv=+A.ltv_buyers?Math.round(+A.ltv_rev/+A.ltv_buyers):0,R=rows[CC.chan]||{},Rltv=+R.ltv_buyers?Math.round(+R.ltv_rev/+R.ltv_buyers):0;
+    const L=metricRows(R,days,Rltv);
+    /* status of every metric with a goal; the worst one is the bottleneck */
+    let worst=null;
+    L.forEach(l=>l.m.forEach(m=>{if(!m.g||!K[m.g]||m.v==null)return;const k=K[m.g],t=(+k.target)*(m.scale||1);if(!(t>0))return;
+      m.goal=t;m.st=k.kind==="max"?(m.v>t*1.3?"is-red":m.v>t?"is-orange":"is-green"):(m.v<t*.7?"is-red":m.v<t?"is-orange":"is-green");
+      const ratio=k.kind==="max"?t/Math.max(.1,m.v):m.v/t;if(ratio<1&&(!worst||ratio<worst.ratio))worst={ratio:ratio,m:m,l:l}}));
+    const val=m=>m.v==null?"–":m.money?eur(m.v):m.unit==="%"?m.v+"%":fmt(m.v);
+    const goalCell=m=>{if(!m.g||!K[m.g])return'<td class="lc75-g">–</td>';const k=K[m.g],ed=d.admin;
+      return'<td class="lc75-g">'+(k.kind==="max"?"≤ ":"")+(ed?'<input class="input lc75-gi" type="number" min="0" step="'+(m.unit==="%"?"0.1":"1")+'" value="'+esc(k.target)+'" data-lc75-goal="'+esc(m.g)+'" aria-label="Goal for '+esc(m.l)+'">':"<b>"+esc(k.target)+"</b>")+"<small>"+(m.unit==="%"?"%":esc(m.u||""))+"</small>"
+        +(m.scale&&m.scale!==1?'<small class="lc75-gp">= '+fmt(m.goal)+" in this period"+(m.g==="l1_views_day"?" · ≈ "+fmt(k.target*30)+" a month":"")+"</small>":"")+"</td>"};
+    const stCell=m=>!m.st?'<td class="lc75-s">–</td>':'<td class="lc75-s"><span class="lc75-pill '+m.st+'">'+(m.st==="is-green"?"✓ On target":worst&&worst.m===m?"⚠ Biggest bottleneck":m.st==="is-red"?"Bottleneck":"Below goal")+"</span></td>";
     host.innerHTML='<header class="lc75-h"><div><p class="lc75-tag">'+(d.admin?"Owner":"Business partner")+'</p><h1>Funnel Command Center</h1></div><div class="btn-row">'
       +(d.admin?'<a class="btn btn-gold" href="#landing-editor">'+ic("pen-to-square")+' Open Landing Page Editor / Preview</a>':"")+'<a class="btn btn-ghost" href="/" target="_blank" rel="noopener">'+ic("arrow-up-right-from-square")+" Live landing page</a></div></header>"
-      +'<div class="lc75-rg" role="tablist">'+RANGES.map(x=>'<button type="button" role="tab" class="lc75-r'+(rg===x[0]?" is-on":"")+(x[0]==="all"?" is-life":"")+'" data-lc75="rg" data-r="'+x[0]+'" aria-selected="'+(rg===x[0])+'">'+x[1]+"</button>").join("")+"</div>"
-      +'<section class="lc75-life'+(rg==="all"?" is-all":"")+'"><div><b>'+eur(A.revenue)+"</b><span>"+(rg==="all"?"Lifetime revenue":"Revenue")+'</span></div><div><b>'+fmt(A.paying)+'</b><span>Paying customers</span></div><div><b>'+eur(avg)+'</b><span>Average spend per customer</span></div><div><b>'+eur(ltv)+'</b><span>LTV (all-time revenue / unique buyers)</span></div><div><b>'+fmt(A.signups)+"</b><span>Registrations"+(rg==="all"?" (career)":"")+'</span></div><div><b>'+fmt(A.installs)+'</b><span>Downloads / app opens</span></div></section>'
-      +(worst?'<div class="lc75-bn is-'+(worst.ratio<.7?"red":"orange")+'"><b>Biggest bottleneck: level '+worst.l.n+", "+esc(worst.l.t)+" ("+esc(worst.x[0])+" "+worst.x[1]+(worst.x[3]||"")+", target "+(worst.x[2].kind==="max"?"≤ ":"")+worst.x[2].target+(worst.x[3]||"")+")</b><span>"+esc(HINT[worst.l.n])+"</span></div>":'<div class="lc75-bn is-green"><b>No KPI below its target in this period.</b></div>')
-      +'<div class="lc75-tw"><table class="lc75-t"><thead><tr><th>Level</th>'+chans.map(c=>"<th>"+(c==="all"?"All channels":esc(c))+"</th>").join("")+"</tr></thead><tbody>"
-      +L.map(l=>'<tr><th><span class="lc75-n">'+l.n+"</span><b>"+esc(l.t)+"</b><small>"+esc(l.s)+"</small></th>"+chans.map(c=>cell(l,c)).join("")+"</tr>").join("")+"</tbody></table></div>"
-      +'<p class="small muted">'+(rg==="all"?"Lifetime":"This period: "+Math.round(days)+" day"+(Math.round(days)===1?"":"s"))+'. Per-day and per-30-day targets are scaled to the period. Levels 7 to 9 count buyers up to the end of the period. Revenue: API checkouts, token packs, library sales, renewals and Payment-Link sales that are logged in lc45_payment_events.</p>'
+      +'<div class="lc75-rg" role="tablist" aria-label="Period">'+RANGES.map(x=>'<button type="button" role="tab" class="lc75-r'+(rg===x[0]?" is-on":"")+(x[0]==="all"?" is-life":"")+'" data-lc75="rg" data-r="'+x[0]+'" aria-selected="'+(rg===x[0])+'">'+x[1]+"</button>").join("")+"</div>"
+      +'<div class="lc75-rg lc75-ch" role="tablist" aria-label="Channel">'+chans.map(c=>'<button type="button" role="tab" class="lc75-r'+(CC.chan===c?" is-on":"")+'" data-lc75="ch" data-c="'+esc(c)+'" aria-selected="'+(CC.chan===c)+'">'+(c==="all"?"All channels (total)":esc(c.charAt(0).toUpperCase()+c.slice(1)))+"</button>").join("")+"</div>"
+      +(worst?'<p class="lc75-bn is-'+(worst.ratio<.7?"red":"orange")+'"><b>Biggest bottleneck: '+esc(worst.m.id+" "+worst.m.l)+" — "+val(worst.m)+" against a goal of "+(worst.m.unit==="%"?worst.m.goal+"%":fmt(worst.m.goal))+"</b><span>"+esc(HINT[worst.l.lv])+"</span></p>":'<p class="lc75-bn is-green"><b>Every goal is met in this period'+(CC.chan==="all"?"":" for "+esc(CC.chan))+".</b></p>")
+      +'<div class="lc75-tw"><table class="lc75-mt"><thead><tr><th scope="col">Step</th><th scope="col">TOTAL <small>live</small></th><th scope="col">GOAL'+(d.admin?" <small>tap to edit</small>":"")+'</th><th scope="col">Status</th></tr></thead><tbody>'
+      +L.map(l=>'<tr class="lc75-lv"><th colspan="4" scope="rowgroup"><span class="lc75-n">'+l.lv+"</span>"+esc(l.t)+"<small>"+esc(l.s)+"</small></th></tr>"
+        +l.m.map(m=>'<tr class="'+(m.st&&m.st!=="is-green"?m.st:"")+'"><th scope="row"><span class="lc75-id">'+m.id+"</span> "+esc(m.l)+"</th><td class=\"lc75-v\">"+val(m)+"</td>"+goalCell(m)+stCell(m)+"</tr>").join("")).join("")+"</tbody></table></div>"
+      +'<p class="small muted">'+(rg==="all"?"Lifetime":"This period: "+Math.round(days)+" day"+(Math.round(days)===1?"":"s"))+". Percentages are between consecutive steps. Goals per day or per 30 days are scaled to the period. Orange = under the goal, red = under 70% of it (churn: above the maximum). "+(CC.chan==="all"?"":"Channel = where the person first came from (short link or utm_source). ")+"Revenue: API checkouts, token packs, library sales, renewals and the Payment-Link sales logged in lc45_payment_events. All-time LTV over all channels: "+eur(ltv)+".</p>"
       +'<details class="panel pad lc75-in"'+(+A.views?"":" open")+'><summary><b>Views per day and channel</b> <small class="muted">(type them in; an API job can fill the same table later)</small></summary><form data-lc75-views class="lc75-vf"><label class="field"><span class="field-label">Day</span><input class="input" type="date" name="day" value="'+new Date().toISOString().slice(0,10)+'"></label>'
         +["tiktok","instagram","youtube","facebook","reddit","x","other"].map(c=>'<label class="field"><span class="field-label">'+c+'</span><input class="input" type="number" min="0" name="'+c+'" inputmode="numeric"></label>').join("")
         +'<button class="btn btn-primary" type="submit">Save the day</button></form><label class="field"><span class="field-label">Or paste a CSV export: date,channel,views (one per line)</span><textarea class="input" rows="3" data-lc75-csv placeholder="2026-11-12,tiktok,5400"></textarea></label><button type="button" class="btn btn-ghost btn-sm" data-lc75="csv">Import the CSV</button></details>'
-      +(d.admin?'<details class="panel pad lc75-in"><summary><b>KPI targets</b></summary><form data-lc75-kpi class="lc75-vf">'+Object.keys(K).map(k=>'<label class="field"><span class="field-label">'+esc(K[k].label)+(K[k].kind==="pct"?" (%)":K[k].kind==="max"?" (max %)":"")+'</span><input class="input" type="number" step="0.1" min="0" name="'+esc(k)+'" value="'+esc(K[k].target)+'"></label>').join("")+'<button class="btn btn-primary" type="submit">Save targets</button></form></details>':"")
       +'<h2>Short links, sources and partners</h2><section data-lc73-dash data-lc73-lite></section>';
     wr("lc73-range",rg==="all"?"30":rg);wr("lc73-all",rg==="all");
     try{LC73.paintDash()}catch(e){}
+  }
+  async function saveGoal(inp){
+    const k=inp.getAttribute("data-lc75-goal"),v=+inp.value;if(!(v>=0)||!CC.d)return;
+    const r=await rpc("lc75_kpi_set",{p:{[k]:v}});
+    if(r.data&&r.data.ok){if(CC.d.kpis&&CC.d.kpis[k])CC.d.kpis[k].target=v;say("Goal saved.","good");renderCC()}else say("Could not save the goal.","bad");
   }
 
   /* ============ 2. admin shortcuts ============ */
@@ -204,11 +254,13 @@ const LC75=(()=>{
     const rdr=t.closest("[data-lc75-read]");if(rdr){e.preventDefault();reader(rdr.getAttribute("data-lc75-read"));return}
     const b=t.closest("[data-lc75]");if(!b)return;const a=b.getAttribute("data-lc75");
     if(a==="rg"){rg=b.getAttribute("data-r");wr("lc75-range",rg);paintCC();return}
+    if(a==="ch"){CC.chan=b.getAttribute("data-c");wr("lc75-chan",CC.chan);renderCC();return}
     if(a==="copy"){const u=b.getAttribute("data-u");try{await navigator.clipboard.writeText(u);say("Copied.","good")}catch(x){window.prompt("Copy the link:",u)}return}
     if(a==="share"){try{await navigator.share({title:"Lanckriet Chess",text:"Train with the MSPC system: 10% off your first purchase with my link.",url:b.getAttribute("data-u")})}catch(x){}return}
     if(a==="csv"){const ta=Q("[data-lc75-csv]");const by={};String(ta&&ta.value||"").split("\n").forEach(l=>{const p=l.split(/[,;\t]/).map(x=>x.trim());if(p.length>=3&&/^\d{4}-\d{2}-\d{2}$/.test(p[0])&&/^\d+$/.test(p[2])){(by[p[0]]=by[p[0]]||{})[p[1].toLowerCase()]=+p[2]}});
       let n=0;for(const day of Object.keys(by)){const r=await rpc("lc75_views_day",{p_day:day,p:by[day]});if(r.data&&r.data.ok)n+=+r.data.saved||0}say(n+" rows imported.",n?"good":"bad");paintCC();return}
   }
+  function onChange(e){const i=e.target;if(i&&i.matches&&i.matches("[data-lc75-goal]"))saveGoal(i)}
   async function onKey(e){if((e.key==="Enter"||e.key===" ")&&e.target&&e.target.matches&&e.target.matches("[data-lc75-read]")){e.preventDefault();reader(e.target.getAttribute("data-lc75-read"))}}
   async function onSubmit(e){
     const f=e.target;if(!f||!f.matches)return;
@@ -226,6 +278,11 @@ const LC75=(()=>{
       +".lc75-t thead th{position:sticky;top:0;background:#0f172a;z-index:1;font-size:12px;text-transform:capitalize}.lc75-t tbody th{position:sticky;left:0;background:#0f172a;z-index:2;min-width:180px;max-width:220px}.lc75-t td:nth-child(2),.lc75-t th:nth-child(2){background:#16213a}.lc75-t thead th:first-child{left:0;z-index:3}"
       +".lc75-t tbody th b{display:block}.lc75-t tbody th small{display:block;color:#94a3b8;font-weight:400}.lc75-n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#38bdf8;color:#0f172a;font-weight:800;font-size:12px;margin-bottom:4px}"
       +".lc75-t td b{font-size:18px;display:block}.lc75-c{display:block;margin-top:3px;padding:2px 6px;border-radius:6px;color:#cbd5e1}.lc75-c i{font-style:normal;color:#94a3b8}.lc75-c.is-red{background:rgba(239,68,68,.18);color:#fecaca}.lc75-c.is-orange{background:rgba(251,146,60,.18);color:#fed7aa}.lc75-c.is-green{background:rgba(34,197,94,.12);color:#bbf7d0}"
+      +".lc75-mt{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}.lc75-mt thead th{position:sticky;top:0;background:#0f172a;text-align:left;padding:10px;border-bottom:2px solid #38bdf8;font-size:12px;text-transform:uppercase;letter-spacing:.05em;z-index:1}.lc75-mt thead small{text-transform:none;color:#94a3b8;font-weight:400;letter-spacing:0}"
+      +".lc75-mt td,.lc75-mt tbody th{padding:8px 10px;border-bottom:1px solid #334155;text-align:left;vertical-align:middle}.lc75-mt tbody th{font-weight:600}.lc75-id{display:inline-block;min-width:30px;color:#94a3b8;font-variant-numeric:tabular-nums}"
+      +".lc75-lv th{background:#16213a;font-size:15px;padding-top:14px!important}.lc75-lv small{display:block;color:#94a3b8;font-weight:400;font-size:12px}.lc75-v{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}"
+      +".lc75-g{white-space:nowrap}.lc75-g small{margin-left:4px;color:#94a3b8}.lc75-gp{display:block;margin:2px 0 0!important}.lc75-gi{width:96px;min-height:40px;display:inline-block}.lc75-mt tr.is-orange td,.lc75-mt tr.is-orange th{background:rgba(251,146,60,.1)}.lc75-mt tr.is-red td,.lc75-mt tr.is-red th{background:rgba(239,68,68,.13)}"
+      +".lc75-pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}.lc75-pill.is-green{background:rgba(34,197,94,.15);color:#86efac}.lc75-pill.is-orange{background:rgba(251,146,60,.2);color:#fdba74}.lc75-pill.is-red{background:rgba(239,68,68,.22);color:#fca5a5}.lc75-ch .lc75-r{text-transform:none}"
       +".lc75-in{margin:12px 0}.lc75-in summary{min-height:44px;display:flex;gap:8px;align-items:center;cursor:pointer;flex-wrap:wrap}.lc75-vf{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin:8px 0}.lc75-vf .field{flex:1 1 120px}.lc75-vf .btn{min-height:44px}"
       +".lc75-top{display:grid;gap:8px;padding:8px 10px;border-bottom:1px solid #334155}.lc75-big{min-height:48px;justify-content:center;font-weight:800}"
       +".lc75-school{flex:1;display:flex;flex-direction:column;gap:8px;padding:14px}.lc75-school h4{margin:2px 0}.lc75-prog{height:8px;border-radius:999px;background:#334155;overflow:hidden}.lc75-prog i{display:block;height:100%;background:linear-gradient(90deg,#38bdf8,#fbbf24)}"
@@ -247,8 +304,8 @@ const LC75=(()=>{
     css();
     try{if(typeof MOUNT!=="undefined"){MOUNT.command=mountCC;MOUNT.analytics=mountCC;try{DOC_TITLES.command="Funnel Command Center";DOC_TITLES.analytics="Funnel Command Center";ALIASES.dashboard="command";ALIASES.funnel="command"}catch(e){}}}catch(e){}
     try{const lv=LC26.levels,o=lv.minLevel;if(!lv.__lc75){lv.__lc75=1;lv.minLevel=r=>r==="command"?1:o(r)}}catch(e){}
-    window.addEventListener("click",onClick,true);document.addEventListener("submit",onSubmit,true);document.addEventListener("keydown",onKey,true);
+    window.addEventListener("click",onClick,true);document.addEventListener("submit",onSubmit,true);document.addEventListener("keydown",onKey,true);document.addEventListener("change",onChange,true);
     new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{scan()}catch(e){}},250)}).observe(document.body,{childList:true,subtree:true});
   }
-  return{init:init,afterRender:afterRender,paint:paintCC,reader:reader,openLesson:openLesson,schoolHTML:schoolHTML,paginate:paginate,levels:levels,status:status,version:"9.38.0"};
+  return{init:init,afterRender:afterRender,paint:paintCC,render:renderCC,metricRows:metricRows,_cc:CC,reader:reader,openLesson:openLesson,schoolHTML:schoolHTML,paginate:paginate,levels:levels,status:status,version:"9.38.1"};
 })(); /*@@end lc75*/

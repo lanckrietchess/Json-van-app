@@ -288,12 +288,14 @@ const LC73=(()=>{
   }
   let deb=0,oldMount=null;
   function scan(){ownerRows();const r=route();if(r==="trim")trimCard();if(r==="community")dmPanel();if(r==="quests")roadStep();if(r==="account")partnerCard();banners()}
-  function afterRender(){clearTimeout(deb);deb=setTimeout(()=>{try{scan()}catch(e){}},250);reportXp()}
+  let trk=0;
+  function afterRender(){clearTimeout(deb);deb=setTimeout(()=>{try{scan()}catch(e){}},250);reportXp();clearTimeout(trk);trk=setTimeout(()=>{try{track()}catch(e){}},1500)}   /* 9.38.1: link the source also when the person signs in after the app started */
   function init(){
     css();
     try{if(typeof MOUNT!=="undefined"){if(MOUNT.rivals&&MOUNT.rivals!==mountRivals)oldMount=MOUNT.rivals;MOUNT.rivals=mountRivals;MOUNT.analytics=mountDash;try{DOC_TITLES.rivals="Rivals & Tribes";DOC_TITLES.analytics="Analytics";ROUTE_TITLES.rivals="Rivals & Tribes";ALIASES.tribes="rivals";ALIASES.tribe="rivals";ALIASES.rival="rivals"}catch(e){}}}catch(e){}
     try{if(typeof LC36!=="undefined"&&LC36.support&&LC36.support.checkout&&!LC36.support.checkout.__lc73){const orig=LC36.support.checkout;const f=async function(plan,tier){const o=await offers();if(o&&o.discount&&(await discountCheckout("subscribe",{plan:plan==="monthly"?"monthly":"yearly",tier:Number(tier)===3?3:2})))return true;return orig.apply(this,arguments)};f.__lc73=true;LC36.support.checkout=f}}catch(e){}
     document.addEventListener("click",onClick,true);document.addEventListener("submit",onSubmit,true);
+    window.addEventListener("storage",e=>{if(e.key==="lc26-auth")setTimeout(()=>{try{track()}catch(x){}},1500)});
     window.addEventListener("appinstalled",()=>{const s=srcRec()||{};rpc("lc73_hit",{p:{kind:"install",device:s.device||device(),code:s.code||""}},true)});
     new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{scan()}catch(e){}},200)}).observe(document.body,{childList:true,subtree:true});
     setTimeout(()=>{track();offers()},4000);

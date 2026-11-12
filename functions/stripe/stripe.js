@@ -241,7 +241,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const to = clean(body.to, 130).toLowerCase(), from = clean(body.email, 130).toLowerCase();
     if (!EMAIL34.test(to)) return { status: 400, body: { ok: false, reason: 'bad_recipient' } };
     if (from && !EMAIL34.test(from)) return { status: 400, body: { ok: false, reason: 'bad_email' } };
-    const rate = await giftRate(body), amount = rate.amount, urls = returnUrls(body.ret), tax = String(E.STRIPE_TAX || '') === 'inclusive', meta = { lc: 'gift', to, plan: 'yearly' };
+    const rate = await giftRate(body), amount = rate.amount, urls = returnUrls(body.ret), tax = String(E.STRIPE_TAX || '') === 'inclusive', meta = { lc: 'gift', to, plan: 'yearly', from_name: clean(body.from_name, 40).replace(/[<>]/g, ''), note: clean(body.note, 300).replace(/[<>]/g, '') };   /* 9.38.1: shown to the friend in the app */
     const form = { mode: 'payment', customer_email: from || undefined, metadata: meta, payment_intent_data: { metadata: meta }, success_url: urls.ok, cancel_url: urls.no,
       automatic_tax: tax ? { enabled: true } : undefined,
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: amount, tax_behavior: tax ? 'inclusive' : undefined,
@@ -255,7 +255,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const have = await DB.prepare("SELECT 1 AS ok FROM public.licenses WHERE flags->>'session' = ?").bind(o.id).first();
     if (have) return;   /* Stripe sent the event twice: one gift, one licence */
     const until = now() + 365 * 864e5, from = clean((o.customer_details && o.customer_details.email) || o.customer_email, 130).toLowerCase();
-    const flags = { source: 'gift', plan: 'yearly', session: o.id, from };
+    const flags = { source: 'gift', plan: 'yearly', session: o.id, from, from_name: clean(m.from_name, 40), note: clean(m.note, 300) };
     if (from) await afterPaid(o, from);
     const lic = await DB.prepare('SELECT license_key FROM public._lc_create_license(?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)')
       .bind(to, 'gift', 'Pro gift (1 year)', 2, false, new Date(until).toISOString(), P34().dailyTokens, flags, 3).first();
