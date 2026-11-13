@@ -12,7 +12,20 @@
      4. Callouts: "2105 ELO Coach" in one tap (animated arrow to the camera + ping), a builder for own callouts (text, font, colours, size, place,
         arrow tip, duration, sound) and presets saved on this device. Sounds are synthesised with Web Audio (no files) and land in the export.
      5. "Show Landing Page (CTA)": the live landing page (snapshot of /?preview=1 through html2canvas, so no visit is counted) in a phone frame in the
-        recorded picture, or a CTA card when the page cannot be captured. Key L toggles it in the Studio. */
+        recorded picture, or a CTA card when the page cannot be captured. Key L toggles it in the Studio.
+     Studio 2.0 NLE (Edit Studio, 9.41.x):
+     6. Zero-stutter playback: two video decks (A/B). While one plays, the other is already loaded and seeked to the next clip, so a cut
+        is a deck swap, not a seek. Pieces of the same take that follow each other play on one deck without any seek. Two video elements
+        per playback whatever the length (4+ minute takes included), and the playhead UI repaints at 10 fps instead of every frame.
+     7. Silence detection: right after a take stops, its level track (Web Audio RMS in dB, every 0.1 s, stored with every take) is
+        scanned and every silence longer than 4.0 s becomes a cut of the take (ripple: the speech pieces sit straight after each other).
+        "Cut silences" in the timeline does the same for the whole project with any threshold (1.5, 2.5, 4 s, slider 0.5 to 8 s).
+        Takes without a level track (imports, exports) are measured by decoding their audio once.
+     8. NLE timeline: Split / blade at the playhead (S), trim handles on both edges of every block, Delete / Backspace removes the block,
+        Undo (Ctrl+Z), zoom and a time ruler. The timeline is magnetic by construction: clips are a list, so it never holds a gap.
+     9. Caption box: captions are written after each take (live captions first, else the same engines as Write captions), they follow
+        the cut blocks (they are timed on the take), and the box on the preview can be dragged, resized (corner or mouse wheel) and
+        styled (background on/off, colour, opacity, text colour, outline, all caps, highlight of the spoken word). */
   const VERSION="9.41.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -119,10 +132,73 @@
   function save(p){if(p)p.updated=Date.now();persist()}
   function takeGone(id){const d=db();let n=0;d.list.forEach(p=>{const b=p.clips.length;p.clips=p.clips.filter(c=>c.take!==id);n+=b-p.clips.length});if(n)persist();try{if(ED.open)ED.paint()}catch(e){}}
   function clipRange(c,t){const D=Math.max(.1,(t.durationMs||0)/1e3);let a=c.in==null?(+t.trimIn||0):+c.in,b=c.out==null?(t.trimOut==null?D:+t.trimOut):+c.out;a=clamp(a,0,Math.max(0,D-.1));b=clamp(b,a+.1,D);return[a,b]}
+  const durOf=t=>Math.max(.1,(+(t&&t.durationMs)||0)/1e3);
+
+  /* ---------- NLE core (pure, unit-tested). Clips are an ordered list, so every split, trim and delete closes up on its own (magnetic ripple). ---------- */
+  const SIL_DT=.1,SIL_PAD=.2;
+  const lvAt=(env,i)=>{const x=env[i];return x==null||!Number.isFinite(+x)?-100:+x};
+  /* the line between silence and voice: 35% of the way from the noise floor (10th percentile) to the voice (90th); the Studio's Trim threshold when the take is flat */
+  function envThr(env,fb){
+    fb=Number.isFinite(fb)?fb:-45;const v=(env||[]).map((x,i)=>lvAt(env,i)).filter(x=>x>-120).sort((a,b)=>a-b);if(v.length<10)return fb;
+    const q=f=>v[Math.min(v.length-1,Math.floor(f*(v.length-1)))],lo=q(.1),hi=q(.9);if(hi-lo<10)return fb;
+    return +clamp(lo+(hi-lo)*.35,-60,-28).toFixed(1);
+  }
+  /* quiet runs of at least minSec inside [from,to] (seconds of the take) */
+  function findQuiet(env,thr,minSec,from,to,dt){
+    dt=dt>0?dt:SIL_DT;const out=[],n=(env||[]).length,lo=from||0,hi=to==null?n*dt:to;let s=-1;
+    for(let i=0;i<=n;i++){const q=i<n&&lvAt(env,i)<thr;if(q&&s<0)s=i;if(!q&&s>=0){const a=Math.max(s*dt,lo),b=Math.min(i*dt,hi);if(b-a>=minSec-1e-6)out.push({s:+a.toFixed(2),e:+b.toFixed(2)});s=-1}}
+    return out;
+  }
+  /* the voice pieces of [a,b]: every silence >= minSec is removed, keeping `pad` seconds of air next to the voice (none at the outer edges) */
+  function speechRanges(env,a,b,minSec,thr,pad,dt){
+    pad=pad==null?SIL_PAD:pad;const keep=[];let cur=a;
+    findQuiet(env,thr,minSec,a,b,dt).forEach(q=>{const cs=q.s<=a+1e-6?a:q.s+pad,ce=q.e>=b-1e-6?b:q.e-pad;if(ce-cs<.05)return;if(cs>cur)keep.push({s:cur,e:cs});cur=Math.max(cur,ce)});
+    if(b-cur>.05)keep.push({s:cur,e:b});
+    return keep.map(k=>({s:+k.s.toFixed(2),e:+k.e.toFixed(2)})).filter(k=>k.e-k.s>=.1);
+  }
+  /* seconds per level value: 0.1 s, stretched to the real length of the take when the recorder's timer drifted (a throttled tab) */
+  function envDt(t){const n=t&&Array.isArray(t.env)?t.env.length:0,D=durOf(t);if(!n)return SIL_DT;const d=D/n;return Math.abs(d/SIL_DT-1)>.02?clamp(d,.05,.25):SIL_DT}
+  function mergeR(rs){const a=(rs||[]).filter(r=>r&&r.e>r.s).map(r=>({s:+r.s,e:+r.e})).sort((x,y)=>x.s-y.s),out=[];a.forEach(r=>{const l=out[out.length-1];if(l&&r.s<=l.e+1e-6)l.e=Math.max(l.e,r.e);else out.push(r)});return out}
+  /* ranges minus cuts */
+  function minus(ranges,cuts){const cs=mergeR(cuts),out=[];(ranges||[]).forEach(r=>{let cur=r.s;cs.forEach(c=>{if(c.e<=cur||c.s>=r.e)return;if(c.s>cur)out.push({s:cur,e:c.s});cur=Math.max(cur,c.e)});if(r.e-cur>1e-6)out.push({s:cur,e:r.e})});return out.filter(r=>r.e-r.s>=.05)}
+  /* [a,b] minus the keep ranges = the cuts */
+  function complement(keep,a,b){const out=[];let cur=a;mergeR(keep).forEach(k=>{if(k.s>cur+1e-6)out.push({s:+cur.toFixed(2),e:+k.s.toFixed(2)});cur=Math.max(cur,k.e)});if(b>cur+1e-6)out.push({s:+cur.toFixed(2),e:+b.toFixed(2)});return out}
+  /* the pieces a take adds to a timeline: its trim, minus its cuts (silences, marked mistakes), each piece one block */
+  function clipsFor(t,p){const D=durOf(t),a=clamp(+t.trimIn||0,0,D),b=t.trimOut==null?D:clamp(+t.trimOut,a,D);
+    const ks=(p&&p.useCuts===false)?[{s:a,e:b}]:minus([{s:a,e:b}],t.cuts||[]);return(ks.length?ks:[{s:a,e:b}]).map(k=>({id:uid(),take:t.id,in:+k.s.toFixed(3),out:+k.e.toFixed(3),raw:true}))}
+  /* blade: one block becomes two at `at` seconds of the take */
+  function splitClip(p,id,at){
+    const i=p.clips.findIndex(c=>c.id===id);if(i<0)return null;const c=p.clips[i],t=takeById(c.take);if(!t)return null;
+    const r=clipRange(c,t);if(!(at>r[0]+.05&&at<r[1]-.05))return null;
+    const A=Object.assign({},c,{in:r[0],out:+at.toFixed(3)}),B=Object.assign({},c,{id:uid(),in:+at.toFixed(3),out:r[1]});
+    p.clips.splice(i,1,A,B);return B.id;
+  }
+  function segAt(segs,Tt){return segs.filter(x=>Tt>=x.T0&&Tt<x.T0+(x.e-x.s))[0]||null}
+  function splitAt(p,Tt){const s=segAt(segments(p),Tt);if(!s)return null;return splitClip(p,s.clip.id,s.s+(Tt-s.T0))}
+  /* trim handle: side "l" sets the start, "r" the end (seconds of the take); never shorter than 0.1 s, never past the take */
+  function trimClip(p,id,side,v){
+    const c=p.clips.filter(x=>x.id===id)[0],t=c&&takeById(c.take);if(!t)return false;const r=clipRange(c,t),D=durOf(t);
+    if(side==="l")c.in=+clamp(+v||0,0,r[1]-.1).toFixed(3);else{c.out=+clamp(+v||0,r[0]+.1,D).toFixed(3);if(c.in==null)c.in=r[0]}
+    if(c.out==null)c.out=r[1];return true;
+  }
+  function deleteClip(p,id){const n=p.clips.length;p.clips=p.clips.filter(c=>c.id!==id);return p.clips.length<n}
+  /* ripple-delete every silence >= minSec in every block of the project. Takes need a level track (t.env); others are skipped. */
+  function cutSilences(p,minSec,thrFb){
+    const before=segments(p).total||0,out=[];let n=0,skipped=0;
+    p.clips.forEach(c=>{const t=takeById(c.take);if(!t){return}
+      if(!Array.isArray(t.env)||t.env.length<5){skipped++;out.push(c);return}
+      const r=clipRange(c,t),base=(c.raw||p.useCuts===false)?[{s:r[0],e:r[1]}]:minus([{s:r[0],e:r[1]}],t.cuts||[]),thr=envThr(t.env,thrFb);
+      const pieces=[];base.forEach(b=>speechRanges(t.env,b.s,b.e,minSec,thr,null,envDt(t)).forEach(k=>pieces.push(k)));
+      if(pieces.length===1&&base.length===1&&Math.abs(pieces[0].s-r[0])<.01&&Math.abs(pieces[0].e-r[1])<.01){out.push(c);return}
+      n+=Math.max(0,complement(pieces,r[0],r[1]).length-complement(base,r[0],r[1]).length);
+      pieces.forEach((k,j)=>out.push(Object.assign({},c,{id:j?uid():c.id,in:k.s,out:k.e,raw:true})))});
+    p.clips=out;const after=segments(p).total||0;
+    return{removed:+Math.max(0,before-after).toFixed(2),places:n,skipped:skipped,total:after};
+  }
   function segments(p){
     const out=[];let T0=0;const tt=T();
     ((p&&p.clips)||[]).forEach((c,ci)=>{const t=takeById(c.take);if(!t)return;const r=clipRange(c,t);let keep=[{s:r[0],e:r[1]}];
-      if(p.useCuts!==false&&tt&&tt.buildKeep&&t.cuts&&t.cuts.length){try{const k=tt.buildKeep(Math.max(.1,t.durationMs/1e3),r[0],r[1],t.cuts);if(k&&k.length)keep=k}catch(e){}}
+      if(!c.raw&&p.useCuts!==false&&t.cuts&&t.cuts.length){try{const k=tt&&tt.buildKeep?tt.buildKeep(durOf(t),r[0],r[1],t.cuts):minus([{s:r[0],e:r[1]}],t.cuts);if(k&&k.length)keep=k}catch(e){}}
       keep.forEach(s=>{if(s.e-s.s<.05)return;out.push({ci:ci,clip:c,take:t,s:s.s,e:s.e,T0:T0});T0+=s.e-s.s})});
     out.total=T0;return out;
   }
@@ -131,14 +207,37 @@
     const m=/^(\d+)x(\d+)$/.exec(String(p&&p.size||""));if(m)return[+m[1],+m[2]];
     const t=segs&&segs[0]&&segs[0].take;const w=Math.round(t&&t.w||1080),h=Math.round(t&&t.h||1920);return[w-w%2,h-h%2];
   }
-  function drawFrame(g,W,H,v,take,ct,p,Tp,noCallouts){
-    const capsOff=!!(p&&p.capsOff);
+  /* ---------- caption box (per project: place, size and style; the text and timing stay on the take, so captions follow every cut) ---------- */
+  const CAP_DEF={x:.5,y:0,scale:1,w:.86,box:true,bg:"#05070a",bgA:.72,fg:"#ffffff",stroke:false,sc:"#000000",upper:false,font:"sora",karaoke:false,hl:"#fbbf24"};
+  function capStyle(p,W,H){const s=Object.assign({},CAP_DEF,(p&&p.cap)||{});if(!(+s.y>0))s.y=W<H?.78:.86;return s}
+  function capLine(take,ct){if(!take||take.capBurn===false||!Array.isArray(take.captions))return null;return take.captions.filter(c=>ct>=c.s&&ct<c.e)[0]||null}
+  /* draws one caption line in its box; returns the box (canvas pixels) for dragging */
+  function drawCaption(g,W,H,line,st,ct){
+    if(!line||!String(line.t||"").trim())return null;
+    const size=Math.max(8,Math.round(Math.min(W,H)*(W<H?.052:.04)*clamp(+st.scale||1,.4,3)));
+    g.save();g.font=(FONTS[st.font]||FONTS.sora).replace("{s}",size);g.textAlign="left";g.textBaseline="middle";
+    let words=null;try{const L=api()&&api().lc33;if(st.karaoke&&L&&L.wordTimes&&line.s!=null)words=L.wordTimes(line)}catch(e){words=null}
+    if(!Array.isArray(words)||!words.length)words=String(line.t).split(/\s+/).filter(Boolean).map(t=>({t:t}));
+    words=words.map(x=>({t:x.t,s:x.s,e:x.e,d:st.upper?String(x.t).toUpperCase():String(x.t)}));
+    const sp=g.measureText(" ").width,maxW=W*clamp(+st.w||.86,.3,.98),rows=[];let cur=[],cw=0;
+    words.forEach(x=>{x.w=g.measureText(x.d).width;if(cur.length&&cw+sp+x.w>maxW){rows.push({ws:cur,w:cw});cur=[];cw=0}cw+=(cur.length?sp:0)+x.w;cur.push(x)});if(cur.length)rows.push({ws:cur,w:cw});
+    const lh=size*1.28,bh=rows.length*lh+size*.5,bw=Math.min(W-4,Math.max.apply(null,rows.map(r=>r.w))+size*1.1);
+    const x0=clamp(clamp(+st.x,0,1)*W-bw/2,2,Math.max(2,W-bw-2)),y0=clamp(clamp(+st.y,0,1)*H-bh/2,2,Math.max(2,H-bh-2)),cx=x0+bw/2;
+    if(st.box){g.globalAlpha=clamp(+st.bgA,0,1);g.fillStyle=st.bg||"#05070a";rr(g,x0,y0,bw,bh,size*.4);g.fill();g.globalAlpha=1}
+    else if(!st.stroke){g.shadowColor="rgba(0,0,0,.85)";g.shadowBlur=size*.35}
+    rows.forEach((row,i)=>{let x=cx-row.w/2;const y=y0+size*.25+lh*(i+.5);
+      row.ws.forEach(wd=>{if(st.stroke){g.lineJoin="round";g.lineWidth=Math.max(2,size*.16);g.strokeStyle=st.sc||"#000";g.strokeText(wd.d,x,y)}
+        g.fillStyle=st.karaoke&&wd.s!=null&&ct>=wd.s&&ct<wd.e?(st.hl||"#fbbf24"):(st.fg||"#fff");g.fillText(wd.d,x,y);x+=wd.w+sp})});
+    g.restore();return{x:x0,y:y0,w:bw,h:bh,size:size};
+  }
+  function drawFrame(g,W,H,v,take,ct,p,Tp,noOverlay){
     g.fillStyle="#000";g.fillRect(0,0,W,H);
     if(v&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,k=Math.min(W/vw,H/vh),w=vw*k,h=vh*k;try{g.drawImage(v,(W-w)/2,(H-h)/2,w,h)}catch(e){}}
-    if(!capsOff)try{const L=api()&&api().lc33;if(L&&L.drawCap&&take)L.drawCap(g,W,H,take,ct)}catch(e){}
-    if(!noCallouts)((p&&p.callouts)||[]).forEach(c=>{try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
+    if(noOverlay)return;
+    if(!(p&&p.capsOff))try{drawCaption(g,W,H,capLine(take,ct),capStyle(p,W,H),ct)}catch(e){}
+    ((p&&p.callouts)||[]).forEach(c=>{try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
   }
-  function mkVideo(src,muted){const v=document.createElement("video");v.playsInline=true;v.setAttribute("playsinline","");v.preload="auto";v.muted=!!muted;v.src=src;v.style.cssText="position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none";document.body.appendChild(v);return v}
+  function mkVideo(src,muted){const v=document.createElement("video");v.playsInline=true;v.setAttribute("playsinline","");v.preload="auto";v.muted=!!muted;if(src)v.src=src;v.style.cssText="position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none";document.body.appendChild(v);return v}
   const once=(el,ev,ms)=>new Promise(r=>{let d=false;const f=()=>{if(d)return;d=true;el.removeEventListener(ev,f);r(true)};el.addEventListener(ev,f);if(ms)setTimeout(()=>{if(!d){d=true;el.removeEventListener(ev,f);r(false)}},ms)});
   async function loaded(v){
     if(v.readyState<1)await once(v,"loadedmetadata",9000);if(v.readyState<1)throw new Error("A take could not be opened on this device.");
@@ -146,18 +245,27 @@
   }
   async function seek(v,t){if(Math.abs(v.currentTime-t)<.015&&v.readyState>=2)return;const p=once(v,"seeked",4000);v.currentTime=t;await p}
 
-  /* plays the project into a canvas: preview (speakers) or export (MediaRecorder). ctl.stopped ends it. */
+  /* plays the project into a canvas: preview (speakers) or export (MediaRecorder). ctl.stopped ends it.
+     Two decks: the next clip is loaded and seeked on the idle deck while the current one plays, so a cut is a swap (no seek, no freeze).
+     Blocks of one take that follow each other without a gap keep playing on the same deck. ctl.stalls counts swaps that had to wait. */
   async function run(p,o){
     const segs=segments(p);if(!segs.length)throw new Error("Add at least one take to the timeline first.");
-    const total=segs.total,sz=o.size||outSize(p,segs),W=sz[0],H=sz[1],cv=o.canvas,ctl=o.ctl||{};cv.width=W;cv.height=H;
+    const total=segs.total,sz=o.size||outSize(p,segs),W=sz[0],H=sz[1],cv=o.canvas,ctl=o.ctl||{};cv.width=W;cv.height=H;ctl.stalls=0;ctl.swaps=0;
     const g=cv.getContext("2d",{alpha:false});
     const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error("This browser has no Web Audio.");
     const ac=new AC();if(ac.state==="suspended"){try{await ac.resume()}catch(e){}}
     const master=ac.createGain();let dest=null;
     if(o.record){dest=ac.createMediaStreamDestination();master.connect(dest)}else master.connect(ac.destination);
-    const vids={};let stream=null;
+    const decks=[];let stream=null;
+    const mkDeck=()=>{const v=mkVideo(null,false),node=ac.createMediaElementSource(v),gn=ac.createGain();gn.gain.value=0;node.connect(gn);gn.connect(master);const d={v:v,gain:gn,url:"",seg:-1,ready:false,job:null,err:null};decks.push(d);return d};
+    const prep=(d,k,at)=>{const s=segs[k];d.seg=k;d.ready=false;d.err=null;
+      const job=(async()=>{if(d.url!==s.take.url){d.url=s.take.url;d.v.src=s.take.url;await loaded(d.v)}await seek(d.v,at==null?s.s:at);if(d.v.readyState<2)await once(d.v,"canplay",1500)})()
+        .then(()=>{if(d.job===job)d.ready=true},e=>{if(d.job===job)d.err=e});
+      d.job=job;return job};
+    const contig=k=>k+1<segs.length&&segs[k+1].take.id===segs[k].take.id&&Math.abs(segs[k+1].s-segs[k].e)<.04;
+    const nextJump=k=>{let j=k;while(contig(j))j++;return j+1};
+    const fade=(d,to,at,tc)=>{try{d.gain.gain.cancelScheduledValues(ac.currentTime);d.gain.gain.setTargetAtTime(to,Math.max(ac.currentTime,at||0),tc||.005)}catch(e){}};
     try{
-      for(const s of segs)if(!vids[s.take.id]){const v=mkVideo(s.take.url,false);await loaded(v);const node=ac.createMediaElementSource(v),gn=ac.createGain();gn.gain.value=0;node.connect(gn);gn.connect(master);vids[s.take.id]={v:v,gain:gn}}
       let mr=null;const chunks=[];let mime="";
       if(o.record){
         if(!window.MediaRecorder||!cv.captureStream)throw new Error("This browser cannot record video. Use Chrome or Edge on a computer.");
@@ -168,32 +276,45 @@
       }
       let from=clamp(+o.from||0,0,Math.max(0,total-.05)),k=0;
       for(;k<segs.length-1;k++)if(from<segs[k].T0+(segs[k].e-segs[k].s))break;
-      let prevT=from-1e-4;
-      for(;k<segs.length&&!ctl.stopped;k++){
-        const s=segs[k],V=vids[s.take.id],v=V.v,start=s.s+Math.max(0,from-s.T0);from=0;
-        V.gain.gain.cancelScheduledValues(ac.currentTime);V.gain.gain.value=0;await seek(v,start);
-        drawFrame(g,W,H,v,s.take,v.currentTime,p,s.T0+(v.currentTime-s.s));
-        if(mr){if(mr.state==="inactive")mr.start(1000);else if(mr.state==="paused")mr.resume()}
-        try{await v.play()}catch(e){throw new Error("The browser blocked playback. Press the button again.")}
-        V.gain.gain.setTargetAtTime(1,ac.currentTime,.006);
+      let prevT=from-1e-4,cur=mkDeck(),nxt=mkDeck();
+      await prep(cur,k,segs[k].s+Math.max(0,from-segs[k].T0));if(cur.err)throw cur.err;
+      let j=nextJump(k);if(j<segs.length)prep(nxt,j,null);
+      drawFrame(g,W,H,cur.v,segs[k].take,cur.v.currentTime,p,segs[k].T0+(cur.v.currentTime-segs[k].s));
+      if(mr)mr.start(1000);
+      try{await cur.v.play()}catch(e){throw new Error("The browser blocked playback. Press the button again.")}
+      fade(cur,1,0,.006);
+      while(k<segs.length&&!ctl.stopped){
+        const s=segs[k],v=cur.v,joined=contig(k);let fading=false;
         await new Promise(res=>{
           const step=()=>{
             if(ctl.stopped)return res();
-            const ct=v.currentTime,Tp=s.T0+Math.max(0,ct-s.s);
+            const ct=v.currentTime,Tp=s.T0+clamp(ct-s.s,0,s.e-s.s);
             ((p.callouts)||[]).forEach(c=>{if(c.t>prevT&&c.t<=Tp+.001)sfx(c.sound,ac,master)});prevT=Tp;
             drawFrame(g,W,H,v,s.take,ct,p,Tp);
             if(o.onTime)try{o.onTime(Tp,total)}catch(e){}
-            if(ct>=s.e-.035||v.ended)return res();
+            const left=s.e-ct;
+            if(!joined&&!fading&&left<.07){fading=true;fade(cur,0,ac.currentTime+Math.max(0,left-.015),.004)}
+            if(left<=.02||v.ended)return res();
             requestAnimationFrame(step)};
           requestAnimationFrame(step)});
-        V.gain.gain.setTargetAtTime(0,ac.currentTime,.004);try{v.pause()}catch(e){}
-        if(mr&&mr.state==="recording")mr.pause();
+        if(ctl.stopped)break;
+        if(joined&&!v.ended){k++;continue}      /* the next block starts where this one ends: same deck, no seek */
+        k++;if(k>=segs.length)break;
+        if(nxt.seg!==k)prep(nxt,k,null);
+        if(!nxt.ready){ctl.stalls++;if(mr&&mr.state==="recording")mr.pause();try{v.pause()}catch(e){}await nxt.job;if(mr&&mr.state==="paused")mr.resume()}
+        if(nxt.err)throw nxt.err;
+        const pl=nxt.v.play();fade(nxt,1,0,.006);fade(cur,0,0,.004);try{v.pause()}catch(e){}
+        const was=cur;cur=nxt;nxt=was;ctl.swaps++;
+        drawFrame(g,W,H,cur.v,segs[k].take,cur.v.currentTime,p,segs[k].T0+Math.max(0,cur.v.currentTime-segs[k].s));
+        try{await pl}catch(e){throw new Error("The browser blocked playback. Press the button again.")}
+        j=nextJump(k);if(j<segs.length)prep(nxt,j,null);
       }
+      try{cur.v.pause()}catch(e){}
       let blob=null;
       if(mr&&mr.state!=="inactive"){if(mr.state==="paused")mr.resume();await new Promise(r=>setTimeout(r,150));const fin=new Promise(r=>{mr.onstop=r});mr.stop();await fin;if(!ctl.stopped)blob=new Blob(chunks,{type:(mime||"video/webm").split(";")[0]})}
-      return{blob:blob,total:total,W:W,H:H,mime:mime};
+      return{blob:blob,total:total,W:W,H:H,mime:mime,stalls:ctl.stalls,swaps:ctl.swaps};
     }finally{
-      Object.keys(vids).forEach(id=>{try{vids[id].v.pause();vids[id].v.removeAttribute("src");vids[id].v.load();vids[id].v.remove()}catch(e){}});
+      decks.forEach(d=>{try{d.v.pause();d.v.removeAttribute("src");d.v.load();d.v.remove()}catch(e){}});
       if(stream)stream.getTracks().forEach(t=>{try{t.stop()}catch(e){}});try{ac.close()}catch(e){}
     }
   }
@@ -222,7 +343,7 @@
       ".lc79-view{display:flex;flex-direction:column;gap:8px;min-width:0}",
       ".lc79-stagebox{position:relative;background:#000;border-radius:12px;display:flex;align-items:center;justify-content:center;height:min(56vh,640px);overflow:hidden;border:1px solid rgba(255,255,255,.08)}",
       ".lc79-stagebox canvas{max-width:100%;max-height:100%;display:block;touch-action:none}",
-      ".lc79-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:#94a3b8}",
+      ".lc79-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:#94a3b8}.lc79-empty[hidden]{display:none}",
       ".lc79-trans{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.lc79-time{font-variant-numeric:tabular-nums;color:#cbd5e1;min-width:110px}",
       ".lc79-insp{background:#0f1217;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;align-self:start;max-height:calc(56vh + 60px);overflow:auto}",
       ".lc79-insp h3{margin:0;font-size:14px;color:#fff}.lc79-f{display:flex;flex-direction:column;gap:4px}.lc79-f>span{font-size:12px;color:#94a3b8}.lc79-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}",
@@ -232,14 +353,20 @@
       ".lc79-chip{min-height:44px;padding:0 12px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:#14171d;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:6px}",
       ".lc79-chip i{width:12px;height:12px;border-radius:50%;display:inline-block}.lc79-chip .x{min-width:28px;min-height:28px;border-radius:50%;border:0;background:rgba(255,255,255,.08);cursor:pointer;margin-right:-6px}",
       ".lc79-tl{margin:0 12px 12px;background:#0f1217;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;position:relative;user-select:none;-webkit-user-select:none}",
-      ".lc79-track{position:relative;height:64px;border-radius:8px;background:rgba(255,255,255,.03);margin-top:6px;touch-action:pan-y}",
+      ".lc79-track{position:relative;height:64px;border-radius:8px;background:rgba(255,255,255,.03);margin-top:6px;touch-action:pan-y}.lc79-ins{top:18px}",
       ".lc79-track.co{height:40px}.lc79-tl-label{font-size:12px;color:#94a3b8;display:flex;justify-content:space-between}",
       ".lc79-clip{position:absolute;top:4px;bottom:4px;border-radius:8px;background:linear-gradient(#18323a,#11252b);border:1px solid rgba(0,229,255,.35);overflow:hidden;cursor:grab;display:flex;align-items:flex-end;padding:4px 6px;font-size:12px;font-weight:600;color:#e0f7fb;min-width:6px;background-size:cover;background-position:center}",
       ".lc79-clip span{background:rgba(5,7,10,.7);border-radius:6px;padding:1px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
       ".lc79-clip.sel{outline:2px solid #00E5FF;outline-offset:1px}.lc79-clip.drag{opacity:.55;cursor:grabbing}",
       ".lc79-co{position:absolute;top:5px;bottom:5px;border-radius:7px;cursor:grab;display:flex;align-items:center;padding:0 6px;font-size:11.5px;font-weight:700;overflow:hidden;white-space:nowrap;min-width:12px;color:#0f172a}",
       ".lc79-co.sel{outline:2px solid #fff;outline-offset:1px}",
-      ".lc79-ph{position:absolute;top:22px;bottom:6px;width:2px;background:#ef4444;pointer-events:none;z-index:3}",
+      ".lc79-ph{position:absolute;left:0;top:0;bottom:0;width:2px;margin-left:-1px;background:#ef4444;pointer-events:none;z-index:3;will-change:transform}",
+      ".lc79-tlbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}.lc79-sep{width:1px;height:28px;background:rgba(255,255,255,.12);margin:0 4px}",
+      ".lc79-sil{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#cbd5e1}.lc79-sil input[type=range]{width:120px}.lc79-sil output{min-width:44px;font-variant-numeric:tabular-nums;color:#fff;font-weight:700}",
+      ".lc79-scroll{overflow-x:auto;overflow-y:hidden;margin-top:6px;border-radius:8px;scrollbar-color:#334155 transparent}.lc79-lane{position:relative;min-width:100%;padding-bottom:4px}",
+      ".lc79-ruler{position:relative;height:18px;font-size:10.5px;color:#64748b;border-bottom:1px solid rgba(255,255,255,.08)}.lc79-ruler i{position:absolute;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.15);padding-left:3px;font-style:normal;white-space:nowrap}",
+      ".lc79-hd{position:absolute;top:0;bottom:0;width:12px;cursor:ew-resize;z-index:2;touch-action:none;background:transparent}.lc79-hd.l{left:0;border-left:3px solid rgba(0,229,255,.55)}.lc79-hd.r{right:0;border-right:3px solid rgba(0,229,255,.55)}",
+      ".lc79-clip:hover .lc79-hd,.lc79-clip.sel .lc79-hd{background:rgba(0,229,255,.28)}.lc79-clip span{position:relative;z-index:1;margin:0 8px}",
       ".lc79-ins{position:absolute;top:0;bottom:0;width:3px;background:#fbbf24;z-index:4;pointer-events:none}",
       ".lc79-arch{padding:0 12px 24px}.lc79-arch h3{font-size:14px;margin:4px 0 8px;color:#fff}",
       ".lc79-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}",
@@ -292,22 +419,79 @@
       try{await loaded(v);await seek(v,Math.min(Math.max(.2,+t.trimIn||0)+.6,Math.max(0,v.duration-.1)||.5));const c=document.createElement("canvas"),k=180/Math.max(v.videoWidth||16,v.videoHeight||9);c.width=Math.round((v.videoWidth||16)*k);c.height=Math.round((v.videoHeight||9)*k);c.getContext("2d").drawImage(v,0,0,c.width,c.height);thumbs[t.id]=c.toDataURL("image/jpeg",.7);cb(thumbs[t.id])}
       catch(e){}finally{v.remove()}});
   }
-  const ED={open:false,el:null,T:0,playing:false,ctl:null,sel:null,busy:false,base:null,scrubTok:0,scrubV:{}};
+  const ED={open:false,el:null,T:0,tot:0,playing:false,ctl:null,sel:null,busy:false,base:null,baseInfo:null,capRect:null,scrubTok:0,scrubV:{},zoom:1,undo:[],lastHead:0,lastSnap:0};
+  /* NLE settings on this device: silence cut after each take, captions after each take, the threshold of the Cut silences button */
+  const NK="lc79-nle";
+  const nle=()=>Object.assign({autoSil:true,silMin:4,autoCaps:true,cutMin:4},rd(NK,{})||{});
+  const setNle=o=>wr(NK,Object.assign(nle(),o));
+  const trThr=()=>{try{const v=T().Trim.thr;return Number.isFinite(v)?v:-45}catch(e){return-45}};
+  /* undo: a copy of the project's timeline before every edit (Ctrl+Z) */
+  function snapEd(p){if(!p)return;ED.undo.push({pid:p.id,clips:JSON.stringify(p.clips||[]),callouts:JSON.stringify(p.callouts||[]),cap:JSON.stringify(p.cap||null)});if(ED.undo.length>60)ED.undo.shift();ED.lastSnap=Date.now()}
+  const snapSoft=p=>{if(Date.now()-ED.lastSnap>1500)snapEd(p)};
+  function undo(){
+    const p=cur();if(!p)return;
+    for(let i=ED.undo.length-1;i>=0;i--){if(ED.undo[i].pid!==p.id)continue;const u=ED.undo.splice(i,1)[0];stopPlay();
+      p.clips=JSON.parse(u.clips);p.callouts=JSON.parse(u.callouts);const c=JSON.parse(u.cap);if(c)p.cap=c;else delete p.cap;
+      save(p);ED.sel=null;ED.paint();say("Undone.","",1200);return}
+    say("Nothing to undo.","",1500);
+  }
+  /* a take without a level track (an import, an export): measure it once by decoding its audio, RMS in dB per 0.1 s */
+  function envOf(ab){
+    const n=ab.numberOfChannels,len=ab.length,step=Math.max(1,Math.round(ab.sampleRate*SIL_DT)),ch=[],out=[];for(let c=0;c<n;c++)ch.push(ab.getChannelData(c));
+    for(let i=0;i<len;i+=step){let sum=0,m=0;const e=Math.min(len,i+step);for(let j=i;j<e;j+=4){let x=0;for(let c=0;c<n;c++)x+=ch[c][j];x/=n;sum+=x*x;m++}
+      const rms=Math.sqrt(sum/Math.max(1,m));out.push(rms>0?Math.max(-100,Math.round(20*Math.log10(rms))):-100)}
+    return out;
+  }
+  async function ensureEnv(t){
+    if(!t)return false;if(Array.isArray(t.env)&&t.env.length>=5)return true;
+    try{const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext,buf=await(await fetch(t.url)).arrayBuffer();
+      const ctx=OAC?new OAC(1,22050,22050):new(window.AudioContext||window.webkitAudioContext)();
+      const ab=await new Promise((res,rej)=>{const pr=ctx.decodeAudioData(buf,res,rej);if(pr&&pr.then)pr.then(res,rej)});
+      t.env=envOf(ab);try{T().Takes.persistMeta(t)}catch(e){}return t.env.length>=5}catch(e){return false}
+  }
+  /* right after a take: every silence >= min seconds becomes a cut of the take (the Studio's Trim shows them too and can undo them) */
+  function autoSilence(t,min){
+    if(!t||!Array.isArray(t.env)||t.env.length<10)return null;
+    const D=durOf(t),a=clamp(+t.trimIn||0,0,D),b=t.trimOut==null?D:clamp(+t.trimOut,a,D),thr=envThr(t.env,trThr()),keep=speechRanges(t.env,a,b,min,thr,null,envDt(t));
+    if(!keep.length)return{n:0,sec:0,silent:true};
+    const cuts=complement(keep,a,b).filter(c=>c.e-c.s>=.05&&!(t.cuts||[]).some(x=>x.s<=c.s+.01&&x.e>=c.e-.01));if(!cuts.length)return{n:0,sec:0};
+    t.cuts=(t.cuts||[]).concat(cuts.map(c=>({s:c.s,e:c.e,auto:1,lc79:1}))).sort((x,y)=>x.s-y.s);
+    try{T().Takes.persistMeta(t)}catch(e){}
+    return{n:cuts.length,sec:+cuts.reduce((s,c)=>s+c.e-c.s,0).toFixed(1)};
+  }
+  /* captions right after a take when the live captions did not catch it (same engines as Write captions), one take at a time */
+  let capQ=Promise.resolve();
+  function autoCaptions(t){
+    if(!nle().autoCaps||!t||(t.captions&&t.captions.length)||/\(export\)|\(edited\)/.test(t.name||""))return;
+    capQ=capQ.then(()=>new Promise(r=>setTimeout(r,1200))).then(async()=>{
+      const L=api()&&api().lc33;if(!L||!L.autoSubs||(t.captions&&t.captions.length)||!takeById(t.id))return;
+      const r=await L.autoSubs(t,()=>{});
+      if(r&&r.ok&&r.lines&&r.lines.length){t.captions=r.lines.map(x=>Object.assign({},x,{t:L.fixText?L.fixText(x.t):x.t}));try{T().Takes.persistMeta(t)}catch(e){}
+        say("Captions written for “"+t.name+"”. Check them with Captions.","ok",3500);if(ED.open&&!ED.playing)showFrame()}
+    }).catch(()=>{});
+  }
   function openProjects(){
     if(!api()){say("Open the Creator Studio first.","err");return}
     if(!cur())newProject("Reel 1");
     ED.sel=null;ED.T=0;
+    const qs=[1.5,2.5,4].map(v=>'<button type="button" class="lc79-b sm" data-a="silq" data-v="'+v+'" aria-label="Silences over '+v+' seconds">'+v+' s</button>').join("");
     ED.el=openLayer("lc79-ed","Edit Studio projects",el=>{
       el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Edit Studio · Projects</h2><button type="button" class="lc79-b sm" data-a="captions">Captions</button>'
         +'<select data-a="pick" aria-label="Project"></select><button type="button" class="lc79-b sm" data-a="new">New project</button><button type="button" class="lc79-b sm" data-a="rename">Rename</button><button type="button" class="lc79-b sm red" data-a="delproj">Delete project</button>'
-        +'<span class="lc79-grow"></span><button type="button" class="lc79-b" data-a="caps" aria-pressed="true">CC Captions: on</button><button type="button" class="lc79-b pri" data-a="export">Export video</button></header>'
-        +'<div class="lc79-body"><div class="lc79-main"><div class="lc79-view"><div class="lc79-stagebox"><canvas aria-label="Project preview. When a callout is selected and the video is paused, drag it to place it."></canvas><div class="lc79-empty" hidden></div></div>'
+        +'<span class="lc79-grow"></span><button type="button" class="lc79-b sm" data-a="capstyle" title="Move, resize and style the caption box">Caption box</button><button type="button" class="lc79-b" data-a="caps" aria-pressed="true">CC Captions: on</button><button type="button" class="lc79-b pri" data-a="export">Export video</button></header>'
+        +'<div class="lc79-body"><div class="lc79-main"><div class="lc79-view"><div class="lc79-stagebox"><canvas aria-label="Project preview. Drag the caption box to move it and its corner to resize it. When a callout is selected and the video is paused, drag it to place it."></canvas><div class="lc79-empty" hidden></div></div>'
         +'<div class="lc79-trans"><button type="button" class="lc79-b" data-a="home" aria-label="Back to the start">⏮</button><button type="button" class="lc79-b pri" data-a="play">▶ Play</button><span class="lc79-time" aria-live="off"></span><input type="range" data-a="scrub" min="0" max="1" step="0.01" value="0" aria-label="Project time" style="flex:1;min-width:140px"></div></div>'
         +'<aside class="lc79-insp" aria-label="Inspector"></aside></div>'
         +'<div class="lc79-calls" aria-label="Callouts"></div>'
-        +'<div class="lc79-tl"><div class="lc79-tl-label"><span>Timeline: drag a clip to move it, tap to trim it</span><span data-tot></span></div><div class="lc79-track" data-track="clips" aria-label="Clips"></div><div class="lc79-tl-label" style="margin-top:6px"><span>Callouts</span></div><div class="lc79-track co" data-track="co" aria-label="Callouts on the timeline"></div><div class="lc79-ph"></div></div>'
+        +'<div class="lc79-tl"><div class="lc79-tlbar" role="toolbar" aria-label="Timeline tools">'
+        +'<button type="button" class="lc79-b sm" data-a="split" title="Cut the block under the playhead in two (S)">✂ Split</button><button type="button" class="lc79-b sm red" data-a="del" title="Remove the selected block; the rest closes up (Delete)">🗑 Delete</button><button type="button" class="lc79-b sm" data-a="undo" title="Undo (Ctrl+Z)">↶ Undo</button>'
+        +'<span class="lc79-sep" aria-hidden="true"></span><span class="lc79-sil"><span>Silences over</span><input type="range" data-a="silmin" min="0.5" max="8" step="0.5" aria-label="Shortest silence to cut, in seconds"><output data-silv></output></span>'+qs
+        +'<button type="button" class="lc79-b sm pri" data-a="cutsil" title="Remove every silence over this length from the whole project; the speech closes up">✂ Cut silences</button>'
+        +'<span class="lc79-sep" aria-hidden="true"></span><button type="button" class="lc79-b sm" data-a="zout" aria-label="Zoom out">−</button><button type="button" class="lc79-b sm" data-a="zin" aria-label="Zoom in">+</button><span class="lc79-grow"></span><span class="lc79-hint" data-tot></span></div>'
+        +'<div class="lc79-tl-label"><span>Drag a block to move it, drag its edges to trim it. S splits at the playhead, Delete removes the selected block, Space plays, Ctrl+Z undoes.</span></div>'
+        +'<div class="lc79-scroll"><div class="lc79-lane"><div class="lc79-ruler" aria-hidden="true"></div><div class="lc79-track" data-track="clips" aria-label="Clips"></div><div class="lc79-track co" data-track="co" aria-label="Callouts on the timeline"></div><div class="lc79-ph"></div></div></div></div>'
         +'<div class="lc79-arch"><h3>Takes archive</h3><p class="lc79-hint" style="margin:0 0 8px">Every take on this device. Tap Add to put it at the end of the timeline, or drag it onto the timeline. Takes you do not use stay here.</p><div class="lc79-grid"></div></div></div>';
-      el._close=()=>{stopPlay();ED.open=false;Object.keys(ED.scrubV).forEach(k=>{try{ED.scrubV[k].remove()}catch(e){}});ED.scrubV={}};
+      el._close=()=>{stopPlay();ED.open=false;Object.keys(ED.scrubV).forEach(k=>{try{ED.scrubV[k].removeAttribute("src");ED.scrubV[k].load();ED.scrubV[k].remove()}catch(e){}});ED.scrubV={};ED.base=null};
       el.addEventListener("click",onEdClick);el.addEventListener("change",onEdChange);el.addEventListener("input",onEdInput);
       bindTimeline(el);bindCanvas(el);
     });
@@ -319,6 +503,11 @@
     sel.innerHTML=d.list.map(x=>'<option value="'+esc(x.id)+'"'+(p&&x.id===p.id?" selected":"")+'>'+esc(x.name)+'</option>').join("");
     const ex=Q('[data-a="export"]',ED.el);ex.disabled=!(p&&segments(p).length)||ED.busy;
     const cc=Q('[data-a="caps"]',ED.el);if(cc){const off=!!(p&&p.capsOff);cc.textContent=off?"CC Captions: hidden":"CC Captions: on";cc.setAttribute("aria-pressed",String(!off));cc.classList.toggle("gold",!off);cc.title=off?"Captions are hidden in the preview and the export. Press to show them.":"Captions are written automatically and burned into the export. Press to hide them."}
+    const cs=Q('[data-a="capstyle"]',ED.el);if(cs)cs.classList.toggle("pri",!!(ED.sel&&ED.sel.kind==="cap"));
+    const sm=Q('[data-a="silmin"]',ED.el),sv=Q("[data-silv]",ED.el),m=+nle().cutMin||4;if(sm&&document.activeElement!==sm)sm.value=String(m);if(sv)sv.textContent=m.toFixed(1)+" s";
+    QA('[data-a="silq"]',ED.el).forEach(b=>b.classList.toggle("gold",+b.getAttribute("data-v")===m));
+    const dl=Q('[data-a="del"]',ED.el);if(dl)dl.disabled=!(ED.sel&&(ED.sel.kind==="clip"||ED.sel.kind==="co"));
+    const un=Q('[data-a="undo"]',ED.el);if(un)un.disabled=!(p&&ED.undo.some(u=>u.pid===p.id));
   }
   function paintCalls(){
     const box=Q(".lc79-calls",ED.el);
@@ -328,39 +517,65 @@
       +'<button type="button" class="lc79-b sm" data-a="addco" data-pid="custom">+ Custom callout</button>';
   }
   function clipLens(p,segs){const L={};segs.forEach(s=>{L[s.ci]=(L[s.ci]||0)+(s.e-s.s)});return L}
-  function paintTimeline(){
-    const p=cur(),segs=segments(p),tot=segs.total||0,L=clipLens(p,segs),tr=Q('[data-track="clips"]',ED.el),co=Q('[data-track="co"]',ED.el);
-    Q("[data-tot]",ED.el).textContent=tot?"Length "+fmt(tot):"";
+  const laneEl=()=>Q(".lc79-lane",ED.el);
+  const fmtR=s=>{s=Math.round(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+  /* o.pps: keep this many pixels per second (while a trim handle is dragged, so the blocks do not jump under the finger) */
+  function paintTimeline(o){
+    o=o||{};const p=cur(),segs=segments(p),tot=segs.total||0,L=clipLens(p,segs),tr=Q('[data-track="clips"]',ED.el),co=Q('[data-track="co"]',ED.el),lane=laneEl();ED.tot=tot;
+    if(lane)lane.style.width=o.pps&&tot?Math.max(1,Math.round(tot*o.pps))+"px":(ED.zoom*100)+"%";
+    Q("[data-tot]",ED.el).textContent=tot?"Length "+fmt(tot)+" · "+(p?p.clips.length:0)+" block"+(p&&p.clips.length===1?"":"s"):"";
     let x=0,html="";
-    (p?p.clips:[]).forEach((c,ci)=>{const t=takeById(c.take);if(!t||!L[ci])return;const w=L[ci]/tot*100;
-      html+='<div class="lc79-clip'+(ED.sel&&ED.sel.kind==="clip"&&ED.sel.id===c.id?" sel":"")+'" data-clip="'+esc(c.id)+'" role="button" tabindex="0" aria-label="Clip '+(ci+1)+': '+esc(t.name)+', '+fmt(L[ci])+'" style="left:'+x+'%;width:calc('+w+'% - 2px)'+(thumbs[t.id]?';background-image:url('+thumbs[t.id]+')':'')+'"><span>'+esc(t.name)+' · '+fmt(L[ci])+'</span></div>';
+    (p?p.clips:[]).forEach((c,ci)=>{const t=takeById(c.take);if(!t||!L[ci])return;const w=L[ci]/tot*100,sel=ED.sel&&ED.sel.kind==="clip"&&ED.sel.id===c.id;
+      html+='<div class="lc79-clip'+(sel?" sel":"")+'" data-clip="'+esc(c.id)+'" role="button" tabindex="0" aria-pressed="'+!!sel+'" aria-label="Block '+(ci+1)+': '+esc(t.name)+', '+fmt(L[ci])+'" style="left:'+x+'%;width:calc('+w+'% - 2px)'+(thumbs[t.id]?';background-image:url('+thumbs[t.id]+')':'')+'">'
+        +'<i class="lc79-hd l" data-h="l" aria-hidden="true" title="Drag to trim the start"></i><span>'+esc(t.name)+' · '+fmt(L[ci])+'</span><i class="lc79-hd r" data-h="r" aria-hidden="true" title="Drag to trim the end"></i></div>';
       x+=w;if(!thumbs[t.id])thumbOf(t,()=>{if(ED.open)paintTimeline()})});
     tr.innerHTML=html||'<div class="lc79-empty" style="position:static;height:100%">Add takes from the archive below.</div>';
+    const ru=Q(".lc79-ruler",ED.el);
+    if(ru){if(tot&&lane){const pps=lane.clientWidth/tot,st=[.5,1,2,5,10,15,30,60,120,300,600].filter(v=>v*pps>=70)[0]||1200;let h="";for(let t=0;t<=tot+1e-6;t+=st)h+='<i style="left:'+(t/tot*100)+'%">'+(st<1?fmt(t):fmtR(t))+'</i>';ru.innerHTML=h}else ru.innerHTML=""}
     co.innerHTML=(p?p.callouts:[]).map(c=>{const l=tot?clamp(c.t/tot*100,0,100):0,w=tot?Math.max(1.5,c.dur/tot*100):10;
       return'<div class="lc79-co'+(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id?" sel":"")+'" data-co="'+esc(c.id)+'" role="button" tabindex="0" aria-label="Callout '+esc(c.text)+' at '+fmt(c.t)+'" style="left:'+l+'%;width:'+Math.min(w,100-l)+'%;background:'+esc(c.bg)+';color:'+esc(c.fg)+'">'+esc(c.text)+'</div>'}).join("");
-    paintHead();
+    paintHead(true);
   }
-  function paintHead(){
-    const p=cur(),tot=segments(p).total||0,ph=Q(".lc79-ph",ED.el),tl=Q(".lc79-tl",ED.el),tr=Q('[data-track="clips"]',ED.el);
-    if(ph&&tr&&tl){const r=tr.getBoundingClientRect(),r0=tl.getBoundingClientRect();ph.style.left=(r.left-r0.left+(tot?ED.T/tot:0)*r.width)+"px";ph.hidden=!tot}
+  /* the playhead: at most 10 repaints a second while playing (no layout work every frame on long takes) */
+  function paintHead(force){
+    const now=performance.now();if(!force&&now-ED.lastHead<100)return;ED.lastHead=now;
+    const tot=ED.tot||0,ph=Q(".lc79-ph",ED.el),lane=laneEl(),sc=Q(".lc79-scroll",ED.el);
+    if(ph&&lane){const x=(tot?ED.T/tot:0)*lane.clientWidth;ph.style.transform="translateX("+x.toFixed(1)+"px)";ph.hidden=!tot;
+      if(ED.playing&&sc&&(x<sc.scrollLeft||x>sc.scrollLeft+sc.clientWidth-30))sc.scrollLeft=Math.max(0,x-40)}
     const tm=Q(".lc79-time",ED.el);if(tm)tm.textContent=fmt(ED.T)+" / "+fmt(tot);
-    const sc=Q('[data-a="scrub"]',ED.el);if(sc){sc.max=String(Math.max(.01,tot));if(document.activeElement!==sc)sc.value=String(ED.T)}
+    const sc2=Q('[data-a="scrub"]',ED.el);if(sc2){sc2.max=String(Math.max(.01,tot));if(document.activeElement!==sc2)sc2.value=String(ED.T)}
     const pl=Q('[data-a="play"]',ED.el);if(pl)pl.textContent=ED.playing?"❚❚ Pause":"▶ Play";
   }
-  function selected(){const p=cur();if(!p||!ED.sel)return null;if(ED.sel.kind==="clip")return p.clips.filter(c=>c.id===ED.sel.id)[0]||null;if(ED.sel.kind==="co")return p.callouts.filter(c=>c.id===ED.sel.id)[0]||null;if(ED.sel.kind==="take")return takeById(ED.sel.id);return null}
+  function selected(){const p=cur();if(!p||!ED.sel)return null;if(ED.sel.kind==="clip")return p.clips.filter(c=>c.id===ED.sel.id)[0]||null;if(ED.sel.kind==="co")return p.callouts.filter(c=>c.id===ED.sel.id)[0]||null;if(ED.sel.kind==="take")return takeById(ED.sel.id);if(ED.sel.kind==="cap")return p;return null}
   const num=(f,v,step,min,max,lab)=>'<label class="lc79-f"><span>'+lab+'</span><input type="number" data-f="'+f+'" value="'+(+v).toFixed(2)+'" step="'+step+'" min="'+min+'"'+(max!=null?' max="'+max+'"':'')+'></label>';
   const rng=(f,v,min,max,step,lab)=>'<label class="lc79-f"><span>'+lab+'</span><input type="range" data-f="'+f+'" value="'+v+'" min="'+min+'" max="'+max+'" step="'+step+'"></label>';
+  const chk=(f,on,lab)=>'<label class="lc79-row" style="min-height:44px"><input type="checkbox" data-f="'+f+'"'+(on?" checked":"")+' style="width:22px;height:22px"> '+lab+'</label>';
+  const col=(f,v,lab)=>'<label class="lc79-f"><span>'+lab+'</span><input type="color" data-f="'+f+'" value="'+esc(/^#[0-9a-f]{6}$/i.test(v||"")?v:"#ffffff")+'"></label>';
   function paintInsp(){
     const box=Q(".lc79-insp",ED.el),p=cur(),it=selected();
     if(!p){box.innerHTML="";return}
     if(ED.sel&&ED.sel.kind==="clip"&&it){
       const t=takeById(it.take),r=clipRange(it,t),D=t.durationMs/1e3,i=p.clips.indexOf(it);
-      box.innerHTML='<h3>Clip '+(i+1)+': '+esc(t.name)+'</h3><video controls playsinline preload="metadata" src="'+esc(t.url)+'" data-clipvid></video>'
-        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="inhere">Start here</button><button type="button" class="lc79-b sm" data-a="outhere">End here</button></div>'
+      box.innerHTML='<h3>Block '+(i+1)+': '+esc(t.name)+'</h3><video controls playsinline preload="metadata" src="'+esc(t.url)+'" data-clipvid></video>'
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="inhere">Start here</button><button type="button" class="lc79-b sm" data-a="outhere">End here</button><button type="button" class="lc79-b sm" data-a="split">✂ Split at the playhead</button></div>'
         +'<div class="lc79-two">'+num("in",r[0],.05,0,D,"Start (s)")+num("out",r[1],.05,0,D,"End (s)")+'</div>'
-        +'<p class="lc79-hint" style="margin:0">Take length '+fmt(D)+'.'+(p.useCuts!==false&&t.cuts&&t.cuts.length?" The "+t.cuts.length+" cut"+(t.cuts.length===1?"":"s")+" you made in this take (silences, mistakes) are skipped.":"")+'</p>'
-        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="mvl"'+(i<=0?" disabled":"")+'>← Earlier</button><button type="button" class="lc79-b sm" data-a="mvr"'+(i>=p.clips.length-1?" disabled":"")+'>Later →</button><button type="button" class="lc79-b sm" data-a="resetclip">Use the take’s trim</button><button type="button" class="lc79-b sm red" data-a="rmclip">Remove from timeline</button></div><button type="button" class="lc79-b sm" data-a="captions">Edit the captions of this take</button>';
+        +'<p class="lc79-hint" style="margin:0">Take length '+fmt(D)+'. Drag the edges of the block on the timeline to trim it.'+(!it.raw&&p.useCuts!==false&&t.cuts&&t.cuts.length?" The "+t.cuts.length+" cut"+(t.cuts.length===1?"":"s")+" you made in this take (silences, mistakes) are skipped.":"")+'</p>'
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="mvl"'+(i<=0?" disabled":"")+'>← Earlier</button><button type="button" class="lc79-b sm" data-a="mvr"'+(i>=p.clips.length-1?" disabled":"")+'>Later →</button><button type="button" class="lc79-b sm" data-a="resetclip">Use the whole take</button><button type="button" class="lc79-b sm red" data-a="rmclip">Delete block</button></div><button type="button" class="lc79-b sm" data-a="captions">Edit the captions of this take</button>';
       const v=Q("[data-clipvid]",box);v.addEventListener("loadedmetadata",()=>{try{v.currentTime=r[0]}catch(e){}},{once:true});
+      return;
+    }
+    if(ED.sel&&ED.sel.kind==="cap"){
+      const sz=previewSize(p,segments(p)),st=capStyle(p,sz[0],sz[1]);
+      box.innerHTML='<h3>Caption box</h3><p class="lc79-hint" style="margin:0">Drag the box on the preview to move it. Drag its corner, or scroll on it, to resize it. One style for the whole project, burned into the export.</p>'
+        +rng("c_scale",st.scale,.4,3,.05,"Size")+rng("c_w",st.w,.3,.98,.01,"Line width")
+        +'<div class="lc79-two">'+rng("c_x",st.x,0,1,.01,"Left ↔ right")+rng("c_y",st.y,0,1,.01,"Top ↕ bottom")+'</div>'
+        +chk("c_box",st.box,"Background box")
+        +'<div class="lc79-row">'+col("c_bg",st.bg,"Box colour")+'<span class="lc79-grow">'+rng("c_bgA",st.bgA,0,1,.05,"Box opacity")+'</span></div>'
+        +'<div class="lc79-row">'+col("c_fg",st.fg,"Text colour")+chk("c_stroke",st.stroke,"Outline")+col("c_sc",st.sc,"Outline colour")+'</div>'
+        +'<div class="lc79-two"><label class="lc79-f"><span>Font</span><select data-f="c_font">'+FONT_NAMES.map(f=>'<option value="'+f[0]+'"'+(f[0]===st.font?" selected":"")+'>'+f[1]+'</option>').join("")+'</select></label>'+chk("c_upper",st.upper,"ALL CAPS")+'</div>'
+        +'<div class="lc79-row">'+chk("c_karaoke",st.karaoke,"Highlight the spoken word")+col("c_hl",st.hl,"Highlight")+'</div>'
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="capreset">Reset the box</button><button type="button" class="lc79-b sm" data-a="captions">Edit the caption text</button><button type="button" class="lc79-b sm" data-a="writecaps">Write missing captions ('+needsCaps(p).length+')</button></div>'
+        +(p.capsOff?'<p class="lc79-hint lc79-err" style="margin:0">CC Captions is hidden: the export has no captions. Press “CC Captions” to show them.</p>':'');
       return;
     }
     if(ED.sel&&ED.sel.kind==="co"&&it){
@@ -385,13 +600,16 @@
         +'<div class="lc79-row"><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(it.id)+'">Add to the timeline</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(it.id)+'">Delete take</button>'+(canShare()?'<button type="button" class="lc79-b sm" data-a="share" data-take="'+esc(it.id)+'">Share</button>':'')+'<button type="button" class="lc79-b sm" data-a="captions">Captions</button></div>';
       return;
     }
-    const segs=segments(p);
+    const segs=segments(p),o=nle();
     box.innerHTML='<h3>Project</h3><label class="lc79-f"><span>Name</span><input type="text" data-f="pname" maxlength="60" value="'+esc(p.name)+'"></label>'
       +'<label class="lc79-f"><span>Video size</span><select data-f="size">'+SIZES.map(s=>'<option value="'+s[0]+'"'+(s[0]===(p.size||"auto")?" selected":"")+'>'+s[1]+'</option>').join("")+'</select></label>'
-      +'<label class="lc79-row" style="min-height:44px"><input type="checkbox" data-f="useCuts"'+(p.useCuts!==false?" checked":"")+' style="width:22px;height:22px"> Skip the cuts made in each take (silences, marked mistakes)</label>'
-      +'<p class="lc79-hint" style="margin:0">'+p.clips.length+' clip'+(p.clips.length===1?"":"s")+' · '+p.callouts.length+' callout'+(p.callouts.length===1?"":"s")+' · '+fmt(segs.total||0)+'</p>'
+      +chk("useCuts",p.useCuts!==false,"Leave out the cuts of each take (silences, marked mistakes)")
+      +'<p class="lc79-hint" style="margin:0">'+p.clips.length+' block'+(p.clips.length===1?"":"s")+' · '+p.callouts.length+' callout'+(p.callouts.length===1?"":"s")+' · '+fmt(segs.total||0)+'</p>'
+      +'<div class="lc79-sec" style="padding:10px;gap:4px"><b style="color:#fff">After every take</b>'
+      +'<label class="lc79-row" style="min-height:44px"><input type="checkbox" data-f="autoSil"'+(o.autoSil?" checked":"")+' style="width:22px;height:22px"> Cut silences longer than <select data-f="autoMin" aria-label="Silence length">'+[1.5,2.5,4,6].map(v=>'<option value="'+v+'"'+(v===+o.silMin?" selected":"")+'>'+v+' s</option>').join("")+'</select></label>'
+      +chk("autoCaps",o.autoCaps,"Write captions when the live captions missed the take")+'</div>'
       +(p.src?'<div class="lc79-sec" style="padding:10px;gap:6px"><b style="color:#fff">Game: '+esc(p.src.label||"")+'</b><span class="lc79-hint">Motif: '+esc(p.src.motif||"")+(p.src.sim?' · Lichess position ready':'')+'</span><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="srcopen">Open in Game-to-Script</button><button type="button" class="lc79-b sm" data-a="recthis">Record this project</button></div></div>':'<p class="lc79-hint" style="margin:0">Tip: make projects from a game in Game-to-Script, one per mistake. The recording flow then loads the board, the feedback card and the Lichess position for you.</p>')
-      +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="writecaps">Write missing captions now ('+needsCaps(p).length+')</button></div>'
+      +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="writecaps">Write missing captions now ('+needsCaps(p).length+')</button><button type="button" class="lc79-b sm" data-a="capstyle">Caption box</button></div>'
       +'<p class="lc79-hint" style="margin:0">Captions are written automatically for every take without captions when you export, unless “CC Captions” is hidden. Edit them any time with Captions. The export plays the project once in real time, so it takes as long as the video. Keep this tab in front.</p>';
   }
   function paintArchive(){
@@ -404,33 +622,37 @@
     list.forEach(t=>{if(!thumbs[t.id])thumbOf(t,u=>{const el=Q('[data-th="'+t.id+'"]',ED.el);if(el)el.style.backgroundImage="url("+u+")"})});
   }
   function previewSize(p,segs){const s=outSize(p,segs),k=Math.min(1,720/Math.max(s[0],s[1]));return[Math.round(s[0]*k),Math.round(s[1]*k)]}
-  /* a still frame at ED.T: the video + captions go to ED.base, the callouts are drawn on top (fast to redraw while dragging) */
+  /* a still frame at ED.T: the video goes to ED.base, the caption box and the callouts are drawn on top (fast to redraw while dragging) */
   async function showFrame(){
     if(!ED.el||ED.playing)return;
     const p=cur(),segs=segments(p),cv=Q(".lc79-stagebox canvas",ED.el),em=Q(".lc79-empty",ED.el);
-    if(!segs.length){const g=cv.getContext("2d");cv.width=360;cv.height=640;g.fillStyle="#000";g.fillRect(0,0,360,640);em.hidden=false;em.textContent="Your project is empty. Tap + Add on a take below.";return}
+    if(!segs.length){const g=cv.getContext("2d");cv.width=360;cv.height=640;g.fillStyle="#000";g.fillRect(0,0,360,640);em.hidden=false;em.textContent="Your project is empty. Tap + Add on a take below.";ED.capRect=null;return}
     em.hidden=true;ED.T=clamp(ED.T,0,segs.total);
-    const s=segs.filter(x=>ED.T>=x.T0&&ED.T<x.T0+(x.e-x.s))[0]||segs[segs.length-1],ct=s.s+clamp(ED.T-s.T0,0,Math.max(0,s.e-s.s-.02));
+    const s=segAt(segs,ED.T)||segs[segs.length-1],ct=s.s+clamp(ED.T-s.T0,0,Math.max(0,s.e-s.s-.02));
     const tok=++ED.scrubTok;let v=ED.scrubV[s.take.id];
     try{if(!v){v=ED.scrubV[s.take.id]=mkVideo(s.take.url,true);await loaded(v)}await seek(v,ct)}catch(e){return}
     if(tok!==ED.scrubTok||ED.playing)return;
     const sz=previewSize(p,segs);if(!ED.base)ED.base=document.createElement("canvas");ED.base.width=sz[0];ED.base.height=sz[1];
-    drawFrame(ED.base.getContext("2d"),sz[0],sz[1],v,s.take,ct,p,ED.T,true);compose();
+    drawFrame(ED.base.getContext("2d"),sz[0],sz[1],v,s.take,ct,p,ED.T,true);ED.baseInfo={take:s.take,ct:ct};compose();
   }
   function compose(){
-    const cv=Q(".lc79-stagebox canvas",ED.el),p=cur();if(!cv||!ED.base||ED.playing)return;
+    const cv=Q(".lc79-stagebox canvas",ED.el),p=cur();if(!cv||!ED.base||ED.playing||!p)return;
     cv.width=ED.base.width;cv.height=ED.base.height;const g=cv.getContext("2d");g.drawImage(ED.base,0,0);
+    const capSel=!!(ED.sel&&ED.sel.kind==="cap"),bi=ED.baseInfo||{};ED.capRect=null;
+    if(!p.capsOff||capSel){let line=capLine(bi.take,bi.ct);if(!line&&capSel)line={t:"Your captions appear here"};
+      try{ED.capRect=drawCaption(g,cv.width,cv.height,line,capStyle(p,cv.width,cv.height),bi.ct)}catch(e){ED.capRect=null}
+      if(capSel&&ED.capRect){const r=ED.capRect,k=Math.max(1,cv.width/540),hs=12*k;g.save();g.setLineDash([6*k,4*k]);g.strokeStyle="#00E5FF";g.lineWidth=2*k;g.strokeRect(r.x-3*k,r.y-3*k,r.w+6*k,r.h+6*k);g.setLineDash([]);g.fillStyle="#00E5FF";g.fillRect(r.x+r.w+3*k-hs/2,r.y+r.h+3*k-hs/2,hs,hs);g.restore()}}
     (p.callouts||[]).forEach(c=>{let lt=ED.T-c.t;if(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id)lt=clamp(lt,.9,Math.max(.9,c.dur-.3));try{drawCallout(g,cv.width,cv.height,c,lt)}catch(e){}});
   }
   async function togglePlay(){
     if(ED.playing){stopPlay();return}
     const p=cur(),segs=segments(p);if(!segs.length){say("Add a take first.","err");return}
     if(ED.T>=segs.total-.05)ED.T=0;
-    ED.playing=true;ED.ctl={stopped:false};paintHead();
-    const cv=Q(".lc79-stagebox canvas",ED.el);
-    try{await run(p,{canvas:cv,record:false,from:ED.T,size:previewSize(p,segs),ctl:ED.ctl,onTime:t=>{ED.T=t;paintHead()}})}
+    ED.playing=true;ED.ctl={stopped:false};ED.tot=segs.total;paintHead(true);
+    const cv=Q(".lc79-stagebox canvas",ED.el),ctl=ED.ctl;
+    try{await run(p,{canvas:cv,record:false,from:ED.T,size:previewSize(p,segs),ctl:ctl,onTime:t=>{ED.T=t;paintHead()}})}
     catch(e){say(e.message||"Playback failed.","err",5000)}
-    const ended=!ED.ctl.stopped;ED.playing=false;if(ended)ED.T=0;paintHead();showFrame();
+    const ended=!ctl.stopped;if(ED.ctl===ctl){ED.playing=false;if(ended)ED.T=0;paintHead(true);showFrame()}
   }
   function stopPlay(){if(ED.ctl)ED.ctl.stopped=true;ED.playing=false}
   /* 9.41.0: every take of the project without captions gets them automatically (same engines as Write captions: exact server, then this device, then the browser) */
@@ -457,9 +679,9 @@
     const box=Q(".lc79-stagebox",ED.el),ov=document.createElement("div");ov.className="lc79-busy";ov.setAttribute("role","status");
     ov.innerHTML='<b style="color:#fff">Exporting “'+esc(p.name)+'”</b><div class="lc79-bar"><i></i></div><span class="lc79-hint">This plays the project once in real time ('+fmt(segs.total)+'). Keep this tab in front.</span><button type="button" class="lc79-b red">Cancel</button>';
     box.appendChild(ov);const bar=Q("i",ov),ctl={stopped:false};Q("button",ov).onclick=()=>{ctl.stopped=true};
-    const off=document.createElement("canvas");
+    const off=document.createElement("canvas");let lastBar=0;
     try{
-      const r=await run(p,{canvas:off,record:true,from:0,ctl:ctl,onTime:(t,tot)=>{bar.style.width=Math.round(t/tot*100)+"%"}});
+      const r=await run(p,{canvas:off,record:true,from:0,ctl:ctl,onTime:(t,tot)=>{const n=performance.now();if(n-lastBar<200)return;lastBar=n;bar.style.width=Math.round(t/tot*100)+"%"}});
       if(ctl.stopped||!r.blob){say("Export cancelled.","",2500)}
       else if(r.blob.size<2e3){say("The browser produced an empty video. Try Chrome or Edge on a computer.","err",6000)}
       else{
@@ -471,11 +693,13 @@
     }catch(e){say(e.message||"Export failed.","err",6000)}
     off.width=off.height=1;ov.remove();ED.busy=false;ED.paint();
   }
+  /* a take comes in as its voice pieces (its trim minus its cuts), one block each, at the end or at a drop position */
   function addTake(id,at){
-    const p=cur(),t=takeById(id);if(!p||!t)return;
-    const c={id:uid(),take:id,in:null,out:null};
-    if(at==null||at>=p.clips.length)p.clips.push(c);else p.clips.splice(Math.max(0,at),0,c);
-    save(p);ED.sel={kind:"clip",id:c.id};ED.paint();
+    const p=cur(),t=takeById(id);if(!p||!t)return;snapEd(p);
+    const cs=clipsFor(t,p);
+    if(at==null||at>=p.clips.length)p.clips=p.clips.concat(cs);else p.clips.splice.apply(p.clips,[Math.max(0,at),0].concat(cs));
+    save(p);ED.sel={kind:"clip",id:cs[0].id};ED.paint();
+    if(cs.length>1)say(t.name+" came in as "+cs.length+" blocks (its silences and cuts are left out).","",3000);
   }
   async function delTake(id){
     const t=takeById(id);if(!t)return;
@@ -483,33 +707,78 @@
     if(!confirm("Delete “"+t.name+"” for good?"+(n?" It is used in "+n+" project"+(n===1?"":"s")+" and will be removed there too.":"")+" This cannot be undone."))return;
     try{await T().Takes.remove(id)}catch(e){}
     delete thumbs[id];if(ED.scrubV[id]){try{ED.scrubV[id].remove()}catch(e){}delete ED.scrubV[id]}
-    if(ED.sel&&ED.sel.id===id)ED.sel=null;takeGone(id);say("Take deleted.","",2000);
+    if(ED.sel&&ED.sel.id===id)ED.sel=null;ED.undo=ED.undo.filter(u=>u.clips.indexOf('"'+id+'"')<0);takeGone(id);say("Take deleted.","",2000);
   }
   function addCallout(pid){
     const p=cur();if(!p)return;
     let pr=allPresets().filter(x=>x.pid===pid)[0];
     if(pid==="custom")pr={pid:"",text:"Your text",font:"sora",bg:"#00E5FF",fg:"#0A0B0E",sound:"ping",arrow:true,aim:"board",dur:2.4,scale:1};
-    if(!pr)return;
+    if(!pr)return;snapEd(p);
     const tot=segments(p).total||0,t=tot?clamp(ED.T,0,Math.max(0,tot-.5)):0;
     const c=makeCallout(pr,t);p.callouts.push(c);p.callouts.sort((a,b)=>a.t-b.t);save(p);
     ED.sel={kind:"co",id:c.id};hear(c.sound);ED.paint();
+  }
+  /* ---------- NLE actions ---------- */
+  function doSplit(){
+    const p=cur();if(!p)return;stopPlay();snapEd(p);const id=splitAt(p,ED.T);
+    if(!id){ED.undo.pop();say("Put the playhead inside a block (not on its edge) to split it.","",2500);return paintTop()}
+    save(p);ED.sel={kind:"clip",id:id};ED.paint();
+  }
+  function doDelete(){
+    const p=cur();if(!p)return;
+    if(!ED.sel||(ED.sel.kind!=="clip"&&ED.sel.kind!=="co")){say("Tap a block on the timeline first.","",2000);return}
+    stopPlay();snapEd(p);
+    if(ED.sel.kind==="co"){p.callouts=p.callouts.filter(c=>c.id!==ED.sel.id);ED.sel=null;save(p);return ED.paint()}
+    const s=segments(p).filter(x=>x.clip.id===ED.sel.id)[0];
+    if(!deleteClip(p,ED.sel.id)){ED.undo.pop();return}
+    if(s)ED.T=s.T0;ED.sel=null;save(p);ED.paint();say("Block deleted, the rest moved up. Ctrl+Z brings it back.","",2400);
+  }
+  async function doCutSilences(){
+    const p=cur();if(!p||ED.busy)return;const min=+nle().cutMin||4;stopPlay();
+    const seen={},list=p.clips.map(c=>takeById(c.take)).filter(t=>t&&!seen[t.id]&&(seen[t.id]=1));
+    for(const t of list)if(!(Array.isArray(t.env)&&t.env.length>=5)){say("Measuring the audio of “"+t.name+"”…","",2000);await ensureEnv(t)}
+    snapEd(p);const r=cutSilences(p,min,trThr());
+    if(!r.places){ED.undo.pop();say("No silence longer than "+min+" s"+(r.skipped?" ("+r.skipped+" block"+(r.skipped===1?" has":"s have")+" no audio to measure)":"")+".","",3500);return ED.paint()}
+    save(p);ED.sel=null;ED.T=clamp(ED.T,0,r.total);ED.paint();
+    say("Cut "+r.places+" silence"+(r.places===1?"":"s")+" over "+min+" s: the video is "+r.removed.toFixed(1)+" s shorter. Ctrl+Z undoes it.","ok",4500);
+  }
+  function setZoom(z){
+    const sc=Q(".lc79-scroll",ED.el),lane=laneEl(),old=lane?lane.clientWidth:1,frac=ED.tot?ED.T/ED.tot:0;
+    ED.zoom=clamp(z,1,64);paintTimeline();
+    if(sc&&lane){const x=frac*lane.clientWidth;sc.scrollLeft=Math.max(0,x-sc.clientWidth/2)}
+  }
+  function setCap(p,f,el){
+    const sz=previewSize(p,segments(p));if(!p.cap)p.cap=capStyle(p,sz[0],sz[1]);const k=f.slice(2),c=p.cap;
+    if(/^(box|stroke|upper|karaoke)$/.test(k))c[k]=!!el.checked;
+    else if(/^(bg|fg|sc|hl)$/.test(k)){if(/^#[0-9a-f]{6}$/i.test(el.value))c[k]=el.value}
+    else if(k==="font"){if(FONTS[el.value])c.font=el.value}
+    else if(/^(scale|w|x|y|bgA)$/.test(k)){const v=+el.value;if(Number.isFinite(v))c[k]=k==="scale"?clamp(v,.4,3):k==="w"?clamp(v,.3,.98):clamp(v,0,1)}
   }
   function onEdClick(e){
     const b=e.target.closest("[data-a]");if(!b||b.tagName==="SELECT"||b.type==="range")return;
     const a=b.getAttribute("data-a"),p=cur(),it=selected();
     if(a==="close")return closeLayer("lc79-ed");
-    if(a==="new"){const n=prompt("Name of the new project","Reel "+(db().list.length+1));if(n===null)return;newProject(n.trim()||null);ED.sel=null;ED.T=0;return ED.paint()}
+    if(a==="new"){const n=prompt("Name of the new project","Reel "+(db().list.length+1));if(n===null)return;stopPlay();newProject(n.trim()||null);ED.sel=null;ED.T=0;return ED.paint()}
     if(a==="rename"&&p){const n=prompt("Project name",p.name);if(n&&n.trim()){p.name=n.trim().slice(0,60);save(p);ED.paint()}return}
-    if(a==="delproj"&&p){if(!confirm("Delete the project “"+p.name+"”? Your takes stay in the archive."))return;const d=db();d.list=d.list.filter(x=>x.id!==p.id);d.cur=d.list[0]?d.list[0].id:"";persist();if(!d.list.length)newProject("Reel 1");ED.sel=null;ED.T=0;return ED.paint()}
+    if(a==="delproj"&&p){if(!confirm("Delete the project “"+p.name+"”? Your takes stay in the archive."))return;stopPlay();const d=db();d.list=d.list.filter(x=>x.id!==p.id);d.cur=d.list[0]?d.list[0].id:"";persist();if(!d.list.length)newProject("Reel 1");ED.sel=null;ED.T=0;return ED.paint()}
     if(a==="export")return exportProject();
     if(a==="caps"&&p){p.capsOff=!p.capsOff;save(p);paintTop();paintInsp();say(p.capsOff?"Captions hidden: the export has no captions.":"Captions on: missing captions are written automatically when you export.","",3000);return showFrame()}
+    if(a==="capstyle"){stopPlay();ED.sel=ED.sel&&ED.sel.kind==="cap"?null:{kind:"cap"};paintTop();paintTimeline();paintInsp();return showFrame()}
+    if(a==="capreset"&&p){snapEd(p);delete p.cap;save(p);paintInsp();return compose()}
     if(a==="writecaps"&&p)return writeCaps(p,null).then(()=>{ED.paint()});
     if(a==="captions"){const sel=selected();const id=ED.sel&&ED.sel.kind==="clip"&&sel?sel.take:ED.sel&&ED.sel.kind==="take"&&sel?sel.id:(p&&p.clips[0]?p.clips[0].take:null);return gotoCaptions(id)}
     if(a==="srcopen"&&p&&p.src)return openFromProject(p);
     if(a==="recthis"&&p){wr(RK,p.id);closeLayer("lc79-ed");try{LC66.setTab(studioRoot(),"shoot")}catch(e){}say("Recording into “"+p.name+"”. Keys 1 to 4 switch the flow: board, feedback card, Lichess, landing page.","ok",5000);paintDock();return}
     if(a==="share"){return shareTake(b.getAttribute("data-take"))}
     if(a==="play")return togglePlay();
-    if(a==="home"){stopPlay();ED.T=0;paintHead();return showFrame()}
+    if(a==="home"){stopPlay();ED.T=0;paintHead(true);return showFrame()}
+    if(a==="split")return doSplit();
+    if(a==="del")return doDelete();
+    if(a==="undo")return undo();
+    if(a==="cutsil")return doCutSilences();
+    if(a==="silq"){setNle({cutMin:+b.getAttribute("data-v")});return paintTop()}
+    if(a==="zin")return setZoom(ED.zoom*1.6);
+    if(a==="zout")return setZoom(ED.zoom/1.6);
     if(a==="addtake")return addTake(b.getAttribute("data-take"));
     if(a==="deltake")return delTake(b.getAttribute("data-take"));
     if(a==="watch"){ED.sel={kind:"take",id:b.getAttribute("data-take")};paintInsp();const v=Q(".lc79-insp video",ED.el);if(v)try{v.focus()}catch(x){}return}
@@ -518,36 +787,44 @@
     if(!p||!it)return;
     if(ED.sel.kind==="clip"){
       const i=p.clips.indexOf(it),t=takeById(it.take),v=Q("[data-clipvid]",ED.el);
-      if(a==="inhere"&&v){const r=clipRange(it,t);it.in=Math.min(v.currentTime,r[1]-.1)}
-      else if(a==="outhere"&&v){const r=clipRange(it,t);it.out=Math.max(v.currentTime,r[0]+.1)}
+      if(!/^(inhere|outhere|mvl|mvr|resetclip|rmclip)$/.test(a))return;
+      if(a==="rmclip")return doDelete();
+      snapEd(p);
+      if(a==="inhere"&&v){const r=clipRange(it,t);it.in=Math.min(v.currentTime,r[1]-.1);if(it.out==null)it.out=r[1]}
+      else if(a==="outhere"&&v){const r=clipRange(it,t);it.out=Math.max(v.currentTime,r[0]+.1);if(it.in==null)it.in=r[0]}
       else if(a==="mvl"&&i>0)p.clips.splice(i-1,0,p.clips.splice(i,1)[0]);
       else if(a==="mvr"&&i<p.clips.length-1)p.clips.splice(i+1,0,p.clips.splice(i,1)[0]);
-      else if(a==="resetclip"){it.in=null;it.out=null}
-      else if(a==="rmclip"){p.clips.splice(i,1);ED.sel=null}
-      else return;
+      else if(a==="resetclip"){it.in=null;it.out=null;it.raw=false}
+      else{ED.undo.pop();return}
       save(p);return ED.paint();
     }
     if(ED.sel.kind==="co"){
       if(a==="hear")return hear(it.sound);
+      if(a==="savepreset"){const n=prompt("Name of the preset",it.text);if(!n||!n.trim())return;const list=myPresets();list.push({pid:"my-"+uid(),name:n.trim().slice(0,30),text:it.text,sub:it.sub,font:it.font,bg:it.bg,fg:it.fg,sound:it.sound,arrow:it.arrow,aim:"keep",x:it.x,y:it.y,ax:it.ax,ay:it.ay,dur:it.dur,scale:it.scale});wr(PK,list.slice(-24));say("Preset saved. It is in the callout bar now.","ok",2500);return paintCalls()}
+      if(a==="rmco")return doDelete();
+      if(a!=="aim"&&a!=="coat")return;
+      snapEd(p);
       if(a==="aim"){const pt=aimPoint(b.getAttribute("data-aim"));it.arrow=true;it.ax=pt.x;it.ay=pt.y;it.x=clamp(pt.x<.5?pt.x+.27:pt.x-.27,.2,.8);it.y=clamp(pt.y-.15,.1,.88)}
-      else if(a==="coat")it.t=+ED.T.toFixed(2);
-      else if(a==="savepreset"){const n=prompt("Name of the preset",it.text);if(!n||!n.trim())return;const list=myPresets();list.push({pid:"my-"+uid(),name:n.trim().slice(0,30),text:it.text,sub:it.sub,font:it.font,bg:it.bg,fg:it.fg,sound:it.sound,arrow:it.arrow,aim:"keep",x:it.x,y:it.y,ax:it.ax,ay:it.ay,dur:it.dur,scale:it.scale});wr(PK,list.slice(-24));say("Preset saved. It is in the callout bar now.","ok",2500);return paintCalls()}
-      else if(a==="rmco"){p.callouts=p.callouts.filter(c=>c!==it);ED.sel=null}
-      else return;
+      else it.t=+ED.T.toFixed(2);
       p.callouts.sort((x,y)=>x.t-y.t);save(p);return ED.paint();
     }
   }
   function onEdChange(e){
     const el=e.target,p=cur();
     if(el.matches('[data-a="pick"]')){stopPlay();db().cur=el.value;persist();ED.sel=null;ED.T=0;return ED.paint()}
+    if(el.matches('[data-a="silmin"]')){setNle({cutMin:clamp(+el.value||4,.5,8)});return paintTop()}
     if(!p||!el.hasAttribute("data-f"))return;
     const f=el.getAttribute("data-f"),it=selected();
+    if(f==="autoSil"){setNle({autoSil:!!el.checked});return}
+    if(f==="autoMin"){setNle({silMin:clamp(+el.value||4,.5,8)});return}
+    if(f==="autoCaps"){setNle({autoCaps:!!el.checked});return}
     if(f==="pname"){p.name=String(el.value||"").trim().slice(0,60)||p.name;save(p);return paintTop()}
     if(f==="size"){p.size=el.value;save(p);return showFrame()}
     if(f==="useCuts"){p.useCuts=el.checked;save(p);return ED.paint()}
+    if(/^c_/.test(f)&&ED.sel&&ED.sel.kind==="cap"){snapSoft(p);setCap(p,f,el);save(p);return compose()}
     if(!it)return;
-    if(ED.sel.kind==="clip"&&(f==="in"||f==="out")){const t=takeById(it.take),D=t.durationMs/1e3,r=clipRange(it,t),x=clamp(+el.value||0,0,D);if(f==="in")it.in=Math.min(x,r[1]-.1);else it.out=Math.max(x,r[0]+.1);save(p);return ED.paint()}
-    if(ED.sel.kind==="co"){setCo(it,f,el);p.callouts.sort((a,b)=>a.t-b.t);save(p);paintTimeline();if(f==="t")return showFrame();return}
+    if(ED.sel.kind==="clip"&&(f==="in"||f==="out")){snapEd(p);const t=takeById(it.take),D=t.durationMs/1e3,x=clamp(+el.value||0,0,D);trimClip(p,it.id,f==="in"?"l":"r",x);save(p);return ED.paint()}
+    if(ED.sel.kind==="co"){snapSoft(p);setCo(it,f,el);p.callouts.sort((a,b)=>a.t-b.t);save(p);paintTimeline();if(f==="t")return showFrame();return}
   }
   function setCo(c,f,el){
     if(f==="arrow")c.arrow=el.checked;
@@ -558,39 +835,63 @@
   let saveTo=0;
   function onEdInput(e){
     const el=e.target;
-    if(el.matches('[data-a="scrub"]')){stopPlay();ED.T=+el.value||0;paintHead();return showFrame()}
-    if(!el.hasAttribute("data-f")||!ED.sel||ED.sel.kind!=="co")return;
-    const f=el.getAttribute("data-f");if(f==="t"||f==="dur")return;
-    const c=selected();if(!c)return;setCo(c,f,el);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>{save(cur());paintTimeline()},350);
+    if(el.matches('[data-a="scrub"]')){stopPlay();ED.T=+el.value||0;paintHead(true);return showFrame()}
+    if(el.matches('[data-a="silmin"]')){const v=clamp(+el.value||4,.5,8),o=Q("[data-silv]",ED.el);if(o)o.textContent=v.toFixed(1)+" s";return}
+    if(!el.hasAttribute("data-f")||!ED.sel)return;
+    const f=el.getAttribute("data-f"),p=cur();
+    if(ED.sel.kind==="cap"&&/^c_/.test(f)&&p){snapSoft(p);setCap(p,f,el);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>save(p),350);return}
+    if(ED.sel.kind!=="co"||f==="t"||f==="dur")return;
+    const c=selected();if(!c)return;snapSoft(p);setCo(c,f,el);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>{save(cur());paintTimeline()},350);
+  }
+  /* keys inside the Edit Studio: S / B split, Delete / Backspace delete, Space play, arrows step (Shift: 1 s), Ctrl+Z undo */
+  function onEdKey(e){
+    if(ED.busy||e.altKey||e.defaultPrevented)return;
+    const t=e.target,tag=t&&t.tagName||"",k=e.key;
+    if(/^(TEXTAREA|SELECT)$/.test(tag)||(tag==="INPUT"&&!/^(range|checkbox|color|button)$/.test(t.type))||(t&&t.isContentEditable))return;
+    const done=()=>{e.preventDefault();e.stopPropagation()};
+    if((e.ctrlKey||e.metaKey)&&(k==="z"||k==="Z")&&!e.shiftKey){done();return undo()}
+    if(e.ctrlKey||e.metaKey)return;
+    if(/^[sSbB]$/.test(k)){done();return doSplit()}
+    if(k==="Delete"||k==="Backspace"){if(tag==="INPUT")return;done();return doDelete()}
+    if(k===" "&&!/^(BUTTON|INPUT|VIDEO)$/.test(tag)&&!(t.closest&&t.closest(".lc79-clip,.lc79-co"))){done();return togglePlay()}
+    if((k==="ArrowLeft"||k==="ArrowRight")&&tag!=="INPUT"&&tag!=="VIDEO"){done();stopPlay();ED.T=clamp(ED.T+(k==="ArrowLeft"?-1:1)*(e.shiftKey?1:1/30),0,ED.tot||0);paintHead(true);return showFrame()}
   }
   function bindTimeline(el){
-    const tl=Q(".lc79-tl",el);let d=null;
+    const tl=Q(".lc79-tl",el);let d=null,frameTo=0;
     const tTrack=()=>Q('[data-track="clips"]',el);
+    const edgesOf=p=>{const segs=segments(p),out=[0,segs.total||0,ED.T];let last="";segs.forEach(s=>{if(s.clip.id!==last){out.push(s.T0);last=s.clip.id}});return out};
     tl.addEventListener("pointerdown",e=>{
+      if(!e.target.closest(".lc79-lane")||e.button>0)return;
       const p=cur(),tot=segments(p).total||0;if(!tot)return;
-      const tr=tTrack(),r=tr.getBoundingClientRect(),clip=e.target.closest(".lc79-clip"),co=e.target.closest(".lc79-co");
-      d={x0:e.clientX,moved:false,clip:clip,co:co,r:r,tot:tot,id:e.pointerId};
-      if(co){const c=p.callouts.filter(x=>x.id===co.getAttribute("data-co"))[0];d.c=c;d.t0=c?c.t:0}
+      const r=laneEl().getBoundingClientRect(),hd=e.target.closest(".lc79-hd"),clip=e.target.closest(".lc79-clip"),co=e.target.closest(".lc79-co");
+      d={x0:e.clientX,moved:false,clip:clip,co:co,r:r,tot:tot,pps:r.width/tot,id:e.pointerId};
+      if(hd&&clip){const id=clip.getAttribute("data-clip"),c=p.clips.filter(x=>x.id===id)[0],t=c&&takeById(c.take);
+        if(c&&t){stopPlay();snapEd(p);d.trim={side:hd.getAttribute("data-h"),id:id,r0:clipRange(c,t)};ED.sel={kind:"clip",id:id}}}
+      if(co){const c=p.callouts.filter(x=>x.id===co.getAttribute("data-co"))[0];d.c=c;d.t0=c?c.t:0;d.edges=edgesOf(p);snapEd(p)}
       try{tl.setPointerCapture(e.pointerId)}catch(x){}
+      if(d.trim)e.preventDefault();
     });
     tl.addEventListener("pointermove",e=>{
-      if(!d)return;const dx=e.clientX-d.x0;if(!d.moved&&Math.abs(dx)<8)return;d.moved=true;
-      if(d.clip){d.clip.classList.add("drag");let ins=Q(".lc79-ins",tl);if(!ins){ins=document.createElement("div");ins.className="lc79-ins";tl.appendChild(ins)}
-        const idx=dropIndex(e.clientX);d.idx=idx;const bl=QA(".lc79-clip",tTrack()),r0=tl.getBoundingClientRect();
+      if(!d)return;const dx=e.clientX-d.x0;if(!d.moved&&Math.abs(dx)<(d.trim?2:8))return;d.moved=true;
+      if(d.trim){const p=cur(),tr=d.trim;trimClip(p,tr.id,tr.side,(tr.side==="l"?tr.r0[0]:tr.r0[1])+dx/d.pps);paintTimeline({pps:d.pps});
+        const ss=segments(p).filter(x=>x.clip.id===tr.id);if(ss.length){const z=ss[ss.length-1];ED.T=tr.side==="l"?ss[0].T0:Math.max(ss[0].T0,z.T0+(z.e-z.s)-.04);paintHead(true);clearTimeout(frameTo);frameTo=setTimeout(showFrame,40)}
+        return}
+      if(d.clip){d.clip.classList.add("drag");let ins=Q(".lc79-ins",tl);if(!ins){ins=document.createElement("div");ins.className="lc79-ins";laneEl().appendChild(ins)}
+        const idx=dropIndex(e.clientX);d.idx=idx;const bl=QA(".lc79-clip",tTrack()),r0=laneEl().getBoundingClientRect();
         const xx=idx>=bl.length?(bl.length?bl[bl.length-1].getBoundingClientRect().right:d.r.left):bl[idx].getBoundingClientRect().left;ins.style.left=(xx-r0.left-1)+"px"}
-      else if(d.c){d.c.t=+clamp(d.t0+dx/d.r.width*d.tot,0,d.tot).toFixed(2);d.co.style.left=(d.c.t/d.tot*100)+"%"}
-      else{ED.T=clamp((e.clientX-d.r.left)/d.r.width*d.tot,0,d.tot);paintHead()}
+      else if(d.c){let t=clamp(d.t0+dx/d.pps,0,d.tot);const th=8/d.pps;let bd=th;d.edges.forEach(x=>{const dd=Math.abs(x-t);if(dd<bd){bd=dd;t=x}});d.c.t=+t.toFixed(2);d.co.style.left=(d.c.t/d.tot*100)+"%"}
+      else{ED.T=clamp((e.clientX-d.r.left)/d.r.width*d.tot,0,d.tot);paintHead(true)}
     });
     const end=e=>{
       if(!d)return;const p=cur(),dd=d;d=null;const ins=Q(".lc79-ins",tl);if(ins)ins.remove();
-      if(dd.clip&&dd.moved&&dd.idx!=null){const id=dd.clip.getAttribute("data-clip"),i=p.clips.findIndex(c=>c.id===id);if(i>=0){let j=dd.idx;const c=p.clips.splice(i,1)[0];if(j>i)j--;p.clips.splice(j,0,c);save(p)}ED.sel={kind:"clip",id:id};return ED.paint()}
-      if(dd.c&&dd.moved){p.callouts.sort((a,b)=>a.t-b.t);save(p);ED.sel={kind:"co",id:dd.c.id};ED.T=dd.c.t;paintTimeline();paintInsp();return showFrame()}
-      if(dd.clip){const id=dd.clip.getAttribute("data-clip");ED.sel={kind:"clip",id:id};const s=segments(p).filter(x=>x.clip.id===id)[0];if(s){stopPlay();ED.T=s.T0}paintTimeline();paintInsp();return showFrame()}
-      if(dd.co){ED.sel={kind:"co",id:dd.co.getAttribute("data-co")};const c=selected();if(c){stopPlay();ED.T=c.t}paintTimeline();paintInsp();return showFrame()}
-      stopPlay();if(!dd.moved){ED.T=clamp((e.clientX-dd.r.left)/dd.r.width*dd.tot,0,dd.tot)}ED.sel=null;paintTimeline();paintInsp();showFrame();
+      if(dd.trim){if(dd.moved){save(p);ED.paint();return}ED.undo.pop();const s=segments(p).filter(x=>x.clip.id===dd.trim.id)[0];if(s)ED.T=s.T0;paintTop();paintTimeline();paintInsp();return showFrame()}
+      if(dd.clip&&dd.moved&&dd.idx!=null){const id=dd.clip.getAttribute("data-clip"),i=p.clips.findIndex(c=>c.id===id);if(i>=0){let j=dd.idx;if(j>i)j--;if(j!==i){snapEd(p);const c=p.clips.splice(i,1)[0];p.clips.splice(j,0,c);save(p)}}ED.sel={kind:"clip",id:id};return ED.paint()}
+      if(dd.c){if(!dd.moved)ED.undo.pop();else{p.callouts.sort((a,b)=>a.t-b.t);save(p)}ED.sel={kind:"co",id:dd.c.id};stopPlay();ED.T=dd.c.t;paintTop();paintTimeline();paintInsp();return showFrame()}
+      if(dd.clip){const id=dd.clip.getAttribute("data-clip");ED.sel={kind:"clip",id:id};stopPlay();const x=clamp((e.clientX-dd.r.left)/dd.r.width*dd.tot,0,dd.tot);ED.T=x;paintTop();paintTimeline();paintInsp();return showFrame()}
+      stopPlay();if(!dd.moved){ED.T=clamp((e.clientX-dd.r.left)/dd.r.width*dd.tot,0,dd.tot)}ED.sel=null;paintTop();paintTimeline();paintInsp();showFrame();
     };
-    tl.addEventListener("pointerup",end);tl.addEventListener("pointercancel",()=>{d=null;const ins=Q(".lc79-ins",tl);if(ins)ins.remove()});
-    tl.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ")return;const c=e.target.closest(".lc79-clip,.lc79-co");if(!c)return;e.preventDefault();ED.sel=c.classList.contains("lc79-clip")?{kind:"clip",id:c.getAttribute("data-clip")}:{kind:"co",id:c.getAttribute("data-co")};paintTimeline();paintInsp()});
+    tl.addEventListener("pointerup",end);tl.addEventListener("pointercancel",()=>{if(d&&d.trim&&d.moved)save(cur());d=null;const ins=Q(".lc79-ins",tl);if(ins)ins.remove()});
+    tl.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ")return;const c=e.target.closest(".lc79-clip,.lc79-co");if(!c)return;e.preventDefault();ED.sel=c.classList.contains("lc79-clip")?{kind:"clip",id:c.getAttribute("data-clip")}:{kind:"co",id:c.getAttribute("data-co")};paintTop();paintTimeline();paintInsp()});
     function dropIndex(x){const bl=QA(".lc79-clip",tTrack());for(let i=0;i<bl.length;i++){const r=bl[i].getBoundingClientRect();if(x<r.left+r.width/2)return i}return bl.length}
     /* drag a take from the archive onto the timeline (mouse) */
     el.addEventListener("dragstart",e=>{const c=e.target.closest&&e.target.closest(".lc79-card");if(!c)return;try{e.dataTransfer.setData("text/plain","lc79:"+c.getAttribute("data-take"));e.dataTransfer.effectAllowed="copy"}catch(x){}});
@@ -599,14 +900,32 @@
   }
   function bindCanvas(el){
     const cv=Q(".lc79-stagebox canvas",el);let d=null;
+    const pt=e=>{const r=cv.getBoundingClientRect(),w=Math.max(1,r.width),h=Math.max(1,r.height);return{r:r,fx:(e.clientX-r.left)/w,fy:(e.clientY-r.top)/h,px:(e.clientX-r.left)/w*cv.width,py:(e.clientY-r.top)/h*cv.height,k:cv.width/w}};
+    /* 2 = the resize corner of the selected caption box, 1 = inside the box */
+    const onCap=q=>{const c=ED.capRect;if(!c||ED.playing)return 0;const hs=18*q.k,pad=6*q.k;
+      if(ED.sel&&ED.sel.kind==="cap"&&Math.abs(q.px-(c.x+c.w))<hs&&Math.abs(q.py-(c.y+c.h))<hs)return 2;
+      return q.px>=c.x-pad&&q.px<=c.x+c.w+pad&&q.py>=c.y-pad&&q.py<=c.y+c.h+pad?1:0};
     cv.addEventListener("pointerdown",e=>{
-      if(ED.playing||!ED.sel||ED.sel.kind!=="co")return;const c=selected();if(!c)return;
-      const r=cv.getBoundingClientRect(),fx=(e.clientX-r.left)/r.width,fy=(e.clientY-r.top)/r.height;
-      const tip=c.arrow&&Math.hypot((fx-c.ax)*r.width,(fy-c.ay)*r.height)<36;d={c:c,tip:tip,r:r};try{cv.setPointerCapture(e.pointerId)}catch(x){}
+      if(ED.playing)return;const q=pt(e),p=cur();if(!p)return;const hit=onCap(q);
+      if(hit){snapEd(p);if(!p.cap)p.cap=capStyle(p,cv.width,cv.height);d={cap:true,resize:hit===2,st0:Object.assign({},p.cap),q0:q,cr:Object.assign({},ED.capRect),moved:false};
+        if(!(ED.sel&&ED.sel.kind==="cap")){ED.sel={kind:"cap"};paintTop();paintTimeline();paintInsp();compose()}
+        try{cv.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault();return}
+      if(!ED.sel||ED.sel.kind!=="co")return;const c=selected();if(!c)return;
+      snapEd(p);const tip=c.arrow&&Math.hypot((q.fx-c.ax)*q.r.width,(q.fy-c.ay)*q.r.height)<36;d={c:c,tip:tip,r:q.r};try{cv.setPointerCapture(e.pointerId)}catch(x){}
       e.preventDefault();
     });
-    cv.addEventListener("pointermove",e=>{if(!d)return;const fx=clamp((e.clientX-d.r.left)/d.r.width,0,1),fy=clamp((e.clientY-d.r.top)/d.r.height,0,1);if(d.tip){d.c.ax=fx;d.c.ay=fy}else{d.c.x=clamp(fx,.05,.95);d.c.y=clamp(fy,.05,.95)}compose()});
-    const up=()=>{if(!d)return;d=null;save(cur());paintInsp()};cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
+    cv.addEventListener("pointermove",e=>{
+      const q=pt(e);
+      if(!d){const h=onCap(q);cv.style.cursor=h===2?"nwse-resize":h?"move":"";return}
+      if(d.cap){const c=cur().cap;d.moved=true;
+        if(d.resize){const ratio=Math.max(.2,(q.px-d.cr.x)/Math.max(10,d.cr.w));c.scale=+clamp(d.st0.scale*ratio,.4,3).toFixed(3)}
+        else{c.x=+clamp(d.st0.x+(q.px-d.q0.px)/cv.width,0,1).toFixed(4);c.y=+clamp(d.st0.y+(q.py-d.q0.py)/cv.height,0,1).toFixed(4)}
+        return compose()}
+      const fx=clamp((e.clientX-d.r.left)/d.r.width,0,1),fy=clamp((e.clientY-d.r.top)/d.r.height,0,1);if(d.tip){d.c.ax=fx;d.c.ay=fy}else{d.c.x=clamp(fx,.05,.95);d.c.y=clamp(fy,.05,.95)}compose();
+    });
+    const up=()=>{if(!d)return;const dd=d;d=null;if(dd.cap&&!dd.moved){ED.undo.pop();return}save(cur());paintInsp()};cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
+    cv.addEventListener("wheel",e=>{const q=pt(e);if(!onCap(q))return;e.preventDefault();const p=cur();snapSoft(p);if(!p.cap)p.cap=capStyle(p,cv.width,cv.height);
+      p.cap.scale=+clamp((+p.cap.scale||1)*(e.deltaY<0?1.06:1/1.06),.4,3).toFixed(3);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>{save(p);if(ED.sel&&ED.sel.kind==="cap")paintInsp()},300)},{passive:false});
   }
 
   /* ---------- Game-to-Script AI ---------- */
@@ -1086,21 +1405,26 @@ CLOSE];
     ctx.restore();
     return{c:cv,x:bx-m,y:by-m};
   }
+  /* right after a take: silences over the threshold are cut (ripple), the take goes to the recording project as its voice pieces, captions follow */
   function afterTake(t){
-    if(!t||!t.id)return;const p=projById(rd(RK,""));
-    if(p){p.clips.push({id:uid(),take:t.id,in:null,out:null});save(p)}
-    showPost(t,p);
+    if(!t||!t.id)return;const o=nle();let sil=null;
+    if(o.autoSil)try{sil=autoSilence(t,clamp(+o.silMin||4,.5,8))}catch(e){sil=null}
+    const p=projById(rd(RK,""));
+    if(p){p.clips=p.clips.concat(clipsFor(t,p));save(p)}
+    showPost(t,p,sil);
+    if(sil&&sil.n)say("Cut "+sil.n+" silence"+(sil.n===1?"":"s")+" over "+(+o.silMin||4)+" s ("+sil.sec+" s) from “"+t.name+"”. Undo it in Trim.","ok",4500);
+    try{autoCaptions(t)}catch(e){}
   }
-  function showPost(t,p){
+  function showPost(t,p,sil){
     const sr=studioRoot(),lcs=sr&&Q("#lcs",sr);if(!lcs)return;let bar=Q("#lc79-post",sr);if(bar)bar.remove();
     bar=document.createElement("div");bar.id="lc79-post";bar.setAttribute("role","status");
     const opts=db().list.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("");
-    bar.innerHTML='<b>'+esc(t.name)+' saved'+(p?' in “'+esc(p.name)+'” (clip '+p.clips.length+')':'')+'.</b>'
+    bar.innerHTML='<b>'+esc(t.name)+' saved'+(p?' in “'+esc(p.name)+'” ('+p.clips.length+' blocks)':'')+'.'+(sil&&sil.n?' '+sil.n+' silence'+(sil.n===1?'':'s')+' cut.':'')+'</b>'
       +(p?'<button type="button" class="btn sm" data-p="open">Open the timeline</button>':'<select aria-label="Add this take to a project"><option value="">Add to a project…</option>'+opts+'<option value="+">+ New project</option></select>')
       +'<button type="button" class="btn sm" data-p="caps">Captions</button><button type="button" class="btn sm" data-p="x" aria-label="Close">×</button>';
     lcs.appendChild(bar);
     bar.addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(!b)return;const a=b.getAttribute("data-p");if(a==="x")return bar.remove();if(a==="caps"){bar.remove();return gotoCaptions(t.id)}if(a==="open"){bar.remove();if(p){db().cur=p.id;persist()}return openProjects()}});
-    const sel=Q("select",bar);if(sel)sel.addEventListener("change",()=>{let pid=sel.value;if(!pid)return;if(pid==="+"){const n=prompt("Name of the new project","Reel "+(db().list.length+1));if(n===null)return;const np=newProject(n.trim()||null);pid=np.id}const pp=projById(pid);if(pp){pp.clips.push({id:uid(),take:t.id,in:null,out:null});save(pp);say(t.name+" added to “"+pp.name+"”.","ok",2500);showPost(t,pp);paintDock()}});
+    const sel=Q("select",bar);if(sel)sel.addEventListener("change",()=>{let pid=sel.value;if(!pid)return;if(pid==="+"){const n=prompt("Name of the new project","Reel "+(db().list.length+1));if(n===null)return;const np=newProject(n.trim()||null);pid=np.id}const pp=projById(pid);if(pp){pp.clips=pp.clips.concat(clipsFor(t,pp));save(pp);say(t.name+" added to “"+pp.name+"”.","ok",2500);showPost(t,pp);paintDock()}});
     clearTimeout(showPost.to);showPost.to=setTimeout(()=>{try{bar.remove()}catch(e){}},25e3);
   }
   function paintDock(note){
@@ -1310,10 +1634,11 @@ CLOSE];
       e.preventDefault();if(/[1-4]/.test(e.key))setStep(+e.key);else ctaToggle();
     });
     window.addEventListener("popstate",()=>{const top=layerStack[layerStack.length-1];if(top&&!(history.state&&history.state.lc79===top))closeLayer(top,true)});
+    window.addEventListener("keydown",e=>{if(ED.open&&layerStack[layerStack.length-1]==="lc79-ed")onEdKey(e)},true);   /* capture: a repainted block loses focus to <body>, the keys still work */
     document.addEventListener("keydown",e=>{if(e.key==="Escape"&&layerStack.length){const top=layerStack[layerStack.length-1];if(top==="lc79-ed"&&ED.busy)return;closeLayer(top)}});
     window.addEventListener("hashchange",()=>{if(route()!=="studio")["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true))});
   }
   return{writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
-    segments:segments,run:run,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,boardSVG:boardSVG,sfx:sfx,
+    segments:segments,run:run,envThr:envThr,findQuiet:findQuiet,envDt:envDt,speechRanges:speechRanges,minus:minus,complement:complement,clipsFor:clipsFor,splitClip:splitClip,splitAt:splitAt,trimClip:trimClip,deleteClip:deleteClip,cutSilences:cutSilences,autoSilence:autoSilence,envOf:envOf,capStyle:capStyle,capLine:capLine,drawCaption:drawCaption,nle:nle,undo:undo,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,boardSVG:boardSVG,sfx:sfx,
     BUILT:BUILT,db:db,newProject:newProject,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/
