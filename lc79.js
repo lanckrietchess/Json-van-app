@@ -13,7 +13,7 @@
         arrow tip, duration, sound) and presets saved on this device. Sounds are synthesised with Web Audio (no files) and land in the export.
      5. "Show Landing Page (CTA)": the live landing page (snapshot of /?preview=1 through html2canvas, so no visit is counted) in a phone frame in the
         recorded picture, or a CTA card when the page cannot be captured. Key L toggles it in the Studio. */
-  const VERSION="9.40.0";
+  const VERSION="9.41.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -132,9 +132,10 @@
     const t=segs&&segs[0]&&segs[0].take;const w=Math.round(t&&t.w||1080),h=Math.round(t&&t.h||1920);return[w-w%2,h-h%2];
   }
   function drawFrame(g,W,H,v,take,ct,p,Tp,noCallouts){
+    const capsOff=!!(p&&p.capsOff);
     g.fillStyle="#000";g.fillRect(0,0,W,H);
     if(v&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,k=Math.min(W/vw,H/vh),w=vw*k,h=vh*k;try{g.drawImage(v,(W-w)/2,(H-h)/2,w,h)}catch(e){}}
-    try{const L=api()&&api().lc33;if(L&&L.drawCap&&take)L.drawCap(g,W,H,take,ct)}catch(e){}
+    if(!capsOff)try{const L=api()&&api().lc33;if(L&&L.drawCap&&take)L.drawCap(g,W,H,take,ct)}catch(e){}
     if(!noCallouts)((p&&p.callouts)||[]).forEach(c=>{try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
   }
   function mkVideo(src,muted){const v=document.createElement("video");v.playsInline=true;v.setAttribute("playsinline","");v.preload="auto";v.muted=!!muted;v.src=src;v.style.cssText="position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none";document.body.appendChild(v);return v}
@@ -299,7 +300,7 @@
     ED.el=openLayer("lc79-ed","Edit Studio projects",el=>{
       el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Edit Studio · Projects</h2><button type="button" class="lc79-b sm" data-a="captions">Captions</button>'
         +'<select data-a="pick" aria-label="Project"></select><button type="button" class="lc79-b sm" data-a="new">New project</button><button type="button" class="lc79-b sm" data-a="rename">Rename</button><button type="button" class="lc79-b sm red" data-a="delproj">Delete project</button>'
-        +'<span class="lc79-grow"></span><button type="button" class="lc79-b pri" data-a="export">Export video</button></header>'
+        +'<span class="lc79-grow"></span><button type="button" class="lc79-b" data-a="caps" aria-pressed="true">CC Captions: on</button><button type="button" class="lc79-b pri" data-a="export">Export video</button></header>'
         +'<div class="lc79-body"><div class="lc79-main"><div class="lc79-view"><div class="lc79-stagebox"><canvas aria-label="Project preview. When a callout is selected and the video is paused, drag it to place it."></canvas><div class="lc79-empty" hidden></div></div>'
         +'<div class="lc79-trans"><button type="button" class="lc79-b" data-a="home" aria-label="Back to the start">⏮</button><button type="button" class="lc79-b pri" data-a="play">▶ Play</button><span class="lc79-time" aria-live="off"></span><input type="range" data-a="scrub" min="0" max="1" step="0.01" value="0" aria-label="Project time" style="flex:1;min-width:140px"></div></div>'
         +'<aside class="lc79-insp" aria-label="Inspector"></aside></div>'
@@ -317,6 +318,7 @@
     const sel=Q('[data-a="pick"]',ED.el),d=db(),p=cur();
     sel.innerHTML=d.list.map(x=>'<option value="'+esc(x.id)+'"'+(p&&x.id===p.id?" selected":"")+'>'+esc(x.name)+'</option>').join("");
     const ex=Q('[data-a="export"]',ED.el);ex.disabled=!(p&&segments(p).length)||ED.busy;
+    const cc=Q('[data-a="caps"]',ED.el);if(cc){const off=!!(p&&p.capsOff);cc.textContent=off?"CC Captions: hidden":"CC Captions: on";cc.setAttribute("aria-pressed",String(!off));cc.classList.toggle("gold",!off);cc.title=off?"Captions are hidden in the preview and the export. Press to show them.":"Captions are written automatically and burned into the export. Press to hide them."}
   }
   function paintCalls(){
     const box=Q(".lc79-calls",ED.el);
@@ -389,7 +391,8 @@
       +'<label class="lc79-row" style="min-height:44px"><input type="checkbox" data-f="useCuts"'+(p.useCuts!==false?" checked":"")+' style="width:22px;height:22px"> Skip the cuts made in each take (silences, marked mistakes)</label>'
       +'<p class="lc79-hint" style="margin:0">'+p.clips.length+' clip'+(p.clips.length===1?"":"s")+' · '+p.callouts.length+' callout'+(p.callouts.length===1?"":"s")+' · '+fmt(segs.total||0)+'</p>'
       +(p.src?'<div class="lc79-sec" style="padding:10px;gap:6px"><b style="color:#fff">Game: '+esc(p.src.label||"")+'</b><span class="lc79-hint">Motif: '+esc(p.src.motif||"")+(p.src.sim?' · Lichess position ready':'')+'</span><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="srcopen">Open in Game-to-Script</button><button type="button" class="lc79-b sm" data-a="recthis">Record this project</button></div></div>':'<p class="lc79-hint" style="margin:0">Tip: make projects from a game in Game-to-Script, one per mistake. The recording flow then loads the board, the feedback card and the Lichess position for you.</p>')
-      +'<p class="lc79-hint" style="margin:0">Captions come from each take (Edit Studio: Write captions). The export plays the project once in real time, so it takes as long as the video. Keep this tab in front.</p>';
+      +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="writecaps">Write missing captions now ('+needsCaps(p).length+')</button></div>'
+      +'<p class="lc79-hint" style="margin:0">Captions are written automatically for every take without captions when you export, unless “CC Captions” is hidden. Edit them any time with Captions. The export plays the project once in real time, so it takes as long as the video. Keep this tab in front.</p>';
   }
   function paintArchive(){
     const g=Q(".lc79-grid",ED.el),p=cur(),list=takes();
@@ -430,9 +433,27 @@
     const ended=!ED.ctl.stopped;ED.playing=false;if(ended)ED.T=0;paintHead();showFrame();
   }
   function stopPlay(){if(ED.ctl)ED.ctl.stopped=true;ED.playing=false}
+  /* 9.41.0: every take of the project without captions gets them automatically (same engines as Write captions: exact server, then this device, then the browser) */
+  const needsCaps=p=>{const seen={};return(p.clips||[]).map(c=>takeById(c.take)).filter(t=>t&&!seen[t.id]&&(seen[t.id]=1)&&!(t.captions&&t.captions.length)&&!/\(export\)|\(edited\)/.test(t.name))};
+  async function writeCaps(p,onMsg){
+    const list=needsCaps(p),L=api()&&api().lc33,Tk=T()&&T().Takes;let ok=0,fail=[];
+    if(!list.length||!L||!L.autoSubs){if(!onMsg&&!list.length)say("Every take in this project already has captions.","",2500);return{ok:0,fail:[],n:0}}
+    for(let i=0;i<list.length;i++){const t=list[i];
+      const msg=(cur,dur)=>{const tx="Writing captions: take "+(i+1)+" of "+list.length+(dur?" ("+Math.round(cur||0)+" of "+Math.round(dur)+" s)":"…");if(onMsg)onMsg(tx);else say(tx,"",1500)};msg();
+      try{const r=await L.autoSubs(t,msg);
+        if(r&&r.ok&&r.lines&&r.lines.length){t.captions=r.lines.map(x=>Object.assign({},x,{t:L.fixText?L.fixText(x.t):x.t}));try{Tk.persistMeta(t)}catch(e){}ok++}
+        else fail.push(t.name+(r&&r.error?": "+r.error:""))}catch(e){fail.push(t.name)}}
+    if(!onMsg)say(ok+" take"+(ok===1?"":"s")+" got captions."+(fail.length?" Not possible for "+fail.length+": "+fail[0]:" Check them with Captions."),fail.length?"err":"ok",6000);
+    return{ok:ok,fail:fail,n:list.length};
+  }
   async function exportProject(){
     const p=cur(),segs=segments(p);if(!segs.length||ED.busy)return;
     stopPlay();ED.busy=true;paintTop();
+    let capNote="";
+    if(!p.capsOff&&needsCaps(p).length){const box0=Q(".lc79-stagebox",ED.el),ov0=document.createElement("div");ov0.className="lc79-busy";ov0.setAttribute("role","status");ov0.innerHTML='<b style="color:#fff">Writing captions first</b><span class="lc79-hint" data-m></span>';box0.appendChild(ov0);
+      const r=await writeCaps(p,m=>{const e=Q("[data-m]",ov0);if(e)e.textContent=m});ov0.remove();
+      capNote=r.ok?" Captions were written for "+r.ok+" take"+(r.ok===1?"":"s")+": you can still edit them (Captions) and export again.":"";
+      if(r.fail.length)capNote+=" No captions for "+r.fail.length+" take"+(r.fail.length===1?"":"s")+" ("+r.fail[0]+").";}
     const box=Q(".lc79-stagebox",ED.el),ov=document.createElement("div");ov.className="lc79-busy";ov.setAttribute("role","status");
     ov.innerHTML='<b style="color:#fff">Exporting “'+esc(p.name)+'”</b><div class="lc79-bar"><i></i></div><span class="lc79-hint">This plays the project once in real time ('+fmt(segs.total)+'). Keep this tab in front.</span><button type="button" class="lc79-b red">Cancel</button>';
     box.appendChild(ov);const bar=Q("i",ov),ctl={stopped:false};Q("button",ov).onclick=()=>{ctl.stopped=true};
@@ -445,7 +466,7 @@
         let nid="x"+uid();
         try{const Tk=T().Takes;await Tk.add({id:nid,name:p.name+" (export)",blob:r.blob,mime:r.blob.type||"video/webm",durationMs:r.total*1e3,w:r.W,h:r.H,fps:30,env:[],markers:[],cuts:[],trimIn:0,trimOut:r.total,createdAt:Date.now(),size:r.blob.size,onDisk:false,captions:[]})}catch(e){}
         ED.sel={kind:"take",id:nid};
-        say("Exported to your takes archive as “"+p.name+" (export)”. Use Share to send it to Instagram, TikTok or YouTube.","ok",5000);
+        say("Exported to your takes archive as “"+p.name+" (export)”. Use Share to send it to Instagram, TikTok or YouTube."+capNote,"ok",7000);
       }
     }catch(e){say(e.message||"Export failed.","err",6000)}
     off.width=off.height=1;ov.remove();ED.busy=false;ED.paint();
@@ -481,6 +502,8 @@
     if(a==="rename"&&p){const n=prompt("Project name",p.name);if(n&&n.trim()){p.name=n.trim().slice(0,60);save(p);ED.paint()}return}
     if(a==="delproj"&&p){if(!confirm("Delete the project “"+p.name+"”? Your takes stay in the archive."))return;const d=db();d.list=d.list.filter(x=>x.id!==p.id);d.cur=d.list[0]?d.list[0].id:"";persist();if(!d.list.length)newProject("Reel 1");ED.sel=null;ED.T=0;return ED.paint()}
     if(a==="export")return exportProject();
+    if(a==="caps"&&p){p.capsOff=!p.capsOff;save(p);paintTop();paintInsp();say(p.capsOff?"Captions hidden: the export has no captions.":"Captions on: missing captions are written automatically when you export.","",3000);return showFrame()}
+    if(a==="writecaps"&&p)return writeCaps(p,null).then(()=>{ED.paint()});
     if(a==="captions"){const sel=selected();const id=ED.sel&&ED.sel.kind==="clip"&&sel?sel.take:ED.sel&&ED.sel.kind==="take"&&sel?sel.id:(p&&p.clips[0]?p.clips[0].take:null);return gotoCaptions(id)}
     if(a==="srcopen"&&p&&p.src)return openFromProject(p);
     if(a==="recthis"&&p){wr(RK,p.id);closeLayer("lc79-ed");try{LC66.setTab(studioRoot(),"shoot")}catch(e){}say("Recording into “"+p.name+"”. Keys 1 to 4 switch the flow: board, feedback card, Lichess, landing page.","ok",5000);paintDock();return}
@@ -918,13 +941,15 @@ CLOSE];
 
   /* ---------- 5. Show Landing Page (CTA) ---------- */
   const CK="lc79-cta";
-  const ctaS=()=>Object.assign({mode:"page",side:"right",scale:1,head:"Get your last game analysed",sub:"Lanckriet Chess",url:"",point:"Link in bio"},rd(CK,{})||{});
+  const ctaS=()=>{const o=Object.assign({mode:"live",fit:"stage",side:"right",scale:1,head:"Get your last game analysed",sub:"Lanckriet Chess",url:"",point:"Link in bio",v:2},rd(CK,{})||{});if(o.v!==2){if(o.mode==="page")o.mode="live";o.v=2;o.fit=o.fit||"stage"}return o};
   let ctaOn=false,ctaAt=0,snap=null,snapAt=0,snapBusy=false,animUntil=0;
   function kick(ms){animUntil=performance.now()+(ms||450);const loop=()=>{dirty();if(performance.now()<animUntil)requestAnimationFrame(loop)};requestAnimationFrame(loop)}
   function ctaToggle(v){
     ctaOn=v==null?!ctaOn:!!v;ctaAt=performance.now();if(ctaOn){FL.step=4;FL.card=null;FL.aha=false}else if(FL.step===4)FL.step=0;try{paintDock()}catch(e){}
-    if(ctaOn&&ctaS().mode==="page"&&!snap)grabLanding();
-    kick(500);paintCtaBtn();say(ctaOn?"Landing page on screen. Press L or the button to hide it.":"Landing page hidden.","",1800);
+    const md=ctaS().mode;
+    if(ctaOn&&md==="page"&&!snap)grabLanding();
+    if(md==="live"){if(ctaOn)liveOn();else liveOff()}else liveOff();
+    kick(500);paintCtaBtn();if(md!=="live")say(ctaOn?"Landing page on screen. Press L or the button to hide it.":"Landing page hidden.","",1800);
   }
   async function loadH2C(){
     if(window.html2canvas)return window.html2canvas;
@@ -952,6 +977,7 @@ CLOSE];
     if(!(W>1&&H>1))return;
     try{if(FL.step===2&&FL.card)drawCard(ctx,W,H,FL.card);if(FL.step===3&&FL.aha)drawAha(ctx,W,H)}catch(e){}
     if(!ctaOn)return;
+    if(ctaS().mode==="live"){drawLiveFrame(ctx,W,H);return}
     const o=ctaS(),p=easeOut(clamp((performance.now()-ctaAt)/380,0,1)),port=H>=W,host=o.url||(location.host||"lanckrietchesstrainerhub.vercel.app");
     ctx.save();
     if(o.mode==="page"&&snap){
@@ -1016,7 +1042,7 @@ CLOSE];
   async function setStep(n){
     n=+n;if(!(n>=1&&n<=4))return;FL.step=n;const p=projById(rd(RK,"")),src=p&&p.src,B=api()&&api().board;
     const sc=(rd(SK,{})||{})[n];if(sc){try{api().lc54.load(sc)}catch(e){}}
-    if(n===4){ctaOn=true;ctaAt=performance.now();if(ctaS().mode==="page"&&!snap)grabLanding()}else ctaOn=false;
+    if(n===4){ctaOn=true;ctaAt=performance.now();if(ctaS().mode==="page"&&!snap)grabLanding();if(ctaS().mode==="live")liveOn()}else{ctaOn=false;liveOff()}
     FL.card=null;FL.aha=false;
     if(src&&B){
       /* while recording only a FEN is loaded: loading a whole PGN into the Studio board during a recording crashed Chromium in tests */
@@ -1098,6 +1124,88 @@ CLOSE];
       el.addEventListener("change",e=>{const s3=e.target.getAttribute("data-step");if(!s3)return;const m=rd(SK,{})||{};m[s3]=e.target.value||"";wr(SK,m)});
     });
   }
+  /* ---------- 9.41.0: the LIVE landing page over the stage (or the board), scrollable and clickable, filmed into the recording ---------- */
+  const LV={el:null,fr:null,stream:null,video:null,how:"",rect:null,snap:null,snapBusy:false,snapTimer:0,raf:0,ptr:null,click:0,asked:false};
+  const landingUrl=()=>location.origin+"/index.html?preview=1&lc79=live";
+  function liveMount(){
+    const sr=studioRoot(),st=sr&&Q("#stage",sr);if(!st)return false;
+    if(!LV.el||!LV.el.isConnected){
+      try{if(getComputedStyle(st).position==="static")st.style.position="relative"}catch(e){}
+      const w=document.createElement("div");w.id="lc79-lp";w.setAttribute("role","region");w.setAttribute("aria-label","Your live landing page. Scroll and click it while you record.");
+      w.style.cssText="position:absolute;z-index:40;isolation:isolate;overflow:hidden;background:#0f172a;display:none;box-shadow:0 0 0 2px rgba(0,229,255,.55)";
+      const fr=document.createElement("iframe");fr.title="Lanckriet Chess landing page";fr.src=landingUrl();
+      fr.setAttribute("sandbox","allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox");
+      fr.style.cssText="display:block;width:100%;height:100%;border:0;background:#0f172a";
+      fr.addEventListener("load",()=>wireFrame(fr));
+      w.appendChild(fr);st.appendChild(w);LV.el=w;LV.fr=fr;
+    }
+    return true;
+  }
+  function wireFrame(fr){
+    let wn=null;try{wn=fr.contentWindow;if(!wn||!wn.document)return}catch(e){return}
+    try{if(/\/app\.html/.test(wn.location.pathname)){wn.location.replace(landingUrl());return}}catch(e){}
+    const fwd=e=>{const t=e.target;if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName||""))return;
+      if(/^[lL1-4rRpPmM]$/.test(e.key)||e.key==="Escape"){e.preventDefault();try{document.dispatchEvent(new KeyboardEvent("keydown",{key:e.key,code:e.code,bubbles:true,cancelable:true}))}catch(x){}}};
+    wn.addEventListener("keydown",fwd,true);
+    wn.addEventListener("mousemove",e=>{LV.ptr={x:e.clientX/Math.max(1,wn.innerWidth),y:e.clientY/Math.max(1,wn.innerHeight),t:performance.now()}},{passive:true});
+    wn.addEventListener("mousedown",()=>{LV.click=performance.now()},{passive:true});
+    wn.addEventListener("mouseleave",()=>{LV.ptr=null},{passive:true});
+  }
+  /* the frame sits exactly over the stage canvas (or the board) and LV.rect holds where that is inside the recorded frame */
+  function livePlace(){
+    const sr=studioRoot(),st=sr&&Q("#stage",sr),cv=sr&&Q("#stage-cv",sr);if(!st||!cv||!LV.el)return;
+    const fit=ctaS().fit,bh=fit==="board"&&Q('.layer[data-layer="board"]',sr),tgt=bh&&bh.getBoundingClientRect().width>20?bh:cv;
+    const c=cv.getBoundingClientRect(),r=tgt.getBoundingClientRect(),s=st.getBoundingClientRect();if(c.width<2||c.height<2)return;
+    const l=Math.round(r.left-s.left)+"px",t=Math.round(r.top-s.top)+"px",w=Math.round(r.width)+"px",h=Math.round(r.height)+"px";
+    const E=LV.el.style;if(E.left!==l)E.left=l;if(E.top!==t)E.top=t;if(E.width!==w)E.width=w;if(E.height!==h)E.height=h;
+    LV.rect={x:(r.left-c.left)/c.width,y:(r.top-c.top)/c.height,w:r.width/c.width,h:r.height/c.height};
+  }
+  function liveLoop(){if(!ctaOn||ctaS().mode!=="live"){LV.raf=0;return}livePlace();LV.raf=requestAnimationFrame(liveLoop)}
+  async function liveOn(){
+    try{const sr=studioRoot(),cv=sr&&Q("#stage-cv",sr);if(!cv||cv.getBoundingClientRect().width<2){LC66.setTab(sr,"shoot");await new Promise(r=>setTimeout(r,350))}}catch(e){}
+    if(!liveMount()){say("Open the stage first (Content Shooting).","err");return}
+    LV.el.style.display="block";if(!LV.raf)LV.raf=requestAnimationFrame(liveLoop);livePlace();
+    if(LV.stream&&LV.stream.active)return;
+    const ok=await liveCapture();
+    if(!ok){startSnaps();if(!LV.asked){LV.asked=true;say(LV.how==="denied"?"Recording keeps a picture of the page every second because the tab was not shared. Press L twice to try again and pick “This tab”.":"This browser cannot film a live page, so the recording gets a new picture every second. Chrome or Edge on a computer films it live.","",6500)}}
+    else say("Live landing page on screen and in the recording. Scroll and click it. Press L to hide it.","ok",3500);
+  }
+  function liveOff(){if(LV.el)LV.el.style.display="none";stopSnaps();if(LV.raf){cancelAnimationFrame(LV.raf);LV.raf=0}}
+  async function liveCapture(){
+    const md=navigator.mediaDevices;if(!md||!md.getDisplayMedia||!(window.CropTarget||window.RestrictionTarget)){LV.how="unsupported";return false}
+    let s=null;
+    try{
+      s=await md.getDisplayMedia({video:{displaySurface:"browser",frameRate:30},audio:false,preferCurrentTab:true,selfBrowserSurface:"include",surfaceSwitching:"exclude",monitorTypeSurfaces:"exclude"});
+      const tr=s.getVideoTracks()[0];let done=false;
+      if(window.RestrictionTarget&&tr.restrictTo){try{await tr.restrictTo(await RestrictionTarget.fromElement(LV.el));done=true;LV.how="element"}catch(e){}}
+      if(!done){if(!(window.CropTarget&&tr.cropTo))throw new Error("crop");await tr.cropTo(await CropTarget.fromElement(LV.el));LV.how="region"}
+      const v=document.createElement("video");v.muted=true;v.playsInline=true;v.srcObject=s;await v.play();
+      LV.stream=s;LV.video=v;tr.addEventListener("ended",()=>{LV.stream=null;LV.video=null;if(ctaOn&&ctaS().mode==="live")startSnaps()});
+      stopSnaps();return true;
+    }catch(e){if(s)s.getTracks().forEach(t=>{try{t.stop()}catch(x){}});LV.how=e&&e.name==="NotAllowedError"?"denied":"failed";return false}
+  }
+  function startSnaps(){if(LV.snapTimer)return;const go=()=>{grabFrame();};go();LV.snapTimer=setInterval(go,1000)}
+  function stopSnaps(){if(LV.snapTimer){clearInterval(LV.snapTimer);LV.snapTimer=0}}
+  async function grabFrame(){
+    if(LV.snapBusy||!LV.fr)return;LV.snapBusy=true;
+    try{const h2c=await loadH2C(),wn=LV.fr.contentWindow,d=wn&&wn.document;if(!d||!d.body)return;
+      const c=await h2c(d.body,{backgroundColor:"#0f172a",useCORS:true,allowTaint:false,logging:false,scale:Math.min(2,window.devicePixelRatio||1),x:wn.scrollX,y:wn.scrollY,width:wn.innerWidth,height:wn.innerHeight,windowWidth:wn.innerWidth,windowHeight:wn.innerHeight});
+      if(c&&c.width)LV.snap=c}
+    catch(e){}finally{LV.snapBusy=false}
+  }
+  function drawLiveFrame(ctx,W,H){
+    const r=LV.rect||{x:0,y:0,w:1,h:1},x=r.x*W,y=r.y*H,w=r.w*W,h=r.h*H;
+    const v=LV.video,src=v&&v.readyState>=2&&v.videoWidth?v:LV.snap;
+    ctx.save();ctx.fillStyle="#0f172a";ctx.fillRect(x,y,w,h);
+    if(src){try{ctx.drawImage(src,x,y,w,h)}catch(e){}}
+    else{ctx.fillStyle="#94a3b8";ctx.font="600 "+Math.round(Math.min(w,h)*.04)+"px Sora,system-ui,sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("Loading the landing page…",x+w/2,y+h/2)}
+    const pt=LV.ptr,now=performance.now();
+    if(pt&&now-pt.t<2500){const px=x+pt.x*w,py=y+pt.y*h,R=Math.max(10,Math.min(W,H)*.022),cl=now-LV.click;
+      ctx.globalAlpha=clamp(1-(now-pt.t-1500)/1000,0,1);ctx.lineWidth=R*.28;ctx.strokeStyle="#fbbf24";ctx.fillStyle="rgba(251,191,36,.28)";ctx.beginPath();ctx.arc(px,py,R,0,6.2832);ctx.fill();ctx.stroke();
+      if(cl<450){ctx.globalAlpha=1-cl/450;ctx.beginPath();ctx.arc(px,py,R*(1+cl/180),0,6.2832);ctx.stroke()}}
+    ctx.restore();
+  }
+  function liveStop(){liveOff();if(LV.stream){LV.stream.getTracks().forEach(t=>{try{t.stop()}catch(e){}});LV.stream=null;LV.video=null}if(LV.el){try{LV.el.remove()}catch(e){}}LV.el=null;LV.fr=null;LV.snap=null;LV.asked=false}
   function paintCtaBtn(){
     const sr=studioRoot(),b=sr&&Q("#lc79-cta",sr);if(!b)return;
     b.setAttribute("aria-pressed",String(ctaOn));b.textContent=snapBusy&&ctaOn?"Capturing the landing page…":ctaOn?"Hide Landing Page (L)":"Show Landing Page (CTA)";
@@ -1107,7 +1215,8 @@ CLOSE];
     openLayer("lc79-ctaset","Landing page CTA settings",el=>{
       const o=ctaS();
       el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Landing page on screen</h2></header><div class="lc79-body"><div class="lc79-ai"><section class="lc79-sec">'
-        +'<label class="lc79-f"><span>What to show</span><select data-f="mode"><option value="page"'+(o.mode==="page"?" selected":"")+'>The live landing page in a phone frame</option><option value="card"'+(o.mode==="card"?" selected":"")+'>A CTA card</option></select></label>'
+        +'<label class="lc79-f"><span>What to show</span><select data-f="mode"><option value="live"'+(o.mode==="live"?" selected":"")+'>The live landing page: scroll and click it while you record</option><option value="page"'+(o.mode==="page"?" selected":"")+'>A picture of the landing page in a phone frame</option><option value="card"'+(o.mode==="card"?" selected":"")+'>A CTA card</option></select></label>'
+        +'<label class="lc79-f"><span>Size of the live page</span><select data-f="fit"><option value="stage"'+(o.fit!=="board"?" selected":"")+'>The whole stage (full size)</option><option value="board"'+(o.fit==="board"?" selected":"")+'>The board area (your camera stays visible)</option></select></label>'
         +'<label class="lc79-f"><span>Where</span><select data-f="side"><option value="right"'+(o.side==="right"?" selected":"")+'>Right (point to your left)</option><option value="left"'+(o.side==="left"?" selected":"")+'>Left</option><option value="center"'+(o.side==="center"?" selected":"")+'>Centre</option></select></label>'
         +'<label class="lc79-f"><span>Phone size</span><input type="range" data-f="scale" min="0.6" max="1.4" step="0.05" value="'+o.scale+'"></label>'
         +'<label class="lc79-f"><span>Label under it</span><input type="text" data-f="point" maxlength="30" value="'+esc(o.point)+'"></label>'
@@ -1115,9 +1224,9 @@ CLOSE];
         +'<label class="lc79-f"><span>Card top line</span><input type="text" data-f="sub" maxlength="40" value="'+esc(o.sub)+'"></label>'
         +'<label class="lc79-f"><span>Address shown (empty = this site)</span><input type="text" data-f="url" maxlength="60" value="'+esc(o.url)+'" placeholder="'+esc(location.host)+'"></label>'
         +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="refresh">Refresh the landing page snapshot</button><span class="lc79-hint" data-snap>'+(snap?"Snapshot from "+new Date(snapAt).toLocaleTimeString():"No snapshot yet.")+'</span></div>'
-        +'<p class="lc79-hint" style="margin:0">The snapshot is taken from your live landing page with “preview” on, so it does not count as a visit and your own Edit button is not in it. Never use the words free, cheap, lifetime or forever in these texts.</p></section></div></div>';
+        +'<p class="lc79-hint" style="margin:0">Live page: Chrome or Edge ask once to share “This tab”; pick it, then the page is filmed live (scrolling, clicks and a yellow pointer ring). Other browsers get a new picture every second. The picture modes use a snapshot taken from your live landing page with “preview” on, so it does not count as a visit and your own Edit button is not in it. Never use the words free, cheap, lifetime or forever in these texts.</p></section></div></div>';
       el.addEventListener("click",async e=>{const b=e.target.closest("[data-a]");if(!b)return;if(b.getAttribute("data-a")==="close")return closeLayer("lc79-ctaset");if(b.getAttribute("data-a")==="refresh"){const s=Q("[data-snap]",el);s.textContent="Capturing…";await grabLanding(true);s.textContent=snap?"Snapshot from "+new Date(snapAt).toLocaleTimeString():"Could not capture the page. The CTA card is used."}});
-      const upd=e=>{const f=e.target.getAttribute("data-f");if(!f)return;const o2=ctaS();o2[f]=f==="scale"?clamp(+e.target.value||1,.6,1.4):String(e.target.value||"").slice(0,60);if(/\b(free|cheap|lifetime|forever)\b/i.test(String(o2[f]))){say("Pick other words: free, cheap, lifetime and forever are not used.","err",3500);return}wr(CK,o2);kick(200)};
+      const upd=e=>{const f=e.target.getAttribute("data-f");if(!f)return;const o2=ctaS();o2[f]=f==="scale"?clamp(+e.target.value||1,.6,1.4):String(e.target.value||"").slice(0,60);if(f==="mode"||f==="fit"){wr(CK,o2);if(ctaOn){if(o2.mode==="live")liveOn();else liveOff()}kick(200);return}if(/\b(free|cheap|lifetime|forever)\b/i.test(String(o2[f]))){say("Pick other words: free, cheap, lifetime and forever are not used.","err",3500);return}wr(CK,o2);kick(200)};
       el.addEventListener("input",upd);el.addEventListener("change",upd);
     });
   }
@@ -1193,7 +1302,7 @@ CLOSE];
   let tickId=0,lastTick=0;
   function tick(){lastTick=Date.now();if(route()!=="studio"){clearInterval(tickId);tickId=0;return}try{inject()}catch(e){}try{liveTick()}catch(e){}}
   function afterRender(r){
-    if(r!=="studio"){["lc79-ed","lc79-ai","lc79-ctaset","lc79-flowset"].forEach(id=>closeLayer(id,true));if(ctaOn){ctaOn=false}FL.step=0;FL.card=null;FL.aha=false;return}
+    if(r!=="studio"){["lc79-ed","lc79-ai","lc79-ctaset","lc79-flowset"].forEach(id=>closeLayer(id,true));if(ctaOn){ctaOn=false}FL.step=0;FL.card=null;FL.aha=false;liveStop();return}
     if(!tickId||Date.now()-lastTick>3000){clearInterval(tickId);tickId=setInterval(tick,400)}
     setTimeout(tick,60);
   }
@@ -1208,7 +1317,7 @@ CLOSE];
     document.addEventListener("keydown",e=>{if(e.key==="Escape"&&layerStack.length){const top=layerStack[layerStack.length-1];if(top==="lc79-ed"&&ED.busy)return;closeLayer(top)}});
     window.addEventListener("hashchange",()=>{if(route()!=="studio")["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true))});
   }
-  return{afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
+  return{writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
     segments:segments,run:run,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,boardSVG:boardSVG,sfx:sfx,
     BUILT:BUILT,db:db,newProject:newProject,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/
