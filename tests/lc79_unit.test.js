@@ -40,4 +40,41 @@ ok(/5\. Nxf7\?\? \(5\. Nf3\) \{Punished by Qxg2\} Qxg2/.test(tp),'trimmed PGN ma
 const plain=LC79.trimmedPgn(g,{i:8,color:"w",san:"Nxf7",num:5},true);const cc=new Chess();ok(cc.load_pgn(plain),'plain trimmed PGN loads in chess.js: '+plain);
 // callout
 const c=LC79.makeCallout(LC79.BUILT[0],1.2);ok(c.text==="2105 ELO Coach"&&c.sound==="ping"&&c.arrow&&c.t===1.2,'authority preset callout');
-console.log('RESULT',pass,'passed',fail,'failed');process.exit(0);
+// ---- Studio 2.0 NLE: silences, split, trim, delete, ripple, captions ----
+const TK={};global.LanckrietStudio={_t:{Takes:{list:[],get:id=>TK[id]||null,persistMeta(){}},Trim:{thr:-45}}};
+// 20 s take: voice 0-2, silence 2-7 (5 s), voice 7-9, silence 9-11.5 (2.5 s), voice 11.5-14, silence 14-20 (6 s, trailing)
+const envT=[];for(let i=0;i<200;i++){const t=i*.1;envT.push((t<2)||(t>=7&&t<9)||(t>=11.5&&t<14)?-18:-62)}
+const thr=LC79.envThr(envT,-45);ok(thr>-62&&thr<-18,'adaptive threshold sits between floor and voice ('+thr+')');
+ok(LC79.envThr([-50,-50,-50,-50,-50,-50,-50,-50,-50,-50,-50],-45)===-45,'flat level track falls back to the Trim threshold');
+const q4=LC79.findQuiet(envT,thr,4,0,20);ok(q4.length===2&&Math.abs(q4[0].s-2)<.01&&Math.abs(q4[0].e-7)<.01&&Math.abs(q4[1].s-14)<.01,'silences over 4 s: 2-7 and the trailing 14-20 ('+JSON.stringify(q4)+')');
+const k4=LC79.speechRanges(envT,0,20,4,thr);
+ok(k4.length===2&&k4[0].s===0&&Math.abs(k4[0].e-2.2)<.01&&Math.abs(k4[1].s-6.8)<.01&&Math.abs(k4[1].e-14.2)<.01,'speech pieces at 4 s keep 0.2 s of air and cut the trailing silence ('+JSON.stringify(k4)+')');
+const k15=LC79.speechRanges(envT,0,20,1.5,thr);ok(k15.length===3,'at 1.5 s the 2.5 s pause is cut too (3 pieces)');
+ok(JSON.stringify(LC79.complement([{s:1,e:2},{s:3,e:4}],0,5))==='[{"s":0,"e":1},{"s":2,"e":3},{"s":4,"e":5}]','complement of keep ranges = cuts');
+ok(JSON.stringify(LC79.minus([{s:0,e:10}],[{s:2,e:3},{s:2.5,e:4},{s:9,e:12}]))==='[{"s":0,"e":2},{"s":4,"e":9}]','ranges minus overlapping cuts');
+TK.a={id:"a",name:"Take 1",url:"blob:a",durationMs:20000,env:envT.slice(),cuts:[],trimIn:0,trimOut:20,captions:[{s:7.2,e:8.6,t:"second piece"}]};
+const sil=LC79.autoSilence(TK.a,4);ok(sil.n===2&&TK.a.cuts.length===2&&TK.a.cuts.every(c=>c.auto&&c.lc79),'after a take: 2 silences over 4 s become auto cuts ('+sil.sec+' s)');
+ok(LC79.autoSilence(TK.a,4).n===0,'running it again adds nothing');
+const P={id:"p",clips:[],callouts:[],useCuts:true};
+P.clips=LC79.clipsFor(TK.a,P);ok(P.clips.length===2&&P.clips.every(c=>c.raw),'the take comes in as 2 blocks (its voice pieces)');
+let segs=LC79.segments(P);ok(segs.length===2&&Math.abs(segs[1].T0-2.2)<.01,'ripple: block 2 starts right after block 1 (T0 '+segs[1].T0+')');
+const tot0=segs.total;
+const r15=LC79.cutSilences(P,1.5,-45);ok(r15.places===1&&P.clips.length===3&&Math.abs(r15.removed-2.1)<.05,'Cut silences 1.5 s: the 2.5 s pause goes, '+r15.removed+' s shorter');
+ok(LC79.cutSilences(P,1.5,-45).places===0,'cutting again finds nothing');
+const nb=LC79.splitAt(P,1.0);ok(nb&&P.clips.length===4&&Math.abs(P.clips[0].out-1)<.001&&Math.abs(P.clips[1].in-1)<.001,'blade at 1.0 s splits block 1 in two');
+ok(LC79.splitAt(P,0)===null,'no split on an edge');
+const before=LC79.segments(P).total;LC79.trimClip(P,P.clips[1].id,"r",1.5);segs=LC79.segments(P);
+ok(Math.abs(before-segs.total-.7)<.01&&Math.abs(segs[2].T0-1.5)<.01,'trim the end: the next block moves up, no gap ('+segs[2].T0+')');
+LC79.trimClip(P,P.clips[1].id,"l",5);ok(P.clips[1].in<=P.clips[1].out-.1+1e-9,'trim never makes a block shorter than 0.1 s');
+const del=P.clips[2].id;ok(LC79.deleteClip(P,del)&&P.clips.length===3,'delete removes the block');
+segs=LC79.segments(P);let gap=0;for(let i=1;i<segs.length;i++)gap=Math.max(gap,Math.abs(segs[i].T0-(segs[i-1].T0+segs[i-1].e-segs[i-1].s)));ok(gap<1e-9,'magnetic: no gap anywhere after split, trim and delete');
+ok(LC79.capLine(TK.a,8).t==="second piece"&&LC79.capLine(TK.a,9)===null,'captions are timed on the take, so they follow the cut blocks');
+const st=LC79.capStyle({cap:{x:.3,scale:1.5}},1080,1920);ok(st.x===.3&&st.scale===1.5&&st.y===.78&&st.box===true,'caption box style: own place and size, defaults for the rest');
+// drawCaption on a stub canvas: box follows x/y and scale
+const calls=[];const cg={save(){},restore(){},measureText:t=>({width:String(t).length*10}),fillText(){},strokeText(){},beginPath(){},moveTo(){},arcTo(){},closePath(){},fill(){calls.push('fill')},set font(v){},set textAlign(v){},set textBaseline(v){},set fillStyle(v){},set globalAlpha(v){},set shadowColor(v){},set shadowBlur(v){},set lineJoin(v){},set lineWidth(v){},set strokeStyle(v){}};
+const b1=LC79.drawCaption(cg,1080,1920,{t:"hello there"},LC79.capStyle({cap:{x:.5,y:.5}},1080,1920),0),b2=LC79.drawCaption(cg,1080,1920,{t:"hello there"},LC79.capStyle({cap:{x:.5,y:.5,scale:2}},1080,1920),0);
+ok(b1&&Math.abs(b1.y+b1.h/2-960)<1&&b2.h>b1.h*1.5&&calls.length===2,'caption box centred on its place, scale makes it bigger, background drawn');
+ok(LC79.drawCaption(cg,1080,1920,{t:"x"},LC79.capStyle({cap:{box:false}},1080,1920),0)&&calls.length===2,'box off: no background');
+const ev=LC79.envOf({numberOfChannels:1,length:4410,sampleRate:44100,getChannelData:()=>{const a=new Float32Array(4410);for(let i=0;i<2205;i++)a[i]=.5*Math.sin(i/5);return a}});ok(ev.length===1&&ev[0]<-6&&ev[0]>-20,'decoded audio gives an RMS level in dB per 0.1 s ('+ev[0]+')');
+ok(LC79.envDt({env:new Array(95),durationMs:10000})>0.104&&LC79.envDt({env:new Array(100),durationMs:10000})===.1,'level timing stretches to the real take length when the timer drifted');
+console.log('RESULT',pass,'passed',fail,'failed');process.exit(fail?1:0);

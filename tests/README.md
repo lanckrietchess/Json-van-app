@@ -13,10 +13,16 @@ Everything here runs in Node with jsdom: fast, no browser needed. The tests that
     node shorten_keys.test.js        # the short-texts tool and the app compute the same key for all 682 real texts (2)
     node audit_logic.test.js         # the puzzle-audit tool and the app judge a move identically on 20,000 random inputs (2)
     node theme_contrast.test.js      # the tech theme never makes text harder to read; muted text reaches WCAG AA (2)
+    node lc79_unit.test.js           # Creator Studio LC79: motifs, trimmed PGN, live-caption alignment, and the Studio 2.0 NLE core: silence detection,
+                                     # ripple cut, split, trim, delete, no gaps, caption box (38)
 
     # the REAL index.html booted in jsdom with your real content (each prints a JSON list of steps and errors)
     node boot_flow.js ../index.html    node boot_routes.js ../index.html    node boot_runners.js ../index.html    node boot_admin.js ../index.html
     node boot_notes.js ../index.html   node boot_tilt.js ../index.html      node boot_final.js ../index.html
+
+Studio 2.0 Edit Studio in real Chromium (from the repo root, after `npm i chess.js@0.10.3 jquery@3.7.1 @chrisoakman/chessboardjs@1.0.0 html2canvas@1.4.1`):
+`NM=./node_modules python3 tests/chromium_942/nle.py` (add `CHROME=/path/to/chrome` to use an installed Chrome): silence cut after a take,
+Cut silences, S split, trim handles, Delete, Ctrl+Z, two-deck playback without stalls, caption box drag / resize / style, 390 px layout (25).
 
 jsdom cannot see layout, overlays, taps, fonts, offline behaviour or native controls. Those are covered by `../browser/` (24 real-Firefox tests).
 The notes generator and puzzle audit tests are in `../tools/mspc` (`npm test`, plus `verify-notes.mjs`).
