@@ -1,5 +1,5 @@
-"""Creator Studio 2.0 (LC79) in real Chromium. From the repo root: npm i chess.js@0.10.3 jquery@3.7.1 @chrisoakman/chessboardjs@1.0.0 html2canvas@1.4.1
-   then NM=./node_modules python3 tests/chromium_939/e2e.py (serves the repo on port 8765; Supabase and other hosts are stubbed)."""
+"""Creator Studio 2.0 (LC79, 9.40.0) in real Chromium. From the repo root: npm i chess.js@0.10.3 jquery@3.7.1 @chrisoakman/chessboardjs@1.0.0 html2canvas@1.4.1
+   then NM=./node_modules python3 tests/chromium_939/e2e.py (serves the repo on port 8765; Supabase and other hosts are stubbed). Note: headless Chromium slows down during Studio recordings (also on 9.38.3), so recordings in this test are kept short."""
 import asyncio, json, os, sys, time, threading, http.server, functools
 from playwright.async_api import async_playwright
 ROOT=os.environ.get('SITE',os.path.abspath(os.path.join(os.path.dirname(__file__),'..','..'))); NM=os.environ.get('NM','node_modules')
@@ -11,9 +11,10 @@ R=[]
 def ok(c,m): R.append((bool(c),m)); print(('PASS ' if c else 'FAIL ')+m, flush=True)
 PGN=open(os.path.join(os.path.dirname(__file__),'fixture.pgn')).read()
 PGN_OLD='[White "Kyenzo"]\n[Black "Student"]\n[WhiteElo "1500"]\n[BlackElo "1210"]\n[Result "1-0"]\n\n1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Be2 h6 9. Nf3 e4 10. Ne5 Qd4 11. Ng4 Bxg4 12. Bxg4 Qe5 13. Be2 Bc5 14. O-O O-O 15. d3 Rad8 1-0'
+SH="(()=>{const v=document.querySelector('#view');const h=[...v.querySelectorAll('*')].find(e=>e.shadowRoot&&e.shadowRoot.querySelector('#lcs'));return h.shadowRoot})()"
 async def main():
     async with async_playwright() as p:
-        b=await p.chromium.launch(args=['--autoplay-policy=no-user-gesture-required','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream'])
+        b=await p.chromium.launch(args=['--disable-dev-shm-usage','--autoplay-policy=no-user-gesture-required','--use-fake-ui-for-media-stream','--use-fake-device-for-media-stream'])
         ctx=await b.new_context(viewport={'width':1280,'height':860},service_workers='block')
         async def route(r):
             u=r.request.url
@@ -27,7 +28,7 @@ async def main():
         await ctx.route('**/*',route)
         page=await ctx.new_page(); errs=[]
         page.on('pageerror',lambda e: errs.append(str(e)))
-        page.on('dialog',lambda d: asyncio.ensure_future(d.accept()))
+        page.on('dialog',lambda d: asyncio.ensure_future(d.accept()));DL=[];page.on('download',lambda d: DL.append(d.suggested_filename))
         await page.add_init_script("""localStorage.setItem('lc26-auth',JSON.stringify({email:'lanckrietchess@gmail.com',access_token:'x',expires_at:9999999999,user:{id:'u1',email:'lanckrietchess@gmail.com'}}));localStorage.setItem('lc6-state-v1',JSON.stringify({total:1700,xp:{}}));localStorage.setItem('lc19-sw',JSON.stringify({on:false}));localStorage.setItem('lc42-onb',JSON.stringify({done:true}));""")
         await page.goto('http://127.0.0.1:8765/app.html#studio'); await page.wait_for_timeout(5000)
         await page.evaluate("localStorage.setItem('lc26-auth',JSON.stringify({email:'lanckrietchess@gmail.com',access_token:'x',expires_at:9999999999,user:{id:'u1',email:'lanckrietchess@gmail.com'}}));LC49.owner=()=>true;location.hash='#quests';undefined;"); await page.wait_for_timeout(1500)
@@ -72,10 +73,11 @@ async def main():
         ok((res['gold'] or 0)>50,'gold 2105 ELO Coach badge is in the exported frames')
         # export via UI (download + new take)
         cnt=await page.evaluate("LanckrietStudio._t.Takes.list.length")
-        async with page.expect_download(timeout=30000) as dl:
-            await page.click('#lc79-ed [data-a="export"]')
-        d=await dl.value; ok(d.suggested_filename.endswith(('.webm','.mp4')),'Export button downloads '+d.suggested_filename)
-        await page.wait_for_timeout(800)
+        await page.click('#lc79-ed [data-a="export"]')
+        for _ in range(40):
+            await page.wait_for_timeout(500)
+            if not await page.evaluate("!!document.querySelector('#lc79-ed .lc79-busy')"): break
+        ok(not DL,'Export does NOT download a file '+str(DL))
         ok(await page.evaluate("LanckrietStudio._t.Takes.list.length")==cnt+1,'export is also kept as a new take')
         # delete take from archive -> removed from project
         await page.click('#lc79-ed [data-a="deltake"][data-take="tTakeA"]'); await page.wait_for_timeout(600)
@@ -130,6 +132,64 @@ async def main():
             await page.fill('#lc79-ai [data-f="answer"]','## Hook\nIf you are around 1200...')
             await page.click('#lc79-ai [data-a="usescript"]')
             ok((await page.evaluate("LanckrietStudio._t.Script.text")).startswith('## Hook'),'Use as my script fills the Studio script')
+
+            # ---- 9.40.0: batch, record into project, flow, captions link ----
+            rows=await page.evaluate("document.querySelectorAll('#lc79-ai #lc79-sb ~ .lc79-games .lc79-game, #lc79-ai .lc79-games .lc79-game').length")
+            ok(await page.evaluate("!!document.querySelector('#lc79-ai #lc79-sb')") and rows>=1,'overview of every crucial mistake ('+str(rows)+' rows)')
+            n0=await page.evaluate("LC79.db().list.length")
+            await page.click('#lc79-ai [data-a="mkall"]'); await page.wait_for_timeout(500)
+            n1=await page.evaluate("LC79.db().list.length"); nlist=await page.evaluate("LC79._ai.list.length")
+            ok(n1-n0==nlist,'one project per mistake: %d new for %d mistakes'%(n1-n0,nlist))
+            await page.click('#lc79-ai [data-a="mkall"]'); await page.wait_for_timeout(300)
+            ok(await page.evaluate("LC79.db().list.length")==n1,'no duplicate projects on a second click')
+            pid=await page.evaluate("LC79.db().list.find(p=>p.src&&p.src.item&&p.src.item.i===LC79._ai.list[0].i).id")
+            await page.click('#lc79-ai [data-a="toedit"]'); await page.wait_for_timeout(900)
+            ed=await page.evaluate("("+SH+").querySelector('#lcs').classList.contains('lc66-edit')")
+            ok(ed and not await page.evaluate("!!document.querySelector('.lc79-layer')"),'"Edit Studio and captions" goes straight to the Edit Studio')
+            await page.evaluate("(()=>{const sr="+SH+";const s=sr.querySelector('#lc79-recto');s.value='"+pid+"';s.dispatchEvent(new Event('change'))})();undefined;")
+            ok(await page.evaluate("localStorage.getItem('lc79-recto')").find(pid)>=0 if False else (await page.evaluate("JSON.parse(localStorage.getItem('lc79-recto'))"))==pid,'record bar: Save to project')
+            c0=await page.evaluate("LC79.db().list.find(p=>p.id==='"+pid+"').clips.length")
+            exp=await page.evaluate("(()=>{const p=LC79.db().list.find(x=>x.id==='"+pid+"');return LC80.scan.parseGame(p.src.pgn).fens[p.src.item.i]})()")
+            await page.evaluate("LanckrietStudio._t.Cfg.countdown=0;LanckrietStudio._t.Cfg.res='720p';LanckrietStudio.rec.start();undefined;"); await page.wait_for_timeout(1200)
+            await page.keyboard.press('1'); await page.wait_for_timeout(400)
+            st1=await page.evaluate("[LanckrietStudio.board.fen,LanckrietStudio.board.orient,LanckrietStudio.rec.state]")
+            ok(st1[0]==exp and st1[2]=='recording','key 1 while recording: the position before the mistake (FEN) '+str(st1[1:]))
+            await page.keyboard.press('2'); await page.wait_for_timeout(400)
+            card=await page.evaluate("(()=>{const c=document.createElement('canvas');c.width=540;c.height=960;const g=c.getContext('2d');g.fillStyle='#000';g.fillRect(0,0,540,960);LC79.drawLive(g,540,960);const d=g.getImageData(0,500,540,460).data;let n=0;for(let i=0;i<d.length;i+=4)if(d[i]+d[i+1]+d[i+2]>60)n++;window.__card=c.toDataURL();return [LC79.flow().step,!!LC79.flow().card,n]})()")
+            ok(card[0]==2 and card[1] and card[2]>20000,'key 2 while recording: feedback card drawn into the picture '+str(card))
+            import base64; open('shot_card.png','wb').write(base64.b64decode((await page.evaluate("window.__card")).split(',')[1]))
+            await page.evaluate("LanckrietStudio.rec.stop();undefined;"); await page.wait_for_timeout(3500)
+            c1=await page.evaluate("LC79.db().list.find(p=>p.id==='"+pid+"').clips.length")
+            ok(c1==c0+1,'Stop: the take is added to the chosen project (%d -> %d clips)'%(c0,c1))
+            await page.evaluate("(()=>{const p=LC79.db().list.find(x=>x.id==='"+pid+"');p.src.sim={id:'T1',rating:1300,themes:['fork'],fen:'r3k2r/8/8/8/3n4/8/8/R3K2R b KQkq - 0 1',side:'b',line:'1... Nc2+',solSan:['Nc2+']};})();undefined;")
+            await page.keyboard.press('3'); await page.wait_for_timeout(600)
+            st3=await page.evaluate("[LanckrietStudio.board.fen,LanckrietStudio.board.orient,LC79.flow().aha]")
+            ok(str(st3[0]).startswith('r3k2r/8/8/8/3n4') and st3[1]=='b' and st3[2],'key 3: the Lichess position on the Studio board '+str(st3[1:]))
+            await page.keyboard.press('4'); await page.wait_for_timeout(300)
+            ok(await page.evaluate("LC79.state().ctaOn"),'key 4: landing page on')
+            await page.keyboard.press('1'); await page.wait_for_timeout(500)
+            st1b=await page.evaluate("[LanckrietStudio.board.idx,LC79.db().list.find(p=>p.id==='"+pid+"').src.item.i,LC79.state().ctaOn]")
+            ok(st1b[0]==st1b[1] and not st1b[2],'key 1 outside a recording: the whole game, stepped to the mistake; landing page off '+str(st1b))
+            post=await page.evaluate("(()=>{const b=("+SH+").querySelector('#lc79-post');return b?b.textContent:''})()")
+            ok('saved in' in post,'after the take: bar with Open the timeline / Captions: '+post[:80])
+            tid=await page.evaluate("LC79.db().list.find(p=>p.id==='"+pid+"').clips.slice(-1)[0].take")
+            await page.evaluate("("+SH+").querySelector('#lc79-post [data-p=caps]').click();undefined;"); await page.wait_for_timeout(700)
+            ok(await page.evaluate("LanckrietStudio._t.Takes.cur")==tid,'Captions button opens that take in the Edit Studio')
+            nt0=await page.evaluate("LanckrietStudio._t.Takes.list.length")
+            await page.evaluate("(()=>{const T=LanckrietStudio._t.Takes;T.cur='tTakeB';T.render()})();undefined;"); await page.wait_for_timeout(1200)
+            await page.evaluate("window.__toasts=[];const _t=window.toast;window.toast=function(m,k,ms){window.__toasts.push(String(m));return _t.apply(this,arguments)};("+SH+").querySelector('#trim-render').click();undefined;")
+            for _ in range(120):
+                await page.wait_for_timeout(500)
+                if await page.evaluate("LanckrietStudio._t.Takes.list.length")>nt0: break
+            ok(await page.evaluate("LanckrietStudio._t.Takes.list.length")==nt0+1 and not DL,'Render edit saves to the archive, no download '+str(DL)+' '+str(await page.evaluate("window.__toasts")))
+            await page.evaluate("document.querySelector('#view').scrollTo&&0;undefined;")
+            await page.screenshot(path='shot_dock_1280.png')
+            await page.set_viewport_size({'width':390,'height':844}); await page.wait_for_timeout(800)
+            dk=await page.evaluate("(()=>{const sr="+SH+";const d=sr.querySelector('#lc54-dock');if(!d)return null;const els=[...d.querySelectorAll('button,select')].filter(e=>e.offsetParent);const r=d.getBoundingClientRect();return {small:els.filter(e=>e.getBoundingClientRect().height<44).map(e=>e.id||e.textContent.trim()).slice(0,5),right:Math.round(r.right),n:els.length}})()")
+            ok(dk and not dk['small'] and dk['right']<=392,'record bar at 390 px: new controls >= 44 px and inside the screen '+str(dk))
+            await page.screenshot(path='shot_dock_390.png')
+            await page.set_viewport_size({'width':1280,'height':860})
+            await page.evaluate("LC79.openScript();LC79._ai.list.length&&0;undefined;"); await page.wait_for_timeout(600)
             await page.screenshot(path='shot_ai_1280.png',full_page=False)
             await page.set_viewport_size({'width':390,'height':844}); await page.wait_for_timeout(500)
             await page.screenshot(path='shot_ai_390.png')

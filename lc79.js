@@ -13,7 +13,7 @@
         arrow tip, duration, sound) and presets saved on this device. Sounds are synthesised with Web Audio (no files) and land in the export.
      5. "Show Landing Page (CTA)": the live landing page (snapshot of /?preview=1 through html2canvas, so no visit is counted) in a phone frame in the
         recorded picture, or a CTA card when the page cannot be captured. Key L toggles it in the Studio. */
-  const VERSION="9.39.1";
+  const VERSION="9.40.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -113,7 +113,7 @@
   const PJ="lc79-projects";
   let P=null;
   function db(){if(P)return P;P=rd(PJ,null);if(!P||!Array.isArray(P.list))P={list:[],cur:""};return P}
-  function persist(){wr(PJ,db())}
+  function persist(){wr(PJ,db());try{paintDock()}catch(e){}}
   function cur(){const d=db();let p=d.list.filter(x=>x.id===d.cur)[0];if(!p&&d.list.length){p=d.list[0];d.cur=p.id}return p||null}
   function newProject(name){const d=db();const p={id:uid(),name:String(name||("Reel "+(d.list.length+1))).slice(0,60),clips:[],callouts:[],size:"auto",useCuts:true,created:Date.now(),updated:Date.now()};d.list.unshift(p);d.cur=p.id;persist();return p}
   function save(p){if(p)p.updated=Date.now();persist()}
@@ -297,7 +297,7 @@
     if(!cur())newProject("Reel 1");
     ED.sel=null;ED.T=0;
     ED.el=openLayer("lc79-ed","Edit Studio projects",el=>{
-      el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Edit Studio · Projects</h2>'
+      el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Edit Studio · Projects</h2><button type="button" class="lc79-b sm" data-a="captions">Captions</button>'
         +'<select data-a="pick" aria-label="Project"></select><button type="button" class="lc79-b sm" data-a="new">New project</button><button type="button" class="lc79-b sm" data-a="rename">Rename</button><button type="button" class="lc79-b sm red" data-a="delproj">Delete project</button>'
         +'<span class="lc79-grow"></span><button type="button" class="lc79-b pri" data-a="export">Export video</button></header>'
         +'<div class="lc79-body"><div class="lc79-main"><div class="lc79-view"><div class="lc79-stagebox"><canvas aria-label="Project preview. When a callout is selected and the video is paused, drag it to place it."></canvas><div class="lc79-empty" hidden></div></div>'
@@ -357,7 +357,7 @@
         +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="inhere">Start here</button><button type="button" class="lc79-b sm" data-a="outhere">End here</button></div>'
         +'<div class="lc79-two">'+num("in",r[0],.05,0,D,"Start (s)")+num("out",r[1],.05,0,D,"End (s)")+'</div>'
         +'<p class="lc79-hint" style="margin:0">Take length '+fmt(D)+'.'+(p.useCuts!==false&&t.cuts&&t.cuts.length?" The "+t.cuts.length+" cut"+(t.cuts.length===1?"":"s")+" you made in this take (silences, mistakes) are skipped.":"")+'</p>'
-        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="mvl"'+(i<=0?" disabled":"")+'>← Earlier</button><button type="button" class="lc79-b sm" data-a="mvr"'+(i>=p.clips.length-1?" disabled":"")+'>Later →</button><button type="button" class="lc79-b sm" data-a="resetclip">Use the take’s trim</button><button type="button" class="lc79-b sm red" data-a="rmclip">Remove from timeline</button></div>';
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="mvl"'+(i<=0?" disabled":"")+'>← Earlier</button><button type="button" class="lc79-b sm" data-a="mvr"'+(i>=p.clips.length-1?" disabled":"")+'>Later →</button><button type="button" class="lc79-b sm" data-a="resetclip">Use the take’s trim</button><button type="button" class="lc79-b sm red" data-a="rmclip">Remove from timeline</button></div><button type="button" class="lc79-b sm" data-a="captions">Edit the captions of this take</button>';
       const v=Q("[data-clipvid]",box);v.addEventListener("loadedmetadata",()=>{try{v.currentTime=r[0]}catch(e){}},{once:true});
       return;
     }
@@ -380,7 +380,7 @@
     if(ED.sel&&ED.sel.kind==="take"&&it){
       const used=p.clips.some(c=>c.take===it.id);
       box.innerHTML='<h3>'+esc(it.name)+'</h3><video controls playsinline preload="metadata" src="'+esc(it.url)+'"></video><p class="lc79-hint" style="margin:0">'+fmt(it.durationMs/1e3)+(it.captions&&it.captions.length?" · "+it.captions.length+" captions":"")+(used?" · in this project":"")+'</p>'
-        +'<div class="lc79-row"><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(it.id)+'">Add to the timeline</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(it.id)+'">Delete take</button></div>';
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(it.id)+'">Add to the timeline</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(it.id)+'">Delete take</button>'+(canShare()?'<button type="button" class="lc79-b sm" data-a="share" data-take="'+esc(it.id)+'">Share</button>':'')+'<button type="button" class="lc79-b sm" data-a="captions">Captions</button></div>';
       return;
     }
     const segs=segments(p);
@@ -388,6 +388,7 @@
       +'<label class="lc79-f"><span>Video size</span><select data-f="size">'+SIZES.map(s=>'<option value="'+s[0]+'"'+(s[0]===(p.size||"auto")?" selected":"")+'>'+s[1]+'</option>').join("")+'</select></label>'
       +'<label class="lc79-row" style="min-height:44px"><input type="checkbox" data-f="useCuts"'+(p.useCuts!==false?" checked":"")+' style="width:22px;height:22px"> Skip the cuts made in each take (silences, marked mistakes)</label>'
       +'<p class="lc79-hint" style="margin:0">'+p.clips.length+' clip'+(p.clips.length===1?"":"s")+' · '+p.callouts.length+' callout'+(p.callouts.length===1?"":"s")+' · '+fmt(segs.total||0)+'</p>'
+      +(p.src?'<div class="lc79-sec" style="padding:10px;gap:6px"><b style="color:#fff">Game: '+esc(p.src.label||"")+'</b><span class="lc79-hint">Motif: '+esc(p.src.motif||"")+(p.src.sim?' · Lichess position ready':'')+'</span><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="srcopen">Open in Game-to-Script</button><button type="button" class="lc79-b sm" data-a="recthis">Record this project</button></div></div>':'<p class="lc79-hint" style="margin:0">Tip: make projects from a game in Game-to-Script, one per mistake. The recording flow then loads the board, the feedback card and the Lichess position for you.</p>')
       +'<p class="lc79-hint" style="margin:0">Captions come from each take (Edit Studio: Write captions). The export plays the project once in real time, so it takes as long as the video. Keep this tab in front.</p>';
   }
   function paintArchive(){
@@ -396,7 +397,7 @@
     g.innerHTML=list.map(t=>{const used=p&&p.clips.some(c=>c.take===t.id);
       return'<div class="lc79-card'+(used?" used":"")+'" draggable="true" data-take="'+esc(t.id)+'"><div class="lc79-thumb" data-th="'+esc(t.id)+'"'+(thumbs[t.id]?' style="background-image:url('+thumbs[t.id]+')"':'')+'>'+(used?"<b>In this project</b>":"")+'</div>'
         +'<div class="m"><b>'+esc(t.name)+'</b>'+fmt(t.durationMs/1e3)+(t.captions&&t.captions.length?" · captions":"")+'</div>'
-        +'<div class="a"><button type="button" class="lc79-b sm" data-a="watch" data-take="'+esc(t.id)+'" aria-label="Watch '+esc(t.name)+'">▶</button><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(t.id)+'" aria-label="Add '+esc(t.name)+' to the timeline">+ Add</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(t.id)+'" aria-label="Delete '+esc(t.name)+'">🗑</button></div></div>'}).join("");
+        +'<div class="a"><button type="button" class="lc79-b sm" data-a="watch" data-take="'+esc(t.id)+'" aria-label="Watch '+esc(t.name)+'">▶</button><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(t.id)+'" aria-label="Add '+esc(t.name)+' to the timeline">+ Add</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(t.id)+'" aria-label="Delete '+esc(t.name)+'">🗑</button></div>'+(canShare()?'<div class="a"><button type="button" class="lc79-b sm" data-a="share" data-take="'+esc(t.id)+'">Share</button></div>':'')+'</div>'}).join("");
     list.forEach(t=>{if(!thumbs[t.id])thumbOf(t,u=>{const el=Q('[data-th="'+t.id+'"]',ED.el);if(el)el.style.backgroundImage="url("+u+")"})});
   }
   function previewSize(p,segs){const s=outSize(p,segs),k=Math.min(1,720/Math.max(s[0],s[1]));return[Math.round(s[0]*k),Math.round(s[1]*k)]}
@@ -441,9 +442,10 @@
       if(ctl.stopped||!r.blob){say("Export cancelled.","",2500)}
       else if(r.blob.size<2e3){say("The browser produced an empty video. Try Chrome or Edge on a computer.","err",6000)}
       else{
-        const ext=/mp4/.test(r.blob.type)?"mp4":"webm";download(r.blob,slug(p.name)+"."+ext);
-        try{const Tk=T().Takes;await Tk.add({id:"x"+uid(),name:p.name+" (export)",blob:r.blob,mime:r.blob.type||"video/webm",durationMs:r.total*1e3,w:r.W,h:r.H,fps:30,env:[],markers:[],cuts:[],trimIn:0,trimOut:r.total,createdAt:Date.now(),size:r.blob.size,onDisk:false,captions:[]})}catch(e){}
-        say("Exported and downloaded. It is also in your takes archive.","ok",4500);
+        let nid="x"+uid();
+        try{const Tk=T().Takes;await Tk.add({id:nid,name:p.name+" (export)",blob:r.blob,mime:r.blob.type||"video/webm",durationMs:r.total*1e3,w:r.W,h:r.H,fps:30,env:[],markers:[],cuts:[],trimIn:0,trimOut:r.total,createdAt:Date.now(),size:r.blob.size,onDisk:false,captions:[]})}catch(e){}
+        ED.sel={kind:"take",id:nid};
+        say("Exported to your takes archive as “"+p.name+" (export)”. Use Share to send it to Instagram, TikTok or YouTube.","ok",5000);
       }
     }catch(e){say(e.message||"Export failed.","err",6000)}
     off.width=off.height=1;ov.remove();ED.busy=false;ED.paint();
@@ -479,6 +481,10 @@
     if(a==="rename"&&p){const n=prompt("Project name",p.name);if(n&&n.trim()){p.name=n.trim().slice(0,60);save(p);ED.paint()}return}
     if(a==="delproj"&&p){if(!confirm("Delete the project “"+p.name+"”? Your takes stay in the archive."))return;const d=db();d.list=d.list.filter(x=>x.id!==p.id);d.cur=d.list[0]?d.list[0].id:"";persist();if(!d.list.length)newProject("Reel 1");ED.sel=null;ED.T=0;return ED.paint()}
     if(a==="export")return exportProject();
+    if(a==="captions"){const sel=selected();const id=ED.sel&&ED.sel.kind==="clip"&&sel?sel.take:ED.sel&&ED.sel.kind==="take"&&sel?sel.id:(p&&p.clips[0]?p.clips[0].take:null);return gotoCaptions(id)}
+    if(a==="srcopen"&&p&&p.src)return openFromProject(p);
+    if(a==="recthis"&&p){wr(RK,p.id);closeLayer("lc79-ed");try{LC66.setTab(studioRoot(),"shoot")}catch(e){}say("Recording into “"+p.name+"”. Keys 1 to 4 switch the flow: board, feedback card, Lichess, landing page.","ok",5000);paintDock();return}
+    if(a==="share"){return shareTake(b.getAttribute("data-take"))}
     if(a==="play")return togglePlay();
     if(a==="home"){stopPlay();ED.T=0;paintHead();return showFrame()}
     if(a==="addtake")return addTake(b.getAttribute("data-take"));
@@ -711,7 +717,7 @@
   function openScript(){
     AI.cancel=false;
     openLayer("lc79-ai","Game-to-Script AI",el=>{
-      el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Game-to-Script AI</h2><span class="lc79-hint">PGN in, master prompt for Claude out. Stockfish runs on this device.</span></header><div class="lc79-body"><div class="lc79-ai"></div></div>';
+      el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Game-to-Script AI</h2><span class="lc79-grow"></span><button type="button" class="lc79-b sm" data-a="toprojects">Projects</button><button type="button" class="lc79-b sm" data-a="toedit">Edit Studio and captions</button></header><div class="lc79-body"><div class="lc79-ai"></div></div>';
       el._close=()=>{AI.cancel=true};
       el.addEventListener("click",onAiClick);el.addEventListener("change",onAiChange);
     });
@@ -751,28 +757,48 @@
       let list=items.filter(it=>it.cls==="blunder"||it.cls==="mistake").sort((a,b)=>b.loss-a.loss);
       if(!list.length)list=items.filter(it=>it.cls==="inaccuracy").sort((a,b)=>b.loss-a.loss);
       if(!list.length)throw new Error("No mistake worth a video in this game. Try another one.");
-      AI.g=g;AI.items=items;AI.list=list.slice(0,6);AI.ci=0;buildCase();
+      AI.g=g;AI.items=items;AI.list=list.slice(0,12);AI.ci=0;buildCase();
     }catch(e){if(!AI.cancel)status(e.message||"The analysis failed.",true);AI.busy=false;return}
     AI.busy=false;paintAi();status("");findSimilar();cloudEval();
   }
-  function buildCase(){
-    const g=AI.g,it=AI.list[AI.ci],fen=g.fens[it.i],color=it.color;
+  function makeCase(g,it){
+    const fen=g.fens[it.i],color=it.color;
     const letter=it.k&&LN[it.k]?it.k:(it.cls==="blunder"?"M":"S"),al=pickAlarm(fen,color,letter),motif=motifOf(g,it);
     let action="";try{action=LC64.actionOf(al&&al.id,letter)}catch(e){action=""}if(!action||action===WP[letter])action=MACT[motif.id]||MACT.plan;
     const h=g.headers||{},rating=+(color==="w"?h.WhiteElo:h.BlackElo)||0;
     const c={it:it,fen:fen,color:color,letter:letter,alarm:al,motif:motif,wp:WP[letter],action:action,rating:rating,student:color==="w"?(h.White||"White"):(h.Black||"Black"),
       opp:color==="w"?(h.Black||"Black"):(h.White||"White"),start:Math.max(1,(it.num||Math.ceil((it.i+1)/2))-3)};
     c.qs=socratic(g,it,c);c.pgn=trimmedPgn(g,it);c.change=boardChange(g,it);
-    const band=rating?Math.floor(rating/100)*100:0;
-    if(!AI.who||AI.whoAuto)c.who=(band?"a player around "+band+" who":"a club player who")+" "+({fork:"keeps walking into forks",pin:"keeps getting pinned",skewer:"loses pieces to skewers",hanging:"leaves pieces hanging",discovered:"never sees discovered attacks",mate:"misses or allows mate",capture:"misses free material",check:"lets the opponent check with tempo",plan:"plays moves without a plan"}[motif.id]||"keeps losing the same way");
-    if(c.who){AI.who=c.who;AI.whoAuto=true}
-    AI.cs=c;
+    return c;
   }
+  function buildCase(){AI.cs=makeCase(AI.g,AI.list[AI.ci])}
+  const mvLabel=it=>(it.color==="w"?it.num+". ":it.num+"... ")+it.san+(it.cls==="blunder"?"??":it.cls==="mistake"?"?":"?!");
+  const ITEM_KEYS=["i","color","san","num","loss","cls","best","bestSan","reply","replySan","k"];
+  const slimItem=it=>{const o={};ITEM_KEYS.forEach(k=>{if(it[k]!=null)o[k]=it[k]});return o};
+  function pgnKey(p){let h=0;const t=String(p||"").replace(/\s+/g," ");for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return"g"+(h>>>0).toString(36)}
+  function projectFor(key,i){return db().list.filter(p=>p.src&&p.src.key===key&&p.src.item&&p.src.item.i===i)[0]||null}
+  /* 9.40.0: one video project per mistake. The project keeps the game, so the recording flow and the master prompt can use it later. */
+  function mkProject(idx,quiet){
+    const it=AI.list[idx];if(!it||!AI.g)return null;const key=pgnKey(AI.pgn);
+    const had=projectFor(key,it.i);if(had)return had;
+    const c=makeCase(AI.g,it),p=newProject(("Reel · "+mvLabel(it)+" · "+c.student).slice(0,60));
+    p.src={key:key,pgn:String(AI.pgn).slice(0,2e5),item:slimItem(it),label:mvLabel(it)+" ("+(AI.g.headers&&AI.g.headers.White||"White")+" vs "+(AI.g.headers&&AI.g.headers.Black||"Black")+")",motif:c.motif.label,sim:null};
+    if(AI.cs&&AI.cs.it&&AI.cs.it.i===it.i&&AI.sim&&!AI.sim.err)p.src.sim=simSlim(AI.sim);
+    save(p);if(!quiet)say("Project “"+p.name+"” made. Pick it in the record bar to record it.","ok",3500);return p;
+  }
+  const simSlim=s=>({id:s.id,rating:s.rating,themes:(s.themes||[]).slice(0,6),fen:s.fen,side:s.side,line:s.line||"",solSan:s.solSan||[]});
   function caseHTML(){
     const c=AI.cs,it=c.it,arr=[{from:it.i!=null&&AI.g.moves[it.i].from,to:AI.g.moves[it.i].to,color:"#ef4444"}];
     if(it.best)arr.push({from:it.best.slice(0,2),to:it.best.slice(2,4),color:"#38bdf8"});
     const loss=Math.round(it.loss),mv=(c.color==="w"?it.num+". ":it.num+"... ");
-    let h='<section class="lc79-sec" aria-labelledby="lc79-s2"><h3 id="lc79-s2">2. The crucial mistake</h3><div class="lc79-case"><div>'+boardSVG(c.fen,c.color,arr)+'<p class="lc79-hint" style="margin:6px 0 0">Red: the move played. Blue: the better move. '+esc(c.student)+' ('+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+').</p></div><div class="lc79-facts">'
+    const key=pgnKey(AI.pgn);
+    let h='<section class="lc79-sec" aria-labelledby="lc79-sb"><h3 id="lc79-sb">2. Every crucial mistake in this game ('+AI.list.length+')</h3><p class="lc79-hint" style="margin:0">One game, several reels: make a video project for each mistake you want to film. Each project keeps the game for the recording flow and the master prompt.</p><div class="lc79-games">'
+      +AI.list.map((x,i)=>{const pr=projectFor(key,x.i);let mo="";try{mo=motifOf(AI.g,x).label}catch(e){}
+        return'<div class="lc79-game'+(i===AI.ci?'" style="border-color:#00E5FF':'')+'"><span><b>'+esc(mvLabel(x))+'</b> · '+(x.color==="w"?"White":"Black")+' · '+Math.round(x.loss)+'% · '+esc(mo)+'</span><span class="lc79-row">'
+        +'<button type="button" class="lc79-b sm" data-a="case" data-i="'+i+'"'+(i===AI.ci?' aria-pressed="true"':'')+'>'+(i===AI.ci?"Shown":"Show")+'</button>'
+        +(pr?'<button type="button" class="lc79-b sm" data-a="openproj" data-p="'+esc(pr.id)+'">Project made: open</button>':'<button type="button" class="lc79-b sm pri" data-a="mkproj" data-i="'+i+'">Make a video project</button>')+'</span></div>'}).join("")
+      +'</div><div class="lc79-row"><button type="button" class="lc79-b gold" data-a="mkall">Make a project for every mistake ('+AI.list.filter(x=>!projectFor(key,x.i)).length+' new)</button><button type="button" class="lc79-b sm" data-a="toprojects">Open Projects</button></div></section>';
+    h+='<section class="lc79-sec" aria-labelledby="lc79-s2"><h3 id="lc79-s2">3. '+esc(mvLabel(it))+' in detail</h3><div class="lc79-case"><div>'+boardSVG(c.fen,c.color,arr)+'<p class="lc79-hint" style="margin:6px 0 0">Red: the move played. Blue: the better move. '+esc(c.student)+' ('+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+').</p></div><div class="lc79-facts">'
       +'<div class="lc79-fact mo"><b>'+esc(mv+it.san)+(it.cls==="blunder"?"??":"?")+'</b>'+(it.bestSan?' Better: <b>'+esc(it.bestSan)+'</b>.':'')+' It cost about '+loss+'% win chance.</div>'
       +(c.change&&c.change.length?'<div class="lc79-fact mo"><b>What it changed:</b> '+esc(c.change.join(" "))+'</div>':'')+'<div class="lc79-fact mo"><b>Motif: '+esc(c.motif.label)+'.</b> '+esc(c.motif.text)+'</div>'
       +'<div class="lc79-fact al"><b>Alarm Signal:</b> '+(c.alarm?esc(c.alarm.label)+". "+esc(c.alarm.say):"none of the standard alarms; the error came from skipping an MSPC step.")+'</div>'
@@ -780,11 +806,10 @@
       +'<div class="lc79-fact"><b>Action Step:</b> '+esc(c.action)+'</div>'
       +'<div class="lc79-fact" data-cloud>'+cloudHTML()+'</div></div></div>'
       +'<h4>The Socratic trim: the questions that would have saved the game</h4><ol class="lc79-q">'+c.qs.map(q=>'<li><b>'+q[0]+'</b>'+esc(q[1])+' <span class="lc79-hint">'+esc(q[2])+'</span></li>').join("")+'</ol>'
-      +(AI.list.length>1?'<div class="lc79-row"><span class="lc79-hint">Other mistakes in this game:</span><div class="lc79-alt">'+AI.list.map((x,i)=>'<button type="button" class="lc79-b sm"'+(i===AI.ci?' aria-pressed="true" style="border-color:#00E5FF"':'')+' data-a="case" data-i="'+i+'">'+esc((x.color==="w"?x.num+". ":x.num+"... ")+x.san)+' · '+Math.round(x.loss)+'%</button>').join("")+'</div></div>':'')
       +'<h4>Trimmed game (the video starts at move '+c.start+')</h4><div class="lc79-pre" tabindex="0">'+esc(c.pgn)+'</div>'
       +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="toboard">Load into the Studio board</button><button type="button" class="lc79-b sm" data-a="copypgn">Copy PGN</button></div></section>';
-    h+='<section class="lc79-sec" aria-labelledby="lc79-s3"><h3 id="lc79-s3">3. A similar position for the re-hook</h3><div data-sim>'+simHTML()+'</div><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="sim">Find another one</button></div></section>';
-    h+='<section class="lc79-sec" aria-labelledby="lc79-s4"><h3 id="lc79-s4">4. Master prompt for Claude</h3><p class="lc79-hint" style="margin:0">Only the game data goes out: game context, the MSPC diagnosis and the Lichess position. The script structure comes from your own Claude instructions.</p>'
+    h+='<section class="lc79-sec" aria-labelledby="lc79-s3"><h3 id="lc79-s3">4. A similar position for the re-hook</h3><div data-sim>'+simHTML()+'</div><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="sim">Find another one</button></div></section>';
+    h+='<section class="lc79-sec" aria-labelledby="lc79-s4"><h3 id="lc79-s4">5. Master prompt for Claude</h3><p class="lc79-hint" style="margin:0">Only the game data goes out: game context, the MSPC diagnosis and the Lichess position. The script structure comes from your own Claude instructions.</p>'
       +'<div class="lc79-row"><button type="button" class="lc79-b pri" data-a="copyprompt">Copy master prompt for Claude</button><button type="button" class="lc79-b sm" data-a="showprompt">Show the prompt</button></div><div class="lc79-pre" data-prompt hidden tabindex="0"></div>'
       +'<label class="lc79-f"><span>Paste Claude’s script here</span><textarea data-f="answer" placeholder="Paste the script Claude wrote, then press Use as my script."></textarea></label><div class="lc79-row"><button type="button" class="lc79-b gold" data-a="usescript">Use as my script</button><span class="lc79-hint">It replaces the text in the Studio’s script panel and prompter.</span></div></section>';
     return h;
@@ -802,6 +827,7 @@
       if(!P)throw new Error("none");
       const g=new Chess(P.fen),solSan=[];(P.solution||[]).forEach(u=>{const m=g.move(uci(u));if(m)solSan.push(m.san)});
       AI.sim={id:P.id,rating:P.rating,themes:P.themes||[],fen:P.fen,side:P.side,last:P.last,solSan:solSan,line:numbered(P.fen,P.solution||[]),theme:theme};
+      try{const pr=projectFor(pgnKey(AI.pgn),c.it.i);if(pr&&!pr.src.sim){pr.src.sim=simSlim(AI.sim);save(pr)}}catch(e){}
     }catch(e){AI.sim={err:"Lichess did not answer (or had no puzzle with this theme). Try again in a moment."}}
     const b2=Q("#lc79-ai [data-sim]");if(b2)b2.innerHTML=simHTML();
   }
@@ -873,6 +899,11 @@ CLOSE];
     }
     if(a==="showprompt"){const p=Q("#lc79-ai [data-prompt]");p.hidden=!p.hidden;if(!p.hidden)p.textContent=buildPrompt();b.textContent=p.hidden?"Show the prompt":"Hide the prompt";return}
     if(a==="copyprompt"){const t=buildPrompt(),ok=await copyText(t);const p=Q("#lc79-ai [data-prompt]");if(p&&!p.hidden)p.textContent=t;return say(ok?"Master prompt copied. Paste it into Claude.":"Could not copy. Press Show the prompt and copy it by hand.",ok?"ok":"err",3500)}
+    if(a==="mkproj"){mkProject(+b.getAttribute("data-i"));return paintAi()}
+    if(a==="mkall"){let n=0;AI.list.forEach((x,i)=>{if(!projectFor(pgnKey(AI.pgn),x.i)){mkProject(i,true);n++}});say(n?n+" video project"+(n===1?"":"s")+" made. They are in Projects and in the record bar.":"Every mistake already has a project.","ok",4000);return paintAi()}
+    if(a==="openproj"){db().cur=b.getAttribute("data-p");persist();closeLayer("lc79-ai");return openProjects()}
+    if(a==="toprojects"){closeLayer("lc79-ai");return openProjects()}
+    if(a==="toedit"){return gotoCaptions(null)}
     if(a==="usescript"){const t=String((Q('#lc79-ai [data-f="answer"]')||{}).value||"").trim();if(!t){say("Paste Claude’s script first.","err");return}
       try{T().Script.set(t);say("Script set. Open Content Shooting to record with the prompter.","ok",4000)}catch(x){say("Open the Creator Studio first.","err")}return}
   }
@@ -891,7 +922,7 @@ CLOSE];
   let ctaOn=false,ctaAt=0,snap=null,snapAt=0,snapBusy=false,animUntil=0;
   function kick(ms){animUntil=performance.now()+(ms||450);const loop=()=>{dirty();if(performance.now()<animUntil)requestAnimationFrame(loop)};requestAnimationFrame(loop)}
   function ctaToggle(v){
-    ctaOn=v==null?!ctaOn:!!v;ctaAt=performance.now();
+    ctaOn=v==null?!ctaOn:!!v;ctaAt=performance.now();if(ctaOn){FL.step=4;FL.card=null;FL.aha=false}else if(FL.step===4)FL.step=0;try{paintDock()}catch(e){}
     if(ctaOn&&ctaS().mode==="page"&&!snap)grabLanding();
     kick(500);paintCtaBtn();say(ctaOn?"Landing page on screen. Press L or the button to hide it.":"Landing page hidden.","",1800);
   }
@@ -918,7 +949,9 @@ CLOSE];
     finally{if(fr)fr.remove();snapBusy=false;paintCtaBtn();kick(300)}
   }
   function drawLive(ctx,W,H){
-    if(!ctaOn||!(W>1&&H>1))return;
+    if(!(W>1&&H>1))return;
+    try{if(FL.step===2&&FL.card)drawCard(ctx,W,H,FL.card);if(FL.step===3&&FL.aha)drawAha(ctx,W,H)}catch(e){}
+    if(!ctaOn)return;
     const o=ctaS(),p=easeOut(clamp((performance.now()-ctaAt)/380,0,1)),port=H>=W,host=o.url||(location.host||"lanckrietchesstrainerhub.vercel.app");
     ctx.save();
     if(o.mode==="page"&&snap){
@@ -944,6 +977,126 @@ CLOSE];
       if(o.point){ctx.font="700 "+Math.round(fs*.62)+"px Sora,system-ui,sans-serif";const lw=ctx.measureText(o.point).width+fs;rr(ctx,x+pad,y+ch-pad-fs*1.05,lw,fs*1.05,fs*.52);ctx.fillStyle="#fbbf24";ctx.fill();ctx.fillStyle="#0f172a";ctx.textBaseline="middle";ctx.fillText(o.point,x+pad+fs*.5,y+ch-pad-fs*.52)}
     }
     ctx.restore();
+  }
+  /* ---------- 9.40.0: navigation, sharing, recording into a project, the 4-step recording flow ---------- */
+  const RK="lc79-recto",SK="lc79-shots";
+  const projById=id=>db().list.filter(p=>p.id===id)[0]||null;
+  function gotoCaptions(takeId){
+    ["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true));
+    try{const Tk=T().Takes;if(takeId&&Tk.get(takeId)){Tk.cur=takeId;Tk.render()}}catch(e){}
+    const sr=studioRoot();try{LC66.setTab(sr,"edit")}catch(e){}
+    setTimeout(()=>{const c=sr&&(Q("#lc33-caps",sr)||Q("#takes-body",sr));if(c)try{c.scrollIntoView({block:"start",behavior:"smooth"})}catch(e){}},450);
+  }
+  function openFromProject(p){
+    if(typeof LC80==="undefined"||!LC80.scan){say("The analysis module is not available.","err");return}
+    const g=LC80.scan.parseGame(p.src.pgn);if(!g){say("The game of this project could not be read.","err");return}
+    closeLayer("lc79-ed",true);openScript();
+    AI.pgn=p.src.pgn;AI.g=g;AI.list=[Object.assign({},p.src.item)];AI.ci=0;AI.cloud=null;AI.sim=p.src.sim||null;buildCase();paintAi();
+    if(!AI.sim)findSimilar();else{const b=Q("#lc79-ai [data-sim]");if(b)b.innerHTML=simHTML()}cloudEval();
+  }
+  function canShare(){try{return!!(navigator.canShare&&navigator.share&&navigator.canShare({files:[new File([new Blob(["x"])],"a.mp4",{type:"video/mp4"})]}))}catch(e){return false}}
+  async function shareTake(id){
+    const t=takeById(id);if(!t)return;const ext=/mp4/.test(t.mime||"")?"mp4":"webm";
+    try{const f=new File([t.blob],slug(t.name)+"."+ext,{type:t.mime||"video/"+ext});if(!navigator.canShare({files:[f]}))throw new Error("type");await navigator.share({files:[f],title:t.name})}
+    catch(e){if(e&&e.name==="AbortError")return;say("This device cannot share this video directly. Open the Content Library or try the Claude app on your phone.","err",5000)}
+  }
+  const FL={step:0,card:null,cardAt:0,aha:false,busy:false};
+  const STEPS=[["1","Game board"],["2","Feedback card"],["3","Lichess position"],["4","Landing page"]];
+  function cardData(p){
+    try{const g=LC80.scan.parseGame(p.src.pgn),it=p.src.item,c=makeCase(g,it);
+      return{mv:mvLabel(it),better:it.bestSan||"",loss:Math.round(it.loss||0),alarm:c.alarm?c.alarm.label:"No standard alarm",motif:c.motif.label,wp:c.wp,action:c.action,student:c.student}}catch(e){return null}
+  }
+  async function simFor(p){
+    if(p.src.sim)return p.src.sim;
+    try{const g=LC80.scan.parseGame(p.src.pgn),c=makeCase(g,p.src.item),theme=c.motif.theme||LC64.themeFor(c.alarm&&c.alarm.id,c.letter);
+      const f=await LC64.liClosest(clamp(c.rating||1500,600,2800),theme),P=f&&LC64.puzzleFromJson(f.json);if(!P)return null;
+      const gg=new Chess(P.fen),sol=[];(P.solution||[]).forEach(u=>{const m=gg.move(uci(u));if(m)sol.push(m.san)});
+      p.src.sim={id:P.id,rating:P.rating,themes:(P.themes||[]).slice(0,6),fen:P.fen,side:P.side,line:numbered(P.fen,P.solution||[]),solSan:sol};save(p);return p.src.sim}catch(e){return null}
+  }
+  async function setStep(n){
+    n=+n;if(!(n>=1&&n<=4))return;FL.step=n;const p=projById(rd(RK,"")),src=p&&p.src,B=api()&&api().board;
+    const sc=(rd(SK,{})||{})[n];if(sc){try{api().lc54.load(sc)}catch(e){}}
+    if(n===4){ctaOn=true;ctaAt=performance.now();if(ctaS().mode==="page"&&!snap)grabLanding()}else ctaOn=false;
+    FL.card=null;FL.aha=false;
+    if(src&&B){
+      /* while recording only a FEN is loaded: loading a whole PGN into the Studio board during a recording crashed Chromium in tests */
+      try{if(n===1||n===2){const g=LC80.scan.parseGame(src.pgn),rec=api().rec&&api().rec.state!=="idle";
+        if(rec){const r=B.loadFEN(g.fens[src.item.i]);if(r&&r.ok&&B.orient!==src.item.color)B.flip()}
+        else{const r=B.loadPGN(trimmedPgn(g,src.item,true));if(r&&r.ok){B.goto(src.item.i);if(B.orient!==src.item.color)B.flip()}}}}catch(e){}
+      if(n===2){FL.card=cardData(p);FL.cardAt=performance.now()}
+      if(n===3){paintDock("Fetching the Lichess position…");const sim=await simFor(p);if(FL.step!==3)return;
+        if(sim){try{B.loadFEN(sim.fen);if(B.orient!==sim.side)B.flip()}catch(e){}FL.aha=true;FL.cardAt=performance.now()}else say("No Lichess position yet (no connection or no puzzle with this motif). Try step 3 again.","err",4000)}
+    }else if(n<=3&&!src)say("Pick a project made from a game in the record bar to load the board, the card and the Lichess position.","",4000);
+    kick(500);paintDock();paintCtaBtn();
+  }
+  function wrapText(g,t,maxW){const w=String(t||"").split(" "),out=[];let cur="";w.forEach(x=>{const tt=cur?cur+" "+x:x;if(g.measureText(tt).width>maxW&&cur){out.push(cur);cur=x}else cur=tt});if(cur)out.push(cur);return out}
+  /* the card is drawn once per size into a buffer; every frame only copies it (cheap while recording) */
+  function drawCard(ctx,W,H,d){
+    const port=H>=W,p=easeOut(clamp((performance.now()-FL.cardAt)/380,0,1)),key=W+"x"+H;
+    if(!FL.buf||FL.bufKey!==key||FL.bufFor!==d){FL.buf=renderCard(W,H,d);FL.bufKey=key;FL.bufFor=d}
+    const B=FL.buf;if(!B)return;ctx.save();ctx.globalAlpha=p;ctx.drawImage(B.c,B.x,B.y+(1-p)*H*.08);ctx.restore();
+  }
+  function renderCard(W,H,d){
+    const port=H>=W,cw=port?W*.9:W*.44,fs=Math.round(cw*.05),pad=fs*1.1,cv=document.createElement("canvas"),ctx0=cv.getContext("2d");
+    ctx0.font="600 "+Math.round(fs*.82)+"px Sora,system-ui,sans-serif";
+    const rows0=[["Alarm Signal","#f97316",d.alarm],["Working Point","#38bdf8",d.wp],["Action Step","#00E5FF",d.action]].map(r=>({lines:wrapText(ctx0,r[2],cw-pad*2)}));
+    const ch0=pad*2+fs*1.1+fs*1.6+rows0.reduce((a,r)=>a+fs*1.05+r.lines.length*fs*1.15+fs*.5,0),m=Math.ceil(fs*1.2);
+    cv.width=Math.ceil(cw+m*2);cv.height=Math.ceil(ch0+m*2);
+    const bx=port?(W-cw)/2:W-cw-W*.04,by=port?H-ch0-H*.06:(H-ch0)/2;
+    const ctx=cv.getContext("2d");ctx.translate(m-bx,m-by);
+    const p=1;
+    ctx.save();ctx.font="600 "+Math.round(fs*.82)+"px Sora,system-ui,sans-serif";
+    const rows=[["Alarm Signal","#f97316",d.alarm],["Working Point","#38bdf8",d.wp],["Action Step","#00E5FF",d.action]].map(r=>({l:r[0],c:r[1],lines:wrapText(ctx,r[2],cw-pad*2)}));
+    const ch=pad*2+fs*1.1+fs*1.6+rows.reduce((a,r)=>a+fs*1.05+r.lines.length*fs*1.15+fs*.5,0);
+    const x=bx,y=by;
+    ctx.shadowColor="rgba(0,0,0,.55)";ctx.shadowBlur=fs;rr(ctx,x,y,cw,ch,fs*.7);ctx.fillStyle="rgba(15,23,42,.96)";ctx.fill();ctx.shadowBlur=0;ctx.shadowColor="transparent";
+    ctx.lineWidth=Math.max(2,fs*.08);ctx.strokeStyle="rgba(56,189,248,.6)";ctx.stroke();
+    let yy=y+pad;ctx.textBaseline="top";ctx.textAlign="left";
+    ctx.fillStyle="#38bdf8";ctx.font="700 "+Math.round(fs*.72)+"px Sora,system-ui,sans-serif";ctx.fillText("Lanckriet Chess · Game review",x+pad,yy);yy+=fs*1.1;
+    ctx.font="800 "+Math.round(fs*1.15)+"px Sora,system-ui,sans-serif";ctx.fillStyle="#f87171";ctx.fillText(d.mv,x+pad,yy);const mw=ctx.measureText(d.mv+"  ").width;
+    if(d.better){ctx.fillStyle="#7dd3fc";ctx.font="700 "+Math.round(fs*.9)+"px Sora,system-ui,sans-serif";ctx.fillText("Better: "+d.better+"  ·  −"+d.loss+"%",x+pad+mw,yy+fs*.2,cw-pad*2-mw)}yy+=fs*1.6;
+    rows.forEach(r=>{ctx.fillStyle=r.c;ctx.font="700 "+Math.round(fs*.75)+"px Sora,system-ui,sans-serif";ctx.fillText(r.l,x+pad,yy);yy+=fs*1.05;ctx.fillStyle="#e2e8f0";ctx.font="600 "+Math.round(fs*.82)+"px Sora,system-ui,sans-serif";r.lines.forEach(l=>{ctx.fillText(l,x+pad,yy);yy+=fs*1.15});yy+=fs*.5});
+    ctx.restore();
+    return{c:cv,x:bx-m,y:by-m};
+  }
+  function drawAha(ctx,W,H){
+    const p=easeOut(clamp((performance.now()-FL.cardAt)/380,0,1)),fs=Math.round(Math.min(W,H)*.05),t="Your turn: find the win";
+    ctx.save();ctx.globalAlpha=p;ctx.font="800 "+fs+"px Sora,system-ui,sans-serif";const w=ctx.measureText(t).width+fs*1.6,x=(W-w)/2,y=H*.06;
+    rr(ctx,x,y,w,fs*1.7,fs*.85);ctx.fillStyle="#fbbf24";ctx.fill();ctx.fillStyle="#0f172a";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t,W/2,y+fs*.86);ctx.restore();
+  }
+  function afterTake(t){
+    if(!t||!t.id)return;const p=projById(rd(RK,""));
+    if(p){p.clips.push({id:uid(),take:t.id,in:null,out:null});save(p)}
+    showPost(t,p);
+  }
+  function showPost(t,p){
+    const sr=studioRoot(),lcs=sr&&Q("#lcs",sr);if(!lcs)return;let bar=Q("#lc79-post",sr);if(bar)bar.remove();
+    bar=document.createElement("div");bar.id="lc79-post";bar.setAttribute("role","status");
+    const opts=db().list.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("");
+    bar.innerHTML='<b>'+esc(t.name)+' saved'+(p?' in “'+esc(p.name)+'” (clip '+p.clips.length+')':'')+'.</b>'
+      +(p?'<button type="button" class="btn sm" data-p="open">Open the timeline</button>':'<select aria-label="Add this take to a project"><option value="">Add to a project…</option>'+opts+'<option value="+">+ New project</option></select>')
+      +'<button type="button" class="btn sm" data-p="caps">Captions</button><button type="button" class="btn sm" data-p="x" aria-label="Close">×</button>';
+    lcs.appendChild(bar);
+    bar.addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(!b)return;const a=b.getAttribute("data-p");if(a==="x")return bar.remove();if(a==="caps"){bar.remove();return gotoCaptions(t.id)}if(a==="open"){bar.remove();if(p){db().cur=p.id;persist()}return openProjects()}});
+    const sel=Q("select",bar);if(sel)sel.addEventListener("change",()=>{let pid=sel.value;if(!pid)return;if(pid==="+"){const n=prompt("Name of the new project","Reel "+(db().list.length+1));if(n===null)return;const np=newProject(n.trim()||null);pid=np.id}const pp=projById(pid);if(pp){pp.clips.push({id:uid(),take:t.id,in:null,out:null});save(pp);say(t.name+" added to “"+pp.name+"”.","ok",2500);showPost(t,pp);paintDock()}});
+    clearTimeout(showPost.to);showPost.to=setTimeout(()=>{try{bar.remove()}catch(e){}},25e3);
+  }
+  function paintDock(note){
+    const sr=studioRoot();if(!sr)return;const sel=Q("#lc79-recto",sr),cur=rd(RK,"");
+    if(sel){const list=db().list;sel.innerHTML='<option value="">Save takes to: no project</option>'+list.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===cur?" selected":"")+'>Save to: '+esc(x.name)+'</option>').join("")+'<option value="+">+ New project</option>';if(cur&&!projById(cur))wr(RK,"")}
+    const lab=Q("#lc79-step",sr);if(lab){const p=projById(cur),st=STEPS[FL.step-1];lab.textContent=note||(st?st[0]+" "+st[1]:"Flow: 1 board · 2 card · 3 Lichess · 4 landing")+(p&&!p.src&&FL.step&&FL.step<4?" (no game in this project)":"")}
+  }
+  function openFlowSettings(){
+    openLayer("lc79-flowset","Recording flow",el=>{
+      let names=[];try{names=(api().lc54.scenes()||[]).map(x=>x.name)}catch(e){}
+      const cur=rd(SK,{})||{};
+      el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Recording flow</h2></header><div class="lc79-body"><div class="lc79-ai"><section class="lc79-sec">'
+        +'<p class="lc79-hint" style="margin:0">While you record, keys 1 to 4 (or the arrows in the record bar) switch the picture. With a project made from a game, the app loads the board, the feedback card and the Lichess position for you. Each step can also load one of your saved scenes.</p>'
+        +STEPS.map((s2,i)=>'<label class="lc79-f"><span>Step '+s2[0]+': '+s2[1]+' uses the scene</span><select data-step="'+(i+1)+'"><option value="">Keep the current layout</option>'+names.map(n=>'<option'+(cur[i+1]===n?" selected":"")+'>'+esc(n)+'</option>').join("")+'</select></label>').join("")
+        +(names.length?'':'<p class="lc79-hint" style="margin:0">No saved scenes yet: build one in Scene Builder and press Scenes, then Save.</p>')+'</section></div></div>';
+      el.addEventListener("click",e=>{if(e.target.closest('[data-a="close"]'))closeLayer("lc79-flowset")});
+      el.addEventListener("change",e=>{const s3=e.target.getAttribute("data-step");if(!s3)return;const m=rd(SK,{})||{};m[s3]=e.target.value||"";wr(SK,m)});
+    });
   }
   function paintCtaBtn(){
     const sr=studioRoot(),b=sr&&Q("#lc79-cta",sr);if(!b)return;
@@ -989,7 +1142,9 @@ CLOSE];
   }
 
   /* ---------- Studio wiring (shadow root) ---------- */
-  const SR_CSS=".lc79-dockb{min-height:44px!important;padding:0 14px!important;border-radius:12px!important;font-weight:700!important}.lc79-dockb.lc79-on{background:#fbbf24!important;color:#0f172a!important;border-color:#fbbf24!important}"
+  const SR_CSS=".lc79-dockb{min-height:44px!important;padding:0 14px!important;border-radius:12px!important;font-weight:700!important}#lc54-dock{flex-wrap:wrap;max-width:calc(100vw - 16px);row-gap:6px}#lc54-dock .btn{min-height:44px}.lc79-dsel{min-height:44px;max-width:220px;border-radius:12px;background:#14171d;color:#e5e7eb;border:1px solid rgba(0,229,255,.45);padding:0 8px;font:600 13px Sora,system-ui,sans-serif}.lc79-flow{display:inline-flex;gap:4px;align-items:center}#lc79-step{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+    +"#lc79-post{position:absolute;left:50%;transform:translateX(-50%);bottom:150px;z-index:72;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:min(720px,94%);padding:8px 12px;border-radius:12px;background:#0f172a;border:1px solid rgba(0,229,255,.5);color:#fff;font:600 13px Sora,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#lc79-post .btn,#lc79-post select{min-height:44px}#lc79-post select{border-radius:10px;background:#14171d;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 8px}"
+    +".lc79-dockb.lc79-on{background:#fbbf24!important;color:#0f172a!important;border-color:#fbbf24!important}"
     +".lc79-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}.lc79-bar .btn{min-height:44px}.lc79-bar .lc79-go{background:#00E5FF;color:#04141a;border-color:#00E5FF;font-weight:700}"
     +".take-chip-w{display:inline-flex;align-items:stretch;gap:2px}.take-del{min-width:44px;min-height:44px;border-radius:10px;border:1px solid rgba(239,68,68,.45);background:rgba(239,68,68,.08);color:#fca5a5;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.take-del:hover{background:rgba(239,68,68,.2)}"
     +".lc79-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:44px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#e5e7eb;font:600 14px/1.2 inherit;text-align:left;cursor:pointer;border-top:1px solid rgba(255,255,255,.06)}.lc79-opt small{color:#94a3b8;font-weight:500;font-size:12px}.lc79-opt:hover,.lc79-opt:focus-visible{background:rgba(0,229,255,.1)}"
@@ -1002,6 +1157,15 @@ CLOSE];
       const b=document.createElement("button");b.type="button";b.id="lc79-cta";b.className="btn sm lc79-dockb";b.title="Show your landing page in the picture while you record the call to action (key L)";b.onclick=()=>ctaToggle();
       const s=document.createElement("button");s.type="button";s.className="btn sm lc79-dockb";s.textContent="⚙";s.setAttribute("aria-label","Landing page CTA settings");s.title="CTA settings";s.onclick=openCtaSettings;
       dock.appendChild(b);dock.appendChild(s);paintCtaBtn();
+    }
+    if(dock&&!Q("#lc79-recto",dock)){
+      const sel=document.createElement("select");sel.id="lc79-recto";sel.className="lc79-dsel";sel.setAttribute("aria-label","Save new takes to a project");
+      sel.addEventListener("change",()=>{let v=sel.value;if(v==="+"){const n=prompt("Name of the new project","Reel "+(db().list.length+1));if(n===null){paintDock();return}v=newProject(n.trim()||null).id}wr(RK,v);paintDock();const p=projById(v);say(p?"New takes go to “"+p.name+"”.":"New takes are not added to a project.","",2500)});
+      const fl=document.createElement("span");fl.className="lc79-flow";
+      fl.innerHTML='<button type="button" class="btn sm lc79-dockb" data-f="-" aria-label="Previous step">◀</button><button type="button" class="btn sm lc79-dockb" id="lc79-step" title="Recording flow settings"></button><button type="button" class="btn sm lc79-dockb" data-f="+" aria-label="Next step">▶</button>';
+      fl.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.id==="lc79-step")return openFlowSettings();setStep(clamp((FL.step||0)+(b.getAttribute("data-f")==="+"?1:-1),1,4))});
+      const ed=document.createElement("button");ed.type="button";ed.className="btn sm lc79-dockb";ed.textContent="✂ Edit Studio";ed.title="Go to the Edit Studio: takes, timeline and captions";ed.onclick=()=>gotoCaptions(null);
+      dock.appendChild(sel);dock.appendChild(fl);dock.appendChild(ed);paintDock();
     }
     const tb=Q("#takes-body",sr);
     if(tb&&!Q(".lc79-bar",tb)){const bar=document.createElement("div");bar.className="lc79-bar";
@@ -1029,22 +1193,22 @@ CLOSE];
   let tickId=0,lastTick=0;
   function tick(){lastTick=Date.now();if(route()!=="studio"){clearInterval(tickId);tickId=0;return}try{inject()}catch(e){}try{liveTick()}catch(e){}}
   function afterRender(r){
-    if(r!=="studio"){["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true));if(ctaOn){ctaOn=false}return}
+    if(r!=="studio"){["lc79-ed","lc79-ai","lc79-ctaset","lc79-flowset"].forEach(id=>closeLayer(id,true));if(ctaOn){ctaOn=false}FL.step=0;FL.card=null;FL.aha=false;return}
     if(!tickId||Date.now()-lastTick>3000){clearInterval(tickId);tickId=setInterval(tick,400)}
     setTimeout(tick,60);
   }
   function init(){
     window.addEventListener("keydown",e=>{
       if(route()!=="studio"||e.ctrlKey||e.metaKey||e.altKey||layerStack.length)return;
-      if(e.key!=="l"&&e.key!=="L")return;
+      if(!/^[lL1-4]$/.test(e.key))return;
       const t=(e.composedPath&&e.composedPath()[0])||e.target;if(t&&(/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)||t.isContentEditable))return;
-      e.preventDefault();ctaToggle();
+      e.preventDefault();if(/[1-4]/.test(e.key))setStep(+e.key);else ctaToggle();
     });
     window.addEventListener("popstate",()=>{const top=layerStack[layerStack.length-1];if(top&&!(history.state&&history.state.lc79===top))closeLayer(top,true)});
     document.addEventListener("keydown",e=>{if(e.key==="Escape"&&layerStack.length){const top=layerStack[layerStack.length-1];if(top==="lc79-ed"&&ED.busy)return;closeLayer(top)}});
     window.addEventListener("hashchange",()=>{if(route()!=="studio")["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true))});
   }
-  return{boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
+  return{afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
     segments:segments,run:run,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,boardSVG:boardSVG,sfx:sfx,
     BUILT:BUILT,db:db,newProject:newProject,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/
