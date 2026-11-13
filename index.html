@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.38.3">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.39.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.38.3" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.38.3">
+<link rel="icon" href="/icons/icon-192.png?v=9.39.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.39.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.38.3">
+<link rel="manifest" href="/manifest.webmanifest?v=9.39.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -152,7 +152,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .flip:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:var(--r)}.flip-hint{margin:.8rem 0 0;color:var(--blue);font-size:.85rem;font-weight:700}
 @media (prefers-reduced-motion:reduce){.flip .fside{transition:none}}
 .micro{margin:.2rem 0 .3rem;color:var(--gold);font-size:.98rem}.micro b{font-size:1.15rem}
-/* 9.38.3: mission banner, hook, Triple-T flow with MSPC under Think, balanced contrast */
+/* 9.39.0: mission banner, hook, Triple-T flow with MSPC under Think, balanced contrast */
 .mission-band{padding:22px 0;background:linear-gradient(90deg,rgba(56,189,248,.14),rgba(251,191,36,.10));border-bottom:1px solid rgba(56,189,248,.35)}
 .mission-band .mb-in{display:grid;grid-template-columns:1fr auto;gap:18px 28px;align-items:center}
 .mission-band h1.mission{margin:0;font-size:clamp(1.45rem,4.2vw,2.5rem)}
@@ -180,7 +180,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .vs-h4{margin:.9rem 0 .2rem;font-size:1rem;color:var(--good)}
 .vs2 li.no,.vs2 li.yes{color:var(--text)}
 
-/* 9.38.3 LC72: owner cards, screenshots, the owner's edit button */
+/* 9.39.0 LC72: owner cards, screenshots, the owner's edit button */
 .shot{margin:14px 0 0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card2)}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:8px 12px;font-size:.85rem;color:var(--mute)}
 .shots{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,300px);gap:14px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}.shots .shot{margin:0;scroll-snap-align:start}
 .love-card .lshot,.pcard .lshot{display:block;width:100%;border-radius:10px;margin-top:10px;border:1px solid var(--line)}
@@ -477,7 +477,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.38.3</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.39.0</p></footer>
 
 <script>
 "use strict";
@@ -601,12 +601,12 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       $("fomo-text").innerHTML="<b class=\"n\">"+left+" of "+cap+"</b> "+esc(who)+" spots left at this price."+(left<=cap/2?" Spots are filling up fast.":"");
       var v=p.vip,vl=v&&v.left&&v.left[(v.tranche||t)-1];$("fomo-vip").textContent=v&&vl!=null?"VIP: "+vl+" spots left at "+eur(v.yearly[(v.tranche||t)-1])+" a year (or "+eur(v.monthly)+" a month).":""}
   }
-  /* 9.38.3: the official prices show at once (same numbers as the Payment Links); the live pricing call replaces them. Before, a failed call left "See at checkout". */
+  /* 9.39.0: the official prices show at once (same numbers as the Payment Links); the live pricing call replaces them. Before, a failed call left "See at checkout". */
   var FALLBACK={ok:true,fallback:true,tranche:1,base:39900,monthly:3900,gift:19950,yearly:[19950,29925,35910,39900],discountPct:[50,25,10],caps:[100,100,100],left:null,
     vip:{tranche:1,base:59900,monthly:5900,yearly:[29950,44925,53910,59900],discountPct:[50,25,10],caps:[100,100,100],left:null}};
   function paintPrices(p){
     tierBlock(p,"");tierBlock(p.vip,"v");ladder(p);
-    var gp=$("g-price"),gl=(p.yearly&&p.yearly[(+p.tranche||4)-1])||p.base,gv=Math.min(+p.gift||p.base,gl||p.base);   /* 9.38.3: the gift always follows the live launch rate */
+    var gp=$("g-price"),gl=(p.yearly&&p.yearly[(+p.tranche||4)-1])||p.base,gv=Math.min(+p.gift||p.base,gl||p.base);   /* 9.39.0: the gift always follows the live launch rate */
     if(gp&&!/your own rate/.test(gp.textContent))gp.innerHTML=(gv<p.base?'<s class="mute" style="font-size:.6em">'+eur(p.base)+"</s> ":"")+eur(gv)+" for one year"+(gv<p.base?' <span class="mute" style="font-size:.55em">'+((+p.tranche||4)===1?"Founding Member rate":"launch rate")+"</span>":"");
     var t=p.tranche||4,py=p.yearly[t-1]||p.base;
     $("vs-price").innerHTML=esc(eur(Math.ceil(py/12)))+'<small> per month (billed yearly)</small>';
@@ -736,7 +736,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     accountExists(em).then(function(ex){if(ex===true){run(em);return}acctModal(em,ex,run)});
   }
   function email(){var em=$("buyer").value.trim().toLowerCase();return EMAIL.test(em)?em:""}
-  /* 9.38.3: a signed-in member (same site as the app) gets the gift at their own locked rate when it is lower */
+  /* 9.39.0: a signed-in member (same site as the app) gets the gift at their own locked rate when it is lower */
   function myTok(){try{var a=JSON.parse(localStorage.getItem("lc26-auth")||"null");return a&&a.access_token&&(!a.expires_at||a.expires_at*1000>Date.now())?a.access_token:""}catch(e){return""}}
   (function(){var t=myTok();if(!t)return;post0("gift_quote",{token:t}).then(function(q){if(q&&q.ok&&q.why==="yours"&&+q.amount>0){var g=$("g-price");if(g)g.textContent=eur(q.amount)+" for one year · your own rate"}})})();
   document.addEventListener("click",function(e){
@@ -910,7 +910,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   /* the flip cards need the height of their longest side */
   function size(){Array.prototype.forEach.call(document.querySelectorAll(".flip"),function(c){var h=0;Array.prototype.forEach.call(c.querySelectorAll(".fside"),function(s){var p=s.style.position;s.style.position="relative";h=Math.max(h,s.offsetHeight);s.style.position=p});if(h)c.style.minHeight=h+"px"})}
   window.addEventListener("resize",function(){clearTimeout(size.t);size.t=setTimeout(size,150)});setTimeout(size,0);setTimeout(size,1500);
-  /* 9.38.3: the counter is always visible; without a live number it says so instead of showing a made-up one */
+  /* 9.39.0: the counter is always visible; without a live number it says so instead of showing a made-up one */
   function mcFallback(){var n=document.getElementById("mc-n"),t=document.getElementById("mc-t");if(n&&n.textContent==="…"){n.textContent="";if(t)t.textContent="The first players have started. Be one of the 20,000."}}
   setTimeout(mcFallback,8000);
   var u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");if(!u||!k){mcFallback();return}
@@ -930,7 +930,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 })();
 </script>
 <script>
-/* 9.38.3 LC73: the first-touch source of this visitor (utm_*, ?ref=, ?src= from a /l/ short link), one landing visit per day, and the owner's Edit button.
+/* 9.39.0 LC73: the first-touch source of this visitor (utm_*, ?ref=, ?src= from a /l/ short link), one landing visit per day, and the owner's Edit button.
    Kept on this device only (localStorage "lc73-src"); the app links it to the account at sign-in (lc73_attach). */
 (function(){
   function m(n){var e=document.querySelector('meta[name="'+n+'"]');return e?e.getAttribute("content")||"":""}
@@ -942,7 +942,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   if(!cur||(has&&(empty||now-(+cur.at||0)>30*864e5))){cur={code:inc.code,utm_source:inc.utm_source,utm_medium:inc.utm_medium,utm_campaign:inc.utm_campaign,ref:inc.ref,device:dev,first_at:new Date().toISOString(),at:now}}
   else if(inc.ref&&!cur.ref)cur.ref=inc.ref;
   try{localStorage.setItem(K,JSON.stringify(cur))}catch(e){}
-  try{document.cookie="lc73_src="+encodeURIComponent(JSON.stringify(cur))+";max-age=2592000;path=/;SameSite=Lax;Secure"}catch(e){}   /* 9.38.3: a cookie copy */
+  try{document.cookie="lc73_src="+encodeURIComponent(JSON.stringify(cur))+";max-age=2592000;path=/;SameSite=Lax;Secure"}catch(e){}   /* 9.39.0: a cookie copy */
   var u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key"),day=new Date().toISOString().slice(0,10);
   if(u&&k&&!/preview=/.test(location.search)){var dk="lc73-land-day";var last="";try{last=localStorage.getItem(dk)||""}catch(e){}
     if(last!==day){try{localStorage.setItem(dk,day)}catch(e){}fetch(u+"/rest/v1/rpc/lc73_hit",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:JSON.stringify({p:{kind:"landing",device:cur.device,code:cur.code||"",utm_source:cur.utm_source||""}})}).catch(function(){})}}
