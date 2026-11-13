@@ -184,7 +184,7 @@ const LC72=(()=>{
     if(!window.confirm("Move the 4 classic summaries into your shelf? After that you can edit, hide or delete each of them like your own items."))return;
     let ok=0;
     for(const b of (LC69.BOOKS||[])){
-      const body=["What it teaches. "+b.what,"What it gets right. "+b.good,"The lazy-school trap. "+b.lazy,"Kyenzo’s take. "+b.ours].join("\n\n");
+      const body=["What it teaches. "+b.what,"What it gets right. "+b.good,"Where players get stuck. "+b.lazy,"Kyenzo’s take. "+b.ours].join("\n\n");
       const r=await rpc("lc70_admin_upsert",{p:{id:"classic-"+b.id,shelf:"kyenzo",kind:"summary",status:"live",title:b.title,author:b.author+" ("+b.year+")",blurb:b.what,body:body}});
       if(r.data&&r.data.ok){ok++;await rpc("lc72_lib_extra_set",{p_id:"classic-"+b.id,p:{credentials:b.author+" ("+b.year+")",summary:b.what+"\n"+b.good}})}
     }

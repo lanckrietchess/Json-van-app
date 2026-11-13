@@ -8,8 +8,8 @@
         and on the quest page and sends the student back to Rapid + MSPC. Nothing is blocked: it is a coach, not a lock.
      4. "Road to a Lanckriet Student": the daily ritual on the quest page: the pre-game MSPC puzzle, a Rapid game, Trim it. Discipline ranks come from the
         ritual streak (not from rating), plus "2000+ Master" from the server-verified peak.
-     5. Books Vault (#books): what classic training books teach, and how the Lanckriet system uses them instead of the lazy school
-        (Puzzle Addicts, Blitz Junkies). The texts are summaries in our own words; the owner should read them once (see PROJECT_KNOWLEDGE 5.17). */
+     5. Books Vault (#books): what classic training books teach, where players usually get stuck with them, and how the Lanckriet system
+        turns them into a habit at the board (9.38.2: calm, professional wording, no "versus" framing). The texts are summaries in our own words; the owner should read them once (see PROJECT_KNOWLEDGE 5.17). */
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const say=(m,k)=>{try{toast(m,k||"")}catch(e){}};
@@ -131,30 +131,30 @@
     {id:"kotov",title:"Think Like a Grandmaster",author:"Alexander Kotov",year:1971,
      what:"Kotov describes how strong players decide: list the candidate moves first, then calculate each one once, in a tree, without jumping back and forth. He also shows how a player assesses a position before calculating, and why time trouble comes from undisciplined thinking.",
      good:"A fixed thinking order. That is the heart of MSPC: the same questions, in the same order, every move.",
-     lazy:"Read as a calculation manual only, it turns into “calculate everything”. Below 2000 most mistakes are not long lines: they are a missed threat after the opponent’s move.",
+     lazy:"Read only as a calculation manual, it can turn into “calculate everything”. Below 2000 most mistakes are not long lines but a threat that was missed after the opponent’s move.",
      ours:"MSPC puts Kotov’s discipline in an order that fits club games: Move (their threat) and Specifics (the plan) come before the tree. Then Priorities give you the candidate list, and Calculation checks it once.",
      link:"#think",linkText:"Train it: the MSPC trainer"},
     {id:"woodpecker",title:"The Woodpecker Method",author:"Axel Smith and Hans Tikkanen",year:2018,
      what:"A large set of tactical puzzles solved in cycles: the whole set again and again, each cycle faster, until the patterns are automatic.",
      good:"Repetition works. Patterns you have seen many times are found in a second.",
-     lazy:"The Puzzle Addict version: grinding puzzles on autopilot, guessing the first forcing move because “it is a puzzle, so there is a tactic”. In a real game nobody tells you there is a tactic.",
+     lazy:"Solving fast on autopilot: you look for the first forcing move because a puzzle always has one. In a real game nobody tells you that there is a tactic, so the habit of checking first matters more than speed.",
      ours:"We repeat too, but with the process switched on: the pre-game MSPC puzzle, the Shuffle Trainer and your own mistakes in My mistakes. You answer Move and Priorities before you are allowed to move.",
      link:"#shuffle",linkText:"Train it: the Shuffle Trainer"},
     {id:"silman",title:"How to Reassess Your Chess",author:"Jeremy Silman",year:1993,
      what:"Silman teaches players to read a position through its imbalances (minor pieces, pawn structure, space, material, development, files and squares) and to make a plan from them.",
      good:"Plans come from features of the position, not from hope.",
-     lazy:"Lists of imbalances can become a checklist you recite without deciding anything.",
+     lazy:"A list of imbalances can turn into a checklist you recite without ever choosing a plan.",
      ours:"That is the S in MSPC: notice the structure and features, then name ONE plan. The middlegame course trains it on real structures.",
      link:"#middlegame",linkText:"Train it: Middlegame"},
     {id:"dvoretsky",title:"Dvoretsky’s Endgame Manual",author:"Mark Dvoretsky",year:2003,
      what:"A complete reference of the endgame positions a strong player must know, with the key positions highlighted.",
      good:"Precise technique, organised by theme.",
-     lazy:"Reading it cover to cover before you can win king and pawn endings is the opening-memoriser’s mistake in a new place.",
+     lazy:"Reading it cover to cover too early spends hours on positions you will rarely meet. The basic endings, played until they are automatic, give more points first.",
      ours:"The endgame course gives the right theory at the right level: the positions a player at your rating meets, learned and then drilled.",
      link:"#endgame",linkText:"Train it: Endgame"}];
   function mountBooks(view){
-    view.innerHTML='<section class="lc69-books"><header class="lc69-bh"><span class="lc69-face">'+face(["serious","calm"],52)+'</span><div><p class="lc69-tag">Books Vault</p><h1>Us vs. the lazy school</h1><p class="muted">The classics are good books. The problem is how the lazy school uses them: <b>Puzzle Addicts</b> grind puzzles on autopilot, <b>Blitz Junkies</b> play fast and hope for tricks, opening memorisers learn lines without knowing what the position wants. Here is what each book really teaches and how the Lanckriet system turns it into a habit.</p></div></header>'
-      +BOOKS.map(b=>'<article class="panel pad lc69-book" id="book-'+b.id+'"><h2>'+esc(b.title)+'</h2><p class="small muted">'+esc(b.author)+' · '+b.year+'</p><p><b>What it teaches.</b> '+esc(b.what)+'</p><p><b>What it gets right.</b> '+esc(b.good)+'</p><p class="lc69-lazy"><b>The lazy-school trap.</b> '+esc(b.lazy)+'</p><div class="lc69-take"><span class="lc69-face sm">'+face(["calm","neutral"],30)+'</span><p><b>Kyenzo’s take.</b> '+esc(b.ours)+'</p></div><a class="btn btn-ghost btn-sm" href="'+b.link+'">'+esc(b.linkText)+'</a></article>').join("")
+    view.innerHTML='<section class="lc69-books"><header class="lc69-bh"><span class="lc69-face">'+face(["serious","calm"],52)+'</span><div><p class="lc69-tag">Books Vault</p><h1>The classics, used the right way</h1><p class="muted">Reading a great book is not the same as getting better from it. For each classic: what it teaches, where players usually get stuck with it, and how to turn it into a habit you use at the board.</p></div></header>'
+      +BOOKS.map(b=>'<article class="panel pad lc69-book" id="book-'+b.id+'"><h2>'+esc(b.title)+'</h2><p class="small muted">'+esc(b.author)+' · '+b.year+'</p><p><b>What it teaches.</b> '+esc(b.what)+'</p><p><b>What it gets right.</b> '+esc(b.good)+'</p><p class="lc69-lazy"><b>Where players get stuck.</b> '+esc(b.lazy)+'</p><div class="lc69-take"><span class="lc69-face sm">'+face(["calm","neutral"],30)+'</span><p><b>Kyenzo’s take.</b> '+esc(b.ours)+'</p></div><a class="btn btn-ghost btn-sm" href="'+b.link+'">'+esc(b.linkText)+'</a></article>').join("")
       +'<p class="small muted">Summaries in our own words, to help you decide what to read and how to use it. Buy the books from the publishers if you want the full text.</p></section>';
     return null;
   }

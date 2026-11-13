@@ -135,6 +135,15 @@ const LC75=(()=>{
     if(r.data&&r.data.ok){if(CC.d.kpis&&CC.d.kpis[k])CC.d.kpis[k].target=v;say("Goal saved.","good");renderCC()}else say("Could not save the goal.","bad");
   }
 
+  /* the Data Briefing in Admin Mode: the Master Funnel Table at the top of the Admin dashboard; the older member counters fold under it */
+  function adminBriefing(){
+    if(route()!=="admin-lc30")return;const v=Q("#view");if(!v)return;
+    let host=Q("#lc75-brief",v);
+    if(!host){host=document.createElement("section");host.id="lc75-brief";host.className="lc75-adm";host.innerHTML='<p class="lc75-tag">Admin Mode · Data Briefing</p><div data-lc75-cc><p class="muted">Loading the funnel…</p></div>';
+      const head=Q(".page-head",v);if(head)head.insertAdjacentElement("afterend",host);else v.insertAdjacentElement("afterbegin",host);paintCC()}
+    const old=Q("#lc36-brief",v);if(old&&!old.closest(".lc75-old")){const d=document.createElement("details");d.className="panel pad lc75-old";d.innerHTML="<summary><b>Members, tools and partners (counters)</b></summary>";host.insertAdjacentElement("afterend",d);d.appendChild(old)}
+  }
+
   /* ============ 2. admin shortcuts ============ */
   function menuButtons(){
     const m=Q("#lc49-menu");if(!m||Q(".lc75-top",m)||!owner())return;
@@ -175,13 +184,20 @@ const LC75=(()=>{
       const price=it.tokens?it.tokens+" tokens":it.price_cents?"€"+(it.price_cents/100).toFixed(2):"";
       right.innerHTML=schoolHTML(id,it.title||"The course",list,access,price);
     }
+    const docs=await docMeta();
     for(const row of QA(".lc72-row")){
-      const cov=Q(".lc72-cover",row);if(!cov||cov.__lc75)continue;cov.__lc75=1;const id=String(row.id||"").replace(/^lib-/,""),it=itemOf(id)||{};
-      if(!(it.has_ebook||it.has_body))continue;
+      const cov=Q(".lc72-cover",row);if(!cov||cov.__lc75)continue;cov.__lc75=1;const id=String(row.id||"").replace(/^lib-/,""),it=itemOf(id)||{},doc=docs[id];
+      const left=Q(".lc72-left",row),right=Q(".lc72-right",row);
+      if(left&&!Q(".lc75-side",left))left.insertAdjacentHTML("afterbegin",'<p class="lc75-side">'+(it.kind==="course"?ic("graduation-cap")+" The course":ic("book")+" The book")+"</p>");
+      if(right&&!Q(".lc75-side",right)&&it.kind!=="course")right.insertAdjacentHTML("afterbegin",'<p class="lc75-side is-r">'+ic("circle-play")+" Video course</p>");
+      if(!(it.has_ebook||it.has_body||doc))continue;
+      const info=Q(".lc72-info h3",row);if(info&&!Q(".lc75-readbtn",row))info.insertAdjacentHTML("afterend",'<button type="button" class="btn '+(it.access?"btn-primary":"btn-ghost")+' btn-sm lc75-readbtn" data-lc75-read="'+esc(id)+'">'+ic(it.access?"book-open":"lock")+(it.access?" Read the book":" Unlock the book")+(doc?" · "+doc.pages+(doc.pages===1?" page":" pages"):"")+"</button>");
       cov.setAttribute("role","button");cov.tabIndex=0;cov.setAttribute("data-lc75-read",id);cov.setAttribute("aria-label","Read "+(it.title||"the e-book"));
       cov.insertAdjacentHTML("beforeend",'<span class="lc75-readtag">'+ic(it.access?"book-open":"lock")+(it.access?" Read":" Preview locked")+"</span>");
     }
   }
+  let dmC={at:0,d:{}};
+  async function docMeta(){return dmC.d}   /* 9.38.3: e-books are PDF files (has_ebook); no written-in-the-app books any more */
   function itemOf(id){let f=null;QA("[data-lc70-shelf]").forEach(h=>{const d=h.__d;if(!f&&d&&d.items)f=d.items.filter(x=>x.id===id)[0]||null});return f}
   async function openLesson(id,i){
     const it=itemOf(id)||{};if(!it.access){try{LC72.unlock(id)}catch(e){}return}
@@ -206,21 +222,30 @@ const LC75=(()=>{
     s.onload=()=>{try{window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib)}catch(e){rej(e)}};s.onerror=()=>{pdfLib=null;rej(new Error("pdf.js"))};document.head.appendChild(s)});return pdfLib}
   function paginate(text){const paras=String(text||"").split(/\n+/).map(x=>x.trim()).filter(Boolean),pages=[];let cur=[],len=0;
     paras.forEach(p=>{if(len+p.length>1500&&cur.length){pages.push(cur);cur=[];len=0}cur.push(p);len+=p.length});if(cur.length)pages.push(cur);return pages.length?pages:[["(empty)"]]}
-  async function reader(id){
-    const it=itemOf(id)||{};if(!it.access){try{LC72.unlock(id)}catch(e){}return}
-    const r=await rpc("lc70_open",{p_id:id},true);const d=r.data||{};if(!d.ok){say(d.error==="sign_in"?"Sign in first.":"This is not in your library yet.","bad");return}
+  function htmlPages(html){   /* a written book: cut between blocks, a new page at every title and after about 1,800 characters */
+    let clean="";try{clean=LC77.clean(html)}catch(e){clean=""}
+    const box=document.createElement("div");box.innerHTML=clean;const pages=[];let cur=[],len=0;
+    [].slice.call(box.children).forEach(el=>{const n=(el.textContent||"").length;if(cur.length&&(el.tagName==="H1"||len+n>1800)){pages.push(cur.join(""));cur=[];len=0}cur.push(el.outerHTML);len+=n});
+    if(cur.length)pages.push(cur.join(""));return pages.length?pages:["<p>(empty)</p>"];
+  }
+  async function reader(id,opts){
+    opts=opts||{};const it=itemOf(id)||{};if(!it.access&&!opts.preview){try{LC72.unlock(id)}catch(e){}return}
+    let d={ok:true,ebook_url:"",body:""};
+    if(!opts.preview){const r=await rpc("lc70_open",{p_id:id},true);d=r.data||{};if(!d.ok){say(d.error==="sign_in"?"Sign in first.":"This is not in your library yet.","bad");return}
+    }else d.html=opts.html||"";
     const url=String(d.ebook_url||""),isPdf=/\.pdf(\?|#|$)/i.test(url)||/\/pdf/i.test(url);
     let ov=Q("#lc75-reader");if(ov)ov.remove();ov=document.createElement("div");ov.id="lc75-reader";ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");ov.setAttribute("aria-label",it.title||"E-book");
-    ov.innerHTML='<header><button type="button" class="lc75-x" data-r="close" aria-label="Close the reader">✕</button><b>'+esc(it.title||"E-book")+'</b><span data-r="pg">…</span><span class="lc75-rt"><button type="button" data-r="zo" aria-label="Smaller">−</button><button type="button" data-r="zi" aria-label="Bigger">+</button>'
+    ov.innerHTML='<header><button type="button" class="lc75-x" data-r="close" aria-label="Close the reader">✕</button><b>'+(opts.preview?"Preview: ":"")+esc(it.title||"E-book")+'</b><span data-r="pg">…</span><span class="lc75-rt"><button type="button" data-r="zo" aria-label="Smaller">−</button><button type="button" data-r="zi" aria-label="Bigger">+</button>'
       +(url?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer" download aria-label="Download">'+ic("download")+"</a>":"")+'</span></header><main data-r="page"></main><footer><button type="button" data-r="prev" aria-label="Previous page">←</button><input type="range" min="1" value="1" data-r="slider" aria-label="Page"><button type="button" data-r="next" aria-label="Next page">→</button></footer><p class="lc75-lic">Licensed to your account: please keep the file for yourself.</p>';
     document.body.appendChild(ov);document.body.classList.add("lc75-noscroll");
     const main=Q('[data-r="page"]',ov),lab=Q('[data-r="pg"]',ov),sl=Q('[data-r="slider"]',ov),key="lc75-pg-"+id;
-    let n=1,pg=Math.max(1,+rd(key,1)||1),zoom=+rd("lc75-zoom",1)||1,pdf=null,pages=null,busy=0;
+    let n=1,pg=Math.max(1,+rd(key,1)||1),zoom=+rd("lc75-zoom",1)||1,pdf=null,pages=null,hp=null,busy=0;if(opts.preview)pg=1;
     const close=()=>{ov.remove();document.body.classList.remove("lc75-noscroll");document.removeEventListener("keydown",kd)};
     async function show(){
       pg=Math.max(1,Math.min(n,pg));wr(key,pg);lab.textContent="Page "+pg+" of "+n;sl.max=String(n);sl.value=String(pg);
       if(pdf){const run=++busy,page=await pdf.getPage(pg);if(run!==busy)return;const w=Math.min(main.clientWidth-16,900)*zoom,vp0=page.getViewport({scale:1}),sc=w/vp0.width,dpr=Math.min(2,window.devicePixelRatio||1),vp=page.getViewport({scale:sc*dpr});
         const cv=document.createElement("canvas");cv.width=vp.width;cv.height=vp.height;cv.style.width=Math.round(vp.width/dpr)+"px";cv.style.height=Math.round(vp.height/dpr)+"px";await page.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise;if(run!==busy)return;main.innerHTML="";main.appendChild(cv)}
+      else if(hp){main.innerHTML='<article class="lc75-tp lc75-doc" style="font-size:'+Math.round(17*zoom)+'px">'+hp[pg-1]+"</article>"}
       else if(pages){main.innerHTML='<article class="lc75-tp" style="font-size:'+Math.round(17*zoom)+'px">'+pages[pg-1].map(p=>"<p>"+esc(p)+"</p>").join("")+"</article>"}
       main.scrollTop=0;
     }
@@ -229,6 +254,7 @@ const LC75=(()=>{
       if(a==="close")close();if(a==="prev"){pg--;show()}if(a==="next"){pg++;show()}if(a==="zi"){zoom=Math.min(2.2,zoom+.15);wr("lc75-zoom",zoom);show()}if(a==="zo"){zoom=Math.max(.6,zoom-.15);wr("lc75-zoom",zoom);show()}});
     sl.addEventListener("change",()=>{pg=+sl.value;show()});
     let sx=null;main.addEventListener("pointerdown",e=>{sx=e.clientX});main.addEventListener("pointerup",e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>60){pg+=dx<0?1:-1;show()}});
+    if(d.html){hp=htmlPages(d.html);n=hp.length;await show();return}
     if(url&&isPdf){main.innerHTML='<p class="lc75-load">Opening the book…</p>';
       try{const lib=await loadPdfJs();pdf=await lib.getDocument({url:url,withCredentials:false}).promise;n=pdf.numPages;await show();return}
       catch(e){pdf=null;main.innerHTML='<div class="lc75-load"><p>This file cannot be shown inside the app (the server that holds it does not allow it).</p><a class="btn btn-primary" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Open the e-book</a></div>';lab.textContent="";if(!d.body)return}}
@@ -248,7 +274,6 @@ const LC75=(()=>{
   /* ============ events and wiring ============ */
   async function onClick(e){
     const t=e.target;if(!t||!t.closest)return;
-    if((t.closest("#admin-chip")||t.closest("#lc49-admin"))&&owner()&&route()!=="command"){e.preventDefault();e.stopImmediatePropagation();location.hash="#command";return}   /* the Admin pill opens the Command Center; on the Command Center it opens the owner menu */
     const g=t.closest("[data-lc75-go]");if(g){try{const m=Q("#lc49-menu");if(m)m.remove()}catch(x){}return}
     const les=t.closest("[data-lc75-les]");if(les){e.preventDefault();openLesson(les.getAttribute("data-lc75-les"),+les.getAttribute("data-i"));return}
     const rdr=t.closest("[data-lc75-read]");if(rdr){e.preventDefault();reader(rdr.getAttribute("data-lc75-read"));return}
@@ -293,12 +318,15 @@ const LC75=(()=>{
       +"#lc75-reader{position:fixed;inset:0;z-index:2147482500;background:#0b1222;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}#lc75-reader header,#lc75-reader footer{display:flex;gap:8px;align-items:center;padding:6px 10px;background:#0f172a;border-bottom:1px solid #334155}#lc75-reader footer{border-top:1px solid #334155;border-bottom:0}"
       +"#lc75-reader header b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#lc75-reader button,#lc75-reader header a{min-width:44px;min-height:44px;border-radius:10px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;font-size:18px;display:inline-grid;place-items:center;cursor:pointer;text-decoration:none}#lc75-reader footer input{flex:1}"
       +"#lc75-reader main{flex:1;overflow:auto;display:flex;justify-content:center;padding:8px;touch-action:pan-y}#lc75-reader canvas{background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:none}.lc75-tp{max-width:720px;background:#f8fafc;color:#0f172a;padding:28px 26px;border-radius:8px;line-height:1.65;font-family:'Iowan Old Style','Palatino Linotype',Georgia,serif}"
+      +".lc75-side{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fbbf24;grid-column:1/-1}.lc75-side.is-r{color:#38bdf8;padding:14px 14px 0}.lc72-right{flex-direction:column}.lc75-readbtn{min-height:44px;margin:6px 0}"
+      +".lc75-adm{margin:0 0 16px}.lc75-adm .lc75-cc{max-width:none}.lc75-old{margin:0 0 16px}.lc75-old summary{min-height:44px;display:flex;align-items:center;cursor:pointer}"
+      +".lc75-doc h1{font-size:1.9em;line-height:1.15;margin:.2em 0 .5em}.lc75-doc h2{font-size:1.4em;margin:1.2em 0 .4em}.lc75-doc h3{font-size:1.12em;margin:1em 0 .3em}.lc75-doc blockquote{border-left:4px solid #fbbf24;margin:1em 0;padding:.2em 1em;font-style:italic}.lc75-doc hr{border:0;border-top:1px solid #cbd5e1;margin:2em 0}"
       +".lc75-lic{margin:0;padding:4px;text-align:center;font-size:11px;color:#64748b}.lc75-load{text-align:center;padding:30px;display:grid;gap:12px;justify-items:center}body.lc75-noscroll{overflow:hidden}.lc75-pgn{white-space:pre-wrap;background:#0f172a;border:1px solid #334155;border-radius:10px;padding:10px;font-size:13px}.lc75-text p{line-height:1.6}"
       +".lc75-ref{border:1px solid rgba(251,191,36,.6);margin-bottom:12px}.lc75-ref h2{margin:4px 0}.lc75-link{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.lc75-link code{flex:1 1 220px;overflow-wrap:anywhere;padding:10px;border-radius:10px;background:#0f172a;border:1px solid #334155}.lc75-link .btn{min-height:44px}";
     document.head.appendChild(s);
   }
   let deb=0;
-  function scan(){menuButtons();enhanceLib();referCard()}
+  function scan(){menuButtons();enhanceLib();referCard();adminBriefing()}
   function afterRender(){clearTimeout(deb);deb=setTimeout(()=>{try{scan()}catch(e){}},300)}
   function init(){
     css();
@@ -307,5 +335,5 @@ const LC75=(()=>{
     window.addEventListener("click",onClick,true);document.addEventListener("submit",onSubmit,true);document.addEventListener("keydown",onKey,true);document.addEventListener("change",onChange,true);
     new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{scan()}catch(e){}},250)}).observe(document.body,{childList:true,subtree:true});
   }
-  return{init:init,afterRender:afterRender,paint:paintCC,render:renderCC,metricRows:metricRows,_cc:CC,reader:reader,openLesson:openLesson,schoolHTML:schoolHTML,paginate:paginate,levels:levels,status:status,version:"9.38.1"};
+  return{init:init,afterRender:afterRender,paint:paintCC,render:renderCC,metricRows:metricRows,_cc:CC,reader:reader,openLesson:openLesson,schoolHTML:schoolHTML,paginate:paginate,levels:levels,status:status,version:"9.38.3"};
 })(); /*@@end lc75*/
