@@ -25926,7 +25926,8 @@ CLOSE];
   }
   function drawLive(ctx,W,H){
     if(!(W>1&&H>1))return;
-    try{if(FL.step===2&&FL.card)drawCard(ctx,W,H,FL.card);if(FL.step===3&&FL.aha)drawAha(ctx,W,H)}catch(e){}
+    /* 9.41.1: step 3 draws no prompt pill over the camera; only the board, scenes and chosen callouts show */
+    try{if(FL.step===2&&FL.card)drawCard(ctx,W,H,FL.card)}catch(e){}
     if(!ctaOn)return;
     if(ctaS().mode==="live"){drawLiveFrame(ctx,W,H);return}
     const o=ctaS(),p=easeOut(clamp((performance.now()-ctaAt)/380,0,1)),port=H>=W,host=o.url||(location.host||"lanckrietchesstrainerhub.vercel.app");
@@ -26035,11 +26036,6 @@ CLOSE];
     rows.forEach(r=>{ctx.fillStyle=r.c;ctx.font="700 "+Math.round(fs*.75)+"px Sora,system-ui,sans-serif";ctx.fillText(r.l,x+pad,yy);yy+=fs*1.05;ctx.fillStyle="#e2e8f0";ctx.font="600 "+Math.round(fs*.82)+"px Sora,system-ui,sans-serif";r.lines.forEach(l=>{ctx.fillText(l,x+pad,yy);yy+=fs*1.15});yy+=fs*.5});
     ctx.restore();
     return{c:cv,x:bx-m,y:by-m};
-  }
-  function drawAha(ctx,W,H){
-    const p=easeOut(clamp((performance.now()-FL.cardAt)/380,0,1)),fs=Math.round(Math.min(W,H)*.05),t="Your turn: find the win";
-    ctx.save();ctx.globalAlpha=p;ctx.font="800 "+fs+"px Sora,system-ui,sans-serif";const w=ctx.measureText(t).width+fs*1.6,x=(W-w)/2,y=H*.06;
-    rr(ctx,x,y,w,fs*1.7,fs*.85);ctx.fillStyle="#fbbf24";ctx.fill();ctx.fillStyle="#0f172a";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t,W/2,y+fs*.86);ctx.restore();
   }
   function afterTake(t){
     if(!t||!t.id)return;const p=projById(rd(RK,""));
