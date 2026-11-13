@@ -13,7 +13,7 @@
         arrow tip, duration, sound) and presets saved on this device. Sounds are synthesised with Web Audio (no files) and land in the export.
      5. "Show Landing Page (CTA)": the live landing page (snapshot of /?preview=1 through html2canvas, so no visit is counted) in a phone frame in the
         recorded picture, or a CTA card when the page cannot be captured. Key L toggles it in the Studio. */
-  const VERSION="9.39.0";
+  const VERSION="9.39.1";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -602,6 +602,47 @@
     return null;
   }
   const list2=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+  /* 9.39.1: what the mistake changed on the board, as plain facts (lost defence, new attacks, pieces left hanging) */
+  function pieceList(fen,color,withKing){const out=[];try{new Chess(fen).board().forEach((row,ri)=>row.forEach((x,fi)=>{if(x&&x.color===color&&(withKing||x.type!=="k"))out.push({sq:FILES[fi]+(8-ri),type:x.type})}))}catch(e){}return out}
+  function defends(fen,from,sq){
+    try{const b=new Chess(fen),pc=b.get(from),t=b.get(sq);if(!pc||!t||t.type==="k"||t.color!==pc.color)return false;
+      b.remove(sq);b.put({type:t.type,color:t.color==="w"?"b":"w"},sq);const g=new Chess();if(!g.load(withTurn(b.fen(),pc.color)))return false;
+      return g.moves({square:from,verbose:true}).some(m=>m.to===sq)}catch(e){return false}
+  }
+  const defended=(fen,sq,color)=>pieceList(fen,color,true).some(q=>q.sq!==sq&&defends(fen,q.sq,sq));
+  function attackers(fen,sq,byColor){return pieceList(fen,byColor,true).filter(q=>hitsFrom(fen,q.sq).some(h=>h.sq===sq))}
+  const pn=(t,sq)=>"the "+NAME[t]+" on "+sq;
+  const MACT={fork:"Before every move, check each square where their knight or queen could attack two of your pieces at once.",pin:"Before you move a piece, look along every line from their bishops, rooks and queen to your king and queen.",skewer:"Before you move a piece, look along every line from their bishops, rooks and queen to your king and queen.",
+    hanging:"Before you move, list which of your pieces are undefended, and which of theirs you can take.",capture:"Before you move, list which of your pieces are undefended, and which of theirs you can take.",mate:"Before every move, list every check they have, and every check you have.",check:"Before every move, list every check they have, and every check you have.",
+    discovered:"Before you move, look behind their pieces: which line opens if one of them moves?",plan:"Before every move, say the plan of this position in one sentence."};
+  function boardChange(g,it){
+    const before=g.fens[it.i],after=g.fens[it.i+1],m=g.moves[it.i];if(!before||!after||!m)return[];
+    const us=it.color,them=us==="w"?"b":"w",out=[];let mt="";try{mt=(new Chess(before).get(m.from)||{}).type||""}catch(e){}
+    const worth=(p,att,free)=>att.length&&(free||VAL[att[0].type]<VAL[p.type]);   /* only facts that cost material */
+    try{
+      const cap=(new Chess(before).get(m.to)||{}).type;if(cap&&cap!=="k")out.push(it.san+" took "+pn(cap,m.to)+".");
+      /* the moved piece itself */
+      const att0=attackers(after,m.to,them).sort((a,b)=>VAL[a.type]-VAL[b.type]),free0=!defended(after,m.to,us),mp={type:mt||"p",sq:m.to};
+      if(worth(mp,att0,free0))out.push(free0?"The "+NAME[mp.type]+" on "+m.to+" now stands where "+pn(att0[0].type,att0[0].sq)+" attacks it and nothing defends it.":"The "+NAME[mp.type]+" on "+m.to+" can be taken by "+pn(att0[0].type,att0[0].sq)+", a piece of lower value.");
+      /* defence the moved piece gave up */
+      const lost=pieceList(before,us).filter(p=>p.sq!==m.from&&p.sq!==m.to&&defends(before,m.from,p.sq)&&!defends(after,m.to,p.sq)&&new Chess(after).get(p.sq));
+      lost.forEach(p=>{const att=attackers(after,p.sq,them).sort((a,b)=>VAL[a.type]-VAL[b.type]),free=!defended(after,p.sq,us);
+        if(worth(p,att,free))out.push("The "+NAME[mt||"p"]+" left "+m.from+", so it no longer defends "+pn(p.type,p.sq)+(free?", which is now attacked by "+pn(att[0].type,att[0].sq)+" and has no defender left.":"; "+pn(att[0].type,att[0].sq)+" can now win it."))});
+      /* other pieces that came under attack (an opened line) */
+      pieceList(after,us).forEach(p=>{
+        if(p.sq===m.to||lost.some(l=>l.sq===p.sq))return;
+        const att=attackers(after,p.sq,them).sort((a,b)=>VAL[a.type]-VAL[b.type]);if(!att.length||attackers(before,p.sq,them).length)return;
+        const free=!defended(after,p.sq,us);if(worth(p,att,free))out.push("It opened an attack on "+pn(p.type,p.sq)+" by "+pn(att[0].type,att[0].sq)+(free?", and that piece has no defender.":"."))});
+      try{const a=new Chess(after);if(a.in_check())out.push("It left the king in check.")}catch(e){}
+    }catch(e){}
+    return out.slice(0,4);
+  }
+  /* SAN with move numbers from a FEN, e.g. "23. Nxe5 Bxd1 24. Bxf7+" */
+  function numbered(fen,ucis){
+    const g=new Chess(fen),parts=[];let n=+(String(fen).split(" ")[5])||1;
+    (ucis||[]).forEach((u,i)=>{const side=g.turn(),m=g.move(uci(u));if(!m)return;parts.push(side==="w"?n+". "+m.san:(i===0?n+"... "+m.san:m.san));if(side==="b")n++});
+    return parts.join(" ");
+  }
   function motifOf(g,it){
     const fen=g.fens[it.i];const mo=(id,label,txt)=>({id:id,label:label,text:txt,theme:THEME[id]||""});
     try{if(it.best){const a=new Chess(fen),m=a.move(uci(it.best));if(m&&a.in_checkmate())return mo("mate","Missed mate in 1",m.san+" was mate on the spot.")}}catch(e){}
@@ -615,7 +656,7 @@
           const moverHits=hitsFrom(fr,r.to).map(x=>x.sq),others=[];
           b.board().forEach((row,ri)=>row.forEach((x,fi)=>{if(x&&x.color===r.color&&FILES[fi]+(8-ri)!==r.to){hitsFrom(fr,FILES[fi]+(8-ri)).forEach(h=>{if(VAL[h.type]>=5&&moverHits.indexOf(h.sq)<0)others.push({from:FILES[fi]+(8-ri),h:h})})}}));
           if(others.length){const pre=new Chess(g.fens[it.i+1]);const before=hitsFrom(withTurn(pre.fen(),r.color),others[0].from).map(x=>x.sq);if(before.indexOf(others[0].h.sq)<0)return mo("discovered","Discovered attack",r.san+" opens a line: the "+NAME[(b.get(others[0].from)||{}).type||"q"]+" on "+others[0].from+" now hits the "+NAME[others[0].h.type]+" on "+others[0].h.sq+".")}
-          if(r.captured&&VAL[r.captured]>=3){const back=b.moves({verbose:true}).some(m=>m.to===r.to);if(!back)return mo("hanging","Hanging piece",r.san+" takes the "+NAME[r.captured]+" and nothing can take back.")}
+          if(r.captured&&VAL[r.captured]>=VAL[r.piece]+2&&r.piece!=="k")return mo("hanging","Piece lost for less",r.san+" wins the "+NAME[r.captured]+" for a "+NAME[r.piece]+".");if(r.captured&&VAL[r.captured]>=3){const back=b.moves({verbose:true}).some(m=>m.to===r.to);if(!back)return mo("hanging","Hanging piece",r.san+" takes the "+NAME[r.captured]+" and nothing can take back.")}
           if(check)return mo("check","Check with tempo",r.san+" is check and wins time.");
         }}
     }catch(e){}
@@ -717,11 +758,11 @@
   function buildCase(){
     const g=AI.g,it=AI.list[AI.ci],fen=g.fens[it.i],color=it.color;
     const letter=it.k&&LN[it.k]?it.k:(it.cls==="blunder"?"M":"S"),al=pickAlarm(fen,color,letter),motif=motifOf(g,it);
-    let action="";try{action=LC64.actionOf(al&&al.id,letter)}catch(e){action=WP[letter]}
+    let action="";try{action=LC64.actionOf(al&&al.id,letter)}catch(e){action=""}if(!action||action===WP[letter])action=MACT[motif.id]||MACT.plan;
     const h=g.headers||{},rating=+(color==="w"?h.WhiteElo:h.BlackElo)||0;
     const c={it:it,fen:fen,color:color,letter:letter,alarm:al,motif:motif,wp:WP[letter],action:action,rating:rating,student:color==="w"?(h.White||"White"):(h.Black||"Black"),
       opp:color==="w"?(h.Black||"Black"):(h.White||"White"),start:Math.max(1,(it.num||Math.ceil((it.i+1)/2))-3)};
-    c.qs=socratic(g,it,c);c.pgn=trimmedPgn(g,it);
+    c.qs=socratic(g,it,c);c.pgn=trimmedPgn(g,it);c.change=boardChange(g,it);
     const band=rating?Math.floor(rating/100)*100:0;
     if(!AI.who||AI.whoAuto)c.who=(band?"a player around "+band+" who":"a club player who")+" "+({fork:"keeps walking into forks",pin:"keeps getting pinned",skewer:"loses pieces to skewers",hanging:"leaves pieces hanging",discovered:"never sees discovered attacks",mate:"misses or allows mate",capture:"misses free material",check:"lets the opponent check with tempo",plan:"plays moves without a plan"}[motif.id]||"keeps losing the same way");
     if(c.who){AI.who=c.who;AI.whoAuto=true}
@@ -733,7 +774,7 @@
     const loss=Math.round(it.loss),mv=(c.color==="w"?it.num+". ":it.num+"... ");
     let h='<section class="lc79-sec" aria-labelledby="lc79-s2"><h3 id="lc79-s2">2. The crucial mistake</h3><div class="lc79-case"><div>'+boardSVG(c.fen,c.color,arr)+'<p class="lc79-hint" style="margin:6px 0 0">Red: the move played. Blue: the better move. '+esc(c.student)+' ('+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+').</p></div><div class="lc79-facts">'
       +'<div class="lc79-fact mo"><b>'+esc(mv+it.san)+(it.cls==="blunder"?"??":"?")+'</b>'+(it.bestSan?' Better: <b>'+esc(it.bestSan)+'</b>.':'')+' It cost about '+loss+'% win chance.</div>'
-      +'<div class="lc79-fact mo"><b>Motif: '+esc(c.motif.label)+'.</b> '+esc(c.motif.text)+'</div>'
+      +(c.change&&c.change.length?'<div class="lc79-fact mo"><b>What it changed:</b> '+esc(c.change.join(" "))+'</div>':'')+'<div class="lc79-fact mo"><b>Motif: '+esc(c.motif.label)+'.</b> '+esc(c.motif.text)+'</div>'
       +'<div class="lc79-fact al"><b>Alarm Signal:</b> '+(c.alarm?esc(c.alarm.label)+". "+esc(c.alarm.say):"none of the standard alarms; the error came from skipping an MSPC step.")+'</div>'
       +'<div class="lc79-fact wp"><b>Working Point ('+LN[c.letter]+'):</b> '+esc(c.wp)+'</div>'
       +'<div class="lc79-fact"><b>Action Step:</b> '+esc(c.action)+'</div>'
@@ -743,7 +784,7 @@
       +'<h4>Trimmed game (the video starts at move '+c.start+')</h4><div class="lc79-pre" tabindex="0">'+esc(c.pgn)+'</div>'
       +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="toboard">Load into the Studio board</button><button type="button" class="lc79-b sm" data-a="copypgn">Copy PGN</button></div></section>';
     h+='<section class="lc79-sec" aria-labelledby="lc79-s3"><h3 id="lc79-s3">3. A similar position for the re-hook</h3><div data-sim>'+simHTML()+'</div><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="sim">Find another one</button></div></section>';
-    h+='<section class="lc79-sec" aria-labelledby="lc79-s4"><h3 id="lc79-s4">4. Master prompt for Claude</h3><label class="lc79-f"><span>Who is the hook for? (one specific person)</span><input type="text" data-f="who" maxlength="140" value="'+esc(AI.who)+'"></label>'
+    h+='<section class="lc79-sec" aria-labelledby="lc79-s4"><h3 id="lc79-s4">4. Master prompt for Claude</h3><p class="lc79-hint" style="margin:0">Only the game data goes out: game context, the MSPC diagnosis and the Lichess position. The script structure comes from your own Claude instructions.</p>'
       +'<div class="lc79-row"><button type="button" class="lc79-b pri" data-a="copyprompt">Copy master prompt for Claude</button><button type="button" class="lc79-b sm" data-a="showprompt">Show the prompt</button></div><div class="lc79-pre" data-prompt hidden tabindex="0"></div>'
       +'<label class="lc79-f"><span>Paste Claude’s script here</span><textarea data-f="answer" placeholder="Paste the script Claude wrote, then press Use as my script."></textarea></label><div class="lc79-row"><button type="button" class="lc79-b gold" data-a="usescript">Use as my script</button><span class="lc79-hint">It replaces the text in the Studio’s script panel and prompter.</span></div></section>';
     return h;
@@ -751,7 +792,7 @@
   function cloudHTML(){const c=AI.cloud;if(!c)return'<span class="lc79-hint">Lichess cloud evaluation: checking…</span>';if(c.none)return'<span class="lc79-hint">Lichess cloud evaluation: this position is not in the Lichess cloud.</span>';return'<b>Lichess cloud agrees?</b> Best '+esc(c.san||c.uci)+', '+esc(c.ev)+' (depth '+c.depth+').'}
   function simHTML(){
     const s=AI.sim;if(!s)return'<p class="lc79-hint">Searching Lichess for a puzzle with the same motif…</p>';if(s.err)return'<p class="lc79-hint lc79-err">'+esc(s.err)+'</p>';
-    return'<div class="lc79-case"><div>'+boardSVG(s.fen,s.side,s.last?[{from:s.last.from,to:s.last.to,color:"#ef4444"}]:[])+'</div><div class="lc79-facts"><div class="lc79-fact"><b>Lichess puzzle '+esc(s.id)+'</b>, rating '+s.rating+'. Themes: '+esc(s.themes.slice(0,5).join(", "))+'.</div><div class="lc79-fact">'+(s.side==="w"?"White":"Black")+' to move. Solution: <b>'+esc(s.solSan.join(" "))+'</b></div><div class="lc79-fact"><a href="https://lichess.org/training/'+esc(s.id)+'" target="_blank" rel="noopener" style="color:#38bdf8">Open on Lichess</a></div></div></div>';
+    return'<div class="lc79-case"><div>'+boardSVG(s.fen,s.side,s.last?[{from:s.last.from,to:s.last.to,color:"#ef4444"}]:[])+'</div><div class="lc79-facts"><div class="lc79-fact"><b>Lichess puzzle '+esc(s.id)+'</b>, rating '+s.rating+'. Themes: '+esc(s.themes.slice(0,5).join(", "))+'.</div><div class="lc79-fact">'+(s.side==="w"?"White":"Black")+' to move. Winning line: <b>'+esc(s.line||s.solSan.join(" "))+'</b></div><div class="lc79-fact"><a href="https://lichess.org/training/'+esc(s.id)+'" target="_blank" rel="noopener" style="color:#38bdf8">Open on Lichess</a></div></div></div>';
   }
   async function findSimilar(){
     const c=AI.cs;if(!c)return;AI.sim=null;const box=Q("#lc79-ai [data-sim]");if(box)box.innerHTML=simHTML();
@@ -759,8 +800,8 @@
       const theme=c.motif.theme||LC64.themeFor(c.alarm&&c.alarm.id,c.letter),target=c.rating||((()=>{try{return LC64.rating()}catch(e){return 1500}})());
       const f=await LC64.liClosest(clamp(target,600,2800),theme),P=f&&LC64.puzzleFromJson(f.json);
       if(!P)throw new Error("none");
-      const g=new Chess(P.fen),solSan=[];(P.solution||[]).slice(0,4).forEach(u=>{const m=g.move(uci(u));if(m)solSan.push(m.san)});
-      AI.sim={id:P.id,rating:P.rating,themes:P.themes||[],fen:P.fen,side:P.side,last:P.last,solSan:solSan,theme:theme};
+      const g=new Chess(P.fen),solSan=[];(P.solution||[]).forEach(u=>{const m=g.move(uci(u));if(m)solSan.push(m.san)});
+      AI.sim={id:P.id,rating:P.rating,themes:P.themes||[],fen:P.fen,side:P.side,last:P.last,solSan:solSan,line:numbered(P.fen,P.solution||[]),theme:theme};
     }catch(e){AI.sim={err:"Lichess did not answer (or had no puzzle with this theme). Try again in a moment."}}
     const b2=Q("#lc79-ai [data-sim]");if(b2)b2.innerHTML=simHTML();
   }
@@ -772,50 +813,43 @@
     catch(e){AI.cloud={none:true}}
     const b=Q("#lc79-ai [data-cloud]");if(b)b.innerHTML=cloudHTML();
   }
+  /* 9.39.1: a pure data package. No beats, no timings, no script rules: the structure comes from the owner's own Claude instructions. */
+  const CLOSE="Based on this game data, generate a ~90-second high-retention viral script strictly following your v2.5 Master System Instructions and Project Knowledge Library.";
   function buildPrompt(){
-    const c=AI.cs,g=AI.g,it=c.it,h=g.headers||{},s=AI.sim&&!AI.sim.err?AI.sim:null,host=(location.host||"lanckrietchesstrainerhub.vercel.app");
-    const mv=(c.color==="w"?it.num+". ":it.num+"... ")+it.san;
-    return[
-"You are my short-form video scriptwriter for Lanckriet Chess (YouTube Shorts, Instagram Reels, TikTok, Facebook Reels). Write ONE vertical video script of 30 to 45 seconds in spoken English, in my voice: direct, calm, coach-like. I am Kyenzo.",
+    const c=AI.cs,g=AI.g,it=c.it,h=g.headers||{},s=AI.sim&&!AI.sim.err?AI.sim:null;
+    const mv=(c.color==="w"?it.num+". ":it.num+"... ")+it.san+(it.cls==="blunder"?"??":"?"),bm=it.bestSan?(c.color==="w"?it.num+". ":it.num+"... ")+it.bestSan:"";
+    const elo=(n,e)=>n+(e?" ("+e+")":"");
+    const q=k=>(c.qs.filter(x=>x[0]===k)[0]||[]);
+    let feats=[];try{feats=(LC61.detect(c.fen,c.color)||[]).map(a=>a.label)}catch(e){}
+    const L=[
+"GAME CONTEXT",
+"- White: "+elo(h.White||"White",h.WhiteElo),
+"- Black: "+elo(h.Black||"Black",h.BlackElo),
+(h.Result||h.Site||h.Date?"- Game: "+[h.Result?"result "+h.Result:"",h.Site||"",h.Date||h.UTCDate||""].filter(Boolean).join(", "):null),
+"- Player with the mistake: "+c.student+" ("+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+")",
+"- Moment: move "+it.num+", "+(c.color==="w"?"White":"Black")+" to move",
+"- Crucial mistake: "+mv+(bm?" (better: "+bm+")":"")+", about "+Math.round(it.loss)+"% win chance lost",
+"- What it changed on the board: "+(c.change&&c.change.length?c.change.join(" "):"no single piece lost its defender; the move changed the plan, not the material."),
+(it.replySan?"- Their best reply: "+it.replySan:null),
+"- Motif: "+c.motif.label+". "+c.motif.text,
+"- FEN before the mistake: "+c.fen,
+"- Moves up to the mistake and the reply (PGN): "+trimmedPgn(g,it,true),
 "",
-"FORMAT: for every beat give the spoken line, then [ON-SCREEN TEXT], [BOARD] and [CALLOUT] cues. Callouts I place in one tap in my editor: \"2105 ELO Coach\" (an arrow to me with a ping), \"Blunder!\", \"Alarm Signal\", \"Brilliant!\", \"Working Point\".",
-"",
-"AUTHORITY: do not spend a single word on who I am or on a greeting. At 0:00 write [CALLOUT: 2105 ELO Coach]: the screen carries the authority, the voice goes straight into the hook.",
-"",
-"FACTS YOU MAY USE (do not invent others):",
-"- Kyenzo Lanckriet, certified chess coach, 2105 Rapid on Chess.com (top 0.1%), went from 355 to 2105 in 2 years and 10 months.",
-"- A student gained +630 ELO in 6 weeks (585 to 1214).",
-"- Method: MSPC (Move, Specifics, Priorities, Calculation) and Triple-T (Think, Theory, Trim). Alarm Signals tell you when to stop and run a Working Point.",
-"",
-"THE GAME (trimmed by Stockfish on my device):",
-"- "+(h.White||"White")+(h.WhiteElo?" ("+h.WhiteElo+")":"")+" vs "+(h.Black||"Black")+(h.BlackElo?" ("+h.BlackElo+")":"")+(h.Result?", result "+h.Result:"")+(h.Site?", "+h.Site:"")+".",
-"- The player we learn from: "+c.student+" ("+(c.color==="w"?"White":"Black")+(c.rating?", rated "+c.rating:"")+").",
-"- The video starts at move "+c.start+". Trimmed PGN:",
-c.pgn,
-"- The crucial mistake: "+mv+(it.bestSan?" instead of "+it.bestSan:"")+", costing about "+Math.round(it.loss)+"% win chance. FEN before the mistake: "+c.fen,
-"- The punishment: "+(it.replySan?it.replySan+". ":"")+c.motif.text,
-"- Tactical motif: "+c.motif.label+".",
-"- Alarm Signal on the board: "+(c.alarm?c.alarm.label+": "+c.alarm.say:"none of the standard alarms; the error came from skipping an MSPC step."),
+"MSPC DIAGNOSIS",
+"- Move: "+(q("M")[1]?q("M")[1]+" "+q("M")[2]:"(first move of the game)"),
+"- Specifics: "+c.motif.label+". "+(feats.length?"Board features: "+feats.join(", ")+".":"No standard structure feature on the board."),
+"- Alarm Signal: "+(c.alarm?c.alarm.label+". "+c.alarm.say:"none of the standard alarms; the error came from skipping an MSPC step."),
 "- Working Point ("+LN[c.letter]+"): "+c.wp,
-"- Action Step for the next game: "+c.action,
-"- The Socratic questions that would have saved the game:",
-c.qs.map(q=>"  "+q[0]+": "+q[1]+" ("+q[2]+")").join("\n"),
-(AI.cloud&&!AI.cloud.none?"- Lichess cloud evaluation: best "+(AI.cloud.san||AI.cloud.uci)+", "+AI.cloud.ev+" (depth "+AI.cloud.depth+").":""),
-"- Similar position for the re-hook: "+(s?"Lichess puzzle "+s.id+" (rating "+s.rating+", themes "+s.themes.slice(0,5).join(", ")+"), "+(s.side==="w"?"White":"Black")+" to move, FEN "+s.fen+", solution "+s.solSan.join(" ")+", https://lichess.org/training/"+s.id:"(none found: use a position with the same motif, "+c.motif.label+")"),
+"- Action Step: "+c.action,
 "",
-"TARGET VIEWER (the hook speaks to this one person): "+(AI.who||"a club player who keeps losing the same way"),
+"LICHESS SIMILAR POSITION",
+(s?"- Puzzle: "+s.id+" (rating "+s.rating+", themes "+s.themes.slice(0,6).join(", ")+"), https://lichess.org/training/"+s.id:"- Puzzle: none found right now (same motif: "+c.motif.label+")"),
+(s?"- FEN: "+s.fen:null),
+(s?"- Side to move: "+(s.side==="w"?"White":"Black"):null),
+(s?"- Winning line (to the end of the combination): "+(s.line||s.solSan.join(" ")):null),
 "",
-"STRUCTURE (5 beats):",
-"1. HOOK (0 to 3 s): talk to that ONE specific person, for example \"If you're around 1200 and you keep ...\". No greeting, no name, no channel intro. [CALLOUT: 2105 ELO Coach] runs on screen at the same time.",
-"2. AHA MOMENT (3 to 15 s): show the position, ask the ONE Socratic question that would have saved the game, then reveal the Alarm Signal and the better move. [CALLOUT: Blunder!] on the mistake, [CALLOUT: Alarm Signal] when you name the alarm.",
-"3. RE-HOOK (15 to 25 s): \"Now you try\" with the similar Lichess position: 2 seconds of silence on screen, then the answer.",
-"4. YOUR NEXT GAME (25 to 35 s): the Working Point as one rule they can use in their very next game, plus the Action Step. [CALLOUT: Working Point].",
-"5. CTA (35 to 45 s): one natural sentence inviting them to get their own last game analysed in the Lanckriet Chess app; the link in bio goes to the landing page ("+host+"). You may say \"no card needed\". Not salesy.",
-"",
-"Then give: 3 alternative hooks (each aimed at a specific person), a title of at most 60 characters, and 5 on-screen keywords.",
-"",
-"RULES: never use the words free, cheap, lifetime or forever; never promise a rating result; no comparisons with other chess sites, coaches or apps; use only the facts above; keep every spoken sentence short enough to read as a caption (about 8 words a line)."
-    ].filter(x=>x!=="").join("\n");
+CLOSE];
+    return L.filter(x=>x!==null).join("\n");
   }
   async function copyText(t){
     try{await navigator.clipboard.writeText(t);return true}catch(e){}
@@ -1010,7 +1044,7 @@ c.qs.map(q=>"  "+q[0]+": "+q[1]+" ("+q[2]+")").join("\n"),
     document.addEventListener("keydown",e=>{if(e.key==="Escape"&&layerStack.length){const top=layerStack[layerStack.length-1];if(top==="lc79-ed"&&ED.busy)return;closeLayer(top)}});
     window.addEventListener("hashchange",()=>{if(route()!=="studio")["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true))});
   }
-  return{init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
+  return{boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
     segments:segments,run:run,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,boardSVG:boardSVG,sfx:sfx,
     BUILT:BUILT,db:db,newProject:newProject,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/

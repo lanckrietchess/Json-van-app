@@ -1,6 +1,5 @@
-"""Creator Studio 2.0 (LC79) in real Chromium. Run from the repo root with a local copy of the CDN libraries:
-   npm i chess.js@0.10.3 jquery@3.7.1 @chrisoakman/chessboardjs@1.0.0 html2canvas@1.4.1
-   NM=./node_modules python3 tests/chromium_939/e2e.py   (serves the repo on port 8765; Supabase and other hosts are stubbed)"""
+"""Creator Studio 2.0 (LC79) in real Chromium. From the repo root: npm i chess.js@0.10.3 jquery@3.7.1 @chrisoakman/chessboardjs@1.0.0 html2canvas@1.4.1
+   then NM=./node_modules python3 tests/chromium_939/e2e.py (serves the repo on port 8765; Supabase and other hosts are stubbed)."""
 import asyncio, json, os, sys, time, threading, http.server, functools
 from playwright.async_api import async_playwright
 ROOT=os.environ.get('SITE',os.path.abspath(os.path.join(os.path.dirname(__file__),'..','..'))); NM=os.environ.get('NM','node_modules')
@@ -119,10 +118,10 @@ async def main():
             ok(info[1]>=3 and info[2],'board, mistake and Socratic questions: '+str(info))
             await page.wait_for_timeout(1500)
             pr=await page.evaluate("LC79.buildPrompt()")
-            ok('[CALLOUT: 2105 ELO Coach]' in pr and 'Trimmed PGN' in pr and 'TARGET VIEWER' in pr,'master prompt has callout cue, trimmed PGN, target viewer ('+str(len(pr))+' chars)')
-            bad=[w for w in ['lifetime','forever','cheap'] if w in pr.lower().split('never use the words')[0]]
-            ok(not bad,'no forbidden words outside the rules line')
-            open('prompt_sample.txt','w').write(pr)
+            ok(pr.startswith('GAME CONTEXT') and '\nMSPC DIAGNOSIS\n' in pr and '\nLICHESS SIMILAR POSITION\n' in pr and pr.rstrip().endswith('Project Knowledge Library.') and 'What it changed on the board:' in pr and 'STRUCTURE' not in pr and 'CALLOUT' not in pr,'clean data prompt: 3 sections + closing line, no structure ('+str(len(pr))+' chars)')
+            bad=[w for w in ['lifetime','forever','cheap','seconds','beat'] if w in pr.lower().replace('~90-second','')]
+            ok(not bad and 'Action Step: '+'x' not in pr and pr.split('- Working Point')[1].split('\n')[0].split(': ',1)[1]!=pr.split('- Action Step: ')[1].split('\n')[0],'no timing, beats or sales words in the data '+str(bad))
+            open('prompt_live.txt','w').write(pr);clip=await page.evaluate("(async()=>{let got='';const o=navigator.clipboard.writeText.bind(navigator.clipboard);navigator.clipboard.writeText=t=>{got=t;return Promise.resolve()};document.querySelector('#lc79-ai [data-a=copyprompt]').click();await new Promise(r=>setTimeout(r,300));return got})()");ok(clip==pr,'the button copies exactly this prompt')
             sim=await page.evaluate("document.querySelector('#lc79-ai [data-sim]').textContent")
             ok('Lichess' in sim,'Lichess similar position: graceful when offline -> '+sim[:80])
             await page.click('#lc79-ai [data-a="toboard"]')
