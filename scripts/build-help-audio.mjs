@@ -79,9 +79,9 @@ const chars = todo.reduce((n, t) => n + t.text.length, 0);
 console.log(`${todo.length} clip(s) to generate, ${chars} characters, voice ${VOICE || '(not set)'}, model ${MODEL}.`);
 if (DRY) { todo.forEach((t) => console.log(`  ${t.f.feature_id.padEnd(14)} ${String(t.text.length).padStart(4)} chars`)); process.exit(0); }
 
-let spent = 0, made = 0;
+let spent = 0, made = 0, budgetStop = false;
 for (const t of todo) {
-  if (spent + t.text.length > BUDGET) { console.log(`Budget of ${BUDGET} characters reached. Run the script again later to continue.`); break; }
+  if (spent + t.text.length > BUDGET) { budgetStop = true; console.log(`Budget of ${BUDGET} characters reached. Run the script again later to continue.`); break; }
   const res = await fetch(`${API}/v1/text-to-speech/${encodeURIComponent(VOICE)}?output_format=mp3_44100_128`, {
     method: 'POST',
     headers: { 'xi-api-key': KEY, 'Content-Type': 'application/json', Accept: 'audio/mpeg' },
@@ -90,7 +90,7 @@ for (const t of todo) {
   if (!res.ok) {
     const body = String(await res.text()).slice(0, 300);
     console.error(`FAILED ${t.f.feature_id}: HTTP ${res.status} ${body}`);
-    if ([401, 402, 403, 429].includes(res.status)) {
+    if ([401, 402, 403, 429].includes(res.status) || /authentication_error|invalid_api_key/.test(body)) {
       console.error('Stopping: this is a key, plan or quota problem, not a text problem. A 402 usually means the voice needs a paid plan.');
       break;
     }
@@ -106,3 +106,4 @@ for (const t of todo) {
   await sleep(400);
 }
 console.log(`Done: ${made} generated, ${spent} characters used. Commit assets/audio/help/ and assets/help/help.json to GitHub.`);
+if (made < todo.length && !budgetStop) process.exitCode = 1;   /* something failed: let the GitHub Action show red, not green */
