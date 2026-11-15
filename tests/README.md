@@ -59,3 +59,10 @@ the app, nothing under it is visible or tappable, the app does not boot, Android
 Facebook), iOS 17+ the x-safari link, iOS 16 Copy the link + the steps; Chrome and Safari never see it; ?lc_iab=0 switches it off; the Install
 button prompts at once when Chrome offered the prompt, otherwise shows the steps on the landing page (and "Install now" when the prompt arrives
 while they are open); the three copies of lc87 are the same and first in both heads.
+
+9.48.0: `python3 tests/run.py lc88` (390 px, a new player): one guide at a time. Every guiding block (quest level, quest drip, roads, claim,
+coach notes from the LC19 stack, save hint, upgrade banner, mission card) is hidden and exactly one of them shows in the banner under the
+navigation, with at most two buttons; no fixed pop-up on screen; on #quests the quest board is the step and the banner steps aside; a coach note
+takes the banner and its cross gives it back; after the first game review the banner moves on to quest level 2; a level-up sheet hides the
+banner; after the quest levels the ritual road shows one step; the OG badge and a second celebration wait in the bell; the same sheet never
+opens twice; lc88.js equals the inline module.
