@@ -184,7 +184,7 @@ const LC39=(()=>{
         const paint=async force=>{
           const a=acct(cur),box=Q("[data-lc39-list]",card);if(!a||!box)return;
           box.innerHTML='<p class="muted small">Loading your latest games…</p>';
-          try{if(force)delete libCache[cur+":"+String(a.user).toLowerCase()+":20"];list=await games(cur,a.user,20);box.innerHTML=list.length?libRows(list):'<p class="muted">No games found for '+E(a.user)+' yet.</p>'}
+          try{if(force)delete libCache[cur+":"+String(a.user).toLowerCase()+":20"];list=await games(cur,a.user,20);box.innerHTML=list.length?libRows(list):'<p class="muted">No games found for '+E(a.user)+' yet.</p>';if(!force)autoTrim(view,list)}
           catch(e){box.innerHTML='<p class="form-msg is-bad">Could not load your games right now. Check your connection and try again.</p>'}
         };
         card.innerHTML='<div class="lc39-libhead"><h2 class="lc39-hl">Trim your library</h2><div class="seg" role="group" aria-label="Game source">'+sites.map(s=>'<button type="button" data-lc39-site="'+s+'" aria-pressed="'+(s===cur)+'">'+nameOf(s)+'</button>').join("")+'</div></div><p class="muted small">Pick a game. Your Hub loads it into the review below.</p><div data-lc39-list></div><div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-lc39-refresh>Refresh</button></div>';
@@ -197,6 +197,32 @@ const LC39=(()=>{
       }
     }
     if(j&&j.pgn){wr("lc39-jump",null);setTimeout(()=>loadIntoTrim(view,{pgn:j.pgn,color:j.color},j.ply),60)}
+  }
+  /* 9.44.0: open Trim and your newest game that was not opened this way before is already on the board; when a daily (free) token is
+     left, or reviews are unlimited, the review starts by itself. Never on the first-time road (it picks its own games), never over a game
+     that is already loaded, never with a bought token. Once per visit. */
+  let autoVisit=false;
+  function autoTrim(view,list){
+    try{
+      if(!list||!list.length||autoVisit||hashNow()!=="trim")return;autoVisit=true;
+      if(CONFIG.lc39&&CONFIG.lc39.autoTrim===false)return;
+      try{if(typeof LC42!=="undefined"&&LC42.owns())return}catch(e){}
+      if(rd("lc39-jump",null))return;
+      const mv=Q("#an-moves",view),ta=Q("#an-pgn",view);
+      if(mv&&mv.children.length||ta&&String(ta.value||"").trim())return;
+      const seen=rd("lc39-auto",{})||{},sig=g=>String(g.site||"")+":"+String(g.t||"")+":"+String(g.opp||"");
+      const g=list.filter(x=>!seen[sig(x)])[0];if(!g)return;
+      seen[sig(g)]=Date.now();const ks=Object.keys(seen);if(ks.length>80)ks.sort((a,b)=>seen[a]-seen[b]).slice(0,ks.length-80).forEach(k=>{delete seen[k]});wr("lc39-auto",seen);
+      loadIntoTrim(view,g);
+      let free=false;try{free=TrimQuota.unlimited()||Quota.leftNow()>0}catch(e){}
+      say(free?"Your newest game is on the board. The Trim review runs by itself.":"Your newest game is on the board. Tap Run the Trim review when you are ready.","good");
+      if(!free)return;
+      let n=0;const iv=setInterval(()=>{
+        if(++n>40||hashNow()!=="trim"){clearInterval(iv);return}
+        const rv=Q('[data-act="review"]',view),m=Q("#an-moves",view),bar=Q("#an-review-bar",view);
+        if(rv&&!rv.disabled&&m&&m.children.length&&!(bar&&!bar.hidden)){clearInterval(iv);rv.click()}
+      },400);
+    }catch(e){}
   }
   function loadIntoTrim(view,g,steps){
     try{
@@ -295,7 +321,9 @@ const LC39=(()=>{
     for(const q of QUESTS){if(d[q.id]||st.skip[q.id])continue;if(minLv(q.route)>lvlNow()){locked=true;continue}return{q:q,locked:false,n:QUESTS.indexOf(q)+1}}
     return{q:null,locked:locked}}
   const onRoute=q=>hashNow()===q.route||(q.route==="think"&&hashNow()==="think");
-  function drip(){return!qst().off&&!(CONFIG.lc39&&CONFIG.lc39.drip===false)}
+  /* 9.44.0: while the first-time road (LC42 / LC84) has its own strip, this one waits: one strip at a time */
+  const road=()=>{try{return typeof LC84!=="undefined"&&LC84.owns()}catch(e){return false}};
+  function drip(){return!qst().off&&!(CONFIG.lc39&&CONFIG.lc39.drip===false)&&!road()}
   const NOSTRIP=/^(admin|privacy|upgrades|level0|account)/;
   function paintStrip(route,view){
     const old=Q("#lc39-q",view)||Q("#lc39-q");if(old)old.remove();
@@ -404,7 +432,7 @@ const LC39=(()=>{
         const f=Q("[data-c-form]",view),title=Q("[data-c-title]",f).value.trim(),text=Q("[data-c-text]",f).value.trim(),cat=Q("[data-c-cat-sel]",f).value;
         if(!title||!text){err(f,{reason:"bad_input"});return}
         t.disabled=true;const r=await api("c39_post",{community:S.comm||"main",category:cat,title:title,body:text});t.disabled=false;
-        if(r&&r.ok===true){say("Posted.","good");S.cat="";loadFeed(true)}else err(f,r);return}
+        if(r&&r.ok===true){say("Posted.","good");S.cat="";loadFeed(true);try{window.dispatchEvent(new CustomEvent("lc39-posted",{detail:cat}))}catch(x){}}else err(f,r);return}
       if(t.hasAttribute("data-c-csend")){
         const box=t.closest(".lc39-cform"),txt=Q("[data-c-ctext]",box).value.trim();if(!txt){err(box,{reason:"bad_input"});return}
         t.disabled=true;const r=await api("c39_comment",{post:+t.getAttribute("data-c-csend"),body:txt});t.disabled=false;
@@ -507,6 +535,7 @@ const LC39=(()=>{
   function afterRender(route){
     try{
       const view=Q("#view");if(!view)return;
+      if(route!=="trim")autoVisit=false;
       setTimeout(()=>{try{paintStrip(route,view)}catch(e){console.error(e)}},60);
       /* some pages build their content a moment after render: paint now, then again whenever the page changes (every paint is idempotent) */
       const run=()=>{try{if(hashNow()===""&&route!=="home")return;const v=Q("#view");if(!v)return;if(!Q("#lc39-q",v))paintStrip(route,v);paintAdminCard(route,v);paintLibrary(route,v);paintShuffle(route,v);if(route==="account")paintAccount(v)}catch(e){console.error(e)}};
@@ -528,6 +557,6 @@ const LC39=(()=>{
       setInterval(()=>{try{if(document.visibilityState!=="visible"||!drip())return;const v=Q("#view"),d=doneMap(),st=qst();const nx=nextQuest();const on=Q("#lc39-q");if(v&&(!on&&nx.q&&!NOSTRIP.test(hashNow())||on&&nx.q&&st.id&&st.id!==nx.q.id))paintStrip(hashNow(),v)}catch(e){}},2500);
     }catch(e){console.error("lc39",e)}
   }
-  return{init:init,afterRender:afterRender,gate:gate,drip:drip,openVideo:openVideo,mountCommunity:mountCommunity,_t:{paintLibrary:paintLibrary,embed:embed,https:https,nextQuest:nextQuest,findBlunder:findBlunder,quickWin:quickWin,boardHTML:boardHTML,libRows:libRows,videoUrl:videoUrl,applyVideo:applyVideo,saveVideo:saveVideo,paintStrip:paintStrip}};
+  return{init:init,afterRender:afterRender,gate:gate,drip:drip,openVideo:openVideo,mountCommunity:mountCommunity,_t:{paintLibrary:paintLibrary,autoTrim:autoTrim,embed:embed,https:https,nextQuest:nextQuest,findBlunder:findBlunder,quickWin:quickWin,boardHTML:boardHTML,libRows:libRows,videoUrl:videoUrl,applyVideo:applyVideo,saveVideo:saveVideo,paintStrip:paintStrip}};
 })();
 /*@@end lc39*/

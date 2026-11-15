@@ -1,0 +1,51 @@
+# Coach Lanckriet help audio (the ? buttons).
+# Generates ONLY the clips that are missing or whose text changed in assets/help/help.json, with the same voice and model
+# as every existing clip (voice jfIS2w2yJi0grJZPyEsk, eleven_multilingual_v2), and commits the mp3 files + help.json back
+# to the same branch. Needs ONE repository secret: ELEVENLABS_API_KEY (GitHub > Settings > Secrets and variables > Actions).
+# Without that secret the job only prints the dry run and changes nothing.
+name: Help audio (Coach Lanckriet)
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main]
+    paths: [assets/help/help.json]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: help-audio-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    env:
+      ELEVENLABS_VOICE_ID: jfIS2w2yJi0grJZPyEsk
+      ELEVENLABS_MODEL: eleven_multilingual_v2
+      HAS_KEY: ${{ secrets.ELEVENLABS_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: What would be generated
+        run: node scripts/build-help-audio.mjs --dry
+      - name: Generate the missing clips
+        if: env.HAS_KEY == 'true'
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: node scripts/build-help-audio.mjs --budget 12000
+      - name: Commit the clips
+        if: env.HAS_KEY == 'true'
+        run: |
+          git config user.name "help-audio-bot"
+          git config user.email "help-audio-bot@users.noreply.github.com"
+          git add assets/audio/help assets/help/help.json
+          if git diff --cached --quiet; then echo "Nothing new."; exit 0; fi
+          git commit -m "Coach Lanckriet help audio: generate missing clips"
+          git push
+      - name: No key yet
+        if: env.HAS_KEY != 'true'
+        run: echo "Add the repository secret ELEVENLABS_API_KEY, then run this workflow again (Actions > Help audio > Run workflow)."

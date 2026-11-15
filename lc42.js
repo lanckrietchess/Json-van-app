@@ -7,7 +7,9 @@ const LC42=(()=>{
               only now the 9 other recent games are fetched and scanned in the background. A finished Trim review = Level 2.
      Level 2: overview of the leaks across the games + personal working points -> MSPC System: tap the ? and listen to Coach Lanckriet to the end = Level 3.
      Level 3: Game Library opens -> tap the ? on Trim and listen to the end -> trim one of the other games yourself = Level 4 (the normal quests continue).
-     One saved state (Store lc42-onb). Steps: tease, first, sys, libq, second, done. */
+     One saved state (Store lc42-onb). Steps: tease, first, sys, libq, second, done.
+     9.44.0: Level 2 asks to save the progress with Google right in its own sheet (the LC53 gate, counted as LC53's one ask) and the strip
+     keeps that button until the person is signed in. Level 4 hands over to LC84 (patterns, the blue sections, the Student Quests). */
   const Q=(s,r)=>(r||document).querySelector(s);
   const E=s=>{try{return esc(s)}catch(e){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}};
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -38,6 +40,7 @@ const LC42=(()=>{
   const xpNow=()=>{try{return LC26.sync.snapshot().xp||0}catch(e){return 0}};
   const helpSeen=id=>{try{return !!(rd("lc29-help-seen",{})||{})[id]}catch(e){return false}};
   const award=()=>{try{V6.addXp("think",XP,{noBench:true,noFw:true})}catch(e){}};
+  const signedIn=()=>{try{return !!LC26.sync.session()}catch(e){return false}};
   const toast2=(m,k)=>{try{toast(m,k||"")}catch(e){}};
   /* only ever raises the quest level (never lowers it, never touches a finished or admin quest) */
   function setLevel(n){
@@ -473,10 +476,13 @@ const LC42=(()=>{
     put({step:"sys",since:Date.now(),l2:Date.now()});
     award();setLevel(2);addPoints();
     try{scanRest()}catch(e){}
-    const b=ovBody();
+    const b=ovBody(),out=!signedIn()&&!admin();
+    let gate="";
+    if(out){try{gate=LC53.gateHTML();LC53.markAsked()}catch(e){gate=""}}
+    const save=gate?'<p class="lc42-k"><b>Step 1: save your progress.</b> Sign in with Google so your levels, your games and your working points stay with you on every device.</p>'+gate:"";
     try{
       openSheet({title:"Level 2",cls:"lc25-sheet lc25-level lc42-sheet",noFocus:true,
-        html:'<div class="lc25-pop"><h2>Level 2 unlocked</h2><p><b>+'+XP+' XP</b></p></div><p><b>Well done.</b> Your first full Trim is finished, and I imported your recent games and checked them too. This is where you lose the most points:</p><ul class="lc42-ov" data-lc42-ovlist>'+b.rows+'</ul><p class="small muted" data-lc42-ovstat>'+E(b.status)+'</p><p>I saved your top leaks as personal working points. To <b>remember your results</b> and keep giving you personal feedback, add your email:</p>'+saveBlock(true)+'<p>Next: open your MSPC System. It also shows the working points that fit your rating.</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc42-go="system">Open my MSPC System</button><button type="button" class="btn btn-quiet" data-close>Later</button></div>'});
+        html:'<div class="lc25-pop"><h2>Level 2 unlocked</h2><p><b>+'+XP+' XP</b></p></div><p><b>Well done.</b> Your first full Trim is finished, and I checked your recent games too. This is where you lose the most points:</p><ul class="lc42-ov" data-lc42-ovlist>'+b.rows+'</ul><p class="small muted" data-lc42-ovstat>'+E(b.status)+'</p><p>I saved your top leaks as personal working points.</p>'+save+'<p class="lc42-k"><b>'+(gate?"Step 2: ":"Next: ")+'your MSPC System.</b> Open it, tap the <b>?</b> and listen to Coach Lanckriet to the end.</p><div class="btn-row"><button type="button" class="btn '+(gate?"btn-ghost":"btn-primary")+'" data-lc42-go="system">Open my MSPC System</button><button type="button" class="btn btn-quiet" data-close>Later</button></div>'});
     }catch(e){}
   }
 
@@ -495,8 +501,10 @@ const LC42=(()=>{
   function secondDone(){
     put({step:"done",doneAt:Date.now()});
     award();setLevel(4);
+    let road=false;try{road=typeof LC84!=="undefined"&&LC84.begin()}catch(e){}
     try{openSheet({title:"Level 4",cls:"lc25-sheet lc25-level lc42-sheet",noFocus:true,
-      html:'<div class="lc25-pop"><h2>Level 4 unlocked</h2><p><b>+'+XP+' XP</b></p></div><p>You trimmed a game on your own. You know the way now. Your quests continue on the quest board.</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc42-go="quests">Open my quests</button><button type="button" class="btn btn-quiet" data-close>Later</button></div>'})}catch(e){}
+      html:road?'<div class="lc25-pop"><h2>Level 4 unlocked</h2><p><b>+'+XP+' XP</b></p></div><p>You trimmed a game on your own. Next: your patterns. I checked your last games with Stockfish and the MSPC steps, so you see where you lose the most points and pick the training that fits.</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc84-pat>See my patterns</button><button type="button" class="btn btn-quiet" data-close>Later</button></div>'
+        :'<div class="lc25-pop"><h2>Level 4 unlocked</h2><p><b>+'+XP+' XP</b></p></div><p>You trimmed a game on your own. You know the way now. Your quests continue on the quest board.</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc42-go="quests">Open my quests</button><button type="button" class="btn btn-quiet" data-close>Later</button></div>'})}catch(e){}
     const x=Q("#lc42-strip");if(x)x.remove();
   }
   function claimBar(on){
@@ -552,7 +560,7 @@ const LC42=(()=>{
     }
     if(s.step==="tease")return{k:"tease",t:"<b>Your first quick win is waiting.</b> One mistake from your latest game.",b:'<button type="button" class="btn btn-primary" data-lc42-tease>Show me</button>'};
     if(s.step==="first")return route==="trim"?{k:"first"+(s.quiz?1:0)+(s.ready2?"r":""),t:s.quiz?(s.ready2?"<b>Your review is done.</b> Go through your mistakes on the board; press Claim Level 2 at the bottom when you are ready.":"<b>Level 1: your Trim.</b> Walk through your mistakes. When the review is done you reach Level 2."):"<b>Your Trim is already running.</b> First find the better move on the card.",b:""}:{k:"first2",t:"<b>Next:</b> finish the Trim of your game. It opens Level 2.",b:go("trim","Back to my Trim")};
-    if(s.step==="sys")return{k:"sys"+route+(skipOn("system")?1:0),t:"<b>Level 2: your MSPC System.</b> Open it, tap the <b>?</b> and listen to Coach Lanckriet to the end. Then look around: the working points for your rating and your personal ones are in there.",b:go("system","Open my MSPC System")+skip("system")};
+    if(s.step==="sys"){const g=!signedIn()&&!admin();return{k:"sys"+route+(skipOn("system")?1:0)+(g?"g":""),t:(g?"<b>Level 2: save your progress with Google</b>, then your MSPC System. ":"<b>Level 2: your MSPC System.</b> ")+"Open it, tap the <b>?</b> and listen to Coach Lanckriet to the end. Then look around: the working points for your rating and your personal ones are in there.",b:(g?'<button type="button" class="btn btn-primary" data-lc39-google>Save with Google</button>':"")+go("system","Open my MSPC System")+skip("system")}}
     if(s.step==="libq")return{k:"libq"+route+(skipOn("trim")?1:0),t:"<b>Level 3: your Game Library.</b> Tap the <b>?</b> on this page and listen to Coach Lanckriet to the end.",b:go("trim","Open the Game Library")+skip("trim")};
     if(s.step==="second")return{k:"second"+route,t:"<b>Last step to Level 4.</b> Pick one of your other games in the Library and run the full Trim yourself.",b:go("trim","Open the Game Library")};
     return null;

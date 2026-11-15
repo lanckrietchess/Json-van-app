@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.43.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.44.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.43.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.43.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.44.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.44.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.43.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.44.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -501,7 +501,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.43.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.44.0</p></footer>
 
 <script>
 "use strict";
@@ -550,9 +550,27 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     },function(){})}catch(err){}
   }
   function waitPrompt(ms){return new Promise(function(res){if(bip)return res(true);var t=setTimeout(function(){res(!!bip)},ms);window.addEventListener("beforeinstallprompt",function(){clearTimeout(t);setTimeout(function(){res(true)},0)},{once:true})})}
+  /* 9.44.0: inside Instagram / TikTok / Facebook the button breaks out of the in-app browser at once: Android opens the app page in
+     Chrome (which then offers Install), iPhone (iOS 17+) opens it in Safari; where that is not possible the steps and a copy button show. */
+  var UA=navigator.userAgent||"",IAB=/FBAN|FBAV|FB_IAB|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|Snapchat|Twitter|LinkedInApp|Line\//i.test(UA);
+  var IOS=/iPhone|iPad|iPod/i.test(UA)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),AND=/Android/i.test(UA);
+  var iosV=(function(){var m=/OS (\d+)_/.exec(UA);return m?+m[1]:0})();
+  function escapeIab(a){
+    var u;try{u=new URL(a.getAttribute("href")||"/app.html?install=1",location.href)}catch(x){u=new URL("/app.html?install=1",location.href)}
+    u.searchParams.set("install","1");u.searchParams.set("source","iab");
+    var abs=u.origin+u.pathname+u.search;
+    var nav=window.__lcNav||function(x){location.href=x};   /* __lcNav: tests only */
+    if(AND){nav("intent://"+u.host+u.pathname+u.search+"#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(abs)+";end");return}
+    if(IOS&&iosV>=17){nav("x-safari-"+abs)}
+    setTimeout(function(){
+      if(document.visibilityState==="hidden")return;
+      try{(navigator.clipboard?navigator.clipboard.writeText(abs):Promise.reject()).then(function(){instMsg("Link copied. Tap ⋯ at the top and choose Open in browser (or paste it in Safari), then Share → Add to Home Screen.")},function(){instMsg("Tap ⋯ at the top and choose Open in browser. In Safari: Share → Add to Home Screen.")})}catch(x){instMsg("Tap ⋯ at the top and choose Open in browser. In Safari: Share → Add to Home Screen.")}
+    },IOS&&iosV>=17?1200:0);
+  }
   document.addEventListener("click",function(e){
     var a=e.target.closest&&e.target.closest("[data-install]");
     if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    if(IAB){e.preventDefault();escapeIab(a);return}
     if(bip){e.preventDefault();promptNow();return}
     if("onbeforeinstallprompt" in window&&!a.__lcWaited){          /* Chromium: the prompt can arrive a moment after the page loads */
       e.preventDefault();a.__lcWaited=true;

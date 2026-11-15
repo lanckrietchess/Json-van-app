@@ -1,7 +1,7 @@
 /*@@module lc83*/
 const LC83=(()=>{
   "use strict";
-  /* LC83 (build 9.43.0): the honest MSPC engine, the calm guide and the mobile shell.
+  /* LC83 (build 9.43.0, 9.44.0): the honest MSPC engine, the calm guide and the mobile shell.
      1. TRUTH: every coach sentence about a move is built from facts read off the board (geometry + chess.js), never from a guess.
         A move "attacks" something only when that piece can really be won: it has no defender, or the attacker is worth less.
         A quiet move (h5, a3, Kh1) is called quiet: "it attacks nothing you can lose", with what it really changed (a pawn in front of
@@ -12,8 +12,14 @@ const LC83=(()=>{
      3. MOBILE SHELL: the on-screen keyboard never covers a field or a sheet (visualViewport: sheets fit the visible part, the focused
         field scrolls into view, fixed bottom bars step aside), no zoom-on-focus on iPhone, no double-tap delay on buttons.
         Inside Instagram / TikTok / Facebook / Snapchat in-app browsers (which cannot install an app) a quiet bar shows how to open the
-        Hub in the real browser and install it as a standalone app. */
-  const VERSION="9.43.0";
+        Hub in the real browser and install it as a standalone app.
+     9.44.0: ONE calm message at a time, everywhere. A pop-up the person did not ask for (no tap in the last 3 s) waits while another
+        pop-up is open and never lands on the Trim analysis; an install / upgrade / promo pop-up also keeps 20 s away from the previous
+        pop-up and never lands on an exercise: it comes when the person leaves. The road (LC42, LC84) and the sign-in sheets always pass.
+        Trim on a phone: no sticky board that the page slides under, the title and its ? at the top, then board, move buttons, the moves and
+        the review button, the coach, the report; engine lines, the library and the PGN box under that. A finished review keeps the board in
+        view instead of jumping to the report. */
+  const VERSION="9.44.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -190,10 +196,29 @@ const LC83=(()=>{
   }
 
   /* ======================= 2. CALM GUIDE ======================= */
-  const ALLOW=/lc42|lc40-auth|lc53|lc39|lc26/;
-  let held=[],relT=0,busyAt=0,lvl=null;
+  const ALLOW=/lc42|lc84|lc40-auth|lc53|lc39|lc26/;
+  const PROMO=/lc34|lc43|lc45|lc72|lc82|upsell|promo|install/;
+  const TASKR=/^(trim|think|bot|shuffle|ranked-shuffle|themes|puzzles|mspc-rep|vision|survival|clinic)$/;
+  const GAP=20000,USER_MS=3000;
+  let held=[],relT=0,busyAt=0,lvl=null,gestAt=0,autoAt=0,allowTill=0;
+  const hashNow=()=>{let h="";try{h=decodeURIComponent((location.hash||"").replace(/^#/,"")).toLowerCase()}catch(e){h=""}return h.split("/")[0].split("?")[0]};
   const marathon=()=>!!Q(".lc42-sheet");   /* the marathon itself and the Level sheet that ends it */
   const busy=()=>{if(marathon())busyAt=Date.now();return Date.now()-busyAt<4000};
+  const reviewing=()=>{const b=Q("#an-review-bar");return !!b&&!b.hidden};
+  const userish=()=>Date.now()-gestAt<USER_MS||Date.now()<allowTill;
+  /* should this pop-up wait? auto = nobody tapped for it */
+  function blocked(o,auto){
+    const cls=String(o&&o.cls||"");
+    if(ALLOW.test(cls))return false;
+    if(busy())return true;
+    if(!auto)return false;
+    if(Q(".sheet-wrap"))return true;
+    if(PROMO.test(cls)&&(TASKR.test(hashNow())||Date.now()-autoAt<GAP))return true;
+    if(hashNow()==="trim")return true;   /* nothing pops up by itself on top of an analysis: it comes when the person leaves Trim */
+    return false;
+  }
+  /* a caller that opens a pop-up on purpose without a tap (the landing page's ?install=1) */
+  function allow(ms){allowTill=Date.now()+(+ms||2500)}
   function wrapSheets(){
     try{
       if(typeof openSheet!=="function"||openSheet.__lc83)return;
@@ -203,11 +228,13 @@ const LC83=(()=>{
           const ti=String(o&&o.title||""),lm=ti.match(/^Level (\d+)$/),dm=ti.match(/^Level (\d+) unlocked$/);
           if(lm&&/lc42/.test(String(o&&o.cls||"")))lvl={n:lm[1],t:Date.now()};
           if(dm&&lvl&&lvl.n===dm[1]&&Date.now()-lvl.t<18e4)return{el:document.createElement("div"),close(){},deferred:true};   /* the same level-up twice: once is enough */
-          if(busy()&&!ALLOW.test(String(o&&o.cls||""))){
+          const auto=!userish();
+          if(blocked(o,auto)){
             held=held.filter(x=>x.o.title!==(o&&o.title)).concat([{o:o,t:Date.now()}]).slice(-3);
             schedule();
             return{el:document.createElement("div"),close(){},deferred:true};
           }
+          if(auto&&!ALLOW.test(String(o&&o.cls||"")))autoAt=Date.now();
         }catch(e){}
         return prev.apply(this,arguments);
       };
@@ -217,9 +244,10 @@ const LC83=(()=>{
   function schedule(){clearTimeout(relT);relT=setTimeout(release,2500)}
   function release(){
     if(!held.length)return;
-    if(busy()||Q(".sheet-wrap")||(document.activeElement&&/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))){schedule();return}
     held=held.filter(x=>Date.now()-x.t<15*6e4);
-    const x=held.shift();if(x){try{openSheet(x.o)}catch(e){}}
+    if(!held.length)return;
+    if(blocked(held[0].o,true)||(document.activeElement&&/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))){schedule();return}
+    const x=held.shift();if(x){gestAt=0;try{openSheet(x.o)}catch(e){}}
     if(held.length)relT=setTimeout(release,3500);
   }
 
@@ -267,7 +295,17 @@ const LC83=(()=>{
       +"html.lc-kb #lc49-float,html.lc-kb .lc49-float,html.lc-kb .lc42-claim,html.lc-kb .lc45-pill,html.lc-kb .lc72-note,html.lc-kb .lc69-bubble,html.lc-kb .lc67-simbar,html.lc-kb .lc25-wait,html.lc-kb .lc30-note,html.lc-kb .data-banner,html.lc-kb .cbar,html.lc-kb .lc83-iab,html.lc-kb .lc54-dock{display:none!important}"
       +"html.lc-kb .sheet-wrap{top:var(--lc-vvt,0px);bottom:auto;height:var(--lc-vvh,100%);align-items:flex-end}html.lc-kb .sheet{max-height:calc(var(--lc-vvh,90vh) - 8px)}"
       +".lc83-iab{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:95;padding:10px 12px;border-radius:16px;background:#1e293b;border:1px solid #38bdf8;box-shadow:0 14px 40px rgba(0,0,0,.55);font-size:14px;line-height:1.4;max-width:560px;margin:0 auto}"
-      +".lc83-iab p{margin:0 0 8px}.lc83-iab-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.lc83-iab .btn{min-height:44px}.lc83-x{margin-left:auto;width:44px;height:44px;border:0;background:transparent;color:#94a3b8;font-size:22px;cursor:pointer}";
+      +".lc83-iab p{margin:0 0 8px}.lc83-iab-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.lc83-iab .btn{min-height:44px}.lc83-x{margin-left:auto;width:44px;height:44px;border:0;background:transparent;color:#94a3b8;font-size:22px;cursor:pointer}"
+      /* Trim on a phone: one column in reading order, nothing sticky for the page to slide under */
+      +"@media (max-width:959px){#view:has(.an-grid){display:flex;flex-direction:column;overflow-x:clip}"
+      +"#view:has(.an-grid)>.page-head{order:-30!important;margin:0 0 8px;padding:0}#view:has(.an-grid)>.page-head h1{font-size:22px!important;line-height:1.25;margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}#view:has(.an-grid)>.page-head>p,#view:has(.an-grid)>.page-head .lead{display:none}"
+      +"#view:has(.an-grid)>.an-grid{order:-10!important;min-width:0}#view:has(.an-grid)>#lc73-pga{order:40}"
+      +".an-grid .an-main{display:flex!important;flex-direction:column;min-width:0}"
+      +".an-main>.board-shell,.an-main>.nav-row{position:static!important;top:auto!important;max-width:100%!important}"
+      +".an-main>#an-meta{order:-4!important}.an-main>.board-shell{order:-3!important}.an-main>.nav-row{order:-2!important}.an-main>#an-interro{order:-1!important}"
+      +".an-main>.panel.pad{order:1!important}.an-main>#coach{order:2!important}.an-main>#an-report{order:3!important}.an-main>.cp{order:4!important}.an-main>#an-var{order:5!important}"
+      +".an-main:has(#an-moves>*)>#lc39-lib{order:6!important}.an-main>#an-import{order:7!important}.an-main:not(:has(#an-moves>*))>#lc39-lib{order:-6!important}"
+      +".an-main>*{min-width:0;max-width:100%}.an-main pre,.an-main .cp,#coach{overflow-wrap:anywhere}}";
     document.head.appendChild(s);
   }
   function onClick(e){
@@ -276,11 +314,22 @@ const LC83=(()=>{
     if(t.closest("[data-lc83-copy]")){const u=location.origin+"/app.html";(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{try{toast("Link copied. Paste it in Safari or Chrome.","good")}catch(x){}},()=>{try{prompt("Copy this link:",u)}catch(x){}});return}
   }
   function afterRender(){if(held.length)schedule()}
+  /* a finished Trim review on a phone: keep the board in view (the old code jumped to the report at the bottom) */
+  function keepBoard(){
+    try{
+      if(window.innerWidth>=960||hashNow()!=="trim")return false;
+      const b=Q(".an-main>.board-shell")||Q("#an-board");if(!b)return false;
+      const r=b.getBoundingClientRect();
+      if(r.top<-40||r.top>window.innerHeight*0.45)b.scrollIntoView({behavior:"smooth",block:"start"});
+      return true;
+    }catch(e){return false}
+  }
   function init(){
     css();wrapSheets();keyboard();
     document.addEventListener("click",onClick,true);
+    ["pointerdown","keydown","touchstart"].forEach(n=>document.addEventListener(n,()=>{gestAt=Date.now()},true));
     setTimeout(iabBar,1500);
   }
   return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
-    NEXT:NEXT,inApp:inApp,intentUrl:intentUrl,_t:{held:()=>held,release:release,iabBar:iabBar},version:VERSION};
+    NEXT:NEXT,inApp:inApp,intentUrl:intentUrl,allow:allow,keepBoard:keepBoard,_t:{held:()=>held,release:release,iabBar:iabBar,blocked:blocked,gap:()=>autoAt,touch:t=>{gestAt=t==null?Date.now():t},reset:()=>{autoAt=0;held=[];clearTimeout(relT)}},version:VERSION};
 })(); /*@@end lc83*/

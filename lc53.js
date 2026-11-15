@@ -47,6 +47,7 @@ const LC53=(()=>{
     if(trimPending)finishTrim();
     if(sess()||admin())return;
     if(s.asks>=MAX_ASKS||(s.asks&&s.reviews<=s.askedAtReview))return;   /* after "Not now": only again after a later review */
+    if(s.stage==="auth-wait"&&Date.now()-(+s.lastAsk||0)<36e5)return;   /* 9.44.0: the road's Level 2 sheet just asked */
     armed=true;clearTimeout(askT);
     askT=setTimeout(()=>tryAsk("time"),35000);                          /* time with the lesson, or leaving the page (onHash) */
   }
@@ -69,6 +70,8 @@ const LC53=(()=>{
       +'<form data-lc39-mail class="lc39-row"><input class="input" name="email" type="email" required autocomplete="email" placeholder="you@example.com" aria-label="Email address"><button type="submit" class="btn btn-ghost">Email me a sign-in link</button></form>'
       +code+'<p class="form-msg" data-lc39-gmsg aria-live="polite"></p></div>';
   }
+  /* 9.44.0: the road's Level 2 sheet (LC42) asks itself, with this same Google / email gate: count it as the ask, so it is not asked twice */
+  function markAsked(){const s=st();clearTimeout(askT);armed=false;put({asks:s.asks+1,lastAsk:Date.now(),askedAtReview:s.reviews,stage:"auth-wait"})}
   function ask(){
     const s=st();put({asks:s.asks+1,lastAsk:Date.now(),askedAtReview:s.reviews,stage:"auth-wait"});
     try{
@@ -142,7 +145,7 @@ const LC53=(()=>{
   }
   function finishTrim(){
     trimPending=false;
-    setTimeout(()=>{const r=Q("#an-report")||Q("#an-review-status");if(r)try{r.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){}},400);
+    setTimeout(()=>{try{if(typeof LC83!=="undefined"&&LC83.keepBoard())return}catch(e){}const r=Q("#an-report")||Q("#an-review-status");if(r)try{r.scrollIntoView({behavior:"smooth",block:"start"})}catch(e){}},400);   /* 9.44.0: a phone keeps the board in view */
   }
   function onClick(e){
     const t=e.target&&e.target.closest?e.target:null;if(!t)return;
@@ -265,6 +268,6 @@ const LC53=(()=>{
       [1500,4500].forEach(ms=>setTimeout(restoreTier,ms));
     }catch(e){console.error("lc53",e)}
   }
-  return{init:init,ask:ask,onReviewDone:onReviewDone,onSignedIn:onSignedIn,toMspc:toMspc,applyTier:applyTier,state:st,
+  return{init:init,ask:ask,markAsked:markAsked,gateHTML:gateHTML,onReviewDone:onReviewDone,onSignedIn:onSignedIn,toMspc:toMspc,applyTier:applyTier,state:st,
     _t:{destOf:destOf,kindOf:kindOf,upgradeRows:upgradeRows,markOnboarded:markOnboarded,tryAsk:tryAsk,TIERS:TIERS}};
 })();
