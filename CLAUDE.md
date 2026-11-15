@@ -1,6 +1,6 @@
 # Lanckrietchess Training Hub
 
-Chess training web app by Kyenzo (lanckrietchess, certified chess coach), live at https://lanckrietchesstrainerhub.vercel.app (landing page `/`, the app `/app.html`, cache wiper `/reset.html`), also installable as a PWA (web-first; no store billing). A `*-<hash>-lanckrietchess.vercel.app` address is a frozen per-deployment link: never install or bookmark one. HANDOFF.md is the V5-era handoff (history only). The current reference is `PROJECT_KNOWLEDGE.md` in the Claude project: read it first.
+Chess training web app by Kyenzo (lanckrietchess, certified chess coach), live at https://lanckrietchesstrainerhub.vercel.app (landing page `/`, the app `/app.html`, cache wiper `/reset.html`), also installable as a PWA (web-first; no store billing). A `*-<hash>-lanckrietchess.vercel.app` address is a frozen per-deployment link: never install or bookmark one. HANDOFF.md is the V5-era handoff (history only). The current reference is `PROJECT_KNOWLEDGE.md` in the Claude project: read it first. GitHub (`lanckrietchess/Json-van-app`) is the single source of truth for code: always fetch the live files from GitHub before a code change, never build on an attached or remembered copy.
 
 ## Architecture rules (never break these)
 
@@ -20,7 +20,7 @@ Chess training web app by Kyenzo (lanckrietchess, certified chess coach), live a
 - `app.html`: the app. `index.html`: the landing page (one-click install). Find code by name (`const Tourney =`, `function MSPCStep`, `const V5Doc =`), not by line number.
 - `engine/`: Stockfish 19 lite (WASM) and its GPL licence.
 - `functions/`: the live backend, Supabase Edge Functions (`stripe`, `stripe-links`, `arena`, `fen-scan` for the board photo scan, `welcome-mail` for the e-mail opt-in bonus, `elo-verify` which reads the public rating for milestones), deployed with `supabase functions deploy <name> --no-verify-jwt`; `sql/` holds the Supabase migrations. `server/`, `server-lc34/`, `server-lc35/`, `worker_v6.js`, `hub-worker.js` and the root `arena.js` are legacy Cloudflare-era code and are not used in production.
-- App modules (LC31 to LC53 and LC55 to LC60) sit inline in `app.html` between `/*@@module lcNN*/` markers. The root `lcNN.js` files are their readable sources and must stay identical to the inline text (LC39 and LC46 at the root are Arena server modules; LC54 lives only inside the Studio closure in `app.html`).
+- App modules (LC31 to LC53, LC55 to LC77, LC79 and LC82) sit inline in `app.html` between `/*@@module lcNN*/` markers. The root `lcNN.js` files are their readable sources and must stay identical to the inline text (LC39 and LC46 at the root are Arena server modules; LC54 lives only inside the Studio closure in `app.html`).
 - `tools/make_lesson_audio.py` turns lesson texts into Coach Lanckriet mp3 files with ElevenLabs (run on the owner's computer, needs a `.env` that is never uploaded; `--dry` first).
 - `tools/fen-scan.mjs` scans every FEN, `lastMove` and solution in `content.json` (read-only; `node tools/fen-scan.mjs content.json --md report.md`, `--self-test` proves it catches errors).
 - `tests/`: regression suites; `tests/README.md` explains them.

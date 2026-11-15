@@ -286,7 +286,7 @@
       +'<p><b>a) Alarm Signal:</b> '+(c.alarm?esc(c.alarm.label)+'. '+esc(c.alarm.say):'none of the standard alarms; the error came from the thinking order')+'</p>'
       +'<p><b>b) Working Point:</b> '+esc(c.wp||"none linked yet ("+LNAME[c.letter]+")")+'</p>'
       +'<p><b>c) Action Step:</b> '+esc(c.action)+'</p>'
-      +'<div class="btn-row"><button type="button" class="btn btn-ghost" data-lc64="similar">Find a similar position</button><button type="button" class="btn btn-primary" data-lc64="prompt">Copy script prompt</button></div><p class="small" data-lc64-sim aria-live="polite"></p></article>').join("");
+      +'<div class="btn-row"><button type="button" class="btn btn-ghost" data-lc64="similar">Find a similar position</button><button type="button" class="btn btn-primary" data-lc64="prompt">Get Prompt: Full Script</button><button type="button" class="btn btn-ghost" data-lc64="bullets">Get Prompt: Bullet Points</button></div><p class="small" data-lc64-sim aria-live="polite"></p></article>').join("");
   }
   async function similar(card,host){
     const c=host._cases[+card.getAttribute("data-i")],out=Q("[data-lc64-sim]",card);
@@ -329,6 +329,23 @@
 "RULES: never call the product free or cheap; never promise a rating result or say lifetime or forever; no named competitors; keep claims to the facts above; every part must end by pushing the viewer to the next part; give 3 hook variants for part 1."
     ].join("\n");
   }
+  /* 9.42.0: Bullet Points mode: the same facts and mistake, a freestyle 5-part skeleton instead of a written script (LC79.BCLOSE when present) */
+  function bulletPrompt(c,game){
+    const full=buildPrompt(c,game).split("\n"),a=full.indexOf("STRUCTURE:");
+    let gl="Release Giveaway: a 15-day ELO-gain challenge in the Lanckriet Chess app. Link your Chess.com or Lichess account, the app reads your public Rapid rating, and the top 5 ELO gainers win 1 month of Pro.";
+    try{if(typeof LC82!=="undefined"&&LC82.giveawayLine)gl=LC82.giveawayLine()}catch(e){}
+    let pc=[];try{if(typeof LC79!=="undefined"&&LC79.pawnCheck)pc=LC79.pawnCheck(c.fen)}catch(e){}
+    let close="";try{if(typeof LC79!=="undefined"&&LC79.BCLOSE)close=LC79.BCLOSE}catch(e){}
+    if(!close)close="Do NOT write a full script. Give me a freestyle bullet-point skeleton in 5 parts: 1. THE HOOK (exact opening sentence), 2. CORE POINTS (2 to 3 anchor points incl. the pawn check), 3. AHA MOMENT (the Lichess puzzle in one line), 4. BRIDGE / RE-HOOK (triangle) to the app, 5. CTA: the Release Giveaway. No guaranteed results, no rating promises, never free or cheap, never lifetime or forever.";
+    return["You are my Shorts & Reels scriptwriter for Lanckriet Chess (Bullet Points mode)."].concat(full.slice(1,a<0?full.length:a)).concat([
+"PAWN CHECK (undefended pieces and pawns before the move, kings left out):",
+"- "+(pc.join(" | ")||"not available"),
+"",
+"RELEASE GIVEAWAY (the CTA):",
+"- "+gl,
+"",
+close]).join("\n");
+  }
   async function copy(text){
     try{await navigator.clipboard.writeText(text);return true}catch(e){}
     try{const t=document.createElement("textarea");t.value=text;t.style.cssText="position:fixed;left:-9999px";document.body.appendChild(t);t.select();const ok=document.execCommand("copy");t.remove();return ok}catch(e){return false}
@@ -353,7 +370,7 @@
       else if(a==="other"){e.preventDefault();const u=String(Q("[data-lc64-user]",root).value||"").trim();if(!/^[A-Za-z0-9_-]{2,30}$/.test(u)){say("Type a valid username.");return}list(Q("[data-lc64-site]",root).value,u)}
       else if(a==="pick"){e.preventDefault();const L=Q("[data-lc64-list]",root),g=L._games[+b.getAttribute("data-i")];L.innerHTML="";runTrim(g,Q("[data-lc64-out]",root))}
       else if(a==="similar"){e.preventDefault();similar(b.closest(".lc64-case"),Q("[data-lc64-out]",root))}
-      else if(a==="prompt"){e.preventDefault();const out=Q("[data-lc64-out]",root),c=out._cases[+b.closest(".lc64-case").getAttribute("data-i")];say(await copy(buildPrompt(c,out._game))?"Script prompt copied. Paste it into Claude.":"Could not copy. Select it from the box below.","good")}
+      else if(a==="prompt"||a==="bullets"){e.preventDefault();const out=Q("[data-lc64-out]",root),c=out._cases[+b.closest(".lc64-case").getAttribute("data-i")];say(await copy(a==="bullets"?bulletPrompt(c,out._game):buildPrompt(c,out._game))?(a==="bullets"?"Bullet Points prompt copied. Paste it into Claude.":"Full Script prompt copied. Paste it into Claude."):"Could not copy. Select it from the box below.","good")}
     });
   }
 
@@ -469,5 +486,5 @@
     document.addEventListener("click",onDoc,true);
     let deb=0;new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{actionObserver();addOwnerRow()}catch(e){}},300)}).observe(document.body,{childList:true,subtree:true});
   }
-  return{init:init,afterRender:afterRender,puzzleFromJson:puzzleFromJson,liClosest:liClosest,interrogate:interrogate,openRanked:openRanked,openTrim:openTrim,buildPrompt:buildPrompt,caseOf:caseOf,nextGames:nextGames,nextGamesHTML:nextGamesHTML,top:topLetterAlarm,actionOf:actionOf,themeFor:themeFor,openCase:openCase,casePick:casePick,ACT:ACT,QS:QS,LNAME:LNAME,liOne:liOne,rating:rating,version:"9.34.0"};
+  return{init:init,afterRender:afterRender,puzzleFromJson:puzzleFromJson,liClosest:liClosest,interrogate:interrogate,openRanked:openRanked,openTrim:openTrim,buildPrompt:buildPrompt,bulletPrompt:bulletPrompt,caseOf:caseOf,nextGames:nextGames,nextGamesHTML:nextGamesHTML,top:topLetterAlarm,actionOf:actionOf,themeFor:themeFor,openCase:openCase,casePick:casePick,ACT:ACT,QS:QS,LNAME:LNAME,liOne:liOne,rating:rating,version:"9.34.0"};
 })(); /*@@end lc64*/

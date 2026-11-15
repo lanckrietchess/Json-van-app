@@ -25,8 +25,13 @@
         Undo (Ctrl+Z), zoom and a time ruler. The timeline is magnetic by construction: clips are a list, so it never holds a gap.
      9. Caption box: captions are written after each take (live captions first, else the same engines as Write captions), they follow
         the cut blocks (they are timed on the take), and the box on the preview can be dragged, resized (corner or mouse wheel) and
-        styled (background on/off, colour, opacity, text colour, outline, all caps, highlight of the spoken word). */
-  const VERSION="9.41.0";
+        styled (background on/off, colour, opacity, text colour, outline, all caps, highlight of the spoken word).
+     Script modes (9.42.0):
+    10. Game-to-Script has two prompt buttons. "Get Prompt: Full Script" = the 9.39.1 data package + its closing line (unchanged).
+        "Get Prompt: Bullet Points" = the same data + a PAWN CHECK block (undefended pieces and pawns before and after the mistake, with their
+        attacker) + the RELEASE GIVEAWAY block (LC82.giveawayLine) and a closing block asking for a 5-part freestyle skeleton: the exact hook,
+        2 to 3 core points incl. the pawn check, the aha moment of the Lichess puzzle in one line, the bridge / re-hook to the app, the giveaway CTA. */
+  const VERSION="9.42.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -1151,8 +1156,8 @@
       +'<h4>Trimmed game (the video starts at move '+c.start+')</h4><div class="lc79-pre" tabindex="0">'+esc(c.pgn)+'</div>'
       +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="toboard">Load into the Studio board</button><button type="button" class="lc79-b sm" data-a="copypgn">Copy PGN</button></div></section>';
     h+='<section class="lc79-sec" aria-labelledby="lc79-s3"><h3 id="lc79-s3">4. A similar position for the re-hook</h3><div data-sim>'+simHTML()+'</div><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="sim">Find another one</button></div></section>';
-    h+='<section class="lc79-sec" aria-labelledby="lc79-s4"><h3 id="lc79-s4">5. Master prompt for Claude</h3><p class="lc79-hint" style="margin:0">Only the game data goes out: game context, the MSPC diagnosis and the Lichess position. The script structure comes from your own Claude instructions.</p>'
-      +'<div class="lc79-row"><button type="button" class="lc79-b pri" data-a="copyprompt">Copy master prompt for Claude</button><button type="button" class="lc79-b sm" data-a="showprompt">Show the prompt</button></div><div class="lc79-pre" data-prompt hidden tabindex="0"></div>'
+    h+='<section class="lc79-sec" aria-labelledby="lc79-s4"><h3 id="lc79-s4">5. Prompt for Claude</h3><p class="lc79-hint" style="margin:0">The game data goes out: game context, the MSPC diagnosis and the Lichess position (Bullet Points adds the pawn check and the Release Giveaway). The script style comes from your own Claude instructions.</p>'
+      +'<div class="lc79-row"><button type="button" class="lc79-b pri" data-a="copyprompt">Get Prompt: Full Script</button><button type="button" class="lc79-b gold" data-a="copybullets">Get Prompt: Bullet Points</button><button type="button" class="lc79-b sm" data-a="showprompt">Show the prompt</button></div><p class="lc79-hint" style="margin:0"><b>Full Script</b>: Claude writes every word. <b>Bullet Points</b>: a freestyle skeleton (the exact hook, 2 to 3 core points with the pawn check, the aha moment, the bridge to the app, the Release Giveaway CTA) so you talk freely on camera.</p><div class="lc79-pre" data-prompt hidden tabindex="0"></div>'
       +'<label class="lc79-f"><span>Paste Claude’s script here</span><textarea data-f="answer" placeholder="Paste the script Claude wrote, then press Use as my script."></textarea></label><div class="lc79-row"><button type="button" class="lc79-b gold" data-a="usescript">Use as my script</button><span class="lc79-hint">It replaces the text in the Studio’s script panel and prompter.</span></div></section>';
     return h;
   }
@@ -1183,8 +1188,28 @@
   }
   /* 9.39.1: a pure data package. No beats, no timings, no script rules: the structure comes from the owner's own Claude instructions. */
   const CLOSE="Based on this game data, generate a ~90-second high-retention viral script strictly following your v2.5 Master System Instructions and Project Knowledge Library.";
-  function buildPrompt(){
-    const c=AI.cs,g=AI.g,it=c.it,h=g.headers||{},s=AI.sim&&!AI.sim.err?AI.sim:null;
+  /* 9.42.0: Bullet Points mode. Same data, plus the pawn check and the Release Giveaway, and a closing block that asks for a freestyle skeleton
+     (no written-out sentences except the hook and the bridge). The Full Script prompt is unchanged. */
+  const BCLOSE=["Based on this game data, do NOT write a full script. Following your v2.5 Master System Instructions and Project Knowledge Library, give me a freestyle bullet-point skeleton for a ~60 to 90-second video that I talk through freely on camera, in exactly these 5 parts:",
+"1. THE HOOK: the exact opening sentence, word for word.",
+"2. CORE POINTS: 2 to 3 short chess anchor points I must touch (keywords, not sentences), one of them the pawn check: which pieces and pawns were undefended (use the PAWN CHECK block) and what that allowed.",
+"3. AHA MOMENT: the core of the Lichess puzzle in one line.",
+"4. BRIDGE / RE-HOOK (triangle): the one transition sentence from the lesson to the app, word for word.",
+"5. CTA: the Release Giveaway call to action in one or two sentences (use the RELEASE GIVEAWAY block).",
+"Rules: no guaranteed results and no rating promises (results differ per person), never call the app free or cheap, never say lifetime or forever, no named competitors."].join("\n");
+  function pawnCheck(fen){
+    const out=[];
+    ["w","b"].forEach(col=>{
+      const them=col==="w"?"b":"w",loose=[];
+      pieceList(fen,col).forEach(p=>{if(defended(fen,p.sq,col))return;const att=attackers(fen,p.sq,them).sort((a,b)=>VAL[a.type]-VAL[b.type]);
+        loose.push({p:p,att:att[0]||null})});
+      loose.sort((a,b)=>(!!b.att-!!a.att)||(VAL[b.p.type]-VAL[a.p.type]));
+      out.push((col==="w"?"White":"Black")+": "+(loose.length?loose.slice(0,8).map(x=>pn(x.p.type,x.p.sq)+(x.att?" (attacked by "+pn(x.att.type,x.att.sq)+")":"")).join(", "):"every piece and pawn is defended"));
+    });
+    return out;
+  }
+  function buildPrompt(mode){
+    const c=AI.cs,g=AI.g,it=c.it,h=g.headers||{},s=AI.sim&&!AI.sim.err?AI.sim:null,bul=mode==="bullets";
     const mv=(c.color==="w"?it.num+". ":it.num+"... ")+it.san+(it.cls==="blunder"?"??":"?"),bm=it.bestSan?(c.color==="w"?it.num+". ":it.num+"... ")+it.bestSan:"";
     const elo=(n,e)=>n+(e?" ("+e+")":"");
     const q=k=>(c.qs.filter(x=>x[0]===k)[0]||[]);
@@ -1217,6 +1242,21 @@
 (s?"- Winning line (to the end of the combination): "+(s.line||s.solSan.join(" ")):null),
 "",
 CLOSE];
+    if(bul){
+      let pc=[],pa=[];try{pc=pawnCheck(c.fen);pa=g.fens[it.i+1]?pawnCheck(g.fens[it.i+1]):[]}catch(e){}
+      let gl="Release Giveaway: a 15-day ELO-gain challenge in the Lanckriet Chess app. Link your Chess.com or Lichess account, the app reads your public Rapid rating, and the top 5 ELO gainers win 1 month of Pro.";
+      try{if(typeof LC82!=="undefined"&&LC82.giveawayLine)gl=LC82.giveawayLine()}catch(e){}
+      L.splice(L.length-1,1,
+"PAWN CHECK (undefended pieces and pawns, kings left out)",
+"- Before the mistake: "+(pc.join(" | ")||"not available"),
+"- After the mistake: "+(pa.join(" | ")||"not available"),
+"",
+"RELEASE GIVEAWAY (the CTA)",
+"- "+gl,
+"- Where: the Lanckriet Chess app, link in bio. Only the public rating counts; results differ per person.",
+"",
+BCLOSE);
+    }
     return L.filter(x=>x!==null).join("\n");
   }
   async function copyText(t){
@@ -1239,8 +1279,9 @@ CLOSE];
       try{B.goto(Math.max(0,AI.cs.it.i-(AI.cs.start>1?0:0)));if(B.orient!==AI.cs.color)B.flip()}catch(x){}
       say("Loaded: the Studio board shows the position before the mistake. Use the arrows on the board to step through.","ok",4500);return;
     }
-    if(a==="showprompt"){const p=Q("#lc79-ai [data-prompt]");p.hidden=!p.hidden;if(!p.hidden)p.textContent=buildPrompt();b.textContent=p.hidden?"Show the prompt":"Hide the prompt";return}
-    if(a==="copyprompt"){const t=buildPrompt(),ok=await copyText(t);const p=Q("#lc79-ai [data-prompt]");if(p&&!p.hidden)p.textContent=t;return say(ok?"Master prompt copied. Paste it into Claude.":"Could not copy. Press Show the prompt and copy it by hand.",ok?"ok":"err",3500)}
+    if(a==="showprompt"){const p=Q("#lc79-ai [data-prompt]");p.hidden=!p.hidden;if(!p.hidden)p.textContent=buildPrompt(AI.pmode);b.textContent=p.hidden?"Show the prompt":"Hide the prompt";return}
+    if(a==="copyprompt"||a==="copybullets"){AI.pmode=a==="copybullets"?"bullets":"full";const t=buildPrompt(AI.pmode),ok=await copyText(t);const p=Q("#lc79-ai [data-prompt]");if(p&&!p.hidden)p.textContent=t;
+      return say(ok?(AI.pmode==="bullets"?"Bullet Points prompt copied. Paste it into Claude.":"Full Script prompt copied. Paste it into Claude."):"Could not copy. Press Show the prompt and copy it by hand.",ok?"ok":"err",3500)}
     if(a==="mkproj"){mkProject(+b.getAttribute("data-i"));return paintAi()}
     if(a==="mkall"){let n=0;AI.list.forEach((x,i)=>{if(!projectFor(pgnKey(AI.pgn),x.i)){mkProject(i,true);n++}});say(n?n+" video project"+(n===1?"":"s")+" made. They are in Projects and in the record bar.":"Every mistake already has a project.","ok",4000);return paintAi()}
     if(a==="openproj"){db().cur=b.getAttribute("data-p");persist();closeLayer("lc79-ai");return openProjects()}
@@ -1639,6 +1680,6 @@ CLOSE];
     window.addEventListener("hashchange",()=>{if(route()!=="studio")["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true))});
   }
   return{writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
-    segments:segments,run:run,envThr:envThr,findQuiet:findQuiet,envDt:envDt,speechRanges:speechRanges,minus:minus,complement:complement,clipsFor:clipsFor,splitClip:splitClip,splitAt:splitAt,trimClip:trimClip,deleteClip:deleteClip,cutSilences:cutSilences,autoSilence:autoSilence,envOf:envOf,capStyle:capStyle,capLine:capLine,drawCaption:drawCaption,nle:nle,undo:undo,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,boardSVG:boardSVG,sfx:sfx,
+    segments:segments,run:run,envThr:envThr,findQuiet:findQuiet,envDt:envDt,speechRanges:speechRanges,minus:minus,complement:complement,clipsFor:clipsFor,splitClip:splitClip,splitAt:splitAt,trimClip:trimClip,deleteClip:deleteClip,cutSilences:cutSilences,autoSilence:autoSilence,envOf:envOf,capStyle:capStyle,capLine:capLine,drawCaption:drawCaption,nle:nle,undo:undo,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,pawnCheck:pawnCheck,BCLOSE:BCLOSE,boardSVG:boardSVG,sfx:sfx,
     BUILT:BUILT,db:db,newProject:newProject,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/

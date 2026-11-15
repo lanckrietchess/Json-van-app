@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.41.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.42.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.41.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.41.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.42.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.42.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.41.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.42.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -186,6 +186,13 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .love-card .lshot,.pcard .lshot{display:block;width:100%;border-radius:10px;margin-top:10px;border:1px solid var(--line)}
 .pr-own{font-size:.75rem;color:var(--gold);font-weight:700}.pr-link{font-size:.82rem}
 .lc72-edit{position:fixed;right:14px;bottom:14px;z-index:150;min-height:44px;padding:0 16px;border-radius:999px;background:var(--gold);color:#241a00;font-weight:800;display:inline-flex;align-items:center;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+/* 9.42.0 LC82: social proof counters and the Release Giveaway board */
+.sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:18px}.sp-stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.sp-stat b{display:block;font-size:1.9rem;font-weight:900;line-height:1.1}.sp-stat b i{font-style:normal;color:var(--gold);font-size:1rem;letter-spacing:1px}.sp-stat span{font-size:.88rem;color:#94a3b8}
+.gw-when{font-weight:700;color:var(--gold)}.gw-board{list-style:none;padding:0;margin:18px 0;display:grid;gap:8px;max-width:720px}
+.gw-board li{display:grid;grid-template-columns:52px minmax(0,1fr) auto auto;gap:12px;align-items:center;min-height:52px;padding:8px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.gw-board li.top{border-color:var(--gold)}.gw-board .rk{font-weight:900;color:var(--gold)}.gw-board .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.gw-board .nm small,.gw-board .rt{color:#94a3b8;font-size:.85rem}
+.gw-board .gn{font-weight:900;color:var(--good)}.gw-board .gn.neg{color:#f87171}@media (max-width:480px){.gw-board li{grid-template-columns:44px minmax(0,1fr) auto}.gw-board .rt{display:none}}
 </style>
 </head>
 <body>
@@ -274,6 +281,19 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       <article class="pcard"><span class="tag pro">Proof of concept</span><p class="gain">+630 <small>ELO in 6 weeks</small></p><p class="mute small">The first student to run the full MSPC system. More verified graphs appear here as members allow it.</p></article>
     </div>
     <p class="small mute" id="proof-note">Verified results load from the app's own data.</p>
+    <div class="sp-stats hide" id="sp-stats" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="giveaway" class="hide" aria-labelledby="h-giveaway">
+  <div class="wrap">
+    <span class="eyebrow">Release Giveaway</span>
+    <h2 id="h-giveaway">Gain the most ELO in 15 days. The top 5 win 1 month of Pro.</h2>
+    <p class="lead">Play your normal games, train in the Hub, and let your public rating do the talking. Link your Chess.com or Lichess account in the app: our server reads your Rapid rating the moment you join, and again while the challenge runs.</p>
+    <p class="gw-when" id="gw-when"></p>
+    <ol class="gw-board" id="gw-board" aria-live="polite"></ol>
+    <p><a class="btn gold big" href="/app.html#giveaway">Join the challenge</a></p>
+    <p class="small mute">Only the public Rapid rating counts. A first name appears here only when the member ticked “show me on the public board”; never an e-mail or a username. Shared or boosted accounts are disqualified. Results differ per person; nothing here is a promise of a rating.</p>
   </div>
 </section>
 
@@ -477,7 +497,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.41.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.42.0</p></footer>
 
 <script>
 "use strict";
@@ -926,6 +946,35 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     var st=document.querySelector('[data-lc-key="story"]');if(st&&v.story)st.innerHTML=String(v.story).split(/\n+/).filter(function(x){return x.trim()}).map(function(x){return"<p>"+esc(x)+"</p>"}).join("");
     if(v.video&&window.__lcShowVideo)window.__lcShowVideo(v.video);
     setTimeout(size,0);
+  });
+})();
+</script>
+<script>
+/* 9.42.0 LC82: social proof (verified ELO gained, five-star reviews) and the Release Giveaway board. Totals only and first names the members
+   allowed; nothing shows while a number is 0 or the SQL (sql/20261115100000_lc82_release_giveaway.sql) is not run. */
+(function(){
+  function m(n){var e=document.querySelector('meta[name="'+n+'"]');return e?e.getAttribute("content")||"":""}
+  var u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");if(!u||!k)return;
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function rpc(n){return fetch(u+"/rest/v1/rpc/"+n,{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:"{}"}).then(function(r){return r.ok?r.json():null}).catch(function(){return null})}
+  function nf(n){try{return(+n||0).toLocaleString("en-US")}catch(e){return String(+n||0)}}
+  function day(d){try{return new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"long"})}catch(e){return""}}
+  function sg(n){n=+n||0;return(n>0?"+":n<0?"−":"")+Math.abs(n)}
+  var SITE={chesscom:"Chess.com",lichess:"Lichess"};
+  Promise.all([rpc("lc82_social_proof"),rpc("lc82_board_public")]).then(function(a){
+    var p=a[0]&&a[0].ok?a[0]:null,b=a[1]&&a[1].ok?a[1]:null,box=document.getElementById("sp-stats");
+    if(p&&box){var rv=p.reviews||{},h=[];
+      if(+p.elo_gained>0)h.push('<div class="sp-stat"><b>+'+nf(p.elo_gained)+'</b><span>ELO gained by '+nf(p.members_gained)+' members, read from their public profiles</span></div>');
+      if(+rv.five_star>0)h.push('<div class="sp-stat"><b>'+nf(rv.five_star)+' <i aria-hidden="true">★★★★★</i></b><span>five-star reviews in the app'+(rv.avg?" · average "+(+rv.avg).toFixed(1)+" / 5":"")+'</span></div>');
+      if(+p.giveaway_entries>0)h.push('<div class="sp-stat"><b>'+nf(p.giveaway_entries)+'</b><span>players in the Release Giveaway</span></div>');
+      if(h.length){box.innerHTML=h.join("");box.classList.remove("hide")}}
+    var g=b&&b.giveaway;if(!g||g.ended)return;
+    var sec=document.getElementById("giveaway"),w=document.getElementById("gw-when"),ol=document.getElementById("gw-board");if(!sec)return;
+    var h2=document.getElementById("h-giveaway");if(h2)h2.textContent="Gain the most ELO in 15 days. The top "+(+g.winners||5)+" win "+(g.prize||"1 month of Pro")+".";
+    if(w){var left=Math.ceil((Date.parse(g.ends_at)-Date.now())/864e5);w.textContent=g.upcoming?"Starts on "+day(g.starts_at)+".":(day(g.starts_at)+" to "+day(g.ends_at)+" · "+(left<=1?"last day":left+" days left")+" · "+nf(b.entries)+" players in")}
+    var rows=b.rows||[];
+    if(ol)ol.innerHTML=rows.length?rows.map(function(r){return'<li class="'+(r.rank<=(+g.winners||5)?"top":"")+'"><span class="rk">#'+r.rank+'</span><span class="nm">'+esc(r.first_name)+' <small>'+esc(SITE[r.site]||"")+'</small></span><span class="rt">'+r.start+' → '+r.now+'</span><span class="gn'+(r.gain<0?" neg":"")+'">'+sg(r.gain)+'</span></li>'}).join(""):'<li><span class="rk">–</span><span class="nm">Be the first on the board.</span></li>';
+    sec.classList.remove("hide");
   });
 })();
 </script>
