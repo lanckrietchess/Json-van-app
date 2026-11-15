@@ -71,8 +71,13 @@ async def main():
             await page.click('.lc42-tease [data-lc42-mclaim]'); await page.wait_for_timeout(1800)
             lv=await page.evaluate("[(Store.get('lc42-onb')||{}).step,[...document.querySelectorAll('.sheet-wrap')].map(x=>x.innerText.slice(0,40)),JSON.stringify(LC42._t.leaksAll())]")
             ok(lv[0]=='sys' and sum(1 for x in lv[1] if 'Level 2' in x)==1 and not any('promo' in x for x in lv[1]),'Claim Level 2 opens ONE Level 2 sheet (no double level-up, the waiting pop-up still waits), the marathon leaks feed the working points '+str(lv))
-            await page.evaluate("document.querySelectorAll('.sheet-wrap').forEach(x=>x.remove());undefined;"); await page.wait_for_timeout(5000)
-            ok(await page.evaluate("[...document.querySelectorAll('.sheet-wrap')].some(x=>/promo/.test(x.innerText))"),'the waiting pop-up comes after the marathon, when the screen is calm')
+            # 9.44.0: nothing pops up by itself on the Trim analysis (LC83): the waiting pop-up comes once the person is off Trim
+            await page.evaluate("document.querySelectorAll('.sheet-wrap').forEach(x=>x.remove());if(location.hash==='#trim')location.hash='#quests';undefined;")
+            got=False
+            for i in range(60):   # and it keeps 20 s away from the previous pop-up nobody tapped for
+                await page.wait_for_timeout(500)
+                if await page.evaluate("[...document.querySelectorAll('.sheet-wrap')].some(x=>/promo/.test(x.innerText))"): got=True; break
+            ok(got,'the waiting pop-up comes after the marathon, when the screen is calm (and off the Trim analysis)')
             ok(not errs,'no page errors '+str(errs[:3]))
             await ctx.close()
         # keyboard shell + in-app browser

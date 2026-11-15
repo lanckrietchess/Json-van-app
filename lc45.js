@@ -150,7 +150,7 @@ const LC45=(()=>{
   let bannerSeq=0;
   async function paintBanner(route){
     const seq=++bannerSeq,old=Q("#lc45-banner");
-    const on=route!=="upgrades"&&!(()=>{try{return LC40.busy()}catch(e){return false}})()&&!hardAdmin()&&!paid()&&!dismissed()&&!(()=>{try{return LC42.owns()}catch(e){return false}})();
+    const on=route!=="upgrades"&&!(()=>{try{return LC40.busy()}catch(e){return false}})()&&!hardAdmin()&&!paid()&&!dismissed()&&!(()=>{try{return typeof LC84!=="undefined"?LC84.owns():LC42.owns()}catch(e){return false}})();   /* 9.44.0: the whole road (LC42 + LC84) keeps the screen calm */
     if(!on){if(old)old.remove();return}
     const host=Q("#top-actions");if(!host){return}
     let open=true;try{open=await LC44._t.foundingOpen(2)}catch(e){open=true}

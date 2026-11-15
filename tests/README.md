@@ -33,3 +33,9 @@ The notes generator and puzzle audit tests are in `../tools/mspc` (`npm test`, p
 Marathon onboarding, calm guide, keyboard shell and in-app browser bar (9.43.0) in real Chromium: `NM=./node_modules python3 tests/chromium_943/marathon.py`
 (port 8768, scripted engine, 390 and 1280 px, Instagram user agent) (30). The honest MSPC engine (LC83): `node tests/lc83_truth.test.js` (22: quiet moves stay quiet,
 only pieces that can really be won are "attacked", lost defence, king shield, opened lines, passed pawns, the M / S / P / C breakdown of a mistake).
+The rest of the road, one calm message, Trim on a phone and the install buttons (9.44.0) in real Chromium: `NM=./node_modules python3 tests/chromium_944/road.py`
+(port 8769, 390 px): LC42 hands Level 4 to LC84 (patterns of the last games, the training that fits, one exercise = Level 5), the tour of every blue
+section (pulse, the ? heard to the end, one exercise on trainers, the "could not hear it" way out), the Lanckriet Student Quests (rival, community post,
+invite link), the LC83 pop-up policy (20 s gap, tapped pop-ups pass, nothing on the Trim analysis), the Trim phone order without sticky board and
+without the jump after a review, Level 2's Google step, the landing page's Instagram install (Android: Chrome intent, iPhone: the steps) and the
+?install=1 sheet within 2 s.
