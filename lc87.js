@@ -9,8 +9,14 @@
        - iPhone / iPad, iOS 17 and newer: "Open in Safari" (x-safari-https link).
        - Everything else: "Copy link", plus the two taps of that app's own menu (⋯ / ⋮ → Open in browser).
      Nothing behind it can be used: the page under it is hidden, and the app does not start (window.__lcIab, read by the boot line of app.html).
-     Not shown in an installed app (standalone) or in a normal browser. ?lc_iab=0 switches it off for this tab (owner testing only). */
-  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.47.0";
+     Not shown in an installed app (standalone) or in a normal browser. ?lc_iab=0 switches it off for this tab (owner testing only).
+     9.49.0, the install state (every browser, also when the gate is off): this script runs before anything else, so it catches Chrome's
+     install prompt (beforeinstallprompt) the moment Chrome offers it and keeps it in window.__lcBip for the Install buttons. It also
+     remembers that the app is installed (localStorage "lc-pwa-installed": set when the app runs standalone or after appinstalled, cleared
+     as soon as Chrome offers its prompt again, which Chrome only does when the app is NOT installed; it also runs out after 60 days without a launch). Android and desktop Chrome share
+     that storage between the browser and the installed app, so the landing page can say "Open the app" instead of a dead Install button.
+     LC87.installed(), LC87.bip(), LC87.standalone(). */
+  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.49.0";
   var RE=/FBAN|FBAV|FB_IAB|FBIOS|FB4A|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|trill_|Snapchat|Twitter|LinkedInApp|Pinterest|Line\//i;
   function isIab(ua){return RE.test(String(ua||""))}
   function appOf(ua){ua=String(ua||"");return/Instagram/i.test(ua)?"Instagram":/TikTok|musical_ly|Bytedance|trill_/i.test(ua)?"TikTok":/FBAN|FBAV|FB_IAB|FBIOS|FB4A/i.test(ua)?"Facebook":/Snapchat/i.test(ua)?"Snapchat":/Twitter/i.test(ua)?"X":/LinkedIn/i.test(ua)?"LinkedIn":/Pinterest/i.test(ua)?"Pinterest":/Line\//i.test(ua)?"LINE":"this app"}
@@ -24,7 +30,16 @@
     return"intent://"+u.host+u.pathname+u.search+"#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(u.href)+";end"}
   function safariUrl(){return"x-safari-"+target()}
   var app=appOf(UA),on=isIab(UA)&&!standalone()&&!off;
-  W.LC87={on:on,app:app,ios:ios,android:android,isIab:isIab,appOf:appOf,target:target,intentUrl:intentUrl,safariUrl:safariUrl,version:VERSION};
+  /* 9.49.0: the install state (see the header) */
+  var IK="lc-pwa-installed";
+  function setInstalled(v){try{if(v)localStorage.setItem(IK,String(Date.now()));else localStorage.removeItem(IK)}catch(e){}}
+  function installed(){if(standalone())return true;try{var t=+localStorage.getItem(IK)||0;return t>0&&Date.now()-t<5184e6}catch(e){return false}}   /* 60 days since the app last ran */
+  if(standalone())setInstalled(true);
+  if(!("__lcBip" in W))W.__lcBip=null;
+  try{W.addEventListener("beforeinstallprompt",function(e){try{e.preventDefault()}catch(x){}W.__lcBip=e;setInstalled(false)});
+    W.addEventListener("appinstalled",function(){W.__lcBip=null;setInstalled(true)})}catch(e){}
+  W.LC87={on:on,app:app,ios:ios,android:android,isIab:isIab,appOf:appOf,target:target,intentUrl:intentUrl,safariUrl:safariUrl,version:VERSION,
+    standalone:standalone,installed:installed,setInstalled:setInstalled,bip:function(){return W.__lcBip||null}};
   if(!on)return;
   W.__lcIab=true;
   var H=D.documentElement;H.classList.add("lc-iab");
