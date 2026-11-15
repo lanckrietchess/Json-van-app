@@ -30,3 +30,6 @@ the landing counters and board, 390 and 1280 px (44). SQL on PostgreSQL 16: `tes
 
 jsdom cannot see layout, overlays, taps, fonts, offline behaviour or native controls. Those are covered by `../browser/` (24 real-Firefox tests).
 The notes generator and puzzle audit tests are in `../tools/mspc` (`npm test`, plus `verify-notes.mjs`).
+Marathon onboarding, calm guide, keyboard shell and in-app browser bar (9.43.0) in real Chromium: `NM=./node_modules python3 tests/chromium_943/marathon.py`
+(port 8768, scripted engine, 390 and 1280 px, Instagram user agent) (30). The honest MSPC engine (LC83): `node tests/lc83_truth.test.js` (22: quiet moves stay quiet,
+only pieces that can really be won are "attacked", lost defence, king shield, opened lines, passed pawns, the M / S / P / C breakdown of a mistake).
