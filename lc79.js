@@ -31,7 +31,7 @@
         "Get Prompt: Bullet Points" = the same data + a PAWN CHECK block (undefended pieces and pawns before and after the mistake, with their
         attacker) + the RELEASE GIVEAWAY block (LC82.giveawayLine) and a closing block asking for a 5-part freestyle skeleton: the exact hook,
         2 to 3 core points incl. the pawn check, the aha moment of the Lichess puzzle in one line, the bridge / re-hook to the app, the giveaway CTA. */
-  const VERSION="9.43.0";
+  const VERSION="9.45.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -1620,14 +1620,302 @@ BCLOSE);
     return out;
   }
 
+  /* ---------- 9.45.0: OBS-style scenes, flexible input block, crop / zoom / pan, and the record bar out of the board ----------
+     Scenes: Classic (board and camera, your own arrangement), Scene 1 = full-screen camera, Scene 2 = camera + a big input block, as a split
+     (input on top / left, camera under / right) or as a bubble (input fills the stage, camera in a circle). The input block takes one source:
+     the interactive chessboard, the live landing page, the app itself, or a shared screen / window / tab. Switching a scene keeps the format, so it
+     works while recording (changing the format waits until you stop).
+     Crop & zoom: for the camera and for the input. Crop each edge (0 to 45 %), zoom (1x to 4x) and pan; drag on the stage to pan, the mouse wheel
+     or two fingers to zoom. Only what is inside the frame is shown and recorded. The board keeps its exact squares (so you can still play on it):
+     its zoom is its size inside the block and the pan moves it there.
+     The record bar is no longer a pill floating over the stage: it is a status bar along the bottom and the stage is fitted above it, so the
+     board is never covered. */
+  const SCK="lc79-scene",XF0={l:0,t:0,r:0,b:0,z:1,px:0,py:0,bs:1};
+  const SCENES=[["classic","Classic: board and camera"],["cam","Scene 1: full-screen camera"],["split","Scene 2: camera + input (split)"],["pip","Scene 2: input + camera bubble"]];
+  const SOURCES=[["board","Interactive chessboard"],["landing","Landing page (live)"],["app","The app (live)"],["screen","Share screen / window / tab"]];
+  const scS=()=>{const o=Object.assign({scene:"classic",src:"board",xf:{},xfOpen:false,target:"in",param:"z"},rd(SCK,{})||{});o.xf=Object.assign({},o.xf);o.xf.cam=Object.assign({},XF0,o.xf.cam||{});o.xf.in=Object.assign({},XF0,o.xf.in||{});return o};
+  const scPut=o=>wr(SCK,Object.assign(scS(),o));
+  const IN={el:null,fr:null,kind:"",stream:null,video:null,live:false,snap:null,snapBusy:false,snapTimer:0,raf:0,shot:null,shotV:null,handle:null,ptrs:{},drag:null};
+  const LAY=()=>{try{return api().layout()}catch(e){return null}};
+  const aspectA=L=>(L&&L.aspect==="9:16")?9/16:16/9;
+  /* pure: the part of a source (vw x vh) that fills a target of aspect tr, after the crop (l,t,r,b: fractions cut off each edge), the zoom and the pan (-1..1) */
+  function srcRect(vw,vh,tr,xf,z0){
+    xf=Object.assign({},XF0,xf||{});vw=+vw||1;vh=+vh||1;tr=+tr>0?+tr:vw/vh;
+    const l=clamp(+xf.l||0,0,.45),r=clamp(+xf.r||0,0,.45),t=clamp(+xf.t||0,0,.45),b=clamp(+xf.b||0,0,.45);
+    const cx=l*vw,cy=t*vh,cw=Math.max(1,(1-l-r)*vw),ch=Math.max(1,(1-t-b)*vh),z=clamp((+xf.z||1)*(+z0||1),1,12);
+    let sw,sh;if(cw/ch>tr){sh=ch/z;sw=sh*tr}else{sw=cw/z;sh=sw/tr}
+    const px=clamp(+xf.px||0,-1,1),py=clamp(+xf.py||0,-1,1);
+    return{sx:cx+(cw-sw)/2*(1+px),sy:cy+(ch-sh)/2*(1+py),sw:sw,sh:sh,cw:cw,ch:ch};
+  }
+  const xfActive=x=>!!x&&(x.l||x.t||x.r||x.b||(x.z||1)!==1||x.px||x.py);
+  function camSrc(vw,vh,tr,z){const S=scS();if(!xfActive(S.xf.cam))return null;return srcRect(vw,vh,tr,S.xf.cam,z)}
+  const sceneOn=()=>{const s=scS();return s.scene==="split"||s.scene==="pip"};
+  const usesInput=()=>sceneOn()&&scS().src!=="board";
+  /* pure: where the input block and the camera go for a scene, in stage fractions (A = width / height of the stage) */
+  function sceneRects(scene,A){
+    const port=A<1;
+    if(scene==="split")return port?{inp:{x:0,y:0,w:1,h:.6},cam:{x:0,y:.6,w:1,h:.4}}:{inp:{x:0,y:0,w:.64,h:1},cam:{x:.64,y:0,w:.36,h:1}};
+    if(scene==="pip"){const cw=port?.36:.2,chh=cw*A,m=.035;return{inp:{x:0,y:0,w:1,h:1},cam:{x:1-cw-m,y:1-chh-m*A*(port?1:1.6),w:cw,h:chh}}}
+    return{inp:null,cam:null};
+  }
+  /* pure: the square board inside the block (bs = its size, 0.5..1; px/py move it inside the free room) */
+  function boardIn(inp,A,xf){xf=Object.assign({},XF0,xf||{});const fit=Math.min(inp.w*A,inp.h),size=fit*clamp(+xf.bs||1,.5,1);
+    const fx=(inp.w*A-size)/2,fy=(inp.h-size)/2;return{x:inp.x+fx*(1+clamp(+xf.px||0,-1,1))/A,y:inp.y+fy*(1+clamp(+xf.py||0,-1,1)),w:size/A,h:size}}
+  function applyScene(o){
+    const L=LAY(),api54=(()=>{try{return api().lc54}catch(e){return null}})();if(!L||!api54||!api54.apply)return false;
+    const S=Object.assign(scS(),o||{}),prev=scS();
+    const cam=JSON.parse(JSON.stringify(L.layers.camera)),board=JSON.parse(JSON.stringify(L.layers.board));
+    let keep=prev.classic||null;
+    if(prev.scene==="classic"&&S.scene!=="classic")keep={camera:cam,board:board};
+    let layers;
+    if(S.scene==="classic"){layers=keep?{camera:keep.camera,board:keep.board}:null}
+    else if(S.scene==="cam"){layers={camera:Object.assign(cam,{on:true,fill:"full"}),board:Object.assign(board,{on:false})}}
+    else{
+      const A=aspectA(L),R=sceneRects(S.scene,A);
+      const c2=S.scene==="split"?Object.assign(cam,{on:true,fill:"pip",shape:"rect",ratio:"free",radius:6},R.cam):Object.assign(cam,{on:true,fill:"pip",shape:"circle",ratio:"1:1",radius:100},R.cam);
+      const b2=S.src==="board"?Object.assign(board,{on:true},boardIn(R.inp,A,S.xf.in)):Object.assign(board,{on:false});
+      layers={camera:c2,board:b2};
+    }
+    scPut({scene:S.scene,src:S.src,classic:keep,aspect:L.aspect});
+    if(layers&&!api54.apply({aspect:L.aspect,layers:layers})){scPut({scene:prev.scene,src:prev.src});return false}
+    inputSync();paintScn();dirty();return true;
+  }
+  function inRect(){const S=scS(),L=LAY();if(!sceneOn()||!L)return null;return sceneRects(S.scene,aspectA(L)).inp}
+  /* ----- the live page sources (landing page, the app): an iframe over the input block, clickable and scrollable ----- */
+  const pageUrl=k=>k==="app"?location.origin+"/app.html?embed=studio#home":location.origin+"/index.html?preview=1&lc79=input";
+  function inMount(kind){
+    const sr=studioRoot(),st=sr&&Q("#stage",sr);if(!st)return false;
+    if(IN.el&&IN.el.isConnected&&IN.kind===kind)return true;
+    inUnmount();
+    try{if(getComputedStyle(st).position==="static")st.style.position="relative"}catch(e){}
+    const w=document.createElement("div");w.id="lc79-in";w.setAttribute("role","region");w.setAttribute("aria-label",(kind==="app"?"The app":"Your landing page")+", live in the input block. Scroll and click it while you record.");
+    w.style.cssText="position:absolute;z-index:35;overflow:hidden;background:#0f172a;display:block;border-radius:6px";
+    const fr=document.createElement("iframe");fr.title=kind==="app"?"Lanckriet Chess app":"Lanckriet Chess landing page";fr.src=pageUrl(kind);
+    fr.setAttribute("sandbox","allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox");
+    fr.style.cssText="display:block;position:absolute;left:0;top:0;border:0;background:#0f172a;transform-origin:0 0";
+    w.appendChild(fr);st.appendChild(w);IN.el=w;IN.fr=fr;IN.kind=kind;
+    fr.addEventListener("load",()=>{try{const wn=fr.contentWindow;wn.addEventListener("scroll",()=>{if(!IN.live)grabIn()},{passive:true})}catch(e){}setTimeout(grabIn,600)});
+    startInSnaps();if(!IN.raf)IN.raf=requestAnimationFrame(inLoop);
+    return true;
+  }
+  function inUnmount(){stopInSnaps();if(IN.stream){IN.stream.getTracks().forEach(t=>{try{t.stop()}catch(e){}})}IN.stream=null;IN.video=null;IN.live=false;if(IN.el){try{IN.el.remove()}catch(e){}}IN.el=null;IN.fr=null;IN.kind="";IN.snap=null}
+  function startInSnaps(){if(IN.snapTimer)return;IN.snapTimer=setInterval(()=>{if(!IN.live)grabIn()},1000)}
+  function stopInSnaps(){if(IN.snapTimer){clearInterval(IN.snapTimer);IN.snapTimer=0}}
+  async function grabIn(){
+    if(IN.snapBusy||!IN.fr)return;IN.snapBusy=true;
+    try{const h2c=await loadH2C(),wn=IN.fr.contentWindow,d=wn&&wn.document;if(!d||!d.body)return;
+      const c=await h2c(d.body,{backgroundColor:"#0f172a",useCORS:true,allowTaint:false,logging:false,scale:Math.min(2,window.devicePixelRatio||1),x:wn.scrollX,y:wn.scrollY,width:wn.innerWidth,height:wn.innerHeight,windowWidth:wn.innerWidth,windowHeight:wn.innerHeight});
+      if(c&&c.width){IN.snap=c;dirty()}}
+    catch(e){}finally{IN.snapBusy=false}
+  }
+  /* Chrome / Edge: film the block live (tab capture cropped to the element) instead of a picture every second */
+  async function inFilmLive(){
+    const md=navigator.mediaDevices;if(!IN.el)return false;
+    if(!md||!md.getDisplayMedia||!(window.CropTarget||window.RestrictionTarget)){say("This browser cannot film a live page, so the recording gets a new picture every second. Chrome or Edge on a computer films it live.","",6000);return false}
+    let s=null;
+    try{s=await md.getDisplayMedia({video:{displaySurface:"browser",frameRate:30},audio:false,preferCurrentTab:true,selfBrowserSurface:"include",surfaceSwitching:"exclude",monitorTypeSurfaces:"exclude"});
+      const tr=s.getVideoTracks()[0];let done=false;
+      if(window.RestrictionTarget&&tr.restrictTo){try{await tr.restrictTo(await RestrictionTarget.fromElement(IN.el));done=true}catch(e){}}
+      if(!done){if(!(window.CropTarget&&tr.cropTo))throw new Error("crop");await tr.cropTo(await CropTarget.fromElement(IN.el))}
+      const v=document.createElement("video");v.muted=true;v.playsInline=true;v.srcObject=s;await v.play();
+      IN.stream=s;IN.video=v;IN.live=true;stopInSnaps();tr.addEventListener("ended",()=>{IN.stream=null;IN.video=null;IN.live=false;startInSnaps();paintScn()});
+      say("The input block is filmed live. Scroll and click it.","ok",3000);paintScn();return true;
+    }catch(e){if(s)s.getTracks().forEach(t=>{try{t.stop()}catch(x){}});say(e&&e.name==="NotAllowedError"?"Not shared: the recording keeps a new picture every second. Pick “This tab” to film it live.":"Could not film the page live: the recording keeps a new picture every second.","",5000);return false}
+  }
+  /* ----- screen share ----- */
+  async function shareScreen(){
+    const md=navigator.mediaDevices;
+    if(!md||!md.getDisplayMedia){say("Screen sharing works in Chrome, Edge, Firefox or Safari on a computer. This device cannot share its screen.","err",6000);return false}
+    let s=null;
+    try{s=await md.getDisplayMedia({video:{frameRate:30},audio:false,selfBrowserSurface:"exclude"});
+      const v=document.createElement("video");v.muted=true;v.playsInline=true;v.srcObject=s;await v.play();
+      shotStop();IN.shot=s;IN.shotV=v;s.getVideoTracks()[0].addEventListener("ended",()=>{IN.shot=null;IN.shotV=null;paintScn();dirty();say("Screen sharing stopped. Pick Share screen again to go on.","",4000)});
+      if(!IN.raf)IN.raf=requestAnimationFrame(inLoop);paintScn();return true;
+    }catch(e){if(s)s.getTracks().forEach(t=>{try{t.stop()}catch(x){}});say(e&&e.name==="NotAllowedError"?"Screen sharing was not allowed.":"Screen sharing did not start.","",4000);return false}
+  }
+  function shotStop(){if(IN.shot){IN.shot.getTracks().forEach(t=>{try{t.stop()}catch(e){}})}IN.shot=null;IN.shotV=null}
+  /* place the iframe over the block, apply crop / zoom / pan to it, and cut out the camera bubble so the preview shows what the recording shows */
+  function inPlace(){
+    const sr=studioRoot(),st=sr&&Q("#stage",sr),cv=sr&&Q("#stage-cv",sr),r=inRect();if(!st||!cv||!IN.el||!r)return;
+    const c=cv.getBoundingClientRect(),s=st.getBoundingClientRect();if(c.width<2||c.height<2)return;
+    const x=c.left-s.left+r.x*c.width,y=c.top-s.top+r.y*c.height,w=r.w*c.width,h=r.h*c.height,E=IN.el.style;
+    const set=(k,v)=>{if(E[k]!==v)E[k]=v};set("left",Math.round(x)+"px");set("top",Math.round(y)+"px");set("width",Math.round(w)+"px");set("height",Math.round(h)+"px");
+    /* the page is laid out at a real width (390 px phone view for a tall block, 1280 px for a wide one) and scaled into the block */
+    if(IN.fr){const F=IN.fr.style,LW=w/Math.max(1,h)<1?390:1280,LH=Math.round(LW*h/Math.max(1,w)),X=srcRect(LW,LH,w/Math.max(1,h),scS().xf.in),k=w/Math.max(1,X.sw);
+      const fw=LW+"px",fh=LH+"px",tf="translate("+(-X.sx*k).toFixed(1)+"px,"+(-X.sy*k).toFixed(1)+"px) scale("+k.toFixed(4)+")";
+      if(F.width!==fw)F.width=fw;if(F.height!==fh)F.height=fh;if(F.transform!==tf)F.transform=tf}
+    let cp="none";
+    try{const L=LAY(),cm=L&&L.layers.camera;if(cm&&cm.on&&cm.fill!=="full"){
+      const sx=c.width,sy=c.height,cx=cm.x*sx-(x-(c.left-s.left)),cy=cm.y*sy-(y-(c.top-s.top)),cw=cm.w*sx,chh=cm.h*sy;
+      if(cx<w&&cy<h&&cx+cw>0&&cy+chh>0){const rad=Math.min(cw,chh)/2*(cm.radius/100);const f=n=>n.toFixed(1);
+        const hole="M"+f(cx+rad)+" "+f(cy)+"H"+f(cx+cw-rad)+"A"+f(rad)+" "+f(rad)+" 0 0 1 "+f(cx+cw)+" "+f(cy+rad)+"V"+f(cy+chh-rad)+"A"+f(rad)+" "+f(rad)+" 0 0 1 "+f(cx+cw-rad)+" "+f(cy+chh)+"H"+f(cx+rad)+"A"+f(rad)+" "+f(rad)+" 0 0 1 "+f(cx)+" "+f(cy+chh-rad)+"V"+f(cy+rad)+"A"+f(rad)+" "+f(rad)+" 0 0 1 "+f(cx+rad)+" "+f(cy)+"Z";
+        cp='path(evenodd,"M0 0H'+f(w)+"V"+f(h)+'H0Z '+hole+'")'}}}catch(e){}
+    if(E.clipPath!==cp)E.clipPath=cp;
+  }
+  function inLoop(){
+    const S=scS(),need=usesInput()&&(S.src==="screen"?!!IN.shotV:!!IN.el);
+    if(!need&&!(scS().xfOpen)){IN.raf=0;return}
+    try{inPlace()}catch(e){}try{placeHandle()}catch(e){}
+    if(IN.shotV||IN.live)dirty();
+    IN.raf=requestAnimationFrame(inLoop);
+  }
+  function inputSync(){
+    const S=scS(),u=usesInput();
+    if(!u||S.src==="screen")inUnmount();
+    if(!u||S.src!=="screen")shotStop();
+    if(u&&(S.src==="landing"||S.src==="app"))inMount(S.src);
+    if(!IN.raf&&(u||S.xfOpen))IN.raf=requestAnimationFrame(inLoop);
+  }
+  function drawUnder(ctx,W,H){
+    if(!(W>1&&H>1)||!usesInput())return;
+    const S=scS(),r=inRect();if(!r)return;
+    const x=r.x*W,y=r.y*H,w=r.w*W,h=r.h*H;
+    ctx.save();rr(ctx,x,y,w,h,Math.min(w,h)*.012);ctx.clip();ctx.fillStyle="#0f172a";ctx.fillRect(x,y,w,h);
+    try{
+      if(S.src==="screen"&&IN.shotV&&IN.shotV.videoWidth){const v=IN.shotV,X=srcRect(v.videoWidth,v.videoHeight,w/h,S.xf.in);ctx.drawImage(v,X.sx,X.sy,X.sw,X.sh,x,y,w,h)}
+      else if(IN.live&&IN.video&&IN.video.videoWidth)ctx.drawImage(IN.video,x,y,w,h);
+      else if(IN.snap&&IN.snap.width){const X=srcRect(IN.snap.width,IN.snap.height,w/h,S.xf.in);ctx.drawImage(IN.snap,X.sx,X.sy,X.sw,X.sh,x,y,w,h)}
+      else{ctx.fillStyle="#94a3b8";ctx.font="600 "+Math.round(Math.max(12,Math.min(w,h)*.045))+"px Sora,system-ui,sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";
+        ctx.fillText(S.src==="screen"?"Pick “Share screen” to show your screen here":S.src==="app"?"Loading the app…":"Loading the landing page…",x+w/2,y+h/2,w*.9)}
+    }catch(e){}
+    ctx.restore();
+  }
+  /* ----- Crop & zoom: the panel and the drag / wheel / pinch handle ----- */
+  function xfTarget(){const S=scS();return S.target==="cam"||!sceneOn()?"cam":"in"}
+  function xfSet(patch,quiet){
+    const S=scS(),tg=xfTarget(),xf=Object.assign({},S.xf[tg],patch);
+    ["l","t","r","b"].forEach(k=>{xf[k]=clamp(+xf[k]||0,0,.45)});if(xf.l+xf.r>.8){xf.r=.8-xf.l}if(xf.t+xf.b>.8){xf.b=.8-xf.t}
+    xf.z=clamp(+xf.z||1,1,4);xf.px=clamp(+xf.px||0,-1,1);xf.py=clamp(+xf.py||0,-1,1);xf.bs=clamp(+xf.bs||1,.5,1);
+    const all=Object.assign({},S.xf);all[tg]=xf;scPut({xf:all});
+    if(tg==="in"&&S.src==="board"&&sceneOn())applyScene({});
+    dirty();if(!quiet)paintXf();
+  }
+  function placeHandle(){
+    const sr=studioRoot(),st=sr&&Q("#stage",sr),cv=sr&&Q("#stage-cv",sr),S=scS();if(!st||!cv)return;
+    let hd=Q("#lc79-xfh",sr);
+    if(!S.xfOpen){if(hd)hd.remove();return}
+    const tg=xfTarget(),L=LAY();let r=null;
+    if(tg==="cam"){const cm=L&&L.layers.camera;if(cm&&cm.on)r=cm.fill==="full"?{x:0,y:0,w:1,h:1}:{x:cm.x,y:cm.y,w:cm.w,h:cm.h}}else r=inRect();
+    if(!r){if(hd)hd.remove();return}
+    if(!hd){hd=document.createElement("div");hd.id="lc79-xfh";hd.setAttribute("aria-hidden","true");hd.title="Drag to pan, wheel or two fingers to zoom";st.appendChild(hd);bindHandle(hd)}
+    const c=cv.getBoundingClientRect(),s=st.getBoundingClientRect(),E=hd.style;
+    E.left=Math.round(c.left-s.left+r.x*c.width)+"px";E.top=Math.round(c.top-s.top+r.y*c.height)+"px";E.width=Math.round(r.w*c.width)+"px";E.height=Math.round(r.h*c.height)+"px";
+    hd.dataset.tg=tg;
+  }
+  function bindHandle(hd){
+    const pts=new Map();let base=null;
+    const start=()=>{const S=scS(),tg=xfTarget(),x=S.xf[tg],R=hd.getBoundingClientRect(),pp=[...pts.values()];
+      base={x:Object.assign({},x),w:R.width,h:R.height,c:pp.length===1?{x:pp[0].x,y:pp[0].y}:null,d:pp.length>=2?Math.hypot(pp[0].x-pp[1].x,pp[0].y-pp[1].y):0,tg:tg}};
+    hd.addEventListener("pointerdown",e=>{e.preventDefault();try{hd.setPointerCapture(e.pointerId)}catch(x){}pts.set(e.pointerId,{x:e.clientX,y:e.clientY});start()});
+    hd.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId)||!base)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});const pp=[...pts.values()];
+      if(pp.length>=2&&base.d>0){const d=Math.hypot(pp[0].x-pp[1].x,pp[0].y-pp[1].y);if(base.tg==="in"&&scS().src==="board")xfSet({bs:base.x.bs*d/base.d},true);else xfSet({z:base.x.z*d/base.d},true);return}
+      if(pp.length===1&&base.c){let dx=(e.clientX-base.c.x)/Math.max(1,base.w),dy=(e.clientY-base.c.y)/Math.max(1,base.h);
+        const L=LAY();if(base.tg==="cam"&&L&&L.layers.camera.flip)dx=-dx;
+        const k=base.tg==="in"&&scS().src==="board"?2:2*Math.max(1,base.x.z);   /* drag the picture with the finger */
+        xfSet({px:base.x.px-dx*k,py:base.x.py-dy*k},true)}});
+    const end=e=>{pts.delete(e.pointerId);if(pts.size)start();else{base=null;paintXf()}};
+    hd.addEventListener("pointerup",end);hd.addEventListener("pointercancel",end);
+    hd.addEventListener("wheel",e=>{e.preventDefault();const S=scS(),tg=xfTarget(),x=S.xf[tg],f=Math.exp(-e.deltaY*.0015);if(tg==="in"&&S.src==="board")xfSet({bs:x.bs*f});else xfSet({z:x.z*f})},{passive:false});
+  }
+  const PARAMS=[["z","Zoom",100,400],["px","Pan left / right",-100,100],["py","Pan up / down",-100,100],["l","Crop left",0,45],["r","Crop right",0,45],["t","Crop top",0,45],["b","Crop bottom",0,45]];
+  function paintVal(){
+    const sr=studioRoot(),p=sr&&Q("#lc79-xf",sr);if(!p)return;const S=scS(),tg=xfTarget(),x=S.xf[tg],brd=tg==="in"&&S.src==="board",k=S.param||"z";
+    const v=Q("[data-xv]",p);if(v)v.textContent=k==="z"?(brd?Math.round(x.bs*100)+"%":(+x.z).toFixed(2)+"x"):(k==="px"||k==="py")?Math.round(x[k]*100):Math.round(x[k]*100)+"%";
+  }
+  function paintXf(){
+    const sr=studioRoot(),p=sr&&Q("#lc79-xf",sr);if(!p)return;const S=scS();p.hidden=!S.xfOpen;if(!S.xfOpen)return;
+    const tg=xfTarget(),x=S.xf[tg],brd=tg==="in"&&S.src==="board";
+    const tsel=Q("[data-x=target]",p);if(tsel){tsel.value=tg;Q('option[value="in"]',tsel).disabled=!sceneOn()}
+    let k=S.param||"z";const list=brd?PARAMS.slice(0,3):PARAMS;if(!list.some(o=>o[0]===k))k="z";
+    const ps=Q("[data-x=param]",p);if(ps){const html=list.map(o=>'<option value="'+o[0]+'">'+esc(brd&&o[0]==="z"?"Board size":o[1])+"</option>").join("");if(ps.innerHTML!==html)ps.innerHTML=html;ps.value=k}
+    const o=list.filter(z=>z[0]===k)[0],r=Q("[data-x=val]",p);
+    if(r){r.min=String(brd&&k==="z"?50:o[2]);r.max=String(brd&&k==="z"?100:o[3]);if(sr.activeElement!==r)r.value=String(Math.round((k==="z"?(brd?x.bs:x.z):x[k])*100))}
+    const lab=Q("[data-xl]",p);if(lab)lab.textContent=brd&&k==="z"?"Board size":o[1];
+    paintVal();
+    const n=Q(".lc79-xnote",p);if(n)n.textContent=brd?"The board keeps its exact squares so you can play on it: set its size in the block and drag it to place it.":"Drag on the "+(tg==="cam"?"camera":"input")+" on the stage to pan, use the wheel or two fingers to zoom. Only what is inside the frame is recorded.";
+    const sh=Q("[data-x=shape]",p);if(sh){const L=LAY(),cm=L&&L.layers.camera;sh.closest("label").hidden=tg!=="cam"||!cm||cm.fill==="full";if(cm)sh.value=cm.shape==="circle"?"circle":(+cm.radius>=20?"rect":"free")}
+  }
+  function setCamShape(v){
+    const L=LAY();if(!L)return;const cm=JSON.parse(JSON.stringify(L.layers.camera));
+    if(v==="circle"){cm.shape="circle";cm.ratio="1:1";cm.radius=100;const s=Math.min(cm.w*aspectA(L),cm.h);cm.w=s/aspectA(L);cm.h=s}
+    else if(v==="free"){cm.shape="rect";cm.ratio="free";cm.radius=6}else{cm.shape="rect";cm.ratio="free";cm.radius=24}
+    try{api().lc54.apply({aspect:L.aspect,layers:{camera:cm}})}catch(e){}paintXf();dirty();
+  }
+  /* ----- the scene row (above the stage) ----- */
+  function paintScn(){
+    const sr=studioRoot(),row=sr&&Q("#lc79-scn",sr);if(!row)return;const S=scS();
+    const sc=Q("[data-s=scene]",row);if(sc&&sc.value!==S.scene)sc.value=S.scene;
+    const so=Q("[data-s=src]",row);if(so){if(so.value!==S.src)so.value=S.src;so.closest("label").hidden=!sceneOn()}
+    const fl=Q("[data-s=film]",row);if(fl){fl.hidden=!(usesInput()&&(S.src==="landing"||S.src==="app"));fl.textContent=IN.live?"● Filming live":"Film it live"}
+    const sh=Q("[data-s=share]",row);if(sh){sh.hidden=!(usesInput()&&S.src==="screen");sh.textContent=IN.shotV?"Change the shared screen":"Share screen"}
+    const xb=Q("[data-s=xf]",row);if(xb){xb.setAttribute("aria-pressed",String(!!S.xfOpen));xb.classList.toggle("lc79-on",!!S.xfOpen)}
+    paintXf();
+  }
+  function buildScn(sr){
+    const col=Q("#stage",sr)&&Q("#stage",sr).closest(".stage-wrap");if(!col||Q("#lc79-scn",sr))return;
+    const row=document.createElement("div");row.id="lc79-scn";row.className="lc79-scn";row.setAttribute("role","toolbar");row.setAttribute("aria-label","Scene and input");
+    row.innerHTML='<label class="lc79-sl"><span>Scene</span><select class="lc79-dsel" data-s="scene">'+SCENES.map(o=>'<option value="'+o[0]+'">'+esc(o[1])+"</option>").join("")+'</select></label>'
+      +'<label class="lc79-sl"><span>Input</span><select class="lc79-dsel" data-s="src">'+SOURCES.map(o=>'<option value="'+o[0]+'">'+esc(o[1])+"</option>").join("")+"</select></label>"
+      +'<button type="button" class="btn sm lc79-dockb" data-s="share" hidden>Share screen</button><button type="button" class="btn sm lc79-dockb" data-s="film" hidden title="Chrome / Edge: film the page in the block live instead of one picture a second">Film it live</button>'
+      +'<button type="button" class="btn sm lc79-dockb" data-s="xf" aria-controls="lc79-xf" aria-pressed="false">⤢ Crop & zoom</button>';
+    const xf=document.createElement("div");xf.id="lc79-xf";xf.className="lc79-xf";xf.hidden=true;
+    xf.innerHTML='<div class="lc79-xrow"><label class="lc79-sl"><span>Edit</span><select class="lc79-dsel" data-x="target"><option value="cam">The camera</option><option value="in">The input block</option></select></label>'
+      +'<label class="lc79-sl"><span>Setting</span><select class="lc79-dsel" data-x="param"></select></label>'
+      +'<label class="lc79-sl lc79-xs"><span><span data-xl>Zoom</span> <b data-xv></b></span><input type="range" data-x="val" min="100" max="400" step="1" aria-label="Value"></label>'
+      +'<label class="lc79-sl"><span>Camera frame</span><select class="lc79-dsel" data-x="shape"><option value="free">Free rectangle</option><option value="rect">Rounded</option><option value="circle">Circle</option></select></label>'
+      +'<button type="button" class="btn sm lc79-dockb" data-x="reset">Reset</button></div>'
+      +'<p class="lc79-hint lc79-xnote"></p>';
+    col.parentNode.insertBefore(row,col);col.parentNode.insertBefore(xf,col);
+    row.addEventListener("change",e=>{const k=e.target.getAttribute("data-s");if(!k)return;const v=e.target.value;
+      if(k==="scene"){if(!applyScene({scene:v}))paintScn();else say(SCENES.filter(o=>o[0]===v)[0][1]+".","ok",1600)}
+      if(k==="src"){applyScene({src:v});if(v==="screen"&&!IN.shotV)shareScreen().then(()=>{paintScn();dirty()})}});
+    row.addEventListener("click",e=>{const b=e.target.closest("[data-s]");if(!b||b.tagName==="SELECT")return;const k=b.getAttribute("data-s");
+      if(k==="xf"){scPut({xfOpen:!scS().xfOpen});paintScn();inputSync();placeHandle()}
+      if(k==="share")shareScreen().then(()=>{paintScn();dirty()});
+      if(k==="film")inFilmLive()});
+    xf.addEventListener("input",e=>{if(e.target.getAttribute("data-x")!=="val")return;const S=scS(),k=S.param||"z",brd=xfTarget()==="in"&&S.src==="board",v=+e.target.value;
+      if(k==="z")xfSet(brd?{bs:v/100}:{z:v/100},true);else xfSet({[k]:v/100},true);paintVal()});
+    xf.addEventListener("change",e=>{const k=e.target.getAttribute("data-x");if(k==="target"){scPut({target:e.target.value});paintXf();placeHandle()}else if(k==="param"){scPut({param:e.target.value});paintXf()}else if(k==="shape")setCamShape(e.target.value)});
+    xf.addEventListener("click",e=>{if(e.target.closest('[data-x="reset"]')){xfSet(Object.assign({},XF0))}});
+    paintScn();
+  }
+  /* the record bar: a fixed status bar along the bottom (always in reach, also after scrolling), and the stage is sized so it always ends
+     ABOVE that bar: the board is never under it. The space under the stage is kept free so the panels below can scroll past the bar. */
+  let fitAt=0;
+  function dockFit(sr){
+    const dock=Q("#lc54-dock",sr),st=Q("#stage",sr),wrap=st&&st.closest(".stage-wrap");if(!dock||!wrap)return;
+    dock.classList.add("lc79-docked");
+    const col=wrap.parentNode,row=Q("#lc79-scn",sr)||wrap;
+    ["#lc79-post","#lc79-live"].forEach(id=>{const el=Q(id,sr);if(el&&el.parentNode!==col)col.insertBefore(el,row)});
+    let rec="idle";try{rec=api().rec.state}catch(e){}
+    if(rec!=="idle")return;                                             /* never resize the stage while a take is running */
+    const dr=dock.getBoundingClientRect();if(dr.height<10)return;
+    const L=LAY(),ar=L&&L.aspect==="9:16"?9/16:16/9,cs=getComputedStyle(wrap),pl=parseFloat(cs.paddingLeft)||0,pr=parseFloat(cs.paddingRight)||0,pt=parseFloat(cs.paddingTop)||0;
+    const top0=wrap.getBoundingClientRect().top+(window.scrollY||0)+pt;  /* where the stage starts with the page at the top */
+    const room=dr.top-8-top0,pad=Math.ceil(window.innerHeight-dr.top+10);
+    let mw=0;if(room>=180&&wrap.getBoundingClientRect().width>0){const w=Math.floor(room*ar+pl+pr);if(w<col.clientWidth)mw=w}
+    /* one style rule in the Studio's own shadow root: the Studio's layout code can rewrite the element styles, never this rule */
+    let fs=Q("#lc79-fit",sr);if(!fs){fs=document.createElement("style");fs.id="lc79-fit";sr.appendChild(fs)}
+    col.classList.add("lc79-fitcol");
+    const css=".lc79-fitcol{padding-bottom:"+pad+"px!important}"+(mw?".lc79-fitcol>.stage-wrap{max-width:"+mw+"px!important;width:100%;margin-left:auto!important;margin-right:auto!important}":"");
+    if(fs.textContent!==css&&Date.now()-fitAt>250){fitAt=Date.now();fs.textContent=css}
+  }
+  function sceneTick(sr){
+    buildScn(sr);dockFit(sr);
+    const S=scS(),L=LAY();if(L&&sceneOn()&&S.aspect&&S.aspect!==L.aspect)applyScene({});     /* the format changed: put the blocks back in place */
+    if(usesInput()&&(S.src==="landing"||S.src==="app")&&!(IN.el&&IN.el.isConnected))inputSync();
+    if(S.xfOpen&&!IN.raf)IN.raf=requestAnimationFrame(inLoop);
+  }
+  function sceneStop(){inUnmount();shotStop();if(IN.raf){cancelAnimationFrame(IN.raf);IN.raf=0}}
+
   /* ---------- Studio wiring (shadow root) ---------- */
-  const SR_CSS=".lc79-dockb{min-height:44px!important;padding:0 14px!important;border-radius:12px!important;font-weight:700!important}#lc54-dock{flex-wrap:wrap;max-width:calc(100vw - 16px);row-gap:6px}#lc54-dock .btn{min-height:44px}.lc79-dsel{min-height:44px;max-width:220px;border-radius:12px;background:#14171d;color:#e5e7eb;border:1px solid rgba(0,229,255,.45);padding:0 8px;font:600 13px Sora,system-ui,sans-serif}.lc79-flow{display:inline-flex;gap:4px;align-items:center}#lc79-step{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
-    +"#lc79-post{position:absolute;left:50%;transform:translateX(-50%);bottom:150px;z-index:72;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:min(720px,94%);padding:8px 12px;border-radius:12px;background:#0f172a;border:1px solid rgba(0,229,255,.5);color:#fff;font:600 13px Sora,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#lc79-post .btn,#lc79-post select{min-height:44px}#lc79-post select{border-radius:10px;background:#14171d;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 8px}"
+  const SR_CSS=".lc79-dockb{min-height:44px!important;padding:0 14px!important;border-radius:12px!important;font-weight:700!important}#lc54-dock{flex-wrap:wrap;max-width:calc(100vw - 16px);row-gap:6px}#lc54-dock.lc79-docked{left:8px!important;right:8px!important;transform:none!important;max-width:none!important;width:auto!important;box-sizing:border-box;justify-content:flex-start;border-radius:14px!important}@media (max-width:700px){#lc54-dock.lc79-docked{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}#lc54-dock.lc79-docked>*{flex:none}}.lc79-scn{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin:0 0 8px}.lc79-sl{display:flex;flex-direction:column;gap:2px;font:600 11px Sora,system-ui,sans-serif;color:#94a3b8;letter-spacing:.02em}.lc79-sl[hidden]{display:none}.lc79-scn .lc79-dsel,.lc79-xf .lc79-dsel{max-width:min(300px,86vw)}.lc79-xf{margin:0 0 8px;padding:6px 10px;border-radius:14px;background:#0f141b;border:1px solid rgba(0,229,255,.3)}.lc79-xf[hidden]{display:none}.lc79-xrow{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.lc79-xs{flex:1 1 160px;min-width:140px}.lc79-xs input{width:100%;min-height:44px}.lc79-xs b{color:#00E5FF}.lc79-xnote{margin:4px 0 0;font-size:12px}#lc79-xfh{position:absolute;z-index:45;cursor:grab;touch-action:none;outline:2px dashed #00E5FF;outline-offset:-2px;background:rgba(0,229,255,.06)}#lc79-xfh:active{cursor:grabbing}#lc54-dock .btn{min-height:44px}.lc79-dsel{min-height:44px;max-width:220px;border-radius:12px;background:#14171d;color:#e5e7eb;border:1px solid rgba(0,229,255,.45);padding:0 8px;font:600 13px Sora,system-ui,sans-serif}.lc79-flow{display:inline-flex;gap:4px;align-items:center}#lc79-step{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+    +"#lc79-post{position:relative;left:auto;transform:none;bottom:auto;z-index:6;margin:0 auto 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:min(720px,94%);padding:8px 12px;border-radius:12px;background:#0f172a;border:1px solid rgba(0,229,255,.5);color:#fff;font:600 13px Sora,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#lc79-post .btn,#lc79-post select{min-height:44px}#lc79-post select{border-radius:10px;background:#14171d;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 8px}"
     +".lc79-dockb.lc79-on{background:#fbbf24!important;color:#0f172a!important;border-color:#fbbf24!important}"
     +".lc79-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}.lc79-bar .btn{min-height:44px}.lc79-bar .lc79-go{background:#00E5FF;color:#04141a;border-color:#00E5FF;font-weight:700}"
     +".take-chip-w{display:inline-flex;align-items:stretch;gap:2px}.take-del{min-width:44px;min-height:44px;border-radius:10px;border:1px solid rgba(239,68,68,.45);background:rgba(239,68,68,.08);color:#fca5a5;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.take-del:hover{background:rgba(239,68,68,.2)}"
     +".lc79-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:44px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#e5e7eb;font:600 14px/1.2 inherit;text-align:left;cursor:pointer;border-top:1px solid rgba(255,255,255,.06)}.lc79-opt small{color:#94a3b8;font-weight:500;font-size:12px}.lc79-opt:hover,.lc79-opt:focus-visible{background:rgba(0,229,255,.1)}"
-    +"#lc79-live{position:absolute;left:50%;transform:translateX(-50%);bottom:96px;z-index:70;max-width:min(680px,90%);padding:6px 14px;border-radius:10px;background:rgba(5,7,10,.82);color:#fff;font:600 15px/1.35 Sora,system-ui,sans-serif;pointer-events:none;text-align:center}#lc79-live small{display:block;color:#00E5FF;font-size:11px;font-weight:600}#lc79-live[hidden]{display:none}";
+    +"#lc79-live{position:relative;left:auto;transform:none;bottom:auto;z-index:6;margin:0 auto 8px;max-width:min(680px,90%);padding:6px 14px;border-radius:10px;background:rgba(5,7,10,.82);color:#fff;font:600 15px/1.35 Sora,system-ui,sans-serif;pointer-events:none;text-align:center}#lc79-live small{display:block;color:#00E5FF;font-size:11px;font-weight:600}#lc79-live[hidden]{display:none}";
   function inject(){
     const sr=studioRoot();if(!sr)return;
     if(!Q("#lc79-srcss",sr)){const st=document.createElement("style");st.id="lc79-srcss";st.textContent=SR_CSS;sr.appendChild(st)}
@@ -1670,10 +1958,12 @@ BCLOSE);
     d.hidden=false;const t=String(txt||"").split(" ").slice(-12).join(" ");d.innerHTML="<small>Live captions</small>"+esc(t||"Listening…");
   }
   let tickId=0,lastTick=0;
-  function tick(){lastTick=Date.now();if(route()!=="studio"){clearInterval(tickId);tickId=0;return}try{inject()}catch(e){}try{liveTick()}catch(e){}}
+  /* 9.45.0: a chain of timeouts instead of one interval: something in the app clears that interval id during boot, which stopped the Studio wiring */
+  function loopTick(){clearTimeout(tickId);tickId=setTimeout(()=>{tickId=0;tick();if(route()==="studio")loopTick()},400)}
+  function tick(){lastTick=Date.now();if(route()!=="studio")return;try{inject()}catch(e){}try{const sr=studioRoot();if(sr)sceneTick(sr)}catch(e){}try{liveTick()}catch(e){}}
   function afterRender(r){
-    if(r!=="studio"){["lc79-ed","lc79-ai","lc79-ctaset","lc79-flowset"].forEach(id=>closeLayer(id,true));if(ctaOn){ctaOn=false}FL.step=0;FL.card=null;FL.aha=false;liveStop();return}
-    if(!tickId||Date.now()-lastTick>3000){clearInterval(tickId);tickId=setInterval(tick,400)}
+    if(r!=="studio"){["lc79-ed","lc79-ai","lc79-ctaset","lc79-flowset"].forEach(id=>closeLayer(id,true));if(ctaOn){ctaOn=false}FL.step=0;FL.card=null;FL.aha=false;liveStop();sceneStop();return}
+    if(!tickId||Date.now()-lastTick>1500)loopTick();
     setTimeout(tick,60);
   }
   function init(){
@@ -1687,8 +1977,9 @@ BCLOSE);
     window.addEventListener("keydown",e=>{if(ED.open&&layerStack[layerStack.length-1]==="lc79-ed")onEdKey(e)},true);   /* capture: a repainted block loses focus to <body>, the keys still work */
     document.addEventListener("keydown",e=>{if(e.key==="Escape"&&layerStack.length){const top=layerStack[layerStack.length-1];if(top==="lc79-ed"&&ED.busy)return;closeLayer(top)}});
     window.addEventListener("hashchange",()=>{if(route()!=="studio")["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true))});
+    window.addEventListener("pointerdown",()=>{if(route()==="studio"&&Date.now()-lastTick>1500)loopTick()},true);   /* watchdog */
   }
-  return{writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
+  return{camSrc:camSrc,drawUnder:drawUnder,applyScene:applyScene,scene:scS,srcRect:srcRect,sceneRects:sceneRects,boardIn:boardIn,shareScreen:shareScreen,inState:()=>({kind:IN.kind,live:IN.live,snap:!!IN.snap,shot:!!IN.shotV,el:!!IN.el}),writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
     segments:segments,run:run,envThr:envThr,findQuiet:findQuiet,envDt:envDt,speechRanges:speechRanges,minus:minus,complement:complement,clipsFor:clipsFor,splitClip:splitClip,splitAt:splitAt,trimClip:trimClip,deleteClip:deleteClip,cutSilences:cutSilences,autoSilence:autoSilence,envOf:envOf,capStyle:capStyle,capLine:capLine,drawCaption:drawCaption,nle:nle,undo:undo,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,pawnCheck:pawnCheck,BCLOSE:BCLOSE,boardSVG:boardSVG,sfx:sfx,
     BUILT:BUILT,db:db,newProject:newProject,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/

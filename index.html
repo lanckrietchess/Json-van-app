@@ -10,15 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.44.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.45.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.44.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.44.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.45.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.45.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.44.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.45.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -206,7 +206,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   <div class="wrap">
     <a class="brand" href="/"><img src="/icons/icon-192.png" width="34" height="34" alt="" id="brand-img"><span>Lanckriet Chess</span></a>
     <nav aria-label="Main">
-      <a href="#how">How it works</a><a href="#proof">Results</a><a href="#install">Install</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a>
+      <a href="#how">How it works</a><a href="#proof">Results</a><a href="#install">Install</a><a href="#faq">FAQ</a>
       <a class="btn bw" data-app data-install href="/app.html?install=1">Install the app</a>
     </nav>
   </div>
@@ -375,84 +375,14 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   <div class="fm-in">
     <div class="fm-l"><span class="fm-tag" id="fm-tag">Founding Member rate</span><span class="fm-pct" id="fm-pct">50% off</span></div>
     <div class="fm-m"><s class="fm-old" id="fm-old">€33.25</s><span class="fm-new" id="fm-new">€16.63</span><span class="fm-per">per month (billed yearly)</span></div>
-    <div class="fm-r"><p class="fm-spots hide" id="fm-leftwrap"><b id="fm-left"></b> <span id="fm-left-t"></span></p><div class="bar fm-barw hide" id="fm-barwrap" aria-hidden="true"><i id="fm-bar" style="width:0"></i></div><a class="btn gold" href="#pricing">See the Pro plan</a></div>
+    <div class="fm-r"><p class="fm-spots hide" id="fm-leftwrap"><b id="fm-left"></b> <span id="fm-left-t"></span></p><div class="bar fm-barw hide" id="fm-barwrap" aria-hidden="true"><i id="fm-bar" style="width:0"></i></div><a class="btn gold" data-app data-install href="/app.html?install=1">Start free, upgrade in the app</a></div>
   </div>
-  <p class="fm-copy"><b>This launch rate is for the Pro plan only</b> (billed yearly). <span id="fm-sub"></span> <b>The Free plan is always available</b>: start with level 1 of everything, no card needed. Nobody has to upgrade to use the app.</p>
+  <p class="fm-copy"><b>The first 100 Founding Members</b> lock in 50% off the yearly Pro or VIP plan. <span id="fm-sub"></span> <b>The Free plan is always available</b>: start with level 1 of everything, no card needed. When you want more, you upgrade inside the app, in two taps.</p>
+  <p class="fm-copy" id="lock-guarantee"><b style="color:var(--gold)">Launch Price Guarantee.</b> Your yearly launch rate (Pro or VIP) is locked for as long as your subscription stays active: the price on your first invoice is the price on every renewal. Cancel, and the launch rate ends. Monthly plans have no launch discount.</p>
   <p class="fm-dbg hide" id="fm-debug"></p>
 </aside>
-    <div class="cta-row"><a class="btn gold big" href="#pricing">See the plans</a></div>
-  </div>
-</section>
-
-<section id="pricing" aria-labelledby="h-pricing">
-  <div class="wrap">
-    <span class="eyebrow">Pricing</span>
-    <h2 id="h-pricing">Pick your plan. Secure checkout with Stripe.</h2>
-    <div id="status" class="banner hide" role="status" aria-live="polite"></div>
-    <p class="lead">Use the email address you sign in with in the app. Your membership switches on there by itself after you sign in.</p>
-    <p class="offer hide" id="offer"></p>
-    <div class="fomo hide" id="fomo" role="status" aria-live="polite"><p><b>Founding Member spots</b></p><div class="bar" aria-hidden="true"><i id="fomo-bar" style="width:0"></i></div><p id="fomo-text"></p><p class="small mute" id="fomo-vip"></p></div>
-    <div class="panel" id="ladder" aria-label="Launch prices" style="margin:14px 0">
-      <h3 style="margin-bottom:.3rem">Yearly launch prices</h3>
-      <p class="small mute">The first members get the lowest price. A launch price is yours for as long as your subscription stays active: Founding Members keep it for as long as they do not cancel.</p>
-      <ol class="steps" id="ladder-rows" style="padding-left:1.1rem"></ol>
-    </div>
-    <label for="buyer">Your email</label>
-    <input id="buyer" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com">
-    <p class="msgline" id="pro-msg" aria-live="polite"></p>
-    <div class="cards" id="plans">
-      <article class="card hl" aria-labelledby="h-pro">
-        <h3 id="h-pro">Pro</h3><span class="tag" id="y-tag">Yearly</span>
-        <p class="micro hide" id="y-micro"></p><div class="price" id="y-price">…</div><div class="bar hide" id="y-bar"><i></i></div>
-        <p class="small mute" id="y-left"></p><p class="small mute" id="y-lock">Billed once a year. Cancel any time.</p>
-        <p class="small">The whole library: every repertoire (Colle-Koltanowski, Caro-Kann, Semi-Slav), the full Masterclass and Opening Vault, middlegame plans and endgames. The full Trim report and the 24/7 AI coach.</p><p class="small"><b>10 tokens a day</b> (about 300 a month). They refresh every day: use them or lose them.</p>
-        <div class="row"><button class="btn primary" type="button" data-plan="yearly" data-tier="2" id="b-yearly">Upgrade to Pro, yearly</button></div>
-        <div class="price" id="m-price" style="font-size:1.4rem;margin-top:1rem">…</div>
-        <div class="row"><button class="btn" type="button" data-plan="monthly" data-tier="2" id="b-monthly">Pro, monthly</button></div>
-      </article>
-      <article class="card" aria-labelledby="h-vip">
-        <h3 id="h-vip">VIP</h3><span class="tag" id="vy-tag">Yearly</span>
-        <p class="micro hide" id="vy-micro"></p><div class="price" id="vy-price">…</div><div class="bar hide" id="vy-bar"><i></i></div>
-        <p class="small mute" id="vy-left"></p><p class="small mute">Billed once a year. Cancel any time.</p>
-        <p class="small"><b>Everything in Pro</b>, plus your tokens upfront: <b>500 tokens credited at once each month</b> (monthly plan), or <b>7,000 tokens at once</b> (yearly plan). Spend them whenever you like: 20 game analyses one day, 5 the next.</p><p class="small">Plus a blue profile banner, the <b>Lanckriet Chess Student</b> title, and priority in live streams and the community. The same Founding and Early Adopter prices for the first 100 and the next 100 VIP members.</p>
-        <div class="row"><button class="btn gold" type="button" data-plan="yearly" data-tier="3" id="b-vip-yearly">Become VIP, yearly</button></div>
-        <div class="price" id="vm-price" style="font-size:1.4rem;margin-top:1rem">…</div>
-        <div class="row"><button class="btn" type="button" data-plan="monthly" data-tier="3" id="b-vip-monthly">VIP, monthly</button></div>
-      </article>
-      <article class="card" aria-labelledby="h-free">
-        <h3 id="h-free">Free</h3><div class="price">€0</div>
-        <p class="small">Start with the MSPC drills and a first game review, 1 token a day (3 a day in your first week). See what it finds in your games, then decide.</p>
-        <div class="row"><a class="btn" data-app data-install href="/app.html?install=1">Install free</a></div>
-      </article>
-    </div>
-    <div class="panel" id="lock-guarantee" style="margin:16px 0;border-color:rgba(251,191,36,.5)">
-      <b style="color:var(--gold)">Launch Price Guarantee</b>
-      <p class="small" style="margin:.35rem 0 0">Your yearly launch rate is locked in for as long as your subscription stays active: the price on your first invoice is the price on every renewal. Cancel, and the launch rate ends. Monthly plans have no launch discount.</p>
-    </div>
-    <p class="small mute">Every course in Kyenzo’s library is included with Pro while Pro is active. Single books and courses can also be bought one by one in the app’s Books Vault. Payment is handled by Stripe. We never see your card. Taxes, if any, are shown at checkout.</p>
-
-    <h3 id="tokens" style="margin-top:42px">Token packs</h3>
-    <p class="mute">Tokens pay for deep game analyses and the coach. Bought once, no subscription. They are added to your account when you sign in with the email above.</p>
-    <div class="packs">
-      <button type="button" class="btn pack" data-pack="t3"><b>3 tokens</b><span>€1.00</span></button>
-      <button type="button" class="btn pack" data-pack="t100"><b>100 tokens</b><span>€10.00</span></button>
-      <button type="button" class="btn pack" data-pack="t300"><b>300 tokens</b><span>€19.99</span></button>
-      <button type="button" class="btn pack" data-pack="t1000"><b>1,000 tokens</b><span>€49.99</span></button>
-    </div>
-    <p class="msgline" id="tok-msg" aria-live="polite"></p>
-
-    <h3 id="gift" style="margin-top:42px">Gift a friend</h3>
-    <div class="panel">
-      <p class="mute">One year of Pro for someone else, at the launch rate that is live now, or your own yearly rate if you are signed in and pay less. Paid once, no renewal. Your friend signs in with their email address and Pro switches on.</p>
-      <div class="price" id="g-price">…</div>
-      <label for="g-to">Your friend’s email</label><input id="g-to" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="friend@example.com">
-      <label for="g-name">Your first name (your friend sees it in the app)</label><input id="g-name" type="text" maxlength="40" autocomplete="given-name" placeholder="Anna">
-      <label for="g-note">A short message for your friend (optional)</label><input id="g-note" type="text" maxlength="200" placeholder="Let’s both hit 1500 this year!">
-      <label for="g-from">Your email (for the receipt, optional)</label><input id="g-from" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="you@example.com">
-      <div class="row"><button class="btn primary" type="button" id="b-gift">Gift one year of Pro</button></div>
-      <p class="msgline" id="gift-msg" aria-live="polite"></p>
-    </div>
-    <p class="small mute hide" id="portal-row">Already subscribed? <a id="portal" href="#" target="_blank" rel="noopener noreferrer">Manage or cancel your subscription</a>.</p>
+    <div class="cta-row"><a class="btn primary big" data-app data-install href="/app.html?install=1">Install free and scan my last 10 games</a></div>
+    <p class="small mute">The app is free to install and free to use. Plans, token packs and gifts are all inside the app, when you are ready.</p>
   </div>
 </section>
 
@@ -489,8 +419,8 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <h2 id="h-faq">Questions</h2>
     <details><summary>Which devices does it work on?</summary><p>Android, iPhone and iPad, Windows and Mac. Any modern browser (Chrome, Edge, Safari, Firefox) can run it. Installing is available in Chrome, Edge, Safari and most Android browsers.</p></details>
     <details open><summary>What is the difference between Pro and VIP?</summary><p><b>Pro</b> gives you the whole library (every repertoire, the Masterclass and the Opening Vault), the MSPC drills, the full Trim report and the 24/7 AI coach. You get <b>10 tokens a day</b>, about 300 a month. Tokens refresh every day, so unused ones are lost.</p><p><b>VIP</b> is everything in Pro, with your tokens credited upfront: <b>500 tokens at once each month</b> on the monthly plan, or <b>7,000 tokens at once</b> on the yearly plan, so you can analyse 20 games one day and 5 the next. VIP also gives you a blue profile banner, the <b>Lanckriet Chess Student</b> title, and priority in live streams and the community.</p></details>
-    <details><summary>How do I cancel?</summary><p>Use the subscription link in the pricing section, or message @lanckrietchess on Instagram. A subscription stays active until the end of the period you paid for.</p></details>
-    <details><summary>How does my membership switch on after I pay?</summary><p>Sign in to the app with the same email address you used here. Pro or VIP, and any tokens, switch on by themselves.</p></details>
+    <details><summary>How do I upgrade or cancel?</summary><p>Everything happens inside the app: open <b>Account → Membership &amp; upgrades</b> to upgrade, buy tokens, gift a friend or manage and cancel your subscription. A subscription stays active until the end of the period you paid for.</p></details>
+    <details><summary>Do I need to pay to start?</summary><p>No. Install the app and start free: no card, no account needed for your first game review. If you want Pro or VIP later, you upgrade in the app and it switches on right away.</p></details>
     <details><summary>What happens to my data?</summary><p>You can delete your account and the data linked to it any time: in the app under Account, or on the <a href="/delete-account.html">account deletion page</a>.</p></details>
   </div>
 </section>
@@ -499,9 +429,9 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 <footer>
   <div class="wrap">
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
-    <p><a href="https://www.youtube.com/@lanckrietchess?sub_confirmation=1" rel="noopener">Subscribe on YouTube</a> · <a href="https://www.instagram.com/lanckrietchess/" rel="noopener">Instagram</a> · <a href="/delete-account.html">Delete my account</a></p>
+    <p><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.44.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.45.0</p></footer>
 
 <script>
 "use strict";
@@ -509,7 +439,9 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   /* 1. People who arrive with a referral code, an old app link (/#refer) or from the installed app go straight to the app. */
   try{
     var q=location.search,h=location.hash,standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
-    var keep=/^#(pricing|tokens|gift|install|proof|how|faq|price-contrast|main)?$/.test(h);
+    var keep=/^#(install|proof|how|faq|price-contrast|main)?$/.test(h),pd=new URLSearchParams(q).get("paid");
+    /* 9.45.0: no checkout on this page any more. Old price links (#pricing, #tokens, #gift, ?plans=1) and Stripe returns (?paid=) go to the app's Upgrades page. */
+    if(!/[?&]preview=/.test(q)&&(/^#(pricing|tokens|gift)$/.test(h)||/[?&]plans=/.test(q)||pd)){location.replace("/app.html#upgrades"+(pd&&/^(cancel|cs_[A-Za-z0-9_]{8,200})$/.test(pd)?"?paid="+pd:""));return}
     if(!/[?&]preview=/.test(q)&&(standalone||/[?&]ref=/.test(q)||(h&&h.length>1&&!keep))){location.replace("/app.html"+q+h);return}
   }catch(e){}
   var meta=function(n){var m=document.querySelector('meta[name="'+n+'"]');return m?m.getAttribute("content"):""};
@@ -611,26 +543,6 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   function device(){var k="lc-landing-device",v="";try{v=localStorage.getItem(k)||""}catch(e){}
     if(!/^web-[a-z0-9]{10,30}$/.test(v)){v="web-"+Array.prototype.map.call(crypto.getRandomValues(new Uint8Array(10)),function(b){return(b%36).toString(36)}).join("");try{localStorage.setItem(k,v)}catch(e){}}return v}
   var NAMES={1:"Founding Member rate",2:"Early Adopter rate",3:"Launch rate"},BADGE={1:" + Founding Member badge",2:" + Early Adopter badge",3:""};
-  function tierBlock(p,pre){
-    if(!p)return;var t=p.tranche||4,price=p.yearly[t-1]||p.base;
-    if(pre===""){var lg=$("lock-guarantee");if(lg)lg.hidden=t>=4}
-    $(pre+"y-price").textContent=eur(price)+" / year";
-    if(t<4){var s=document.createElement("s");s.textContent=eur(p.base);$(pre+"y-price").appendChild(s);
-      var pct=Math.round((1-price/p.base)*100);if(pct>0){var bd=document.createElement("span");bd.className="tag";bd.style.cssText="margin-left:8px;background:rgba(251,191,36,.2);color:var(--gold);vertical-align:middle";bd.textContent=pct+"% off";$(pre+"y-price").appendChild(bd)}
-      $(pre+"y-tag").textContent=NAMES[t];
-      var cap=(p.caps&&p.caps[t-1])||100,left=p.left&&p.left[t-1];
-      if(left!=null){$(pre+"y-left").textContent=left+" of "+cap+" places left at this price.";$(pre+"y-bar").className="bar";$(pre+"y-bar").firstChild.style.width=Math.max(4,Math.round((1-left/cap)*100))+"%"}
-      var lk=$(pre+"y-lock");if(lk)lk.textContent="Your price stays the same for as long as your subscription stays active. Billed once a year. Cancel any time."}
-    $(pre+"m-price").textContent=eur(p.monthly)+" / month";
-    var mi=$(pre+"y-micro");if(mi&&price){mi.innerHTML="<b>"+esc(eur(Math.ceil(price/12)))+" a month</b> (billed yearly) · only "+esc(eur(Math.ceil(price/365)))+" a day";mi.className="micro"}
-  }
-  function ladder(p){
-    var box=$("ladder-rows");if(!box||!p||!p.yearly)return;var cur=p.tranche||4,html="";
-    for(var i=1;i<=3;i++){var pct=(p.discountPct&&p.discountPct[i-1])||0,left=p.left&&p.left[i-1],state=left===0?" (sold out)":i===cur?" (now)":"";
-      html+="<li><b>"+esc(NAMES[i])+"</b>: "+pct+"% off, "+esc(eur(p.yearly[i-1]))+" a year"+esc(BADGE[i])+" · "+(left==null?"":esc(left+" places left"))+esc(state)+"</li>"}
-    html+="<li><b>Full price</b>: "+esc(eur(p.base))+" a year"+(cur===4?" (now)":"")+"</li>";box.innerHTML=html;
-  }
-
   /* 3b. launch offer and the scarcity counter: every number comes from the live pricing call, nothing is made up */
   function offer(p){
     var t=p.tranche||4,promo=$("promo"),fomo=$("fomo"),of=$("offer");
@@ -647,24 +559,19 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   var FALLBACK={ok:true,fallback:true,tranche:1,base:39900,monthly:3900,gift:19950,yearly:[19950,29925,35910,39900],discountPct:[50,25,10],caps:[100,100,100],left:null,
     vip:{tranche:1,base:59900,monthly:5900,yearly:[29950,44925,53910,59900],discountPct:[50,25,10],caps:[100,100,100],left:null}};
   function paintPrices(p){
-    tierBlock(p,"");tierBlock(p.vip,"v");ladder(p);
-    var gp=$("g-price"),gl=(p.yearly&&p.yearly[(+p.tranche||4)-1])||p.base,gv=Math.min(+p.gift||p.base,gl||p.base);   /* 9.41.0: the gift always follows the live launch rate */
-    if(gp&&!/your own rate/.test(gp.textContent))gp.innerHTML=(gv<p.base?'<s class="mute" style="font-size:.6em">'+eur(p.base)+"</s> ":"")+eur(gv)+" for one year"+(gv<p.base?' <span class="mute" style="font-size:.55em">'+((+p.tranche||4)===1?"Founding Member rate":"launch rate")+"</span>":"");
     var t=p.tranche||4,py=p.yearly[t-1]||p.base;
     $("vs-price").innerHTML=esc(eur(Math.ceil(py/12)))+'<small> per month (billed yearly)</small>';
     var vm=$("vs-micro");if(vm)vm.textContent="Only "+eur(Math.ceil(py/365))+" a day";
     $("vs-hours").textContent="A whole year costs about as much as "+Math.max(1,Math.ceil(py/8000))+" hours of private coaching.";
-    if(p.fallback){["y-lock","vy-left"].forEach(function(id){var e=$(id);if(e&&!e.textContent)e.textContent="Your exact launch rate and the spots left are confirmed at checkout."})}
   }
   try{paintPrices(FALLBACK)}catch(e){}
   pricingOnce().then(function(p){
-    if(!p||!p.ok){try{paintPrices(FALLBACK);var yl=$("y-lock");if(yl)yl.textContent="Your exact launch rate and the spots left are confirmed at checkout. Billed once a year. Cancel any time."}catch(e){}return}
+    if(!p||!p.ok){try{paintPrices(FALLBACK)}catch(e){}return}
     paintPrices(p);try{offer(p)}catch(e){}
     var t=p.tranche||4,py=p.yearly[t-1]||p.base;
     var vb=$("vs-badge");if(vb){if(t<4){vb.textContent="Pro, billed yearly · "+(((p.discountPct&&p.discountPct[t-1])||Math.round((1-py/p.base)*100))+"% off the regular price");vb.hidden=false}else vb.hidden=true}
     var vu=$("vs-urgency"),lf=p.left&&p.left[t-1];if(vu)vu.hidden=t>=4||(lf!=null&&lf<=0); /* only while launch spots really exist */
     
-    if(typeof p.portal==="string"&&/^https:\/\//.test(p.portal)){$("portal").href=p.portal;$("portal-row").className="small mute"}
   });
   /* 3c. the launch banner: every number comes from the live pricing call; a plain fallback shows at once if the call fails and is replaced when a retry works */
   var FMN=["Founding Member rate","Early Adopter rate","Launch rate"],fmLive=false,PCT=[50,25,10];
@@ -684,117 +591,13 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   function fmFallback(){
     var box=$("fm-hero");if(!box||fmLive)return;
     $("fm-tag").textContent="Founding Member rate";$("fm-pct").textContent="50% off";$("fm-old").textContent="€33.25";$("fm-new").textContent="€16.63";
-    $("fm-sub").textContent="The first 100 members get this rate; the next 100 get 25% off, then 10%. Your exact rate and the spots left are confirmed at checkout.";
+    $("fm-sub").textContent="The first 100 members get this rate; the next 100 get 25% off, then 10%. Your exact rate and the spots left are shown in the app.";
     box.className="fm-hero";
     var vp=$("vs-price");if(vp&&!fmLive)vp.innerHTML='€16.63<small> per month (billed yearly)</small>';
     var vb=$("vs-badge");if(vb&&!fmLive){vb.textContent="Pro, billed yearly · Founding Member rate, 50% off";vb.hidden=false}
   }
   (function fmLoad(n){pricingOnce().then(function(p){if(p){try{fmHero(p)}catch(e){}fmDebug();return}fmFallback();fmDebug();if(n<1){setTimeout(function(){fmLoad(n+1)},35000)}})})(0);
-  /* 3e. Stripe Payment Links (9.20.4). The yearly links carry the FOUNDING price: when the live pricing says that tier is no longer open, the old per-checkout price is used instead, so nobody is charged the wrong amount. */
-  var LINKS={pro:{yearly:"https://buy.stripe.com/28EaEX99TaUccZqe5N28800",monthly:"https://buy.stripe.com/cNi3cv99T6DW0cE6Dl28801"},vip:{yearly:"https://buy.stripe.com/dRmeVdeud8M44sU0eX28803",monthly:"https://buy.stripe.com/4gMcN5dq94vO5wY2n528804"}};
-  var PACKL={t3:"https://buy.stripe.com/14A28reud9Q80cE9Px28805",t100:"https://buy.stripe.com/eVq8wPbi16DW9Ne7Hp28806",t300:"https://buy.stripe.com/bJe8wP99TfasbVmaTB28807",t1000:"https://buy.stripe.com/9B67sLcm5e6o8JaaTB28808"};
-  function linkOk(u){return/^https:\/\/buy\.stripe\.com\/[A-Za-z0-9]+$/.test(u||"")}
-  function navTo(u){window.__lastNav=u;location.href=u}
-  function withMail(u,em){return u+(em?"?prefilled_email="+encodeURIComponent(em):"")}
-  function getP(){return window.__lcP?Promise.resolve(window.__lcP):pricingOnce(true)}
-  function payPlan(b,em){
-    var plan=b.getAttribute("data-plan")==="monthly"?"monthly":"yearly",tier=+b.getAttribute("data-tier")===3?3:2,u=LINKS[tier===3?"vip":"pro"][plan];
-    var dyn=function(){go("subscribe",{plan:plan,tier:tier,email:em,ret:"support",device:device()},b,"pro-msg")};
-    if(!linkOk(u)){dyn();return}
-    if(plan==="monthly"){navTo(withMail(u,em));return}
-    var old=b.innerHTML;b.disabled=true;b.textContent="Opening secure checkout…";
-    getP().then(function(p){
-      var x=p?(tier===3?p.vip:p):null,open=!x||((x.tranche||4)<=1&&(x.left==null||x.left[0]==null||x.left[0]>0));
-      if(open){navTo(withMail(u,em));return}
-      b.disabled=false;b.innerHTML=old;dyn();
-    });
-  }
-  function payPack(k,em){var u=PACKL[k.getAttribute("data-pack")];if(linkOk(u))navTo(withMail(u,em));else go("tokens",{pack:k.getAttribute("data-pack"),email:em,ret:"support"},k,"tok-msg")}
-  var busy=false;
-  var DEBUG=/[?&]debug/.test(location.search),lastGo=null;
-  function sayHTML(id,h,cls){var e=$(id);if(!e)return;e.innerHTML=h||"";e.className="msgline"+(cls?" "+cls:"")}
-  /* why did the checkout not open? visitors get a plain sentence, ?debug shows the cause (CORS / ALLOWED_ORIGINS, JWT, keys, offline) */
-  function diagnose(r){
-    var st=r&&r.status,why=r&&(r.reason||r.error),sorry="Nothing was charged.";
-    if(st===401||st===403)return Promise.resolve({u:"Checkout is not reachable right now. "+sorry,o:"The stripe function answered "+st+": it refuses calls without a login. Deploy it with: supabase functions deploy stripe --no-verify-jwt"});
-    if(st===404)return Promise.resolve({u:"Checkout is not reachable right now. "+sorry,o:"The stripe function or this route was not found (404). Deploy the stripe function."});
-    if(why==="not_configured"||why==="stripe_not_configured"||why==="no_stripe")return Promise.resolve({u:"Checkout is not open yet. "+sorry+" Please try again soon.",o:"The stripe function says it is not configured: set the Stripe secret key and price settings as Supabase secrets, then redeploy."});
-    if(st===0||why==="network"){
-      if(typeof navigator!=="undefined"&&navigator.onLine===false)return Promise.resolve({u:"You seem to be offline. Check your connection and try again. "+sorry,o:"The browser reports no network."});
-      return fetch(API+"/pricing",{method:"GET",mode:"no-cors"}).then(function(){return true},function(){return false}).then(function(reach){
-        return reach?{u:"We could not reach secure checkout from here. "+sorry,o:"The function is reachable but the browser blocked the answer (CORS). Set the secret ALLOWED_ORIGINS on the stripe function to include "+location.origin+" (and the Vercel address) and redeploy it."}
-                    :{u:"We could not reach secure checkout. "+sorry,o:"The stripe function cannot be reached at all: it is not deployed, the project is paused, or the address in this page is wrong."}});
-    }
-    return Promise.resolve({u:"Checkout could not start. "+sorry+" Please try again.",o:"The stripe function answered "+(st||"?")+(why?" ("+why+")":"")+". Check its logs in the Supabase dashboard."});
-  }
-  function go(path,body,btn,msgId){
-    if(busy)return;busy=true;var old=btn.innerHTML;btn.disabled=true;btn.textContent="Opening secure checkout…";say(msgId,"");
-    post(path,body).then(function(r){
-      busy=false;
-      if(r&&r.ok&&typeof r.url==="string"&&/^https:\/\/[a-z0-9.-]+\.stripe\.com\//i.test(r.url)){location.href=r.url;return}
-      btn.disabled=false;btn.innerHTML=old;
-      diagnose(r).then(function(d){
-        try{console.warn("checkout failed:",d.o)}catch(e){}
-        sayHTML(msgId,esc(d.u)+' <button type="button" class="btn bw" data-retry>Try again</button><br><small>'+(DEBUG?"Owner: "+esc(d.o):"Still stuck? Send a DM to @lanckrietchess on Instagram.")+"</small>","bad");
-        lastGo=function(){go(path,body,btn,msgId)};
-      });
-    });
-  }
-  document.addEventListener("click",function(e){if(e.target.closest&&e.target.closest("[data-retry]")&&lastGo){e.preventDefault();lastGo()}});
-  /* 3d. before Stripe the buyer needs an account. Known account = straight to checkout; otherwise one tap creates it (sign-in link by email) and goes on to Stripe with that exact email */
-  function sbHdr(){var k=meta("lc-sb-key");return{"Content-Type":"application/json","apikey":k,"Authorization":"Bearer "+k}}
-  function accountExists(em){
-    var u=meta("lc-sb-url").replace(/\/+$/,"");if(!u||!meta("lc-sb-key"))return Promise.resolve(null);
-    return fetch(u+"/rest/v1/rpc/lc43_account_exists",{method:"POST",headers:sbHdr(),body:JSON.stringify({p_email:em})})
-      .then(function(r){return r.json().catch(function(){return null}).then(function(j){return r.status===200&&j&&j.ok===true&&typeof j.exists==="boolean"?j.exists:null})})
-      .catch(function(){return null});
-  }
-  function createAccount(em){
-    var u=meta("lc-sb-url").replace(/\/+$/,"");if(!u||!meta("lc-sb-key"))return Promise.resolve(false);
-    return fetch(u+"/auth/v1/otp?redirect_to="+encodeURIComponent(location.origin+(meta("lc-app")||"/app.html")),{method:"POST",headers:sbHdr(),body:JSON.stringify({email:em,create_user:true})})
-      .then(function(r){return r.status===200}).catch(function(){return false});
-  }
-  function closeAcct(){var o=$("acct-ov");if(o)o.remove()}
-  function acctModal(em,ex,run){
-    closeAcct();
-    var neutral=ex===true?false:ex===null&&!!em,ov=document.createElement("div");
-    ov.id="acct-ov";ov.className="acct-ov";ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");ov.setAttribute("aria-labelledby","acct-h");
-    ov.innerHTML='<div class="acct-box"><h3 id="acct-h">'+(neutral?"Confirm your account first.":"No account found yet.")+'</h3><p>'+(neutral?"First, confirm your account to secure your membership. If you already have one, nothing changes.":"First, create your account to secure your membership.")+'</p>'
-      +'<input id="acct-em" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Email address" value="'+esc(em)+'"><p class="small mute">We email you a sign-in link and a 6-digit code so you can open the app right after paying. Use this same email at checkout.</p><p class="acct-msg" id="acct-msg" aria-live="polite"></p>'
-      +'<div class="row"><button type="button" class="btn gold" id="acct-go">Create account &amp; proceed</button><button type="button" class="btn bw" id="acct-x">Cancel</button></div></div>';
-    document.body.appendChild(ov);var inp=$("acct-em");if(inp&&!em)inp.focus();
-    ov.addEventListener("click",function(e){if(e.target===ov||e.target.id==="acct-x")closeAcct()});
-    document.addEventListener("keydown",function k(e){if(!$("acct-ov")){document.removeEventListener("keydown",k);return}if(e.key==="Escape"){closeAcct();document.removeEventListener("keydown",k)}});
-    $("acct-go").addEventListener("click",function(){
-      var v=($("acct-em").value||"").trim().toLowerCase(),m=$("acct-msg");
-      if(!EMAIL.test(v)){m.textContent=WHY.bad_email;m.className="acct-msg bad";return}
-      this.disabled=true;m.textContent="Creating your account…";m.className="acct-msg";$("buyer").value=v;
-      createAccount(v).then(function(){closeAcct();run(v)});
-    });
-  }
-  function guard(run){
-    var raw=($("buyer").value||"").trim().toLowerCase(),em=email();
-    if(!em){acctModal(raw,null,run);return}
-    accountExists(em).then(function(ex){if(ex===true){run(em);return}acctModal(em,ex,run)});
-  }
-  function email(){var em=$("buyer").value.trim().toLowerCase();return EMAIL.test(em)?em:""}
-  /* 9.41.0: a signed-in member (same site as the app) gets the gift at their own locked rate when it is lower */
-  function myTok(){try{var a=JSON.parse(localStorage.getItem("lc26-auth")||"null");return a&&a.access_token&&(!a.expires_at||a.expires_at*1000>Date.now())?a.access_token:""}catch(e){return""}}
-  (function(){var t=myTok();if(!t)return;post0("gift_quote",{token:t}).then(function(q){if(q&&q.ok&&q.why==="yours"&&+q.amount>0){var g=$("g-price");if(g)g.textContent=eur(q.amount)+" for one year · your own rate"}})})();
-  document.addEventListener("click",function(e){
-    var b=e.target.closest&&e.target.closest("[data-plan]");
-    if(b){guard(function(em){payPlan(b,em)});return}
-    var k=e.target.closest&&e.target.closest("[data-pack]");
-    if(k){guard(function(em2){payPack(k,em2)});return}
-    if(e.target.id==="b-gift"){var to=$("g-to").value.trim().toLowerCase(),from=$("g-from").value.trim().toLowerCase();
-      if(!EMAIL.test(to)){say("gift-msg",WHY.bad_recipient,"bad");$("g-to").focus();return}
-      if(from&&!EMAIL.test(from)){say("gift-msg",WHY.bad_email,"bad");return}
-      go("gift",{to:to,email:from||undefined,from_name:($("g-name")||{}).value||undefined,note:($("g-note")||{}).value||undefined,ret:"support",token:myTok()||undefined},e.target,"gift-msg")}
-  });
-  var paid=new URLSearchParams(location.search).get("paid"),st=$("status");
-  if(paid==="cancel"){st.textContent="Checkout was cancelled. Nothing was charged.";st.className="banner bad"}
-  else if(/^cs_[A-Za-z0-9_]{8,200}$/.test(paid||"")){st.innerHTML="Thank you! Your payment is received. Open the app and sign in with the same email address you used here: your membership or tokens switch on by themselves. If you bought a gift, your friend signs in with their own email address. <a href=\"/app.html\">Open the app and sign in</a>";st.className="banner good"}
-  if(paid){document.getElementById("pricing").scrollIntoView()}
+  /* 3e. (9.45.0) no checkout here: plans, tokens and gifts are bought inside the app (LC85). */
 
 
   /* 3c. the walkthrough video: its address is set in the app in admin mode and read here; the first week it replaces the coach card in the hero */
@@ -875,7 +678,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     var h=by("hero")[0],hs=$("shot-hero"),wk=$("walk-hero");if(h&&hs&&(!wk||wk.classList.contains("hide"))){hs.innerHTML=shotHTML(h).replace(/^<figure class="shot">|<\/figure>$/g,"");hs.classList.remove("hide");var cc=$("coach-card");if(cc)cc.classList.add("hide")}
     var cards=document.querySelectorAll("#how .tt");["think","theory","trim"].forEach(function(k,i){var x=by(k)[0];if(x&&cards[i]&&!cards[i].querySelector(".shot"))cards[i].insertAdjacentHTML("beforeend",shotHTML(x))});
     var g=by("gallery");if(g.length){$("inside-list").innerHTML=g.map(shotHTML).join("");$("inside").classList.remove("hide")}}
-  Promise.all([getP().then(function(){return rpc("lc36_proof_public",{p_surface:"web"})}),rpc("lc59_wall_public",{}),rpc("lc72_landing_public",{})]).then(function(a){
+  Promise.all([pricingOnce().then(function(){return rpc("lc36_proof_public",{p_surface:"web"})},function(){return rpc("lc36_proof_public",{p_surface:"web"})}),rpc("lc59_wall_public",{}),rpc("lc72_landing_public",{})]).then(function(a){
     var L=a[2]&&a[2].ok?a[2]:{cfg:{},items:[],shots:[]},C=L.cfg||{},own=Array.isArray(L.items)?L.items:[];try{paintShots(L)}catch(e){}
     var res=a[0],wall=a[1]&&a[1].ok&&Array.isArray(a[1].rows)?a[1].rows.slice().sort(function(x,y){return x.kind-y.kind||(+y.gain||0)-(+x.gain||0)}):[],rows=res&&res.ok&&Array.isArray(res.rows)?res.rows:[];
     var msgs=wall.filter(function(r){return r.message}).slice(0,9),ol=own.filter(function(x){return x.kind==="love"&&x.body});
