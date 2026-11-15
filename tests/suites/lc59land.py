@@ -27,7 +27,7 @@ with sync_playwright() as p:
     br = p.chromium.launch()
     c, pg = _page(br, ROWS, LEGACY)
     order = pg.evaluate("[...document.querySelectorAll('body section[id]')].map(s => s.id)")
-    out('section order [video, Wall of Love, Proof Queue, method, price contrast + feature stack, pricing, install, FAQ]', order)
+    out('section order [video, Wall of Love, Proof Queue, method, price contrast + feature stack, install, FAQ]', order)
     out('Founding Member banner [moved down into the price contrast, no longer the first thing on the page]', pg.evaluate("(() => { const f = document.getElementById('fm-hero'); return [f.closest('#price-contrast') !== null, document.body.firstElementChild.id !== 'fm-hero', !f.classList.contains('hide')]; })()"))
     names = pg.evaluate("[...document.querySelectorAll('#proof-list .pcard')].map(c => (c.querySelector('.pr-name b, .small b') || {textContent: ''}).textContent + ':' + (c.getAttribute('data-kind') || (c.classList.contains('pr') ? '2' : 'static')))")
     out('Proof Queue ranking [1) message + result by Peak Gain: Anna 200 then Dan 150, 2) results: Eli 400 then Bob 300, 3) message only: Cleo; the owner\'s own cards after the members]', names[:5])

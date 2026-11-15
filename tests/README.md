@@ -39,3 +39,12 @@ section (pulse, the ? heard to the end, one exercise on trainers, the "could not
 invite link), the LC83 pop-up policy (20 s gap, tapped pop-ups pass, nothing on the Trim analysis), the Trim phone order without sticky board and
 without the jump after a review, Level 2's Google step, the landing page's Instagram install (Android: Chrome intent, iPhone: the steps) and the
 ?install=1 sheet within 2 s.
+
+9.45.0: `python3 tests/run.py lc85` (Chromium, 390 and 1280 px): the Studio record bar is a bottom status bar and the stage is fitted above it
+(the board is never under it; the record button stays in reach after scrolling), Scene 1 (full camera), Scene 2 as split and as bubble, the
+board / live landing page / the app as the input block, crop / zoom / pan for the camera and the input (the board keeps its squares: size and
+place only), Classic brings the old layout back; the 💬 feedback button next to the ?, the feedback sheet (permission unticked), the grace
+period, the soft and the full in-app upgrade sheet, Stripe from the sheet, LC36.support.open stays in the app, the old /#gift link, the token
+wall with packs, V5Doc keeps v5.lc85; the landing page without checkout or social links and its redirects to the app's Upgrades page.
+`node tests/lc85_unit.test.js`: the crop / zoom / pan maths, the scene rectangles, the board inside the block, the grace period, escaping.
+`python3 tests/lc85_sql.test.py` (local PostgreSQL 16): sql/20261115120000_lc85_feature_feedback.sql, nothing public before the owner approves.
