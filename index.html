@@ -1,6 +1,88 @@
 <!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
+<script>/*@@module lc87*/
+(function(){
+  "use strict";
+  /* LC87 (build 9.47.0): the in-app browser gate. Instagram, TikTok, Facebook, Messenger, Snapchat, X, LinkedIn, Pinterest and LINE open links
+     in their own browser, and those browsers cannot install a web app. This script runs first, in the <head> of BOTH the landing page
+     (index.html) and the app (app.html), with the same text. In such a browser it covers the whole page with one screen: "Open this page in
+     Google Chrome or Safari to install the app." and one big button:
+       - Android: "Open in Chrome" (an intent link; Chrome opens this same page). On Instagram and Facebook it is also tried once by itself.
+       - iPhone / iPad, iOS 17 and newer: "Open in Safari" (x-safari-https link).
+       - Everything else: "Copy link", plus the two taps of that app's own menu (⋯ / ⋮ → Open in browser).
+     Nothing behind it can be used: the page under it is hidden, and the app does not start (window.__lcIab, read by the boot line of app.html).
+     Not shown in an installed app (standalone) or in a normal browser. ?lc_iab=0 switches it off for this tab (owner testing only). */
+  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.47.0";
+  var RE=/FBAN|FBAV|FB_IAB|FBIOS|FB4A|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|trill_|Snapchat|Twitter|LinkedInApp|Pinterest|Line\//i;
+  function isIab(ua){return RE.test(String(ua||""))}
+  function appOf(ua){ua=String(ua||"");return/Instagram/i.test(ua)?"Instagram":/TikTok|musical_ly|Bytedance|trill_/i.test(ua)?"TikTok":/FBAN|FBAV|FB_IAB|FBIOS|FB4A/i.test(ua)?"Facebook":/Snapchat/i.test(ua)?"Snapchat":/Twitter/i.test(ua)?"X":/LinkedIn/i.test(ua)?"LinkedIn":/Pinterest/i.test(ua)?"Pinterest":/Line\//i.test(ua)?"LINE":"this app"}
+  var ios=/iPhone|iPad|iPod/i.test(UA)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),android=/Android/i.test(UA);
+  var iosV=(function(){var m=/OS (\d+)_/.exec(UA);return m?+m[1]:0})();
+  function standalone(){try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
+  var off=false;try{if(/[?&]lc_iab=0(&|$)/.test(location.search))sessionStorage.setItem("lc87-off","1");off=sessionStorage.getItem("lc87-off")==="1"}catch(e){}
+  /* the address to open outside: this same page, marked as coming from the in-app browser */
+  function target(){var u;try{u=new URL(location.href);u.searchParams.delete("lc_iab");u.searchParams.set("source","iab");return u.href}catch(e){return location.href}}
+  function intentUrl(){var u;try{u=new URL(target())}catch(e){return target()}
+    return"intent://"+u.host+u.pathname+u.search+"#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(u.href)+";end"}
+  function safariUrl(){return"x-safari-"+target()}
+  var app=appOf(UA),on=isIab(UA)&&!standalone()&&!off;
+  W.LC87={on:on,app:app,ios:ios,android:android,isIab:isIab,appOf:appOf,target:target,intentUrl:intentUrl,safariUrl:safariUrl,version:VERSION};
+  if(!on)return;
+  W.__lcIab=true;
+  var H=D.documentElement;H.classList.add("lc-iab");
+  var css="html.lc-iab,html.lc-iab body{overflow:hidden!important;height:100%!important;background:#0f172a!important}"
+    +"html.lc-iab body>*:not(#lc87){display:none!important}"
+    +"#lc87{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));background:radial-gradient(120% 80% at 50% 0%,#14304a 0%,#0f172a 55%);color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;overflow-y:auto}"
+    +"#lc87 .b{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px}"
+    +"#lc87 img{width:76px;height:76px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.45)}"
+    +"#lc87 h1{margin:4px 0 0;font-size:1.55rem;line-height:1.2;color:#fff;font-weight:800}"
+    +"#lc87 p{margin:0;color:#cbd5e1}#lc87 p b{color:#fff}"
+    +"#lc87 .go{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;border-radius:16px;border:0;background:#38bdf8;color:#04121c;font-family:inherit;font-weight:800;font-size:1.15rem;line-height:1;text-decoration:none;cursor:pointer;box-shadow:0 10px 30px rgba(56,189,248,.35)}"
+    +"#lc87 .go:focus-visible,#lc87 .cp:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}"
+    +"#lc87 .cp{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;border-radius:14px;border:1px solid rgba(148,163,184,.45);background:transparent;color:#e2e8f0;font-family:inherit;font-weight:700;font-size:1rem;line-height:1;cursor:pointer}"
+    +"#lc87 ol{margin:4px 0 0;padding:12px 14px 12px 34px;text-align:left;border-radius:14px;background:rgba(30,41,59,.85);border:1px solid rgba(148,163,184,.22);width:100%;box-sizing:border-box}"
+    +"#lc87 li{margin:4px 0}#lc87 .lk{width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;border-radius:12px;border:1px solid rgba(148,163,184,.4);background:#0b1222;color:#e2e8f0;font:14px ui-monospace,Menlo,monospace}"
+    +"#lc87 .ok{color:#4ade80;font-weight:700;min-height:1.5em}";
+  var st=D.createElement("style");st.id="lc87-css";st.textContent=css;(D.head||H).appendChild(st);
+  var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+  function html(){
+    var big=android?'<a class="go" id="lc87-go" href="'+esc(intentUrl())+'">Open in Chrome</a>'
+      :(ios&&iosV>=17)?'<a class="go" id="lc87-go" href="'+esc(safariUrl())+'">Open in Safari</a>'
+      :'<button type="button" class="go" id="lc87-go" data-lc87-copy>Copy the link</button>';
+    var steps=ios?"<li>Tap <b>⋯</b> (top right) in "+esc(app)+".</li><li>Choose <b>Open in browser</b> (or <b>Open in Safari</b>).</li><li>In Safari: <b>Share</b> → <b>Add to Home Screen</b>.</li>"
+      :"<li>Tap <b>⋮</b> (top right) in "+esc(app)+".</li><li>Choose <b>Open in Chrome</b> (or <b>Open in browser</b>).</li><li>In Chrome: tap <b>Install app</b>.</li>";
+    return'<div class="b" role="dialog" aria-modal="true" aria-labelledby="lc87-h"><img src="/icons/icon-192.png" alt="Lanckriet Chess" width="76" height="76">'
+      +'<h1 id="lc87-h">Open in Chrome or Safari</h1>'
+      +'<p><b>Open this page in Google Chrome or Safari to install the app.</b> The built-in browser of '+esc(app)+' cannot install apps.</p>'
+      +big+(android||(ios&&iosV>=17)?'<button type="button" class="cp" data-lc87-copy>Copy the link</button>':"")
+      +'<p class="ok" id="lc87-ok" role="status" aria-live="polite"></p>'
+      +'<ol>'+steps+"</ol></div>";
+  }
+  function copy(btn){
+    var u=target(),ok=D.getElementById("lc87-ok");
+    var done=function(){if(ok)ok.textContent="Link copied. Paste it in Chrome or Safari.";if(btn)btn.textContent="Copied ✓"};
+    var manual=function(){if(!ok)return;ok.innerHTML='<input class="lk" readonly aria-label="The link to open in your browser" value="'+esc(u)+'">';var i=ok.querySelector("input");try{i.focus();i.select()}catch(e){}};
+    try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(done,manual);return}}catch(e){}
+    try{var t=D.createElement("textarea");t.value=u;t.setAttribute("readonly","");t.style.cssText="position:fixed;left:-9999px;top:0";D.body.appendChild(t);t.select();var r=D.execCommand("copy");t.remove();if(r){done();return}}catch(e){}
+    manual();
+  }
+  var box=null;
+  function mount(){
+    if(!D.body)return;
+    if(!box){box=D.createElement("div");box.id="lc87";box.innerHTML=html();
+      box.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest("[data-lc87-copy]");if(c){e.preventDefault();copy(c)}});}
+    if(box.parentNode!==D.body||D.body.lastElementChild!==box)D.body.appendChild(box);
+    try{var g=D.getElementById("lc87-go");if(g&&!g.__f){g.__f=1;setTimeout(function(){try{g.focus()}catch(e){}},50)}}catch(e){}
+  }
+  if(D.body)mount();else D.addEventListener("DOMContentLoaded",mount);
+  W.addEventListener("load",mount);
+  try{new MutationObserver(function(){if(box&&(box.parentNode!==D.body))mount()}).observe(H,{childList:true,subtree:false})}catch(e){}
+  setInterval(mount,1500);                                         /* nothing the page adds later can cover it */
+  /* Android, Instagram and Facebook: try Chrome once by itself (they hand intent links to Chrome); the button stays for a second try */
+  try{if(android&&/Instagram|FBAN|FBAV|FB_IAB|FB4A/i.test(UA)&&!sessionStorage.getItem("lc87-auto")){sessionStorage.setItem("lc87-auto","1");
+    setTimeout(function(){var nav=W.__lcNav||function(x){location.href=x};nav(intentUrl())},600)}}catch(e){}
+})(); /*@@end lc87*/</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Lanckriet Chess: a 2100+ ELO personal chess coach in your pocket</title>
@@ -10,15 +92,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.46.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.47.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.46.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.46.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.47.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.47.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.46.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.47.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -180,6 +262,8 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .vs-h4{margin:.9rem 0 .2rem;font-size:1rem;color:var(--good)}
 .vs2 li.no,.vs2 li.yes{color:var(--text)}
 
+/* 9.47.0: the install steps sheet (uses the gallery styles) */
+.ins-steps{margin:0;padding-left:1.3rem;display:grid;gap:8px;font-size:1.02rem}.ins-steps b{color:#fff}.ins-ico{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(56,189,248,.18);color:var(--blue)}
 /* 9.46.0 LC86: the person-by-person Wall of Love and its gallery */
 .wl-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));margin-top:16px}
 .wl-card{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:4px 14px;align-items:center;text-align:left;width:100%;cursor:pointer;color:var(--text);font:inherit;min-height:96px;transition:border-color .15s,transform .15s}
@@ -455,7 +539,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.46.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.47.0</p></footer>
 
 <script>
 "use strict";
@@ -523,16 +607,45 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       try{(navigator.clipboard?navigator.clipboard.writeText(abs):Promise.reject()).then(function(){instMsg("Link copied. Tap ⋯ at the top and choose Open in browser (or paste it in Safari), then Share → Add to Home Screen.")},function(){instMsg("Tap ⋯ at the top and choose Open in browser. In Safari: Share → Add to Home Screen.")})}catch(x){instMsg("Tap ⋯ at the top and choose Open in browser. In Safari: Share → Add to Home Screen.")}
     },IOS&&iosV>=17?1200:0);
   }
+  /* 9.47.0: the in-app browsers never get here (LC87 covers the page and sends people to Chrome / Safari). In a real browser the button
+     opens the browser's own install prompt the moment the browser offers it. Chrome only offers it after a tap and some time on the page, so
+     until then the button shows the two taps of the browser's own menu, right here: no detour into the app, no form. The steps sheet keeps
+     listening: if Chrome offers its prompt while it is open, a big "Install now" button appears in it. */
+  var CHR=("onbeforeinstallprompt" in window)&&!IOS,FF=/Firefox|FxiOS/i.test(UA),IOS_OTHER=IOS&&/CriOS|FxiOS|EdgiOS|OPiOS/i.test(UA);
+  function standaloneNow(){try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
+  function stepsHTML(){
+    if(IOS)return'<ol class="ins-steps"><li>Tap <b>Share</b> <span class="ins-ico" aria-hidden="true">⬆︎</span> '+(IOS_OTHER?"(in the address bar)":"(at the bottom of Safari)")+'.</li><li>Scroll and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. Lanckriet Chess is now on your home screen.</li></ol>'
+      +(IOS_OTHER&&!/CriOS|EdgiOS/i.test(UA)?'<p class="small mute">Not there? Open this page in <b>Safari</b> and do the same.</p>':"");
+    if(AND)return'<ol class="ins-steps"><li>Tap <b>⋮</b> (top right of '+(FF?"Firefox":"the browser")+').</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Tap <b>Install</b>. Lanckriet Chess is now in your apps.</li></ol>';
+    if(FF)return'<p>Firefox on a computer cannot install web apps. Open this page in <b>Chrome</b>, <b>Edge</b> or <b>Safari</b> and tap <b>Install on my device</b> again.</p>';
+    if(/Safari/i.test(UA)&&!CHR)return'<ol class="ins-steps"><li>Open the <b>File</b> menu.</li><li>Choose <b>Add to Dock</b>.</li><li>Click <b>Add</b>. Lanckriet Chess opens from your Dock.</li></ol>';
+    return'<ol class="ins-steps"><li>Click the <b>install icon</b> at the right of the address bar (a screen with an arrow).</li><li>Or open the <b>⋮</b> menu → <b>Cast, save and share</b> → <b>Install page as app</b>.</li><li>Click <b>Install</b>.</li></ol>';
+  }
+  function insClose(){var o=$("ins-ov");if(o)o.hidden=true;document.documentElement.style.overflow=""}
+  function insOpen(){
+    var o=$("ins-ov");
+    if(!o){o=document.createElement("div");o.id="ins-ov";o.className="wl-ov";o.innerHTML='<div class="wl-box ins-box" role="dialog" aria-modal="true" aria-labelledby="ins-h"><header class="wl-head"><img src="/icons/icon-192.png" alt="" width="44" height="44" style="border-radius:12px"><div><h3 id="ins-h">Install Lanckriet Chess</h3><p class="small mute" style="margin:2px 0 0">Two taps, no store, no account needed.</p></div><button type="button" class="wl-x" data-ins-x aria-label="Close">×</button></header><div class="wl-body" id="ins-body"></div></div>';
+      document.body.appendChild(o);
+      o.addEventListener("click",function(e){if(e.target===o||e.target.closest("[data-ins-x]")){insClose();return}if(e.target.closest("[data-ins-now]")){insClose();promptNow()}});
+      document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!o.hidden)insClose()})}
+    $("ins-body").innerHTML=(bip?'<button type="button" class="btn primary big" data-ins-now style="width:100%">Install now</button>':"")+stepsHTML()
+      +'<p class="small mute">Already installed? Open Lanckriet Chess from your home screen or app list.</p><p class="small"><a href="/app.html" data-ins-web>Or use it in the browser for now →</a></p>';
+    o.hidden=false;document.documentElement.style.overflow="hidden";var x=o.querySelector("[data-ins-now]")||o.querySelector("[data-ins-x]");if(x)x.focus();
+  }
+  window.addEventListener("beforeinstallprompt",function(){var o=$("ins-ov");if(o&&!o.hidden)insOpen()});
   document.addEventListener("click",function(e){
     var a=e.target.closest&&e.target.closest("[data-install]");
     if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
-    if(IAB){e.preventDefault();escapeIab(a);return}
-    if(bip){e.preventDefault();promptNow();return}
-    if("onbeforeinstallprompt" in window&&!a.__lcWaited){          /* Chromium: the prompt can arrive a moment after the page loads */
-      e.preventDefault();a.__lcWaited=true;
-      waitPrompt(1500).then(function(ok){if(ok&&bip)promptNow();else location.href=a.href});
-    }
+    e.preventDefault();
+    if(IAB&&window.LC87&&!LC87.on){escapeIab(a);return}         /* the gate was switched off for testing: the old breakout */
+    if(standaloneNow()){location.href="/app.html";return}
+    if(bip){promptNow();return}
+    if(CHR&&!a.__lcWaited){a.__lcWaited=true;waitPrompt(1200).then(function(ok){if(ok&&bip)promptNow();else insOpen()});return}
+    insOpen();
   });
+
+  /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.47.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -830,23 +943,8 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 })();
 </script>
 <script>
-/* 9.43.0 LC83: in-app browsers (Instagram, TikTok, Facebook, Snapchat) cannot install a web app. Show how to open the Hub in the real browser,
-   where "Install app" / "Add to Home Screen" makes it a standalone app. Quiet bar, hidden for a day after ×. */
+/* 9.47.0: the quiet in-app browser bar of 9.43.0 is replaced by the LC87 gate in the <head>. */
 (function(){
-  var u=navigator.userAgent||"";if(!/FBAN|FBAV|FB_IAB|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|Snapchat|Twitter|LinkedInApp|Line\//i.test(u))return;
-  try{if(matchMedia("(display-mode: standalone)").matches)return;if(Date.now()-(+localStorage.getItem("lc83-iab-l")||0)<864e5)return}catch(e){}
-  var ios=/iPhone|iPad|iPod/i.test(u)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),and=/Android/i.test(u);
-  var app=/Instagram/i.test(u)?"Instagram":/TikTok|musical_ly|Bytedance/i.test(u)?"TikTok":/FBAN|FBAV|FB_IAB/i.test(u)?"Facebook":/Snapchat/i.test(u)?"Snapchat":"this app";
-  var url=location.origin+"/app.html?source=iab",intent="intent://"+location.host+"/app.html?source=iab#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(url)+";end";
-  var b=document.createElement("div");b.className="iab";b.setAttribute("role","note");
-  b.innerHTML="<p><b>You are inside "+app+".</b> Its browser cannot install apps. "+(ios?"Tap <b>⋯</b> (top right), then <b>Open in browser</b>. In Safari: <b>Share</b> → <b>Add to Home Screen</b>.":"Open this page in Chrome, then tap <b>Install app</b>. It runs full screen, like any app.")+"</p>"
-    +"<div class='row'>"+(and?"<a class='btn primary' href='"+intent+"'>Open in Chrome</a>":"")+"<button type='button' class='btn' data-iab-copy>Copy link</button><button type='button' class='x' data-iab-x aria-label='Hide for today'>×</button></div>";
-  function show(){document.body.appendChild(b)}
-  if(document.body)show();else document.addEventListener("DOMContentLoaded",show);
-  b.addEventListener("click",function(e){
-    if(e.target.closest("[data-iab-x]")){try{localStorage.setItem("lc83-iab-l",String(Date.now()))}catch(x){}b.remove();return}
-    if(e.target.closest("[data-iab-copy]")){var c=e.target.closest("[data-iab-copy]");(navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){c.textContent="Copied: paste it in your browser"},function(){try{prompt("Copy this link:",url)}catch(x){}})}
-  });
 })();
 </script>
 <script>

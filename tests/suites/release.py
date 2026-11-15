@@ -10,7 +10,7 @@ _reset = open(REPO + '/reset.html', encoding='utf-8').read()
 # static checks: one version, the live address, no v17
 out('versions [CONFIG.version, assetVersion, sw, version.json]', [_re.search(r'const CONFIG=\{version:"([^"]+)"', _src).group(1), _re.search(r'assetVersion:"([^"]+)"', _src).group(1), _re.search(r'serviceWorker:"(sw\.js\?v=[^"]+)"', _src).group(1), open(REPO + '/version.json').read().strip()])
 out('old address left in app/landing/stripe defaults', [_src.count('https://lanckrietchess-app.vercel.app'), _land.count('lanckrietchess-app.vercel.app'), open(REPO + '/functions/stripe/stripe.js').read().count("DEFAULT_ORIGIN = 'https://lanckrietchesstrainerhub.vercel.app'")])
-out('landing [launch links, manifest link, install buttons]', [_land.count('Launch the app'), bool(_re.search(r'<link rel="manifest" href="/manifest\.webmanifest\?v=9\.46\.0">', _land)), _land.count('data-install href="/app.html?install=1"')])
+out('landing [launch links, manifest link, install buttons]', [_land.count('Launch the app'), bool(_re.search(r'<link rel="manifest" href="/manifest\.webmanifest\?v=9\.47\.0">', _land)), _land.count('data-install href="/app.html?install=1"')])
 out('manifest [id, start_url, scope]', [_re.search(r'"id": "([^"]+)"', _man).group(1), _re.search(r'"start_url": "([^"]+)"', _man).group(1), _re.search(r'"scope": "([^"]+)"', _man).group(1)])
 out('reset target', _re.search(r'var TARGET = "([^"]+)"', _reset).group(1))
 import json as _json, subprocess as _sp
@@ -30,13 +30,13 @@ with sync_playwright() as p:
     out('landing install click [prompted, still on landing, message]', [pg.evaluate('window.__prompted'), pg.url.endswith('/index.html'), pg.evaluate("(document.getElementById('lc-inst') || {}).textContent || ''")])
     out('landing phone [overflow-x]', pg.evaluate('Math.max(0, document.documentElement.scrollWidth - window.innerWidth)'))
     c.close()
-    # without a prompt (iPhone, in-app browsers) the button still opens the app's install guide
+    # 9.47.0: without a prompt (iPhone, or Chrome before it offers one) the button shows the browser's own install steps on the landing page
     c = mkctx(br, 390, 844, True); pg = c.new_page(); watch(pg, 'landing2')
     pg.add_init_script("delete window.onbeforeinstallprompt; Object.defineProperty(window, 'onbeforeinstallprompt', { value: undefined, configurable: true }); delete window.onbeforeinstallprompt;")
     docs = []; pg.on('request', lambda r: docs.append(r.url.replace('http://127.0.0.1:8765', '')) if r.resource_type == 'document' else None)
     pg.goto(LAND); pg.wait_for_timeout(400)
     pg.click('.hero [data-install]'); pg.wait_for_timeout(1500)
-    out('no prompt available: the button opens', (docs + [''])[1])
+    out('no prompt available [no new page, steps sheet open, steps, use-in-browser link]', [len(docs), pg.evaluate("(() => { const o = document.getElementById('ins-ov'); return [!!o && !o.hidden, document.querySelectorAll('#ins-body .ins-steps li').length, !!document.querySelector('[data-ins-web]')]; })()")])
     c.close()
     # 2. the app: version, live address, service worker
     c = mkctx(br, 1280, 900); pg = c.new_page(); watch(pg, 'app')
