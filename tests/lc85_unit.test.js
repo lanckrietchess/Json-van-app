@@ -3,7 +3,7 @@ const fs=require('fs'),path=require('path');const {Chess}=require('chess.js');gl
 global.Store={m:{},get(k,d){return k in this.m?this.m[k]:d},set(k,v){this.m[k]=v}};global.toast=()=>{};
 global.window=global;global.location={hash:"",host:"lanckrietchesstrainerhub.vercel.app",origin:"https://lanckrietchesstrainerhub.vercel.app"};global.document={querySelector:()=>null,querySelectorAll:()=>[]};
 const load=(f,n)=>{const src=fs.readFileSync(path.join(__dirname,'..',f),'utf8');return new Function(src.replace('/*@@module '+n+'*/','').replace('/*@@end '+n+'*/','')+';return '+n.toUpperCase()+';')()};
-const LC79=load('lc79.js','lc79'),LC85=load('lc85.js','lc85');
+const LC79=load('lc79.js','lc79'),LC85=load('lc85.js','lc85'),LC86=load('lc86.js','lc86');
 let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'PASS ':'FAIL ')+m)};
 const near=(a,b,e)=>Math.abs(a-b)<(e||1e-6);
 // srcRect: no transform = centre crop of a 16:9 source into a square
@@ -34,4 +34,10 @@ ok(JSON.stringify(LC85.cleanCfg({graceDays:'40',fbOn:true,x:1}))==='{"graceDays"
 ok(LC85._t.NOFB.test('admin')&&LC85._t.NOFB.test('studio')&&!LC85._t.NOFB.test('trim'),'no 💬 on admin and Studio pages');
 ok(/See how Anna rated the Opening trainer/.test(LC85._t.quoteHTML({who:'Anna',stars:5,text:'Great',feature:'openings',same:true},'the Opening trainer')),'social proof line names the member and the feature');
 ok(!/<script/.test(LC85._t.quoteHTML({who:'<script>',stars:5,text:'<script>x</script>'},'x')),'quotes are escaped');
+// 9.46.0 LC86: the Wall of Love items and initials
+const ci=LC86._t.cleanItems([{t:'img',url:'https://a.b/c.png',cap:'<x>'},{t:'img',url:'http://a.b/c.png'},{t:'msg',from:'coach',text:'  Hi  '},{t:'msg',text:''},{t:'x'},null]);
+ok(JSON.stringify(ci)==='[{"t":"img","url":"https://a.b/c.png","cap":"x"},{"t":"msg","from":"coach","text":"Hi"}]','wall items: only https screenshots and real chat lines, no angle brackets');
+ok(LC86._t.cleanItems(Array(40).fill({t:'msg',text:'a'})).length===24,'wall items: at most 24');
+ok(LC86._t.initials('Igor P.')==='IP'&&LC86._t.initials('mathijs')==='M'&&LC86._t.initials('')==='?','initials');
+ok(!/<script/.test(LC86._t.avatarHTML({name:'<script>',avatar:'javascript:x'})),'avatar HTML is escaped and only https');
 console.log('RESULT '+pass+' passed '+fail+' failed');process.exit(fail?1:0);
