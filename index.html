@@ -1,6 +1,88 @@
 <!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
+<script>/*@@module lc87*/
+(function(){
+  "use strict";
+  /* LC87 (build 9.47.0): the in-app browser gate. Instagram, TikTok, Facebook, Messenger, Snapchat, X, LinkedIn, Pinterest and LINE open links
+     in their own browser, and those browsers cannot install a web app. This script runs first, in the <head> of BOTH the landing page
+     (index.html) and the app (app.html), with the same text. In such a browser it covers the whole page with one screen: "Open this page in
+     Google Chrome or Safari to install the app." and one big button:
+       - Android: "Open in Chrome" (an intent link; Chrome opens this same page). On Instagram and Facebook it is also tried once by itself.
+       - iPhone / iPad, iOS 17 and newer: "Open in Safari" (x-safari-https link).
+       - Everything else: "Copy link", plus the two taps of that app's own menu (⋯ / ⋮ → Open in browser).
+     Nothing behind it can be used: the page under it is hidden, and the app does not start (window.__lcIab, read by the boot line of app.html).
+     Not shown in an installed app (standalone) or in a normal browser. ?lc_iab=0 switches it off for this tab (owner testing only). */
+  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.47.0";
+  var RE=/FBAN|FBAV|FB_IAB|FBIOS|FB4A|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|trill_|Snapchat|Twitter|LinkedInApp|Pinterest|Line\//i;
+  function isIab(ua){return RE.test(String(ua||""))}
+  function appOf(ua){ua=String(ua||"");return/Instagram/i.test(ua)?"Instagram":/TikTok|musical_ly|Bytedance|trill_/i.test(ua)?"TikTok":/FBAN|FBAV|FB_IAB|FBIOS|FB4A/i.test(ua)?"Facebook":/Snapchat/i.test(ua)?"Snapchat":/Twitter/i.test(ua)?"X":/LinkedIn/i.test(ua)?"LinkedIn":/Pinterest/i.test(ua)?"Pinterest":/Line\//i.test(ua)?"LINE":"this app"}
+  var ios=/iPhone|iPad|iPod/i.test(UA)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),android=/Android/i.test(UA);
+  var iosV=(function(){var m=/OS (\d+)_/.exec(UA);return m?+m[1]:0})();
+  function standalone(){try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
+  var off=false;try{if(/[?&]lc_iab=0(&|$)/.test(location.search))sessionStorage.setItem("lc87-off","1");off=sessionStorage.getItem("lc87-off")==="1"}catch(e){}
+  /* the address to open outside: this same page, marked as coming from the in-app browser */
+  function target(){var u;try{u=new URL(location.href);u.searchParams.delete("lc_iab");u.searchParams.set("source","iab");return u.href}catch(e){return location.href}}
+  function intentUrl(){var u;try{u=new URL(target())}catch(e){return target()}
+    return"intent://"+u.host+u.pathname+u.search+"#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(u.href)+";end"}
+  function safariUrl(){return"x-safari-"+target()}
+  var app=appOf(UA),on=isIab(UA)&&!standalone()&&!off;
+  W.LC87={on:on,app:app,ios:ios,android:android,isIab:isIab,appOf:appOf,target:target,intentUrl:intentUrl,safariUrl:safariUrl,version:VERSION};
+  if(!on)return;
+  W.__lcIab=true;
+  var H=D.documentElement;H.classList.add("lc-iab");
+  var css="html.lc-iab,html.lc-iab body{overflow:hidden!important;height:100%!important;background:#0f172a!important}"
+    +"html.lc-iab body>*:not(#lc87){display:none!important}"
+    +"#lc87{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));background:radial-gradient(120% 80% at 50% 0%,#14304a 0%,#0f172a 55%);color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;overflow-y:auto}"
+    +"#lc87 .b{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px}"
+    +"#lc87 img{width:76px;height:76px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.45)}"
+    +"#lc87 h1{margin:4px 0 0;font-size:1.55rem;line-height:1.2;color:#fff;font-weight:800}"
+    +"#lc87 p{margin:0;color:#cbd5e1}#lc87 p b{color:#fff}"
+    +"#lc87 .go{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;border-radius:16px;border:0;background:#38bdf8;color:#04121c;font-family:inherit;font-weight:800;font-size:1.15rem;line-height:1;text-decoration:none;cursor:pointer;box-shadow:0 10px 30px rgba(56,189,248,.35)}"
+    +"#lc87 .go:focus-visible,#lc87 .cp:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}"
+    +"#lc87 .cp{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;border-radius:14px;border:1px solid rgba(148,163,184,.45);background:transparent;color:#e2e8f0;font-family:inherit;font-weight:700;font-size:1rem;line-height:1;cursor:pointer}"
+    +"#lc87 ol{margin:4px 0 0;padding:12px 14px 12px 34px;text-align:left;border-radius:14px;background:rgba(30,41,59,.85);border:1px solid rgba(148,163,184,.22);width:100%;box-sizing:border-box}"
+    +"#lc87 li{margin:4px 0}#lc87 .lk{width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;border-radius:12px;border:1px solid rgba(148,163,184,.4);background:#0b1222;color:#e2e8f0;font:14px ui-monospace,Menlo,monospace}"
+    +"#lc87 .ok{color:#4ade80;font-weight:700;min-height:1.5em}";
+  var st=D.createElement("style");st.id="lc87-css";st.textContent=css;(D.head||H).appendChild(st);
+  var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+  function html(){
+    var big=android?'<a class="go" id="lc87-go" href="'+esc(intentUrl())+'">Open in Chrome</a>'
+      :(ios&&iosV>=17)?'<a class="go" id="lc87-go" href="'+esc(safariUrl())+'">Open in Safari</a>'
+      :'<button type="button" class="go" id="lc87-go" data-lc87-copy>Copy the link</button>';
+    var steps=ios?"<li>Tap <b>⋯</b> (top right) in "+esc(app)+".</li><li>Choose <b>Open in browser</b> (or <b>Open in Safari</b>).</li><li>In Safari: <b>Share</b> → <b>Add to Home Screen</b>.</li>"
+      :"<li>Tap <b>⋮</b> (top right) in "+esc(app)+".</li><li>Choose <b>Open in Chrome</b> (or <b>Open in browser</b>).</li><li>In Chrome: tap <b>Install app</b>.</li>";
+    return'<div class="b" role="dialog" aria-modal="true" aria-labelledby="lc87-h"><img src="/icons/icon-192.png" alt="Lanckriet Chess" width="76" height="76">'
+      +'<h1 id="lc87-h">Open in Chrome or Safari</h1>'
+      +'<p><b>Open this page in Google Chrome or Safari to install the app.</b> The built-in browser of '+esc(app)+' cannot install apps.</p>'
+      +big+(android||(ios&&iosV>=17)?'<button type="button" class="cp" data-lc87-copy>Copy the link</button>':"")
+      +'<p class="ok" id="lc87-ok" role="status" aria-live="polite"></p>'
+      +'<ol>'+steps+"</ol></div>";
+  }
+  function copy(btn){
+    var u=target(),ok=D.getElementById("lc87-ok");
+    var done=function(){if(ok)ok.textContent="Link copied. Paste it in Chrome or Safari.";if(btn)btn.textContent="Copied ✓"};
+    var manual=function(){if(!ok)return;ok.innerHTML='<input class="lk" readonly aria-label="The link to open in your browser" value="'+esc(u)+'">';var i=ok.querySelector("input");try{i.focus();i.select()}catch(e){}};
+    try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(done,manual);return}}catch(e){}
+    try{var t=D.createElement("textarea");t.value=u;t.setAttribute("readonly","");t.style.cssText="position:fixed;left:-9999px;top:0";D.body.appendChild(t);t.select();var r=D.execCommand("copy");t.remove();if(r){done();return}}catch(e){}
+    manual();
+  }
+  var box=null;
+  function mount(){
+    if(!D.body)return;
+    if(!box){box=D.createElement("div");box.id="lc87";box.innerHTML=html();
+      box.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest("[data-lc87-copy]");if(c){e.preventDefault();copy(c)}});}
+    if(box.parentNode!==D.body||D.body.lastElementChild!==box)D.body.appendChild(box);
+    try{var g=D.getElementById("lc87-go");if(g&&!g.__f){g.__f=1;setTimeout(function(){try{g.focus()}catch(e){}},50)}}catch(e){}
+  }
+  if(D.body)mount();else D.addEventListener("DOMContentLoaded",mount);
+  W.addEventListener("load",mount);
+  try{new MutationObserver(function(){if(box&&(box.parentNode!==D.body))mount()}).observe(H,{childList:true,subtree:false})}catch(e){}
+  setInterval(mount,1500);                                         /* nothing the page adds later can cover it */
+  /* Android, Instagram and Facebook: try Chrome once by itself (they hand intent links to Chrome); the button stays for a second try */
+  try{if(android&&/Instagram|FBAN|FBAV|FB_IAB|FB4A/i.test(UA)&&!sessionStorage.getItem("lc87-auto")){sessionStorage.setItem("lc87-auto","1");
+    setTimeout(function(){var nav=W.__lcNav||function(x){location.href=x};nav(intentUrl())},600)}}catch(e){}
+})(); /*@@end lc87*/</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Lanckriet Chess: a 2100+ ELO personal chess coach in your pocket</title>
@@ -10,15 +92,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.45.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.47.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.45.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.45.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.47.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.47.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.45.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.47.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -180,6 +262,26 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .vs-h4{margin:.9rem 0 .2rem;font-size:1rem;color:var(--good)}
 .vs2 li.no,.vs2 li.yes{color:var(--text)}
 
+/* 9.47.0: the install steps sheet (uses the gallery styles) */
+.ins-steps{margin:0;padding-left:1.3rem;display:grid;gap:8px;font-size:1.02rem}.ins-steps b{color:#fff}.ins-ico{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(56,189,248,.18);color:var(--blue)}
+/* 9.46.0 LC86: the person-by-person Wall of Love and its gallery */
+.wl-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));margin-top:16px}
+.wl-card{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:4px 14px;align-items:center;text-align:left;width:100%;cursor:pointer;color:var(--text);font:inherit;min-height:96px;transition:border-color .15s,transform .15s}
+.wl-card:hover{border-color:rgba(56,189,248,.6);transform:translateY(-1px)}.wl-card:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.wl-av{grid-row:span 2;width:56px;height:56px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;object-fit:cover;background:linear-gradient(135deg,#38bdf8,#6366f1);color:#0f172a;font-weight:900;font-size:1.1rem;box-shadow:0 0 0 3px rgba(56,189,248,.18)}
+.wl-who{display:flex;flex-direction:column;gap:4px;min-width:0}.wl-name{font-size:1.08rem}.wl-tag{display:inline-block;align-self:flex-start;margin:0;padding:3px 11px;border-radius:999px;background:rgba(251,191,36,.16);color:var(--gold);font-weight:800;font-size:.88rem}
+.wl-cta{grid-column:2;color:var(--blue);font-weight:700;font-size:.88rem}.wl-edit{grid-column:1/-1;justify-self:start;margin-top:6px;font-size:.8rem;color:#241a00;background:var(--gold);border-radius:999px;padding:4px 12px;text-decoration:none;font-weight:800}
+.wl-admin{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:14px;padding:10px 12px;border-radius:14px;border:1px dashed var(--gold);background:rgba(251,191,36,.07)}.wl-admin b{color:var(--gold)}
+#love-list:empty{display:none}
+.wl-ov{position:fixed;inset:0;z-index:200;background:rgba(2,6,23,.82);display:flex;align-items:center;justify-content:center;padding:16px}.wl-ov[hidden]{display:none}
+.wl-box{width:min(640px,100%);max-height:calc(100dvh - 32px);display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.wl-head{display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}.wl-head>div{flex:1;min-width:0}.wl-head h3{margin:0;font-size:1.15rem}.wl-head .wl-tag{margin-top:4px}
+.wl-x{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:1.5rem;cursor:pointer;flex:none}
+.wl-body{overflow-y:auto;padding:14px 16px;display:grid;gap:12px;-webkit-overflow-scrolling:touch}.wl-fine{margin:0;padding:8px 16px 12px;border-top:1px solid var(--line)}
+.wl-shot{margin:0}.wl-shot img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);background:#0b1222}.wl-shot figcaption{font-size:.82rem;color:var(--mute);margin-top:4px}
+.wl-msg{max-width:88%;padding:10px 14px;border-radius:16px;white-space:pre-wrap;line-height:1.45}.wl-msg.member{background:#0f172a;border:1px solid var(--line);justify-self:start;border-bottom-left-radius:4px}.wl-msg.coach{background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.4);justify-self:end;border-bottom-right-radius:4px}
+.wl-msg small{display:block;font-size:.72rem;color:var(--mute);margin-bottom:2px;font-weight:700}
+.wl-empty{color:var(--mute);margin:0}
 /* 9.41.0 LC72: owner cards, screenshots, the owner's edit button */
 .shot{margin:14px 0 0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card2)}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:8px 12px;font-size:.85rem;color:var(--mute)}
 .shots{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,300px);gap:14px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}.shots .shot{margin:0;scroll-snap-align:start}
@@ -257,15 +359,6 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 
 <section class="alt hide" id="walkthrough" aria-labelledby="h-walk"><div class="wrap"><span class="eyebrow">See it in action</span><h2 id="h-walk">Watch the walkthrough</h2><p class="lead">Three minutes: how the Hub finds the mistakes that cost you rating.</p><div class="walk" id="walk-sec" style="max-width:820px;margin-top:18px"></div></div></section>
 
-<section id="love" class="hide" aria-labelledby="h-love">
-  <div class="wrap">
-    <span class="eyebrow">Wall of Love</span>
-    <h2 id="h-love">What members say</h2>
-    <p class="mute small">Real messages from members. Each one is shown because the member allowed it, and Kyenzo has read and approved it first.</p>
-    <div class="love" id="love-list" aria-live="polite"></div>
-  </div>
-</section>
-
 <section id="heroes" class="hide" aria-labelledby="h-heroes">
   <div class="wrap">
     <span class="eyebrow">Hero's Journeys</span>
@@ -274,6 +367,21 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <div class="love" id="heroes-list" aria-live="polite"></div>
   </div>
 </section>
+
+<section id="love" aria-labelledby="h-love">
+  <div class="wrap">
+    <span class="eyebrow">Wall of Love</span>
+    <h2 id="h-love">Real players. Real results.</h2>
+    <p class="mute small">Every card is a real member who agreed to share it. Tap a card to see the chat and the screenshots behind it. Results differ per person; nothing here is a promise of a rating.</p>
+    <div class="wl-admin hide" id="wl-admin" role="region" aria-label="Admin mode"><b>Admin mode</b><span class="small">Only you see this bar.</span><a class="btn gold" href="/app.html?lc86=new#wall-cms">+ Add a person</a><a class="btn bw" href="/app.html#wall-cms">Manage the Wall in the app</a><a class="btn bw" href="/#love" id="wl-leave">Leave admin mode</a></div>
+    <div class="wl-grid" id="wl-grid" role="list">
+      <button type="button" class="card wl-card" role="listitem" data-wl="seed-igor"><span class="wl-av" aria-hidden="true">IP</span><span class="wl-who"><b class="wl-name">Igor P.</b><span class="wl-tag">+630 Elo in 6 weeks</span></span><span class="wl-cta">See the proof →</span></button>
+      <button type="button" class="card wl-card" role="listitem" data-wl="seed-mathijs"><span class="wl-av" aria-hidden="true">M</span><span class="wl-who"><b class="wl-name">Mathijs</b><span class="wl-tag">Hit 1500 Elo</span></span><span class="wl-cta">See the proof →</span></button>
+    </div>
+    <div class="love" id="love-list" aria-live="polite"></div>
+  </div>
+</section>
+<div class="wl-ov" id="wl-ov" hidden><div class="wl-box" role="dialog" aria-modal="true" aria-labelledby="wl-h"><header class="wl-head"><span id="wl-av"></span><div><h3 id="wl-h"></h3><p class="wl-tag" id="wl-t"></p></div><button type="button" class="wl-x" id="wl-x" aria-label="Close">×</button></header><div class="wl-body" id="wl-body"></div><p class="small mute wl-fine">Shared with the member’s permission. Results differ per person; nothing here is a promise of a rating.</p></div></div>
 
 <section id="proof" aria-labelledby="h-proof">
   <div class="wrap">
@@ -431,7 +539,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.45.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.47.0</p></footer>
 
 <script>
 "use strict";
@@ -439,7 +547,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   /* 1. People who arrive with a referral code, an old app link (/#refer) or from the installed app go straight to the app. */
   try{
     var q=location.search,h=location.hash,standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
-    var keep=/^#(install|proof|how|faq|price-contrast|main)?$/.test(h),pd=new URLSearchParams(q).get("paid");
+    var keep=/^#(install|proof|love|how|faq|price-contrast|main)?$/.test(h),pd=new URLSearchParams(q).get("paid");
     /* 9.45.0: no checkout on this page any more. Old price links (#pricing, #tokens, #gift, ?plans=1) and Stripe returns (?paid=) go to the app's Upgrades page. */
     if(!/[?&]preview=/.test(q)&&(/^#(pricing|tokens|gift)$/.test(h)||/[?&]plans=/.test(q)||pd)){location.replace("/app.html#upgrades"+(pd&&/^(cancel|cs_[A-Za-z0-9_]{8,200})$/.test(pd)?"?paid="+pd:""));return}
     if(!/[?&]preview=/.test(q)&&(standalone||/[?&]ref=/.test(q)||(h&&h.length>1&&!keep))){location.replace("/app.html"+q+h);return}
@@ -499,16 +607,45 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       try{(navigator.clipboard?navigator.clipboard.writeText(abs):Promise.reject()).then(function(){instMsg("Link copied. Tap ⋯ at the top and choose Open in browser (or paste it in Safari), then Share → Add to Home Screen.")},function(){instMsg("Tap ⋯ at the top and choose Open in browser. In Safari: Share → Add to Home Screen.")})}catch(x){instMsg("Tap ⋯ at the top and choose Open in browser. In Safari: Share → Add to Home Screen.")}
     },IOS&&iosV>=17?1200:0);
   }
+  /* 9.47.0: the in-app browsers never get here (LC87 covers the page and sends people to Chrome / Safari). In a real browser the button
+     opens the browser's own install prompt the moment the browser offers it. Chrome only offers it after a tap and some time on the page, so
+     until then the button shows the two taps of the browser's own menu, right here: no detour into the app, no form. The steps sheet keeps
+     listening: if Chrome offers its prompt while it is open, a big "Install now" button appears in it. */
+  var CHR=("onbeforeinstallprompt" in window)&&!IOS,FF=/Firefox|FxiOS/i.test(UA),IOS_OTHER=IOS&&/CriOS|FxiOS|EdgiOS|OPiOS/i.test(UA);
+  function standaloneNow(){try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
+  function stepsHTML(){
+    if(IOS)return'<ol class="ins-steps"><li>Tap <b>Share</b> <span class="ins-ico" aria-hidden="true">⬆︎</span> '+(IOS_OTHER?"(in the address bar)":"(at the bottom of Safari)")+'.</li><li>Scroll and tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. Lanckriet Chess is now on your home screen.</li></ol>'
+      +(IOS_OTHER&&!/CriOS|EdgiOS/i.test(UA)?'<p class="small mute">Not there? Open this page in <b>Safari</b> and do the same.</p>':"");
+    if(AND)return'<ol class="ins-steps"><li>Tap <b>⋮</b> (top right of '+(FF?"Firefox":"the browser")+').</li><li>Tap <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Tap <b>Install</b>. Lanckriet Chess is now in your apps.</li></ol>';
+    if(FF)return'<p>Firefox on a computer cannot install web apps. Open this page in <b>Chrome</b>, <b>Edge</b> or <b>Safari</b> and tap <b>Install on my device</b> again.</p>';
+    if(/Safari/i.test(UA)&&!CHR)return'<ol class="ins-steps"><li>Open the <b>File</b> menu.</li><li>Choose <b>Add to Dock</b>.</li><li>Click <b>Add</b>. Lanckriet Chess opens from your Dock.</li></ol>';
+    return'<ol class="ins-steps"><li>Click the <b>install icon</b> at the right of the address bar (a screen with an arrow).</li><li>Or open the <b>⋮</b> menu → <b>Cast, save and share</b> → <b>Install page as app</b>.</li><li>Click <b>Install</b>.</li></ol>';
+  }
+  function insClose(){var o=$("ins-ov");if(o)o.hidden=true;document.documentElement.style.overflow=""}
+  function insOpen(){
+    var o=$("ins-ov");
+    if(!o){o=document.createElement("div");o.id="ins-ov";o.className="wl-ov";o.innerHTML='<div class="wl-box ins-box" role="dialog" aria-modal="true" aria-labelledby="ins-h"><header class="wl-head"><img src="/icons/icon-192.png" alt="" width="44" height="44" style="border-radius:12px"><div><h3 id="ins-h">Install Lanckriet Chess</h3><p class="small mute" style="margin:2px 0 0">Two taps, no store, no account needed.</p></div><button type="button" class="wl-x" data-ins-x aria-label="Close">×</button></header><div class="wl-body" id="ins-body"></div></div>';
+      document.body.appendChild(o);
+      o.addEventListener("click",function(e){if(e.target===o||e.target.closest("[data-ins-x]")){insClose();return}if(e.target.closest("[data-ins-now]")){insClose();promptNow()}});
+      document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!o.hidden)insClose()})}
+    $("ins-body").innerHTML=(bip?'<button type="button" class="btn primary big" data-ins-now style="width:100%">Install now</button>':"")+stepsHTML()
+      +'<p class="small mute">Already installed? Open Lanckriet Chess from your home screen or app list.</p><p class="small"><a href="/app.html" data-ins-web>Or use it in the browser for now →</a></p>';
+    o.hidden=false;document.documentElement.style.overflow="hidden";var x=o.querySelector("[data-ins-now]")||o.querySelector("[data-ins-x]");if(x)x.focus();
+  }
+  window.addEventListener("beforeinstallprompt",function(){var o=$("ins-ov");if(o&&!o.hidden)insOpen()});
   document.addEventListener("click",function(e){
     var a=e.target.closest&&e.target.closest("[data-install]");
     if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
-    if(IAB){e.preventDefault();escapeIab(a);return}
-    if(bip){e.preventDefault();promptNow();return}
-    if("onbeforeinstallprompt" in window&&!a.__lcWaited){          /* Chromium: the prompt can arrive a moment after the page loads */
-      e.preventDefault();a.__lcWaited=true;
-      waitPrompt(1500).then(function(ok){if(ok&&bip)promptNow();else location.href=a.href});
-    }
+    e.preventDefault();
+    if(IAB&&window.LC87&&!LC87.on){escapeIab(a);return}         /* the gate was switched off for testing: the old breakout */
+    if(standaloneNow()){location.href="/app.html";return}
+    if(bip){promptNow();return}
+    if(CHR&&!a.__lcWaited){a.__lcWaited=true;waitPrompt(1200).then(function(ok){if(ok&&bip)promptNow();else insOpen()});return}
+    insOpen();
   });
+
+  /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.47.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -682,7 +819,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     var L=a[2]&&a[2].ok?a[2]:{cfg:{},items:[],shots:[]},C=L.cfg||{},own=Array.isArray(L.items)?L.items:[];try{paintShots(L)}catch(e){}
     var res=a[0],wall=a[1]&&a[1].ok&&Array.isArray(a[1].rows)?a[1].rows.slice().sort(function(x,y){return x.kind-y.kind||(+y.gain||0)-(+x.gain||0)}):[],rows=res&&res.ok&&Array.isArray(res.rows)?res.rows:[];
     var msgs=wall.filter(function(r){return r.message}).slice(0,9),ol=own.filter(function(x){return x.kind==="love"&&x.body});
-    if(C.love_on!==false&&(msgs.length||ol.length)){var lv=$("love");if(lv){lv.classList.remove("hide");$("love-list").innerHTML=ol.map(ocard).concat(msgs.map(lcard)).join("")}}
+    if(C.love_on===false){var lv0=$("love");if(lv0&&!wlAdmin)lv0.classList.add("hide")}else if(msgs.length||ol.length){$("love-list").innerHTML=ol.map(ocard).concat(msgs.map(lcard)).join("")}
     if(C.proof_on===false){var pq=$("proof");if(pq)pq.classList.add("hide");return}
     if(C.builtin_on===false)Array.prototype.forEach.call(document.querySelectorAll("#proof-list > .pcard:not(.pr)"),function(x){x.remove()});
     var seen={},items=[];
@@ -696,6 +833,37 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     $("proof-note").textContent="Results and messages are shown because the member allowed it, and checked by Kyenzo.";
   });
   document.addEventListener("keydown",function(e){if((e.key==="Enter"||e.key===" ")&&e.target&&e.target.classList&&e.target.classList.contains("pr")){e.preventDefault();e.target.click()}});
+  /* 9.46.0 LC86: the person-by-person Wall of Love. One card per person (from the app's #wall-cms, lc86_wall_public); a tap opens that person's
+     screenshots and chat. The two starter cards in the HTML stay until the first person is saved. ?admin=1 (owner signed in) shows Add / Edit. */
+  var WL={"seed-igor":{name:"Igor P.",tag:"+630 Elo in 6 weeks",avatar:"",items:[{t:"msg",from:"coach",text:"585 → 1214 Elo in 6 weeks. The first student to run the full MSPC system, move by move."}]},
+          "seed-mathijs":{name:"Mathijs",tag:"Hit 1500 Elo",avatar:"",items:[]}};
+  var wlAdmin=false;
+  try{var wa=JSON.parse(localStorage.getItem("lc26-auth")||"null"),own=!!(wa&&String(wa.email||"").toLowerCase()==="lanckrietchess@gmail.com");
+    if(own&&/[?&]admin=1/.test(location.search))sessionStorage.setItem("lc86-admin","1");
+    if(own&&/[?&]admin=0/.test(location.search))sessionStorage.removeItem("lc86-admin");
+    wlAdmin=own&&sessionStorage.getItem("lc86-admin")==="1"}catch(e){wlAdmin=false}
+  function wlIni(n){return String(n||"?").trim().split(/\s+/).map(function(w){return w.replace(/[^A-Za-z0-9\u00C0-\u024F]/g,"").charAt(0)}).filter(Boolean).slice(0,2).join("").toUpperCase()||"?"}
+  function wlAv(p,cls){return/^https:\/\//.test(p.avatar||"")?'<img class="'+cls+'" src="'+esc(p.avatar)+'" alt="" loading="lazy">':'<span class="'+cls+'" aria-hidden="true">'+esc(wlIni(p.name))+"</span>"}
+  function wlCard(id,p){var n=(p.items||[]).filter(function(x){return x.t==="img"}).length,edit=wlAdmin?'<a class="wl-edit" href="/app.html?lc86='+(/^seed-/.test(id)?id.replace("seed-","seed-"):"edit-"+esc(id))+'#wall-cms">✎ Edit</a>':"";
+    return'<button type="button" class="card wl-card" role="listitem" data-wl="'+esc(id)+'">'+wlAv(p,"wl-av")+'<span class="wl-who"><b class="wl-name">'+esc(p.name)+"</b>"+(p.tag?'<span class="wl-tag">'+esc(p.tag)+"</span>":"")+'</span><span class="wl-cta">'+(n?"See the chat & "+n+(n===1?" screenshot":" screenshots")+" →":"See the proof →")+"</span>"+edit+"</button>"}
+  function wlPaint(){var g=$("wl-grid");if(!g)return;g.innerHTML=Object.keys(WL).map(function(k){return wlCard(k,WL[k])}).join("");if(wlAdmin){var ad=$("wl-admin");if(ad)ad.classList.remove("hide")}}
+  var wlLast=null;
+  function wlOpen(id,from){var p=WL[id];if(!p)return;wlLast=from||null;
+    $("wl-av").innerHTML=wlAv(p,"wl-av");$("wl-h").textContent=p.name;var t=$("wl-t");t.textContent=p.tag||"";t.hidden=!p.tag;
+    var it=p.items||[];$("wl-body").innerHTML=it.length?it.map(function(x){
+      if(x.t==="img")return'<figure class="wl-shot"><img src="'+esc(x.url)+'" alt="'+esc(x.cap||("Screenshot shared by "+p.name))+'" loading="lazy">'+(x.cap?"<figcaption>"+esc(x.cap)+"</figcaption>":"")+"</figure>";
+      return'<p class="wl-msg '+(x.from==="coach"?"coach":"member")+'"><small>'+(x.from==="coach"?"Kyenzo":esc(p.name))+"</small>"+esc(x.text)+"</p>"}).join(""):'<p class="wl-empty">The chat screenshots are being added.</p>';
+    var ov=$("wl-ov");ov.hidden=false;document.documentElement.style.overflow="hidden";$("wl-body").scrollTop=0;$("wl-x").focus()}
+  function wlClose(){var ov=$("wl-ov");if(!ov||ov.hidden)return;ov.hidden=true;document.documentElement.style.overflow="";if(wlLast&&wlLast.focus)wlLast.focus()}
+  document.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest("[data-wl]");if(c&&!(e.target.closest&&e.target.closest(".wl-edit"))){e.preventDefault();wlOpen(c.getAttribute("data-wl"),c);return}
+    if(e.target.id==="wl-ov"||e.target.id==="wl-x")wlClose();
+    if(e.target.id==="wl-leave"){try{sessionStorage.removeItem("lc86-admin")}catch(x){}}});
+  document.addEventListener("keydown",function(e){var ov=$("wl-ov");if(!ov||ov.hidden)return;if(e.key==="Escape"){e.preventDefault();wlClose();return}
+    if(e.key==="Tab"){var f=[].slice.call(ov.querySelectorAll("button,a[href]")),a=f[0],z=f[f.length-1];if(!f.length)return;if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});
+  wlPaint();
+  rpc("lc86_wall_public",{}).then(function(r){if(!r||!r.ok||!Array.isArray(r.rows)||!r.rows.length)return;var o={};
+    r.rows.forEach(function(p){if(p&&p.name)o[String(p.id)]={name:String(p.name),tag:String(p.tag||""),avatar:String(p.avatar||""),items:Array.isArray(p.items)?p.items:[]}});
+    if(Object.keys(o).length){WL=o;wlPaint()}});
   /* the account data behind a card, in a dialog */
   var last=null;
   function closeDlg(){var d=$("dlg");if(d){d.remove();document.body.style.overflow="";if(last&&last.focus)last.focus()}}
@@ -775,23 +943,8 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 })();
 </script>
 <script>
-/* 9.43.0 LC83: in-app browsers (Instagram, TikTok, Facebook, Snapchat) cannot install a web app. Show how to open the Hub in the real browser,
-   where "Install app" / "Add to Home Screen" makes it a standalone app. Quiet bar, hidden for a day after ×. */
+/* 9.47.0: the quiet in-app browser bar of 9.43.0 is replaced by the LC87 gate in the <head>. */
 (function(){
-  var u=navigator.userAgent||"";if(!/FBAN|FBAV|FB_IAB|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|Snapchat|Twitter|LinkedInApp|Line\//i.test(u))return;
-  try{if(matchMedia("(display-mode: standalone)").matches)return;if(Date.now()-(+localStorage.getItem("lc83-iab-l")||0)<864e5)return}catch(e){}
-  var ios=/iPhone|iPad|iPod/i.test(u)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),and=/Android/i.test(u);
-  var app=/Instagram/i.test(u)?"Instagram":/TikTok|musical_ly|Bytedance/i.test(u)?"TikTok":/FBAN|FBAV|FB_IAB/i.test(u)?"Facebook":/Snapchat/i.test(u)?"Snapchat":"this app";
-  var url=location.origin+"/app.html?source=iab",intent="intent://"+location.host+"/app.html?source=iab#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(url)+";end";
-  var b=document.createElement("div");b.className="iab";b.setAttribute("role","note");
-  b.innerHTML="<p><b>You are inside "+app+".</b> Its browser cannot install apps. "+(ios?"Tap <b>⋯</b> (top right), then <b>Open in browser</b>. In Safari: <b>Share</b> → <b>Add to Home Screen</b>.":"Open this page in Chrome, then tap <b>Install app</b>. It runs full screen, like any app.")+"</p>"
-    +"<div class='row'>"+(and?"<a class='btn primary' href='"+intent+"'>Open in Chrome</a>":"")+"<button type='button' class='btn' data-iab-copy>Copy link</button><button type='button' class='x' data-iab-x aria-label='Hide for today'>×</button></div>";
-  function show(){document.body.appendChild(b)}
-  if(document.body)show();else document.addEventListener("DOMContentLoaded",show);
-  b.addEventListener("click",function(e){
-    if(e.target.closest("[data-iab-x]")){try{localStorage.setItem("lc83-iab-l",String(Date.now()))}catch(x){}b.remove();return}
-    if(e.target.closest("[data-iab-copy]")){var c=e.target.closest("[data-iab-copy]");(navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){c.textContent="Copied: paste it in your browser"},function(){try{prompt("Copy this link:",url)}catch(x){}})}
-  });
 })();
 </script>
 <script>

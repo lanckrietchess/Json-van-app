@@ -48,3 +48,14 @@ period, the soft and the full in-app upgrade sheet, Stripe from the sheet, LC36.
 wall with packs, V5Doc keeps v5.lc85; the landing page without checkout or social links and its redirects to the app's Upgrades page.
 `node tests/lc85_unit.test.js`: the crop / zoom / pan maths, the scene rectangles, the board inside the block, the grace period, escaping.
 `python3 tests/lc85_sql.test.py` (local PostgreSQL 16): sql/20261115120000_lc85_feature_feedback.sql, nothing public before the owner approves.
+
+9.46.0: `python3 tests/run.py lc86` (Chromium, 390 and 1280 px): the Wall of Love starter cards directly above the Proof Queue, the gallery
+(open, Esc, backdrop, focus back), people from lc86_wall_public() (escaped names, initials or avatar, screenshots and chat in order), admin mode
+(owner + ?admin=1: bar and Edit links; a visitor never sees them), the #wall-cms page (list, add a person, the exact save payload, no SQL yet,
+owner only). `python3 tests/lc86_sql.test.py`: sql/20261115140000_lc86_wall_people.sql (owner-only writes, items rebuilt, order, hidden people).
+
+9.47.0: `python3 tests/run.py lc87` (Chromium with the real Instagram / TikTok / Facebook user agents): the gate covers the landing page and
+the app, nothing under it is visible or tappable, the app does not boot, Android gets the Chrome intent (tried once by itself on Instagram /
+Facebook), iOS 17+ the x-safari link, iOS 16 Copy the link + the steps; Chrome and Safari never see it; ?lc_iab=0 switches it off; the Install
+button prompts at once when Chrome offered the prompt, otherwise shows the steps on the landing page (and "Install now" when the prompt arrives
+while they are open); the three copies of lc87 are the same and first in both heads.

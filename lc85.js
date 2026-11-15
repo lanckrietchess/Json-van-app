@@ -54,7 +54,7 @@ const LC85=(()=>{
   function graceLeft(){const g=cfg().graceDays;return Math.max(0,Math.ceil(g-days()))}
 
   /* ---------- feature names ---------- */
-  const NOFB=/^(admin|privacy|upgrades|level0|giveaway-admin|social-proof|landing-editor|studio|reset|delete-account|analytics)$/;
+  const NOFB=/^(admin|privacy|upgrades|level0|giveaway-admin|social-proof|wall-cms|landing-editor|studio|reset|delete-account|analytics)$/;
   function featureName(r){
     r=r||route();let t="";
     try{if(typeof DOC_TITLES!=="undefined"&&DOC_TITLES[r])t=String(DOC_TITLES[r])}catch(e){}

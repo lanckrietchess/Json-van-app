@@ -27,7 +27,7 @@ with sync_playwright() as p:
     br = p.chromium.launch()
     c, pg = _page(br, ROWS, LEGACY)
     order = pg.evaluate("[...document.querySelectorAll('body section[id]')].map(s => s.id)")
-    out('section order [video, Wall of Love, Proof Queue, method, price contrast + feature stack, install, FAQ]', order)
+    out('section order [video, hero stories, Wall of Love, Proof Queue, method, price contrast + feature stack, install, FAQ]', order)
     out('Founding Member banner [moved down into the price contrast, no longer the first thing on the page]', pg.evaluate("(() => { const f = document.getElementById('fm-hero'); return [f.closest('#price-contrast') !== null, document.body.firstElementChild.id !== 'fm-hero', !f.classList.contains('hide')]; })()"))
     names = pg.evaluate("[...document.querySelectorAll('#proof-list .pcard')].map(c => (c.querySelector('.pr-name b, .small b') || {textContent: ''}).textContent + ':' + (c.getAttribute('data-kind') || (c.classList.contains('pr') ? '2' : 'static')))")
     out('Proof Queue ranking [1) message + result by Peak Gain: Anna 200 then Dan 150, 2) results: Eli 400 then Bob 300, 3) message only: Cleo; the owner\'s own cards after the members]', names[:5])
@@ -43,7 +43,7 @@ with sync_playwright() as p:
     pg.evaluate("document.getElementById('price-contrast').scrollIntoView()"); pg.wait_for_timeout(300); pg.screenshot(path=SHOTS + '/land59-stack.png'); c.close()
     # nothing yet: no empty wall, the owner's two cards stay, honest note
     c, pg = _page(br, [], [])
-    out('no members yet [Wall of Love hidden, the Founder and Proof of concept cards stay, honest note]', pg.evaluate("[document.getElementById('love').classList.contains('hide'), document.querySelectorAll('#proof-list .pcard').length, /appear here as soon as members allow/.test(document.getElementById('proof-note').textContent)]")); c.close()
+    out('no members yet [the Wall of Love shows its starter cards (not hidden), the Founder and Proof of concept cards stay, honest note]', pg.evaluate("[document.getElementById('love').classList.contains('hide'), document.querySelectorAll('#proof-list .pcard').length, /appear here as soon as members allow/.test(document.getElementById('proof-note').textContent)]")); c.close()
     # the stack
     c, pg = _page(br, [], [])
     out('results stack (9.35.0) [6+ outcome ticks in the Lanckriet Chess card, 3 per market card front, two columns]', pg.evaluate("(() => { const hl = document.querySelector('#vs-grid .card.hl'); const others = [...document.querySelectorAll('#vs-grid .card:not(.hl) .front')]; return [hl.querySelectorAll('li.yes').length >= 6, others.length === 3 && others.every(o => o.querySelectorAll('li').length === 3), document.querySelectorAll('#vs-grid > .vs-col').length === 2]; })()"))
