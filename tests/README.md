@@ -23,6 +23,10 @@ Everything here runs in Node with jsdom: fast, no browser needed. The tests that
 Studio 2.0 Edit Studio in real Chromium (from the repo root, after `npm i chess.js@0.10.3 jquery@3.7.1 @chrisoakman/chessboardjs@1.0.0 html2canvas@1.4.1`):
 `NM=./node_modules python3 tests/chromium_942/nle.py` (add `CHROME=/path/to/chrome` to use an installed Chrome): silence cut after a take,
 Cut silences, S split, trim handles, Delete, Ctrl+Z, two-deck playback without stalls, caption box drag / resize / style, 390 px layout (25).
+Release Giveaway (LC82, 9.42.0) in real Chromium with a stubbed Supabase: `NM=./node_modules python3 tests/chromium_942/giveaway.py` (port 8767):
+link a chess account (elo-verify), join with the public-board opt-in, the board, the banner, the owner overview with the winners' SQL,
+the landing counters and board, 390 and 1280 px (44). SQL on PostgreSQL 16: `tests/sql/lc82_stub.sql`, then `sql/20261107100000_lc59_milestones_proof.sql`,
+`sql/20261115100000_lc82_release_giveaway.sql` (twice), then `tests/sql/lc82.test.sql` (29). Script modes: `node tests/lc79_prompt.test.js` (23, Full Script unchanged, Bullet Points).
 
 jsdom cannot see layout, overlays, taps, fonts, offline behaviour or native controls. Those are covered by `../browser/` (24 real-Firefox tests).
 The notes generator and puzzle audit tests are in `../tools/mspc` (`npm test`, plus `verify-notes.mjs`).

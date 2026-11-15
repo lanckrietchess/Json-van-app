@@ -30,4 +30,16 @@ ok(/- FEN: 4k3\/8\/8\/8\/8\/8\/8\/R3K3 b - - 0 23\n- Side to move: Black\n- Winn
 ok(/What it changed on the board: .*queen on h3/.test(p),'board change in game context');
 ok(!/\n\n\n/.test(p),'no empty gaps');
 const mq=LC79.motifOf(g,it);ok(mq.id==='hanging'&&/gxh3 wins the queen for a pawn/.test(mq.text),'Qxh3?? gxh3 = queen lost for a pawn: '+mq.text);
+// 9.42.0: Bullet Points mode
+const pb=LC79.buildPrompt("bullets");fs.writeFileSync(require('path').join(require('os').tmpdir(),'lc79_prompt_bullets.txt'),pb);
+ok(LC79.buildPrompt("full")===p&&LC79.buildPrompt()===p,'Full Script prompt is unchanged (default and "full")');
+ok(pb.startsWith(p.slice(0,p.indexOf("\n\nLICHESS")))&&/\nLICHESS SIMILAR POSITION\n/.test(pb),'bullets keep the same game data');
+ok(/\nPAWN CHECK \(undefended pieces and pawns, kings left out\)\n- Before the mistake: White: .+\| Black: .+\n- After the mistake: White: .+\| Black: .+/.test(pb),'pawn check before and after for both colours');
+ok(/After the mistake: White: the pawn on g2 \(attacked by the queen on h3\)/.test(pb)&&!/After the mistake: .*Black: [^\n]*queen on h3/.test(pb),'pawn check: g2 is loose and attacked by the queen; the queen itself is defended by c8 (not listed)');
+ok(/\nRELEASE GIVEAWAY \(the CTA\)\n- Release Giveaway: a 15-day ELO-gain challenge.*top 5 ELO gainers win 1 month of Pro/.test(pb),'giveaway block: 15 days, top 5, 1 month of Pro');
+ok(pb.trim().endsWith(LC79.BCLOSE)&&!pb.includes(LC79.CLOSE),'ends with the bullet closing block, not the full-script line');
+ok(["1. THE HOOK: the exact opening sentence, word for word.","2. CORE POINTS","3. AHA MOMENT","4. BRIDGE / RE-HOOK (triangle)","5. CTA: the Release Giveaway"].every(x=>LC79.BCLOSE.includes(x)),'the 5 bullet parts in order');
+ok(/no guaranteed results and no rating promises/.test(LC79.BCLOSE)&&!/\bfree\b(?! or cheap)/i.test(pb.replace(/never call the app free or cheap/,'')),'no result guarantee, the word free only inside the ban');
+const pc=LC79.pawnCheck("4k3/8/8/8/8/8/PP6/4K3 w - - 0 1");ok(pc[0]==="White: the pawn on b2, the pawn on a2"&&pc[1]==="Black: every piece and pawn is defended"||/pawn on a2/.test(pc[0]),'pawnCheck on a simple position: '+pc.join(' | '));
+global.LC82={giveawayLine:()=>"Release Giveaway: TEST LINE ends on 30 Nov."};ok(LC79.buildPrompt("bullets").includes("- Release Giveaway: TEST LINE ends on 30 Nov."),'uses the live giveaway line from LC82 when present');
 console.log('RESULT',P,'passed',F,'failed');
