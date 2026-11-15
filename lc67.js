@@ -177,14 +177,21 @@
     ["C","Calculation","Calculate your line to the end. What is their best reply?"]];
   const PIECE={p:"pawn",n:"knight",b:"bishop",r:"rook",q:"queen",k:"king"};
   /* facts read from the position with chess.js (no engine, no AI): what the coach would point at for each step */
-  function facts(fen,last,lastSan){
+  function facts(fen,last,lastSan,before){
     const out={M:"",S:"",P:"",C:"Do not play the first move you see. Calculate it until the position is quiet, then check their best reply once more."};
     try{
       const g=new Chess(fen),me=g.turn();
       if(last&&last.to){
         const p=fen.split(" ");p[1]=me==="w"?"b":"w";p[3]="-";
-        let hit=[];try{const o=new Chess(p.join(" "));hit=o.moves({square:last.to,verbose:true}).filter(m=>m.captured).map(m=>PIECE[m.captured]+" on "+m.to)}catch(e){}
-        out.M="Their last move"+(lastSan?" was "+lastSan:"")+" (marked on the board). "+(g.in_check()?"You are in check: that comes first. ":"")+(hit.length?"That piece now attacks your "+hit.slice(0,3).join(" and your ")+".":"It attacks nothing directly: ask what it prepares and which square it left.");
+        /* 9.43.0: only REAL threats (LC83): a piece of yours that can be won. A pawn "hitting" a defended pawn is not an attack. */
+        let said="";
+        try{if(typeof LC83!=="undefined"){
+          const mf=before?LC83.moveFacts(before,{from:last.from,to:last.to,promotion:"q"},me):null;
+          said=mf?(mf.quiet?"A quiet move: it attacks nothing you can lose."+(mf.facts.length?" "+LC83.factText(mf,1):"")+" Ask what it prepares.":LC83.factText(mf,2)):LC83.threatsBy(fen,last.to,me).text;
+        }}catch(e){said=""}
+        if(!said){let hit=[];try{const o=new Chess(p.join(" "));hit=o.moves({square:last.to,verbose:true}).filter(m=>m.captured&&m.captured!=="p").map(m=>PIECE[m.captured]+" on "+m.to)}catch(e){}
+          said=hit.length?"That piece now reaches your "+hit.slice(0,3).join(" and your ")+": check whether it can really win one.":"It attacks nothing directly: ask what it prepares and which square it left."}
+        out.M="Their last move"+(lastSan?" was "+lastSan:"")+" (marked on the board). "+(g.in_check()?"You are in check: that comes first. ":"")+said;
       }else out.M=g.in_check()?"You are in check: that comes first.":"Start with their idea: what would they play if it were their move again?";
       let al=[];try{al=LC61.detect(fen,me).filter(a=>a.id!=="loose").slice(0,2)}catch(e){}
       out.S=al.length?"Alarm Signal"+(al.length>1?"s":"")+" on the board: "+al.map(a=>a.label).join(" and ")+". "+al[0].say:"No Alarm Signal jumps out. Look at the pawn structure and at your worst-placed piece, then name a plan.";
@@ -403,7 +410,8 @@
     const i=v.idx,prev=i>0?v.plies[i-1]:null;
     let fen="";try{fen=prev?prev.fen:START_FEN}catch(e){fen=""}
     if(!fen||!prev)return;                                   /* move 1: nothing to read yet */
-    const F=facts(fen,{from:prev.from,to:prev.to},prev.san),open=rd("lc67-lens",0)?" open":"";
+    let bef="";try{bef=i>1?v.plies[i-2].fen:START_FEN}catch(e){bef=""}
+    const F=facts(fen,{from:prev.from,to:prev.to},prev.san,bef),open=rd("lc67-lens",0)?" open":"";
     const d=document.createElement("details");d.className="lc67-lens";if(open)d.open=true;
     d.innerHTML='<summary><span class="lc67-face sm">'+face(["thinking","neutral"],28)+'</span><b>MSPC on this move</b><small>Coach Lanckriet</small></summary><ul><li><b>M</b> '+esc(F.M)+'</li><li><b>S</b> '+esc(F.S)+'</li><li><b>P</b> '+esc(F.P)+'</li><li><b>C</b> '+esc(c.learn?"In Learn mode the move is shown: say out loud why it answers M, S and P.":"Recall the repertoire move, then check it against M, S and P before you play it.")+'</li></ul>';
     d.addEventListener("toggle",()=>wr("lc67-lens",d.open?1:0));

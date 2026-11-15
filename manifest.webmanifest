@@ -6,6 +6,10 @@
   "start_url": "/app.html?source=pwa",
   "scope": "/app.html",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
@@ -17,19 +21,19 @@
   ],
   "icons": [
     {
-      "src": "/icons/icon-192.png?v=9.42.0",
+      "src": "/icons/icon-192.png?v=9.43.0",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png?v=9.42.0",
+      "src": "/icons/icon-512.png?v=9.43.0",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-maskable-512.png?v=9.42.0",
+      "src": "/icons/icon-maskable-512.png?v=9.43.0",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -42,7 +46,7 @@
       "url": "/app.html?source=pwa#think",
       "icons": [
         {
-          "src": "/icons/icon-192.png?v=9.42.0",
+          "src": "/icons/icon-192.png?v=9.43.0",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -54,7 +58,7 @@
       "url": "/app.html?source=pwa#trim",
       "icons": [
         {
-          "src": "/icons/icon-192.png?v=9.42.0",
+          "src": "/icons/icon-192.png?v=9.43.0",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -66,7 +70,7 @@
       "url": "/app.html?source=pwa#upgrades",
       "icons": [
         {
-          "src": "/icons/icon-192.png?v=9.42.0",
+          "src": "/icons/icon-192.png?v=9.43.0",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -78,16 +82,12 @@
       "url": "/app.html?source=pwa#refer",
       "icons": [
         {
-          "src": "/icons/icon-192.png?v=9.42.0",
+          "src": "/icons/icon-192.png?v=9.43.0",
           "sizes": "192x192",
           "type": "image/png"
         }
       ]
     }
   ],
-  "prefer_related_applications": false,
-  "display_override": [
-    "standalone",
-    "minimal-ui"
-  ]
+  "prefer_related_applications": false
 }

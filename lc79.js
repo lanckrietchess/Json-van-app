@@ -31,7 +31,7 @@
         "Get Prompt: Bullet Points" = the same data + a PAWN CHECK block (undefended pieces and pawns before and after the mistake, with their
         attacker) + the RELEASE GIVEAWAY block (LC82.giveawayLine) and a closing block asking for a 5-part freestyle skeleton: the exact hook,
         2 to 3 core points incl. the pawn check, the aha moment of the Lichess puzzle in one line, the bridge / re-hook to the app, the giveaway CTA. */
-  const VERSION="9.42.0";
+  const VERSION="9.43.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -1020,7 +1020,16 @@
   function hdr(pgn){const h={};String(pgn||"").replace(/\[(\w+)\s+"([^"]*)"\]/g,(m,k,v)=>{h[k]=v;return m});return h}
   function socratic(g,it,c){
     const fen=g.fens[it.i],prev=it.i>0?g.moves[it.i-1]:null,out=[];
-    if(prev){const hs=hitsFrom(g.fens[it.i],prev.to);out.push(["M","What did "+prev.san+" change?",hs.length?"It attacks "+list2(hs.map(x=>"the "+NAME[x.type]+" on "+x.sq))+".":"It created no direct attack: look at what it allows next."])}
+    if(prev){
+      /* 9.43.0: only facts. A move "attacks" a piece only when that piece can be won (no defender, or a cheaper attacker): LC83 when loaded */
+      let said="";
+      try{if(typeof LC83!=="undefined"){const mf=LC83.moveFacts(g.fens[it.i-1],{from:prev.from,to:prev.to,promotion:prev.promotion||"q"},it.color);
+        if(mf)said=mf.quiet?"A quiet move: it attacks nothing that can be won."+(mf.facts.length?" "+LC83.factText(mf,1):""):LC83.factText(mf,2)}}catch(e){said=""}
+      if(!said){const pc=(new Chess(g.fens[it.i]).get(prev.to)||{}).type||"p";
+        const hs=hitsFrom(g.fens[it.i],prev.to).filter(x=>x.type!=="k"&&(!defended(g.fens[it.i],x.sq,it.color)||VAL[pc]<VAL[x.type]));
+        said=hs.length?"It attacks "+list2(hs.map(x=>"the "+NAME[x.type]+" on "+x.sq))+", which can be won.":"A quiet move: it attacks nothing that can be won. Look at what it prepares."}
+      out.push(["M","What did "+prev.san+" change?",said]);
+    }
     out.push(["S","Which Alarm Signal is on the board?",c.alarm?c.alarm.label+": "+c.alarm.say:"No standard alarm: the danger was concrete, not structural."]);
     try{const b=new Chess(fen),ms=b.moves({verbose:true}),ck=ms.filter(m=>/\+|#/.test(m.san)).length,cp=ms.filter(m=>m.captured).length;out.push(["P","Which checks, captures and attacks did you have?",ck+" check"+(ck===1?"":"s")+" and "+cp+" capture"+(cp===1?"":"s")+"."+(it.bestSan?" The engine’s choice: "+it.bestSan+".":"")])}catch(e){}
     out.push(["C","What is their best reply to "+it.san+"?",it.replySan?it.replySan+". "+c.motif.text:"Check every forcing reply before you move."]);
