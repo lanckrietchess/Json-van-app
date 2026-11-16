@@ -15,6 +15,7 @@ PNG = bytes.fromhex('89504e470d0a1a0a0000000d4948445200000001000000010806000000'
 def stub(pg, people=None, admin=None, saved=None, missing=False):
     def h(route, request):
         n = request.url.split('/rpc/')[1].split('?')[0]
+        if n == 'lc89_whoami': return route.fulfill(status=200, content_type='application/json', body=_json.dumps({'ok': True, 'admin': request.headers.get('authorization', '') == 'Bearer x'}))   # 9.52.0: the server decides who is admin
         if n == 'lc86_wall_public': return route.fulfill(status=200, content_type='application/json', body=_json.dumps(people if people is not None else {'ok': True, 'rows': []}))
         if n == 'lc86_wall_admin':
             if missing: return route.fulfill(status=404, content_type='application/json', body=_json.dumps({'code': 'PGRST202', 'message': 'Could not find the function'}))

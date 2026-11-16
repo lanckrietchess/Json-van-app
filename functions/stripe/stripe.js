@@ -96,13 +96,43 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     catch (e) { try { await stripe('POST', 'coupons', { id, amount_off: cents, currency: 'eur', duration: 'once', name }); return id; } catch (e2) { return ''; } }
   }
   /* LC73 routes: the 7-day trial (one per e-mail) and the rescue offer (after the first paid month of a trial) */
+  /* LC90 (9.52.0): the owner's Day-7 pop-up settings (sql/20261116100000_lc89_lc90_inline_cms_founding_paywall.sql), read HERE on the server:
+     the trial length (0 = no trial) and optional Stripe Price IDs. The browser never chooses either. Cached for a minute. */
+  let pwMem = { at: 0, v: null };
+  async function paywallCfg() {
+    if (pwMem.v && now() - pwMem.at < 6e4) return pwMem.v;
+    const r = await q1("SELECT v FROM public.lc89_cfg WHERE k = 'paywall'");
+    let v = r && r.v; if (typeof v === 'string') { try { v = JSON.parse(v); } catch (e) { v = null; } }
+    pwMem = { at: now(), v: v && typeof v === 'object' ? v : {} };
+    return pwMem.v;
+  }
+  async function trialDays() {
+    const v = await paywallCfg(), d = v && v.trial_days;
+    return Number.isInteger(d) && d >= 0 && d <= 30 ? d : 7;
+  }
+  /* a Price ID from the owner's config is only used after Stripe confirms it: active, in euro, recurring at the right interval */
+  const priceMem = new Map();
+  async function checkedPrice(id, interval) {
+    if (!/^price_[A-Za-z0-9]{6,80}$/.test(String(id || ''))) return null;
+    const c = priceMem.get(id); if (c && now() - c.at < 3e5) return c.p && c.p.recurring && c.p.recurring.interval === interval ? c.p : null;
+    let p = null;
+    try { p = await stripe('GET', 'prices/' + encodeURIComponent(id)); } catch (e) { p = null; }
+    const good = p && p.active === true && String(p.currency).toLowerCase() === 'eur' && p.recurring && (p.recurring.interval === 'year' || p.recurring.interval === 'month') && +p.unit_amount > 0 ? p : null;
+    priceMem.set(id, { at: now(), p: good }); if (priceMem.size > 50) priceMem.clear();
+    if (!good) console.error('LC90: the Price ID ' + id + ' is not an active recurring euro price; the built-in price is used');
+    return good && good.recurring.interval === interval ? good : null;
+  }
   async function trial(body, ip) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
     const email = await userEmail(body.token);
     if (!email) return { status: 401, body: { ok: false, reason: 'sign_in' } };
+    const days = await trialDays();
+    if (!days) return { status: 409, body: { ok: false, reason: 'no_trial' } };
     if (await q1('SELECT 1 AS ok FROM public.lc73_trials WHERE email = ?', email)) return { status: 409, body: { ok: false, reason: 'trial_used' } };
     if (await q1("SELECT 1 AS ok FROM public.licenses WHERE lower(email) = ? AND tier >= 2 AND coalesce(revoked, false) = false AND expires_at > now()", email)) return { status: 409, body: { ok: false, reason: 'already_member' } };
-    return subscribe({ plan: 'monthly', tier: 2, email, ret: body.ret, device: body.device }, ip, { trial: true, email, meta: { trial: '1' } });
+    /* LC90: the Founding Trial can start on the yearly plan (the live launch rate, a Founding place is held) or the monthly plan */
+    const plan = body.plan === 'yearly' ? 'yearly' : 'monthly';
+    return subscribe({ plan, tier: 2, email, ret: body.ret, device: body.device }, ip, { trial: true, trialDays: days, email, meta: { trial: '1', trial_days: String(days), src: clean(body.src, 20) || undefined } });
   }
   async function rescue(body, ip) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
@@ -194,6 +224,12 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       for (const t of [1, 2, 3]) { const s = await takeSlot(t, p.caps[t - 1], Object.assign({ amount: p.prices[t - 1] }, row)); if (s) { tranche = t; slot = s; amount = p.prices[t - 1]; break; } }
       if (!tranche) { tranche = 4; amount = p.base; await insertSale(Object.assign({ tranche: 4, amount }, row)); }
     } else await insertSale(Object.assign({ amount }, row));
+    /* LC90: the owner's Stripe Price ID (Pro only: the yearly one for the Founding rate, the monthly one for every monthly Pro checkout) */
+    let priceId = '';
+    if (tier === 2 && (plan === 'monthly' || tranche === 1)) {
+      const v = await paywallCfg(), pr = await checkedPrice(plan === 'yearly' ? v.stripe_price_yearly : v.stripe_price_monthly, plan === 'yearly' ? 'year' : 'month');
+      if (pr) { priceId = pr.id; if (+pr.unit_amount !== amount) { amount = +pr.unit_amount; await DB.prepare('UPDATE arena.lc34_pro_sales SET amount_cents = ? WHERE session_id = ?').bind(amount, tmp).run(); } }
+    }
     const base = String(E.APP_URL), meta = Object.assign({ lc: 'pro', plan, tier, tranche: tranche || '', slot: slot || '', locked_cents: amount }, opt.meta || {});
     const tax = String(E.STRIPE_TAX || '') === 'inclusive';
     const names = { 1: 'Founding Member rate', 2: 'Early Adopter rate', 3: 'Launch rate', 4: 'Standard rate' };
@@ -202,11 +238,13 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       automatic_tax: tax ? { enabled: true } : undefined, subscription_data: { metadata: meta },
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: amount, tax_behavior: tax ? 'inclusive' : undefined, recurring: { interval: plan === 'yearly' ? 'year' : 'month' },
         product_data: { name: 'Lanckriet Chess ' + (tier === 3 ? 'VIP' : 'Pro') + ', ' + (plan === 'yearly' ? 'yearly' : 'monthly') + (tranche ? ' (' + names[tranche] + ')' : ''), description: (tier === 3 ? 'Everything in Pro, plus your tokens credited upfront (500 a month, or 7,000 on the yearly plan), the Lanckriet Chess Student title, a blue profile border and priority in live streams and the community.' : 'The whole library, the 24/7 AI coach and 10 tokens a day, refreshed daily.') + (tranche && tranche < 4 ? ' Your ' + names[tranche] + ' stays the same for as long as your subscription stays active.' : '') } } }] };
-    if (opt.trial) {   /* LC73: 7 days at EUR 0 with the card on file, then the monthly price until cancelled; Checkout shows "7 days, then EUR 39.00 / month" */
+    if (priceId) form.line_items = [{ quantity: 1, price: priceId }];
+    if (opt.trial) {   /* LC73: 7 days at EUR 0 with the card on file, then the plan's price until cancelled; Checkout shows "7 days, then EUR 39.00 / month" */
+      const days = Number.isInteger(opt.trialDays) && opt.trialDays >= 1 && opt.trialDays <= 30 ? opt.trialDays : 7;   /* LC90: the owner sets the length */
       form.payment_method_collection = 'always';
-      form.subscription_data.trial_period_days = 7;
+      form.subscription_data.trial_period_days = days;
       form.subscription_data.trial_settings = { end_behavior: { missing_payment_method: 'cancel' } };
-      form.custom_text = { submit: { message: 'EUR 0 today. From day 8 Pro costs EUR ' + (amount / 100).toFixed(2) + ' a month until you cancel. Cancel any time before the trial ends (Account > Manage subscription) and nothing is charged. Pro starts right away, so payments after the trial are not refunded (you agreed to this in the app).' } };
+      form.custom_text = { submit: { message: 'EUR 0 today. From day ' + (days + 1) + ' Pro costs EUR ' + (amount / 100).toFixed(2) + (plan === 'yearly' ? ' a year' : ' a month') + ' until you cancel. Cancel any time before the trial ends (Account > Manage subscription) and nothing is charged. Pro starts right away, so payments after the trial are not refunded (you agreed to this in the app).' } };
     }
     if (opt.minus) {   /* LC73 rescue: a one-time EUR 39 off the first year; renewals are at the normal yearly rate */
       const c = await fixedCoupon('LC-RESCUE39', opt.minus, 'Your first month counts toward the year');
@@ -319,6 +357,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const lic = await DB.prepare("SELECT 1 AS ok FROM public.licenses WHERE upper(license_key) = upper(?) AND coalesce(revoked, false) = false AND (expires_at IS NULL OR expires_at > now())").bind(key).first();
     return { status: 200, body: Object.assign({ ok: true, active: !!lic, expires: r.license_expires }, saleView(r)) };   /* the badge is for good: it is kept after a lapse */
   }
+  const trialLen = (m) => { const d = Math.floor(+(m && m.trial_days)); return d >= 1 && d <= 30 ? d : 7; };   /* LC90: older sessions carry no trial_days: 7 */
   const licenseUntil = (sale, periodEndMs) => (periodEndMs || (now() + (sale.plan === 'yearly' ? 365 : 30) * 864e5)) + P34().graceMs;
   async function proPaid(o) {
     const sale = await DB.prepare('SELECT * FROM arena.lc34_pro_sales WHERE session_id = ?').bind(o.id).first();
@@ -333,7 +372,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     await afterPaid(o, email);
     const m = o.metadata || {};
     if (m.trial === '1') {
-      await run1('INSERT INTO public.lc73_trials (session_id, email, subscription_id, customer_id, trial_end) VALUES (?, ?, ?, ?, ?) ON CONFLICT (session_id) DO NOTHING', o.id, email, o.subscription || null, o.customer || null, new Date(now() + 7 * 864e5).toISOString());
+      await run1('INSERT INTO public.lc73_trials (session_id, email, subscription_id, customer_id, trial_end) VALUES (?, ?, ?, ?, ?) ON CONFLICT (session_id) DO NOTHING', o.id, email, o.subscription || null, o.customer || null, new Date(now() + trialLen(m) * 864e5).toISOString());
       await run1("INSERT INTO public.lc73_sub_events (kind, email, ref) VALUES ('trial_start', ?, ?) ON CONFLICT DO NOTHING", email, o.id);
     }
     if (m.rescue === '1') {
@@ -342,7 +381,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       if (/^sub_[A-Za-z0-9]+$/.test(m.cancel_sub || '') && m.cancel_sub !== o.subscription) { try { await stripe('DELETE', 'subscriptions/' + m.cancel_sub); } catch (e) { console.error('LC73: could not cancel the monthly plan ' + m.cancel_sub); } }
     }
     if (sale.license_key) return;
-    const until = m.trial === '1' ? now() + 8 * 864e5 + P34().graceMs : licenseUntil(sale), flags = { source: 'stripe', plan: sale.plan, vip: sale.tier === 3, tranche: sale.tranche || 0, founding: sale.tranche === 1, early: sale.tranche === 1 || sale.tranche === 2, locked_cents: sale.amount_cents, session: o.id };
+    const until = m.trial === '1' ? now() + (trialLen(m) + 1) * 864e5 + P34().graceMs : licenseUntil(sale), flags = { source: 'stripe', plan: sale.plan, vip: sale.tier === 3, tranche: sale.tranche || 0, founding: sale.tranche === 1, early: sale.tranche === 1 || sale.tranche === 2, locked_cents: sale.amount_cents, session: o.id };
     const lic = await DB.prepare('SELECT license_key FROM public._lc_create_license(?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)')
       .bind(email, 'stripe', (sale.tier === 3 ? 'VIP ' : 'Pro ') + sale.plan, 2, false, new Date(until).toISOString(), P34().dailyTokens, flags, 3).first();   /* an object, not a string: the driver encodes jsonb itself */
     if (!lic || !lic.license_key) throw new Error('licence not created');   /* throwing makes Stripe retry the webhook; nothing is lost */
@@ -353,7 +392,8 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (ev.type === 'checkout.session.completed' && m.lc === 'tokens') { if (o.mode === 'payment' && o.payment_status === 'paid') await tokensPaid(o); return true; }
     if (ev.type === 'checkout.session.completed' && m.lc === 'gift') { if (o.mode === 'payment' && o.payment_status === 'paid') await giftPaid(o); return true; }
     if (ev.type === 'checkout.session.completed' && m.lc === 'pro') { if (o.mode === 'subscription' && (o.payment_status === 'paid' || (m.trial === '1' && o.payment_status === 'no_payment_required'))) await proPaid(o); return true; }
-    if (ev.type === 'customer.subscription.deleted' && o.id) { await run1('UPDATE public.lc73_trials SET cancelled = true WHERE subscription_id = ? AND converted_at IS NULL', o.id); await run1("INSERT INTO public.lc73_sub_events (kind, ref) VALUES ('trial_cancel', ?) ON CONFLICT DO NOTHING", o.id); return false; }
+    if (ev.type === 'customer.subscription.deleted' && o.id) { if (await q1('SELECT 1 AS ok FROM public.lc73_trials WHERE subscription_id = ? AND converted_at IS NULL', o.id)) await run1("UPDATE arena.lc34_pro_sales SET status = 'expired', slot = NULL WHERE subscription_id = ? AND status = 'paid'", o.id);   /* LC90: an unconverted trial frees its Founding place */
+      await run1('UPDATE public.lc73_trials SET cancelled = true WHERE subscription_id = ? AND converted_at IS NULL', o.id); await run1("INSERT INTO public.lc73_sub_events (kind, ref) VALUES ('trial_cancel', ?) ON CONFLICT DO NOTHING", o.id); return false; }
     if (ev.type === 'checkout.session.expired' && m.lc === 'pro') { await DB.prepare("UPDATE arena.lc34_pro_sales SET status = 'expired' WHERE session_id = ? AND status = 'open'").bind(o.id).run(); return true; }
     if (ev.type === 'invoice.paid') {
       const subId = o.subscription || (o.parent && o.parent.subscription_details && o.parent.subscription_details.subscription) || '';

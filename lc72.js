@@ -39,7 +39,7 @@ const LC72=(()=>{
   async function loadLand(){const r=await rpc("lc72_land_admin",{});land=r.data&&r.data.ok?r.data:{error:missing(r)?"missing":"auth"};return land}
   function mountEditor(view){
     if(!owner()){view.innerHTML='<section class="panel pad"><h1>Landing page editor</h1><p class="muted">Only the owner can edit the landing page.</p></section>';return null}
-    view.innerHTML='<section class="lc72-le"><p class="lc72-tag">Owner</p><h1>Landing page editor</h1><p class="muted">Everything you save here is live on <a href="/" target="_blank" rel="noopener">the landing page</a> within a minute. Only real messages and results you can show.</p>'
+    view.innerHTML='<section class="lc72-le"><p class="lc72-tag">Owner</p><h1>Landing page editor</h1><p class="muted">Everything you save here is live on <a href="/" target="_blank" rel="noopener">the landing page</a> within a minute. Only real messages and results you can show.</p><p><a class="btn btn-gold" href="/?edit=1" target="_blank" rel="noopener">✎ Edit every text and card directly on the landing page</a></p>'
       +'<div class="lc72-tabs" role="tablist">'+[["sections","Sections"],["love","Wall of Love"],["proof","Proof Queue"],["shots","Screenshots"],["texts","Texts and video"],["preview","Preview"]].map(x=>'<button type="button" role="tab" class="lc72-tab'+(tab===x[0]?" is-on":"")+'" data-lc72="tab" data-t="'+x[0]+'" aria-selected="'+(tab===x[0])+'">'+x[1]+"</button>").join("")+'</div><div data-lc72-body><p class="muted">Loading…</p></div></section>';
     loadLand().then(()=>paintTab(view));return null;
   }

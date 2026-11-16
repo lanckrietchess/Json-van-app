@@ -73,8 +73,8 @@ async function touch(env, b) {
   const pid = await hashId(env, 'device|' + device), name = str(b.name, 30), t = now();
   await env.DB.prepare("INSERT INTO players (pid, name, created, updated) VALUES (?, ?, ?, ?) ON CONFLICT (pid) DO UPDATE SET name = CASE WHEN excluded.name <> '' THEN excluded.name ELSE players.name END, updated = excluded.updated")
     .bind(pid, name, t, t).run();
-  const row = await env.DB.prepare('SELECT name, banned FROM players WHERE pid = ?').bind(pid).first();
-  return { pid, name: (row && row.name) || name, banned: !!(row && row.banned) };
+  const row = await env.DB.prepare('SELECT name, banned, created FROM players WHERE pid = ?').bind(pid).first();
+  return { pid, name: (row && row.name) || name, banned: !!(row && row.banned), created: row && row.created ? +row.created : t };   // 9.52.0: created drives the intro week
 }
 async function quota(env, pid, kind, n, max) {
   const r = await env.DB.prepare('INSERT INTO quota (pid, day, kind, n) VALUES (?, ?, ?, ?) ON CONFLICT (pid, day, kind) DO UPDATE SET n = quota.n + excluded.n RETURNING n')
@@ -1277,17 +1277,22 @@ async function tierOf(env, b, me) {
       reason = 'unbound';
     } else if (m.reason && m.reason !== 'invalid') reason = m.reason;
   }
-  return { id: 'free', name: 'free', owner: me.pid, keyPresented: presented, reason };
+  return { id: 'free', name: 'free', owner: me.pid, keyPresented: presented, reason, created: me.created };
 }
-function limitsOf(env, name) {
+function limitsOf(env, name, created) {
   if (name === 'vip') return { limit: envInt(env.TOKENS_VIP_CAP, 1, 100000, 500), unlimited: true };
   if (name === 'pro') return { limit: envInt(env.TOKENS_PRO, 1, 1000, 10), unlimited: false };
-  return { limit: envInt(env.TOKENS_FREE, 0, 100, 1), unlimited: false };
+  const base = envInt(env.TOKENS_FREE, 0, 100, 1), days = envInt(env.TOKENS_FREE_BOOST_DAYS, 0, 60, 7), boost = envInt(env.TOKENS_FREE_BOOST, 0, 100, 3);
+  /* 9.52.0 (ported from the old functions/arena copy, which had it; the deployed code did not): the intro week. A new free player gets
+     TOKENS_FREE_BOOST (3) a day for TOKENS_FREE_BOOST_DAYS (7) days, counted from the first time this device reached the server; then
+     TOKENS_FREE (1). The app's Day-7 Founding pop-up (LC90) reads week1 / week1Ends from the token state. */
+  if (days > 0 && created && boost > base && now() - created < days * 864e5) return { limit: boost, unlimited: false, boosted: true, boostEnds: created + days * 864e5 };
+  return { limit: base, unlimited: false };
 }
 function tokenView(env, t, used, bonus) {
-  const L = limitsOf(env, t.name);
+  const L = limitsOf(env, t.name, t.created);
   return { day: today(), tier: t.name, label: TIER_LABELS[t.name], unlimited: L.unlimited, limit: L.unlimited ? null : L.limit, used, left: L.unlimited ? null : Math.max(0, L.limit - used), bonus: bonus || 0, resetsAt: nextMidnight(),
-    verified: !(t.keyPresented && t.name === 'free'), reason: t.keyPresented && t.name === 'free' ? str(t.reason || 'unverified', 30) : '' };
+    week1: !!L.boosted, week1Ends: L.boosted ? L.boostEnds : 0, verified: !(t.keyPresented && t.name === 'free'), reason: t.keyPresented && t.name === 'free' ? str(t.reason || 'unverified', 30) : '' };
 }
 async function tokenUsed(env, owner) {
   const r = await env.DB.prepare('SELECT n FROM token_ledger WHERE owner = ? AND day = ?').bind(owner, today()).first();
@@ -1467,7 +1472,7 @@ const V9_ACTIONS = {
     await quota(env, me.pid, 'tokcall', 1, 2000);
     const t = await tierOf(env, b, me);
     await adoptBonus(env, t, me);
-    const owner = t.owner, L = limitsOf(env, t.name), cost = kind === 'wallet' ? int(b.n, 1, 10) || 1 : 1, day = today(), ctx = { fused: false };
+    const owner = t.owner, L = limitsOf(env, t.name, t.created), cost = kind === 'wallet' ? int(b.n, 1, 10) || 1 : 1, day = today(), ctx = { fused: false };
     const view = async () => tokenView(env, t, await tokenUsed(env, owner), await bonusOf(env, owner));
     const log = await env.DB.prepare('INSERT OR IGNORE INTO token_spend (owner, day, ref, kind, t) VALUES (?, ?, ?, ?, ?)').bind(owner, day, ref, kind, now()).run();
     if (!log.meta.changes) return { charged: false, state: await view() };                                          // already paid today
@@ -1606,7 +1611,7 @@ const LC26_ACTIONS = {
     await quota(env, me.pid, 'tokcall', 1, 2000);
     const t = await tierOf(env, b, me);
     await adoptBonus(env, t, me);
-    const owner = t.owner, L = limitsOf(env, t.name), day = today();
+    const owner = t.owner, L = limitsOf(env, t.name, t.created), day = today();
     const view = async () => tokenView(env, t, await tokenUsed(env, owner), await bonusOf(env, owner));
     // 1. This game is already paid today, or its token is already held: nothing more to take.
     const have = await env.DB.prepare("SELECT day, state FROM token_spend WHERE owner = ? AND ref = ? AND (day = ? OR state = 'pending') ORDER BY (state = 'pending') DESC LIMIT 1").bind(owner, ref, day).first();
