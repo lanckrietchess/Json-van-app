@@ -12,7 +12,7 @@ OLD = "localStorage.setItem('lc34-first', JSON.stringify(Date.now() - 8 * 864e5)
 NEW = "localStorage.setItem('lc34-first', JSON.stringify(Date.now() - 2 * 864e5))"
 PAYWALL = {'on': True, 'title': 'Your intro week is over', 'subtitle': 'From today: 1 token a day.', 'use_live': True, 'trial_days': 7,
            'features': [{'t': 'Every course included', 'on': True}, {'t': 'Hidden line', 'on': False}, {'t': 'The Test Panel', 'on': True}]}
-PRICING = {'ok': True, 'tier': 2, 'tranche': 1, 'left': [37, 100, 100], 'sold': [63, 0, 0], 'caps': [100, 100, 100], 'yearly': [19950, 29925, 35910, 39900], 'base': 39900, 'monthly': 3900, 'discountPct': [50, 25, 10], 'vip': {'ok': True}}
+PRICING = {'ok': True, 'tier': 2, 'tranche': 1, 'left': [37, 100, 100], 'sold': [63, 0, 0], 'caps': [100, 100, 100], 'yearly': [19950, 29925, 35910, 39900], 'base': 39900, 'monthly': 3900, 'discountPct': [50, 25, 10], 'vip': {'ok': True, 'tier': 3, 'tranche': 1, 'left': [100, 100, 100], 'yearly': [29950, 44925, 53910, 59900], 'base': 59900, 'monthly': 5900, 'discountPct': [50, 25, 10]}}
 def stub(pg, calls, seen=False, paywall=PAYWALL):
     def rpc(route, request):
         n = request.url.split('/rpc/')[1].split('?')[0]; body = _json.loads(request.post_data or '{}'); calls.append([n, body])
@@ -43,14 +43,36 @@ with sync_playwright() as p:
         pg.goto(APP + '#home'); pg.wait_for_timeout(1500)
         pg.evaluate("document.querySelectorAll('.sheet-wrap:not(.lc90-sheet) [data-close]').forEach(b => b.click())"); pg.wait_for_timeout(300)
         pg.evaluate("LC90._t.reset(); LC90.check('test')"); pg.wait_for_timeout(2500)
-        out(tag + ' day 8, free [pop-up open, title, prices, struck price, features shown, trial button locked]', pg.evaluate("(() => { const s = " + SHEET + "; if (!s) return [false]; return [true, s.getAttribute('aria-label'), [...s.querySelectorAll('.lc90-price strong')].map(x => x.textContent), (s.querySelector('.lc90-price s') || {}).textContent, [...s.querySelectorAll('.lc90-feats li')].map(x => x.textContent.trim()), s.querySelector('[data-lc90=\"go\"]').disabled]; })()"))
+        out(tag + ' day 8, free [pop-up open, title, prices, struck price, features shown, trial button locked]', pg.evaluate("(() => { const s = " + SHEET + "; if (!s) return [false]; return [true, s.getAttribute('aria-label'), [...s.querySelectorAll('[data-tierbox=\"pro\"] .lc90-price strong')].map(x => x.textContent), (s.querySelector('[data-tierbox=\"pro\"] .lc90-price s') || {}).textContent, [...s.querySelectorAll('[data-tierbox=\"pro\"] .lc90-feats li')].map(x => x.textContent.trim()), s.querySelector('[data-lc90=\"go\"]').disabled]; })()"))
         out(tag + ' pop-up texts [eyebrow, badge, button]', pg.evaluate("(() => { const s = " + SHEET + "; return [s.querySelector('.lc90-eye').textContent, (s.querySelector('.lc90-badge') || {}).textContent, s.querySelector('[data-lc90=\"go\"]').textContent.trim()]; })()"))
         out(tag + ' pop-up layout [overflow-x, sheet inside the screen width]', pg.evaluate("[Math.max(0, document.documentElement.scrollWidth - innerWidth), document.querySelector('.lc90-sheet').getBoundingClientRect().width <= innerWidth]"))
         pg.screenshot(path=SHOTS + '/lc90-popup-' + tag + '.png')
         out(tag + ' logged and remembered [shown logged, seen asked, device flag]', [any(x[0] == 'lc89_paywall_log' and x[1].get('p_kind') == 'shown' for x in calls), any(x[0] == 'lc89_paywall_seen' for x in calls), pg.evaluate("!!localStorage.getItem('lc-hub-lc90-seen') || !!Object.keys(localStorage).find(k => /lc90-seen/.test(k))")])
+        out(tag + ' VIP path [two tier cards, VIP box hidden, VIP live prices, VIP extras, no trial in VIP]', pg.evaluate("(() => { const s = " + SHEET + "; return [s.querySelectorAll('.lc90-tier').length, s.querySelector('[data-tierbox=\"vip\"]').hidden, [...s.querySelectorAll('[data-tierbox=\"vip\"] .lc90-price strong')].map(x => x.textContent), [...s.querySelectorAll('[data-tierbox=\"vip\"] .lc90-feats li')].length, !s.querySelector('[data-tierbox=\"vip\"] [data-lc90-ok]')]; })()"))
+        pg.evaluate("(() => { const s = " + SHEET + "; s.querySelector('input[name=\"lc90-tier\"][value=\"vip\"]').click(); })()"); pg.wait_for_timeout(200)
+        out(tag + ' VIP chosen [pro box hidden, vip box shown]', pg.evaluate("(() => { const s = " + SHEET + "; return [s.querySelector('[data-tierbox=\"pro\"]').hidden, s.querySelector('[data-tierbox=\"vip\"]').hidden]; })()"))
+        pg.screenshot(path=SHOTS + '/lc90-popup-vip-' + tag + '.png')
+        pg.evaluate("(() => { const s = " + SHEET + "; s.querySelector('input[name=\"lc90-tier\"][value=\"pro\"]').click(); })()"); pg.wait_for_timeout(200)
         pg.evaluate("(() => { const s = " + SHEET + "; s.querySelector('[data-lc90-ok]').click(); s.querySelector('[data-lc90=\"go\"]').click(); })()"); pg.wait_for_timeout(1500)
         tr = [x[1] for x in calls if x[0] == 'stripe/trial']
         out(tag + ' trial [sent plan, src, token present, opened Stripe]', [tr[0].get('plan') if tr else None, tr[0].get('src') if tr else None, bool(tr and tr[0].get('token')), pg.evaluate("location.host")])
+        c.close()
+    # the VIP button: checkout with tier 3, counted as "vip"
+    calls = []
+    c = mkctx(br, 390, 844, True); pg = c.new_page(); watch(pg, 'lc90-vip'); stub(pg, calls)
+    boot(pg, MEMBER, OLD); pg.goto(APP + '#home'); pg.wait_for_timeout(1500)
+    pg.evaluate("document.querySelectorAll('.sheet-wrap:not(.lc90-sheet) [data-close]').forEach(b => b.click())"); pg.wait_for_timeout(300)
+    pg.evaluate("LC90._t.reset(); LC90.check('test')"); pg.wait_for_timeout(2500)
+    pg.evaluate("window.__co = null; if (typeof LC44 !== 'undefined') LC44.checkout = (p, t) => { window.__co = [p, t]; return true }; LC36.support.checkout = (p, t) => { window.__co = [p, t]; return true }; undefined;")
+    pg.evaluate("(() => { const s = " + SHEET + "; s.querySelector('input[name=\"lc90-tier\"][value=\"vip\"]').click(); s.querySelector('input[name=\"lc90-vplan\"][value=\"monthly\"]').click(); s.querySelector('[data-lc90=\"vip\"]').click(); })()"); pg.wait_for_timeout(800)
+    out('VIP button [checkout plan + tier, counted, sheet closed]', [pg.evaluate("window.__co"), any(x[0] == 'lc89_paywall_log' and x[1].get('p_kind') == 'vip' for x in calls), pg.evaluate("!" + SHEET)])
+    c.close()
+    # layered access (9.53.0): Beginner open in the intro week, Intermediate / Advanced / Master locked, no credit unlock for them
+    ACC = "[Levels.open({id: 'acc-l1', lvl: 1}), Levels.open({id: 'acc-l2', lvl: 2}), Levels.open({id: 'acc-l3', lvl: 3}), Levels.open({id: 'acc-l5', lvl: 5}), !!(Credits.unlock({id: 'acc-l3', lvl: 3}) || {}).strict, /fa-lock|lock/.test(lockBadge({id: 'acc-l4', lvl: 4}))]"
+    for label, js, cfgv in [('day 3, free', NEW, PAYWALL), ('day 8, free', OLD, PAYWALL), ('day 3, free, owner switched Beginner off and strict off', NEW, dict(PAYWALL, beginner_in_week=False, strict_lock=False))]:
+        c = mkctx(br, 390, 844, True); pg = c.new_page(); watch(pg, 'lc90-acc'); stub(pg, [], paywall=cfgv)
+        boot(pg, MEMBER, js); pg.goto(APP + '#home'); pg.wait_for_timeout(1500); pg.evaluate("LC90._t.reset(); LC90._t.cfg(true)"); pg.wait_for_timeout(800)
+        out('access ' + label + ' [L1, L2, L3, L5, credits refused for L3, lock badge on L4]', pg.evaluate(ACC))
         c.close()
     # the moment, pure: week over needs a 7-day-old device (a server without the intro week says week1 false for everyone)
     c = mkctx(br, 390, 844, True); pg = c.new_page(); watch(pg, 'lc90-due'); stub(pg, [])
@@ -76,13 +98,15 @@ with sync_playwright() as p:
     out('owner on day 8 [pop-up by itself]', pg.evaluate("!!" + SHEET))
     pg.goto(APP + '#paywall-editor'); pg.wait_for_timeout(2500)
     pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())"); pg.wait_for_timeout(300)
-    out('editor [title, fields, features, live price line, counters]', pg.evaluate("[(document.querySelector('#view h1') || {}).textContent, document.querySelectorAll('.lc90-ed [data-k]').length, document.querySelectorAll('.lc90-ed [data-ft]').length, (document.querySelector('[data-lc90-live]') || {}).textContent, (document.querySelector('[data-lc90-stats] b') || {}).textContent]"))
+    out('editor [title, fields, Pro lines, VIP lines, live price line, counters]', pg.evaluate("[(document.querySelector('#view h1') || {}).textContent, document.querySelectorAll('.lc90-ed [data-k]').length, document.querySelectorAll('.lc90-ed .lc90-ft[data-fk=\"features\"]').length, document.querySelectorAll('.lc90-ed .lc90-ft[data-fk=\"vip_features\"]').length, (document.querySelector('[data-lc90-live]') || {}).textContent, (document.querySelector('[data-lc90-stats] b') || {}).textContent]"))
     pg.fill('.lc90-ed [data-k="title"]', 'Day 7: keep your momentum')
     pg.evaluate("document.querySelector('[data-lc90e=\"fadd\"]').click()"); pg.wait_for_timeout(200)
-    pg.fill('.lc90-ed [data-ft="3"]', 'Priority in live streams')
-    pg.evaluate("document.querySelector('[data-lc90e=\"fup\"][data-i=\"3\"]').click()"); pg.wait_for_timeout(200)
+    pg.fill('.lc90-ed .lc90-ft[data-fk="features"][data-i="3"]', 'Priority in live streams')
+    pg.evaluate("document.querySelector('[data-lc90e=\"fup\"][data-fk=\"features\"][data-i=\"3\"]').click()"); pg.wait_for_timeout(200)
+    pg.evaluate("document.querySelector('[data-lc90e=\"fadd\"][data-fk=\"vip_features\"]').click()"); pg.wait_for_timeout(200)
+    pg.fill('.lc90-ed .lc90-ft[data-fk="vip_features"][data-i="4"]', 'A monthly live Q&A')
     pg.evaluate("document.querySelector('[data-lc90e=\"preview\"]').click()"); pg.wait_for_timeout(1500)
-    out('preview [open, title, preview note, features in order]', pg.evaluate("(() => { const s = " + SHEET + "; if (!s) return [false]; return [true, s.getAttribute('aria-label'), !!s.querySelector('.lc90-pv'), [...s.querySelectorAll('.lc90-feats li')].map(x => x.textContent.trim())]; })()"))
+    out('preview [open, title, preview note, Pro features in order, VIP extras]', pg.evaluate("(() => { const s = " + SHEET + "; if (!s) return [false]; return [true, s.getAttribute('aria-label'), !!s.querySelector('.lc90-pv'), [...s.querySelectorAll('[data-tierbox=\"pro\"] .lc90-feats li')].map(x => x.textContent.trim()), [...s.querySelectorAll('[data-tierbox=\"vip\"] .lc90-feats li')].map(x => x.textContent.trim())]; })()"))
     n0 = len(calls)
     pg.evaluate("(() => { const s = " + SHEET + "; s.querySelector('[data-lc90-ok]').click(); s.querySelector('[data-lc90=\"go\"]').click(); })()"); pg.wait_for_timeout(600)
     out('preview buttons [no checkout, message]', [not any(x[0].startswith('stripe/trial') or x[0] == 'lc89_paywall_log' for x in calls[n0:]), pg.evaluate("(document.querySelector('.lc90-sheet [data-lc90-msg]') || {}).textContent")])
@@ -99,6 +123,7 @@ with sync_playwright() as p:
     sv = [x[1] for x in calls if x[0] == 'lc89_cfg_save']
     v = sv[0]['p_v'] if sv else {}
     out('saved [key, title, body, trial days, price id, features]', [sv[0].get('p_k') if sv else None, v.get('title'), v.get('body'), v.get('trial_days'), v.get('stripe_price_yearly'), [(f['t'], f['on']) for f in v.get('features', [])]])
+    out('saved VIP and access [vip on, VIP lines, beginner in week, strict lock]', [v.get('vip_on'), [f['t'] for f in v.get('vip_features', [])], v.get('beginner_in_week'), v.get('strict_lock')])
     out('saved [message]', pg.evaluate("document.querySelector('[data-lc90-emsg]').textContent"))
     pg.evaluate("document.querySelector('[data-k=\"use_live\"]').click()"); pg.fill('.lc90-ed [data-k="price_yearly"]', '€149'); pg.wait_for_timeout(300)
     out('typed price differs from Stripe [warning]', pg.evaluate("(document.querySelector('[data-lc90-mis]') || {}).textContent"))

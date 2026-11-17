@@ -7,6 +7,7 @@ Run: python3 tests/lc89_sql.test.py (needs a local PostgreSQL 16)."""
 import os, subprocess, json
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SQL = open(os.path.join(ROOT, 'sql', '20261116100000_lc89_lc90_inline_cms_founding_paywall.sql')).read()
+SQL91 = open(os.path.join(ROOT, 'sql', '20261116150000_lc91_layered_access.sql')).read()   # 9.53.0: the VIP counter and VIP feature list
 OWNER = '11111111-1111-1111-1111-111111111111'; MEMBER = '22222222-2222-2222-2222-222222222222'
 SETUP = """
 do $$ begin
@@ -33,6 +34,8 @@ psql('-q -c "drop database if exists lc89" -c "create database lc89"', '')
 r = psql('-q -d lc89 -v ON_ERROR_STOP=1', SETUP); assert r.returncode == 0, r.stderr
 r = psql('-q -d lc89 -v ON_ERROR_STOP=1', SQL); assert r.returncode == 0, r.stderr
 r = psql('-q -d lc89 -v ON_ERROR_STOP=1', SQL); assert r.returncode == 0, 'second run: ' + r.stderr
+r = psql('-q -d lc89 -v ON_ERROR_STOP=1', SQL91); assert r.returncode == 0, 'lc91: ' + r.stderr
+r = psql('-q -d lc89 -v ON_ERROR_STOP=1', SQL91); assert r.returncode == 0, 'lc91 second run: ' + r.stderr
 P = 0; F = 0
 def ok(c, m):
     global P, F
@@ -102,16 +105,22 @@ ok(save('paywall', dict(pw, body='50% off for life')).get('error') == 'wording',
 ok(save('paywall', dict(pw, features=[{'t': str(i)} for i in range(13)])).get('error') == 'features', 'at most 12 feature lines')
 ok(j("public.lc89_cfg_public('paywall')").get('v', {}).get('stripe_price_yearly') == 'price_1QabcDEF', 'the pop-up config is public (Stripe Price IDs are not secrets)')
 
+# 9.53.0: the VIP path
+ok(save('paywall', dict(pw, vip_on=True, vip_features=[{'t': 'Test Panel', 'on': True}], beginner_in_week=True, strict_lock=True)).get('ok') is True, 'the pop-up with a VIP list and the access switches saves')
+ok(save('paywall', dict(pw, vip_features=[{'t': str(i)} for i in range(13)])).get('error') == 'features', 'at most 12 VIP lines')
+ok(save('paywall', dict(pw, vip_features='nope')).get('error') == 'features', 'the VIP list must be a list')
+ok(save('paywall', dict(pw, vip_features=[{'t': 'VIP forever'}])).get('error') == 'wording', 'no "forever" in the VIP list either')
 # counters
 ok(j("public.lc89_paywall_log('shown','dev-abc123')", **M).get('ok') is True, 'a member logs "shown"')
 j("public.lc89_paywall_log('shown','dev-abc123')", **M)
 ok(j("public.lc89_paywall_log('hack','dev-abc123')").get('error') == 'invalid', 'unknown kinds are refused')
+ok(j("public.lc89_paywall_log('vip','dev-vip0001')").get('ok') is True, 'a VIP tap is counted (9.53.0)')
 ok(j("public.lc89_paywall_log('later','dev-xyz789')").get('ok') is True, 'anon logs too (device only)')
 ok(j('public.lc89_paywall_seen()', **M).get('seen') is True, 'the account has seen it (any device)')
 ok(j('public.lc89_paywall_seen()', **O).get('seen') is False, 'another account has not')
 ok(j('public.lc89_paywall_seen()').get('signed_in') is False, 'anon: not signed in')
 st = j('public.lc89_paywall_stats(30)', **O)
-ok(st.get('counts') == {'shown': 1, 'later': 1}, 'stats: one device per kind and day')
+ok(st.get('counts') == {'shown': 1, 'later': 1, 'vip': 1}, 'stats: one device per kind and day')
 ok('_err' in j('public.lc89_paywall_stats(30)', **M), 'a member cannot read the stats')
 r = raw("select count(*) from public.lc89_paywall_events;", role='anon')
 ok('permission denied' in r.stderr, 'the events table is closed to anon')
