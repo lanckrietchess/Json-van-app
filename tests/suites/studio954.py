@@ -5,6 +5,7 @@ APP = 'http://127.0.0.1:8765/app.html'
 OWNER = "localStorage.setItem('lc26-auth', JSON.stringify({ access_token: 'x', refresh_token: '', exp: Date.now() + 36e5, email: 'lanckrietchess@gmail.com' }))"
 _SR = "(() => { const h = [...document.querySelectorAll('*')].find(e => e.shadowRoot && e.shadowRoot.getElementById('stage')); return h ? h.shadowRoot : null; })()"
 def st(pg, js): return pg.evaluate("(async () => { const R = " + _SR + "; if (!R) return 'no studio'; " + js + " })()")
+HIDE = "(k, n) => { const el = document.querySelectorAll('#lc79-ed ' + k)[n]; const r = el.getBoundingClientRect(), o = {bubbles: true, clientX: r.left + 4, clientY: r.top + 4, pointerId: 1}; el.dispatchEvent(new PointerEvent('pointerdown', o)); el.dispatchEvent(new PointerEvent('pointerup', o)); document.querySelector('#lc79-ed [data-a=hideit]').click(); }"
 FORK = 'r5k1/pp3ppp/2q5/3N4/8/8/PPP2PPP/2KR3R w - - 0 1'
 with sync_playwright() as p:
     br = p.chromium.launch(args=['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'])
@@ -46,11 +47,11 @@ with sync_playwright() as p:
         out('studio954 take review delete [takes before, after]', [n, pg.evaluate("LanckrietStudio.takes.list.length")])
         pg.evaluate("window.prompt = () => 'Reel A'"); st(pg, "R.querySelector('[data-mb=projects]').click(); return 1"); pg.wait_for_timeout(1500)
         pg.evaluate("(() => { const p = LC79.db().list[0]; p.callouts.push(LC79.makeCallout(LC79.BUILT[4], .5)); p.callouts.push(LC79.makeCallout(LC79.BUILT[2], 1.5)); LC79._ed.paint(); })()"); pg.wait_for_timeout(500)
-        pg.evaluate("document.querySelectorAll('#lc79-ed [data-a=lay-co]')[0].click()"); pg.evaluate("document.querySelector('#lc79-ed [data-a=var-save]').click()")
-        pg.evaluate("window.prompt = () => 'Reel B'"); pg.evaluate("document.querySelectorAll('#lc79-ed [data-a=lay-co]')[0].click()"); pg.evaluate("document.querySelectorAll('#lc79-ed [data-a=lay-co]')[1].click()"); pg.evaluate("document.querySelector('#lc79-ed [data-a=var-save]').click()"); pg.wait_for_timeout(300)
+        pg.evaluate("(%s)('.lc79-co', 0)" % HIDE); pg.wait_for_timeout(200); pg.evaluate("document.querySelector('#lc79-ed [data-a=var-save]').click()")
+        pg.evaluate("window.prompt = () => 'Reel B'"); pg.evaluate("(%s)('.lc79-co', 0)" % HIDE); pg.wait_for_timeout(200); pg.evaluate("(%s)('.lc79-co', 1)" % HIDE); pg.wait_for_timeout(200); pg.evaluate("document.querySelector('#lc79-ed [data-a=var-save]').click()"); pg.wait_for_timeout(300)
         pg.evaluate("document.querySelectorAll('#lc79-ed [data-a=var-apply]')[0].click()"); pg.wait_for_timeout(300)
         t0 = pg.evaluate("LC79.segments(LC79.db().list[0]).total > 0")
-        pg.evaluate("document.querySelector('#lc79-ed [data-a=lay-clip]').click()"); pg.wait_for_timeout(400)
+        pg.evaluate("(%s)('.lc79-clip', 0)" % HIDE); pg.wait_for_timeout(400)
         out('studio954 layers [versions, version A hides callout 1, block hidden leaves the video empty, marker]', [pg.evaluate("LC79.db().list[0].variants.map(v => v.name)"), pg.evaluate("LC79.db().list[0].callouts.map(c => !!c.hidden)"), [t0, pg.evaluate("LC79.segments(LC79.db().list[0]).total")], pg.evaluate("!!document.querySelector('#lc79-ed .lc79-hidmark')")])
         c.close()
     br.close()

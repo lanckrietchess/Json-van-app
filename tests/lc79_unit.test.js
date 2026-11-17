@@ -83,4 +83,12 @@ const ph={clips:[{id:"c1",take:"hid",in:0,out:4},{id:"c2",take:"hid",in:4,out:7}
 ok(Math.abs(LC79.segments(ph).total-10)<.01,'three visible blocks: 10 s');
 ph.clips[1].hidden=true;const sh=LC79.segments(ph);ok(Math.abs(sh.total-7)<.01&&sh.every(x=>x.clip.id!=="c2")&&ph.clips.length===3,'a hidden block is left out of the video but stays in the project (7 s)');
 ph.clips.forEach(c=>{c.hidden=true});ok(LC79.segments(ph).length===0,'every block hidden: nothing to play');
+// 9.55.0: tracks, captions on the timeline, versions
+TK.cap={id:"cap",name:"Take C",durationMs:10000,cuts:[],trimIn:0,trimOut:null,env:[],captions:[{s:1,e:2,t:"one"},{s:5,e:6,t:"two"},{s:8,e:9,t:"three"}]};
+const pt={clips:[{id:"k1",take:"cap",in:0,out:3},{id:"k2",take:"cap",in:7,out:10}],callouts:[{id:"a",t:1,dur:2},{id:"b",t:2,dur:2,track:"gone"}],useCuts:true};
+ok(LC79.tracksOf(pt).length===1&&pt.callouts.every(c=>c.track==="o1"),'an old project gets track V2 and every callout lands on it');
+const ci=LC79.capItems(pt);ok(ci.length===2&&ci[0].T0===1&&Math.abs(ci[1].T0-4)<1e-6&&ci.every(x=>x.c.t!=="two"),'captions follow the cut: "two" sits in a cut part, "three" moves to 0:04');
+pt.tracks.push({id:"o2",name:"V3"});pt.callouts[1].track="o2";pt.tracks[1].hidden=true;
+ok(LC79.coOn(pt,pt.callouts[0])&&!LC79.coOn(pt,pt.callouts[1]),'a hidden track hides its callouts');
+const va=LC79.visOf(pt);pt.tracks[1].hidden=false;pt.tracks[0].hidden=true;LC79.applyVis(pt,va);ok(!pt.tracks[0].hidden&&pt.tracks[1].hidden&&va.tracks.join()==="o2",'a version brings back exactly its hidden tracks');
 console.log('RESULT',pass,'passed',fail,'failed');process.exit(fail?1:0);

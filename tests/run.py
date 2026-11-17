@@ -11,7 +11,7 @@ prints. Exit code 1 when anything fails. Screenshots land in tests/shots/."""
 import os, re, sys, subprocess, shutil
 TESTS = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(TESTS)
 EXPECT = {
-  'release': [r"versions \[CONFIG\.version, assetVersion, sw, version\.json\]: \['9\.54\.0', '9\.54\.0', 'sw\.js\?v=9\.54\.0', '\{\"build\":\"9\.54\.0\"\}'\]",
+  'release': [r"versions \[CONFIG\.version, assetVersion, sw, version\.json\]: \['9\.55\.0', '9\.55\.0', 'sw\.js\?v=9\.55\.0', '\{\"build\":\"9\.55\.0\"\}'\]",
               r"old address left in app/landing/stripe defaults: \[0, 0, 1\]", r"landing \[launch links, manifest link, install buttons\]: \[0, True, 6\]",
               r"manifest \[id, start_url, scope\]: \['/app\.html', '/app\.html\?source=pwa', '/'\]", r"reset target: https://lanckrietchesstrainerhub\.vercel\.app/app\.html\?fresh=1793615024470",
               r"assetlinks \[relation, package\]: \['delegate_permission/common\.handle_all_urls', 'com\.lanckrietchess\.app'\]", r"node tests/sw\.test\.js: 14 passed", r"node tests/sw\.test\.mjs: 10 passed, 0 failed", r"node tests/stripe\.test\.mjs: 12 passed, 0 failed",
@@ -31,9 +31,9 @@ EXPECT = {
               r"studio recording \[while recording: Stop, timer runs, pause shown\], \[after: Record, Export shown, takes\]: \[\['Stop', True, False\], \['Record', True\]\]",
               r"studio scenes \[saved, board off, loaded back\]: \[\['Board and camera'\], True, True\]", r"studio subtitles \[position, size saved for Render edit\]: \[0\.3, 'l'\]",
               r"studio \[silence default, auto subtitles button\]: \['\.8', True\]", r"landing install click \[prompted, still on landing, message\]: \[1, True, 'Installing",
-              r"landing phone \[overflow-x\]: 0", r"no prompt available \[no new page, steps sheet open, steps, use-in-browser link\]: \[1, \[True, 1, True\]\]", r"app \[CONFIG\.version, footer shows, SiteURL production\]: \['9\.54\.0', 'v9\.54\.0', 'https://lanckrietchesstrainerhub\.vercel\.app/'\]",
-              r"preview check \[live, old live, per-commit link, localhost\]: \[False, False, True, False\]", r"service worker \[script, controls the page, caches\]: \['/sw\.js\?v=9\.54\.0', True, \[[^\]]*'lc-shell-nf1-9\.54\.0'[^\]]*\]\]",
-              r"old 9\.25\.0 shell cache deleted: True", r"network-first: the page is the newest build: 9\.54\.0", r"owner \[owner account, admin on, switcher, label\]: \[True, True, True, 'Admin Mode", r"auto subtitles \[ok, on device, captions, track not mic, busy after, players left\]: \[True, True, [23], \['audio', False\], False, 0\]", r"auto subtitles \[first two lines, max 8 words, inside the clip\]: \[\['Every move starts with the opponent', 'what did their last move'\], [1-8], True\]"],
+              r"landing phone \[overflow-x\]: 0", r"no prompt available \[no new page, steps sheet open, steps, use-in-browser link\]: \[1, \[True, 1, True\]\]", r"app \[CONFIG\.version, footer shows, SiteURL production\]: \['9\.55\.0', 'v9\.55\.0', 'https://lanckrietchesstrainerhub\.vercel\.app/'\]",
+              r"preview check \[live, old live, per-commit link, localhost\]: \[False, False, True, False\]", r"service worker \[script, controls the page, caches\]: \['/sw\.js\?v=9\.55\.0', True, \[[^\]]*'lc-shell-nf1-9\.55\.0'[^\]]*\]\]",
+              r"old 9\.25\.0 shell cache deleted: True", r"network-first: the page is the newest build: 9\.55\.0", r"owner \[owner account, admin on, switcher, label\]: \[True, True, True, 'Admin Mode", r"auto subtitles \[ok, on device, captions, track not mic, busy after, players left\]: \[True, True, [23], \['audio', False\], False, 0\]", r"auto subtitles \[first two lines, max 8 words, inside the clip\]: \[\['Every move starts with the opponent', 'what did their last move'\], [1-8], True\]"],
   'mspc': [r"\[multiple-choice buttons, interactive steps\]: \[0, 1\]", r"M, after tapping \w\d: Correct", r"S \(tap stage from the file\): Correct", r"P, check: Correct",
            r"after dragging 170px left \[columns, session, board px\]: \['\d+px \d+px', '\{\"trainer\":0\.\d+\}', \d+\]", r"phone \[handle hidden, inline columns, overflow-x\]: \[True, '', 0\]",
            r"clinic S, wrong phase: Not that phase", r"clinic C, Ndf6: Correct", r"clinic miscalc \[feedback, struggles, log\]: \['Tagged: .*\['calc'\], 1\]",
@@ -63,7 +63,7 @@ EXPECT = {
                 r"B sees the ELO board: .*#1 KY KyenzoTest 2105", r"admin insights: Last 30 days, from players who share anonymous stats\. 2 on the leaderboard\. 1 Players 1 Drills finished 25% First-try accuracy 1 Coach questions",
                 r"admin insights \[players on the board, question\]: \[True, True\]", r"admin insights, wrong token: The worker refused the admin secret\.", r"admin hides Bram: Bram \(hidden\), Anna", r"A board after the admin hid Bram: Anna / 1"],
   'touch': [r"touch drag without LC55 \[page scrolls, piece in the air\]: \[True, True\]", r"touch drag with LC55 \[page stays put, piece in the air\]: \[True, True\]",
-            r"touch swipe from an empty square with LC55 \[page scrolls, no piece in the air\]: \[True, True\]", r"touch real app \[LC55 on, build, embedded copy equals lc55\.js\]: \[True, '9\.54\.0', True\]"],
+            r"touch swipe from an empty square with LC55 \[page scrolls, no piece in the air\]: \[True, True\]", r"touch real app \[LC55 on, build, embedded copy equals lc55\.js\]: \[True, '9\.55\.0', True\]"],
   'lc56': [r"bot\ \[board\ starts\ above\ 560\ px,\ board\ ends\ inside\ the\ 844\ px\ screen,\ quest\ strip\ below\ the\ board,\ touch\-action\]:\ \[True,\ True,\ True,\ 'none'\]",
             r"trim\ \[board\ starts\ above\ 300\ px,\ controls\ under\ it,\ scan\ button\ in\ the\ controls\]:\ \[True,\ True,\ True\]",
             r"middlegame\ \[Instant\ Play\ above\ 460\ px,\ stats\ below\ it\]:\ \[True,\ True\]",
@@ -84,7 +84,7 @@ EXPECT = {
             r"scan,\ no\ connection\ \[message,\ no\ crash,\ spinner\ gone\]:\ \[True,\ True\]",
             r"scan,\ free\ member\ \[no\ camera,\ upgrade\ pop\-up\]:\ \[True,\ True\]",
             r"scan,\ guest\ \[no\ camera,\ sign\-in\ hint\]:\ \[True,\ True\]",
-            r"LC56\ \[embedded\ copy\ equals\ lc56\.js,\ build,\ init\]:\ \[True,\ '9\.54\.0',\ True\]"],
+            r"LC56\ \[embedded\ copy\ equals\ lc56\.js,\ build,\ init\]:\ \[True,\ '9\.55\.0',\ True\]"],
   'lc57': [r"sheet\ \[benefit\ wording,\ not\ the\ old\ two\-button\ text\]:\ \[True,\ True,\ True\]",
             r"sheet\ \[box\ NOT\ pre\-ticked,\ button\ off,\ No\ thanks\ present\]:\ \[False,\ True,\ True\]",
             r"sheet,\ ticked\ and\ accepted\ \[button\ on,\ consent\ stored,\ queued,\ mail\ sent,\ inbox\ message\ with\ the\ address\]:\ \[True,\ True,\ True,\ True,\ True\]",
@@ -98,7 +98,7 @@ EXPECT = {
             r"mail\ not\ configured,\ Redeem\ now\ \[token\ credited\ once,\ wallet\ claimed\]:\ \[True,\ True\]",
             r"No\ thanks\ \[no\ consent,\ nothing\ queued,\ no\ mail,\ sheet\ closed,\ not\ asked\ again\]:\ \[False,\ False,\ 0,\ True,\ False\]",
             r"account\ card,\ first\ time\ \[unticked\ \+\ button\ off;\ ticking\ and\ accepting\ shows\ the\ key\ field\]:\ \[\[False,\ True\],\ True,\ True\]",
-            r"LC57\ \[embedded\ copy\ equals\ lc57\.js,\ both\ old\ sheets\ hand\ over\ to\ it,\ build\]:\ \[True,\ 2,\ '9\.54\.0'\]"],
+            r"LC57\ \[embedded\ copy\ equals\ lc57\.js,\ both\ old\ sheets\ hand\ over\ to\ it,\ build\]:\ \[True,\ 2,\ '9\.55\.0'\]"],
   'lc58': [r"before\ the\ scan\ \[no\ working\ points,\ no\ cached\ games\]:\ \[0,\ 0\]",
             r"scan\ of\ 4\ games\ \[4\ games\ cached,\ 4\ graphs\ saved,\ 4\ mistake\ counts,\ own\-colour\ leaks\ only:\ P\ and\ S/M,\ never\ the\ opponent's\ C\]:\ \[4,\ 4,\ 4,\ True\]",
             r"working\ points\ \[filled\ by\ the\ scan,\ 3\ at\ most,\ a\ toast\ told\ the\ member\]:\ \[3,\ True,\ True\]",
@@ -109,7 +109,7 @@ EXPECT = {
             r"no\ linked\ account\ \[nothing\ scanned,\ nothing\ cached\]:\ \[0,\ 0\]",
             r"switched\ off\ \[lc58\-off\ stops\ it\]:\ 0",
             r"three\ working\ points\ already\ there\ \[kept,\ none\ added,\ no\ \"filled\ in\"\ toast\]:\ \[3,\ True\]",
-            r"LC58\ \[embedded\ copy\ equals\ lc58\.js,\ build\]:\ \[True,\ '9\.54\.0'\]"],
+            r"LC58\ \[embedded\ copy\ equals\ lc58\.js,\ build\]:\ \[True,\ '9\.55\.0'\]"],
   'lc59': [r"join\ at\ 1437\ \[Catch\-Up\ Bonus\ pop\-up:\ \+6,\ one\ token\ per\ hundred,\ tokens\ claimed\ into\ the\ wallet,\ no\ milestone\ pop\-up\ for\ hundreds\ below\ the\ start\]:\ \[True,\ 6,\ True,\ True\]",
             r"milestone\ 1500\ \[congratulation,\ the\ three\-step\ reward\ ladder,\ Peak\ Gain\ line,\ box\ unticked,\ fields\ hidden\ until\ ticked\]:\ \[True,\ True,\ True,\ \[False,\ True\]\]",
             r"ticking\ the\ website\ box\ shows\ first\ name\ \+\ message:\ True",
@@ -400,7 +400,16 @@ EXPECT['studio954'] = [r"truth fork \[board alarms, alarms the line uses, motif,
   r"studio954 take review \[pop-up, sent to project\]: \[\['Keep this take\?', '✓ Send to project', '🗑 Delete this take'\], \[\['Reel 1', 1\]\]\]",
   r"studio954 take review delete \[takes before, after\]: \[2, 1\]",
   r"studio954 layers \[versions, version A hides callout 1, block hidden leaves the video empty, marker\]: \[\['Reel A', 'Reel B'\], \[True, False\], \[True, 0\], True\]"]
-ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community', 'touch', 'lc56', 'lc57', 'lc58', 'lc59', 'lc59land', 'lc60', 'lc85', 'lc86', 'lc87', 'lc88', 'lc89', 'lc90', 'hub', 'trim', 'studio954', 'release']
+EXPECT['studio955'] = [r"1\. project after 2 takes \[project, blocks, captions per take\]: \['Reel 1', 2, \[\['Take 2', 2\], \['Take 1', 2\]\]\]",
+  r"2\. Edit Studio \[tracks, caption blocks on T1, caption in the viewer\]: \[\['V2 · Callouts', 'T1 · Captions 4 lines', 'V1 · Video'\], 4, True\]",
+  r"3\. caption box dragged up in the viewer \[moved, saved\]: \[True, True\]", r"4\. caption edited on T1 \[text on the take\]: Every move starts with THE OPPONENT",
+  r"5\. CTAs on tracks \[track names, callout -> track\]: \[\['V2 · Callouts', 'V3 · CTA 2'\], \[\['CTA 1: free drills, link in bio', 'V2 · Callouts'\], \['CTA 2: comment MSPC', 'V3 · CTA 2'\]\]\]",
+  r"6\. versions \[names, hidden tracks per version\]: \[\['Reel A', \['V3 · CTA 2'\]\], \['Reel B', \['V2 · Callouts'\]\]\]",
+  r"7\. exported \[names, both bigger than 100 kB\]: \[\['Reel 1 – Reel A \(export\)', 'Reel 1 – Reel B \(export\)'\], True\]",
+  r"7b\. exports decode .*\['vp9,1080,1920', 'opus'\], \['vp9,1080,1920', 'opus'\]\]", r"8\. reopened \[caption blocks, tracks, versions\]: \[4, 2, 2\]",
+  r"9\. after a reload \[captions per take, project captions box y\]: \[\[\['Take 2', 2, 'Then run your checks and captures'\], \['Take 1', 2, 'Every move starts with THE OPPONENT'\]\], 0\.\d+\]",
+  r"10\. failing speech engine \[status line, message inside the Edit Studio\]: \[True, True\]", r"11\. phone \[track rows, page overflow-x\]: \[3, 0\]"]
+ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community', 'touch', 'lc56', 'lc57', 'lc58', 'lc59', 'lc59land', 'lc60', 'lc85', 'lc86', 'lc87', 'lc88', 'lc89', 'lc90', 'hub', 'trim', 'studio954', 'studio955', 'release']
 NEEDS_NODE = {'unit', 'server', 'ai', 'members', 'community'}
 def node_ok():
     try: v = subprocess.run(['node', '--version'], capture_output=True, text=True).stdout.strip().lstrip('v').split('.'); return (int(v[0]), int(v[1])) >= (22, 5)
