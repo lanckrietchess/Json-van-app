@@ -43,12 +43,26 @@
         out of the preview and the export. "Versions" save a set of hidden layers under a name (Reel A: CTA 1, Reel B: CTA 2) and
         "Export every version" renders them one after the other, so one take with two CTAs gives two reels without recording again.
     15. Live engine: a small Stockfish monitor on the Studio board (eval bar, the best line, and what the last move did to the eval),
-        on this device only, never drawn into the recording. */
-  const VERSION="9.54.0";
+        on this device only, never drawn into the recording.
+     Edit Studio as a track editor (9.55.0):
+    16. DaVinci-style page: media pool | viewer | inspector on top, the timeline below with a header per track. V1 = the video blocks,
+        T1 = the captions (one block per caption line, on the project's timeline, so they follow every cut), V2, V3… = overlay tracks for
+        callouts and CTAs (+ Track; a callout moves to another track by dragging it up or down, or in its inspector). The eye on a track hides
+        it in the viewer AND the export; a version saves the hidden tracks too, so CTA 1 on V2 and CTA 2 on V3 give two reels from one take.
+    17. Captions live here: CC on T1 writes them for every take that has none (Rewrite all, From script); a caption is fixed by clicking it on T1
+        (text, timing, split, delete) and placed by dragging it in the viewer. Every take shows its caption state (writing / done / failed with
+        the engine's own reason). Before, a failure was swallowed, and every message in the Edit Studio sat under it (toasts at z-index 90):
+        LC79's messages now show inside the open layer. T1's eye replaces the old "Burn captions into Render edit" switch for this editor.
+    18. ⬇ Download on every take in the media pool and in the take inspector. */
+  const VERSION="9.55.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
-  const say=(m,k,ms)=>{try{toast(m,k||"",ms||3200)}catch(e){}};
+  /* 9.55.0: the app's toasts sit at z-index 90, under the full-screen Edit Studio: every message there was invisible. Inside a layer the message shows in the layer itself. */
+  const say=(m,k,ms)=>{try{const top=typeof layerStack!=="undefined"&&layerStack.length?document.getElementById(layerStack[layerStack.length-1]):null;
+    if(top){let box=top.querySelector(".lc79-toasts");if(!box){box=document.createElement("div");box.className="lc79-toasts";box.setAttribute("role","status");box.setAttribute("aria-live","polite");top.appendChild(box)}
+      const t=document.createElement("div");t.className="lc79-toast"+(k==="err"?" err":k==="ok"?" ok":"");t.textContent=String(m||"");box.appendChild(t);while(box.children.length>3)box.firstChild.remove();setTimeout(()=>{try{t.remove()}catch(e){}},ms||3200);return}
+    toast(m,k||"",ms||3200)}catch(e){}};
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const route=()=>String(location.hash||"").replace(/^#/,"").split(/[?&\/]/)[0];
   const fmt=s=>{s=Math.max(0,+s||0);const m=Math.floor(s/60),r=s-m*60;return m+":"+(r<10?"0":"")+r.toFixed(1)};
@@ -117,7 +131,7 @@
     g.save();g.globalAlpha=alpha;
     g.font=(FONTS[c.font]||FONTS.sora).replace("{s}",fs);const tw=g.measureText(c.text||" ").width;
     let sw=0;if(c.sub){g.font=FONTS.sora.replace("800","600").replace("{s}",sfs);sw=g.measureText(c.sub).width}
-    const padX=fs*.6,padY=fs*.36,bw=Math.max(tw,sw)+padX*2,bh=padY*2+fs*1.02+(c.sub?sfs*1.3:0),cx=c.x*W,cy=c.y*H;
+    const padX=fs*.6,padY=fs*.36,bw=Math.max(tw,sw)+padX*2,bh=padY*2+fs*1.02+(c.sub?sfs*1.3:0),cx=bw+8>=W?W/2:clamp(c.x*W,bw/2+4,W-bw/2-4),cy=clamp(c.y*H,bh/2+4,H-bh/2-4);   /* 9.55.0: the badge always stays inside the frame (9:16 cut it off) */
     if(c.arrow){
       const tx=c.ax*W,ty=c.ay*H,dx=tx-cx,dy=ty-cy,dist=Math.hypot(dx,dy);
       if(dist>Math.max(bw,bh)*.62){
@@ -146,8 +160,19 @@
   function db(){if(P)return P;P=rd(PJ,null);if(!P||!Array.isArray(P.list))P={list:[],cur:""};return P}
   function persist(){wr(PJ,db());try{paintDock()}catch(e){}}
   function cur(){const d=db();let p=d.list.filter(x=>x.id===d.cur)[0];if(!p&&d.list.length){p=d.list[0];d.cur=p.id}return p||null}
-  function newProject(name){const d=db();const p={id:uid(),name:String(name||("Reel "+(d.list.length+1))).slice(0,60),clips:[],callouts:[],size:"auto",useCuts:true,created:Date.now(),updated:Date.now()};d.list.unshift(p);d.cur=p.id;persist();return p}
+  function newProject(name){const d=db();const p={id:uid(),name:String(name||("Reel "+(d.list.length+1))).slice(0,60),clips:[],callouts:[],tracks:[DEF_TRACK()],size:"auto",useCuts:true,created:Date.now(),updated:Date.now()};d.list.unshift(p);d.cur=p.id;persist();return p}
   function save(p){if(p)p.updated=Date.now();persist()}
+  /* ---------- 9.55.0: tracks (DaVinci style). V1 = the video blocks, T1 = the captions, V2, V3… = overlay tracks for callouts and CTAs.
+     A hidden track leaves the preview and the export; every callout sits on one track; a higher track draws on top of a lower one. ---------- */
+  const DEF_TRACK=()=>({id:"o1",name:"V2 · Callouts"});
+  function tracksOf(p){
+    if(!p)return[];if(!Array.isArray(p.tracks)||!p.tracks.length)p.tracks=[DEF_TRACK()];
+    const ids={};p.tracks.forEach(t=>{ids[t.id]=1});(p.callouts||[]).forEach(c=>{if(!c.track||!ids[c.track])c.track=p.tracks[0].id});
+    return p.tracks;
+  }
+  const trackOf=(p,id)=>tracksOf(p).filter(t=>t.id===id)[0]||null;
+  const coOn=(p,c)=>!!c&&!c.hidden&&!((trackOf(p,c.track)||{}).hidden);
+  function coOrder(p){const ix={};tracksOf(p).forEach((t,i)=>{ix[t.id]=i});return((p&&p.callouts)||[]).slice().sort((a,b)=>(ix[a.track]||0)-(ix[b.track]||0))}
   function takeGone(id){const d=db();let n=0;d.list.forEach(p=>{const b=p.clips.length;p.clips=p.clips.filter(c=>c.take!==id);n+=b-p.clips.length});if(n)persist();try{if(ED.open)ED.paint()}catch(e){}}
   function clipRange(c,t){const D=Math.max(.1,(t.durationMs||0)/1e3);let a=c.in==null?(+t.trimIn||0):+c.in,b=c.out==null?(t.trimOut==null?D:+t.trimOut):+c.out;a=clamp(a,0,Math.max(0,D-.1));b=clamp(b,a+.1,D);return[a,b]}
   const durOf=t=>Math.max(.1,(+(t&&t.durationMs)||0)/1e3);
@@ -228,7 +253,7 @@
   /* ---------- caption box (per project: place, size and style; the text and timing stay on the take, so captions follow every cut) ---------- */
   const CAP_DEF={x:.5,y:0,scale:1,w:.86,box:true,bg:"#05070a",bgA:.72,fg:"#ffffff",stroke:false,sc:"#000000",upper:false,font:"sora",karaoke:false,hl:"#fbbf24"};
   function capStyle(p,W,H){const s=Object.assign({},CAP_DEF,(p&&p.cap)||{});if(!(+s.y>0))s.y=W<H?.78:.86;return s}
-  function capLine(take,ct){if(!take||take.capBurn===false||!Array.isArray(take.captions))return null;return take.captions.filter(c=>ct>=c.s&&ct<c.e)[0]||null}
+  function capLine(take,ct){if(!take||!Array.isArray(take.captions))return null;   /* 9.55.0: T1's eye decides (capsOff), not the old Render-edit switch */return take.captions.filter(c=>ct>=c.s&&ct<c.e)[0]||null}
   /* draws one caption line in its box; returns the box (canvas pixels) for dragging */
   function drawCaption(g,W,H,line,st,ct){
     if(!line||!String(line.t||"").trim())return null;
@@ -253,7 +278,7 @@
     if(v&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,k=Math.min(W/vw,H/vh),w=vw*k,h=vh*k;try{g.drawImage(v,(W-w)/2,(H-h)/2,w,h)}catch(e){}}
     if(noOverlay)return;
     if(!(p&&p.capsOff))try{drawCaption(g,W,H,capLine(take,ct),capStyle(p,W,H),ct)}catch(e){}
-    ((p&&p.callouts)||[]).forEach(c=>{if(c.hidden)return;try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
+    if(p)coOrder(p).forEach(c=>{if(!coOn(p,c))return;try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
   }
   function mkVideo(src,muted){const v=document.createElement("video");v.playsInline=true;v.setAttribute("playsinline","");v.preload="auto";v.muted=!!muted;if(src)v.src=src;v.style.cssText="position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none";document.body.appendChild(v);return v}
   const once=(el,ev,ms)=>new Promise(r=>{let d=false;const f=()=>{if(d)return;d=true;el.removeEventListener(ev,f);r(true)};el.addEventListener(ev,f);if(ms)setTimeout(()=>{if(!d){d=true;el.removeEventListener(ev,f);r(false)}},ms)});
@@ -307,7 +332,7 @@
           const step=()=>{
             if(ctl.stopped)return res();
             const ct=v.currentTime,Tp=s.T0+clamp(ct-s.s,0,s.e-s.s);
-            ((p.callouts)||[]).forEach(c=>{if(!c.hidden&&c.t>prevT&&c.t<=Tp+.001)sfx(c.sound,ac,master)});prevT=Tp;
+            ((p.callouts)||[]).forEach(c=>{if(coOn(p,c)&&c.t>prevT&&c.t<=Tp+.001)sfx(c.sound,ac,master)});prevT=Tp;
             drawFrame(g,W,H,v,s.take,ct,p,Tp);
             if(o.onTime)try{o.onTime(Tp,total)}catch(e){}
             const left=s.e-ct;
@@ -386,6 +411,25 @@
       ".lc79-hd{position:absolute;top:0;bottom:0;width:12px;cursor:ew-resize;z-index:2;touch-action:none;background:transparent}.lc79-hd.l{left:0;border-left:3px solid rgba(0,229,255,.55)}.lc79-hd.r{right:0;border-right:3px solid rgba(0,229,255,.55)}",
       ".lc79-clip:hover .lc79-hd,.lc79-clip.sel .lc79-hd{background:rgba(0,229,255,.28)}.lc79-clip span{position:relative;z-index:1;margin:0 8px}",
       ".lc79-ins{position:absolute;top:0;bottom:0;width:3px;background:#fbbf24;z-index:4;pointer-events:none}",
+      /* 9.55.0 DaVinci-style Edit Studio: media pool | viewer | inspector, then the timeline with track headers */
+      ".lc79-dv{display:grid;grid-template-columns:230px minmax(0,1fr) 340px;gap:10px;padding:10px 12px}",
+      ".lc79-pool{background:#0f1217;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;max-height:calc(52vh + 56px);overflow:auto}.lc79-pool h3{margin:0 0 4px;font-size:13px;color:#fff;text-transform:uppercase;letter-spacing:.04em}",
+      ".lc79-pool .lc79-grid{grid-template-columns:1fr}.lc79-dv .lc79-stagebox{height:min(52vh,600px)}.lc79-dv .lc79-insp{max-height:calc(52vh + 56px)}",
+      "@media (max-width:1100px){.lc79-dv{grid-template-columns:minmax(0,1fr) 320px}.lc79-pool{grid-column:1/-1;order:3;max-height:none}.lc79-pool .lc79-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}",
+      "@media (max-width:760px){.lc79-dv{grid-template-columns:1fr}.lc79-dv .lc79-stagebox{height:46vh}.lc79-dv .lc79-insp{max-height:none}}",
+      ".lc79-tlbar .lc79-calls{padding:0;flex-wrap:nowrap}.lc79-tlbar .lc79-calls select{min-height:44px;max-width:260px}",
+      ".lc79-capst{margin:0 0 6px;font-size:12.5px;color:#fbbf24}.lc79-capst[hidden]{display:none}.lc79-capst.lc79-err{color:#fca5a5}",
+      ".lc79-tlwrap{display:flex;align-items:flex-start;gap:0}.lc79-heads{flex:0 0 172px;padding-right:6px;padding-bottom:4px}.lc79-tlwrap .lc79-scroll{flex:1;margin-top:0}",
+      ".lc79-hspace{height:18px}.lc79-hrow{display:flex;align-items:center;gap:4px;margin-top:6px;height:44px;padding:0 4px;border-radius:8px;background:#14171d;border:1px solid rgba(255,255,255,.08)}",
+      ".lc79-hrow.cap{background:#1c1a10;border-color:rgba(251,191,36,.3)}.lc79-hrow.vid{height:64px;background:#10232a;border-color:rgba(0,229,255,.25)}.lc79-hrow.tg{border-color:#00E5FF;box-shadow:0 0 0 1px #00E5FF inset}.lc79-hrow.off .lc79-tname{opacity:.5;text-decoration:line-through}",
+      ".lc79-eye{min-width:34px;min-height:34px;border-radius:8px;border:0;background:transparent;cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center}.lc79-eye:hover{background:rgba(255,255,255,.08)}",
+      ".lc79-tname{flex:1;min-width:0;min-height:34px;border:0;background:transparent;text-align:left;cursor:pointer;font-weight:700;font-size:12.5px;color:#e5e7eb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}.lc79-tname small{display:block;font-weight:500;font-size:10.5px;color:#94a3b8}",
+      ".lc79-tx{min-width:30px;min-height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:#0A0B0E;color:#fca5a5;cursor:pointer;font-weight:700}.lc79-tx.cc{color:#fbbf24;border-color:rgba(251,191,36,.5);font-size:11px}",
+      ".lc79-track{height:44px}.lc79-track.vid{height:64px}.lc79-track.co,.lc79-track.cap{height:44px}.lc79-track.co.tg{background:rgba(0,229,255,.06)}.lc79-track.off{opacity:.45;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 8px,transparent 8px 16px)}",
+      ".lc79-track.cap{background:rgba(251,191,36,.05)}.lc79-cl{position:absolute;top:6px;bottom:6px;border-radius:6px;background:#fbbf24;color:#1c1a10;font-size:11px;font-weight:700;padding:0 5px;display:flex;align-items:center;overflow:hidden;white-space:nowrap;cursor:grab;min-width:4px;border:1px solid rgba(0,0,0,.35)}",
+      ".lc79-cl.sel{outline:2px solid #fff;outline-offset:1px}.lc79-capempty{position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#94a3b8}",
+      ".lc79-toasts{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(560px,92vw)}",
+      ".lc79-toast{background:#0b1222;border:1px solid rgba(0,229,255,.45);color:#e5e7eb;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13.5px;box-shadow:0 12px 30px rgba(0,0,0,.55);text-align:center}.lc79-toast.err{border-color:rgba(239,68,68,.7);color:#fecaca}.lc79-toast.ok{border-color:rgba(34,197,94,.6)}",
       /* 9.54.0 layers and versions */
       ".lc79-layers{padding:8px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(255,255,255,.06)}.lc79-layhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}.lc79-layhead b{color:#fff;font-size:13px}",
       ".lc79-laylist{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.lc79-vlab{color:#cbd5e1;font-size:12.5px;margin-right:4px}",
@@ -446,19 +490,20 @@
       try{await loaded(v);await seek(v,Math.min(Math.max(.2,+t.trimIn||0)+.6,Math.max(0,v.duration-.1)||.5));const c=document.createElement("canvas"),k=180/Math.max(v.videoWidth||16,v.videoHeight||9);c.width=Math.round((v.videoWidth||16)*k);c.height=Math.round((v.videoHeight||9)*k);c.getContext("2d").drawImage(v,0,0,c.width,c.height);thumbs[t.id]=c.toDataURL("image/jpeg",.7);cb(thumbs[t.id])}
       catch(e){}finally{v.remove()}});
   }
-  const ED={open:false,el:null,T:0,tot:0,playing:false,ctl:null,sel:null,busy:false,base:null,baseInfo:null,capRect:null,scrubTok:0,scrubV:{},zoom:1,undo:[],lastHead:0,lastSnap:0};
+  const ED={target:"",capSt:{},open:false,el:null,T:0,tot:0,playing:false,ctl:null,sel:null,busy:false,base:null,baseInfo:null,capRect:null,scrubTok:0,scrubV:{},zoom:1,undo:[],lastHead:0,lastSnap:0};
   /* NLE settings on this device: silence cut after each take, captions after each take, the threshold of the Cut silences button */
   const NK="lc79-nle";
   const nle=()=>Object.assign({autoSil:true,silMin:4,autoCaps:true,cutMin:4},rd(NK,{})||{});
   const setNle=o=>wr(NK,Object.assign(nle(),o));
   const trThr=()=>{try{const v=T().Trim.thr;return Number.isFinite(v)?v:-45}catch(e){return-45}};
   /* undo: a copy of the project's timeline before every edit (Ctrl+Z) */
-  function snapEd(p){if(!p)return;ED.undo.push({pid:p.id,clips:JSON.stringify(p.clips||[]),callouts:JSON.stringify(p.callouts||[]),cap:JSON.stringify(p.cap||null)});if(ED.undo.length>60)ED.undo.shift();ED.lastSnap=Date.now()}
+  function snapEd(p){if(!p)return;ED.undo.push({pid:p.id,clips:JSON.stringify(p.clips||[]),callouts:JSON.stringify(p.callouts||[]),cap:JSON.stringify(p.cap||null),tracks:JSON.stringify(p.tracks||null),capsOff:!!p.capsOff});if(ED.undo.length>60)ED.undo.shift();ED.lastSnap=Date.now()}
   const snapSoft=p=>{if(Date.now()-ED.lastSnap>1500)snapEd(p)};
   function undo(){
     const p=cur();if(!p)return;
     for(let i=ED.undo.length-1;i>=0;i--){if(ED.undo[i].pid!==p.id)continue;const u=ED.undo.splice(i,1)[0];stopPlay();
       p.clips=JSON.parse(u.clips);p.callouts=JSON.parse(u.callouts);const c=JSON.parse(u.cap);if(c)p.cap=c;else delete p.cap;
+      if(u.tracks){const tr=JSON.parse(u.tracks);if(tr)p.tracks=tr}if(u.capsOff!=null)p.capsOff=u.capsOff;
       save(p);ED.sel=null;ED.paint();say("Undone.","",1200);return}
     say("Nothing to undo.","",1500);
   }
@@ -488,49 +533,77 @@
   }
   /* captions right after a take when the live captions did not catch it (same engines as Write captions), one take at a time */
   let capQ=Promise.resolve();
+  /* 9.55.0: captions are written in the background after a take is sent to a project, and from T1 (CC). Every take has a visible state
+     (writing / done / failed with the engine's own reason); before, a failure was swallowed and the message landed under the Edit Studio. */
+  function capDone(t,r,L){
+    if(r&&r.ok&&r.lines&&r.lines.length){t.captions=r.lines.map(x=>Object.assign({},x,{t:L.fixText?L.fixText(x.t):x.t}));try{T().Takes.persistMeta(t)}catch(e){}
+      ED.capSt[t.id]={state:"ok",msg:r.lines.length+" lines"+(r.note?" ("+r.note+")":"")};return true}
+    ED.capSt[t.id]={state:"fail",msg:(r&&r.error)||"No speech engine answered."};return false;
+  }
+  function capTick(t){let last=0;return(c,d)=>{ED.capSt[t.id]={state:"busy",msg:d?Math.round(c||0)+" of "+Math.round(d)+" s":""};const n=Date.now();if(n-last>400){last=n;try{if(ED.open){paintCapStatus(cur());paintHeads(cur())}}catch(e){}}}}
   function autoCaptions(t){
     if(!nle().autoCaps||!t||(t.captions&&t.captions.length)||/\(export\)|\(edited\)/.test(t.name||""))return;
+    ED.capSt[t.id]={state:"busy",msg:"waiting"};
     capQ=capQ.then(()=>new Promise(r=>setTimeout(r,1200))).then(async()=>{
-      const L=api()&&api().lc33;if(!L||!L.autoSubs||(t.captions&&t.captions.length)||!takeById(t.id))return;
-      const r=await L.autoSubs(t,()=>{});
-      if(r&&r.ok&&r.lines&&r.lines.length){t.captions=r.lines.map(x=>Object.assign({},x,{t:L.fixText?L.fixText(x.t):x.t}));try{T().Takes.persistMeta(t)}catch(e){}
-        say("Captions written for “"+t.name+"”. Check them with Captions.","ok",3500);if(ED.open&&!ED.playing)showFrame()}
-    }).catch(()=>{});
+      const L=api()&&api().lc33;if(!L||!L.autoSubs||(t.captions&&t.captions.length)||!takeById(t.id)){delete ED.capSt[t.id];return}
+      if(ED.open)ED.paint();
+      const r=await L.autoSubs(t,capTick(t));
+      if(capDone(t,r,L))say("Captions written for “"+t.name+"”: they are on T1 in the Edit Studio.","ok",3500);
+      else say("Captions for “"+t.name+"” failed: "+ED.capSt[t.id].msg+" Open the Edit Studio and tap CC to try again.","err",9000);
+      if(ED.open&&!ED.playing)ED.paint();
+    }).catch(e=>{ED.capSt[t.id]={state:"fail",msg:String(e&&e.message||e)};if(ED.open)ED.paint()});
+  }
+  async function genCaps(force){
+    const p=cur();if(!p||ED.capBusy)return;const L=api()&&api().lc33;
+    if(!L||!L.autoSubs){say("The caption engine is not loaded: open the Creator Studio once, then come back.","err",5000);return}
+    const cs=capState(p),list=force?cs.list:cs.none;
+    if(!list.length){say(cs.list.length?"Every take on V1 has captions. Use “Rewrite all” to write them again.":"Put a take on V1 first.","",3500);return}
+    if(force&&cs.n&&!confirm("Write the captions of "+list.length+" take"+(list.length===1?"":"s")+" again? Your own edits to them are replaced."))return;
+    stopPlay();ED.capBusy=true;let ok=0;const fail=[];
+    list.forEach(t=>{ED.capSt[t.id]={state:"busy",msg:"waiting"}});ED.paint();
+    for(const t of list){let r=null;try{r=await L.autoSubs(t,capTick(t))}catch(e){r={ok:false,error:String(e&&e.message||e)}}if(capDone(t,r,L))ok++;else fail.push(t)}
+    ED.capBusy=false;if(ok&&p.capsOff){p.capsOff=false;save(p)}
+    if(ED.open)ED.paint();
+    say(ok?ok+" take"+(ok===1?"":"s")+" got captions: they are on T1 and in the viewer."+(fail.length?" Failed: "+fail[0].name+" ("+ED.capSt[fail[0].id].msg+")":""):"No captions: "+ED.capSt[fail[0].id].msg,ok?"ok":"err",8000);
   }
   function openProjects(){
     if(!api()){say("Open the Creator Studio first.","err");return}
     if(!cur())newProject("Reel 1");
     ED.sel=null;ED.T=0;
     const qs=[1.5,2.5,4].map(v=>'<button type="button" class="lc79-b sm" data-a="silq" data-v="'+v+'" aria-label="Silences over '+v+' seconds">'+v+' s</button>').join("");
-    ED.el=openLayer("lc79-ed","Edit Studio projects",el=>{
-      el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Edit Studio · Projects</h2><button type="button" class="lc79-b sm" data-a="captions">Captions</button>'
+    ED.el=openLayer("lc79-ed","Edit Studio",el=>{
+      /* 9.55.0: a DaVinci-style page. Top: project and export. Middle: media pool | viewer | inspector. Bottom: the timeline with one row per track. */
+      el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Edit Studio</h2>'
         +'<select data-a="pick" aria-label="Project"></select><button type="button" class="lc79-b sm" data-a="new">New project</button><button type="button" class="lc79-b sm" data-a="rename">Rename</button><button type="button" class="lc79-b sm red" data-a="delproj">Delete project</button>'
-        +'<span class="lc79-grow"></span><button type="button" class="lc79-b sm" data-a="capstyle" title="Move, resize and style the caption box">Caption box</button><button type="button" class="lc79-b" data-a="caps" aria-pressed="true">CC Captions: on</button><button type="button" class="lc79-b pri" data-a="export">Export video</button></header>'
-        +'<div class="lc79-body"><div class="lc79-main"><div class="lc79-view"><div class="lc79-stagebox"><canvas aria-label="Project preview. Drag the caption box to move it and its corner to resize it. When a callout is selected and the video is paused, drag it to place it."></canvas><div class="lc79-empty" hidden></div></div>'
+        +'<span class="lc79-grow"></span><span class="lc79-hint" data-verlab></span><button type="button" class="lc79-b pri" data-a="export" title="Export what you see: hidden tracks and blocks stay out">Export video</button></header>'
+        +'<div class="lc79-body"><div class="lc79-dv">'
+        +'<aside class="lc79-pool" aria-label="Media pool"><h3>Media pool</h3><p class="lc79-hint" style="margin:0 0 6px">Every take on this device. + Add puts it at the end of V1, or drag it onto the timeline.</p><div class="lc79-grid"></div></aside>'
+        +'<div class="lc79-view"><div class="lc79-stagebox"><canvas aria-label="Viewer. Drag the captions to move them, drag their corner or scroll on them to resize them. Pause and drag a selected callout to place it."></canvas><div class="lc79-empty" hidden></div></div>'
         +'<div class="lc79-trans"><button type="button" class="lc79-b" data-a="home" aria-label="Back to the start">⏮</button><button type="button" class="lc79-b pri" data-a="play">▶ Play</button><span class="lc79-time" aria-live="off"></span><input type="range" data-a="scrub" min="0" max="1" step="0.01" value="0" aria-label="Project time" style="flex:1;min-width:140px"></div></div>'
         +'<aside class="lc79-insp" aria-label="Inspector"></aside></div>'
-        +'<div class="lc79-calls" aria-label="Callouts"></div>'
-        +'<section class="lc79-layers" aria-label="Layers and versions"></section>'
         +'<div class="lc79-tl"><div class="lc79-tlbar" role="toolbar" aria-label="Timeline tools">'
-        +'<button type="button" class="lc79-b sm" data-a="split" title="Cut the block under the playhead in two (S)">✂ Split</button><button type="button" class="lc79-b sm red" data-a="del" title="Remove the selected block; the rest closes up (Delete)">🗑 Delete</button><button type="button" class="lc79-b sm" data-a="undo" title="Undo (Ctrl+Z)">↶ Undo</button>'
+        +'<button type="button" class="lc79-b sm" data-a="split" title="Cut the block under the playhead in two (S)">✂ Split</button><button type="button" class="lc79-b sm red" data-a="del" title="Remove the selected item; the rest closes up (Delete)">🗑 Delete</button><button type="button" class="lc79-b sm" data-a="hideit" title="Hide or show the selected block or callout (H)">⊘ Hide</button><button type="button" class="lc79-b sm" data-a="undo" title="Undo (Ctrl+Z)">↶ Undo</button>'
+        +'<span class="lc79-sep" aria-hidden="true"></span><span class="lc79-calls" aria-label="Add a callout to the target track"></span>'
         +'<span class="lc79-sep" aria-hidden="true"></span><span class="lc79-sil"><span>Silences over</span><input type="range" data-a="silmin" min="0.5" max="8" step="0.5" aria-label="Shortest silence to cut, in seconds"><output data-silv></output></span>'+qs
-        +'<button type="button" class="lc79-b sm pri" data-a="cutsil" title="Remove every silence over this length from the whole project; the speech closes up">✂ Cut silences</button>'
+        +'<button type="button" class="lc79-b sm" data-a="cutsil" title="Remove every silence over this length from the whole project; the speech closes up">✂ Cut silences</button>'
         +'<span class="lc79-sep" aria-hidden="true"></span><button type="button" class="lc79-b sm" data-a="zout" aria-label="Zoom out">−</button><button type="button" class="lc79-b sm" data-a="zin" aria-label="Zoom in">+</button><span class="lc79-grow"></span><span class="lc79-hint" data-tot></span></div>'
-        +'<div class="lc79-tl-label"><span>Drag a block to move it, drag its edges to trim it. S splits at the playhead, Delete removes the selected block, Space plays, Ctrl+Z undoes.</span></div>'
-        +'<div class="lc79-scroll"><div class="lc79-lane"><div class="lc79-ruler" aria-hidden="true"></div><div class="lc79-track" data-track="clips" aria-label="Clips"></div><div class="lc79-track co" data-track="co" aria-label="Callouts on the timeline"></div><div class="lc79-ph"></div></div></div></div>'
-        +'<div class="lc79-arch"><h3>Takes archive</h3><p class="lc79-hint" style="margin:0 0 8px">Every take on this device. Tap Add to put it at the end of the timeline, or drag it onto the timeline. Takes you do not use stay here.</p><div class="lc79-grid"></div></div></div>';
+        +'<p class="lc79-capst" data-capst aria-live="polite" hidden></p>'
+        +'<div class="lc79-tlwrap"><div class="lc79-heads" aria-label="Tracks"></div><div class="lc79-scroll"><div class="lc79-lane"><div class="lc79-ruler" aria-hidden="true"></div><div class="lc79-rows"></div><div class="lc79-ph"></div></div></div></div>'
+        +'<div class="lc79-tl-label"><span>Tap a track name to make it the target for new callouts. Drag a callout up or down to move it to another track. Eye = hide the whole track. S split · Delete · H hide · Space play · Ctrl+Z undo.</span></div></div>'
+        +'<section class="lc79-layers" aria-label="Versions"></section></div>';
       el._close=()=>{stopPlay();ED.open=false;Object.keys(ED.scrubV).forEach(k=>{try{ED.scrubV[k].removeAttribute("src");ED.scrubV[k].load();ED.scrubV[k].remove()}catch(e){}});ED.scrubV={};ED.base=null};
       el.addEventListener("click",onEdClick);el.addEventListener("change",onEdChange);el.addEventListener("input",onEdInput);
       bindTimeline(el);bindCanvas(el);
     });
     ED.open=true;ED.paint();
   }
-  ED.paint=function(){if(!ED.el||!ED.el.isConnected)return;paintTop();paintCalls();paintLayers();paintTimeline();paintInsp();paintArchive();showFrame()};
+  ED.paint=function(){if(!ED.el||!ED.el.isConnected)return;paintTop();paintCalls();paintTimeline();paintLayers();paintInsp();paintArchive();showFrame()};
   /* ---------- 9.54.0: layers (hide without deleting) and versions (named sets of hidden layers, exported one after the other) ---------- */
-  const visOf=p=>({clips:(p.clips||[]).filter(c=>c.hidden).map(c=>c.id),co:(p.callouts||[]).filter(c=>c.hidden).map(c=>c.id),capsOff:!!p.capsOff});
+  const visOf=p=>({clips:(p.clips||[]).filter(c=>c.hidden).map(c=>c.id),co:(p.callouts||[]).filter(c=>c.hidden).map(c=>c.id),tracks:tracksOf(p).filter(t=>t.hidden).map(t=>t.id),capsOff:!!p.capsOff});
   function applyVis(p,v){const hc={},ho={};(v.clips||[]).forEach(id=>{hc[id]=1});(v.co||[]).forEach(id=>{ho[id]=1});
-    (p.clips||[]).forEach(c=>{if(hc[c.id])c.hidden=true;else delete c.hidden});(p.callouts||[]).forEach(c=>{if(ho[c.id])c.hidden=true;else delete c.hidden});p.capsOff=!!v.capsOff}
-  const sameVis=(a,b)=>{const k=v=>JSON.stringify([(v.clips||[]).slice().sort(),(v.co||[]).slice().sort(),!!v.capsOff]);return k(a)===k(b)};
+    (p.clips||[]).forEach(c=>{if(hc[c.id])c.hidden=true;else delete c.hidden});(p.callouts||[]).forEach(c=>{if(ho[c.id])c.hidden=true;else delete c.hidden});p.capsOff=!!v.capsOff;
+    const ht={};(v.tracks||[]).forEach(id=>{ht[id]=1});tracksOf(p).forEach(t=>{if(ht[t.id])t.hidden=true;else delete t.hidden})}
+  const sameVis=(a,b)=>{const k=v=>JSON.stringify([(v.clips||[]).slice().sort(),(v.co||[]).slice().sort(),(v.tracks||[]).slice().sort(),!!v.capsOff]);return k(a)===k(b)};
   function activeVersion(p){const v=visOf(p);return(p.variants||[]).filter(x=>sameVis(x,v))[0]||null}
   function toggleHidden(kind,id){
     const p=cur();if(!p)return;const list=kind==="clip"?p.clips:p.callouts,it=list.filter(c=>c.id===id)[0];if(!it)return;
@@ -539,17 +612,14 @@
     say((kind==="clip"?"Block":"Callout")+(it.hidden?" hidden: it is left out of the preview and the export. Nothing is deleted.":" is back in the video."),"",2600);
   }
   function paintLayers(){
+    /* 9.55.0: the bar under the timeline: versions = named sets of hidden tracks / blocks / callouts / captions */
     const box=Q(".lc79-layers",ED.el),p=cur();if(!box)return;if(!p){box.innerHTML="";return}
-    const eye=on=>on?"👁":"⊘",av=activeVersion(p);
-    const chip=(a,id,on,label,title)=>'<button type="button" class="lc79-lay'+(on?"":" off")+'" data-a="'+a+'"'+(id?' data-id="'+esc(id)+'"':'')+' aria-pressed="'+on+'" title="'+esc(title)+'"><b aria-hidden="true">'+eye(on)+'</b>'+esc(label)+'</button>';
-    const clips=(p.clips||[]).map((c,i)=>{const t=takeById(c.take);if(!t)return"";const r=clipRange(c,t);return chip("lay-clip",c.id,!c.hidden,"Block "+(i+1)+" · "+fmt(r[1]-r[0]),(c.hidden?"Show":"Hide")+" block "+(i+1)+" ("+t.name+")")}).join("");
-    const cos=(p.callouts||[]).map(c=>chip("lay-co",c.id,!c.hidden,"“"+String(c.text).slice(0,18)+"” "+fmt(c.t),(c.hidden?"Show":"Hide")+" the callout “"+c.text+"”")).join("");
-    const vs=(p.variants||[]);
-    box.innerHTML='<div class="lc79-layhead"><b>Layers</b><span class="lc79-hint">Hide a block, a callout or the captions: it is left out of the preview and the export, nothing is deleted. Two CTAs in one take? Hide one, save a version, hide the other, save a second version, then export every version.</span></div>'
-      +'<div class="lc79-laylist" role="group" aria-label="Layers">'+chip("lay-caps","",!p.capsOff,"CC Captions",p.capsOff?"Show the captions":"Hide the captions")+clips+cos+'</div>'
-      +'<div class="lc79-laylist" role="group" aria-label="Versions"><b class="lc79-vlab">Versions</b>'
-      +vs.map(v=>'<span class="lc79-ver'+(av&&av.id===v.id?" on":"")+'"><button type="button" data-a="var-apply" data-id="'+esc(v.id)+'" title="Use the layers of this version" aria-pressed="'+!!(av&&av.id===v.id)+'">'+esc(v.name)+'</button><button type="button" class="x" data-a="var-del" data-id="'+esc(v.id)+'" aria-label="Delete the version '+esc(v.name)+'">×</button></span>').join("")
-      +'<button type="button" class="lc79-b sm" data-a="var-save">+ Save these layers as a version</button>'
+    const av=activeVersion(p),vs=(p.variants||[]),lab=Q("[data-verlab]",ED.el);if(lab)lab.textContent=av?"Version: "+av.name:"";
+    const hidN=tracksOf(p).filter(t=>t.hidden).length+(p.clips||[]).filter(c=>c.hidden).length+(p.callouts||[]).filter(c=>c.hidden).length+(p.capsOff?1:0);
+    box.innerHTML='<div class="lc79-layhead"><b>Versions</b><span class="lc79-hint">One video, several endings: put CTA 1 on V2 and CTA 2 on V3. Hide V3 and save “Reel A”, then show V3, hide V2 and save “Reel B”. “Export every version” renders them one after the other. Now hidden: '+hidN+'.</span></div>'
+      +'<div class="lc79-laylist" role="group" aria-label="Versions">'
+      +vs.map(v=>'<span class="lc79-ver'+(av&&av.id===v.id?" on":"")+'"><button type="button" data-a="var-apply" data-id="'+esc(v.id)+'" title="Show and hide the tracks of this version" aria-pressed="'+!!(av&&av.id===v.id)+'">'+esc(v.name)+'</button><button type="button" class="x" data-a="var-del" data-id="'+esc(v.id)+'" aria-label="Delete the version '+esc(v.name)+'">×</button></span>').join("")
+      +'<button type="button" class="lc79-b sm" data-a="var-save">+ Save what is shown as a version</button>'
       +(vs.length?'<button type="button" class="lc79-b sm pri" data-a="var-all"'+(ED.busy?" disabled":"")+'>Export every version ('+vs.length+')</button>':'')+'</div>';
   }
   async function exportVersions(){
@@ -568,35 +638,80 @@
     const cs=Q('[data-a="capstyle"]',ED.el);if(cs)cs.classList.toggle("pri",!!(ED.sel&&ED.sel.kind==="cap"));
     const sm=Q('[data-a="silmin"]',ED.el),sv=Q("[data-silv]",ED.el),m=+nle().cutMin||4;if(sm&&document.activeElement!==sm)sm.value=String(m);if(sv)sv.textContent=m.toFixed(1)+" s";
     QA('[data-a="silq"]',ED.el).forEach(b=>b.classList.toggle("gold",+b.getAttribute("data-v")===m));
-    const dl=Q('[data-a="del"]',ED.el);if(dl)dl.disabled=!(ED.sel&&(ED.sel.kind==="clip"||ED.sel.kind==="co"));
+    const dl=Q('[data-a="del"]',ED.el);if(dl)dl.disabled=!(ED.sel&&(ED.sel.kind==="clip"||ED.sel.kind==="co"||ED.sel.kind==="cl"));
+    const hi=Q('[data-a="hideit"]',ED.el);if(hi)hi.disabled=!(ED.sel&&(ED.sel.kind==="clip"||ED.sel.kind==="co"));
     const un=Q('[data-a="undo"]',ED.el);if(un)un.disabled=!(p&&ED.undo.some(u=>u.pid===p.id));
   }
   function paintCalls(){
-    const box=Q(".lc79-calls",ED.el);
-    box.innerHTML='<button type="button" class="lc79-b gold" data-a="addco" data-pid="authority" title="Adds the authority callout at the playhead: an arrow to you and a ping">+ 2105 ELO Coach</button>'
-      +allPresets().filter(x=>x.pid!=="authority").map(x=>'<span class="lc79-chip" role="group"><button type="button" class="lc79-chip" style="border:0;padding:0;min-height:44px;background:none" data-a="addco" data-pid="'+esc(x.pid)+'"><i style="background:'+esc(x.bg)+'"></i>+ '+esc(x.name)+'</button>'
-        +(/^my-/.test(x.pid)?'<button type="button" class="x" data-a="delpreset" data-pid="'+esc(x.pid)+'" aria-label="Delete preset '+esc(x.name)+'">×</button>':'')+'</span>').join("")
-      +'<button type="button" class="lc79-b sm" data-a="addco" data-pid="custom">+ Custom callout</button>';
+    /* 9.55.0: one compact picker in the timeline bar: the callout lands on the target track at the playhead */
+    const box=Q(".lc79-calls",ED.el),p=cur();if(!box)return;const tg=trackOf(p,ED.target)||tracksOf(p)[tracksOf(p).length-1];
+    box.innerHTML='<select data-a="addco-sel" aria-label="Add a callout or CTA to '+esc(tg?tg.name:"the target track")+'"><option value="">+ Callout / CTA on '+esc(tg?tg.name:"V2")+'…</option>'
+      +allPresets().map(x=>'<option value="'+esc(x.pid)+'">'+esc(x.name)+'</option>').join("")+'<option value="custom">Custom text…</option></select>'
+      +'<button type="button" class="lc79-b sm" data-a="trk-add" title="A new overlay track on top (V3, V4…)">+ Track</button>';
   }
   function clipLens(p,segs){const L={};segs.forEach(s=>{L[s.ci]=(L[s.ci]||0)+(s.e-s.s)});return L}
   const laneEl=()=>Q(".lc79-lane",ED.el);
   const fmtR=s=>{s=Math.round(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
+  /* the captions of the takes, placed on the project's timeline (they follow every cut and every hidden block) */
+  function capItems(p,segs){
+    const out=[];(segs||segments(p)).forEach(sg=>{const t=sg.take;if(!t||!Array.isArray(t.captions))return;
+      t.captions.forEach((c,i)=>{const a=Math.max(c.s,sg.s),b=Math.min(c.e,sg.e);if(b-a<.05)return;out.push({take:t,i:i,c:c,T0:sg.T0+(a-sg.s),T1:sg.T0+(b-sg.s)})})});
+    return out;
+  }
+  function capState(p){
+    const ts={};(p.clips||[]).forEach(c=>{const t=takeById(c.take);if(t&&!c.hidden)ts[t.id]=t});const list=Object.keys(ts).map(k=>ts[k]);
+    const busy=list.filter(t=>ED.capSt[t.id]&&ED.capSt[t.id].state==="busy"),fail=list.filter(t=>ED.capSt[t.id]&&ED.capSt[t.id].state==="fail"),none=list.filter(t=>!(t.captions&&t.captions.length));
+    return{list:list,busy:busy,fail:fail,none:none,n:list.reduce((n,t)=>n+((t.captions||[]).length),0)};
+  }
+  function paintHeads(p){
+    const hd=Q(".lc79-heads",ED.el);if(!hd)return;const tr=tracksOf(p),cs=p?capState(p):{busy:[],fail:[],none:[],n:0};
+    const row=(cls,inner)=>'<div class="lc79-hrow '+cls+'">'+inner+'</div>';
+    let h='<div class="lc79-hspace" aria-hidden="true"></div>';
+    tr.slice().reverse().forEach(t=>{const tg=ED.target===t.id;
+      h+=row("ov"+(tg?" tg":"")+(t.hidden?" off":""),'<button type="button" class="lc79-eye" data-a="trk-eye" data-id="'+esc(t.id)+'" aria-pressed="'+!t.hidden+'" title="'+(t.hidden?"Show":"Hide")+' this track in the preview and the export">'+(t.hidden?"⊘":"👁")+'</button>'
+        +'<button type="button" class="lc79-tname" data-a="trk-target" data-id="'+esc(t.id)+'" aria-pressed="'+tg+'" title="Tap: this track gets the new callouts. Rename it in the inspector.">'+esc(t.name)+'</button>'
+        +(tr.length>1?'<button type="button" class="lc79-tx" data-a="trk-del" data-id="'+esc(t.id)+'" aria-label="Delete the track '+esc(t.name)+'">×</button>':''))});
+    const st=cs.busy.length?"writing…":cs.fail.length?"failed":cs.n?cs.n+" lines":"none yet";
+    h+=row("cap"+(p&&p.capsOff?" off":""),'<button type="button" class="lc79-eye" data-a="lay-caps" aria-pressed="'+!(p&&p.capsOff)+'" title="'+(p&&p.capsOff?"Show":"Hide")+' the captions in the preview and the export">'+(p&&p.capsOff?"⊘":"👁")+'</button>'
+      +'<button type="button" class="lc79-tname" data-a="capstyle" title="Caption style and place">T1 · Captions <small>'+esc(st)+'</small></button><button type="button" class="lc79-tx cc" data-a="cc-gen" title="Write the captions of every take that has none">CC</button>');
+    h+=row("vid",'<span class="lc79-eye" aria-hidden="true">🎬</span><span class="lc79-tname">V1 · Video</span>');
+    hd.innerHTML=h;
+  }
   /* o.pps: keep this many pixels per second (while a trim handle is dragged, so the blocks do not jump under the finger) */
   function paintTimeline(o){
-    o=o||{};const p=cur(),segs=segments(p),tot=segs.total||0,L=clipLens(p,segs),tr=Q('[data-track="clips"]',ED.el),co=Q('[data-track="co"]',ED.el),lane=laneEl();ED.tot=tot;
+    o=o||{};const p=cur(),segs=segments(p),tot=segs.total||0,L=clipLens(p,segs),lane=laneEl(),rows=Q(".lc79-rows",ED.el);ED.tot=tot;if(!rows)return;
+    if(p&&!trackOf(p,ED.target)){const tr=tracksOf(p);ED.target=tr[tr.length-1].id}
     if(lane)lane.style.width=o.pps&&tot?Math.max(1,Math.round(tot*o.pps))+"px":(ED.zoom*100)+"%";
     Q("[data-tot]",ED.el).textContent=tot?"Length "+fmt(tot)+" · "+(p?p.clips.length:0)+" block"+(p&&p.clips.length===1?"":"s"):"";
-    let x=0,html="";
-    (p?p.clips:[]).forEach((c,ci)=>{const t=takeById(c.take);if(t&&c.hidden){html+='<button type="button" class="lc79-hidmark" data-a="lay-clip" data-id="'+esc(c.id)+'" style="left:'+x+'%" title="Block '+(ci+1)+' is hidden. Tap to show it again." aria-label="Show hidden block '+(ci+1)+': '+esc(t.name)+'">⊘</button>';return}if(!t||!L[ci])return;const w=L[ci]/tot*100,sel=ED.sel&&ED.sel.kind==="clip"&&ED.sel.id===c.id;
-      html+='<div class="lc79-clip'+(sel?" sel":"")+'" data-clip="'+esc(c.id)+'" role="button" tabindex="0" aria-pressed="'+!!sel+'" aria-label="Block '+(ci+1)+': '+esc(t.name)+', '+fmt(L[ci])+'" style="left:'+x+'%;width:calc('+w+'% - 2px)'+(thumbs[t.id]?';background-image:url('+thumbs[t.id]+')':'')+'">'
+    let html="";
+    /* overlay tracks, the highest on top */
+    tracksOf(p).slice().reverse().forEach(tk=>{
+      const items=(p?p.callouts:[]).filter(c=>c.track===tk.id).map(c=>{const l=tot?clamp(c.t/tot*100,0,100):0,w=tot?Math.max(1.5,c.dur/tot*100):10;
+        return'<div class="lc79-co'+(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id?" sel":"")+(c.hidden?" hid":"")+'" data-co="'+esc(c.id)+'" role="button" tabindex="0" aria-label="Callout '+esc(c.text)+' at '+fmt(c.t)+' on '+esc(tk.name)+'" style="left:'+l+'%;width:'+Math.min(w,100-l)+'%;background:'+esc(c.bg)+';color:'+esc(c.fg)+'">'+esc(c.text)+'</div>'}).join("");
+      html+='<div class="lc79-track co'+(tk.hidden?" off":"")+(ED.target===tk.id?" tg":"")+'" data-track="co" data-tid="'+esc(tk.id)+'" aria-label="'+esc(tk.name)+'">'+items+'</div>'});
+    /* the captions track */
+    const caps=p?capItems(p,segs):[];
+    html+='<div class="lc79-track cap'+(p&&p.capsOff?" off":"")+'" data-track="cap" aria-label="Captions">'+(caps.length?caps.map(x=>{const l=tot?x.T0/tot*100:0,w=tot?Math.max(.8,(x.T1-x.T0)/tot*100):5,sel=ED.sel&&ED.sel.kind==="cl"&&ED.sel.take===x.take.id&&ED.sel.i===x.i;
+      return'<div class="lc79-cl'+(sel?" sel":"")+'" data-cl="'+esc(x.take.id+"|"+x.i)+'" role="button" tabindex="0" style="left:'+l+'%;width:calc('+w+'% - 1px)" title="'+esc(x.c.t)+'">'+esc(x.c.t)+'</div>'}).join(""):'<div class="lc79-capempty">'+(p&&capState(p).busy.length?"Writing captions…":"No captions yet: tap CC on the left to write them.")+'</div>')+'</div>';
+    /* V1: the video blocks */
+    let x=0,vh="";
+    (p?p.clips:[]).forEach((c,ci)=>{const t=takeById(c.take);if(t&&c.hidden){vh+='<button type="button" class="lc79-hidmark" data-a="lay-clip" data-id="'+esc(c.id)+'" style="left:'+x+'%" title="Block '+(ci+1)+' is hidden. Tap to show it again." aria-label="Show hidden block '+(ci+1)+': '+esc(t.name)+'">⊘</button>';return}if(!t||!L[ci])return;const w=L[ci]/tot*100,sel=ED.sel&&ED.sel.kind==="clip"&&ED.sel.id===c.id;
+      vh+='<div class="lc79-clip'+(sel?" sel":"")+'" data-clip="'+esc(c.id)+'" role="button" tabindex="0" aria-pressed="'+!!sel+'" aria-label="Block '+(ci+1)+': '+esc(t.name)+', '+fmt(L[ci])+'" style="left:'+x+'%;width:calc('+w+'% - 2px)'+(thumbs[t.id]?';background-image:url('+thumbs[t.id]+')':'')+'">'
         +'<i class="lc79-hd l" data-h="l" aria-hidden="true" title="Drag to trim the start"></i><span>'+esc(t.name)+' · '+fmt(L[ci])+'</span><i class="lc79-hd r" data-h="r" aria-hidden="true" title="Drag to trim the end"></i></div>';
       x+=w;if(!thumbs[t.id])thumbOf(t,()=>{if(ED.open)paintTimeline()})});
-    tr.innerHTML=html||'<div class="lc79-empty" style="position:static;height:100%">Add takes from the archive below.</div>';
+    html+='<div class="lc79-track vid" data-track="clips" aria-label="V1 video">'+(vh||'<div class="lc79-empty" style="position:static;height:100%">Add takes from the media pool.</div>')+'</div>';
+    rows.innerHTML=html;
+    paintHeads(p);
     const ru=Q(".lc79-ruler",ED.el);
-    if(ru){if(tot&&lane){const pps=lane.clientWidth/tot,st=[.5,1,2,5,10,15,30,60,120,300,600].filter(v=>v*pps>=70)[0]||1200;let h="";for(let t=0;t<=tot+1e-6;t+=st)h+='<i style="left:'+(t/tot*100)+'%">'+(st<1?fmt(t):fmtR(t))+'</i>';ru.innerHTML=h}else ru.innerHTML=""}
-    co.innerHTML=(p?p.callouts:[]).map(c=>{const l=tot?clamp(c.t/tot*100,0,100):0,w=tot?Math.max(1.5,c.dur/tot*100):10;
-      return'<div class="lc79-co'+(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id?" sel":"")+(c.hidden?" hid":"")+'" data-co="'+esc(c.id)+'" role="button" tabindex="0" aria-label="Callout '+esc(c.text)+' at '+fmt(c.t)+'" style="left:'+l+'%;width:'+Math.min(w,100-l)+'%;background:'+esc(c.bg)+';color:'+esc(c.fg)+'">'+esc(c.text)+'</div>'}).join("");
+    if(ru){if(tot&&lane){const pps=lane.clientWidth/tot,stp=[.5,1,2,5,10,15,30,60,120,300,600].filter(v=>v*pps>=70)[0]||1200;let h="";for(let t=0;t<=tot+1e-6;t+=stp)h+='<i style="left:'+(t/tot*100)+'%">'+(stp<1?fmt(t):fmtR(t))+'</i>';ru.innerHTML=h}else ru.innerHTML=""}
+    paintCapStatus(p);
     paintHead(true);
+  }
+  function paintCapStatus(p){
+    const el=Q("[data-capst]",ED.el);if(!el||!p)return;const cs=capState(p);let t="",bad=false;
+    if(cs.busy.length)t="Writing captions for "+cs.busy.map(x=>x.name).join(", ")+"… "+((ED.capSt[cs.busy[0].id]||{}).msg||"");
+    else if(cs.fail.length){bad=true;const f=ED.capSt[cs.fail[0].id]||{};const kept=cs.fail.some(x=>x.captions&&x.captions.length);t="Captions failed for "+cs.fail.map(x=>x.name).join(", ")+": "+(f.msg||"no speech engine answered")+(kept?" The captions you had are kept.":"")+" Tap CC to try again, or “From script” in the caption inspector."}
+    el.hidden=!t;el.textContent=t;el.classList.toggle("lc79-err",bad);
   }
   /* the playhead: at most 10 repaints a second while playing (no layout work every frame on long takes) */
   function paintHead(force){
@@ -608,7 +723,7 @@
     const sc2=Q('[data-a="scrub"]',ED.el);if(sc2){sc2.max=String(Math.max(.01,tot));if(document.activeElement!==sc2)sc2.value=String(ED.T)}
     const pl=Q('[data-a="play"]',ED.el);if(pl)pl.textContent=ED.playing?"❚❚ Pause":"▶ Play";
   }
-  function selected(){const p=cur();if(!p||!ED.sel)return null;if(ED.sel.kind==="clip")return p.clips.filter(c=>c.id===ED.sel.id)[0]||null;if(ED.sel.kind==="co")return p.callouts.filter(c=>c.id===ED.sel.id)[0]||null;if(ED.sel.kind==="take")return takeById(ED.sel.id);if(ED.sel.kind==="cap")return p;return null}
+  function selected(){const p=cur();if(!p||!ED.sel)return null;if(ED.sel.kind==="clip")return p.clips.filter(c=>c.id===ED.sel.id)[0]||null;if(ED.sel.kind==="co")return p.callouts.filter(c=>c.id===ED.sel.id)[0]||null;if(ED.sel.kind==="take")return takeById(ED.sel.id);if(ED.sel.kind==="cap")return p;if(ED.sel.kind==="cl"){const t=takeById(ED.sel.take);return t&&t.captions&&t.captions[ED.sel.i]||null}if(ED.sel.kind==="trk")return trackOf(p,ED.sel.id);return null}
   const num=(f,v,step,min,max,lab)=>'<label class="lc79-f"><span>'+lab+'</span><input type="number" data-f="'+f+'" value="'+(+v).toFixed(2)+'" step="'+step+'" min="'+min+'"'+(max!=null?' max="'+max+'"':'')+'></label>';
   const rng=(f,v,min,max,step,lab)=>'<label class="lc79-f"><span>'+lab+'</span><input type="range" data-f="'+f+'" value="'+v+'" min="'+min+'" max="'+max+'" step="'+step+'"></label>';
   const chk=(f,on,lab)=>'<label class="lc79-row" style="min-height:44px"><input type="checkbox" data-f="'+f+'"'+(on?" checked":"")+' style="width:22px;height:22px"> '+lab+'</label>';
@@ -616,6 +731,23 @@
   function paintInsp(){
     const box=Q(".lc79-insp",ED.el),p=cur(),it=selected();
     if(!p){box.innerHTML="";return}
+    if(ED.sel&&ED.sel.kind==="cl"&&it){
+      const t=takeById(ED.sel.take),n=(t.captions||[]).length,ix=capItems(p).filter(x=>x.take.id===t.id&&x.i===ED.sel.i)[0];
+      box.innerHTML='<h3>Caption '+(ED.sel.i+1)+' of '+n+'</h3><p class="lc79-hint" style="margin:0">'+esc(t.name)+(ix?' · in the video at '+fmt(ix.T0):' · in a hidden or cut part of the take')+'</p>'
+        +'<label class="lc79-f"><span>Text</span><textarea data-f="cl_t" maxlength="240" rows="3" style="min-height:80px">'+esc(it.t)+'</textarea></label>'
+        +'<div class="lc79-two"><div class="lc79-f"><span>Start '+it.s.toFixed(2)+' s</span><span class="lc79-row"><button type="button" class="lc79-b sm" data-a="cl-nudge" data-k="s" data-d="-0.1">−0.1</button><button type="button" class="lc79-b sm" data-a="cl-nudge" data-k="s" data-d="0.1">+0.1</button></span></div>'
+        +'<div class="lc79-f"><span>End '+it.e.toFixed(2)+' s</span><span class="lc79-row"><button type="button" class="lc79-b sm" data-a="cl-nudge" data-k="e" data-d="-0.1">−0.1</button><button type="button" class="lc79-b sm" data-a="cl-nudge" data-k="e" data-d="0.1">+0.1</button></span></div></div>'
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="cl-split">Split at the playhead</button><button type="button" class="lc79-b sm" data-a="cl-add">+ Caption at the playhead</button><button type="button" class="lc79-b sm red" data-a="cl-del">Delete caption</button></div>'
+        +'<p class="lc79-hint" style="margin:0">Drag the caption on T1 to move it in time. Drag it in the viewer to place it on the screen; the look is set in “T1 · Captions”.</p>';
+      return;
+    }
+    if(ED.sel&&ED.sel.kind==="trk"&&it){
+      const n=(p.callouts||[]).filter(c=>c.track===it.id).length;
+      box.innerHTML='<h3>Track</h3><label class="lc79-f"><span>Name</span><input type="text" data-f="trk_name" maxlength="30" value="'+esc(it.name)+'"></label>'
+        +'<p class="lc79-hint" style="margin:0">'+n+' callout'+(n===1?'':'s')+' on this track. New callouts land here while it is the target (highlighted). '+(it.hidden?'Hidden: left out of the viewer and the export.':'Shown in the viewer and the export.')+'</p>'
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="trk-eye" data-id="'+esc(it.id)+'">'+(it.hidden?"👁 Show track":"⊘ Hide track")+'</button><button type="button" class="lc79-b sm red" data-a="trk-del" data-id="'+esc(it.id)+'">Delete track</button></div>';
+      return;
+    }
     if(ED.sel&&ED.sel.kind==="clip"&&it){
       const t=takeById(it.take),r=clipRange(it,t),D=t.durationMs/1e3,i=p.clips.indexOf(it);
       box.innerHTML='<h3>Block '+(i+1)+': '+esc(t.name)+'</h3><video controls playsinline preload="metadata" src="'+esc(t.url)+'" data-clipvid></video>'
@@ -628,7 +760,15 @@
     }
     if(ED.sel&&ED.sel.kind==="cap"){
       const sz=previewSize(p,segments(p)),st=capStyle(p,sz[0],sz[1]);
-      box.innerHTML='<h3>Caption box</h3><p class="lc79-hint" style="margin:0">Drag the box on the preview to move it. Drag its corner, or scroll on it, to resize it. One style for the whole project, burned into the export.</p>'
+      const cs=capState(p),under=segAt(segments(p),ED.T);
+      box.innerHTML='<h3>T1 · Captions</h3>'
+        +'<div class="lc79-sec" style="padding:10px;gap:8px"><b style="color:#fff">'+(cs.n?cs.n+' caption lines on the timeline':'No captions yet')+'</b>'
+        +(cs.busy.length?'<span class="lc79-hint">Writing for '+esc(cs.busy.map(x=>x.name).join(", "))+'…</span>':'')
+        +cs.list.map(t=>{const st=ED.capSt[t.id];return st&&st.state==="fail"?'<span class="lc79-hint lc79-err">'+esc(t.name)+': '+esc(st.msg)+'</span>':''}).join("")
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm pri" data-a="cc-gen"'+(ED.capBusy?" disabled":"")+'>CC Write missing captions ('+cs.none.length+')</button><button type="button" class="lc79-b sm" data-a="cc-regen"'+(ED.capBusy||!cs.list.length?" disabled":"")+'>Rewrite all</button>'
+        +'<button type="button" class="lc79-b sm" data-a="cc-script"'+(under?'':' disabled')+' title="Spreads your Studio script over the spoken parts of the take under the playhead">From script</button></div>'
+        +'<span class="lc79-hint">The speech engine listens to every take on V1. Exact captions need the “captions” server function; without it this device does it (the first time it downloads a model of about 80 MB). Click a caption on T1 to fix a word.</span></div>'
+        +'<p class="lc79-hint" style="margin:0">Drag the captions in the viewer to move them. Drag the corner, or scroll on them, to resize them. One style for the whole project, burned into the export.</p>'
         +rng("c_scale",st.scale,.4,3,.05,"Size")+rng("c_w",st.w,.3,.98,.01,"Line width")
         +'<div class="lc79-two">'+rng("c_x",st.x,0,1,.01,"Left ↔ right")+rng("c_y",st.y,0,1,.01,"Top ↕ bottom")+'</div>'
         +chk("c_box",st.box,"Background box")
@@ -636,13 +776,14 @@
         +'<div class="lc79-row">'+col("c_fg",st.fg,"Text colour")+chk("c_stroke",st.stroke,"Outline")+col("c_sc",st.sc,"Outline colour")+'</div>'
         +'<div class="lc79-two"><label class="lc79-f"><span>Font</span><select data-f="c_font">'+FONT_NAMES.map(f=>'<option value="'+f[0]+'"'+(f[0]===st.font?" selected":"")+'>'+f[1]+'</option>').join("")+'</select></label>'+chk("c_upper",st.upper,"ALL CAPS")+'</div>'
         +'<div class="lc79-row">'+chk("c_karaoke",st.karaoke,"Highlight the spoken word")+col("c_hl",st.hl,"Highlight")+'</div>'
-        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="capreset">Reset the box</button><button type="button" class="lc79-b sm" data-a="captions">Edit the caption text</button><button type="button" class="lc79-b sm" data-a="writecaps">Write missing captions ('+needsCaps(p).length+')</button></div>'
-        +(p.capsOff?'<p class="lc79-hint lc79-err" style="margin:0">CC Captions is hidden: the export has no captions. Press “CC Captions” to show them.</p>':'');
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="capreset">Reset the box</button></div>'
+        +(p.capsOff?'<p class="lc79-hint lc79-err" style="margin:0">T1 is hidden (eye): the export has no captions. Tap the eye to show them.</p>':'');
       return;
     }
     if(ED.sel&&ED.sel.kind==="co"&&it){
       const c=it;
       box.innerHTML='<h3>Callout</h3>'
+        +'<label class="lc79-f"><span>Track</span><select data-f="track">'+tracksOf(p).slice().reverse().map(t=>'<option value="'+esc(t.id)+'"'+(t.id===c.track?" selected":"")+'>'+esc(t.name)+(t.hidden?" (hidden)":"")+'</option>').join("")+'</select></label>'
         +'<label class="lc79-f"><span>Text</span><input type="text" data-f="text" maxlength="40" value="'+esc(c.text)+'"></label>'
         +'<label class="lc79-f"><span>Second line (optional)</span><input type="text" data-f="sub" maxlength="50" value="'+esc(c.sub||"")+'"></label>'
         +'<div class="lc79-two">'+num("t",c.t,.1,0,null,"Starts at (s)")+num("dur",c.dur,.1,.6,8,"Duration (s)")+'</div>'
@@ -659,7 +800,7 @@
     if(ED.sel&&ED.sel.kind==="take"&&it){
       const used=p.clips.some(c=>c.take===it.id);
       box.innerHTML='<h3>'+esc(it.name)+'</h3><video controls playsinline preload="metadata" src="'+esc(it.url)+'"></video><p class="lc79-hint" style="margin:0">'+fmt(it.durationMs/1e3)+(it.captions&&it.captions.length?" · "+it.captions.length+" captions":"")+(used?" · in this project":"")+'</p>'
-        +'<div class="lc79-row"><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(it.id)+'">Add to the timeline</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(it.id)+'">Delete take</button>'+(canShare()?'<button type="button" class="lc79-b sm" data-a="share" data-take="'+esc(it.id)+'">Share</button>':'')+'<button type="button" class="lc79-b sm" data-a="captions">Captions</button></div>';
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(it.id)+'">Add to the timeline</button><button type="button" class="lc79-b sm" data-a="dl" data-take="'+esc(it.id)+'">⬇ Download</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(it.id)+'">Delete take</button>'+(canShare()?'<button type="button" class="lc79-b sm" data-a="share" data-take="'+esc(it.id)+'">Share</button>':'')+'<button type="button" class="lc79-b sm" data-a="captions">Captions</button></div>';
       return;
     }
     const segs=segments(p),o=nle();
@@ -671,8 +812,8 @@
       +'<label class="lc79-row" style="min-height:44px"><input type="checkbox" data-f="autoSil"'+(o.autoSil?" checked":"")+' style="width:22px;height:22px"> Cut silences longer than <select data-f="autoMin" aria-label="Silence length">'+[1.5,2.5,4,6].map(v=>'<option value="'+v+'"'+(v===+o.silMin?" selected":"")+'>'+v+' s</option>').join("")+'</select></label>'
       +chk("autoCaps",o.autoCaps,"Write captions when the live captions missed the take")+'</div>'
       +(p.src?'<div class="lc79-sec" style="padding:10px;gap:6px"><b style="color:#fff">Game: '+esc(p.src.label||"")+'</b><span class="lc79-hint">Motif: '+esc(p.src.motif||"")+(p.src.sim?' · Lichess position ready':'')+'</span><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="srcopen">Open in Game-to-Script</button><button type="button" class="lc79-b sm" data-a="recthis">Record this project</button></div></div>':'<p class="lc79-hint" style="margin:0">Tip: make projects from a game in Game-to-Script, one per mistake. The recording flow then loads the board, the feedback card and the Lichess position for you.</p>')
-      +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="writecaps">Write missing captions now ('+needsCaps(p).length+')</button><button type="button" class="lc79-b sm" data-a="capstyle">Caption box</button></div>'
-      +'<p class="lc79-hint" style="margin:0">Captions are written automatically for every take without captions when you export, unless “CC Captions” is hidden. Edit them any time with Captions. The export plays the project once in real time, so it takes as long as the video. Keep this tab in front.</p>';
+      +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="cc-gen">CC Write missing captions ('+capState(p).none.length+')</button><button type="button" class="lc79-b sm" data-a="capstyle">Caption style</button></div>'
+      +'<p class="lc79-hint" style="margin:0">Tracks: V1 holds the video, T1 the captions, V2, V3… your callouts and CTAs. The export shows exactly what the viewer shows: hidden tracks stay out. It plays the project once in real time, so keep this tab in front.</p>';
   }
   function paintArchive(){
     const g=Q(".lc79-grid",ED.el),p=cur(),list=takes();
@@ -680,7 +821,7 @@
     g.innerHTML=list.map(t=>{const used=p&&p.clips.some(c=>c.take===t.id);
       return'<div class="lc79-card'+(used?" used":"")+'" draggable="true" data-take="'+esc(t.id)+'"><div class="lc79-thumb" data-th="'+esc(t.id)+'"'+(thumbs[t.id]?' style="background-image:url('+thumbs[t.id]+')"':'')+'>'+(used?"<b>In this project</b>":"")+'</div>'
         +'<div class="m"><b>'+esc(t.name)+'</b>'+fmt(t.durationMs/1e3)+(t.captions&&t.captions.length?" · captions":"")+'</div>'
-        +'<div class="a"><button type="button" class="lc79-b sm" data-a="watch" data-take="'+esc(t.id)+'" aria-label="Watch '+esc(t.name)+'">▶</button><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(t.id)+'" aria-label="Add '+esc(t.name)+' to the timeline">+ Add</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(t.id)+'" aria-label="Delete '+esc(t.name)+'">🗑</button></div>'+(canShare()?'<div class="a"><button type="button" class="lc79-b sm" data-a="share" data-take="'+esc(t.id)+'">Share</button></div>':'')+'</div>'}).join("");
+        +'<div class="a"><button type="button" class="lc79-b sm" data-a="watch" data-take="'+esc(t.id)+'" aria-label="Watch '+esc(t.name)+'">▶</button><button type="button" class="lc79-b sm pri" data-a="addtake" data-take="'+esc(t.id)+'" aria-label="Add '+esc(t.name)+' to the timeline">+ Add</button><button type="button" class="lc79-b sm" data-a="dl" data-take="'+esc(t.id)+'" aria-label="Download '+esc(t.name)+'">⬇</button><button type="button" class="lc79-b sm red" data-a="deltake" data-take="'+esc(t.id)+'" aria-label="Delete '+esc(t.name)+'">🗑</button></div>'+(canShare()?'<div class="a"><button type="button" class="lc79-b sm" data-a="share" data-take="'+esc(t.id)+'">Share</button></div>':'')+'</div>'}).join("");
     list.forEach(t=>{if(!thumbs[t.id])thumbOf(t,u=>{const el=Q('[data-th="'+t.id+'"]',ED.el);if(el)el.style.backgroundImage="url("+u+")"})});
   }
   function previewSize(p,segs){const s=outSize(p,segs),k=Math.min(1,720/Math.max(s[0],s[1]));return[Math.round(s[0]*k),Math.round(s[1]*k)]}
@@ -704,7 +845,7 @@
     if(!p.capsOff||capSel){let line=capLine(bi.take,bi.ct);if(!line&&capSel)line={t:"Your captions appear here"};
       try{ED.capRect=drawCaption(g,cv.width,cv.height,line,capStyle(p,cv.width,cv.height),bi.ct)}catch(e){ED.capRect=null}
       if(capSel&&ED.capRect){const r=ED.capRect,k=Math.max(1,cv.width/540),hs=12*k;g.save();g.setLineDash([6*k,4*k]);g.strokeStyle="#00E5FF";g.lineWidth=2*k;g.strokeRect(r.x-3*k,r.y-3*k,r.w+6*k,r.h+6*k);g.setLineDash([]);g.fillStyle="#00E5FF";g.fillRect(r.x+r.w+3*k-hs/2,r.y+r.h+3*k-hs/2,hs,hs);g.restore()}}
-    (p.callouts||[]).forEach(c=>{if(c.hidden)return;let lt=ED.T-c.t;if(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id)lt=clamp(lt,.9,Math.max(.9,c.dur-.3));try{drawCallout(g,cv.width,cv.height,c,lt)}catch(e){}});
+    coOrder(p).forEach(c=>{if(!coOn(p,c))return;let lt=ED.T-c.t;if(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id)lt=clamp(lt,.9,Math.max(.9,c.dur-.3));try{drawCallout(g,cv.width,cv.height,c,lt)}catch(e){}});
   }
   async function togglePlay(){
     if(ED.playing){stopPlay();return}
@@ -725,8 +866,7 @@
     for(let i=0;i<list.length;i++){const t=list[i];
       const msg=(cur,dur)=>{const tx="Writing captions: take "+(i+1)+" of "+list.length+(dur?" ("+Math.round(cur||0)+" of "+Math.round(dur)+" s)":"…");if(onMsg)onMsg(tx);else say(tx,"",1500)};msg();
       try{const r=await L.autoSubs(t,msg);
-        if(r&&r.ok&&r.lines&&r.lines.length){t.captions=r.lines.map(x=>Object.assign({},x,{t:L.fixText?L.fixText(x.t):x.t}));try{Tk.persistMeta(t)}catch(e){}ok++}
-        else fail.push(t.name+(r&&r.error?": "+r.error:""))}catch(e){fail.push(t.name)}}
+        if(capDone(t,r,L))ok++;else fail.push(t.name+": "+ED.capSt[t.id].msg)}catch(e){ED.capSt[t.id]={state:"fail",msg:String(e&&e.message||e)};fail.push(t.name)}}
     if(!onMsg)say(ok+" take"+(ok===1?"":"s")+" got captions."+(fail.length?" Not possible for "+fail.length+": "+fail[0]:" Check them with Captions."),fail.length?"err":"ok",6000);
     return{ok:ok,fail:fail,n:list.length};
   }
@@ -778,7 +918,7 @@
     if(pid==="custom")pr={pid:"",text:"Your text",font:"sora",bg:"#00E5FF",fg:"#0A0B0E",sound:"ping",arrow:true,aim:"board",dur:2.4,scale:1};
     if(!pr)return;snapEd(p);
     const tot=segments(p).total||0,t=tot?clamp(ED.T,0,Math.max(0,tot-.5)):0;
-    const c=makeCallout(pr,t);p.callouts.push(c);p.callouts.sort((a,b)=>a.t-b.t);save(p);
+    const c=makeCallout(pr,t);const tr=tracksOf(p);c.track=trackOf(p,ED.target)?ED.target:tr[tr.length-1].id;p.callouts.push(c);p.callouts.sort((a,b)=>a.t-b.t);save(p);
     ED.sel={kind:"co",id:c.id};hear(c.sound);ED.paint();
   }
   /* ---------- NLE actions ---------- */
@@ -789,6 +929,7 @@
   }
   function doDelete(){
     const p=cur();if(!p)return;
+    if(ED.sel&&ED.sel.kind==="cl"){const t=takeById(ED.sel.take);if(t&&t.captions&&t.captions[ED.sel.i]){t.captions.splice(ED.sel.i,1);try{T().Takes.persistMeta(t)}catch(x){}ED.sel={kind:"cap"};paintTimeline();paintInsp();return showFrame()}return}
     if(!ED.sel||(ED.sel.kind!=="clip"&&ED.sel.kind!=="co")){say("Tap a block on the timeline first.","",2000);return}
     stopPlay();snapEd(p);
     if(ED.sel.kind==="co"){p.callouts=p.callouts.filter(c=>c.id!==ED.sel.id);ED.sel=null;save(p);return ED.paint()}
@@ -829,7 +970,28 @@
     if(a==="capstyle"){stopPlay();ED.sel=ED.sel&&ED.sel.kind==="cap"?null:{kind:"cap"};paintTop();paintTimeline();paintInsp();return showFrame()}
     if(a==="capreset"&&p){snapEd(p);delete p.cap;save(p);paintInsp();return compose()}
     if(a==="writecaps"&&p)return writeCaps(p,null).then(()=>{ED.paint()});
-    if(a==="captions"){const sel=selected();const id=ED.sel&&ED.sel.kind==="clip"&&sel?sel.take:ED.sel&&ED.sel.kind==="take"&&sel?sel.id:(p&&p.clips[0]?p.clips[0].take:null);return gotoCaptions(id)}
+    if(a==="captions"){stopPlay();ED.sel={kind:"cap"};paintTop();paintTimeline();paintInsp();return showFrame()}   /* 9.55.0: captions are edited here, on T1 */
+    /* 9.55.0: tracks */
+    if(a==="trk-eye"&&p){const t=trackOf(p,b.getAttribute("data-id"));if(!t)return;stopPlay();snapEd(p);if(t.hidden)delete t.hidden;else t.hidden=true;save(p);ED.paint();say(t.name+(t.hidden?" hidden: it is left out of the viewer and the export.":" is back in the video."),"",2400);return}
+    if(a==="trk-target"&&p){const t=trackOf(p,b.getAttribute("data-id"));if(!t)return;ED.target=t.id;ED.sel={kind:"trk",id:t.id};paintCalls();paintTimeline();paintInsp();return}
+    if(a==="trk-add"&&p){stopPlay();snapEd(p);const tr=tracksOf(p),n=tr.length+2,t={id:"o"+uid(),name:"V"+n+" · CTA "+(n-1)};tr.push(t);ED.target=t.id;ED.sel={kind:"trk",id:t.id};save(p);ED.paint();say(t.name+" added on top. New callouts land on it.","ok",2600);return}
+    if(a==="trk-del"&&p){const tr=tracksOf(p),t=trackOf(p,b.getAttribute("data-id"));if(!t||tr.length<2)return;const n=p.callouts.filter(c=>c.track===t.id).length;if(n&&!confirm("Delete "+t.name+" and its "+n+" callout"+(n===1?"":"s")+"?"))return;
+      stopPlay();snapEd(p);p.callouts=p.callouts.filter(c=>c.track!==t.id);p.tracks=tr.filter(x=>x!==t);if(ED.target===t.id)ED.target="";ED.sel=null;save(p);ED.paint();return}
+    /* 9.55.0: captions on T1 */
+    if(a==="cc-gen")return genCaps(false);
+    if(a==="cc-regen")return genCaps(true);
+    if(a==="cc-script"&&p){const sg=segAt(segments(p),ED.T),t=sg&&sg.take,L=api()&&api().lc33;if(!t||!L||!L.fromScript)return;const r=L.fromScript(t);if(!r||!r.ok){say((r&&r.error)||"Write a script in Script Studio first.","err",4500);return}
+      if(t.captions&&t.captions.length&&!confirm("Replace the "+t.captions.length+" captions of “"+t.name+"” with your script?"))return;t.captions=r.lines;try{T().Takes.persistMeta(t)}catch(x){}ED.capSt[t.id]={state:"ok",msg:"from script"};p.capsOff=false;save(p);ED.paint();say(r.lines.length+" captions made from your script for “"+t.name+"”. Check the timing on T1.","ok",4000);return}
+    if(/^cl-/.test(a)&&ED.sel&&ED.sel.kind==="cl"){const t=takeById(ED.sel.take);if(!t||!t.captions)return;const c=t.captions[ED.sel.i];
+      const done=()=>{t.captions.sort((x,y)=>x.s-y.s);try{T().Takes.persistMeta(t)}catch(x){}paintTimeline();paintInsp();compose()};
+      if(a==="cl-del"&&c){t.captions.splice(ED.sel.i,1);ED.sel={kind:"cap"};done();return showFrame()}
+      if(a==="cl-nudge"&&c){const k=b.getAttribute("data-k"),dd=+b.getAttribute("data-d");if(k==="s")c.s=+clamp(c.s+dd,0,c.e-.15).toFixed(2);else c.e=+clamp(c.e+dd,c.s+.15,durOf(t)).toFixed(2);delete c.w;return done()}
+      if(a==="cl-split"&&c){const sg=segAt(segments(p),ED.T),at=sg&&sg.take.id===t.id?sg.s+(ED.T-sg.T0):-1;if(!(at>c.s+.1&&at<c.e-.1)){say("Put the playhead inside this caption first.","",2500);return}
+        const ws=String(c.t).split(" "),k=Math.max(1,Math.round(ws.length*(at-c.s)/(c.e-c.s))),A={s:c.s,e:+at.toFixed(2),t:ws.slice(0,k).join(" ")},B={s:+at.toFixed(2),e:c.e,t:ws.slice(k).join(" ")||"…"};t.captions.splice(ED.sel.i,1,A,B);return done()}
+      if(a==="cl-add"){const sg=segAt(segments(p),ED.T);if(!sg){say("Put the playhead on a block first.","",2500);return}const at=+(sg.s+(ED.T-sg.T0)).toFixed(2),nt=sg.take;nt.captions=(nt.captions||[]).concat([{s:at,e:+Math.min(durOf(nt),at+2).toFixed(2),t:"New caption"}]).sort((x,y)=>x.s-y.s);
+        ED.sel={kind:"cl",take:nt.id,i:nt.captions.findIndex(x=>x.s===at&&x.t==="New caption")};try{T().Takes.persistMeta(nt)}catch(x){}p.capsOff=false;save(p);paintTimeline();paintInsp();return showFrame()}
+    }
+    if(a==="dl"){const t=takeById(b.getAttribute("data-take"));if(t&&t.blob){download(t.blob,String(t.name||"take").replace(/[^\w\- ().–]+/g,"").replace(/\s+/g,"-")+(/mp4/.test(t.mime||t.blob.type||"")?".mp4":".webm"));say("Downloading “"+t.name+"”.","",2000)}return}
     if(a==="srcopen"&&p&&p.src)return openFromProject(p);
     if(a==="recthis"&&p){wr(RK,p.id);closeLayer("lc79-ed");try{LC66.setTab(studioRoot(),"shoot")}catch(e){}say("Recording into “"+p.name+"”. Keys 1 to 4 switch the flow: board, feedback card, Lichess, landing page.","ok",5000);paintDock();return}
     if(a==="share"){return shareTake(b.getAttribute("data-take"))}
@@ -853,7 +1015,7 @@
     if(a==="lay-caps"&&p){p.capsOff=!p.capsOff;save(p);ED.paint();return}
     if(a==="hideit"&&p&&ED.sel&&(ED.sel.kind==="clip"||ED.sel.kind==="co"))return toggleHidden(ED.sel.kind,ED.sel.id);
     if(a==="var-save"&&p){const n=prompt("Name of this version (for example: Reel A, CTA 1)","Reel "+String.fromCharCode(65+((p.variants||[]).length%26)));if(!n||!n.trim())return;
-      const v=Object.assign({id:uid(),name:n.trim().slice(0,40)},visOf(p));p.variants=(p.variants||[]).filter(x=>!sameVis(x,v)).concat([v]).slice(-12);save(p);paintLayers();say("Version “"+v.name+"” saved: "+(v.clips.length+v.co.length)+" hidden layer"+(v.clips.length+v.co.length===1?"":"s")+(v.capsOff?", no captions":"")+".","ok",3200);return}
+      const v=Object.assign({id:uid(),name:n.trim().slice(0,40)},visOf(p));p.variants=(p.variants||[]).filter(x=>!sameVis(x,v)).concat([v]).slice(-12);save(p);paintLayers();const hn=v.tracks.length+v.clips.length+v.co.length;say("Version “"+v.name+"” saved: "+(v.tracks.length?"hidden track"+(v.tracks.length===1?"":"s")+" "+v.tracks.map(id=>(trackOf(p,id)||{}).name).join(", "):hn?hn+" hidden item"+(hn===1?"":"s"):"everything shown")+(v.capsOff?", no captions":"")+".","ok",3600);return}
     if(a==="var-apply"&&p){const v=(p.variants||[]).filter(x=>x.id===b.getAttribute("data-id"))[0];if(!v)return;stopPlay();snapEd(p);applyVis(p,v);save(p);ED.T=0;ED.paint();say("Layers of “"+v.name+"” in use.","",2200);return}
     if(a==="var-del"&&p){const v=(p.variants||[]).filter(x=>x.id===b.getAttribute("data-id"))[0];if(!v||!confirm("Delete the version “"+v.name+"”? The blocks and callouts stay."))return;p.variants=(p.variants||[]).filter(x=>x!==v);save(p);return paintLayers()}
     if(a==="var-all")return exportVersions();
@@ -884,6 +1046,10 @@
   }
   function onEdChange(e){
     const el=e.target,p=cur();
+    if(el.matches('[data-a="addco-sel"]')){const v=el.value;el.value="";if(v)addCallout(v);return}
+    if(el.matches('[data-f="trk_name"]')&&p&&ED.sel&&ED.sel.kind==="trk"){const t=trackOf(p,ED.sel.id);if(t){t.name=String(el.value||"").trim().slice(0,30)||t.name;save(p);paintCalls();paintTimeline()}return}
+    if(el.matches('[data-f="cl_t"]')&&ED.sel&&ED.sel.kind==="cl"){const t=takeById(ED.sel.take),c=t&&t.captions&&t.captions[ED.sel.i];if(c){const nt=String(el.value||"").replace(/\s+/g," ").trim().slice(0,240);if(c.w&&nt.split(" ").length!==c.w.length)delete c.w;c.t=nt;try{T().Takes.persistMeta(t)}catch(x){}paintTimeline();compose()}return}
+    if(el.matches('[data-f="track"]')&&p&&ED.sel&&ED.sel.kind==="co"){const c=selected();if(c&&trackOf(p,el.value)){snapEd(p);c.track=el.value;save(p);paintTimeline();compose()}return}
     if(el.matches('[data-a="pick"]')){stopPlay();db().cur=el.value;persist();ED.sel=null;ED.T=0;return ED.paint()}
     if(el.matches('[data-a="silmin"]')){setNle({cutMin:clamp(+el.value||4,.5,8)});return paintTop()}
     if(!p||!el.hasAttribute("data-f"))return;
@@ -908,6 +1074,7 @@
   let saveTo=0;
   function onEdInput(e){
     const el=e.target;
+    if(el.matches('[data-f="cl_t"]')&&ED.sel&&ED.sel.kind==="cl"){const t=takeById(ED.sel.take),c=t&&t.captions&&t.captions[ED.sel.i];if(c){const nt=String(el.value||"").replace(/\s+/g," ").slice(0,240);if(c.w&&nt.trim().split(" ").length!==c.w.length)delete c.w;c.t=nt;compose();clearTimeout(saveTo);saveTo=setTimeout(()=>{c.t=c.t.trim();try{T().Takes.persistMeta(t)}catch(x){}paintTimeline()},500)}return}
     if(el.matches('[data-a="scrub"]')){stopPlay();ED.T=+el.value||0;paintHead(true);return showFrame()}
     if(el.matches('[data-a="silmin"]')){const v=clamp(+el.value||4,.5,8),o=Q("[data-silv]",ED.el);if(o)o.textContent=v.toFixed(1)+" s";return}
     if(!el.hasAttribute("data-f")||!ED.sel)return;
@@ -935,10 +1102,11 @@
     const tTrack=()=>Q('[data-track="clips"]',el);
     const edgesOf=p=>{const segs=segments(p),out=[0,segs.total||0,ED.T];let last="";segs.forEach(s=>{if(s.clip.id!==last){out.push(s.T0);last=s.clip.id}});return out};
     tl.addEventListener("pointerdown",e=>{
-      if(!e.target.closest(".lc79-lane")||e.button>0)return;
+      if(!e.target.closest(".lc79-lane")||e.button>0||e.target.closest("button"))return;
       const p=cur(),tot=segments(p).total||0;if(!tot)return;
-      const r=laneEl().getBoundingClientRect(),hd=e.target.closest(".lc79-hd"),clip=e.target.closest(".lc79-clip"),co=e.target.closest(".lc79-co");
-      d={x0:e.clientX,moved:false,clip:clip,co:co,r:r,tot:tot,pps:r.width/tot,id:e.pointerId};
+      const r=laneEl().getBoundingClientRect(),hd=e.target.closest(".lc79-hd"),clip=e.target.closest(".lc79-clip"),co=e.target.closest(".lc79-co"),cl=e.target.closest(".lc79-cl");
+      d={x0:e.clientX,y0:e.clientY,moved:false,clip:clip,co:co,r:r,tot:tot,pps:r.width/tot,id:e.pointerId};
+      if(cl){const k=cl.getAttribute("data-cl").split("|"),t=takeById(k[0]),c=t&&t.captions&&t.captions[+k[1]];if(c){d.cl={el:cl,take:t,i:+k[1],c:c,s0:c.s,e0:c.e,w0:c.w?JSON.parse(JSON.stringify(c.w)):null,l0:parseFloat(cl.style.left)||0}}}
       if(hd&&clip){const id=clip.getAttribute("data-clip"),c=p.clips.filter(x=>x.id===id)[0],t=c&&takeById(c.take);
         if(c&&t){stopPlay();snapEd(p);d.trim={side:hd.getAttribute("data-h"),id:id,r0:clipRange(c,t)};ED.sel={kind:"clip",id:id}}}
       if(co){const c=p.callouts.filter(x=>x.id===co.getAttribute("data-co"))[0];d.c=c;d.t0=c?c.t:0;d.edges=edgesOf(p);snapEd(p)}
@@ -950,22 +1118,30 @@
       if(d.trim){const p=cur(),tr=d.trim;trimClip(p,tr.id,tr.side,(tr.side==="l"?tr.r0[0]:tr.r0[1])+dx/d.pps);paintTimeline({pps:d.pps});
         const ss=segments(p).filter(x=>x.clip.id===tr.id);if(ss.length){const z=ss[ss.length-1];ED.T=tr.side==="l"?ss[0].T0:Math.max(ss[0].T0,z.T0+(z.e-z.s)-.04);paintHead(true);clearTimeout(frameTo);frameTo=setTimeout(showFrame,40)}
         return}
+      if(d.cl){const dt=dx/d.pps,c=d.cl.c,D=durOf(d.cl.take),len=d.cl.e0-d.cl.s0,ns=clamp(d.cl.s0+dt,0,Math.max(0,D-len));c.s=+ns.toFixed(2);c.e=+(ns+len).toFixed(2);
+        if(d.cl.w0)c.w=d.cl.w0.map(w=>({s:+(w.s+ns-d.cl.s0).toFixed(2),e:+(w.e+ns-d.cl.s0).toFixed(2)}));d.cl.el.style.left=(d.cl.l0+(ns-d.cl.s0)/d.tot*100)+"%";return}
       if(d.clip){d.clip.classList.add("drag");let ins=Q(".lc79-ins",tl);if(!ins){ins=document.createElement("div");ins.className="lc79-ins";laneEl().appendChild(ins)}
         const idx=dropIndex(e.clientX);d.idx=idx;const bl=QA(".lc79-clip",tTrack()),r0=laneEl().getBoundingClientRect();
         const xx=idx>=bl.length?(bl.length?bl[bl.length-1].getBoundingClientRect().right:d.r.left):bl[idx].getBoundingClientRect().left;ins.style.left=(xx-r0.left-1)+"px"}
-      else if(d.c){let t=clamp(d.t0+dx/d.pps,0,d.tot);const th=8/d.pps;let bd=th;d.edges.forEach(x=>{const dd=Math.abs(x-t);if(dd<bd){bd=dd;t=x}});d.c.t=+t.toFixed(2);d.co.style.left=(d.c.t/d.tot*100)+"%"}
+      else if(d.c){let t=clamp(d.t0+dx/d.pps,0,d.tot);const th=8/d.pps;let bd=th;d.edges.forEach(x=>{const dd=Math.abs(x-t);if(dd<bd){bd=dd;t=x}});d.c.t=+t.toFixed(2);d.co.style.left=(d.c.t/d.tot*100)+"%";
+        /* 9.55.0: up or down moves the callout to another overlay track */
+        let row=null;try{const hit=document.elementFromPoint(e.clientX,e.clientY);row=hit&&hit.closest&&hit.closest(".lc79-track.co")}catch(x){}
+        if(row&&row!==d.co.parentNode){row.appendChild(d.co);d.newTrack=row.getAttribute("data-tid")}}
       else{ED.T=clamp((e.clientX-d.r.left)/d.r.width*d.tot,0,d.tot);paintHead(true)}
     });
     const end=e=>{
       if(!d)return;const p=cur(),dd=d;d=null;const ins=Q(".lc79-ins",tl);if(ins)ins.remove();
       if(dd.trim){if(dd.moved){save(p);ED.paint();return}ED.undo.pop();const s=segments(p).filter(x=>x.clip.id===dd.trim.id)[0];if(s)ED.T=s.T0;paintTop();paintTimeline();paintInsp();return showFrame()}
       if(dd.clip&&dd.moved&&dd.idx!=null){const id=dd.clip.getAttribute("data-clip"),i=p.clips.findIndex(c=>c.id===id);if(i>=0){let j=dd.idx;if(j>i)j--;if(j!==i){snapEd(p);const c=p.clips.splice(i,1)[0];p.clips.splice(j,0,c);save(p)}}ED.sel={kind:"clip",id:id};return ED.paint()}
-      if(dd.c){if(!dd.moved)ED.undo.pop();else{p.callouts.sort((a,b)=>a.t-b.t);save(p)}ED.sel={kind:"co",id:dd.c.id};stopPlay();ED.T=dd.c.t;paintTop();paintTimeline();paintInsp();return showFrame()}
+      if(dd.cl){ED.sel={kind:"cl",take:dd.cl.take.id,i:dd.cl.i};stopPlay();if(dd.moved){try{T().Takes.persistMeta(dd.cl.take)}catch(x){}}
+        const it=capItems(p).filter(x=>x.take.id===dd.cl.take.id&&x.i===dd.cl.i)[0];if(it)ED.T=it.T0;paintTop();paintTimeline();paintInsp();return showFrame()}
+      if(dd.c){if(dd.newTrack&&trackOf(p,dd.newTrack)){dd.c.track=dd.newTrack;dd.moved=true}if(!dd.moved)ED.undo.pop();else{p.callouts.sort((a,b)=>a.t-b.t);save(p);if(dd.newTrack)say("Moved to "+trackOf(p,dd.newTrack).name+".","",1600)}ED.sel={kind:"co",id:dd.c.id};stopPlay();ED.T=dd.c.t;paintTop();paintTimeline();paintInsp();return showFrame()}
       if(dd.clip){const id=dd.clip.getAttribute("data-clip");ED.sel={kind:"clip",id:id};stopPlay();const x=clamp((e.clientX-dd.r.left)/dd.r.width*dd.tot,0,dd.tot);ED.T=x;paintTop();paintTimeline();paintInsp();return showFrame()}
       stopPlay();if(!dd.moved){ED.T=clamp((e.clientX-dd.r.left)/dd.r.width*dd.tot,0,dd.tot)}ED.sel=null;paintTop();paintTimeline();paintInsp();showFrame();
     };
     tl.addEventListener("pointerup",end);tl.addEventListener("pointercancel",()=>{if(d&&d.trim&&d.moved)save(cur());d=null;const ins=Q(".lc79-ins",tl);if(ins)ins.remove()});
-    tl.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ")return;const c=e.target.closest(".lc79-clip,.lc79-co");if(!c)return;e.preventDefault();ED.sel=c.classList.contains("lc79-clip")?{kind:"clip",id:c.getAttribute("data-clip")}:{kind:"co",id:c.getAttribute("data-co")};paintTop();paintTimeline();paintInsp()});
+    tl.addEventListener("keydown",e=>{if(e.key!=="Enter"&&e.key!==" ")return;const c=e.target.closest(".lc79-clip,.lc79-co,.lc79-cl");if(!c)return;e.preventDefault();
+      if(c.classList.contains("lc79-cl")){const k=c.getAttribute("data-cl").split("|");ED.sel={kind:"cl",take:k[0],i:+k[1]}}else ED.sel=c.classList.contains("lc79-clip")?{kind:"clip",id:c.getAttribute("data-clip")}:{kind:"co",id:c.getAttribute("data-co")};paintTop();paintTimeline();paintInsp()});
     function dropIndex(x){const bl=QA(".lc79-clip",tTrack());for(let i=0;i<bl.length;i++){const r=bl[i].getBoundingClientRect();if(x<r.left+r.width/2)return i}return bl.length}
     /* drag a take from the archive onto the timeline (mouse) */
     el.addEventListener("dragstart",e=>{const c=e.target.closest&&e.target.closest(".lc79-card");if(!c)return;try{e.dataTransfer.setData("text/plain","lc79:"+c.getAttribute("data-take"));e.dataTransfer.effectAllowed="copy"}catch(x){}});
@@ -1581,7 +1757,7 @@ BCLOSE);
       +(p?'<button type="button" class="btn sm" data-p="open">Open the timeline</button>':'<select aria-label="Add this take to a project"><option value="">Add to a project…</option>'+opts+'<option value="+">+ New project</option></select>')
       +'<button type="button" class="btn sm" data-p="caps">Captions</button><button type="button" class="btn sm" data-p="x" aria-label="Close">×</button>';
     lcs.appendChild(bar);
-    bar.addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(!b)return;const a=b.getAttribute("data-p");if(a==="x")return bar.remove();if(a==="caps"){bar.remove();return gotoCaptions(t.id)}if(a==="open"){bar.remove();if(p){db().cur=p.id;persist()}return openProjects()}});
+    bar.addEventListener("click",e=>{const b=e.target.closest("[data-p]");if(!b)return;const a=b.getAttribute("data-p");if(a==="x")return bar.remove();if(a==="caps"){bar.remove();openProjects();ED.sel={kind:"cap"};return ED.paint()}if(a==="open"){bar.remove();if(p){db().cur=p.id;persist()}return openProjects()}});
     const sel=Q("select",bar);if(sel)sel.addEventListener("change",()=>{let pid=sel.value;if(!pid)return;if(pid==="+"){const n=prompt("Name of the new project","Reel "+(db().list.length+1));if(n===null)return;const np=newProject(n.trim()||null);pid=np.id}const pp=projById(pid);if(pp){pp.clips=pp.clips.concat(clipsFor(t,pp));save(pp);say(t.name+" added to “"+pp.name+"”.","ok",2500);showPost(t,pp);paintDock()}});
     clearTimeout(showPost.to);showPost.to=setTimeout(()=>{try{bar.remove()}catch(e){}},25e3);
   }
@@ -2255,5 +2431,5 @@ BCLOSE);
   }
   return{camSrc:camSrc,drawUnder:drawUnder,applyScene:applyScene,scene:scS,srcRect:srcRect,sceneRects:sceneRects,boardIn:boardIn,shareScreen:shareScreen,inState:()=>({kind:IN.kind,live:IN.live,snap:!!IN.snap,shot:!!IN.shotV,el:!!IN.el}),writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
     segments:segments,run:run,envThr:envThr,findQuiet:findQuiet,envDt:envDt,speechRanges:speechRanges,minus:minus,complement:complement,clipsFor:clipsFor,splitClip:splitClip,splitAt:splitAt,trimClip:trimClip,deleteClip:deleteClip,cutSilences:cutSilences,autoSilence:autoSilence,envOf:envOf,capStyle:capStyle,capLine:capLine,drawCaption:drawCaption,nle:nle,undo:undo,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,pawnCheck:pawnCheck,BCLOSE:BCLOSE,boardSVG:boardSVG,sfx:sfx,
-    BUILT:BUILT,db:db,newProject:newProject,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
+    BUILT:BUILT,db:db,newProject:newProject,tracksOf:tracksOf,coOn:coOn,capItems:capItems,visOf:visOf,applyVis:applyVis,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/
