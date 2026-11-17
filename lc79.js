@@ -1371,7 +1371,7 @@
   /* 9.56.0: the diagnosis of THIS mistake (LC83.diagnose: the board, Stockfish's better move and refutation, their last move and threat) */
   function diagOf(g,it){
     try{if(typeof LC83==="undefined"||!LC83.diagnose)return null;const m=g.moves[it.i],pm=it.i>0?g.moves[it.i-1]:null;if(!m)return null;
-      return LC83.diagnose({fen:g.fens[it.i],color:it.color,played:{from:m.from,to:m.to,promotion:m.promotion||"q",san:m.san},bestUci:it.best||"",replyUci:it.reply||"",
+      return LC83.diagnose({fen:g.fens[it.i],color:it.color,played:{from:m.from,to:m.to,promotion:m.promotion||"q",san:m.san},bestUci:it.best||"",replyUci:it.reply||"",bestPv:it.bestPv,replyPv:it.replyPv,replyMate:it.replyMate,
         prevFen:it.i>0?g.fens[it.i-1]:null,oppUci:pm&&pm.from?pm.from+pm.to+(pm.promotion||""):null,threatUci:it.threat&&it.threat.best||""})}catch(e){return null}
   }
   function makeCase(g,it){
@@ -1415,6 +1415,10 @@
       +'<div class="lc79-fact mo"><b>'+esc(mv+it.san)+(it.cls==="blunder"?"??":"?")+'</b>'+(it.bestSan?' Better: <b>'+esc(it.bestSan)+'</b>.':'')+' It cost about '+loss+'% win chance.</div>'
       +(c.error?'<div class="lc79-fact mo"><b>What went wrong:</b> '+esc(c.error)+'</div>':c.change&&c.change.length?'<div class="lc79-fact mo"><b>What it changed:</b> '+esc(c.change.join(" "))+'</div>':'')+'<div class="lc79-fact mo"><b>Motif: '+esc(c.motif.label)+'.</b> '+esc(c.motif.text)+'</div>'
       +(c.diag&&c.diag.why?'<div class="lc79-fact"><b>Their last move:</b> '+esc(c.diag.why)+'</div>':'')
+      +(c.diag&&c.diag.blind?'<div class="lc79-fact"><b>Why a human misses it ('+esc(c.diag.blind.label)+'):</b> '+esc(c.diag.blind.text)+'</div>':'')
+      +(c.diag&&c.diag.line&&c.diag.line.ref?'<div class="lc79-fact"><b>Stockfish:</b> after '+esc(it.san)+': '+esc(c.diag.line.ref)+(c.diag.line.best?'. Better: '+esc(c.diag.line.best):'')+'.</div>':'')
+      +(c.diag&&c.diag.train?'<div class="lc79-fact"><b>Training theme:</b> '+esc(c.diag.train.label)+'</div>':'')
+      +(c.diag&&window.LC92?LC92.block(c.diag,{fen:c.fen||(AI.g&&AI.g.fens[it.i]),color:it.color,san:it.san,num:it.num}):'')
       +'<div class="lc79-fact al"><b>Alarm Signal:</b> '+(c.alarm?esc(c.alarm.label)+". "+esc(c.alarm.say):"none of the standard alarms; the error came from skipping an MSPC step.")+'</div>'
       +'<div class="lc79-fact wp"><b>Working Point ('+LN[c.letter]+'):</b> '+esc(c.wp)+'</div>'
       +'<div class="lc79-fact"><b>Action Step:</b> '+esc(c.action)+'</div>'
@@ -1502,7 +1506,7 @@
 "- Working Point ("+LN[c.letter]+"): "+c.wp,
 "- Action Step: "+c.action,
 (c.error?"- What went wrong: "+c.error:null),
-(c.diag&&c.diag.find?"- How a human finds the better move: "+c.diag.find:null),
+(c.diag&&c.diag.find?"- How a human finds the better move: "+c.diag.find:null),(c.diag&&c.diag.blind?"- Why a human misses it ("+c.diag.blind.label+"): "+c.diag.blind.text:null),(c.diag&&c.diag.line&&c.diag.line.ref?"- Stockfish after the mistake: "+c.diag.line.ref+(c.diag.line.lost?" ("+c.diag.line.lost+")":""):null),(c.diag&&c.diag.line&&c.diag.line.best?"- Stockfish's better line: "+c.diag.line.best:null),
 "",
 "LICHESS SIMILAR POSITION",
 (s?"- Puzzle: "+s.id+" (rating "+s.rating+", themes "+s.themes.slice(0,6).join(", ")+"), https://lichess.org/training/"+s.id:"- Puzzle: none found right now (same motif: "+c.motif.label+")"),

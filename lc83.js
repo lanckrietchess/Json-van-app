@@ -197,7 +197,263 @@ const LC83=(()=>{
   }
   function kingRoom(fen,c){try{const g=new Chess();if(!g.load(withSide(fen,c)))return 0;return g.moves({verbose:true}).filter(m=>m.piece==="k").length}catch(e){return 0}}
   function mobility(fen,sq){try{const B=new Chess(fen),p=B.get(sq);if(!p)return 0;const g=new Chess();if(!g.load(withSide(fen,p.color)))return 0;return g.moves({square:sq,verbose:true}).length}catch(e){return 0}}
+  /* ======================= 1c. COACH BRAIN (9.56.0): Stockfish's lines read move by move =======================
+     No AI and no stock sentence: every line below is computed from THIS game.
+       walk     plays a principal variation and keeps every board on the way
+       motifs   what the line really does: fork, pin, skewer, discovered attack, removing the defender, deflection,
+                in-between move, trapped piece, promotion, back-rank / smothered mate, a quiet killer
+       blind    why a human misses it: hope chess, greed, a backward or long move, a quiet move, the point came later,
+                the other wing, the expected recapture
+       swing    what the line wins or loses, in pieces
+       train    the puzzle theme that trains exactly this pattern
+       pattern  how often the same cause or blind spot came back in this player's reviewed games */
+  const PV=(a,u)=>(Array.isArray(a)&&a.length?a:u?[u]:[]).filter(x=>/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(String(x)));
+  function walk(fen,pv,max){
+    const steps=[];let g=null;try{g=new Chess(fen)}catch(e){return steps}
+    for(const u of PV(pv).slice(0,max||8)){
+      const fb=g.fen();let m=null;try{m=g.move(uciMove(u))}catch(e){m=null}if(!m)break;
+      steps.push({m:m,before:fb,after:g.fen(),check:g.in_check(),mate:g.in_checkmate(),B0:parse(fb),B1:parse(g.fen())});
+      if(g.game_over())break;
+    }
+    return steps;
+  }
+  function sanLine(steps,n){
+    return steps.slice(0,n||6).map((s,i)=>{const no=+String(s.before).split(" ")[5]||1;return(s.m.color==="w"?no+".":i===0?no+"...":"")+s.m.san}).join(" ");
+  }
+  const mat=(B,c)=>Object.keys(B).reduce((t,q)=>t+(B[q].c===c&&B[q].t!=="k"?VAL[B[q].t]:0),0);
+  const bal=(B,me)=>mat(B,me)-mat(B,other(me));
+  /* material change for `me` over the line, with one look at a capture that is still hanging at the end */
+  function swingOf(fen,steps,me){
+    if(!steps.length)return{net:0,mate:false,lost:[],won:[]};
+    const B0=parse(fen),last=steps[steps.length-1];let net=bal(last.B1,me)-bal(B0,me);
+    const lost=[],won=[];steps.forEach(s=>{if(s.m.captured){(s.m.color===me?won:lost).push(NAME[s.m.captured])}if(s.m.promotion)(s.m.color===me?won:lost).push("a new "+NAME[s.m.promotion])});
+    if(last.m.captured&&!last.mate){const B=last.B1,sq=last.m.to,p=B[sq];if(p){const att=attackers(B,sq,other(p.c)),def=attackers(B,sq,p.c).length;
+      if(att.length){const cheapest=Math.min.apply(null,att.map(a=>VAL[B[a].t]));const back=!def?VAL[p.t]:Math.max(0,VAL[p.t]-cheapest);net+=(p.c===me?-1:1)*back}}}
+    return{net:net,mate:last.mate&&last.m.color!==me?"them":last.mate?"me":false,lost:lost,won:won};
+  }
+  const SLIDE={b:[[1,1],[1,-1],[-1,1],[-1,-1]],r:[[1,0],[-1,0],[0,1],[0,-1]]};SLIDE.q=SLIDE.b.concat(SLIDE.r);
+  /* pins and skewers that side `s` has on the board B */
+  function lineTricks(B,s){
+    const out=[];
+    Object.keys(B).forEach(sq=>{const p=B[sq];if(p.c!==s||!SLIDE[p.t])return;const f0=FILES.indexOf(sq[0]),r0=+sq[1];
+      SLIDE[p.t].forEach(d=>{let f=f0+d[0],r=r0+d[1],first=null;
+        while(on(f,r)){const q=FILES[f]+r,x=B[q];if(x){if(x.c===s)break;if(!first)first=q;else{
+          const a=B[first],b=x;
+          if(b.t==="k"&&a.t!=="p")out.push({id:"pin",by:sq,front:first,behind:q,abs:true});
+          else if(a.t!=="p"&&a.t!=="k"&&VAL[b.t]>=5&&VAL[b.t]>VAL[a.t]&&VAL[a.t]>=VAL[p.t]-2)out.push({id:"pin",by:sq,front:first,behind:q,abs:false});
+          else if((a.t==="k"||(VAL[a.t]>=5&&VAL[a.t]>VAL[b.t]))&&VAL[b.t]>=3&&b.t!=="k"&&VAL[b.t]>=VAL[p.t]-2)out.push({id:"skewer",by:sq,front:first,behind:q});
+          break}}f+=d[0];r+=d[1]}})});
+    return out;
+  }
+  const key=t=>t.id+t.by+t.front+t.behind;
+  /* the targets one piece hits that are worth more than it, undefended, or the king */
+  const targetsOf=(B,sq)=>{const p=B[sq];if(!p)return[];return attacksFrom(B,sq).filter(t=>B[t]&&B[t].c!==p.c&&(B[t].t==="k"||(B[t].t!=="p"&&(VAL[B[t].t]>VAL[p.t]||!attackers(B,t,B[t].c).length))))};
+  const nm=(B,sq,own)=>(B[sq]&&B[sq].t==="k"?own+" king":own+" "+(B[sq]?NAME[B[sq].t]:"piece"))+" on "+sq;
+  function motifsOf(fen,steps,s,pov){
+    const M=[],own=s===pov?"your":"their",vic=s===pov?"their":"your";
+    steps.forEach((st,i)=>{if(st.m.color!==s)return;const B0=st.B0,B1=st.B1,m=st.m;
+      if(st.mate){const ks=m.to,kk=kingSq(B1,other(s)),home=other(s)==="w"?"1":"8",nb=zone(kk).filter(q=>q!==kk);
+        if(m.piece==="n"&&nb.every(q=>(B1[q]&&B1[q].c===other(s))||attacksFrom(B1,ks).indexOf(q)>=0))M.push({id:"smothered",ply:i,label:"Smothered mate",text:m.san+" is a smothered mate: the king on "+kk+" is boxed in by its own pieces."});
+        else if(kk[1]===home&&/[rq]/.test(m.piece)&&m.to[1]===home)M.push({id:"backRank",ply:i,label:"Back-rank mate",text:m.san+" mates on the back rank: the pawns in front of the king on "+kk+" took away its escape squares."});
+        else M.push({id:"mateNet",ply:i,label:"Mating net",text:m.san+" is checkmate."});return}
+      if(m.promotion){M.push({id:"promotion",ply:i,label:"Promotion",text:"The pawn promotes with "+m.san+"."});}
+      const tg=targetsOf(B1,m.to);
+      if(tg.length>=2&&tg.some(q=>B1[q].t==="k"||VAL[B1[q].t]>=3))M.push({id:"fork",ply:i,label:m.piece==="n"?"Knight fork":m.piece==="p"?"Pawn fork":"Fork",text:m.san+" forks "+list(tg.map(q=>nm(B1,q,vic)))+"."});
+      /* discovered attack: another long-range piece of `s` now hits something big */
+      Object.keys(B1).forEach(q=>{const x=B1[q];if(x.c!==s||q===m.to||!SLIDE[x.t])return;const a0=B0[q]&&B0[q].t===x.t?attacksFrom(B0,q):[];
+        attacksFrom(B1,q).filter(t=>a0.indexOf(t)<0&&B1[t]&&B1[t].c!==s&&(B1[t].t==="k"||VAL[B1[t].t]>=3)).slice(0,1).forEach(t=>{
+          if(!M.some(z=>z.id==="discovered"&&z.ply===i))M.push({id:"discovered",ply:i,label:B1[t].t==="k"?"Discovered check":"Discovered attack",text:m.san+" moves out of the way: "+nm(B1,q,own)+" now hits "+nm(B1,t,vic)+"."})})});
+      /* new pins and skewers */
+      const before={};lineTricks(B0,s).forEach(t=>{before[key(t)]=1});
+      lineTricks(B1,s).filter(t=>!before[key(t)]&&(t.by===m.to||t.front===m.to||t.behind===m.to||i===0)).slice(0,1).forEach(t=>{
+        M.push(t.id==="pin"?{id:"pin",ply:i,label:"Pin",text:m.san+" pins "+nm(B1,t.front,vic)+" to "+nm(B1,t.behind,vic)+(t.abs?": it cannot move at all.":".")}
+          :{id:"skewer",ply:i,label:"Skewer",text:m.san+" skewers "+nm(B1,t.front,vic)+": when it moves, "+nm(B1,t.behind,vic)+" falls."})});
+      /* removing the defender / deflection: this capture or check takes away the guard of what is won later */
+      const later=steps.slice(i+1).filter(z=>z.m.color===s&&z.m.captured)[0];
+      if(later&&(m.captured||st.check)){
+        const tsq=later.m.to;
+        if(m.captured&&B0[m.to]&&attacksFrom(B0,m.to).indexOf(tsq)>=0&&B0[tsq]&&B0[tsq].c!==s&&!attackers(later.B1,tsq,other(s)).length)M.push({id:"removal",ply:i,label:"Removing the defender",text:m.san+" takes the "+NAME[m.captured]+" that guarded "+tsq+"; then "+later.m.san+" wins on "+tsq+"."});
+        else{const ans=steps[i+1];if(ans&&ans.m.color!==s&&ans.m.from!==tsq&&ans.m.to!==tsq&&attacksFrom(B0,ans.m.from).indexOf(tsq)>=0&&attacksFrom(ans.B1,ans.m.to).indexOf(tsq)<0)
+          M.push({id:"deflection",ply:i,label:"Deflection",text:m.san+" drags the "+NAME[ans.m.piece]+" away from "+ans.m.from+", where it guarded "+tsq+"; "+later.m.san+" follows."})}}
+    });
+    return M;
+  }
+  function trappedIn(B,fen,me){
+    let g=null;try{g=new Chess();if(!g.load(withSide(fen,me)))return null}catch(e){return null}
+    const ms=g.moves({verbose:true});
+    for(const sq of Object.keys(B)){const p=B[sq];if(p.c!==me||p.t==="k"||p.t==="p"||VAL[p.t]<3)continue;
+      const att=attackers(B,sq,other(me));if(!att.length)continue;
+      if(!(att.some(a=>VAL[B[a].t]<VAL[p.t])||!defended(B,sq)))continue;
+      const safe=ms.filter(m=>m.from===sq).filter(m=>{const t=new Chess(g.fen());t.move(m);const B2=parse(t.fen());const a=attackers(B2,m.to,other(me));return !a.length||(m.captured&&VAL[m.captured]>=VAL[p.t])});
+      if(!safe.length)return{sq:sq,t:p.t};
+    }
+    return null;
+  }
+  const dist=(a,b)=>Math.max(Math.abs(FILES.indexOf(a[0])-FILES.indexOf(b[0])),Math.abs(+a[1]-+b[1]));
+  const backward=m=>m.piece!=="p"&&(m.color==="w"?+m.to[1]<+m.from[1]:+m.to[1]>+m.from[1]);
+  /* why a human misses it: one blind spot, the first that is true */
+  function blindOf(r,P,refSteps,refSwing,pfx,bestSteps,punished){
+    const R=refSteps[0],B=bestSteps&&bestSteps[0];
+    if(!punished){
+      if(!B)return null;const bm=B.m,bs=bm.san;
+      if(B.mate)return{id:"ownMate",label:"Your own checks",text:bs+" was mate. When you are attacking, play through every check first, even the ones that look silly.",habit:"Start every move with your own checks, the most forcing first."};
+      if(bm.piece==="n"&&(B.check||bestSteps.length>2))return{id:"knight",label:"A knight jump",text:bs+" is a knight move. Knights jump instead of sliding along a line, so the eye does not follow them.",habit:"For every knight, picture its jumps before you choose a move."};
+      if(backward(bm))return{id:"ownBackward",label:"A backward move of your own",text:bs+" goes backwards. Our candidate moves usually go forward, so it never got checked.",habit:"Include backward moves in your candidate list."};
+      const B1=B.B1;if(!bm.captured&&attackers(B1,bm.to,other(bm.color)).length&&!defended(B1,bm.to)&&bm.piece!=="p")return{id:"sacrifice",label:"A move that gives material",text:bs+" puts the "+NAME[bm.piece]+" where it can be taken. Humans skip moves that seem to give material away; this one works.",habit:"Look at moves that give material when your opponent's king or a piece is exposed."};
+      const bf=moveFacts(B.before,bm,bm.color);
+      if(!B.check&&!bm.captured&&bf&&bf.facts.some(x=>(x.k==="threat"||x.k==="line")&&/(knight|bishop|rook|queen|king) on/.test(x.t)))return{id:"ownThreat",label:"An attack, not a capture",text:bs+" is no check and no capture, but it attacks: "+factText(bf,1,/threat|line/).replace(/^It /,"it ")+" A scan of only checks and captures skips it.",habit:"In the CCA scan, the A counts: after checks and captures, list the moves that attack something."};
+      if(!B.check&&!bm.captured)return{id:"ownQuiet",label:"A quiet move",text:bs+" is no check and no capture. A quiet move that improves your position is found by comparing, not by scanning.",habit:"In quiet positions, compare two candidate moves on one question: which piece improves?"};
+      return null}
+    if(!R)return null;const rm=R.m,ps=P.m.san,rs=rm.san;
+    const forcing=st=>st.check||st.m.captured;
+    const gainAt=(()=>{let i=refSteps.findIndex(st=>st.m.color!==P.m.color&&(st.m.captured||st.mate));return i})();
+    if(P.m.captured&&rm.to!==P.m.to&&(R.check||(rm.captured&&VAL[rm.captured]>=3)))
+      return{id:"intermezzo",label:"The expected recapture never came",text:"After "+ps+" you expected them to take back. "+rs+" comes first"+(R.check?", with check":"")+".",habit:"After every capture, ask: do they have to take back, or is there a check or a bigger capture first?"};
+    const fp=lineTricks(R.B0,P.m.color).filter(t=>t.id==="pin"&&!t.abs&&t.front===rm.from)[0];
+    if(fp)return{id:"fakePin",label:"A pin that was not a real pin",text:"You counted on the pin of their "+NAME[rm.piece]+" on "+rm.from+". It was pinned to the "+NAME[R.B0[fp.behind].t]+" on "+fp.behind+", not to the king, so it could still move: "+rs+".",habit:"Before you rely on a pin, ask: is it pinned to the king? If not, check what happens when it moves anyway."};
+    if(pfx&&pfx.facts.some(x=>/threat|line|check|king/.test(x.k))&&(forcing(R)||refSwing.net<=-2||refSwing.mate))
+      return{id:"hope",label:"Looking at your own threat",text:ps+" made a threat of its own, and that is where your attention went. Their answer "+rs+" is stronger than your threat.",habit:"When a move makes a threat, look first at their most forcing reply, then at your threat."};
+    if(P.m.captured&&refSwing.net<=-(VAL[P.m.captured]+1))
+      return{id:"greed",label:"Material that was not free",text:ps+" took the "+NAME[P.m.captured]+", but the line costs you more than it gave.",habit:"Before you take, ask what the capture gives them: a check, an open line or a loose piece."};
+    if(backward(rm))return{id:"backward",label:"A backward move",text:rs+" moves backwards. Our eyes look forward; backward moves are the ones we do not see.",habit:"When you check their replies, include the moves that go backwards."};
+    if(/[bqr]/.test(rm.piece)&&dist(rm.from,rm.to)>=4)return{id:"long",label:"A long-range move",text:"Their "+NAME[rm.piece]+" comes from "+rm.from+", "+dist(rm.from,rm.to)+" squares away. Long moves from the other side of the board are easy to miss.",habit:"Before you move, follow every open line of their bishops, rooks and queen to the end."};
+    if(!forcing(R)&&(refSwing.net<=-2||refSwing.mate))return{id:"quiet",label:"A quiet move",text:rs+" is no check and no capture, so a quick scan of their checks and captures misses it. It still wins.",habit:"After the checks and captures, ask one more question: which quiet move of theirs makes a new threat?"};
+    if(gainAt>=2)return{id:"late",label:"The point came later",text:"Nothing is lost on their first move. The damage comes "+Math.ceil(gainAt/2)+" move"+(gainAt>=4?"s":"")+" later in the line: "+sanLine(refSteps,gainAt+1)+".",habit:"When their reply is forcing, calculate one move further than feels necessary."};
+    if(Math.abs(FILES.indexOf(P.m.to[0])-FILES.indexOf(rm.to[0]))>=4)return{id:"wing",label:"The other side of the board",text:ps+" was played on the "+(FILES.indexOf(P.m.to[0])<4?"queenside":"kingside")+"; the punishment comes on the "+(FILES.indexOf(rm.to[0])<4?"queenside":"kingside")+".",habit:"Before you move, look once at the other side of the board."};
+    return null;
+  }
+  const TRAIN={fork:"fork",pin:"pin",skewer:"skewer",discovered:"discoveredAttack",removal:"capturingDefender",deflection:"deflection",intermezzo:"intermezzo",
+    trapped:"trappedPiece",promotion:"promotion",backRank:"backRankMate",smothered:"smotheredMate",mateNet:"mateIn1",quiet:"quietMove",
+    counter:"intermezzo",allowedMate:"mateIn1",missedMate:"mateIn1",blocker:"xRayAttack",hanging:"hangingPiece",leftDefence:"hangingPiece",doubleAttack:"fork",missedTactic:"hangingPiece"};
+  const TRAIN_LABEL={fork:"Fork",pin:"Pin",skewer:"Skewer",discoveredAttack:"Discovered attack",capturingDefender:"Capturing the defender",deflection:"Deflection",
+    intermezzo:"In-between move",counter:"In-between move",trappedPiece:"Trapped piece",promotion:"Promotion",backRankMate:"Back-rank mate",smotheredMate:"Smothered mate",mateIn1:"Mate in 1",
+    quietMove:"Quiet move",xRayAttack:"X-ray attack",hangingPiece:"Hanging piece",pawnEndgame:"Pawn endgame",rookEndgame:"Rook endgame",advancedPawn:"Advanced pawn",opening:"Opening",castling:"Castling"};
+  /* this player's own history of causes (Trim reviews of their own games only) */
+  const MEM="lc83-brain";
+  function remember(d,id){
+    if(!d||!id)return;const m=rd(MEM,{})||{},it=m.items||{};if(it[id])return;
+    it[id]={t:Date.now(),c:d.id,b:d.blind?d.blind.id:"",m:(d.motifs||[]).map(x=>x.id).slice(0,3)};
+    const ks=Object.keys(it).sort((a,b)=>it[a].t-it[b].t);while(ks.length>300)delete it[ks.shift()];
+    m.items=it;wr(MEM,m);
+  }
+  function patternOf(d,id){
+    try{const it=(rd(MEM,{})||{}).items||{},ks=Object.keys(it).filter(k=>k!==id&&Date.now()-it[k].t<60*864e5);if(ks.length<3)return"";
+      const same=f=>ks.filter(k=>f(it[k])).length;
+      if(d.blind){const n=same(x=>x.b===d.blind.id);if(n>=2)return"This blind spot (“"+d.blind.label.toLowerCase()+"”) cost you "+(n+1)+" times in your last "+(ks.length+1)+" reviewed mistakes. It is your pattern, so it is your training.";}
+      const n=same(x=>x.c===d.id);if(n>=2)return"The same kind of mistake (“"+d.alarm.label.toLowerCase()+"”) came back "+(n+1)+" times in your last "+(ks.length+1)+" reviewed mistakes.";
+      const mo=(d.motifs||[])[0];if(mo){const k=same(x=>(x.m||[]).indexOf(mo.id)>=0);if(k>=2)return"The "+mo.label.toLowerCase()+" hit you "+(k+1)+" times in your last "+(ks.length+1)+" reviewed mistakes.";}
+    }catch(e){}
+    return"";
+  }
+  /* quiet positions: pawn structure, opening and endgame facts, only when they are true */
+  function quietFacts(fen,pu,bestUci,me){
+    const F=[];try{
+      const P=playOn(fen,pu),Bm=bestUci?playOn(fen,bestUci):null;if(!P)return F;
+      const B0=parse(fen),B1=parse(P.after),full=+String(fen).split(" ")[5]||1;
+      const pf=(B,c)=>{const o={};Object.keys(B).forEach(q=>{if(B[q].t==="p"&&B[q].c===c)o[q[0]]=(o[q[0]]||0)+1});return o};
+      const p0=pf(B0,me),p1=pf(B1,me);
+      Object.keys(p1).forEach(f=>{const i=FILES.indexOf(f),iso=B=>!(B[FILES[i-1]]||B[FILES[i+1]]);
+        if(p1[f]>=2&&!(p0[f]>=2))F.push({k:"doubled",t:P.m.san+" doubles your pawns on the "+f+"-file."});
+        if(iso(p1)&&!(p0[f]&&iso(p0)))F.push({k:"isolated",t:P.m.san+" leaves your "+f+"-pawn isolated: no pawn next to it can ever defend it."})});
+      const nonPawn=c=>Object.keys(B0).filter(q=>B0[q].c===c&&/[nbrq]/.test(B0[q].t)).reduce((t,q)=>t+VAL[B0[q].t],0);
+      const endgame=nonPawn("w")+nonPawn("b")<=26;
+      const cen=q=>Math.max(Math.abs(FILES.indexOf(q[0])-3.5),Math.abs(+q[1]-4.5));
+      if(Bm&&endgame&&Bm.m.piece==="k"&&P.m.piece==="k"&&cen(Bm.m.to)<cen(P.m.to))F.push({k:"kingact",t:Bm.m.san+" walks the king toward the centre and the pawns; "+P.m.san+" walks it toward the edge. In the endgame every king step counts."});
+      if(Bm&&endgame&&Bm.m.piece==="k"&&P.m.piece!=="k")F.push({k:"kingact",t:"In the endgame the king is a fighting piece: "+Bm.m.san+" brings it closer to the action, "+P.m.san+" leaves it waiting."});
+      if(Bm&&endgame&&Bm.m.piece==="r"){const B2=parse(Bm.after);const pp=Object.keys(B2).filter(q=>B2[q].t==="p"&&passed(B2,q)&&q[0]===Bm.m.to[0]);if(pp.length)F.push({k:"rookpass",t:Bm.m.san+" puts the rook on the file of the passed pawn on "+pp[0]+": rooks belong behind passed pawns."})}
+      if(Bm&&Bm.m.piece==="p"&&passed(parse(Bm.after),Bm.m.to))F.push({k:"passer",t:Bm.m.san+" pushes a passed pawn: every step forward ties up one of their pieces."});
+      if(full<=12){
+        const home=me==="w"?"1":"8",undev=Object.keys(B0).filter(q=>B0[q].c===me&&/[nb]/.test(B0[q].t)&&q[1]===home).length;
+        if(P.m.piece==="q"&&undev>=2)F.push({k:"earlyq",t:P.m.san+" moves the queen while "+undev+" of your minor pieces are still at home."});
+        if(Bm&&/O-O/.test(Bm.m.san)&&!/O-O/.test(P.m.san))F.push({k:"castle",t:Bm.m.san+" was the move: your king was still in the centre."});
+        if(Bm&&/[nb]/.test(Bm.m.piece)&&Bm.m.from[1]===home&&!(/[nb]/.test(P.m.piece)&&P.m.from[1]===home)&&undev>=2)F.push({k:"develop",t:Bm.m.san+" develops a piece; "+P.m.san+" does not, with "+undev+" minor pieces still at home."});
+      }
+      if(Bm){const m0=mobility(fen,Bm.m.from),m1=mobility(Bm.after,Bm.m.to);if(m1>=m0+3)F.push({k:"activate",t:Bm.m.san+" brings your "+NAME[Bm.m.piece]+" from "+m0+" to "+m1+" squares."})}
+    }catch(e){}
+    return F;
+  }
   function diagnose(r){
+    const d=diagnoseCore(r);if(!d)return d;
+    try{brain(r,d)}catch(e){}
+    return d;
+  }
+  /* adds the line reading to a diagnosis, and replaces a weak cause (missed tactic / positional) when the refutation line shows a motif */
+  function brain(r,d){
+    const fen=r.fen,me=r.color||(String(fen).split(" ")[1]||"w"),them=other(me);
+    const pu=r.played&&r.played.from?{from:r.played.from,to:r.played.to,promotion:r.played.promotion||"q"}:r.playedUci;
+    const P=playOn(fen,pu);if(!P)return d;
+    const ref=walk(P.after,PV(r.replyPv,r.replyUci),10),best=walk(fen,PV(r.bestPv,r.bestUci),8);
+    const rs=swingOf(P.after,ref,me),bsw=swingOf(fen,best,me);
+    const pfx=moveFacts(fen,pu,me);
+    const mot=motifsOf(P.after,ref,them,me),bmot=motifsOf(fen,best,me,me);
+    for(let i=0;i<ref.length&&i<7;i++){const st=ref[i];if(st.m.color!==them||st.check||st.mate)continue;const tr=trappedIn(st.B1,st.after,me);
+      if(tr){mot.push({id:"trapped",ply:i,label:"Trapped piece",text:"After "+sanLine(ref,i+1)+" your "+NAME[tr.t]+" on "+tr.sq+" is attacked and has no safe square left."});break}}
+    for(let i=2;i<ref.length;i++){const st=ref[i],prev=ref[i-1];
+      if(st.m.color===them&&st.check&&prev.m.color===me&&prev.m.captured&&VAL[prev.m.captured]>=3&&st.m.to!==prev.m.to){
+        mot.push({id:"counter",ply:i,label:"Their in-between check",text:sanLine(ref,i)+" looks like it wins for you, but "+st.m.san+" comes first, with check."});break}}
+    if(ref.length&&!ref[0].check&&!ref[0].m.captured&&(rs.net<=-2||rs.mate==="them")&&!mot.some(x=>x.id==="quiet"))mot.push({id:"quiet",ply:0,label:"Quiet move",text:ref[0].m.san+" is a quiet move, and it still wins."});
+    d.motifs=mot;d.bestMotifs=bmot;
+    const forced=r.replyMate!=null&&r.replyMate!==""?(me==="w"?+r.replyMate<0:+r.replyMate>0):ref.length<=3;
+    const lost=rs.mate==="them"&&forced?"it ends in mate":rs.net<=-1?"you lose "+(rs.net<=-9?"about a queen":rs.net<=-5?"about a rook":rs.net<=-3?"a piece":rs.net===-1?"a pawn":(-rs.net)+" pawns"):"",
+      won=bsw.mate==="me"?"it mates":bsw.net>=1?"you win "+(bsw.net>=9?"about a queen":bsw.net>=5?"about a rook":bsw.net>=3?"a piece":bsw.net===1?"a pawn":bsw.net+" pawns"):"";
+    d.line={ref:sanLine(ref,6),best:sanLine(best,6),lost:lost,won:won,net:rs.net,bestNet:bsw.net,refU:ref.map(x=>x.m.from+x.m.to+(x.m.promotion||"")),bestU:best.map(x=>x.m.from+x.m.to+(x.m.promotion||"")),after:P.after};
+    const punished=/^(missedTactic|missedMate)$/.test(d.id)?rs.net<=-2||rs.mate==="them":rs.net<=-1||rs.mate==="them"||!/^(positional|missedTactic|missedMate)$/.test(d.id);
+    d.blind=blindOf(r,P,ref,rs,pfx,best,punished);
+    /* a stronger cause from the line itself */
+    /* a forced mate in their line beats every other cause */
+    if(rs.mate==="them"&&forced&&d.id!=="allowedMate"){const ps=P.m.san,bs=best[0]?best[0].m.san:"",n=Math.ceil(ref.length/2),last=ref[ref.length-1].m.san;
+      Object.assign(d,{id:"allowedMate",k:"C",error:ps+" allows a forced mate: "+sanLine(ref,ref.length)+". "+(ref[0].check?"It starts with a check: a forcing line you can calculate to the end.":"It starts with a quiet move, the hardest kind to see."),
+        alarm:{label:"A forced mate on the board",say:"After "+ps+" they mate in "+n+" with "+ref[0].m.san+" and "+last+"."},wp:{k:"C",text:"After my move, list every check they have and follow each one to the end."},
+        action:"Before "+ps+", play their checks one by one: "+ref[0].m.san+" leads to mate."+(bs?" "+bs+" stops it.":""),find:bs?bs+" is Stockfish's move. It is found by asking first: which checks do they have after my move?":""})}
+    const ctr=mot.filter(x=>x.id==="counter")[0];
+    if(ctr&&d.id!=="allowedMate"&&rs.net<=-2&&/^(hanging|missedTactic|positional|doubleAttack|leftDefence)$/.test(d.id)){const ps=P.m.san,bs=best[0]?best[0].m.san:"";
+      Object.assign(d,{id:"counter",k:"C",error:ps+" sets up a trade that looks good: "+ctr.text+" Stockfish's line: "+d.line.ref+", and "+lost+".",
+        alarm:{label:"Their in-between check",say:ctr.text},wp:{k:"C",text:"When I plan a capture, check whether they have a check first."},
+        action:"Before "+ps+", play the trade to the end and ask at every step: do they have to take back, or is there a check first?"+(bs?" "+bs+" keeps it simple.":""),
+        find:bs?bs+" is Stockfish's move: no trade that depends on them taking back.":""})}
+    const gainPly=ref.findIndex(st=>st.m.color===them&&(st.m.captured||st.mate||st.m.promotion));
+    const strong=(rs.net<=-1||rs.mate==="them")?mot.filter(x=>/^(fork|pin|skewer|discovered|removal|deflection|trapped|promotion|backRank|smothered)$/.test(x.id)&&(x.id==="trapped"||x.ply===0||x.ply===gainPly||x.ply===gainPly-2))[0]:null;
+    if(strong&&/^(missedTactic|positional)$/.test(d.id)){
+      const ps=P.m.san,bs=best[0]?best[0].m.san:"";
+      const WP={fork:"After my move, check every square from which one of their pieces hits two of mine.",pin:"Before I move, check which of my pieces stand on one line with something bigger behind them.",
+        skewer:"Before I move, check which of my big pieces stand on one line with a smaller piece behind them.",discovered:"When their piece stands in front of their own long-range piece, ask what happens when it moves.",
+        removal:"Before I move, name which of my pieces does the defending, and what happens if it is taken.",deflection:"Before I move, name which of my pieces does two jobs at once.",
+        trapped:"Before I put a piece on a square, count its way back out.",promotion:"Count how many moves their passed pawn needs, and who stops it.",
+        backRank:"Give my king air before the back rank becomes a target.",smothered:"Keep a square free next to my king when their knight comes close."}[strong.id];
+      const k=/^(pin|skewer|discovered|removal|deflection|backRank|smothered)$/.test(strong.id)?"C":strong.id==="trapped"?"S":strong.id==="promotion"?"S":"C";
+      Object.assign(d,{id:strong.id,k:k,error:(/^After /.test(strong.text)?ps+" walks into it. ":"After "+ps+": ")+strong.text+(lost?" In Stockfish's line ("+d.line.ref+") "+lost+".":""),
+        alarm:{label:strong.label,say:strong.text},wp:{k:k,text:WP},
+        action:"Before "+ps+", play their most forcing replies in your head. "+(ref[0]?ref[0].m.san+" leads to the "+strong.label.toLowerCase()+". ":"")+(bs?bs+" avoids it.":""),
+        find:bs?bs+" is Stockfish's move"+(won?" ("+won+")":"")+". "+(best[0]&&(best[0].check||best[0].m.captured)?"It is a check or capture, so a CCA scan finds it.":"A human finds it by asking first what their best reply to "+ps+" would be."):""});
+    }
+    /* positional: replace the generic comparison with the first true structure / opening / endgame fact */
+    if(d.id==="positional"){const qf=quietFacts(fen,pu,r.bestUci,me);
+      if(qf.length){const f=qf[0];d.quiet=f.k;d.error=f.t+(qf[1]?" "+qf[1].t:"")+(d.line.best?" Stockfish's line: "+d.line.best+".":"");
+        const L={doubled:"Doubled pawns",isolated:"An isolated pawn",kingact:"The king belongs in the game",rookpass:"Rooks behind passed pawns",passer:"A passed pawn to push",earlyq:"The queen out too early",castle:"The king still in the centre",develop:"Pieces still at home",activate:"A passive piece"}[f.k]||d.alarm.label;
+        d.alarm={label:L,say:f.t};
+        const A={doubled:"Before a capture with a pawn, ask what it does to your pawn structure, and whether a piece can take instead.",isolated:"Before a pawn trade, check which of your pawns will stand alone afterwards.",
+          kingact:"Once the queens are off, ask every move: can my king come closer?",rookpass:"In rook endgames, put the rook behind the passed pawn first.",passer:"With a passed pawn, push it whenever it is safe: passed pawns must be pushed.",
+          earlyq:"In the first ten moves, develop a knight or bishop before the queen moves twice.",castle:"In the opening, castle before you start an action in the centre.",develop:"In the opening, count your pieces still at home before every move.",
+          activate:"In quiet positions, find the piece with the fewest squares and improve it."}[f.k];
+        if(A){d.action=A;d.wp={k:"S",text:A}}
+      }else if(d.line.best)d.error+=" Stockfish's line: "+d.line.best+".";}
+    const m0=mot.filter(x=>x.ply===0&&/^(fork|pin|skewer|discovered|removal|deflection)$/.test(x.id))[0];
+    if(m0&&/^(ignoredThreat|hanging|leftDefence)$/.test(d.id)&&d.error.indexOf(m0.text)<0)d.error=d.error.replace(/ came anyway\./," came anyway.")+" "+m0.text;
+    /* the line itself, said once, only when it adds something */
+    if(lost&&d.line.ref&&d.error.indexOf(d.line.ref)<0&&/^(blocker|hanging|leftDefence|doubleAttack|ignoredThreat)$/.test(d.id))d.error+=" Stockfish's line: "+d.line.ref+", and "+lost+".";
+    if(d.blind&&d.action.indexOf(d.blind.habit)<0)d.action+=" "+d.blind.habit;
+    const spec=x=>x&&/^(fork|pin|skewer|discovered|removal|deflection|trapped|promotion|backRank|smothered)$/.test(x.id);
+    const mine=/^(missedTactic|missedMate)$/.test(d.id)?bmot.filter(spec)[0]:mot.filter(spec)[0];
+    const own=/^(counter|blocker|hanging|leftDefence|doubleAttack|fork|pin|skewer|discovered|removal|deflection|trapped|promotion|backRank|smothered)$/.test(d.id)?TRAIN[d.id]:"";
+    const QT={kingact:"pawnEndgame",rookpass:"rookEndgame",passer:"advancedPawn",earlyq:"opening",castle:"castling",develop:"opening"};
+    const theme=own||(mine&&TRAIN[mine.id])||TRAIN[d.id]||(d.quiet&&QT[d.quiet])||"";
+    if(d.id==="missedTactic"&&mine){d.alarm={label:mine.label+" was there",say:mine.text};if(d.error.indexOf(mine.text)<0&&!/two targets/.test(d.error))d.error=d.error.replace(/ ([^ ]+) is quieter/," "+mine.text+" $1 is quieter")}
+    let th2=theme;if(d.id==="allowedMate"){const n=Math.max(1,Math.ceil(ref.length/2));th2=mot.some(x=>x.id==="backRank")?"backRankMate":mot.some(x=>x.id==="smothered")?"smotheredMate":n===1?"mateIn1":n===2?"mateIn2":"mate"}
+    d.train=th2?{theme:th2,label:TRAIN_LABEL[th2]||({mateIn2:"Mate in 2",mate:"Checkmate"})[th2]||th2}:null;
+    d.pattern=patternOf(d,r.memKey||"");
+    return d;
+  }
+  function diagnoseCore(r){
     try{
       const fen=r.fen,me=r.color||(String(fen).split(" ")[1]||"w"),them=other(me);
       const pu=r.played&&r.played.from?{from:r.played.from,to:r.played.to,promotion:r.played.promotion||"q"}:r.playedUci;
@@ -217,9 +473,12 @@ const LC83=(()=>{
       out.refute=rs?(R.mate?rs+" is checkmate.":"After "+ps+", "+rs+" is their best answer."):"";
       const set=(id,k,error,alarm,wp,action,find)=>Object.assign(out,{id:id,k:k,error:error,alarm:alarm,wp:{k:k,text:wp},action:action,find:find});
       /* 1. allowed mate */
-      if(R&&R.mate){const room=kingRoom(P.after,me);
-        return set("allowedMate","C",ps+" allows "+rs+": checkmate. Your king on "+ksq+" had "+(room?room+" free square"+(room===1?"":"s"):"no free square")+" and their "+NAME[R.m.piece]+" could reach a checking square.",
-          {label:"A king with no air",say:"Your king on "+ksq+" had "+(room?"only "+room:"no")+" escape square"+(room===1?"":"s")+" while their "+NAME[R.m.piece]+" could give check."},
+      if(R&&R.mate){
+        let sq=[];try{const g=new Chess();if(g.load(withSide(P.after,me)))sq=g.moves({verbose:true}).filter(m=>m.piece==="k").map(m=>m.to)}catch(e){}
+        const Bx=Object.assign({},B2);delete Bx[ksq];const covered=sq.filter(q=>attackers(Bx,q,them).length),home=me==="w"?"1":"8",rank=ksq[1]===home&&R.m.to[1]===home;
+        const air=!sq.length?"had no free square at all":covered.length===sq.length?"could only go to "+list(sq)+(rank?", on the same back rank":"")+", and "+(sq.length===1?"that square is":"those squares are")+" covered too":"had "+list(sq);
+        return set("allowedMate","C",ps+" allows "+rs+": checkmate. Your king on "+ksq+" "+air+".",
+          {label:rank?"A back rank with no air":"A king with no air",say:rank?"Your king on "+ksq+" had no square off the back rank, and their "+NAME[R.m.piece]+" could reach "+R.m.to+".":"Your king on "+ksq+" had no safe square once their "+NAME[R.m.piece]+" reached "+R.m.to+"."},
           "After my move, list every check they have before I let go of the piece.","Before "+ps+", look at their checks: "+rs+" was one of them, and it mates. Make room for the king or cover "+R.m.to+" first.",
           bs?"Count their checks after your candidate move. "+bs+" keeps "+R.m.to+" covered or gives the king air.":"Count their checks after your candidate move.")}
       /* 2. missed mate */
@@ -229,24 +488,30 @@ const LC83=(()=>{
           "Start every move with my own checks, most forcing first.","When their king has no air, play through every check before anything else: "+bs+" was mate.",
           "List your checks first ("+bs+" is one), then ask for each one: where can the king go?")}
       /* 3. a blocker left its line: the refutation runs through the square the moved piece left */
-      if(R&&/[brq]/.test(R.m.piece)){
+      if(R&&/[brq]/.test(R.m.piece)&&R.m.to!==P.m.to){
         let tgt=null;
         const path=between(R.m.from,R.m.to);if(path&&path.indexOf(P.m.from)>=0)tgt={sq:R.m.to,how:"path"};
         if(!tgt){attacksFrom(B2,R.m.to).forEach(s=>{if(tgt||!B2[s]||B2[s].c!==me||(B2[s].t!=="k"&&VAL[B2[s].t]<3))return;const bt=between(R.m.to,s);if(bt&&bt.indexOf(P.m.from)>=0)tgt={sq:s,how:"line"}})}
         if(tgt){
           const hits=attacksFrom(B2,R.m.to).filter(s=>B2[s]&&B2[s].c===me&&(B2[s].t==="k"||VAL[B2[s].t]>=3)).map(s=>(B2[s].t==="k"?"your king":"your "+NAME[B2[s].t])+" on "+s);
-          const lineName=R.m.from[0]===R.m.to[0]?"the "+R.m.from[0]+"-file":R.m.from[1]===R.m.to[1]?"rank "+R.m.from[1]:"the diagonal";
-          return set("blocker","C","Your "+mover+" on "+P.m.from+" was the piece blocking "+lineName+" between their "+NAME[R.m.piece]+" on "+R.m.from+" and "+(tgt.how==="path"&&B1[R.m.to]?"your "+NAME[B1[R.m.to].t]+" on "+R.m.to:tgt.sq)+". "+ps+" moved it away, so "+rs+(R.check?" comes with check":"")+(hits.length?" and hits "+list(hits):"")+".",
+          const la=tgt.how==="path"?R.m.from:R.m.to,lb=tgt.how==="path"?R.m.to:tgt.sq;
+          const lineName=la[0]===lb[0]?"the "+la[0]+"-file":la[1]===lb[1]?"rank "+la[1]:"the "+la+"–"+lb+" diagonal";
+          return set("blocker","C","Your "+mover+" on "+P.m.from+" was the piece blocking "+lineName+" between their "+NAME[R.m.piece]+" on "+(tgt.how==="path"?R.m.from:R.m.to)+" and "+(tgt.how==="path"&&B1[R.m.to]?"your "+NAME[B1[R.m.to].t]+" on "+R.m.to:B2[tgt.sq]?nm(B2,tgt.sq,"your"):tgt.sq)+". "+ps+" moved it away, so "+rs+(R.check?" comes with check":"")+(hits.length?", hitting "+list(hits):"")+".",
             {label:"A blocker on a line",say:"Your "+mover+" on "+P.m.from+" stood between their "+NAME[R.m.piece]+" on "+R.m.from+" and your camp. A blocker may only leave when nothing behind it can be hit."},
             "Before a piece leaves its square, check what it was shielding.","Before "+ps+", look along "+lineName+" through "+P.m.from+": their "+NAME[R.m.piece]+" on "+R.m.from+" is waiting behind your "+mover+". Keep the "+mover+" there, or move the targets first"+(bs?" ("+bs+" does that)":"")+".",
             "Ask of every candidate move: which line does this piece open when it leaves? Then calculate their capture or check down that line."+(bs?" "+bs+" passes that test.":""))}
       }
       /* 4. their threat was already there and the move ignored it */
+      if(R&&!(th&&String(th.uci).slice(0,4)===R.m.from+R.m.to)&&R.m.captured&&(!attackers(B1,R.m.to,me).length||VAL[R.m.captured]>VAL[R.m.piece])&&R.m.to!==P.m.to&&B0[R.m.from]&&B0[R.m.from].c===them&&(!R.m.captured||(B0[R.m.to]&&B0[R.m.to].t===R.m.captured))){
+        const t0=playOn(withSide(fen,them),R.m.from+R.m.to+(R.m.promotion||""));
+        if(t0&&t0.m.san.replace(/[+#]/,"")===rs.replace(/[+#]/,""))th={uci:R.m.from+R.m.to,san:t0.m.san,kind:"win",text:t0.m.san+(R.m.captured?" would take the "+NAME[R.m.captured]+" on "+R.m.to:" would give check")};
+      }
       if(R&&th&&String(th.uci).slice(0,4)===R.m.from+R.m.to)
-        return set("ignoredThreat","M",(opp?opp.san+" set up "+th.san+". ":"Their threat was "+th.san+". ")+ps+" did nothing about it, and "+rs+" came anyway.",
-          {label:"Their last move made a threat",say:(opp?opp.san+" ":"Their position ")+"aimed at "+th.text.replace(/^\S+ would /,"")+"."},
+      {let was=false;try{if(r.prevFen){const t1=playOn(r.prevFen,th.uci);was=!!t1&&t1.m.san.replace(/[+#]/,"")===th.san.replace(/[+#]/,"")}}catch(e){}
+        return set("ignoredThreat","M",(opp&&!was?opp.san+" set up "+th.san+". ":th.san+" was already on the board. ")+ps+" did nothing about it, and "+rs+" came anyway.",
+          {label:opp&&!was?"Their last move made a threat":"A threat still on the board",say:"Their threat: "+th.text+"."},
           "After every move of theirs, name their threat before I think about my own plan.","When they moved, ask “what do they want to play next?” Here the answer was "+th.san+". Stop it first"+(bs?" ("+bs+")":"")+", then go on with your plan.",
-          (bs?bs+" deals with "+th.san+". ":"")+"A human finds it by asking the M question first: what does their last move threaten?")
+          (bs?bs+" deals with "+th.san+". ":"")+"A human finds it by asking the M question first: what does their last move threaten?")}
       /* 5. a defender walked away */
       if(R&&R.m.captured&&B0[R.m.to]&&B0[R.m.to].c===me&&attacksFrom(B0,P.m.from).indexOf(R.m.to)>=0&&attacksFrom(B1,P.m.to).indexOf(R.m.to)<0){
         const left=attackers(B1,R.m.to,me).length;
@@ -257,8 +522,9 @@ const LC83=(()=>{
       /* 6. the moved piece itself was left en prise */
       if(R&&R.m.captured&&R.m.to===P.m.to){
         const att=attackers(B1,P.m.to,them).length,def=attackers(B1,P.m.to,me).length;
-        return set("hanging","C",ps+" put the "+mover+" on "+P.m.to+", where "+(def?"it is attacked "+att+" time"+(att===1?"":"s")+" and defended "+def+" time"+(def===1?"":"s")+" by more valuable pieces":"it has no defender")+". "+rs+" takes it.",
-          {label:"A square they control",say:P.m.to+" was covered by "+att+" of their piece"+(att===1?"":"s")+(def?" and only "+def+" of yours":" and none of yours")+"."},
+        const cheap=attackers(B1,P.m.to,them).map(a=>B1[a]).filter(x=>x&&VAL[x.t]<VAL[P.m.piece]);
+        return set("hanging","C",ps+" put the "+mover+" on "+P.m.to+", where "+(!def?"it has no defender":cheap.length?"a "+NAME[cheap[0].t]+" can take it, and a defender does not help when the attacker is worth less":"it is attacked "+att+" time"+(att===1?"":"s")+" and defended only "+def+" time"+(def===1?"":"s"))+". "+rs+" takes it.",
+          {label:"A square they control",say:cheap.length&&def?"Their "+NAME[cheap[0].t]+" covers "+P.m.to+": a defender does not help when the attacker is cheaper.":P.m.to+" was covered by "+att+" of their piece"+(att===1?"":"s")+(def?" and only "+def+" of yours":" and none of yours")+"."},
           "Before I put a piece on a square, count its attackers and defenders.","Before "+ps+", count on "+P.m.to+": "+att+" attacker"+(att===1?"":"s")+" against "+def+" defender"+(def===1?"":"s")+". With fewer defenders, choose another square"+(bs?" ("+bs+")":"")+".",
           "Count attackers and defenders on the target square of every candidate move.")}
       /* 7. the reply hits two things at once */
@@ -273,11 +539,12 @@ const LC83=(()=>{
       /* 8. a forcing move was missed */
       if(Bm){const bf=moveFacts(fen,r.bestUci,me),sf=solutionFacts(fen,[r.bestUci],me);
         const win=Bm.m.captured&&(!attackers(B0,Bm.m.to,them).length||VAL[Bm.m.captured]>VAL[Bm.m.piece]);
-        if(win||Bm.check||(sf&&sf.motif==="double attack")||(bf&&bf.facts.some(x=>x.k==="threat"||x.k==="line"))){
-          const what=sf&&sf.motif==="double attack"?sf.text:bs+": "+(factText(bf,2)||"a forcing move");
+        const realThreat=bf&&bf.facts.some(x=>(x.k==="threat"||x.k==="line")&&/(knight|bishop|rook|queen|king) on/.test(x.t));
+        if(win||Bm.check||(sf&&sf.motif==="double attack")||realThreat){
+          const what=sf&&sf.motif==="double attack"?sf.text:bs+": "+(factText(bf,2,/capture|check|mate|threat|line|king|passed|file/)||"a forcing move");
           const cc=cca(fen);
           return set("missedTactic","P","You had a forcing move: "+what+" "+ps+" is quieter and lets them off the hook.",
-            {label:win?"A loose piece on their side":"A forcing move is available",say:win?"Their "+NAME[Bm.m.captured]+" on "+Bm.m.to+" could be won.":"You had "+cc.checks.length+" check"+(cc.checks.length===1?"":"s")+" and "+cc.wins.length+" winning capture"+(cc.wins.length===1?"":"s")+" here."},
+            {label:win?"A loose piece on their side":"A forcing move is available",say:win?"Their "+NAME[Bm.m.captured]+" on "+Bm.m.to+" could be won.":Bm.check?bs+" was one of your "+cc.checks.length+" check"+(cc.checks.length===1?"":"s")+".":(factText(bf,1)||bs+" made a threat.").replace(/^It /,bs+" ")},
             "Before a quiet move, list my checks, captures and threats.","Before "+ps+", go through your checks and captures one by one: "+bs+" was among them"+(win?" and it wins material":"")+".",
             "Scan forcing moves first: "+(cc.checks.length?"checks "+cc.checks.slice(0,3).join(", ")+"; ":"")+(cc.wins.length?"captures "+cc.wins.slice(0,3).join(", "):"captures that win something")+". "+bs+" is the one that works.")}
       }
@@ -488,6 +755,6 @@ const LC83=(()=>{
     ["pointerdown","keydown","touchstart"].forEach(n=>document.addEventListener(n,()=>{gestAt=Date.now()},true));
     setTimeout(iabBar,1500);
   }
-  return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,solutionFacts:solutionFacts,diagnose:diagnose,threatOf:threatOf,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
+  return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,solutionFacts:solutionFacts,diagnose:diagnose,threatOf:threatOf,walk:walk,motifsOf:motifsOf,remember:remember,patternOf:patternOf,quietFacts:quietFacts,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
     NEXT:NEXT,inApp:inApp,intentUrl:intentUrl,allow:allow,keepBoard:keepBoard,_t:{held:()=>held,release:release,iabBar:iabBar,blocked:blocked,gap:()=>autoAt,touch:t=>{gestAt=t==null?Date.now():t},reset:()=>{autoAt=0;held=[];clearTimeout(relT)}},version:VERSION};
 })(); /*@@end lc83*/
