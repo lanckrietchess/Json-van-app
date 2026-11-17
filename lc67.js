@@ -177,7 +177,7 @@
     ["C","Calculation","Calculate your line to the end. What is their best reply?"]];
   const PIECE={p:"pawn",n:"knight",b:"bishop",r:"rook",q:"queen",k:"king"};
   /* facts read from the position with chess.js (no engine, no AI): what the coach would point at for each step */
-  function facts(fen,last,lastSan,before){
+  function facts(fen,last,lastSan,before,sol,themes){
     const out={M:"",S:"",P:"",C:"Do not play the first move you see. Calculate it until the position is quiet, then check their best reply once more."};
     try{
       const g=new Chess(fen),me=g.turn();
@@ -193,8 +193,9 @@
           said=hit.length?"That piece now reaches your "+hit.slice(0,3).join(" and your ")+": check whether it can really win one.":"It attacks nothing directly: ask what it prepares and which square it left."}
         out.M="Their last move"+(lastSan?" was "+lastSan:"")+" (marked on the board). "+(g.in_check()?"You are in check: that comes first. ":"")+said;
       }else out.M=g.in_check()?"You are in check: that comes first.":"Start with their idea: what would they play if it were their move again?";
-      let al=[];try{al=LC61.detect(fen,me).filter(a=>a.id!=="loose").slice(0,2)}catch(e){}
-      out.S=al.length?"Alarm Signal"+(al.length>1?"s":"")+" on the board: "+al.map(a=>a.label).join(" and ")+". "+al[0].say:"No Alarm Signal jumps out. Look at the pawn structure and at your worst-placed piece, then name a plan.";
+      /* 9.54.0: in a puzzle (sol given) only an alarm that the winning line really uses is named, never a board-wide guess */
+      let al=[];try{al=(sol&&sol.length&&LC61.relevant?LC61.relevant(fen,me,sol,themes):LC61.detect(fen,me)).filter(a=>a.id!=="loose").slice(0,2)}catch(e){}
+      out.S=al.length?"Alarm Signal"+(al.length>1?"s":"")+" that matters here: "+al.map(a=>a.label).join(" and ")+". "+al[0].say:(sol&&sol.length?"No big structural alarm decides this one: the answer is in the forcing moves. Look at what is loose and what your checks and captures hit.":"No Alarm Signal jumps out. Look at the pawn structure and at your worst-placed piece, then name a plan.");
       const mv=g.moves({verbose:true}),ch=mv.filter(m=>/[+#]/.test(m.san)).length,cp=mv.filter(m=>m.captured).length;
       out.P="You have "+ch+(ch===1?" check":" checks")+" and "+cp+(cp===1?" capture":" captures")+". Look at every one of them before a quiet move.";
     }catch(e){}
@@ -239,7 +240,7 @@
     opts=opts||{};let alive=true,step=0,si=0,done=false,x=null,tries=0;
     host.innerHTML='<div class="lc67-pz"><div class="lc67-pzboard" data-lc67-board></div><div class="lc67-pzside"><ol class="lc67-steps" aria-label="MSPC steps">'+STEPS.map((s,i)=>'<li data-i="'+i+'"><b>'+s[0]+'</b><span>'+s[1]+'</span></li>').join("")+'</ol><div data-lc67-step aria-live="polite"></div></div></div>';
     const bhost=Q("[data-lc67-board]",host),box=Q("[data-lc67-step]",host);
-    const g=new Chess(P.fen);const F=facts(P.fen,P.last,P.lastSan);
+    const g=new Chess(P.fen);const F=facts(P.fen,P.last,P.lastSan,null,P.solution,P.themes);
     const board=Board(bhost,{fen:P.fen,orientation:P.orient,onMove:m=>onMove(m)});
     const mark=()=>{try{board.setArrows(si===0&&P.last?[{from:P.last.from,to:P.last.to,kind:"bad"}]:[])}catch(e){}};
     const home=()=>{try{x=new Chess(P.fen);board.setPosition(P.fen,{lastMove:P.last||null});board.setInteractive(x.turn());mark()}catch(e){}};
@@ -259,7 +260,8 @@
       const first=P.solution[0];
       try{if(!ok){board.setPosition(P.fen,{lastMove:P.last||null});board.setArrows([{from:first.slice(0,2),to:first.slice(2,4),kind:"best"}])}}catch(e){}
       const r=ritualMark(ok);
-      box.innerHTML='<p class="lc67-q">'+(ok?'<b class="lc67-good">Correct.</b> ':'<b class="lc67-bad">The move was '+esc(san||first)+'.</b> ')+esc(ok?"That is how every rated game should start: four questions, then the move.":"The routine was right, the answer was not yet. That is exactly what the routine is for.")+'</p><p class="small muted">Daily ritual done · streak '+r.streak+(r.streak===1?" day":" days")+(P.src==="lichess"&&P.id?' · <a href="https://lichess.org/training/'+esc(P.id)+'" target="_blank" rel="noopener noreferrer">this puzzle on Lichess</a>':"")+'</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc67="go">'+esc(opts.goLabel||"Continue")+'</button></div>';
+      let why="";try{const tr=LC64.truth(P);if(tr&&tr.sf)why='<p class="lc67-why">'+esc(tr.sf.text)+'</p><p class="small"><b>Action Step.</b> '+esc(tr.step)+'</p>'}catch(e){why=""}
+      box.innerHTML='<p class="lc67-q">'+(ok?'<b class="lc67-good">Correct.</b> ':'<b class="lc67-bad">The move was '+esc(san||first)+'.</b> ')+esc(ok?"That is how every rated game should start: four questions, then the move.":"The routine was right, the answer was not yet. That is exactly what the routine is for.")+'</p>'+why+'<p class="small muted">Daily ritual done · streak '+r.streak+(r.streak===1?" day":" days")+(P.src==="lichess"&&P.id?' · <a href="https://lichess.org/training/'+esc(P.id)+'" target="_blank" rel="noopener noreferrer">this puzzle on Lichess</a>':"")+'</p><div class="btn-row"><button type="button" class="btn btn-primary" data-lc67="go">'+esc(opts.goLabel||"Continue")+'</button></div>';
       if(typeof opts.onSolved==="function"){try{opts.onSolved({ok:ok,ritual:r})}catch(e){}}
     }
     function onMove(m){

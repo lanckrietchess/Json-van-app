@@ -77,4 +77,10 @@ ok(b1&&Math.abs(b1.y+b1.h/2-960)<1&&b2.h>b1.h*1.5&&calls.length===2,'caption box
 ok(LC79.drawCaption(cg,1080,1920,{t:"x"},LC79.capStyle({cap:{box:false}},1080,1920),0)&&calls.length===2,'box off: no background');
 const ev=LC79.envOf({numberOfChannels:1,length:4410,sampleRate:44100,getChannelData:()=>{const a=new Float32Array(4410);for(let i=0;i<2205;i++)a[i]=.5*Math.sin(i/5);return a}});ok(ev.length===1&&ev[0]<-6&&ev[0]>-20,'decoded audio gives an RMS level in dB per 0.1 s ('+ev[0]+')');
 ok(LC79.envDt({env:new Array(95),durationMs:10000})>0.104&&LC79.envDt({env:new Array(100),durationMs:10000})===.1,'level timing stretches to the real take length when the timer drifted');
+// 9.54.0: hidden layers stay in the project but leave the video
+TK.hid={id:"hid",name:"Take H",durationMs:10000,cuts:[],trimIn:0,trimOut:null,env:[]};
+const ph={clips:[{id:"c1",take:"hid",in:0,out:4},{id:"c2",take:"hid",in:4,out:7},{id:"c3",take:"hid",in:7,out:10}],callouts:[],useCuts:true};
+ok(Math.abs(LC79.segments(ph).total-10)<.01,'three visible blocks: 10 s');
+ph.clips[1].hidden=true;const sh=LC79.segments(ph);ok(Math.abs(sh.total-7)<.01&&sh.every(x=>x.clip.id!=="c2")&&ph.clips.length===3,'a hidden block is left out of the video but stays in the project (7 s)');
+ph.clips.forEach(c=>{c.hidden=true});ok(LC79.segments(ph).length===0,'every block hidden: nothing to play');
 console.log('RESULT',pass,'passed',fail,'failed');process.exit(fail?1:0);

@@ -30,8 +30,21 @@
     10. Game-to-Script has two prompt buttons. "Get Prompt: Full Script" = the 9.39.1 data package + its closing line (unchanged).
         "Get Prompt: Bullet Points" = the same data + a PAWN CHECK block (undefended pieces and pawns before and after the mistake, with their
         attacker) + the RELEASE GIVEAWAY block (LC82.giveawayLine) and a closing block asking for a 5-part freestyle skeleton: the exact hook,
-        2 to 3 core points incl. the pawn check, the aha moment of the Lichess puzzle in one line, the bridge / re-hook to the app, the giveaway CTA. */
-  const VERSION="9.45.0";
+        2 to 3 core points incl. the pawn check, the aha moment of the Lichess puzzle in one line, the bridge / re-hook to the app, the giveaway CTA.
+     Studio menu, devices, take review, layers (9.54.0):
+    11. One visible menu bar under the Studio's own top bar: the sections (Script Studio, Scene Builder, Content Shooting, Takes & captions,
+        Content Library, Free layout) as labelled tabs, then the tools (Edit Studio timeline, Game-to-Script, Devices, Live engine, CTA settings,
+        Recording flow). The old "☰ Script Studio ▾" dropdown in the corner of the canvas and the ⚙ / Edit Studio buttons in the record dock are gone.
+    12. Devices: pick the camera and the microphone (an external USB mic instead of the webcam mic) with a live level meter; the choice is saved
+        (id + device name, so it is found again when the browser renews the id) and used for every take.
+    13. Take review: when a take stops, one choice: "Send to project" (into the chosen project's timeline) or "Delete this take" (gone at once,
+        so the archive does not fill with a thousand bad takes). "Decide later" keeps it in the archive only. Can be switched off in the pop-up.
+    14. Layers in the Edit Studio: every block, every callout and the captions can be hidden (eye) without deleting them. Hidden layers are left
+        out of the preview and the export. "Versions" save a set of hidden layers under a name (Reel A: CTA 1, Reel B: CTA 2) and
+        "Export every version" renders them one after the other, so one take with two CTAs gives two reels without recording again.
+    15. Live engine: a small Stockfish monitor on the Studio board (eval bar, the best line, and what the last move did to the eval),
+        on this device only, never drawn into the recording. */
+  const VERSION="9.54.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -202,7 +215,7 @@
   }
   function segments(p){
     const out=[];let T0=0;const tt=T();
-    ((p&&p.clips)||[]).forEach((c,ci)=>{const t=takeById(c.take);if(!t)return;const r=clipRange(c,t);let keep=[{s:r[0],e:r[1]}];
+    ((p&&p.clips)||[]).forEach((c,ci)=>{if(c.hidden)return;const t=takeById(c.take);if(!t)return;const r=clipRange(c,t);let keep=[{s:r[0],e:r[1]}];
       if(!c.raw&&p.useCuts!==false&&t.cuts&&t.cuts.length){try{const k=tt&&tt.buildKeep?tt.buildKeep(durOf(t),r[0],r[1],t.cuts):minus([{s:r[0],e:r[1]}],t.cuts);if(k&&k.length)keep=k}catch(e){}}
       keep.forEach(s=>{if(s.e-s.s<.05)return;out.push({ci:ci,clip:c,take:t,s:s.s,e:s.e,T0:T0});T0+=s.e-s.s})});
     out.total=T0;return out;
@@ -240,7 +253,7 @@
     if(v&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,k=Math.min(W/vw,H/vh),w=vw*k,h=vh*k;try{g.drawImage(v,(W-w)/2,(H-h)/2,w,h)}catch(e){}}
     if(noOverlay)return;
     if(!(p&&p.capsOff))try{drawCaption(g,W,H,capLine(take,ct),capStyle(p,W,H),ct)}catch(e){}
-    ((p&&p.callouts)||[]).forEach(c=>{try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
+    ((p&&p.callouts)||[]).forEach(c=>{if(c.hidden)return;try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
   }
   function mkVideo(src,muted){const v=document.createElement("video");v.playsInline=true;v.setAttribute("playsinline","");v.preload="auto";v.muted=!!muted;if(src)v.src=src;v.style.cssText="position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none";document.body.appendChild(v);return v}
   const once=(el,ev,ms)=>new Promise(r=>{let d=false;const f=()=>{if(d)return;d=true;el.removeEventListener(ev,f);r(true)};el.addEventListener(ev,f);if(ms)setTimeout(()=>{if(!d){d=true;el.removeEventListener(ev,f);r(false)}},ms)});
@@ -294,7 +307,7 @@
           const step=()=>{
             if(ctl.stopped)return res();
             const ct=v.currentTime,Tp=s.T0+clamp(ct-s.s,0,s.e-s.s);
-            ((p.callouts)||[]).forEach(c=>{if(c.t>prevT&&c.t<=Tp+.001)sfx(c.sound,ac,master)});prevT=Tp;
+            ((p.callouts)||[]).forEach(c=>{if(!c.hidden&&c.t>prevT&&c.t<=Tp+.001)sfx(c.sound,ac,master)});prevT=Tp;
             drawFrame(g,W,H,v,s.take,ct,p,Tp);
             if(o.onTime)try{o.onTime(Tp,total)}catch(e){}
             const left=s.e-ct;
@@ -373,6 +386,15 @@
       ".lc79-hd{position:absolute;top:0;bottom:0;width:12px;cursor:ew-resize;z-index:2;touch-action:none;background:transparent}.lc79-hd.l{left:0;border-left:3px solid rgba(0,229,255,.55)}.lc79-hd.r{right:0;border-right:3px solid rgba(0,229,255,.55)}",
       ".lc79-clip:hover .lc79-hd,.lc79-clip.sel .lc79-hd{background:rgba(0,229,255,.28)}.lc79-clip span{position:relative;z-index:1;margin:0 8px}",
       ".lc79-ins{position:absolute;top:0;bottom:0;width:3px;background:#fbbf24;z-index:4;pointer-events:none}",
+      /* 9.54.0 layers and versions */
+      ".lc79-layers{padding:8px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(255,255,255,.06)}.lc79-layhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}.lc79-layhead b{color:#fff;font-size:13px}",
+      ".lc79-laylist{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.lc79-vlab{color:#cbd5e1;font-size:12.5px;margin-right:4px}",
+      ".lc79-lay{min-height:40px;padding:0 10px;border-radius:999px;border:1px solid rgba(0,229,255,.45);background:rgba(0,229,255,.08);color:#e5e7eb;font:600 12.5px/1 inherit;cursor:pointer;display:inline-flex;gap:6px;align-items:center}",
+      ".lc79-lay.off{border-style:dashed;border-color:rgba(148,163,184,.5);background:transparent;color:#94a3b8;text-decoration:line-through}.lc79-lay b{font-weight:400;text-decoration:none}",
+      ".lc79-ver{display:inline-flex;align-items:stretch;border:1px solid rgba(255,255,255,.18);border-radius:999px;overflow:hidden}.lc79-ver.on{border-color:#fbbf24;box-shadow:0 0 0 1px #fbbf24 inset}",
+      ".lc79-ver button{min-height:40px;padding:0 12px;border:0;background:#14171d;color:#e5e7eb;font:600 12.5px/1 inherit;cursor:pointer}.lc79-ver .x{padding:0 10px;color:#fca5a5;border-left:1px solid rgba(255,255,255,.12)}.lc79-ver.on button:first-child{color:#fbbf24}",
+      ".lc79-hidmark{position:absolute;top:10px;bottom:10px;width:26px;margin-left:-13px;z-index:3;border-radius:8px;border:1px dashed #94a3b8;background:#0A0B0E;color:#94a3b8;font-size:14px;cursor:pointer;padding:0}.lc79-hidmark:hover{color:#fff;border-color:#00E5FF}",
+      ".lc79-co.hid{opacity:.35;background-image:repeating-linear-gradient(135deg,rgba(0,0,0,.35) 0 6px,transparent 6px 12px)!important;text-decoration:line-through}",
       ".lc79-arch{padding:0 12px 24px}.lc79-arch h3{font-size:14px;margin:4px 0 8px;color:#fff}",
       ".lc79-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}",
       ".lc79-card{background:#0f1217;border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}",
@@ -488,6 +510,7 @@
         +'<div class="lc79-trans"><button type="button" class="lc79-b" data-a="home" aria-label="Back to the start">⏮</button><button type="button" class="lc79-b pri" data-a="play">▶ Play</button><span class="lc79-time" aria-live="off"></span><input type="range" data-a="scrub" min="0" max="1" step="0.01" value="0" aria-label="Project time" style="flex:1;min-width:140px"></div></div>'
         +'<aside class="lc79-insp" aria-label="Inspector"></aside></div>'
         +'<div class="lc79-calls" aria-label="Callouts"></div>'
+        +'<section class="lc79-layers" aria-label="Layers and versions"></section>'
         +'<div class="lc79-tl"><div class="lc79-tlbar" role="toolbar" aria-label="Timeline tools">'
         +'<button type="button" class="lc79-b sm" data-a="split" title="Cut the block under the playhead in two (S)">✂ Split</button><button type="button" class="lc79-b sm red" data-a="del" title="Remove the selected block; the rest closes up (Delete)">🗑 Delete</button><button type="button" class="lc79-b sm" data-a="undo" title="Undo (Ctrl+Z)">↶ Undo</button>'
         +'<span class="lc79-sep" aria-hidden="true"></span><span class="lc79-sil"><span>Silences over</span><input type="range" data-a="silmin" min="0.5" max="8" step="0.5" aria-label="Shortest silence to cut, in seconds"><output data-silv></output></span>'+qs
@@ -502,7 +525,41 @@
     });
     ED.open=true;ED.paint();
   }
-  ED.paint=function(){if(!ED.el||!ED.el.isConnected)return;paintTop();paintCalls();paintTimeline();paintInsp();paintArchive();showFrame()};
+  ED.paint=function(){if(!ED.el||!ED.el.isConnected)return;paintTop();paintCalls();paintLayers();paintTimeline();paintInsp();paintArchive();showFrame()};
+  /* ---------- 9.54.0: layers (hide without deleting) and versions (named sets of hidden layers, exported one after the other) ---------- */
+  const visOf=p=>({clips:(p.clips||[]).filter(c=>c.hidden).map(c=>c.id),co:(p.callouts||[]).filter(c=>c.hidden).map(c=>c.id),capsOff:!!p.capsOff});
+  function applyVis(p,v){const hc={},ho={};(v.clips||[]).forEach(id=>{hc[id]=1});(v.co||[]).forEach(id=>{ho[id]=1});
+    (p.clips||[]).forEach(c=>{if(hc[c.id])c.hidden=true;else delete c.hidden});(p.callouts||[]).forEach(c=>{if(ho[c.id])c.hidden=true;else delete c.hidden});p.capsOff=!!v.capsOff}
+  const sameVis=(a,b)=>{const k=v=>JSON.stringify([(v.clips||[]).slice().sort(),(v.co||[]).slice().sort(),!!v.capsOff]);return k(a)===k(b)};
+  function activeVersion(p){const v=visOf(p);return(p.variants||[]).filter(x=>sameVis(x,v))[0]||null}
+  function toggleHidden(kind,id){
+    const p=cur();if(!p)return;const list=kind==="clip"?p.clips:p.callouts,it=list.filter(c=>c.id===id)[0];if(!it)return;
+    stopPlay();snapEd(p);if(it.hidden)delete it.hidden;else it.hidden=true;save(p);
+    const segs=segments(p);ED.T=clamp(ED.T,0,segs.total||0);ED.paint();
+    say((kind==="clip"?"Block":"Callout")+(it.hidden?" hidden: it is left out of the preview and the export. Nothing is deleted.":" is back in the video."),"",2600);
+  }
+  function paintLayers(){
+    const box=Q(".lc79-layers",ED.el),p=cur();if(!box)return;if(!p){box.innerHTML="";return}
+    const eye=on=>on?"👁":"⊘",av=activeVersion(p);
+    const chip=(a,id,on,label,title)=>'<button type="button" class="lc79-lay'+(on?"":" off")+'" data-a="'+a+'"'+(id?' data-id="'+esc(id)+'"':'')+' aria-pressed="'+on+'" title="'+esc(title)+'"><b aria-hidden="true">'+eye(on)+'</b>'+esc(label)+'</button>';
+    const clips=(p.clips||[]).map((c,i)=>{const t=takeById(c.take);if(!t)return"";const r=clipRange(c,t);return chip("lay-clip",c.id,!c.hidden,"Block "+(i+1)+" · "+fmt(r[1]-r[0]),(c.hidden?"Show":"Hide")+" block "+(i+1)+" ("+t.name+")")}).join("");
+    const cos=(p.callouts||[]).map(c=>chip("lay-co",c.id,!c.hidden,"“"+String(c.text).slice(0,18)+"” "+fmt(c.t),(c.hidden?"Show":"Hide")+" the callout “"+c.text+"”")).join("");
+    const vs=(p.variants||[]);
+    box.innerHTML='<div class="lc79-layhead"><b>Layers</b><span class="lc79-hint">Hide a block, a callout or the captions: it is left out of the preview and the export, nothing is deleted. Two CTAs in one take? Hide one, save a version, hide the other, save a second version, then export every version.</span></div>'
+      +'<div class="lc79-laylist" role="group" aria-label="Layers">'+chip("lay-caps","",!p.capsOff,"CC Captions",p.capsOff?"Show the captions":"Hide the captions")+clips+cos+'</div>'
+      +'<div class="lc79-laylist" role="group" aria-label="Versions"><b class="lc79-vlab">Versions</b>'
+      +vs.map(v=>'<span class="lc79-ver'+(av&&av.id===v.id?" on":"")+'"><button type="button" data-a="var-apply" data-id="'+esc(v.id)+'" title="Use the layers of this version" aria-pressed="'+!!(av&&av.id===v.id)+'">'+esc(v.name)+'</button><button type="button" class="x" data-a="var-del" data-id="'+esc(v.id)+'" aria-label="Delete the version '+esc(v.name)+'">×</button></span>').join("")
+      +'<button type="button" class="lc79-b sm" data-a="var-save">+ Save these layers as a version</button>'
+      +(vs.length?'<button type="button" class="lc79-b sm pri" data-a="var-all"'+(ED.busy?" disabled":"")+'>Export every version ('+vs.length+')</button>':'')+'</div>';
+  }
+  async function exportVersions(){
+    const p=cur();if(!p||ED.busy)return;const vs=(p.variants||[]).slice();if(!vs.length){say("Save a version first: hide the layers you do not want, then “Save these layers as a version”.","err",4500);return}
+    const keep=visOf(p);let n=0;
+    for(const v of vs){applyVis(p,v);save(p);ED.paint();if(!segments(p).length){say("“"+v.name+"” has no visible block: skipped.","err",3500);continue}
+      const r=await exportProject({suffix:v.name,quiet:true});if(r==="cancel")break;if(r==="ok")n++}
+    applyVis(p,keep);save(p);ED.paint();
+    say(n+" of "+vs.length+" version"+(vs.length===1?"":"s")+" exported to your takes archive (“"+p.name+" – …(export)”). Use Share on each one.",n?"ok":"err",7000);
+  }
   function paintTop(){
     const sel=Q('[data-a="pick"]',ED.el),d=db(),p=cur();
     sel.innerHTML=d.list.map(x=>'<option value="'+esc(x.id)+'"'+(p&&x.id===p.id?" selected":"")+'>'+esc(x.name)+'</option>').join("");
@@ -530,7 +587,7 @@
     if(lane)lane.style.width=o.pps&&tot?Math.max(1,Math.round(tot*o.pps))+"px":(ED.zoom*100)+"%";
     Q("[data-tot]",ED.el).textContent=tot?"Length "+fmt(tot)+" · "+(p?p.clips.length:0)+" block"+(p&&p.clips.length===1?"":"s"):"";
     let x=0,html="";
-    (p?p.clips:[]).forEach((c,ci)=>{const t=takeById(c.take);if(!t||!L[ci])return;const w=L[ci]/tot*100,sel=ED.sel&&ED.sel.kind==="clip"&&ED.sel.id===c.id;
+    (p?p.clips:[]).forEach((c,ci)=>{const t=takeById(c.take);if(t&&c.hidden){html+='<button type="button" class="lc79-hidmark" data-a="lay-clip" data-id="'+esc(c.id)+'" style="left:'+x+'%" title="Block '+(ci+1)+' is hidden. Tap to show it again." aria-label="Show hidden block '+(ci+1)+': '+esc(t.name)+'">⊘</button>';return}if(!t||!L[ci])return;const w=L[ci]/tot*100,sel=ED.sel&&ED.sel.kind==="clip"&&ED.sel.id===c.id;
       html+='<div class="lc79-clip'+(sel?" sel":"")+'" data-clip="'+esc(c.id)+'" role="button" tabindex="0" aria-pressed="'+!!sel+'" aria-label="Block '+(ci+1)+': '+esc(t.name)+', '+fmt(L[ci])+'" style="left:'+x+'%;width:calc('+w+'% - 2px)'+(thumbs[t.id]?';background-image:url('+thumbs[t.id]+')':'')+'">'
         +'<i class="lc79-hd l" data-h="l" aria-hidden="true" title="Drag to trim the start"></i><span>'+esc(t.name)+' · '+fmt(L[ci])+'</span><i class="lc79-hd r" data-h="r" aria-hidden="true" title="Drag to trim the end"></i></div>';
       x+=w;if(!thumbs[t.id])thumbOf(t,()=>{if(ED.open)paintTimeline()})});
@@ -538,7 +595,7 @@
     const ru=Q(".lc79-ruler",ED.el);
     if(ru){if(tot&&lane){const pps=lane.clientWidth/tot,st=[.5,1,2,5,10,15,30,60,120,300,600].filter(v=>v*pps>=70)[0]||1200;let h="";for(let t=0;t<=tot+1e-6;t+=st)h+='<i style="left:'+(t/tot*100)+'%">'+(st<1?fmt(t):fmtR(t))+'</i>';ru.innerHTML=h}else ru.innerHTML=""}
     co.innerHTML=(p?p.callouts:[]).map(c=>{const l=tot?clamp(c.t/tot*100,0,100):0,w=tot?Math.max(1.5,c.dur/tot*100):10;
-      return'<div class="lc79-co'+(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id?" sel":"")+'" data-co="'+esc(c.id)+'" role="button" tabindex="0" aria-label="Callout '+esc(c.text)+' at '+fmt(c.t)+'" style="left:'+l+'%;width:'+Math.min(w,100-l)+'%;background:'+esc(c.bg)+';color:'+esc(c.fg)+'">'+esc(c.text)+'</div>'}).join("");
+      return'<div class="lc79-co'+(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id?" sel":"")+(c.hidden?" hid":"")+'" data-co="'+esc(c.id)+'" role="button" tabindex="0" aria-label="Callout '+esc(c.text)+' at '+fmt(c.t)+'" style="left:'+l+'%;width:'+Math.min(w,100-l)+'%;background:'+esc(c.bg)+';color:'+esc(c.fg)+'">'+esc(c.text)+'</div>'}).join("");
     paintHead(true);
   }
   /* the playhead: at most 10 repaints a second while playing (no layout work every frame on long takes) */
@@ -565,7 +622,7 @@
         +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="inhere">Start here</button><button type="button" class="lc79-b sm" data-a="outhere">End here</button><button type="button" class="lc79-b sm" data-a="split">✂ Split at the playhead</button></div>'
         +'<div class="lc79-two">'+num("in",r[0],.05,0,D,"Start (s)")+num("out",r[1],.05,0,D,"End (s)")+'</div>'
         +'<p class="lc79-hint" style="margin:0">Take length '+fmt(D)+'. Drag the edges of the block on the timeline to trim it.'+(!it.raw&&p.useCuts!==false&&t.cuts&&t.cuts.length?" The "+t.cuts.length+" cut"+(t.cuts.length===1?"":"s")+" you made in this take (silences, mistakes) are skipped.":"")+'</p>'
-        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="mvl"'+(i<=0?" disabled":"")+'>← Earlier</button><button type="button" class="lc79-b sm" data-a="mvr"'+(i>=p.clips.length-1?" disabled":"")+'>Later →</button><button type="button" class="lc79-b sm" data-a="resetclip">Use the whole take</button><button type="button" class="lc79-b sm red" data-a="rmclip">Delete block</button></div><button type="button" class="lc79-b sm" data-a="captions">Edit the captions of this take</button>';
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="mvl"'+(i<=0?" disabled":"")+'>← Earlier</button><button type="button" class="lc79-b sm" data-a="mvr"'+(i>=p.clips.length-1?" disabled":"")+'>Later →</button><button type="button" class="lc79-b sm" data-a="resetclip">Use the whole take</button><button type="button" class="lc79-b sm" data-a="hideit" title="Leave this block out of the preview and the export (H)">⊘ Hide block</button><button type="button" class="lc79-b sm red" data-a="rmclip">Delete block</button></div><button type="button" class="lc79-b sm" data-a="captions">Edit the captions of this take</button>';
       const v=Q("[data-clipvid]",box);v.addEventListener("loadedmetadata",()=>{try{v.currentTime=r[0]}catch(e){}},{once:true});
       return;
     }
@@ -596,7 +653,7 @@
         +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="aim" data-aim="camera">Point at me (camera)</button><button type="button" class="lc79-b sm" data-a="aim" data-aim="board">Point at the board</button></div>'
         +'<div class="lc79-two">'+rng("x",c.x,.05,.95,.01,"Badge left ↔ right")+rng("y",c.y,.05,.95,.01,"Badge top ↕ bottom")+rng("ax",c.ax,0,1,.01,"Arrow tip ↔")+rng("ay",c.ay,0,1,.01,"Arrow tip ↕")+'</div>'
         +'<p class="lc79-hint" style="margin:0">Paused? Drag the badge or the arrow tip on the preview.</p>'
-        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="coat">Move to the playhead</button><button type="button" class="lc79-b sm" data-a="savepreset">Save as preset</button><button type="button" class="lc79-b sm red" data-a="rmco">Delete callout</button></div>';
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="coat">Move to the playhead</button><button type="button" class="lc79-b sm" data-a="hideit" title="Leave this callout out of the preview and the export (H)">'+(c.hidden?"👁 Show callout":"⊘ Hide callout")+'</button><button type="button" class="lc79-b sm" data-a="savepreset">Save as preset</button><button type="button" class="lc79-b sm red" data-a="rmco">Delete callout</button></div>';
       return;
     }
     if(ED.sel&&ED.sel.kind==="take"&&it){
@@ -631,7 +688,7 @@
   async function showFrame(){
     if(!ED.el||ED.playing)return;
     const p=cur(),segs=segments(p),cv=Q(".lc79-stagebox canvas",ED.el),em=Q(".lc79-empty",ED.el);
-    if(!segs.length){const g=cv.getContext("2d");cv.width=360;cv.height=640;g.fillStyle="#000";g.fillRect(0,0,360,640);em.hidden=false;em.textContent="Your project is empty. Tap + Add on a take below.";ED.capRect=null;return}
+    if(!segs.length){const g=cv.getContext("2d");cv.width=360;cv.height=640;g.fillStyle="#000";g.fillRect(0,0,360,640);em.hidden=false;em.textContent=p&&p.clips.some(c=>c.hidden)?"Every block is hidden. Tap an eye under Layers to show one again.":"Your project is empty. Tap + Add on a take below.";ED.capRect=null;return}
     em.hidden=true;ED.T=clamp(ED.T,0,segs.total);
     const s=segAt(segs,ED.T)||segs[segs.length-1],ct=s.s+clamp(ED.T-s.T0,0,Math.max(0,s.e-s.s-.02));
     const tok=++ED.scrubTok;let v=ED.scrubV[s.take.id];
@@ -647,7 +704,7 @@
     if(!p.capsOff||capSel){let line=capLine(bi.take,bi.ct);if(!line&&capSel)line={t:"Your captions appear here"};
       try{ED.capRect=drawCaption(g,cv.width,cv.height,line,capStyle(p,cv.width,cv.height),bi.ct)}catch(e){ED.capRect=null}
       if(capSel&&ED.capRect){const r=ED.capRect,k=Math.max(1,cv.width/540),hs=12*k;g.save();g.setLineDash([6*k,4*k]);g.strokeStyle="#00E5FF";g.lineWidth=2*k;g.strokeRect(r.x-3*k,r.y-3*k,r.w+6*k,r.h+6*k);g.setLineDash([]);g.fillStyle="#00E5FF";g.fillRect(r.x+r.w+3*k-hs/2,r.y+r.h+3*k-hs/2,hs,hs);g.restore()}}
-    (p.callouts||[]).forEach(c=>{let lt=ED.T-c.t;if(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id)lt=clamp(lt,.9,Math.max(.9,c.dur-.3));try{drawCallout(g,cv.width,cv.height,c,lt)}catch(e){}});
+    (p.callouts||[]).forEach(c=>{if(c.hidden)return;let lt=ED.T-c.t;if(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id)lt=clamp(lt,.9,Math.max(.9,c.dur-.3));try{drawCallout(g,cv.width,cv.height,c,lt)}catch(e){}});
   }
   async function togglePlay(){
     if(ED.playing){stopPlay();return}
@@ -673,8 +730,8 @@
     if(!onMsg)say(ok+" take"+(ok===1?"":"s")+" got captions."+(fail.length?" Not possible for "+fail.length+": "+fail[0]:" Check them with Captions."),fail.length?"err":"ok",6000);
     return{ok:ok,fail:fail,n:list.length};
   }
-  async function exportProject(){
-    const p=cur(),segs=segments(p);if(!segs.length||ED.busy)return;
+  async function exportProject(o){
+    o=o||{};const p=cur(),segs=segments(p);if(!segs.length||ED.busy)return"skip";let res="fail";const outName=p.name+(o.suffix?" – "+String(o.suffix).slice(0,40):"")+" (export)";
     stopPlay();ED.busy=true;paintTop();
     let capNote="";
     if(!p.capsOff&&needsCaps(p).length){const box0=Q(".lc79-stagebox",ED.el),ov0=document.createElement("div");ov0.className="lc79-busy";ov0.setAttribute("role","status");ov0.innerHTML='<b style="color:#fff">Writing captions first</b><span class="lc79-hint" data-m></span>';box0.appendChild(ov0);
@@ -682,21 +739,22 @@
       capNote=r.ok?" Captions were written for "+r.ok+" take"+(r.ok===1?"":"s")+": you can still edit them (Captions) and export again.":"";
       if(r.fail.length)capNote+=" No captions for "+r.fail.length+" take"+(r.fail.length===1?"":"s")+" ("+r.fail[0]+").";}
     const box=Q(".lc79-stagebox",ED.el),ov=document.createElement("div");ov.className="lc79-busy";ov.setAttribute("role","status");
-    ov.innerHTML='<b style="color:#fff">Exporting “'+esc(p.name)+'”</b><div class="lc79-bar"><i></i></div><span class="lc79-hint">This plays the project once in real time ('+fmt(segs.total)+'). Keep this tab in front.</span><button type="button" class="lc79-b red">Cancel</button>';
+    ov.innerHTML='<b style="color:#fff">Exporting “'+esc(p.name+(o.suffix?" – "+o.suffix:""))+'”</b><div class="lc79-bar"><i></i></div><span class="lc79-hint">This plays the project once in real time ('+fmt(segs.total)+'). Keep this tab in front.</span><button type="button" class="lc79-b red">Cancel</button>';
     box.appendChild(ov);const bar=Q("i",ov),ctl={stopped:false};Q("button",ov).onclick=()=>{ctl.stopped=true};
     const off=document.createElement("canvas");let lastBar=0;
     try{
       const r=await run(p,{canvas:off,record:true,from:0,ctl:ctl,onTime:(t,tot)=>{const n=performance.now();if(n-lastBar<200)return;lastBar=n;bar.style.width=Math.round(t/tot*100)+"%"}});
-      if(ctl.stopped||!r.blob){say("Export cancelled.","",2500)}
+      if(ctl.stopped||!r.blob){res="cancel";say("Export cancelled.","",2500)}
       else if(r.blob.size<2e3){say("The browser produced an empty video. Try Chrome or Edge on a computer.","err",6000)}
       else{
         let nid="x"+uid();
-        try{const Tk=T().Takes;await Tk.add({id:nid,name:p.name+" (export)",blob:r.blob,mime:r.blob.type||"video/webm",durationMs:r.total*1e3,w:r.W,h:r.H,fps:30,env:[],markers:[],cuts:[],trimIn:0,trimOut:r.total,createdAt:Date.now(),size:r.blob.size,onDisk:false,captions:[]})}catch(e){}
-        ED.sel={kind:"take",id:nid};
-        say("Exported to your takes archive as “"+p.name+" (export)”. Use Share to send it to Instagram, TikTok or YouTube."+capNote,"ok",7000);
+        try{const Tk=T().Takes;await Tk.add({id:nid,name:outName,blob:r.blob,mime:r.blob.type||"video/webm",durationMs:r.total*1e3,w:r.W,h:r.H,fps:30,env:[],markers:[],cuts:[],trimIn:0,trimOut:r.total,createdAt:Date.now(),size:r.blob.size,onDisk:false,captions:[]})}catch(e){}
+        ED.sel={kind:"take",id:nid};res="ok";
+        if(!o.quiet)say("Exported to your takes archive as “"+outName+"”. Use Share to send it to Instagram, TikTok or YouTube."+capNote,"ok",7000);
       }
     }catch(e){say(e.message||"Export failed.","err",6000)}
     off.width=off.height=1;ov.remove();ED.busy=false;ED.paint();
+    return res;
   }
   /* a take comes in as its voice pieces (its trim minus its cuts), one block each, at the end or at a drop position */
   function addTake(id,at){
@@ -789,6 +847,16 @@
     if(a==="watch"){ED.sel={kind:"take",id:b.getAttribute("data-take")};paintInsp();const v=Q(".lc79-insp video",ED.el);if(v)try{v.focus()}catch(x){}return}
     if(a==="addco")return addCallout(b.getAttribute("data-pid"));
     if(a==="delpreset"){wr(PK,myPresets().filter(x=>x.pid!==b.getAttribute("data-pid")));return paintCalls()}
+    /* 9.54.0: layers and versions */
+    if(a==="lay-clip")return toggleHidden("clip",b.getAttribute("data-id"));
+    if(a==="lay-co")return toggleHidden("co",b.getAttribute("data-id"));
+    if(a==="lay-caps"&&p){p.capsOff=!p.capsOff;save(p);ED.paint();return}
+    if(a==="hideit"&&p&&ED.sel&&(ED.sel.kind==="clip"||ED.sel.kind==="co"))return toggleHidden(ED.sel.kind,ED.sel.id);
+    if(a==="var-save"&&p){const n=prompt("Name of this version (for example: Reel A, CTA 1)","Reel "+String.fromCharCode(65+((p.variants||[]).length%26)));if(!n||!n.trim())return;
+      const v=Object.assign({id:uid(),name:n.trim().slice(0,40)},visOf(p));p.variants=(p.variants||[]).filter(x=>!sameVis(x,v)).concat([v]).slice(-12);save(p);paintLayers();say("Version “"+v.name+"” saved: "+(v.clips.length+v.co.length)+" hidden layer"+(v.clips.length+v.co.length===1?"":"s")+(v.capsOff?", no captions":"")+".","ok",3200);return}
+    if(a==="var-apply"&&p){const v=(p.variants||[]).filter(x=>x.id===b.getAttribute("data-id"))[0];if(!v)return;stopPlay();snapEd(p);applyVis(p,v);save(p);ED.T=0;ED.paint();say("Layers of “"+v.name+"” in use.","",2200);return}
+    if(a==="var-del"&&p){const v=(p.variants||[]).filter(x=>x.id===b.getAttribute("data-id"))[0];if(!v||!confirm("Delete the version “"+v.name+"”? The blocks and callouts stay."))return;p.variants=(p.variants||[]).filter(x=>x!==v);save(p);return paintLayers()}
+    if(a==="var-all")return exportVersions();
     if(!p||!it)return;
     if(ED.sel.kind==="clip"){
       const i=p.clips.indexOf(it),t=takeById(it.take),v=Q("[data-clipvid]",ED.el);
@@ -857,6 +925,7 @@
     if((e.ctrlKey||e.metaKey)&&(k==="z"||k==="Z")&&!e.shiftKey){done();return undo()}
     if(e.ctrlKey||e.metaKey)return;
     if(/^[sSbB]$/.test(k)){done();return doSplit()}
+    if(/^[hH]$/.test(k)&&ED.sel&&(ED.sel.kind==="clip"||ED.sel.kind==="co")){done();return toggleHidden(ED.sel.kind,ED.sel.id)}
     if(k==="Delete"||k==="Backspace"){if(tag==="INPUT")return;done();return doDelete()}
     if(k===" "&&!/^(BUTTON|INPUT|VIDEO)$/.test(tag)&&!(t.closest&&t.closest(".lc79-clip,.lc79-co"))){done();return togglePlay()}
     if((k==="ArrowLeft"||k==="ArrowRight")&&tag!=="INPUT"&&tag!=="VIDEO"){done();stopPlay();ED.T=clamp(ED.T+(k==="ArrowLeft"?-1:1)*(e.shiftKey?1:1/30),0,ED.tot||0);paintHead(true);return showFrame()}
@@ -1459,11 +1528,50 @@ BCLOSE);
   function afterTake(t){
     if(!t||!t.id)return;const o=nle();let sil=null;
     if(o.autoSil)try{sil=autoSilence(t,clamp(+o.silMin||4,.5,8))}catch(e){sil=null}
+    /* 9.54.0: one clear choice right after the take: send it to a project, or delete it */
+    if(o.review!==false&&!/\((export|edited)\)/.test(String(t.name||""))&&showReview(t,sil))return;
     const p=projById(rd(RK,""));
     if(p){p.clips=p.clips.concat(clipsFor(t,p));save(p)}
     showPost(t,p,sil);
     if(sil&&sil.n)say("Cut "+sil.n+" silence"+(sil.n===1?"":"s")+" over "+(+o.silMin||4)+" s ("+sil.sec+" s) from “"+t.name+"”. Undo it in Trim.","ok",4500);
     try{autoCaptions(t)}catch(e){}
+  }
+  /* ---------- 9.54.0: take review: "Send to project" or "Delete this take" ---------- */
+  function showReview(t,sil){
+    const sr=studioRoot(),lcs=sr&&Q("#lcs",sr);if(!lcs)return false;
+    const old=Q("#lc79-rv",sr);if(old)old.remove();
+    const list=db().list,cur0=projById(rd(RK,""))||null,D=durOf(t);
+    const opts=list.map(x=>'<option value="'+esc(x.id)+'"'+(cur0&&x.id===cur0.id?" selected":"")+'>'+esc(x.name)+' ('+x.clips.length+' block'+(x.clips.length===1?'':'s')+')</option>').join("")
+      +'<option value="+"'+(cur0?"":" selected")+'>+ New project'+(list.length?"":": Reel 1")+'</option>';
+    const el=document.createElement("div");el.id="lc79-rv";el.className="lc79-rv";
+    el.innerHTML='<div class="rv-card" role="dialog" aria-modal="true" aria-labelledby="lc79-rv-h" tabindex="-1">'
+      +'<h3 id="lc79-rv-h">Keep this take?</h3><p class="rv-meta"><b>'+esc(t.name||"Take")+'</b> · '+fmt(D)+(sil&&sil.n?' · '+sil.n+' silence'+(sil.n===1?'':'s')+' cut':'')+'</p>'
+      +'<video src="'+esc(t.url||"")+'" controls playsinline preload="metadata" muted></video>'
+      +'<label class="rv-f"><span>Send it to</span><select data-rv="pid" aria-label="Project">'+opts+'</select></label>'
+      +'<div class="rv-act"><button type="button" class="rv-b rv-send" data-rv="send">✓ Send to project</button><button type="button" class="rv-b rv-del" data-rv="del">🗑 Delete this take</button></div>'
+      +'<div class="rv-foot"><button type="button" class="rv-later" data-rv="later">Decide later (keep it in the takes archive)</button><label class="rv-ask"><input type="checkbox" data-rv="ask" checked> Ask after every take</label></div>'
+      +'<p class="rv-keys">Enter: send · Delete: delete · Esc: decide later</p></div>';
+    lcs.appendChild(el);
+    let done=false;
+    const close=()=>{done=true;try{const v=Q("video",el);if(v){v.pause();v.removeAttribute("src");v.load()}}catch(e){}el.remove()};
+    const act=async a=>{
+      if(done)return;
+      const ask=Q('[data-rv="ask"]',el);if(ask&&!ask.checked)setNle({review:false});
+      if(a==="send"){
+        let pid=Q('[data-rv="pid"]',el).value,p=projById(pid);
+        if(!p){p=newProject("Reel "+(db().list.length+1))}
+        p.clips=p.clips.concat(clipsFor(t,p));save(p);wr(RK,p.id);try{paintDock()}catch(e){}close();
+        showPost(t,p,sil);try{autoCaptions(t)}catch(e){}
+        say("Sent to “"+p.name+"”. It is on the timeline of the Edit Studio.","ok",3200);
+      }else if(a==="del"){
+        close();try{await T().Takes.remove(t.id)}catch(e){}
+        delete thumbs[t.id];takeGone(t.id);say("Take deleted. Ready for the next one.","",2400);
+      }else{close();try{autoCaptions(t)}catch(e){}say("Kept in the takes archive. Add it to a project any time in the Edit Studio.","",3000)}
+    };
+    el.addEventListener("click",e=>{const b=e.target.closest("[data-rv]");if(!b||b.tagName==="SELECT"||b.tagName==="INPUT")return;e.preventDefault();act(b.getAttribute("data-rv"))});
+    el.addEventListener("keydown",e=>{const tg=e.target&&e.target.tagName;if(e.key==="Escape"){e.preventDefault();e.stopPropagation();act("later")}else if(e.key==="Enter"&&tg!=="SELECT"&&tg!=="BUTTON"){e.preventDefault();e.stopPropagation();act("send")}else if((e.key==="Delete")&&tg!=="SELECT"){e.preventDefault();e.stopPropagation();act("del")}else e.stopPropagation()});
+    setTimeout(()=>{try{Q(".rv-send",el).focus({preventScroll:true})}catch(e){}},30);
+    return true;
   }
   function showPost(t,p,sil){
     const sr=studioRoot(),lcs=sr&&Q("#lcs",sr);if(!lcs)return;let bar=Q("#lc79-post",sr);if(bar)bar.remove();
@@ -1908,6 +2016,148 @@ BCLOSE);
   }
   function sceneStop(){inUnmount();shotStop();if(IN.raf){cancelAnimationFrame(IN.raf);IN.raf=0}}
 
+  /* ---------- 9.54.0: the Studio menu bar, the Devices panel and the Live engine monitor (all inside the Studio's shadow root) ---------- */
+  const MB_TABS=[["script","Script"],["scenes","Scene Builder"],["shoot","Shoot"],["edit","Takes"],["library","Library"],["free","Free layout"]];
+  const MB={eng:false,dev:false,devRaf:0};
+  function curTab(){return String(rd("lc66-tab","script")||"script")}
+  function menuBar(sr){
+    const lcs=Q("#lcs",sr),canvas=Q("#canvas",sr)||Q("main.canvas",sr);if(!lcs||!canvas)return;
+    let bar=Q("#lc79-menu",sr);
+    if(!bar){
+      const notes={};try{(LC66.TABS||[]).forEach(t=>{notes[t.id]=t.note})}catch(e){}
+      bar=document.createElement("nav");bar.id="lc79-menu";bar.setAttribute("aria-label","Creator Studio menu");
+      bar.innerHTML='<div class="mb-g" role="group" aria-label="Studio sections">'+MB_TABS.map(t=>'<button type="button" class="mb-t" data-mb-tab="'+t[0]+'" aria-pressed="false" title="'+esc(notes[t[0]]||t[1])+'">'+esc(t[1])+'</button>').join("")+'</div>'
+        +'<span class="mb-sep" aria-hidden="true"></span>'
+        +'<div class="mb-g" role="group" aria-label="Studio tools">'
+        +'<button type="button" class="mb-b mb-pri" data-mb="projects" title="The timeline: cut, layers, versions, callouts and export">✂ Edit Studio</button>'
+        +'<button type="button" class="mb-b" data-mb="script" title="PGN in: crucial mistake, similar Lichess position and a master prompt">Game-to-Script</button>'
+        +'<button type="button" class="mb-b" data-mb="devices" aria-expanded="false" title="Choose your camera and microphone">🎙 Devices</button>'
+        +'<button type="button" class="mb-b" data-mb="engine" aria-pressed="false" title="Stockfish checks the Studio board while you talk. Only you see it: it is not recorded.">♞ Live engine</button>'
+        +'<button type="button" class="mb-b" data-mb="cta" title="Landing page in the picture: what it shows and where">CTA settings</button>'
+        +'<button type="button" class="mb-b" data-mb="flow" title="Which scene each recording step uses">Recording flow</button></div>'
+        +'<div class="mb-x" aria-label="Section options"></div>';
+      lcs.insertBefore(bar,canvas);
+      bar.addEventListener("click",e=>{
+        const tb=e.target.closest("[data-mb-tab]");
+        if(tb){try{LC66.setTab(sr,tb.getAttribute("data-mb-tab"))}catch(x){}paintMenu(sr);return}
+        const b=e.target.closest("[data-mb]");if(!b)return;const a=b.getAttribute("data-mb");
+        if(a==="projects")return openProjects();
+        if(a==="script")return openScript();
+        if(a==="devices")return toggleDevices(sr);
+        if(a==="engine")return toggleEngine(sr);
+        if(a==="cta")return openCtaSettings();
+        if(a==="flow")return openFlowSettings();
+      });
+    }
+    /* the section options of LC66 (watermark size, saved scene chips) live in the bar now, not in a corner of the canvas */
+    const x=Q(".mb-x",bar);[".lc66-wm",".lc66-scn"].forEach(c=>{const el=Q(c,sr);if(el&&el.parentNode!==x)x.appendChild(el)});
+    paintMenu(sr);
+  }
+  function paintMenu(sr){
+    const bar=Q("#lc79-menu",sr);if(!bar)return;const t=curTab();
+    QA("[data-mb-tab]",bar).forEach(b=>{const on=b.getAttribute("data-mb-tab")===t;if(b.getAttribute("aria-pressed")!==String(on))b.setAttribute("aria-pressed",String(on))});
+    const e=Q('[data-mb="engine"]',bar);if(e)e.setAttribute("aria-pressed",String(MB.eng));
+    const d=Q('[data-mb="devices"]',bar);if(d)d.setAttribute("aria-expanded",String(!!Q("#lc79-dev",sr)));
+  }
+  /* ----- Devices ----- */
+  function toggleDevices(sr){const el=Q("#lc79-dev",sr);if(el){closeDevices(sr);return}openDevices(sr)}
+  function closeDevices(sr){const el=sr&&Q("#lc79-dev",sr);if(el)el.remove();if(MB.devRaf){cancelAnimationFrame(MB.devRaf);MB.devRaf=0}MB.dev=false;if(sr)paintMenu(sr)}
+  async function openDevices(sr){
+    const lcs=Q("#lcs",sr),t=T();if(!lcs||!t)return;
+    const el=document.createElement("div");el.id="lc79-dev";el.className="mb-pop";el.setAttribute("role","dialog");el.setAttribute("aria-label","Camera and microphone");
+    el.innerHTML='<header><b>Camera &amp; microphone</b><button type="button" class="mb-b" data-dv="close" aria-label="Close">×</button></header>'
+      +'<label class="dv-f"><span>Microphone (recorded sound)</span><select data-dv="mic"></select></label>'
+      +'<div class="dv-meter" aria-hidden="true"><i></i></div><p class="dv-st" data-dv-st aria-live="polite"></p>'
+      +'<label class="dv-f"><span>Camera</span><select data-dv="cam"></select></label>'
+      +'<div class="dv-row"><button type="button" class="mb-b" data-dv="detect">Detect devices</button><button type="button" class="mb-b mb-pri" data-dv="test">Test the microphone</button></div>'
+      +'<p class="dv-hint">Your choice is saved on this device and used for every take. Plugged in a USB microphone? Press Detect devices and pick it here. If it is unplugged, the default stands in until it is back.</p>';
+    lcs.appendChild(el);MB.dev=true;paintMenu(sr);
+    const bar=Q("#lc79-menu",sr);if(bar)el.style.top=(bar.offsetTop+bar.offsetHeight+6)+"px";
+    try{await t.Cam.refresh()}catch(e){}
+    paintDevices(sr);
+    el.addEventListener("click",async e=>{const b=e.target.closest("[data-dv]");if(!b||b.tagName==="SELECT")return;const a=b.getAttribute("data-dv");
+      if(a==="close")return closeDevices(sr);
+      if(a==="detect"){try{await t.Hardware.detect()}catch(x){}try{await t.Cam.refresh()}catch(x){}return paintDevices(sr)}
+      if(a==="test"){try{if(!t.Mic.active)await t.Mic.enable();else await t.Mic.enable()}catch(x){say("The microphone could not start: "+(x&&x.message||x),"err",4000)}return paintDevices(sr)}});
+    el.addEventListener("change",async e=>{const s2=e.target.closest("select[data-dv]");if(!s2)return;
+      const rec=(()=>{try{return api().rec.state}catch(x){return"idle"}})();if(rec!=="idle"){say("Stop recording before you switch devices.","err",3000);return paintDevices(sr)}
+      const kind=s2.getAttribute("data-dv")==="cam"?"videoinput":"audioinput",v=s2.value;
+      try{t.devRemember(kind,v)}catch(x){}
+      const mirror=Q(kind==="videoinput"?"#cameraSelect":"#micSelect",sr);if(mirror){mirror.value=v}
+      try{
+        if(t.Hardware.live){await api().startCreatorStream()}
+        else if(kind==="audioinput"){await t.Mic.enable()}
+        else if(t.Cam.active){await t.Cam.enable()}
+      }catch(x){say("That device could not start: "+(x&&x.message||x),"err",4000)}
+      const lab=s2.options[s2.selectedIndex]?s2.options[s2.selectedIndex].text:"";
+      say((kind==="videoinput"?"Camera":"Microphone")+" saved: "+lab+".","ok",2600);paintDevices(sr)});
+    const meter=()=>{if(!el.isConnected){MB.devRaf=0;return}const i=Q(".dv-meter i",el);let db=-90;try{db=t.Mic.levelDb()}catch(x){}if(i)i.style.width=Math.round(clamp((db+70)/70,0,1)*100)+"%";MB.devRaf=requestAnimationFrame(meter)};
+    MB.devRaf=requestAnimationFrame(meter);
+  }
+  function paintDevices(sr){
+    const el=Q("#lc79-dev",sr),t=T();if(!el||!t)return;const list=t.Cam.devices||[];
+    const fill=(sel,kind,def)=>{const want=(()=>{try{return t.devPick(kind)}catch(e){return""}})(),items=list.filter(d=>d.kind===kind);
+      sel.innerHTML='<option value="">'+def+'</option>'+items.map((d,i)=>'<option value="'+esc(d.deviceId)+'">'+esc(d.label||(kind==="videoinput"?"Camera ":"Microphone ")+(i+1))+'</option>').join("");
+      sel.value=items.some(d=>d.deviceId===want)?want:""};
+    fill(Q('[data-dv="mic"]',el),"audioinput","Default microphone");fill(Q('[data-dv="cam"]',el),"videoinput","Default camera");
+    const st=Q("[data-dv-st]",el),named=list.some(d=>d.label);let using="";
+    try{const tr=t.Mic.active&&t.Mic.stream&&t.Mic.stream.getAudioTracks()[0];using=tr?tr.label||"a microphone":""}catch(e){}
+    const saved=t.Cfg.micLabel||"";
+    st.textContent=(using?"Listening to: "+using+". Speak: the bar moves.":"The microphone is off. Press Test the microphone to hear which one is used.")+(saved&&using&&using!==saved?" (Saved choice “"+saved+"” is not connected: the default stands in.)":"")+(named?"":" Press Detect devices so the browser shows the device names.");
+    const rec=(()=>{try{return api().rec.state}catch(x){return"idle"}})();QA("select[data-dv]",el).forEach(s=>{s.disabled=rec!=="idle"});
+  }
+  /* ----- Live engine monitor: on this device only, never drawn into the recording ----- */
+  const EG={timer:0,deb:0,fen:"",ver:-1,evals:{},res:null,prev:null,busy:false};
+  function toggleEngine(sr){MB.eng=!MB.eng;wr("lc79-eng",MB.eng?1:0);if(MB.eng)engineOn(sr);else engineOff(sr);paintMenu(sr)}
+  function engineOn(sr){
+    const lcs=Q("#lcs",sr);if(!lcs)return;let el=Q("#lc79-eng",sr);
+    if(!el){el=document.createElement("aside");el.id="lc79-eng";el.className="mb-pop mb-eng";el.setAttribute("aria-label","Live engine");el.setAttribute("aria-live","polite");
+      el.innerHTML='<header><b>♞ Live engine</b><span class="eg-d" data-eg-d></span><button type="button" class="mb-b" data-eg="x" aria-label="Turn the live engine off">×</button></header><div class="eg-bar" aria-hidden="true"><i></i></div><p class="eg-ev" data-eg-ev>Starting Stockfish…</p><p class="eg-last" data-eg-last></p><ol class="eg-lines" data-eg-lines></ol><p class="dv-hint">Only you see this: it is not in the recording. Play moves on the Studio board and it checks every position.</p>';
+      lcs.appendChild(el);el.addEventListener("click",e=>{if(e.target.closest('[data-eg="x"]'))toggleEngine(sr)})}
+    const bar=Q("#lc79-menu",sr);if(bar)el.style.top=(bar.offsetTop+bar.offsetHeight+6)+"px";
+    EG.ver=-1;EG.fen="";if(!EG.timer)EG.timer=setInterval(engineTick,350);engineTick();
+  }
+  function engineOff(sr){if(EG.timer){clearInterval(EG.timer);EG.timer=0}clearTimeout(EG.deb);const el=sr&&Q("#lc79-eng",sr);if(el)el.remove();try{if(EG.busy&&typeof Engine!=="undefined")Engine.stop()}catch(e){}EG.busy=false}
+  const cpOf=l=>!l?0:l.mate!=null?(l.mate>0?1e4-l.mate*10:-1e4-l.mate*10):(l.cp||0);
+  const evTxt=l=>!l?"…":l.mate!=null?(l.mate>0?"#":"-#")+Math.abs(l.mate):((l.cp||0)>0?"+":"")+((l.cp||0)/100).toFixed(2);
+  function engineTick(){
+    const sr=studioRoot();if(!sr||route()!=="studio"){engineOff(sr);return}
+    if(layerStack.length)return;                                   /* Game-to-Script and the Edit Studio use the engine themselves */
+    const B=api()&&api().board;if(!B)return;const fen=B.fen;if(!fen||(fen===EG.fen&&B.version===EG.ver))return;
+    EG.ver=B.version;if(fen===EG.fen)return;
+    const prevFen=EG.fen;EG.fen=fen;clearTimeout(EG.deb);
+    EG.deb=setTimeout(()=>analyseNow(sr,fen,prevFen,B),250);
+  }
+  function analyseNow(sr,fen,prevFen,B){
+    if(typeof Engine==="undefined"||!Engine.analyse){paintEngine(sr,{err:"Stockfish is not available on this device."});return}
+    let rec="idle";try{rec=api().rec.state}catch(e){}
+    EG.busy=true;
+    Engine.analyse(fen,{movetime:rec==="idle"?1400:600,multipv:2},snap=>{if(EG.fen===fen)paintEngine(sr,{snap:snap,fen:fen,prevFen:prevFen,B:B})})
+      .then(r=>{EG.busy=false;if(r&&r.lines&&r.lines[0])EG.evals[fen]=cpOf(r.lines[0]);if(EG.fen===fen)paintEngine(sr,{snap:r,fen:fen,prevFen:prevFen,B:B,done:true})})
+      .catch(e=>{EG.busy=false;if(String(e&&e.message)!=="superseded"&&EG.fen===fen)paintEngine(sr,{err:"The engine stopped. Change the position to try again."})});
+  }
+  function paintEngine(sr,o){
+    const el=sr&&Q("#lc79-eng",sr);if(!el)return;
+    if(o.err){Q("[data-eg-ev]",el).textContent=o.err;return}
+    const sn=o.snap,top=sn&&sn.lines&&sn.lines[0];if(!top)return;
+    const cp=cpOf(top),wp=50+50*(2/(1+Math.exp(-.00368208*clamp(cp,-1500,1500)))-1);
+    Q(".eg-bar i",el).style.width=wp.toFixed(1)+"%";
+    const side=String(o.fen).split(" ")[1]==="b"?"Black":"White";
+    Q("[data-eg-ev]",el).innerHTML='<b>'+esc(evTxt(top))+'</b> <span>'+(Math.abs(cp)<35?"about equal":cp>0?"White is better":"Black is better")+' · '+side+' to move</span>';
+    Q("[data-eg-d]",el).textContent="depth "+(sn.depth||0);
+    let pvt="";const lines=(sn.lines||[]).slice(0,2).map(l=>{try{pvt=Engine.pvText(o.fen,l.pv,6)}catch(e){pvt=(l.pv||[]).slice(0,6).join(" ")}return'<li><b>'+esc(evTxt(l))+'</b> '+esc(pvt)+'</li>'}).join("");
+    Q("[data-eg-lines]",el).innerHTML=lines;
+    /* what the last move on the Studio board did, compared with the position before it */
+    const lm=Q("[data-eg-last]",el),pf=o.prevFen,before=pf&&EG.evals[pf];let txt="",cls="";
+    try{const B=o.B,i=B.idx,mv=i>0&&B.moves[i-1];
+      if(mv&&pf&&B.fens[i-1]===pf&&before!=null&&o.done){
+        const mover=String(pf).split(" ")[1],loss=(mover==="w"?1:-1)*(before-cp);
+        const cls0=loss>=300?["Blunder","bad"]:loss>=150?["Mistake","bad"]:loss>=70?["Inaccuracy","warn"]:["Fine","good"];
+        txt=mv.san+": "+cls0[0]+(loss>=70?" (costs "+(loss>=5000?"the game":(loss/100).toFixed(1)+" pawns")+")":"")+". Best was "+(()=>{try{return Engine.uciToSan(pf,(EG.res&&EG.res[pf])||"")||"see above"}catch(e){return"see above"}})()+".";cls=cls0[1]}
+    }catch(e){}
+    if(o.done&&top.pv&&top.pv[0]){EG.res=EG.res||{};EG.res[o.fen]=top.pv[0]}
+    if(txt){lm.textContent=txt;lm.className="eg-last "+cls}else if(o.done){lm.textContent="";lm.className="eg-last"}
+  }
   /* ---------- Studio wiring (shadow root) ---------- */
   const SR_CSS=".lc79-dockb{min-height:44px!important;padding:0 14px!important;border-radius:12px!important;font-weight:700!important}#lc54-dock{flex-wrap:wrap;max-width:calc(100vw - 16px);row-gap:6px}#lc54-dock.lc79-docked{left:8px!important;right:8px!important;transform:none!important;max-width:none!important;width:auto!important;box-sizing:border-box;justify-content:flex-start;border-radius:14px!important}@media (max-width:700px){#lc54-dock.lc79-docked{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}#lc54-dock.lc79-docked>*{flex:none}}.lc79-scn{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin:0 0 8px}.lc79-sl{display:flex;flex-direction:column;gap:2px;font:600 11px Sora,system-ui,sans-serif;color:#94a3b8;letter-spacing:.02em}.lc79-sl[hidden]{display:none}.lc79-scn .lc79-dsel,.lc79-xf .lc79-dsel{max-width:min(300px,86vw)}.lc79-xf{margin:0 0 8px;padding:6px 10px;border-radius:14px;background:#0f141b;border:1px solid rgba(0,229,255,.3)}.lc79-xf[hidden]{display:none}.lc79-xrow{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.lc79-xs{flex:1 1 160px;min-width:140px}.lc79-xs input{width:100%;min-height:44px}.lc79-xs b{color:#00E5FF}.lc79-xnote{margin:4px 0 0;font-size:12px}#lc79-xfh{position:absolute;z-index:45;cursor:grab;touch-action:none;outline:2px dashed #00E5FF;outline-offset:-2px;background:rgba(0,229,255,.06)}#lc79-xfh:active{cursor:grabbing}#lc54-dock .btn{min-height:44px}.lc79-dsel{min-height:44px;max-width:220px;border-radius:12px;background:#14171d;color:#e5e7eb;border:1px solid rgba(0,229,255,.45);padding:0 8px;font:600 13px Sora,system-ui,sans-serif}.lc79-flow{display:inline-flex;gap:4px;align-items:center}#lc79-step{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
     +"#lc79-post{position:relative;left:auto;transform:none;bottom:auto;z-index:6;margin:0 auto 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:min(720px,94%);padding:8px 12px;border-radius:12px;background:#0f172a;border:1px solid rgba(0,229,255,.5);color:#fff;font:600 13px Sora,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#lc79-post .btn,#lc79-post select{min-height:44px}#lc79-post select{border-radius:10px;background:#14171d;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 8px}"
@@ -1915,15 +2165,38 @@ BCLOSE);
     +".lc79-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}.lc79-bar .btn{min-height:44px}.lc79-bar .lc79-go{background:#00E5FF;color:#04141a;border-color:#00E5FF;font-weight:700}"
     +".take-chip-w{display:inline-flex;align-items:stretch;gap:2px}.take-del{min-width:44px;min-height:44px;border-radius:10px;border:1px solid rgba(239,68,68,.45);background:rgba(239,68,68,.08);color:#fca5a5;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.take-del:hover{background:rgba(239,68,68,.2)}"
     +".lc79-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:44px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#e5e7eb;font:600 14px/1.2 inherit;text-align:left;cursor:pointer;border-top:1px solid rgba(255,255,255,.06)}.lc79-opt small{color:#94a3b8;font-weight:500;font-size:12px}.lc79-opt:hover,.lc79-opt:focus-visible{background:rgba(0,229,255,.1)}"
-    +"#lc79-live{position:relative;left:auto;transform:none;bottom:auto;z-index:6;margin:0 auto 8px;max-width:min(680px,90%);padding:6px 14px;border-radius:10px;background:rgba(5,7,10,.82);color:#fff;font:600 15px/1.35 Sora,system-ui,sans-serif;pointer-events:none;text-align:center}#lc79-live small{display:block;color:#00E5FF;font-size:11px;font-weight:600}#lc79-live[hidden]{display:none}";
+    +"#lc79-live{position:relative;left:auto;transform:none;bottom:auto;z-index:6;margin:0 auto 8px;max-width:min(680px,90%);padding:6px 14px;border-radius:10px;background:rgba(5,7,10,.82);color:#fff;font:600 15px/1.35 Sora,system-ui,sans-serif;pointer-events:none;text-align:center}#lc79-live small{display:block;color:#00E5FF;font-size:11px;font-weight:600}#lc79-live[hidden]{display:none}"
+    /* 9.54.0: menu bar (the old corner dropdown is hidden; its watermark slider and scene chips sit in the bar) */
+    +".lc66-bar{display:none!important}#lc79-menu{position:relative;z-index:40;display:flex;align-items:center;gap:6px;padding:6px 8px;margin:0;border-bottom:1px solid rgba(0,229,255,.18);background:rgba(10,11,14,.92);overflow-x:auto;scrollbar-width:thin;flex:none;font:600 13px/1 Sora,system-ui,sans-serif}"
+    +"#lc79-menu .mb-g{display:flex;gap:4px;flex:none;align-items:center}#lc79-menu .mb-sep{width:1px;height:28px;background:rgba(255,255,255,.14);flex:none;margin:0 4px}"
+    +".mb-t,.mb-b{min-height:40px;padding:0 11px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:#14171d;color:#e5e7eb;font:600 13px/1 Sora,system-ui,sans-serif;cursor:pointer;white-space:nowrap}"
+    +".mb-t:hover,.mb-b:hover{border-color:rgba(0,229,255,.55)}.mb-t:focus-visible,.mb-b:focus-visible{outline:2px solid #00E5FF;outline-offset:2px}"
+    +".mb-t[aria-pressed=true]{background:rgba(0,229,255,.16);border-color:#00E5FF;color:#00E5FF}.mb-b.mb-pri{background:#00E5FF;color:#04141a;border-color:#00E5FF}.mb-b[aria-pressed=true],.mb-b[aria-expanded=true]{background:#fbbf24;color:#0f172a;border-color:#fbbf24}"
+    +"#lc79-menu .mb-x{display:flex;gap:8px;align-items:center;flex:none}#lc79-menu .lc66-wm,#lc79-menu .lc66-scn{display:inline-flex}#lc79-menu .lc66-wm[hidden],#lc79-menu .lc66-scn[hidden]{display:none}"
+    +".mb-pop{position:absolute;right:10px;top:110px;z-index:70;width:min(360px,calc(100% - 20px));padding:12px;border-radius:14px;background:rgba(10,11,14,.97);border:1px solid rgba(0,229,255,.35);box-shadow:0 18px 40px rgba(0,0,0,.55);color:#e5e7eb;font:13px/1.45 Sora,system-ui,sans-serif;display:flex;flex-direction:column;gap:8px;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}"
+    +".mb-pop header{display:flex;align-items:center;gap:8px}.mb-pop header b{flex:1;color:#fff;font-size:14px}.mb-pop header .mb-b{min-height:36px;padding:0 10px}"
+    +".dv-f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#94a3b8}.dv-f select{min-height:44px;border-radius:10px;background:#14171d;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 8px;font:600 13px Sora,system-ui,sans-serif}"
+    +".dv-meter{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.dv-meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#fbbf24 75%,#ef4444)}"
+    +".dv-st{margin:0;font-size:12px;color:#cbd5e1}.dv-row{display:flex;gap:6px;flex-wrap:wrap}.dv-hint{margin:0;font-size:11.5px;color:#94a3b8}"
+    +".mb-eng{width:min(320px,calc(100% - 20px))}.eg-d{font-size:11px;color:#94a3b8}.eg-bar{height:10px;border-radius:99px;background:#1e293b;overflow:hidden;border:1px solid rgba(255,255,255,.2)}.eg-bar i{display:block;height:100%;width:50%;background:#f1f5f9;transition:width .25s}"
+    +".eg-ev{margin:0;font-size:13px}.eg-ev b{font-size:18px;color:#fff;margin-right:4px}.eg-ev span{color:#94a3b8;font-size:12px}.eg-lines{margin:0;padding-left:18px;font-size:12.5px;display:flex;flex-direction:column;gap:2px}.eg-lines b{color:#00E5FF;margin-right:4px}"
+    +".eg-last{margin:0;font-weight:700;font-size:12.5px}.eg-last:empty{display:none}.eg-last.bad{color:#fca5a5}.eg-last.warn{color:#fbbf24}.eg-last.good{color:#86efac}"
+    /* 9.54.0: take review */
+    +".lc79-rv{position:absolute;inset:0;z-index:90;background:rgba(5,7,10,.74);display:flex;align-items:center;justify-content:center;padding:12px;font:14px/1.45 Sora,system-ui,sans-serif;color:#e5e7eb}"
+    +".rv-card{width:min(460px,100%);max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:16px;background:#0A0B0E;border:1px solid rgba(0,229,255,.45);box-shadow:0 20px 50px rgba(0,0,0,.6)}"
+    +".rv-card h3{margin:0;font-size:18px;color:#fff}.rv-meta{margin:0;font-size:12.5px;color:#94a3b8}.rv-meta b{color:#e5e7eb}.rv-card video{width:100%;max-height:34vh;border-radius:10px;background:#000}"
+    +".rv-f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#94a3b8}.rv-f select{min-height:44px;border-radius:10px;background:#14171d;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 8px;font:600 14px Sora,system-ui,sans-serif}"
+    +".rv-act{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rv-b{min-height:52px;border-radius:12px;font:700 15px Sora,system-ui,sans-serif;cursor:pointer;border:1px solid transparent}.rv-send{background:#00E5FF;color:#04141a}.rv-del{background:rgba(239,68,68,.12);color:#fca5a5;border-color:rgba(239,68,68,.6)}"
+    +".rv-b:focus-visible,.rv-later:focus-visible{outline:2px solid #fff;outline-offset:2px}.rv-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}"
+    +".rv-later{min-height:40px;background:none;border:0;color:#cbd5e1;text-decoration:underline;cursor:pointer;font:600 12.5px Sora,system-ui,sans-serif;padding:0}.rv-ask{display:inline-flex;gap:6px;align-items:center;font-size:12px;color:#94a3b8}.rv-ask input{width:18px;height:18px}.rv-keys{margin:0;font-size:11px;color:#64748b}"
+    +"@media (max-width:420px){.rv-act{grid-template-columns:1fr}}";
   function inject(){
     const sr=studioRoot();if(!sr)return;
     if(!Q("#lc79-srcss",sr)){const st=document.createElement("style");st.id="lc79-srcss";st.textContent=SR_CSS;sr.appendChild(st)}
     const dock=Q("#lc54-dock",sr);
     if(dock&&!Q("#lc79-cta",dock)){
       const b=document.createElement("button");b.type="button";b.id="lc79-cta";b.className="btn sm lc79-dockb";b.title="Show your landing page in the picture while you record the call to action (key L)";b.onclick=()=>ctaToggle();
-      const s=document.createElement("button");s.type="button";s.className="btn sm lc79-dockb";s.textContent="⚙";s.setAttribute("aria-label","Landing page CTA settings");s.title="CTA settings";s.onclick=openCtaSettings;
-      dock.appendChild(b);dock.appendChild(s);paintCtaBtn();
+      dock.appendChild(b);paintCtaBtn();                                 /* 9.54.0: CTA settings moved to the menu bar */
     }
     if(dock&&!Q("#lc79-recto",dock)){
       const sel=document.createElement("select");sel.id="lc79-recto";sel.className="lc79-dsel";sel.setAttribute("aria-label","Save new takes to a project");
@@ -1931,8 +2204,7 @@ BCLOSE);
       const fl=document.createElement("span");fl.className="lc79-flow";
       fl.innerHTML='<button type="button" class="btn sm lc79-dockb" data-f="-" aria-label="Previous step">◀</button><button type="button" class="btn sm lc79-dockb" id="lc79-step" title="Recording flow settings"></button><button type="button" class="btn sm lc79-dockb" data-f="+" aria-label="Next step">▶</button>';
       fl.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.id==="lc79-step")return openFlowSettings();setStep(clamp((FL.step||0)+(b.getAttribute("data-f")==="+"?1:-1),1,4))});
-      const ed=document.createElement("button");ed.type="button";ed.className="btn sm lc79-dockb";ed.textContent="✂ Edit Studio";ed.title="Go to the Edit Studio: takes, timeline and captions";ed.onclick=()=>gotoCaptions(null);
-      dock.appendChild(sel);dock.appendChild(fl);dock.appendChild(ed);paintDock();
+      dock.appendChild(sel);dock.appendChild(fl);paintDock();            /* 9.54.0: Edit Studio moved to the menu bar */
     }
     const tb=Q("#takes-body",sr);
     if(tb&&!Q(".lc79-bar",tb)){const bar=document.createElement("div");bar.className="lc79-bar";
@@ -1949,6 +2221,8 @@ BCLOSE);
         b.onclick=e=>{e.stopPropagation();menu.hidden=true;const dd=Q(".lc66-dd",sr);if(dd)dd.setAttribute("aria-expanded","false");o[3]()};menu.appendChild(b)})}
     const lcs=Q("#lcs",sr);
     if(lcs&&!Q("#lc79-live",sr)){const d=document.createElement("div");d.id="lc79-live";d.hidden=true;d.setAttribute("aria-live","off");lcs.appendChild(d)}
+    try{menuBar(sr)}catch(e){console.error("lc79 menu",e)}
+    if(rd("lc79-eng",0)&&!MB.eng&&!Q("#lc79-eng",sr)){MB.eng=true;try{engineOn(sr)}catch(e){}paintMenu(sr)}
   }
   function liveTick(){
     const sr=studioRoot(),d=sr&&Q("#lc79-live",sr);if(!d)return;
@@ -1962,7 +2236,7 @@ BCLOSE);
   function loopTick(){clearTimeout(tickId);tickId=setTimeout(()=>{tickId=0;tick();if(route()==="studio")loopTick()},400)}
   function tick(){lastTick=Date.now();if(route()!=="studio")return;try{inject()}catch(e){}try{const sr=studioRoot();if(sr)sceneTick(sr)}catch(e){}try{liveTick()}catch(e){}}
   function afterRender(r){
-    if(r!=="studio"){["lc79-ed","lc79-ai","lc79-ctaset","lc79-flowset"].forEach(id=>closeLayer(id,true));if(ctaOn){ctaOn=false}FL.step=0;FL.card=null;FL.aha=false;liveStop();sceneStop();return}
+    if(r!=="studio"){["lc79-ed","lc79-ai","lc79-ctaset","lc79-flowset"].forEach(id=>closeLayer(id,true));if(ctaOn){ctaOn=false}FL.step=0;FL.card=null;FL.aha=false;liveStop();sceneStop();engineOff(null);if(MB.devRaf){cancelAnimationFrame(MB.devRaf);MB.devRaf=0}MB.eng=false;return}
     if(!tickId||Date.now()-lastTick>1500)loopTick();
     setTimeout(tick,60);
   }
