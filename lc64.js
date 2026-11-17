@@ -278,7 +278,7 @@
   function caseOf(g,it,gi){
     const fen=g.fens[it.i],color=it.color==="b"?"b":"w";
     /* 9.56.0: THIS mistake, read from the board and Stockfish (LC83.diagnose); the board-wide alarm guess is only the fallback */
-    let d=null;try{const m=g.moves[it.i],pm=it.i>0?g.moves[it.i-1]:null;d=LC83.diagnose({fen:fen,color:color,played:{from:m.from,to:m.to,promotion:m.promotion||"q",san:m.san},bestUci:it.best||"",replyUci:it.reply||"",
+    let d=null;try{const m=g.moves[it.i],pm=it.i>0?g.moves[it.i-1]:null;d=LC83.diagnose({fen:fen,color:color,played:{from:m.from,to:m.to,promotion:m.promotion||"q",san:m.san},bestUci:it.best||"",replyUci:it.reply||"",bestPv:it.bestPv,replyPv:it.replyPv,replyMate:it.replyMate,
       prevFen:it.i>0?g.fens[it.i-1]:null,oppUci:pm&&pm.from?pm.from+pm.to+(pm.promotion||""):null,threatUci:it.threat&&it.threat.best||""})}catch(e){d=null}
     if(d&&d.error)return{no:Math.ceil((it.i+1)/2),san:it.san,best:it.bestSan||"",loss:Math.round(it.loss),cls:it.cls,fen:fen,color:color,letter:d.k,
       alarm:{id:d.id,label:d.alarm.label,say:d.alarm.say},wp:d.wp.text,action:d.action,theme:themeFor(d.id,d.k),reply:it.replySan||"",error:d.error,why:d.why,find:d.find};

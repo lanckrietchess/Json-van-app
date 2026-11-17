@@ -326,6 +326,8 @@
     const letter=d.k||"S";
     let h='<div class="lc61-tail">';
     h+='<p><b>a) What went wrong.</b> '+esc(LETTER_NAME[letter]||letter)+'. '+esc(d.error)+'</p>';
+    if(d.blind)h+='<p><b>Why a human misses it.</b> '+esc(d.blind.text)+'</p>';
+    if(d.pattern)h+='<p class="lc61-pat"><b>Your pattern.</b> '+esc(d.pattern)+'</p>';
     if(d.why)h+='<p class="small"><b>Their last move.</b> '+esc(d.why)+'</p>';
     h+='<p><b>b) The Alarm Signal that should have gone off.</b> '+esc(d.alarm.label)+'. '+esc(d.alarm.say)+' '+vbtn(d.alarm.say)+'</p>';
     let pts=[];try{pts=Framework.ranked()}catch(e){pts=[]}
@@ -333,6 +335,8 @@
     h+='<p><b>c) Working Point ('+esc(LETTER_NAME[letter]||letter)+').</b> “'+esc(d.wp.text)+'”'+(mine?' Your own point for this letter: “'+esc(mine.text)+'”.':' <button type="button" class="btn btn-ghost btn-sm" data-lc61="wp-add" data-letter="'+esc(letter)+'" data-text="'+esc(d.wp.text)+'">Add it as a Working Point</button>')+'</p>';
     h+='<p><b>d) Action Step.</b> '+esc(d.action)+' '+vbtn(d.action)+'</p>';
     if(d.find)h+='<p class="small muted"><b>How a human finds it:</b> '+esc(d.find)+'</p>';
+    if(d.line&&(d.line.ref||d.line.best))h+='<p class="small muted"><b>Stockfish.</b> '+(d.line.ref?'After your move: '+esc(d.line.ref)+'. ':'')+(d.line.best?'Better: '+esc(d.line.best)+'.':'')+'</p>';
+    if(d.train||window.LC92)h+='<div class="btn-row" style="margin-top:6px">'+(d.train?'<button type="button" class="btn btn-ghost btn-sm" data-lc61="train" data-theme="'+esc(d.train.theme)+'">Train it: '+esc(d.train.label)+' puzzles</button>':'')+(window.LC92?LC92.button(d,o):'')+'</div>'+(window.LC92?'<div data-lc92-out></div>':'');
     h+=crowdHTML(o,{id:d.id});
     return h+'</div>';
   }
@@ -538,6 +542,8 @@
     +"@media(min-width:760px){.lc61-top{grid-template-columns:140px 1fr 1fr}.lc61-top .btn-row{grid-column:1/-1}}";
     document.head.appendChild(s);
   }
+  /* 9.56.0: open the theme trainer on the pattern of this mistake */
+  function trainTheme(id){try{sessionStorage.setItem("lc-tp-open",String(id||""))}catch(e){}document.querySelectorAll(".sheet-wrap [data-close]").forEach(b=>b.click());location.hash="#themes"}
   function onClick(e){
     const el=e.target.closest&&e.target.closest("[data-lc61]");if(!el)return;
     const a=el.getAttribute("data-lc61");
@@ -546,6 +552,7 @@
     else if(a==="schedule"){e.preventDefault();schedule()}
     else if(a==="coach-say"){e.preventDefault();coachSay()}
     else if(a==="voice"){e.preventDefault();sayClip(el.getAttribute("data-text"))}
+    else if(a==="train"){e.preventDefault();trainTheme(el.getAttribute("data-theme"))}
   }
   async function openQueue(){
     try{
