@@ -163,10 +163,12 @@ const LC42=(()=>{
     const showWhy=()=>{
       const box=Q("[data-lc52-why]",el);if(!box)return;
       const bk=/#/.test(bestSan)?"gives checkmate":/\+/.test(bestSan)?"gives check":/x/.test(bestSan)?"is a capture":"is a quiet move";
-      box.innerHTML='<h4>What went wrong</h4><p>'+E(y.d)+'</p>'
+      /* 9.56.0: THIS mistake, read from the board and Stockfish (LC83.diagnose); the stock lines are only the fallback */
+      let dg=null;try{dg=LC83.diagnose({fen:fen,color:g.color,played:r.played,bestUci:r.bestUci,replyUci:r.replyUci})}catch(e){dg=null}
+      box.innerHTML='<h4>What went wrong</h4><p>'+E(dg&&dg.error||y.d)+'</p>'
         +'<h4>The better move: '+E(bestSan)+'</h4><p>'+E(bestSan)+' '+bk+'. Before your move you were about '+pawns(r.before)+' pawns better; after '+E(ps)+' you were about '+pawns(r.after)+'.</p>'
-        +'<h4>How you could have found it</h4><p>'+E(THINKK[y.k])+'</p>'
-        +'<p class="lc52-next"><b>In your next game:</b> '+E(NEXTK[y.k])+'</p>'+(()=>{try{return LC61.tail({fen:fen,color:g.color,k:y.k,why:y.d,ps:ps})}catch(e){return""}})();
+        +'<h4>How you could have found it</h4><p>'+E(dg&&dg.find||THINKK[y.k])+'</p>'
+        +'<p class="lc52-next"><b>In your next game:</b> '+E(dg?dg.action:NEXTK[y.k])+'</p>'+(()=>{try{return LC61.tail({fen:fen,color:g.color,k:dg?dg.k:y.k,why:y.d,ps:ps,diag:dg})}catch(e){return""}})();
       box.hidden=false;
     };
     let board=null,tries=0,finished=false;

@@ -319,8 +319,27 @@
     let p=pts.filter(x=>map[x.id]===alarmId)[0]||pts.filter(x=>x.cat===letter)[0]||null;
     return p;
   }
+  /* 9.56.0: with a diagnosis (LC83.diagnose: the move played, Stockfish's better move and refutation) the overview is about THIS mistake:
+     what went wrong, the Alarm Signal that should have gone off, the Working Point, the Action Step and how a human finds the better move.
+     The board-wide guess below is only the fallback when no engine data came with the call. */
+  function diagTail(o,d){
+    const letter=d.k||"S";
+    let h='<div class="lc61-tail">';
+    h+='<p><b>a) What went wrong.</b> '+esc(LETTER_NAME[letter]||letter)+'. '+esc(d.error)+'</p>';
+    if(d.why)h+='<p class="small"><b>Their last move.</b> '+esc(d.why)+'</p>';
+    h+='<p><b>b) The Alarm Signal that should have gone off.</b> '+esc(d.alarm.label)+'. '+esc(d.alarm.say)+' '+vbtn(d.alarm.say)+'</p>';
+    let pts=[];try{pts=Framework.ranked()}catch(e){pts=[]}
+    const mine=pts.filter(x=>x.cat===letter)[0];
+    h+='<p><b>c) Working Point ('+esc(LETTER_NAME[letter]||letter)+').</b> “'+esc(d.wp.text)+'”'+(mine?' Your own point for this letter: “'+esc(mine.text)+'”.':' <button type="button" class="btn btn-ghost btn-sm" data-lc61="wp-add" data-letter="'+esc(letter)+'" data-text="'+esc(d.wp.text)+'">Add it as a Working Point</button>')+'</p>';
+    h+='<p><b>d) Action Step.</b> '+esc(d.action)+' '+vbtn(d.action)+'</p>';
+    if(d.find)h+='<p class="small muted"><b>How a human finds it:</b> '+esc(d.find)+'</p>';
+    h+=crowdHTML(o,{id:d.id});
+    return h+'</div>';
+  }
   function tail(o){
     try{
+      if(o&&o.diag&&o.diag.error&&o.diag.alarm)return diagTail(o,o.diag);
+      if(o&&o.played&&o.bestUci&&typeof LC83!=="undefined"&&LC83.diagnose){const d=LC83.diagnose(o);if(d&&d.error)return diagTail(o,d)}
       const color=o.color==="b"?"b":"w";
       const al=detect(o.fen,color);
       const letter=o.k||"S";
@@ -371,7 +390,7 @@
   }
   function addWp(btn){
     const letter=btn.getAttribute("data-letter")||"S",id=btn.getAttribute("data-alarm")||"";
-    const a=ALARM[id];const text=a?("When “"+a.label.toLowerCase()+"” is on the board: "+a.ask):"";
+    const a=ALARM[id];const text=btn.getAttribute("data-text")||(a?("When “"+a.label.toLowerCase()+"” is on the board: "+a.ask):"");
     let r=null;
     try{r=Framework.coachAdd(letter,text.slice(0,120),{sev:2,freq:2,pers:2})}catch(e){r=null}
     if(r&&r.id){const m=rd(AK,{})||{};m[r.id]=id;wr(AK,m);say("Added to your Working Points.","good");btn.replaceWith(document.createTextNode("Added."))}

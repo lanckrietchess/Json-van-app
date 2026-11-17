@@ -71,7 +71,8 @@
   /* ---------- Lichess puzzles ---------- */
   const LI="https://lichess.org/api/puzzle/next";
   const THEME={tension:"capturingDefender",closed:"quietMove",outpost:"quietMove",loose:"hangingPiece",king:"exposedKing",passed:"advancedPawn",opposite:"kingsideAttack"};
-  const themeFor=(alarmId,letter)=>THEME[alarmId]||(letter==="C"?"short":letter==="P"?"mateIn2":"middlegame");
+  const THEME2={blocker:"discoveredAttack",allowedMate:"mateIn2",missedMate:"mateIn1",ignoredThreat:"defensiveMove",leftDefence:"hangingPiece",hanging:"hangingPiece",doubleAttack:"fork",missedTactic:"short",positional:"middlegame"};
+  const themeFor=(alarmId,letter)=>THEME[alarmId]||THEME2[alarmId]||(letter==="C"?"short":letter==="P"?"mateIn2":"middlegame");
   async function liOne(angle){
     const r=await fetch(LI+(angle?"?angle="+encodeURIComponent(angle):""),{headers:{Accept:"application/json"}});
     if(!r.ok)throw new Error("lichess "+r.status);
@@ -276,6 +277,11 @@
   }
   function caseOf(g,it,gi){
     const fen=g.fens[it.i],color=it.color==="b"?"b":"w";
+    /* 9.56.0: THIS mistake, read from the board and Stockfish (LC83.diagnose); the board-wide alarm guess is only the fallback */
+    let d=null;try{const m=g.moves[it.i],pm=it.i>0?g.moves[it.i-1]:null;d=LC83.diagnose({fen:fen,color:color,played:{from:m.from,to:m.to,promotion:m.promotion||"q",san:m.san},bestUci:it.best||"",replyUci:it.reply||"",
+      prevFen:it.i>0?g.fens[it.i-1]:null,oppUci:pm&&pm.from?pm.from+pm.to+(pm.promotion||""):null,threatUci:it.threat&&it.threat.best||""})}catch(e){d=null}
+    if(d&&d.error)return{no:Math.ceil((it.i+1)/2),san:it.san,best:it.bestSan||"",loss:Math.round(it.loss),cls:it.cls,fen:fen,color:color,letter:d.k,
+      alarm:{id:d.id,label:d.alarm.label,say:d.alarm.say},wp:d.wp.text,action:d.action,theme:themeFor(d.id,d.k),reply:it.replySan||"",error:d.error,why:d.why,find:d.find};
     const letter=it.k&&LNAME[it.k]?it.k:(it.cls==="blunder"?"M":"S");
     const al=pickAlarm(fen,color,letter);
     let wp=null;try{wp=LC61.linkedPoint(letter,al&&al.id)}catch(e){}
@@ -302,6 +308,7 @@
     if(!cases.length){host.innerHTML='<p class="muted">No serious errors in this game. Pick another one.</p>';return}
     host.innerHTML='<p class="small muted">'+cases.length+' video concepts from this game (vs '+esc(game.opp||"?")+'). Each error: Alarm Signal, Working Point, Action Step, a similar position for the Aha moment, and one button for the script prompt.</p>'
       +cases.map((c,i)=>'<article class="lc64-case" data-i="'+i+'"><h4>Move '+c.no+': '+esc(c.san)+(c.best?' (better: '+esc(c.best)+')':'')+' · cost '+c.loss+'%</h4>'
+      +(c.error?'<p><b>What went wrong:</b> '+esc(c.error)+'</p>':'')
       +'<p><b>a) Alarm Signal:</b> '+(c.alarm?esc(c.alarm.label)+'. '+esc(c.alarm.say):'none of the standard alarms; the error came from the thinking order')+'</p>'
       +'<p><b>b) Working Point:</b> '+esc(c.wp||"none linked yet ("+LNAME[c.letter]+")")+'</p>'
       +'<p><b>c) Action Step:</b> '+esc(c.action)+'</p>'
@@ -333,9 +340,12 @@
 "THE MISTAKE (the concept of this video):",
 "- Game: "+(game&&game.opp?"vs "+game.opp+" ("+(game.oppR||"?")+")":"a student game")+", move "+c.no+", the student played "+c.san+(c.best?" instead of "+c.best:"")+", costing about "+c.loss+"% win chance.",
 "- Position (FEN, before the move): "+c.fen,
+(c.error?"- What went wrong: "+c.error:null),
+(c.why?"- Their last move: "+c.why:null),
 "- Alarm Signal on the board: "+a,
 "- Active Working Point: "+(c.wp||"(none yet)"),
 "- Action Step: "+c.action,
+(c.find?"- How a human finds the better move: "+c.find:null),
 "- Similar position for the Aha moment: "+(c.sim?"Lichess puzzle "+c.sim.id+" (rating "+c.sim.rating+", themes "+c.sim.themes.join(", ")+"), https://lichess.org/training/"+c.sim.id:"(search one on Lichess with the theme "+c.theme+")"),
 "",
 "STRUCTURE:",
@@ -346,7 +356,7 @@
 "5. [CTA & PROOF] 75-90s: the Wall of Love and verified results (+630 ELO in 6 weeks), then one direct call to action to open the Lanckriet Chess app (link in bio).",
 "",
 "RULES: never call the product free or cheap; never promise a rating result or say lifetime or forever; no named competitors; keep claims to the facts above; every part must end by pushing the viewer to the next part; give 3 hook variants for part 1."
-    ].join("\n");
+    ].filter(x=>x!==null).join("\n");
   }
   /* 9.42.0: Bullet Points mode: the same facts and mistake, a freestyle 5-part skeleton instead of a written script (LC79.BCLOSE when present) */
   function bulletPrompt(c,game){
