@@ -24,10 +24,10 @@
     {id:"library",label:"Content Library",note:"Your saved projects: post, drag or export",open:["takes"]},
     {id:"free",label:"Free layout",note:"Every panel where you left it",open:[]}];
   const OLD={t1:"script",t2:"scenes",t3:"shoot",t4:"edit"};
-  const TOP="52px",H="calc(100% - 58px)";
+  const TOP="8px",H="calc(100% - 16px)";   /* 9.54.0: the section dropdown left the canvas for LC79's menu bar, so the panels start at the top */
   const R={ /* panel rectangles per section: left, width, top, height */
     script:{script:["1%","57%",TOP,H],library:["60%","39%",TOP,H]},
-    scenes:{stage:["1%","57%",TOP,H],camera:["60%","39%",TOP,"calc(50% - 30px)"],board:["60%","39%","calc(50% + 26px)","calc(50% - 32px)"]},
+    scenes:{stage:["1%","57%",TOP,H],camera:["60%","39%",TOP,"calc(50% - 12px)"],board:["60%","39%","calc(50% + 4px)","calc(50% - 12px)"]},
     shoot:{stage:["1%","72%",TOP,H],script:["75%","24%",TOP,H]},
     edit:{takes:["1%","98%",TOP,H]},
     library:{takes:["1%","98%",TOP,H]}};

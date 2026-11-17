@@ -118,6 +118,30 @@ const LC83=(()=>{
     return{san:m.san,from:m.from,to:m.to,piece:m.piece,color:me,captured:m.captured||null,after:after,facts:F,quiet:!F.length||F.every(x=>x.k==="develop")};
   }
   function factText(r,max,kinds){if(!r)return"";return r.facts.filter(x=>!kinds||kinds.test(x.k)).slice(0,max||3).map(x=>x.t).join(" ")}
+  /* 9.54.0: what a puzzle's WINNING LINE really does, read off the board move by move (chess.js + geometry, no engine, no AI).
+     Used for puzzle feedback so it always matches the move that was played: the first move's facts, a double attack when the moved
+     piece hits two or more valuable targets (king included), and the result of the whole line (mate, promotion or the material won).
+     Returns {san, line, motif, mate, net, text} or null. */
+  function solutionFacts(fen,sol,pov){
+    try{
+      const g=new Chess(fen),me=g.turn();pov=pov||me;
+      const list=(Array.isArray(sol)?sol:[]).map(uciMove);if(!list.length)return null;
+      const first=moveFacts(fen,list[0],pov);if(!first)return null;
+      const sans=[];let net=0,promo=false,mate=false;
+      for(const u of list){let m=null;try{m=g.move(u)}catch(e){m=null}if(!m)break;sans.push(m.san);
+        if(m.captured)net+=(m.color===me?1:-1)*VAL[m.captured];if(m.promotion&&m.color===me){promo=true;net+=VAL[m.promotion]-1}
+        if(g.in_checkmate())mate=true}
+      const B1=parse(first.after),targets=attacksFrom(B1,first.to).filter(s=>B1[s]&&B1[s].c!==me&&(B1[s].t==="k"||VAL[B1[s].t]>=3||VAL[B1[s].t]>VAL[first.piece]));
+      const dbl=targets.length>=2,motif=mate?"mate":dbl?"double attack":promo?"promotion":first.captured?"capture":first.facts.some(x=>x.k==="check")?"check":first.facts.some(x=>x.k==="line")?"discovered attack":first.facts.some(x=>x.k==="threat")?"threat":"quiet move";
+      const own=pov===me?"you":"they",tgt=dbl?targets.slice(0,3).map(s=>(B1[s].t==="k"?"the king":"the "+NAME[B1[s].t])+" on "+s).join(" and "):"";
+      let text=first.san+": "+(dbl?"one move, two targets: it hits "+tgt+" at the same time. ":"")+(factText(first,2,dbl?/capture|mate|check|line|passed|file/:null)||(first.quiet?"a quiet move that prepares the blow.":""));
+      if(mate&&!first.facts.some(x=>x.k==="mate"))text+=" The line ends in checkmate.";
+      else if(net>=2)text+=" The whole line wins material: "+own+" come out "+net+" point"+(net===1?"":"s")+" up.";
+      else if(promo)text+=" The pawn promotes.";
+      text=text.replace(/\s+/g," ").trim().replace(/^([^:]+: )([A-Z])(?=[a-z])/,(m0,a,b)=>a+b.toLowerCase());
+      return{san:first.san,line:sans,motif:motif,mate:mate,net:net,text:text};
+    }catch(e){return null}
+  }
   /* what the side to move can do right now: checks, captures that win something, pieces of theirs that are loose */
   function cca(fen){
     const out={checks:[],wins:[],theirLoose:[],myLoose:[]};
@@ -156,7 +180,7 @@ const LC83=(()=>{
           :"Their last move "+opp.san+": "+factText(opp,2)+(real.length?"":" No piece of yours can be won because of it.");
       }else out.M="Their last move gave you nothing to answer: no check, no threat on your pieces.";
       /* S: the facts of the position (loose pieces, alarm signals) */
-      let al=[];try{al=(LC61.detect(r.fen,me)||[]).filter(a=>a.id!=="loose").slice(0,1)}catch(e){}
+      let al=[];try{al=((r.bestUci&&LC61.relevant?LC61.relevant(r.fen,me,[r.bestUci],[]):LC61.detect(r.fen,me))||[]).filter(a=>a.id!=="loose").slice(0,1)}catch(e){}   /* 9.54.0: only an alarm the better move really uses */
       const ls=myLoose.slice(0,2).map(x=>"your "+NAME[x.t]+" on "+x.sq+(x.free?" (no defender)":" (attacked by a cheaper piece)"));
       const tl=c.theirLoose.slice(0,2).map(x=>"their "+NAME[x.t]+" on "+x.sq);
       out.S=(ls.length?"Loose right now: "+ls.join(" and ")+". ":"None of your pieces is loose. ")+(tl.length?"Loose on their side: "+tl.join(" and ")+". ":"")+(al.length?"On the board: "+al[0].label.toLowerCase()+". "+al[0].say:"");out.S=out.S.trim();
@@ -330,6 +354,6 @@ const LC83=(()=>{
     ["pointerdown","keydown","touchstart"].forEach(n=>document.addEventListener(n,()=>{gestAt=Date.now()},true));
     setTimeout(iabBar,1500);
   }
-  return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
+  return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,solutionFacts:solutionFacts,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
     NEXT:NEXT,inApp:inApp,intentUrl:intentUrl,allow:allow,keepBoard:keepBoard,_t:{held:()=>held,release:release,iabBar:iabBar,blocked:blocked,gap:()=>autoAt,touch:t=>{gestAt=t==null?Date.now():t},reset:()=>{autoAt=0;held=[];clearTimeout(relT)}},version:VERSION};
 })(); /*@@end lc83*/

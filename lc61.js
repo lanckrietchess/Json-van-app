@@ -244,6 +244,42 @@
     return out;
   }
   function findKing(b,c){for(let r=0;r<8;r++)for(let f=0;f<8;f++){const p=b[r][f];if(p&&p.t==="k"&&p.c===c)return{r:r,f:f}}return null}
+  /* 9.54.0: an alarm only counts for a puzzle when the SOLUTION really uses it. detect() reads the board and nothing else, so a fork on a
+     board where the kings happen to stand on opposite wings used to get "Who is faster: my pawn storm or theirs?" as its feedback.
+     relevant(fen, me, solution UCI moves, puzzle themes) keeps an alarm only when the winning line touches it:
+       loose    the line moves from / to / captures on one of the loose squares
+       tension  the line captures something
+       closed   the line is a pawn break, or the theme says quiet move / prophylaxis
+       outpost  the line moves to, captures on or attacks the outpost square
+       king     my king is exposed AND the opponent checks it in the line, or the theme is defensive
+       passed   the line captures, blocks or stops their passed pawn (same file, in front of it), or the theme names it
+       opposite the kings stand on opposite wings AND I push a pawn on their king's wing, or the theme is a king-side / queen-side attack
+     Without a solution (a game, not a puzzle) the board alarms are returned as before. */
+  function relevant(fen,me,sol,themes){
+    me=me==="b"?"b":"w";const all=detect(fen,me);
+    if(!Array.isArray(sol)||!sol.length)return all;
+    const th=(Array.isArray(themes)?themes:[]).map(x=>String(x||"").toLowerCase()),has=re=>th.some(x=>re.test(x));
+    let g=null;try{g=new Chess(fen)}catch(e){return[]}
+    const mv=[];
+    for(const u of sol){let m=null;try{m=g.move({from:String(u).slice(0,2),to:String(u).slice(2,4),promotion:String(u)[4]||"q"})}catch(e){m=null}if(!m)break;mv.push(m)}
+    if(!mv.length)return[];
+    const mine=mv.filter(m=>m.color===me),theirs=mv.filter(m=>m.color!==me),touched={};
+    mine.forEach(m=>{touched[m.from]=1;touched[m.to]=1});
+    const b=parse(fen),ek=b?findKing(b,other(me)):null,kf=ek?ek.f:-9;
+    const B1=b?parse(g.fen()):null;
+    const hitsSq=s=>{try{const ax=attackMap(B1||b);const r=8-(+s[1]),f=FILES.indexOf(s[0]);return ax.A[me][r][f]>0}catch(e){return false}};
+    return all.filter(a=>{
+      const sq=a.squares||[];
+      if(a.id==="loose")return sq.some(s=>touched[s]);
+      if(a.id==="tension")return mine.some(m=>m.captured);
+      if(a.id==="closed")return mine.some(m=>m.piece==="p")||has(/quiet|prophyl/);
+      if(a.id==="outpost")return sq.some(s=>touched[s]||hitsSq(s));
+      if(a.id==="king")return theirs.some(m=>/[+#]/.test(m.san))||has(/defen/);
+      if(a.id==="passed")return sq.some(s=>mine.some(m=>m.to===s||(m.to[0]===s[0]&&(me==="w"?+m.to[1]>+s[1]:+m.to[1]<+s[1]))))||has(/advancedpawn|promotion/);
+      if(a.id==="opposite")return has(/kingsideattack|queensideattack/)||mine.some(m=>m.piece==="p"&&Math.abs(FILES.indexOf(m.to[0])-kf)<=1);
+      return false;
+    });
+  }
 
   /* ---------- recorded voice (optional): assets/audio/coach/index.json + <hash>.mp3, made with tools/make_coach_audio.py in the owner's voice.
      The hash is the first 16 hex characters of the SHA-1 of the cleaned text (same cleaning as LC60). No clip = no button. ---------- */
@@ -532,5 +568,5 @@
     window.addEventListener("storage",ev=>{if(ev.key&&/lc26-auth/.test(ev.key))setTimeout(()=>hydrate(true),500)});
     new MutationObserver(()=>{try{addOwnerRows();paintVoice()}catch(e){}}).observe(document.body,{childList:true,subtree:true});
   }
-  return{init:init,afterRender:afterRender,getUserLevel:getUserLevel,hydrate:hydrate,wdl:wdl,moveAcc:moveAcc,gameAcc:gameAcc,reviewMoveAcc:reviewMoveAcc,epLoss:epLoss,detect:detect,tail:tail,ALARM:ALARM,latestStar:latestStar,linkedPoint:linkedPoint,schedule:schedule,trainLevel:trainLevel,vbtn:vbtn,sayClip:sayClip,paintVoice:paintVoice,learnPass:learnPass,learnPasses:learnPasses,coachImg:coachImg,untrained:untrained,levelLines:levelLines,WCFG:WCFG,applyNames:applyNames,version:"9.33.0"};
+  return{init:init,afterRender:afterRender,getUserLevel:getUserLevel,hydrate:hydrate,wdl:wdl,moveAcc:moveAcc,gameAcc:gameAcc,reviewMoveAcc:reviewMoveAcc,epLoss:epLoss,detect:detect,relevant:relevant,tail:tail,ALARM:ALARM,latestStar:latestStar,linkedPoint:linkedPoint,schedule:schedule,trainLevel:trainLevel,vbtn:vbtn,sayClip:sayClip,paintVoice:paintVoice,learnPass:learnPass,learnPasses:learnPasses,coachImg:coachImg,untrained:untrained,levelLines:levelLines,WCFG:WCFG,applyNames:applyNames,version:"9.33.0"};
 })(); /*@@end lc61*/

@@ -30,6 +30,24 @@
     opposite:"Count the tempi: your pawn storm against theirs. Then choose attack or defence for the next three moves."
   };
   const LNAME={M:"Move",S:"Specifics",P:"Priorities",C:"Calculation"};
+  /* 9.54.0: when no alarm on the board is part of the solution, the Action Step follows what the winning move really did */
+  const MOTIF_ACT={
+    "mate":"Start every P step with the checks: one of them may end the game at once.",
+    "double attack":"Before every move, look for one move that hits two things at once: a check plus a loose piece is the classic.",
+    "capture":"Before every move, list what you can take for free or with a cheaper piece.",
+    "check":"Start your P step with the checks: a check takes the opponent's choices away.",
+    "discovered attack":"When one of your pieces stands in front of your rook, bishop or queen, ask what moving it would open.",
+    "threat":"Look for the move that creates a threat they must answer, then win with the next one.",
+    "promotion":"When a pawn is close to promotion, count the moves to the last rank before anything else.",
+    "quiet move":"When nothing forcing works at once, look for the quiet move that makes the threat impossible to stop."};
+  function puzzleTruth(P){
+    let sf=null,al=[];
+    try{sf=LC83.solutionFacts(P.fen,P.solution,P.side)}catch(e){sf=null}
+    try{al=LC61.relevant(P.fen,P.side,P.solution,P.themes).filter(a=>a.id!=="loose")}catch(e){al=[]}
+    const tl=topLetterAlarm();
+    const step=al[0]?actionOf(al[0].id,al[0].letter):(sf&&MOTIF_ACT[sf.motif])||actionOf("",tl.letter);
+    return{sf:sf,al:al,step:step};
+  }
   function actionOf(alarmId,letter){
     return ACT[alarmId]||({M:"Say out loud what their last move changed before you touch a piece.",S:"Name the pawn structure and the biggest weakness before you pick a plan.",P:"Write down your checks, captures and attacks first, then choose.",C:"Calculate their best reply to your move before you play it."})[letter]||"Run the four MSPC steps on every move.";
   }
@@ -156,11 +174,11 @@
     }
     function reveal(ans,ok){
       const t=new Chess(P.fen);const m=t.move({from:P.solution[0].slice(0,2),to:P.solution[0].slice(2,4),promotion:P.solution[0][4]||"q"});
-      const al=LC61.detect(P.fen,P.side).filter(a=>a.id!=="loose");
-      const tl=topLetterAlarm();
+      /* 9.54.0: the feedback is built from the solution itself: what the winning move does, and only an alarm that the line really uses */
+      const tr=puzzleTruth(P),al=tr.al;
       try{board.setArrows([{from:P.solution[0].slice(0,2),to:P.solution[0].slice(2,4),kind:"best"}])}catch(e){}
-      msg.innerHTML=(ok?"Correct. ":"")+'The move was <b>'+esc(m?m.san:P.solution[0])+'</b>.'+(al.length?' Alarm Signal on the board: <b>'+esc(al[0].label)+'</b>. '+esc(al[0].say):'')
-        +'<p class="lc64-next"><b>Action Step.</b> '+esc(actionOf(al[0]?al[0].id:tl.alarm,al[0]?al[0].letter:tl.letter))+' '+(()=>{try{return LC61.vbtn(actionOf(al[0]?al[0].id:tl.alarm,al[0]?al[0].letter:tl.letter))}catch(e){return""}})()+'</p>';
+      msg.innerHTML=(ok?"Correct. ":"")+'The move was <b>'+esc(m?m.san:P.solution[0])+'</b>.'+(tr.sf?' '+esc(tr.sf.text.replace(/^[^:]*:\s*/,"")):'')+(al.length?' Alarm Signal in this line: <b>'+esc(al[0].label)+'</b>. '+esc(al[0].say):'')
+        +'<p class="lc64-next"><b>Action Step.</b> '+esc(tr.step)+' '+(()=>{try{return LC61.vbtn(tr.step)}catch(e){return""}})()+'</p>';
       act.innerHTML='<button type="button" class="btn btn-primary" data-lc64="again">Another puzzle</button><a class="btn btn-ghost" target="_blank" rel="noopener" href="https://lichess.org/training/'+esc(P.id)+'">Open on Lichess</a>';
       if(ok){try{V6.addXp("think",15)}catch(e){}}
     }
@@ -226,10 +244,11 @@
     const onMv=m=>{
       if(done)return;done=true;try{board.setInteractive(null)}catch(e){}
       const ok=(m.from+m.to)===String(c.best).slice(0,4);caseDone(c.fen,ok);
-      const al=LC61.detect(c.fen,side).filter(a=>a.id!=="loose")[0]||null;
+      let al=null;try{al=LC61.relevant(c.fen,side,[String(c.best)],[]).filter(a=>a.id!=="loose")[0]||null}catch(e){al=null}
+      let sf=null;try{sf=LC83.solutionFacts(c.fen,[String(c.best)],side)}catch(e){sf=null}
       try{board.setArrows([{from:String(c.best).slice(0,2),to:String(c.best).slice(2,4),kind:"best"}])}catch(e){}
-      msg.innerHTML=(ok?"Correct, and that is the move you missed in the game. ":"The better move was <b>"+esc(c.bestSan||c.best)+"</b>. ")+(al?'Alarm Signal on the board: <b>'+esc(al.label)+'</b>. '+esc(al.say)+' ':'')
-        +'<p class="lc64-next"><b>Action Step.</b> '+esc(actionOf(al?al.id:"",c.k||"S"))+'</p>';
+      msg.innerHTML=(ok?"Correct, and that is the move you missed in the game. ":"The better move was <b>"+esc(c.bestSan||c.best)+"</b>. ")+(sf?esc(sf.text.replace(/^[^:]*:\s*/,""))+' ':'')+(al?'Alarm Signal in this line: <b>'+esc(al.label)+'</b>. '+esc(al.say)+' ':'')
+        +'<p class="lc64-next"><b>Action Step.</b> '+esc(al?actionOf(al.id,c.k||"S"):(sf&&MOTIF_ACT[sf.motif])||actionOf("",c.k||"S"))+'</p>';
       act.innerHTML='<button type="button" class="btn btn-primary" data-lc64="case-again">Another case</button>';
     };
     const board=Board(bhost,{fen:c.fen,orientation:side==="b"?"black":"white",onMove:onMv});
@@ -486,5 +505,5 @@ close]).join("\n");
     document.addEventListener("click",onDoc,true);
     let deb=0;new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{actionObserver();addOwnerRow()}catch(e){}},300)}).observe(document.body,{childList:true,subtree:true});
   }
-  return{init:init,afterRender:afterRender,puzzleFromJson:puzzleFromJson,liClosest:liClosest,interrogate:interrogate,openRanked:openRanked,openTrim:openTrim,buildPrompt:buildPrompt,bulletPrompt:bulletPrompt,caseOf:caseOf,nextGames:nextGames,nextGamesHTML:nextGamesHTML,top:topLetterAlarm,actionOf:actionOf,themeFor:themeFor,openCase:openCase,casePick:casePick,ACT:ACT,QS:QS,LNAME:LNAME,liOne:liOne,rating:rating,version:"9.34.0"};
+  return{init:init,afterRender:afterRender,truth:puzzleTruth,MOTIF_ACT:MOTIF_ACT,puzzleFromJson:puzzleFromJson,liClosest:liClosest,interrogate:interrogate,openRanked:openRanked,openTrim:openTrim,buildPrompt:buildPrompt,bulletPrompt:bulletPrompt,caseOf:caseOf,nextGames:nextGames,nextGamesHTML:nextGamesHTML,top:topLetterAlarm,actionOf:actionOf,themeFor:themeFor,openCase:openCase,casePick:casePick,ACT:ACT,QS:QS,LNAME:LNAME,liOne:liOne,rating:rating,version:"9.34.0"};
 })(); /*@@end lc64*/
