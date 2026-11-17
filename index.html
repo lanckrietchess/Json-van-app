@@ -112,15 +112,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.49.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.52.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.49.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.49.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.52.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.52.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.49.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.52.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -282,7 +282,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .vs-h4{margin:.9rem 0 .2rem;font-size:1rem;color:var(--good)}
 .vs2 li.no,.vs2 li.yes{color:var(--text)}
 
-/* 9.49.0: the install steps sheet (uses the gallery styles) */
+/* 9.48.0: the install steps sheet (uses the gallery styles) */
 /* 9.49.0: the 2-step iPhone / iPad guide and the one-step browser-menu fallback */
 .ins-steps.ins-two{list-style:none;margin:0;padding:0;display:grid;gap:10px;grid-template-columns:1fr 1fr}.ins-two li{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:14px 10px;border-radius:14px;background:#0f172a;border:1px solid var(--line);font-size:.98rem;line-height:1.35}
 .ins-two .n{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#04121c;font-weight:900;display:inline-flex;align-items:center;justify-content:center;font-size:.9rem}.ins-two .ic{width:58px;height:58px;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;background:rgba(56,189,248,.14);color:var(--blue)}.ins-two .ic svg{width:34px;height:34px}.ins-two b{color:#fff}
@@ -313,7 +313,9 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .shots{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,300px);gap:14px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory}.shots .shot{margin:0;scroll-snap-align:start}
 .love-card .lshot,.pcard .lshot{display:block;width:100%;border-radius:10px;margin-top:10px;border:1px solid var(--line)}
 .pr-own{font-size:.75rem;color:var(--gold);font-weight:700}.pr-link{font-size:.82rem}
-.lc72-edit{position:fixed;right:14px;bottom:14px;z-index:150;min-height:44px;padding:0 16px;border-radius:999px;background:var(--gold);color:#241a00;font-weight:800;display:inline-flex;align-items:center;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.lc72-edit{display:none;position:fixed;right:14px;bottom:14px;z-index:150;min-height:44px;padding:0 16px;border-radius:999px;border:0;background:var(--gold);color:#241a00;font:800 15px/1 inherit;align-items:center;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,.45);cursor:pointer}
+.lc72-edit.is-on{display:inline-flex}   /* 9.52.0 LC89: shown only after the server confirmed an admin session */
+[data-lc89-off]{display:none!important}   /* 9.52.0 LC89: a section or block the owner hid on the page */
 /* 9.42.0 LC82: social proof counters and the Release Giveaway board */
 .sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:18px}.sp-stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
 .sp-stat b{display:block;font-size:1.9rem;font-weight:900;line-height:1.1}.sp-stat b i{font-style:normal;color:var(--gold);font-size:1rem;letter-spacing:1px}.sp-stat span{font-size:.88rem;color:#94a3b8}
@@ -334,72 +336,72 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   <div class="wrap">
     <a class="brand" href="/"><img src="/icons/icon-192.png" width="34" height="34" alt="" id="brand-img"><span>Lanckriet Chess</span></a>
     <nav aria-label="Main">
-      <a href="#how">How it works</a><a href="#proof">Results</a><a href="#install">Install</a><a href="#faq">FAQ</a>
-      <a class="btn bw" data-app data-install href="/app.html?install=1">Install the app</a>
+      <a data-cms="nav.1" href="#how">How it works</a><a data-cms="nav.2" href="#proof">Results</a><a data-cms="nav.3" href="#install">Install</a><a data-cms="nav.4" href="#faq">FAQ</a>
+      <a data-cms="nav.5" class="btn bw" data-app data-install href="/app.html?install=1">Install the app</a>
     </nav>
   </div>
 </header>
 
 <main id="main">
-<section class="mission-band" aria-labelledby="h-hero">
+<section data-cms-sec="mission" class="mission-band" aria-labelledby="h-hero">
   <div class="wrap mb-in">
-    <h1 id="h-hero" class="mission" data-lc-key="hero_title">My goal is to save <span style="color:var(--blue)">20,000 people</span> out of the lies and chaos by the end of 2027.</h1>
+    <h1 data-cms="mission.1" id="h-hero" class="mission" data-lc-key="hero_title">My goal is to save <span style="color:var(--blue)">20,000 people</span> out of the lies and chaos by the end of 2027.</h1>
     <div class="mcount" id="mcount" role="status" aria-live="polite"><div class="mc-top"><b id="mc-n">…</b><span id="mc-t">of 20,000 players have started</span></div><div class="bar" aria-hidden="true"><i id="mc-bar" style="width:1%"></i></div></div>
   </div>
 </section>
-<section class="hero" aria-labelledby="h-story">
+<section data-cms-sec="story" class="hero" aria-labelledby="h-story">
   <div class="wrap grid">
     <div class="hero-main">
       <div id="promo" class="promo hide" role="status" aria-live="polite"></div>
-      <h2 id="h-story" class="story-h">Why I’m 100% confident you will see results</h2>
-      <div class="story-t" id="story-t" data-lc-key="story">
+      <h2 data-cms="story.1" id="h-story" class="story-h">Why I’m 100% confident you will see results</h2>
+      <div data-cms="story.body" class="story-t" id="story-t" data-lc-key="story">
         <p>I started at <b>355 ELO</b>. Like everybody, I drowned in contradictory advice: watch this course, grind these puzzles, memorize that opening, never memorize openings. It all contradicted itself.</p>
         <p>I got stuck around <b>500 ELO</b> — not because I lacked talent, but because I thought differently on every single move and kept repeating the exact same mistakes.</p>
         <p>The turning point came when I stopped collecting tips and defined what improvement actually is: making better moves in the same types of positions. I sat down against bots, wrote every thought down in my notes, and engineered the <b>MSPC system</b>.</p>
         <p>When I began coaching my best friends, I built improvement on three unshakeable pillars: <b>Think</b> correctly, have the proper <b>Theory</b>, and <b>Trim</b> your mistakes away. That became the <b>Triple-T method</b>.</p>
         <p>By applying these exact systems, I climbed to <b>2105 ELO</b> in 2 years and 10 months. This Hub is those systems, built so you never have to spend years figuring it out alone.</p>
       </div>
-      <p class="mute">Built on the <b>MSPC system</b> and the <b>Triple-T method</b>. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
+      <p data-cms="story.2" class="mute">Built on the <b>MSPC system</b> and the <b>Triple-T method</b>. It reads your own games, shows the mistakes that cost you rating, and tells you what to fix first. Any hour, on any device.</p>
       <div class="cta-row">
-        <a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a>
+        <a data-cms="story.3" class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a>
       </div>
-      <p class="small mute">No store, no download queue. Works on Android, iPhone, Windows and Mac. Download the app and let it scan your last 10 games.</p>
+      <p data-cms="story.4" class="small mute">No store, no download queue. Works on Android, iPhone, Windows and Mac. Download the app and let it scan your last 10 games.</p>
       <div class="chips" aria-label="Credentials">
-        <span class="chip"><b>355 → 2105</b> Rapid on Chess.com in 2 years and 10 months</span>
-        <span class="chip">Top <b>0.1%</b> worldwide (99.9th percentile)</span>
-        <span class="chip"><b>+630</b> ELO in 6 weeks, proof-of-concept student</span>
+        <span data-cms="story.5" class="chip"><b>355 → 2105</b> Rapid on Chess.com in 2 years and 10 months</span>
+        <span data-cms="story.6" class="chip">Top <b>0.1%</b> worldwide (99.9th percentile)</span>
+        <span data-cms="story.7" class="chip"><b>+630</b> ELO in 6 weeks, proof-of-concept student</span>
       </div>
     </div>
     <div id="hero-side"><figure class="shot hide" id="shot-hero"></figure>
     <div class="walk hide" id="walk-hero"></div>
     <div class="coach" id="coach-card" aria-label="What the coach does">
       <div class="who"><span class="dot" aria-hidden="true">♞</span><span>Coach Lanckriet</span></div>
-      <div class="msg"><b>M · Move.</b> What did your opponent just change? A threat? A new weakness?</div>
-      <div class="msg"><b>S · Specifics.</b> What does this position and this phase of the game ask of you?</div>
-      <div class="msg"><b>P · Priorities.</b> Checks, captures, attacks. What do you play first?</div>
-      <div class="msg"><b>C · Calculation.</b> Verify the line until it is clear. Then play it.</div>
-      <p class="small mute" style="margin-top:12px">One habit, four questions. It catches the move before you play it.</p>
+      <div data-cms="story.8" class="msg"><b>M · Move.</b> What did your opponent just change? A threat? A new weakness?</div>
+      <div data-cms="story.9" class="msg"><b>S · Specifics.</b> What does this position and this phase of the game ask of you?</div>
+      <div data-cms="story.10" class="msg"><b>P · Priorities.</b> Checks, captures, attacks. What do you play first?</div>
+      <div data-cms="story.11" class="msg"><b>C · Calculation.</b> Verify the line until it is clear. Then play it.</div>
+      <p data-cms="story.12" class="small mute" style="margin-top:12px">One habit, four questions. It catches the move before you play it.</p>
     </div></div>
   </div>
 </section>
 
-<section class="alt hide" id="walkthrough" aria-labelledby="h-walk"><div class="wrap"><span class="eyebrow">See it in action</span><h2 id="h-walk">Watch the walkthrough</h2><p class="lead">Three minutes: how the Hub finds the mistakes that cost you rating.</p><div class="walk" id="walk-sec" style="max-width:820px;margin-top:18px"></div></div></section>
+<section data-cms-sec="walk" class="alt hide" id="walkthrough" aria-labelledby="h-walk"><div class="wrap"><span data-cms="walk.1" class="eyebrow">See it in action</span><h2 data-cms="walk.2" id="h-walk">Watch the walkthrough</h2><p data-cms="walk.3" class="lead">Three minutes: how the Hub finds the mistakes that cost you rating.</p><div class="walk" id="walk-sec" style="max-width:820px;margin-top:18px"></div></div></section>
 
-<section id="heroes" class="hide" aria-labelledby="h-heroes">
+<section data-cms-sec="heroes" id="heroes" class="hide" aria-labelledby="h-heroes">
   <div class="wrap">
-    <span class="eyebrow">Hero's Journeys</span>
-    <h2 id="h-heroes">Elite Students: how they climbed.</h2>
-    <p class="mute small">Each story was written by the member, checked by Kyenzo against the member's public rating, and is shown with their permission. Results differ per person; nothing here is a promise of a rating.</p>
+    <span data-cms="heroes.1" class="eyebrow">Hero's Journeys</span>
+    <h2 data-cms="heroes.2" id="h-heroes">Elite Students: how they climbed.</h2>
+    <p data-cms="heroes.3" class="mute small">Each story was written by the member, checked by Kyenzo against the member's public rating, and is shown with their permission. Results differ per person; nothing here is a promise of a rating.</p>
     <div class="love" id="heroes-list" aria-live="polite"></div>
   </div>
 </section>
 
-<section id="love" aria-labelledby="h-love">
+<section data-cms-sec="love" id="love" aria-labelledby="h-love">
   <div class="wrap">
-    <span class="eyebrow">Wall of Love</span>
-    <h2 id="h-love">Real players. Real results.</h2>
-    <p class="mute small">Every card is a real member who agreed to share it. Tap a card to see the chat and the screenshots behind it. Results differ per person; nothing here is a promise of a rating.</p>
-    <div class="wl-admin hide" id="wl-admin" role="region" aria-label="Admin mode"><b>Admin mode</b><span class="small">Only you see this bar.</span><a class="btn gold" href="/app.html?lc86=new#wall-cms">+ Add a person</a><a class="btn bw" href="/app.html#wall-cms">Manage the Wall in the app</a><a class="btn bw" href="/#love" id="wl-leave">Leave admin mode</a></div>
+    <span data-cms="love.1" class="eyebrow">Wall of Love</span>
+    <h2 data-cms="love.2" id="h-love">Real players. Real results.</h2>
+    <p data-cms="love.3" class="mute small">Every card is a real member who agreed to share it. Tap a card to see the chat and the screenshots behind it. Results differ per person; nothing here is a promise of a rating.</p>
+    <div class="wl-admin hide" id="wl-admin" role="region" aria-label="Admin mode"><b>Admin mode</b><span class="small">Only you see this bar.</span><a class="btn gold" href="/app.html?lc86=new#wall-cms">+ Add a person</a><a class="btn bw" href="/app.html#wall-cms">Manage the Wall in the app</a><a class="btn gold" href="/?edit=1#love">✎ Edit on this page</a><a class="btn bw" href="/#love" id="wl-leave">Leave admin mode</a></div>
     <div class="wl-grid" id="wl-grid" role="list">
       <button type="button" class="card wl-card" role="listitem" data-wl="seed-igor"><span class="wl-av" aria-hidden="true">IP</span><span class="wl-who"><b class="wl-name">Igor P.</b><span class="wl-tag">+630 Elo in 6 weeks</span></span><span class="wl-cta">See the proof →</span></button>
       <button type="button" class="card wl-card" role="listitem" data-wl="seed-mathijs"><span class="wl-av" aria-hidden="true">M</span><span class="wl-who"><b class="wl-name">Mathijs</b><span class="wl-tag">Hit 1500 Elo</span></span><span class="wl-cta">See the proof →</span></button>
@@ -409,98 +411,98 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 </section>
 <div class="wl-ov" id="wl-ov" hidden><div class="wl-box" role="dialog" aria-modal="true" aria-labelledby="wl-h"><header class="wl-head"><span id="wl-av"></span><div><h3 id="wl-h"></h3><p class="wl-tag" id="wl-t"></p></div><button type="button" class="wl-x" id="wl-x" aria-label="Close">×</button></header><div class="wl-body" id="wl-body"></div><p class="small mute wl-fine">Shared with the member’s permission. Results differ per person; nothing here is a promise of a rating.</p></div></div>
 
-<section id="proof" aria-labelledby="h-proof">
+<section data-cms-sec="proof" id="proof" aria-labelledby="h-proof">
   <div class="wrap">
-    <span class="eyebrow">The Proof Queue</span>
-    <h2 id="h-proof">Live results: what members gained, checked.</h2>
-    <p class="lead">Ranked by proof: members with a verified result <b>and</b> a message come first, then verified results, then messages. The number shown is the <b>Peak Gain</b>: the highest rise since the member joined, read from their public Chess.com or Lichess rating by our server. A card only appears because the member allowed it, and Kyenzo checks it first. Tap a card to open the rating chart.</p>
+    <span data-cms="proof.1" class="eyebrow">The Proof Queue</span>
+    <h2 data-cms="proof.2" id="h-proof">Live results: what members gained, checked.</h2>
+    <p data-cms="proof.3" class="lead">Ranked by proof: members with a verified result <b>and</b> a message come first, then verified results, then messages. The number shown is the <b>Peak Gain</b>: the highest rise since the member joined, read from their public Chess.com or Lichess rating by our server. A card only appears because the member allowed it, and Kyenzo checks it first. Tap a card to open the rating chart.</p>
     <div class="proof" id="proof-list" aria-live="polite">
-      <article class="pcard"><span class="tag pro">Founder</span><p class="gain">355 → 2105 <small>Rapid rating</small></p><p class="mute small">Kyenzo started at 355 on 27 Nov 2023 and reached 2105 on Chess.com in 2 years and 10 months. 3,616 rapid games, 99.9th percentile.</p></article>
-      <article class="pcard"><span class="tag pro">Proof of concept</span><p class="gain">+630 <small>ELO in 6 weeks</small></p><p class="mute small">The first student to run the full MSPC system. More verified graphs appear here as members allow it.</p></article>
+      <article class="pcard" data-cms-box="proof.founder"><span data-cms="proof.4" class="tag pro">Founder</span><p data-cms="proof.5" class="gain">355 → 2105 <small>Rapid rating</small></p><p data-cms="proof.6" class="mute small">Kyenzo started at 355 on 27 Nov 2023 and reached 2105 on Chess.com in 2 years and 10 months. 3,616 rapid games, 99.9th percentile.</p></article>
+      <article class="pcard" data-cms-box="proof.poc"><span data-cms="proof.7" class="tag pro">Proof of concept</span><p data-cms="proof.8" class="gain">+630 <small>ELO in 6 weeks</small></p><p data-cms="proof.9" class="mute small">The first student to run the full MSPC system. More verified graphs appear here as members allow it.</p></article>
     </div>
     <p class="small mute" id="proof-note">Verified results load from the app's own data.</p>
     <div class="sp-stats hide" id="sp-stats" aria-live="polite"></div>
   </div>
 </section>
 
-<section id="giveaway" class="hide" aria-labelledby="h-giveaway">
+<section data-cms-sec="giveaway" id="giveaway" class="hide" aria-labelledby="h-giveaway">
   <div class="wrap">
-    <span class="eyebrow">Release Giveaway</span>
+    <span data-cms="giveaway.1" class="eyebrow">Release Giveaway</span>
     <h2 id="h-giveaway">Gain the most ELO in 15 days. The top 5 win 1 month of Pro.</h2>
-    <p class="lead">Play your normal games, train in the Hub, and let your public rating do the talking. Link your Chess.com or Lichess account in the app: our server reads your Rapid rating the moment you join, and again while the challenge runs.</p>
+    <p data-cms="giveaway.2" class="lead">Play your normal games, train in the Hub, and let your public rating do the talking. Link your Chess.com or Lichess account in the app: our server reads your Rapid rating the moment you join, and again while the challenge runs.</p>
     <p class="gw-when" id="gw-when"></p>
     <ol class="gw-board" id="gw-board" aria-live="polite"></ol>
-    <p><a class="btn gold big" href="/app.html#giveaway">Join the challenge</a></p>
-    <p class="small mute">Only the public Rapid rating counts. A first name appears here only when the member ticked “show me on the public board”; never an e-mail or a username. Shared or boosted accounts are disqualified. Results differ per person; nothing here is a promise of a rating.</p>
+    <p><a data-cms="giveaway.3" class="btn gold big" href="/app.html#giveaway">Join the challenge</a></p>
+    <p data-cms="giveaway.4" class="small mute">Only the public Rapid rating counts. A first name appears here only when the member ticked “show me on the public board”; never an e-mail or a username. Shared or boosted accounts are disqualified. Results differ per person; nothing here is a promise of a rating.</p>
   </div>
 </section>
 
-<section id="how" aria-labelledby="h-how">
+<section data-cms-sec="how" id="how" aria-labelledby="h-how">
   <div class="wrap">
-    <span class="eyebrow">The method</span>
-    <h2 id="h-how">Think the same way every time. Know the right theory. Trim your mistakes away.</h2>
-    <p class="lead">Rating does not stall because you lack talent. It stalls because your thinking changes from move to move, your theory has holes, and the same mistakes come back game after game. The Hub fixes all three, in a fixed order.</p>
+    <span data-cms="how.1" class="eyebrow">The method</span>
+    <h2 data-cms="how.2" id="h-how">Think the same way every time. Know the right theory. Trim your mistakes away.</h2>
+    <p data-cms="how.3" class="lead">Rating does not stall because you lack talent. It stalls because your thinking changes from move to move, your theory has holes, and the same mistakes come back game after game. The Hub fixes all three, in a fixed order.</p>
     <div class="tt-flow" aria-label="The Triple-T method">
-      <article class="card tt tt-think"><div class="tt-head"><span class="tt-n">1</span><div><span class="tt-k">Think</span><h3>One fixed way to think: the MSPC system</h3></div></div>
-        <p class="mute">The first T is the engine of everything: the same four questions, in the same order, on every move. Drilled on real positions until it runs by itself.</p>
+      <article class="card tt tt-think" data-cms-box="how.think"><div class="tt-head"><span class="tt-n">1</span><div><span data-cms="how.4" class="tt-k">Think</span><h3 data-cms="how.5">One fixed way to think: the MSPC system</h3></div></div>
+        <p data-cms="how.6" class="mute">The first T is the engine of everything: the same four questions, in the same order, on every move. Drilled on real positions until it runs by itself.</p>
         <ol class="mspc-steps">
-          <li><b>M</b><span><strong>Move.</strong> What did my opponent’s last move change? New threats, new weaknesses.</span></li>
-          <li><b>S</b><span><strong>Specifics.</strong> Notice the structure and the features of the position, then make a plan.</span></li>
-          <li><b>P</b><span><strong>Priorities.</strong> Checks, captures, attacks: the forcing moves first, for both sides.</span></li>
-          <li><b>C</b><span><strong>Calculation.</strong> Verify the line until it is clear. Then play it.</span></li>
+          <li data-cms="how.7"><b>M</b><span><strong>Move.</strong> What did my opponent’s last move change? New threats, new weaknesses.</span></li>
+          <li data-cms="how.8"><b>S</b><span><strong>Specifics.</strong> Notice the structure and the features of the position, then make a plan.</span></li>
+          <li data-cms="how.9"><b>P</b><span><strong>Priorities.</strong> Checks, captures, attacks: the forcing moves first, for both sides.</span></li>
+          <li data-cms="how.10"><b>C</b><span><strong>Calculation.</strong> Verify the line until it is clear. Then play it.</span></li>
         </ol></article>
-      <article class="card tt"><div class="tt-head"><span class="tt-n">2</span><div><span class="tt-k">Theory</span><h3>The right theory for your level</h3></div></div>
-        <p class="mute">Not “stop memorising openings”. The <b>right</b> theory at the <b>right</b> level: from about 800 to 1200 the Colle-Koltanowski, Caro-Kann and Semi-Slav, plus middlegame structures and plans and endgame technique. Every line is read with MSPC.</p></article>
-      <article class="card tt"><div class="tt-head"><span class="tt-n">3</span><div><span class="tt-k">Trim</span><h3>Cut your own mistakes away</h3></div></div>
-        <p class="mute">Full analysis of your own games finds the blunders, bad habits and leaks, sorts them by MSPC step and turns them into Working Points you train until they stop coming back.</p></article>
+      <article class="card tt" data-cms-box="how.theory"><div class="tt-head"><span class="tt-n">2</span><div><span data-cms="how.11" class="tt-k">Theory</span><h3 data-cms="how.12">The right theory for your level</h3></div></div>
+        <p data-cms="how.13" class="mute">Not “stop memorising openings”. The <b>right</b> theory at the <b>right</b> level: from about 800 to 1200 the Colle-Koltanowski, Caro-Kann and Semi-Slav, plus middlegame structures and plans and endgame technique. Every line is read with MSPC.</p></article>
+      <article class="card tt" data-cms-box="how.trim"><div class="tt-head"><span class="tt-n">3</span><div><span data-cms="how.14" class="tt-k">Trim</span><h3 data-cms="how.15">Cut your own mistakes away</h3></div></div>
+        <p data-cms="how.16" class="mute">Full analysis of your own games finds the blunders, bad habits and leaks, sorts them by MSPC step and turns them into Working Points you train until they stop coming back.</p></article>
     </div>
-    <p class="lead" style="margin-top:18px"><b>Put those three together and the things that keep players stuck, random thinking, patchy theory and repeated mistakes, disappear one by one.</b> This is exactly how a 355 became a 2105.</p>
-    <p class="small mute">Nothing here is a promise of a rating: the results above are real, checked, and ranked by what members actually gained.</p>
-    <div class="cta-row"><a class="btn primary" data-app data-install href="/app.html?install=1">Install it and scan my last 10 games</a></div>
+    <p data-cms="how.17" class="lead" style="margin-top:18px"><b>Put those three together and the things that keep players stuck, random thinking, patchy theory and repeated mistakes, disappear one by one.</b> This is exactly how a 355 became a 2105.</p>
+    <p data-cms="how.18" class="small mute">Nothing here is a promise of a rating: the results above are real, checked, and ranked by what members actually gained.</p>
+    <div class="cta-row"><a data-cms="how.19" class="btn primary" data-app data-install href="/app.html?install=1">Install it and scan my last 10 games</a></div>
   </div>
 </section>
 
-<section class="alt hide" id="inside" aria-labelledby="h-inside"><div class="wrap"><span class="eyebrow">Inside the app</span><h2 id="h-inside">What you train with, on your own phone</h2><div class="shots" id="inside-list"></div></div></section>
+<section data-cms-sec="inside" class="alt hide" id="inside" aria-labelledby="h-inside"><div class="wrap"><span data-cms="inside.1" class="eyebrow">Inside the app</span><h2 data-cms="inside.2" id="h-inside">What you train with, on your own phone</h2><div class="shots" id="inside-list"></div></div></section>
 
-<section class="alt" id="price-contrast" aria-labelledby="h-contrast">
+<section data-cms-sec="contrast" class="alt" id="price-contrast" aria-labelledby="h-contrast">
   <div class="wrap">
-    <span class="eyebrow">The contrast</span>
-    <h2 id="h-contrast">The usual way costs more and changes less. Here is what changes for you.</h2>
-    <p class="mute small">Typical prices of video-course academies, private coaching and premium chess-site memberships. They vary by provider, plan and country, so the examples are anonymous on purpose. Titled coaches typically charge from about €50 to well over €100 an hour; we compare with €80.</p>
+    <span data-cms="contrast.1" class="eyebrow">The contrast</span>
+    <h2 data-cms="contrast.2" id="h-contrast">The usual way costs more and changes less. Here is what changes for you.</h2>
+    <p data-cms="contrast.3" class="mute small">Typical prices of video-course academies, private coaching and premium chess-site memberships. They vary by provider, plan and country, so the examples are anonymous on purpose. Titled coaches typically charge from about €50 to well over €100 an hour; we compare with €80.</p>
     <div class="vs2" id="vs-grid">
       <div class="vs-col vs-them">
-        <p class="vs-label is-bad">The usual way</p>
-        <article class="card flip" tabindex="0" role="button" aria-pressed="false" aria-label="A typical video academy: tap to see why it falls short">
-          <div class="fside front"><h3>A typical video academy</h3><p class="big-num">€20+<small> / month</small></p>
-          <ul><li class="no">You watch someone else think</li><li class="no">The same course for everybody</li><li class="no">Nobody looks at your own games</li></ul><p class="flip-hint">Tap to see why ↻</p></div>
-          <div class="fside back"><h3>Why it falls short</h3><ul><li>Nothing trains how <b>you</b> decide at the board.</li><li>The same mistake comes back next week.</li><li>One more course often adds to the chaos.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
+        <p data-cms="contrast.4" class="vs-label is-bad">The usual way</p>
+        <article class="card flip" data-cms-box="contrast.academy" tabindex="0" role="button" aria-pressed="false" aria-label="A typical video academy: tap to see why it falls short">
+          <div class="fside front"><h3 data-cms="contrast.5">A typical video academy</h3><p data-cms="contrast.6" class="big-num">€20+<small> / month</small></p>
+          <ul><li data-cms="contrast.7" class="no">You watch someone else think</li><li data-cms="contrast.8" class="no">The same course for everybody</li><li data-cms="contrast.9" class="no">Nobody looks at your own games</li></ul><p data-cms="contrast.10" class="flip-hint">Tap to see why ↻</p></div>
+          <div class="fside back"><h3 data-cms="contrast.11">Why it falls short</h3><ul><li data-cms="contrast.12">Nothing trains how <b>you</b> decide at the board.</li><li data-cms="contrast.13">The same mistake comes back next week.</li><li data-cms="contrast.14">One more course often adds to the chaos.</li></ul><p data-cms="contrast.15" class="flip-hint">Tap to go back ↻</p></div>
         </article>
-        <article class="card flip" tabindex="0" role="button" aria-pressed="false" aria-label="Private coaching: tap to see why it falls short">
-          <div class="fside front"><h3>Private coaching</h3><p class="big-num">€80<small> / hour</small></p>
-          <ul><li class="no">One lesson a week at best</li><li class="no">Ten lessons already cost <b>€800</b></li><li class="no">Feedback days after the game</li></ul><p class="flip-hint">Tap to see why ↻</p></div>
-          <div class="fside back"><h3>Why it falls short</h3><ul><li>Good coaching works, but few players can pay for more than one hour a week.</li><li>Between lessons you play alone, with the same habits.</li><li>A year of weekly lessons costs over €4,000.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
+        <article class="card flip" data-cms-box="contrast.coach" tabindex="0" role="button" aria-pressed="false" aria-label="Private coaching: tap to see why it falls short">
+          <div class="fside front"><h3 data-cms="contrast.16">Private coaching</h3><p data-cms="contrast.17" class="big-num">€80<small> / hour</small></p>
+          <ul><li data-cms="contrast.18" class="no">One lesson a week at best</li><li data-cms="contrast.19" class="no">Ten lessons already cost <b>€800</b></li><li data-cms="contrast.20" class="no">Feedback days after the game</li></ul><p data-cms="contrast.21" class="flip-hint">Tap to see why ↻</p></div>
+          <div class="fside back"><h3 data-cms="contrast.22">Why it falls short</h3><ul><li data-cms="contrast.23">Good coaching works, but few players can pay for more than one hour a week.</li><li data-cms="contrast.24">Between lessons you play alone, with the same habits.</li><li data-cms="contrast.25">A year of weekly lessons costs over €4,000.</li></ul><p data-cms="contrast.26" class="flip-hint">Tap to go back ↻</p></div>
         </article>
-        <article class="card flip" id="vs-premium" tabindex="0" role="button" aria-pressed="false" aria-label="Premium chess-site membership: tap to see why it falls short">
-          <div class="fside front"><h3>Premium chess-site membership</h3><p class="big-num">up to ~€140<small> / year</small></p>
-          <ul><li class="no">Mostly puzzles, lessons and engine game review</li><li class="no">Built for everyone, not for your habits</li><li class="no">It says <b>what</b> went wrong, not which habit to fix</li></ul>
-          <p class="small mute">Top-tier yearly memberships at the big chess sites. Prices vary by site, plan, country and device.</p><p class="flip-hint">Tap to see why ↻</p></div>
-          <div class="fside back"><h3>Why it falls short</h3><ul><li>Endless puzzles, but no fixed way of thinking: the Puzzle Addict trap.</li><li>Nobody tracks your Working Points between games.</li><li>Nothing makes you slow down before the move that loses.</li></ul><p class="flip-hint">Tap to go back ↻</p></div>
+        <article class="card flip" data-cms-box="contrast.premium" id="vs-premium" tabindex="0" role="button" aria-pressed="false" aria-label="Premium chess-site membership: tap to see why it falls short">
+          <div class="fside front"><h3 data-cms="contrast.27">Premium chess-site membership</h3><p data-cms="contrast.28" class="big-num">up to ~€140<small> / year</small></p>
+          <ul><li data-cms="contrast.29" class="no">Mostly puzzles, lessons and engine game review</li><li data-cms="contrast.30" class="no">Built for everyone, not for your habits</li><li data-cms="contrast.31" class="no">It says <b>what</b> went wrong, not which habit to fix</li></ul>
+          <p data-cms="contrast.32" class="small mute">Top-tier yearly memberships at the big chess sites. Prices vary by site, plan, country and device.</p><p data-cms="contrast.33" class="flip-hint">Tap to see why ↻</p></div>
+          <div class="fside back"><h3 data-cms="contrast.34">Why it falls short</h3><ul><li data-cms="contrast.35">Endless puzzles, but no fixed way of thinking: the Puzzle Addict trap.</li><li data-cms="contrast.36">Nobody tracks your Working Points between games.</li><li data-cms="contrast.37">Nothing makes you slow down before the move that loses.</li></ul><p data-cms="contrast.38" class="flip-hint">Tap to go back ↻</p></div>
         </article>
       </div>
       <div class="vs-col vs-us">
-        <p class="vs-label is-good">The Lanckriet way</p>
+        <p data-cms="contrast.39" class="vs-label is-good">The Lanckriet way</p>
         <article class="card hl vs-main">
-          <h3>Lanckriet Chess</h3><p class="big-num" id="vs-price">€16.63<small> per month (billed yearly)</small></p><p class="micro" id="vs-micro">Only €0.55 a day</p><p class="vs-badge" id="vs-badge" hidden></p>
-          <h4 class="vs-h4">What changes for you</h4>
-          <ul><li class="yes">You think the same way on every move, so the blunder gets caught <b>before</b> you play it.</li>
-          <li class="yes">You know which habit costs you the most rating, from your own games, and you fix that one first.</li>
-          <li class="yes">Your mistakes stop repeating: every lost game becomes a Working Point you train until it sticks.</li>
-          <li class="yes">Your openings make sense: you know the plan, not just the moves, at the level you play.</li>
-          <li class="yes">You convert won middlegames and endgames instead of letting them slip.</li>
-          <li class="yes">You train every day with a coach that answers at 2 a.m., not once a week.</li>
+          <h3 data-cms="contrast.40">Lanckriet Chess</h3><p class="big-num" id="vs-price">€16.63<small> per month (billed yearly)</small></p><p class="micro" id="vs-micro">Only €0.55 a day</p><p class="vs-badge" id="vs-badge" hidden></p>
+          <h4 data-cms="contrast.41" class="vs-h4">What changes for you</h4>
+          <ul><li data-cms="contrast.42" class="yes">You think the same way on every move, so the blunder gets caught <b>before</b> you play it.</li>
+          <li data-cms="contrast.43" class="yes">You know which habit costs you the most rating, from your own games, and you fix that one first.</li>
+          <li data-cms="contrast.44" class="yes">Your mistakes stop repeating: every lost game becomes a Working Point you train until it sticks.</li>
+          <li data-cms="contrast.45" class="yes">Your openings make sense: you know the plan, not just the moves, at the level you play.</li>
+          <li data-cms="contrast.46" class="yes">You convert won middlegames and endgames instead of letting them slip.</li>
+          <li data-cms="contrast.47" class="yes">You train every day with a coach that answers at 2 a.m., not once a week.</li>
           <li class="yes" id="vs-hours">A whole year costs about as much as three hours of private coaching.</li></ul>
-          <p class="small mute">The method and every trainer in one app on your phone. Results differ per person: nothing here is a promise of a rating.</p>
-          <div class="vs-urgency" id="vs-urgency" hidden><p>🔒 Lock in your rate: your price stays the same for as long as you keep your subscription active</p><p>⚡ Limited spots remaining for the current cohort</p><p class="small mute">This is the yearly launch rate. Monthly plans have no launch discount.</p></div>
+          <p data-cms="contrast.48" class="small mute">The method and every trainer in one app on your phone. Results differ per person: nothing here is a promise of a rating.</p>
+          <div class="vs-urgency" id="vs-urgency" hidden><p data-cms="contrast.49">🔒 Lock in your rate: your price stays the same for as long as you keep your subscription active</p><p data-cms="contrast.50">⚡ Limited spots remaining for the current cohort</p><p data-cms="contrast.51" class="small mute">This is the yearly launch rate. Monthly plans have no launch discount.</p></div>
         </article>
       </div>
     </div>
@@ -515,57 +517,502 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   <p class="fm-copy" id="lock-guarantee"><b style="color:var(--gold)">Launch Price Guarantee.</b> Your yearly launch rate (Pro or VIP) is locked for as long as your subscription stays active: the price on your first invoice is the price on every renewal. Cancel, and the launch rate ends. Monthly plans have no launch discount.</p>
   <p class="fm-dbg hide" id="fm-debug"></p>
 </aside>
-    <div class="cta-row"><a class="btn primary big" data-app data-install href="/app.html?install=1">Install free and scan my last 10 games</a></div>
-    <p class="small mute">The app is free to install and free to use. Plans, token packs and gifts are all inside the app, when you are ready.</p>
+    <div class="cta-row"><a data-cms="contrast.52" class="btn primary big" data-app data-install href="/app.html?install=1">Install free and scan my last 10 games</a></div>
+    <p data-cms="contrast.53" class="small mute">The app is free to install and free to use. Plans, token packs and gifts are all inside the app, when you are ready.</p>
   </div>
 </section>
 
-<section class="alt" id="install" aria-labelledby="h-install">
+<section data-cms-sec="install" class="alt" id="install" aria-labelledby="h-install">
   <div class="wrap">
-    <span class="eyebrow">Get the app</span>
-    <h2 id="h-install">On your home screen in one minute. No store.</h2>
-    <p class="lead">It is a web app that behaves like a real one: full screen, its own icon, works offline after the first visit, and updates itself.</p>
-    <div class="cta-row"><a class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a></div>
+    <span data-cms="install.1" class="eyebrow">Get the app</span>
+    <h2 data-cms="install.2" id="h-install">On your home screen in one minute. No store.</h2>
+    <p data-cms="install.3" class="lead">It is a web app that behaves like a real one: full screen, its own icon, works offline after the first visit, and updates itself.</p>
+    <div class="cta-row"><a data-cms="install.4" class="btn primary big" data-app data-install href="/app.html?install=1">Install on my device</a></div>
     <div class="tabs" role="tablist" aria-label="Choose your device">
-      <button class="tab" role="tab" id="t-android" aria-controls="p-android" aria-selected="false" data-tab="android">Android</button>
-      <button class="tab" role="tab" id="t-ios" aria-controls="p-ios" aria-selected="false" data-tab="ios">iPhone / iPad</button>
-      <button class="tab" role="tab" id="t-windows" aria-controls="p-windows" aria-selected="false" data-tab="windows">Windows</button>
-      <button class="tab" role="tab" id="t-mac" aria-controls="p-mac" aria-selected="false" data-tab="mac">Mac</button>
+      <button data-cms="install.5" class="tab" role="tab" id="t-android" aria-controls="p-android" aria-selected="false" data-tab="android">Android</button>
+      <button data-cms="install.6" class="tab" role="tab" id="t-ios" aria-controls="p-ios" aria-selected="false" data-tab="ios">iPhone / iPad</button>
+      <button data-cms="install.7" class="tab" role="tab" id="t-windows" aria-controls="p-windows" aria-selected="false" data-tab="windows">Windows</button>
+      <button data-cms="install.8" class="tab" role="tab" id="t-mac" aria-controls="p-mac" aria-selected="false" data-tab="mac">Mac</button>
     </div>
     <div class="panel" role="tabpanel" id="p-android" aria-labelledby="t-android" hidden>
-      <ol class="steps"><li>Tap <b>Install on my device</b> above, in Chrome or another Android browser.</li><li>Tap <b>Install</b> in the prompt that appears. Or open the <b>⋮ menu</b> and choose <b>Install app</b> (or <b>Add to Home screen</b>).</li><li>Launch Lanckriet Chess from your home screen.</li></ol>
+      <ol class="steps"><li data-cms="install.9">Tap <b>Install on my device</b> above, in Chrome or another Android browser.</li><li data-cms="install.10">Tap <b>Install</b> in the prompt that appears. Or open the <b>⋮ menu</b> and choose <b>Install app</b> (or <b>Add to Home screen</b>).</li><li data-cms="install.11">Launch Lanckriet Chess from your home screen.</li></ol>
     </div>
     <div class="panel" role="tabpanel" id="p-ios" aria-labelledby="t-ios" hidden>
-      <ol class="steps"><li>Open this page in <b>Safari</b> and tap <b>Install on my device</b>.</li><li>Tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>. Launch Lanckriet Chess from your home screen.</li></ol>
-      <p class="small mute">Other iPhone browsers can also add it from their Share menu on iOS 16.4 and newer.</p>
+      <ol class="steps"><li data-cms="install.12">Open this page in <b>Safari</b> and tap <b>Install on my device</b>.</li><li data-cms="install.13">Tap the <b>Share</b> button, then <b>Add to Home Screen</b>.</li><li data-cms="install.14">Tap <b>Add</b>. Launch Lanckriet Chess from your home screen.</li></ol>
+      <p data-cms="install.15" class="small mute">Other iPhone browsers can also add it from their Share menu on iOS 16.4 and newer.</p>
     </div>
     <div class="panel" role="tabpanel" id="p-windows" aria-labelledby="t-windows" hidden>
-      <ol class="steps"><li>Use <b>Chrome</b> or <b>Edge</b>. Tap <b>Install on my device</b> above.</li><li>Click <b>Install</b> in the prompt, or click the <b>install icon</b> at the right of the address bar.</li><li>Launch it from your desktop, taskbar or Start menu.</li></ol>
+      <ol class="steps"><li data-cms="install.16">Use <b>Chrome</b> or <b>Edge</b>. Tap <b>Install on my device</b> above.</li><li data-cms="install.17">Click <b>Install</b> in the prompt, or click the <b>install icon</b> at the right of the address bar.</li><li data-cms="install.18">Launch it from your desktop, taskbar or Start menu.</li></ol>
     </div>
     <div class="panel" role="tabpanel" id="p-mac" aria-labelledby="t-mac" hidden>
-      <ol class="steps"><li><b>Chrome or Edge:</b> click <b>Install on my device</b> above, then <b>Install</b> (or the install icon in the address bar).</li><li><b>Safari:</b> open the app, then <b>File</b> menu, <b>Add to Dock</b>.</li><li>Launch it from your Dock or Launchpad.</li></ol>
+      <ol class="steps"><li data-cms="install.19"><b>Chrome or Edge:</b> click <b>Install on my device</b> above, then <b>Install</b> (or the install icon in the address bar).</li><li data-cms="install.20"><b>Safari:</b> open the app, then <b>File</b> menu, <b>Add to Dock</b>.</li><li data-cms="install.21">Launch it from your Dock or Launchpad.</li></ol>
     </div>
   </div>
 </section>
 
-<section class="alt" id="faq" aria-labelledby="h-faq">
+<section data-cms-sec="faq" class="alt" id="faq" aria-labelledby="h-faq">
   <div class="wrap">
-    <h2 id="h-faq">Questions</h2>
-    <details><summary>Which devices does it work on?</summary><p>Android, iPhone and iPad, Windows and Mac. Any modern browser (Chrome, Edge, Safari, Firefox) can run it. Installing is available in Chrome, Edge, Safari and most Android browsers.</p></details>
-    <details open><summary>What is the difference between Pro and VIP?</summary><p><b>Pro</b> gives you the whole library (every repertoire, the Masterclass and the Opening Vault), the MSPC drills, the full Trim report and the 24/7 AI coach. You get <b>10 tokens a day</b>, about 300 a month. Tokens refresh every day, so unused ones are lost.</p><p><b>VIP</b> is everything in Pro, with your tokens credited upfront: <b>500 tokens at once each month</b> on the monthly plan, or <b>7,000 tokens at once</b> on the yearly plan, so you can analyse 20 games one day and 5 the next. VIP also gives you a blue profile banner, the <b>Lanckriet Chess Student</b> title, and priority in live streams and the community.</p></details>
-    <details><summary>How do I upgrade or cancel?</summary><p>Everything happens inside the app: open <b>Account → Membership &amp; upgrades</b> to upgrade, buy tokens, gift a friend or manage and cancel your subscription. A subscription stays active until the end of the period you paid for.</p></details>
-    <details><summary>Do I need to pay to start?</summary><p>No. Install the app and start free: no card, no account needed for your first game review. If you want Pro or VIP later, you upgrade in the app and it switches on right away.</p></details>
-    <details><summary>What happens to my data?</summary><p>You can delete your account and the data linked to it any time: in the app under Account, or on the <a href="/delete-account.html">account deletion page</a>.</p></details>
+    <h2 data-cms="faq.1" id="h-faq">Questions</h2>
+    <details data-cms-box="faq.q1"><summary data-cms="faq.2">Which devices does it work on?</summary><p data-cms="faq.3">Android, iPhone and iPad, Windows and Mac. Any modern browser (Chrome, Edge, Safari, Firefox) can run it. Installing is available in Chrome, Edge, Safari and most Android browsers.</p></details>
+    <details open data-cms-box="faq.q2"><summary data-cms="faq.4">What is the difference between Pro and VIP?</summary><p data-cms="faq.5"><b>Pro</b> gives you the whole library (every repertoire, the Masterclass and the Opening Vault), the MSPC drills, the full Trim report and the 24/7 AI coach. You get <b>10 tokens a day</b>, about 300 a month. Tokens refresh every day, so unused ones are lost.</p><p data-cms="faq.6"><b>VIP</b> is everything in Pro, with your tokens credited upfront: <b>500 tokens at once each month</b> on the monthly plan, or <b>7,000 tokens at once</b> on the yearly plan, so you can analyse 20 games one day and 5 the next. VIP also gives you a blue profile banner, the <b>Lanckriet Chess Student</b> title, and priority in live streams and the community.</p></details>
+    <details data-cms-box="faq.q3"><summary data-cms="faq.7">How do I upgrade or cancel?</summary><p data-cms="faq.8">Everything happens inside the app: open <b>Account → Membership &amp; upgrades</b> to upgrade, buy tokens, gift a friend or manage and cancel your subscription. A subscription stays active until the end of the period you paid for.</p></details>
+    <details data-cms-box="faq.q4"><summary data-cms="faq.9">Do I need to pay to start?</summary><p data-cms="faq.10">No. Install the app and start free: no card, no account needed for your first game review. If you want Pro or VIP later, you upgrade in the app and it switches on right away.</p></details>
+    <details data-cms-box="faq.q5"><summary data-cms="faq.11">What happens to my data?</summary><p data-cms="faq.12">You can delete your account and the data linked to it any time: in the app under Account, or on the <a href="/delete-account.html">account deletion page</a>.</p></details>
   </div>
 </section>
 </main>
 
 <footer>
   <div class="wrap">
-    <p><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
-    <p><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
+    <p data-cms="foot.1"><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
+    <p data-cms="foot.2"><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.49.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.52.0</p></footer>
+<button type="button" class="lc72-edit" id="lc89-edit" hidden>✎ Edit this page</button>
+<script>
+/*@@module lc89*/
+/* LC89 (build 9.52.0): the inline editor ON the landing page (index.html). The readable source of the script between the lc89 markers in index.html.
+   1. Hard admin gate. The yellow "Edit this page" button is in the HTML but hidden by CSS. It only shows after the SERVER confirmed that the
+      signed-in session is an admin (lc89_whoami: public.is_admin(), the admin_users table). An e-mail typed into localStorage is not enough,
+      and every write is checked again on the server (RLS + security definer functions), so nothing can be saved from DevTools.
+   2. The editor, right on the page. Every text with a data-cms key (headings, paragraphs, list items, buttons, chips, FAQ) becomes editable in
+      place; sections can be hidden or moved; blocks with data-cms-box (the Founder cards, the price cards, the FAQ) can be hidden. The Wall of
+      Love cards (lc86_wall_people: name, result tag, avatar, screenshots, chat, order, add, delete) and your own Proof Queue cards
+      (lc72_land_items) are edited inline too. One "Save & Publish" sends it all: texts and sections to lc89_cfg 'landing', cards to their tables.
+      Every visitor sees it at once, without a code push. The previous 30 versions can be restored (History).
+   3. For visitors: the published texts are applied on load (a cached copy first, then the live one). Texts are sanitised before they render:
+      only b, strong, i, em, u, s, small, span, br, sup, sub and links (https, / or #) survive; the story block also keeps paragraphs.
+   Open: the button (admin only), or /?edit=1. SQL: sql/20261116100000_lc89_lc90_inline_cms_founding_paywall.sql (the owner runs it). */
+(function(){
+  "use strict";
+  var VERSION="9.52.0",W=window,D=document,CACHE="lc89-landing",AUTH="lc26-auth";
+  function meta(n){var e=D.querySelector('meta[name="'+n+'"]');return e?e.getAttribute("content")||"":""}
+  var SB=meta("lc-sb-url").replace(/\/+$/,""),KEY=meta("lc-sb-key");
+  function $$(s,r){return Array.prototype.slice.call((r||D).querySelectorAll(s))}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function has(o,k){return Object.prototype.hasOwnProperty.call(o,k)}
+
+  /* ---------- 1. the sanitiser (pure: the same rules for the editor and for every visitor) ---------- */
+  var INLINE={B:1,STRONG:1,I:1,EM:1,U:1,S:1,SMALL:1,BR:1,SPAN:1,A:1,SUP:1,SUB:1},BLOCK={P:1,UL:1,OL:1,LI:1};
+  var DROP=/^(SCRIPT|STYLE|TEMPLATE|IFRAME|OBJECT|EMBED|SVG|MATH|NOSCRIPT|TEXTAREA|SELECT|OPTION|BUTTON|INPUT|IMG|VIDEO|AUDIO|CANVAS|FORM|LINK|META|HEAD|TITLE)$/;
+  function safeHref(u){
+    u=String(u==null?"":u).trim();
+    if(/^https:\/\/[^\s"'<>\\]{3,400}$/i.test(u))return u;
+    if(/^\/(?!\/)[^\s"'<>\\]{0,300}$/.test(u))return u;
+    if(/^#[A-Za-z0-9_-]{0,60}$/.test(u))return u;
+    if(/^mailto:[^\s"'<>@\\]{1,64}@[^\s"'<>\\]{3,120}$/i.test(u))return u;
+    return"";
+  }
+  function external(h){return/^https:/i.test(h)&&h.indexOf(location.origin+"/")!==0}
+  function clean(html,block){
+    var tpl=D.createElement("template");tpl.innerHTML=String(html==null?"":html).slice(0,8000);
+    var out=D.createElement("div");
+    (function copy(src,dst){
+      for(var n=src.firstChild;n;n=n.nextSibling){
+        if(n.nodeType===3){dst.appendChild(D.createTextNode(n.nodeValue));continue}
+        if(n.nodeType!==1)continue;
+        var t=String(n.tagName).toUpperCase();
+        if(DROP.test(t))continue;
+        if(block&&t==="DIV")t="P";                                    /* Enter in a story paragraph makes a div: keep it as a paragraph */
+        if(INLINE[t]||(block&&BLOCK[t])){
+          var e=D.createElement(t.toLowerCase());
+          if(t==="A"){var h=safeHref(n.getAttribute("href"));if(h){e.setAttribute("href",h);if(external(h)){e.setAttribute("target","_blank");e.setAttribute("rel","noopener noreferrer")}}}
+          if(t==="SPAN"||t==="B"||t==="SMALL"||t==="STRONG"){
+            var c=n.getAttribute("class");if(c&&/^[a-z0-9 _-]{1,60}$/i.test(c))e.setAttribute("class",c);
+            var st=n.getAttribute("style");if(st&&/^\s*color\s*:\s*var\(--[a-z0-9-]{1,20}\)\s*;?\s*$/i.test(st))e.setAttribute("style",st.trim().replace(/;$/,""));
+          }
+          copy(n,e);dst.appendChild(e);
+        }else copy(n,dst);                                             /* an unknown wrapper: keep its text and its allowed children */
+      }
+    })(tpl.content,out);
+    return out.innerHTML.replace(/​/g,"").replace(/^(\s|&nbsp;|<br>)+|(\s|&nbsp;|<br>)+$/g,"");
+  }
+  function norm(d){
+    var o={v:1,text:{},href:{},hide:{},box:{},order:[]};if(!d||typeof d!=="object")return o;
+    ["text","href"].forEach(function(f){var s=d[f];if(s&&typeof s==="object")Object.keys(s).slice(0,600).forEach(function(k){if(/^[a-z0-9]{1,20}\.[a-z0-9]{1,8}$/.test(k)&&typeof s[k]==="string")o[f][k]=s[k].slice(0,8000)})});
+    ["hide","box"].forEach(function(f){var s=d[f];if(s&&typeof s==="object")Object.keys(s).slice(0,200).forEach(function(k){if(/^[a-z0-9.-]{1,40}$/.test(k)&&s[k]===true)o[f][k]=true})});
+    if(Array.isArray(d.order))d.order.forEach(function(k){if(typeof k==="string"&&/^[a-z0-9-]{1,20}$/.test(k)&&o.order.indexOf(k)<0)o.order.push(k)});
+    return o;
+  }
+
+  /* ---------- 2. the published page (every visitor) ---------- */
+  var ORIG={},ORDER0=[],DOC=norm(null),EDIT=false;
+  var keyOf=function(el){return el.getAttribute("data-cms")},isBlock=function(el){return/\.body$/.test(keyOf(el)||"")};
+  var hrefEditable=function(el){return el.tagName==="A"&&!el.hasAttribute("data-install")&&!el.hasAttribute("data-app")};
+  function snapshot(){
+    $$("[data-cms]").forEach(function(el){var k=keyOf(el);if(!has(ORIG,k))ORIG[k]={html:el.innerHTML,href:el.getAttribute("href")}});
+    if(!ORDER0.length)ORDER0=$$("[data-cms-sec]").map(function(s){return s.getAttribute("data-cms-sec")});
+  }
+  function rebase(el){var k=el&&keyOf(el);if(k&&!has(DOC.text,k)&&ORIG[k])ORIG[k].html=el.innerHTML}   /* the LC69 texts become the base */
+  function main(){return D.getElementById("main")}
+  function secOf(k){return D.querySelector('[data-cms-sec="'+k+'"]')}
+  function order(list){
+    var m=main();if(!m)return;var want=list.filter(function(k){return ORDER0.indexOf(k)>=0}).concat(ORDER0.filter(function(k){return list.indexOf(k)<0}));
+    var now=$$("[data-cms-sec]",m).map(function(s){return s.getAttribute("data-cms-sec")});
+    if(now.join()===want.join())return;
+    want.forEach(function(k){var s=secOf(k);if(s)m.appendChild(s)});
+  }
+  function apply(doc){
+    DOC=norm(doc);
+    $$("[data-cms]").forEach(function(el){
+      var k=keyOf(el),o=ORIG[k];if(!o)return;
+      if(EDIT&&el===D.activeElement)return;
+      var want=has(DOC.text,k)?clean(DOC.text[k],isBlock(el)):o.html;
+      if(el.innerHTML!==want)el.innerHTML=want;
+      if(hrefEditable(el)){var h=has(DOC.href,k)?safeHref(DOC.href[k]):"";el.setAttribute("href",h||o.href||"#")}
+    });
+    $$("[data-cms-box]").forEach(function(el){if(DOC.box[el.getAttribute("data-cms-box")])el.setAttribute("data-lc89-off","");else el.removeAttribute("data-lc89-off")});
+    $$("[data-cms-sec]").forEach(function(el){if(DOC.hide[el.getAttribute("data-cms-sec")])el.setAttribute("data-lc89-off","");else el.removeAttribute("data-lc89-off")});
+    order(DOC.order);
+  }
+  function rpc(fn,args,token){
+    if(!SB||!KEY)return Promise.resolve({status:0,data:null});
+    return fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json",apikey:KEY,Authorization:"Bearer "+(token||KEY)},body:JSON.stringify(args||{})})
+      .then(function(r){return r.json().catch(function(){return null}).then(function(d){return{status:r.status,data:d}})}).catch(function(){return{status:0,data:null}});
+  }
+  function missing(r){return!!(r&&(r.status===404||(r.data&&/PGRST202|does not exist|42883|42P01/i.test(String(r.data.code||"")+String(r.data.message||"")))))}
+  function load(){
+    try{var c=JSON.parse(localStorage.getItem(CACHE)||"null");if(c&&c.v===1)apply(c)}catch(e){}
+    rpc("lc89_cfg_public",{p_k:"landing"}).then(function(r){
+      if(!r||r.status!==200||!r.data||!r.data.ok)return;var d=norm(r.data.v);
+      try{localStorage.setItem(CACHE,JSON.stringify(d))}catch(e){}
+      if(!(EDIT&&dirty))apply(d);
+    });
+  }
+
+  /* ---------- 3. the admin gate: the server decides ---------- */
+  function sess(){try{var a=JSON.parse(localStorage.getItem(AUTH)||"null");return a&&a.access_token?a:null}catch(e){return null}}
+  function bearer(){
+    var a=sess();if(!a||!SB||!KEY)return Promise.resolve("");
+    if((+a.exp||0)-6e4>Date.now())return Promise.resolve(a.access_token);
+    if(!a.refresh_token)return Promise.resolve("");
+    return fetch(SB+"/auth/v1/token?grant_type=refresh_token",{method:"POST",headers:{"Content-Type":"application/json",apikey:KEY},body:JSON.stringify({refresh_token:a.refresh_token})})
+      .then(function(r){return r.ok?r.json():null}).then(function(d){
+        if(!d||!d.access_token)return"";
+        try{localStorage.setItem(AUTH,JSON.stringify({access_token:d.access_token,refresh_token:d.refresh_token||a.refresh_token,exp:Date.now()+(+d.expires_in||3600)*1e3,email:a.email}))}catch(e){}
+        return d.access_token;
+      }).catch(function(){return""});
+  }
+  var ADMIN=false;
+  function verify(){
+    if(/[?&]preview=/.test(location.search)||!sess())return Promise.resolve(false);
+    return bearer().then(function(t){if(!t)return false;return rpc("lc89_whoami",{},t).then(function(r){return!!(r&&r.status===200&&r.data&&r.data.ok&&r.data.admin===true)})});
+  }
+  function gate(){
+    verify().then(function(ok){
+      ADMIN=ok;var b=D.getElementById("lc89-edit");
+      if(!ok){if(b){b.classList.remove("is-on");b.hidden=true}return}
+      try{if(W.__lcWall)W.__lcWall.admin(true)}catch(e){}
+      if(b){b.hidden=false;b.classList.add("is-on");b.addEventListener("click",function(){enter()})}
+      if(/[?&]edit=1(&|$)/.test(location.search))enter();
+    });
+  }
+
+  /* ---------- 4. the editor ---------- */
+  var dirty=false,HIDE={},BOX={},bar=null,fmt=null,WALL=null,WALLDEL=[],PROOF=null,PROOFDEL=[],WALLSTATE="",PROOFSTATE="",unhid=[];
+  function css(){
+    if(D.getElementById("lc89-css"))return;var s=D.createElement("style");s.id="lc89-css";
+    s.textContent="[data-lc89-off]{display:none!important}"
+      +".lc89-editing [data-lc89-off]{display:block!important;opacity:.38}.lc89-editing [data-cms-sec][data-lc89-off]{display:block!important}"
+      +".lc89-editing body{padding-bottom:150px}.lc89-editing .lc72-edit,.lc89-editing #wl-admin{display:none!important}"
+      +".lc89-editing:not(.lc89-preview) #proof-list [data-kind=own]{display:none!important}"
+      +".lc89-editing [data-cms-sec]{position:relative;outline:1px dashed rgba(251,191,36,.35);outline-offset:-4px}"
+      +".lc89-editing [data-cms]{outline:1px dashed rgba(56,189,248,.45);outline-offset:2px;border-radius:4px;cursor:text;min-width:1ch}"
+      +".lc89-editing [data-cms]:hover{outline-color:#38bdf8}.lc89-editing [data-cms]:focus{outline:2px solid #fbbf24;background:rgba(251,191,36,.07)}"
+      +".lc89-editing [data-cms].lc89-changed{box-shadow:inset 3px 0 0 #fbbf24}"
+      +".lc89-preview [data-cms]{outline:none!important;box-shadow:none!important}.lc89-preview [data-cms-sec]{outline:none!important}.lc89-preview [data-lc89-off]{display:none!important}"
+      +".lc89-preview .lc89-secbar,.lc89-preview .lc89-boxbtn,.lc89-preview .lc89-cardbar,.lc89-preview .lc89-add,.lc89-preview .lc89-own{display:none!important}"
+      +".lc89-bar{position:fixed;left:0;right:0;bottom:0;z-index:400;background:rgba(2,6,23,.97);border-top:2px solid #fbbf24;padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font:14px/1.3 system-ui,sans-serif;color:#e2e8f0}"
+      +".lc89-bar .lc89-st{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 180px}.lc89-bar .lc89-st b{color:#fbbf24}.lc89-bar .lc89-st small{color:#94a3b8}"
+      +".lc89-bar .lc89-btns{display:flex;flex-wrap:wrap;gap:6px}"
+      +".lc89-b{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:#1e293b;color:#e2e8f0;font-weight:700;cursor:pointer;font-size:14px}"
+      +".lc89-b.is-gold{background:#fbbf24;color:#241a00;border-color:#fbbf24}.lc89-b.is-gold[disabled]{opacity:.55;cursor:default}.lc89-b.is-sm{min-height:36px;min-width:36px;padding:0 10px;font-size:13px}"
+      +".lc89-secbar{position:absolute;top:6px;right:6px;z-index:5;display:flex;gap:4px;align-items:center;background:rgba(2,6,23,.92);border:1px solid #fbbf24;border-radius:999px;padding:3px 4px 3px 10px;font:12px system-ui,sans-serif;color:#fbbf24}"
+      +".lc89-secbar span{font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-right:2px}"
+      +".lc89-boxbtn{position:absolute;top:4px;right:4px;z-index:5}.lc89-editing [data-cms-box]{position:relative}"
+      +"[data-lc89-ui][hidden],.lc89-fmt [hidden]{display:none!important}"
+      +".lc89-fmt{position:fixed;z-index:410;display:flex;gap:4px;background:#020617;border:1px solid #fbbf24;border-radius:12px;padding:4px;box-shadow:0 10px 30px rgba(0,0,0,.5)}"
+      +".lc89-cardbar{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;width:100%}.lc89-wl{cursor:default!important;display:flex;flex-wrap:wrap;align-items:center;gap:10px}"
+      +".lc89-wl.is-off{opacity:.45}.lc89-wl [data-f]{outline:1px dashed rgba(56,189,248,.5);border-radius:4px;min-width:2ch}.lc89-wl [data-f]:focus{outline:2px solid #fbbf24}"
+      +".lc89-add{display:grid;place-items:center;min-height:96px;border:2px dashed #fbbf24;border-radius:16px;color:#fbbf24;font-weight:800;background:transparent;cursor:pointer;font-size:15px}"
+      +".lc89-own{display:grid;gap:12px;margin:0 0 16px;padding:12px;border:1px dashed #fbbf24;border-radius:16px}.lc89-own h3{margin:0;color:#fbbf24;font-size:15px}"
+      +".lc89-own .lc89-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}"
+      +".lc89-pc{display:grid;gap:6px;padding:12px;border-radius:14px;background:#1e293b;border:1px solid rgba(148,163,184,.25)}.lc89-pc.is-off{opacity:.45}"
+      +".lc89-pc label{display:grid;gap:2px;font-size:12px;color:#94a3b8}.lc89-pc input,.lc89-pc textarea,.lc89-pc select,.lc89-dlg input,.lc89-dlg textarea,.lc89-dlg select{width:100%;box-sizing:border-box;min-height:40px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;padding:8px;font:14px system-ui,sans-serif}"
+      +".lc89-pc .lc89-3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.lc89-pc img{max-width:100%;border-radius:8px}"
+      +".lc89-ov{position:fixed;inset:0;z-index:420;background:rgba(2,6,23,.8);display:grid;place-items:center;padding:12px}"
+      +".lc89-dlg{width:90%;max-width:560px;max-height:88vh;overflow:auto;background:#0f172a;border:1px solid #fbbf24;border-radius:18px;padding:16px;display:grid;gap:10px;color:#e2e8f0;font:14px/1.4 system-ui,sans-serif}"
+      +".lc89-dlg h3{margin:0}.lc89-dlg .lc89-it{display:grid;grid-template-columns:64px 1fr auto;gap:8px;align-items:center;padding:8px;border:1px solid #334155;border-radius:12px}"
+      +".lc89-dlg .lc89-it img{width:64px;height:64px;object-fit:cover;border-radius:8px}.lc89-dlg .lc89-row{display:flex;flex-wrap:wrap;gap:6px}"
+      +".lc89-dlg .lc89-hist li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #1e293b}"
+      +".lc89-msg{min-height:1.2em}";
+    D.head.appendChild(s);
+  }
+  function say(t,bad){var m=bar&&bar.querySelector("[data-lc89-msg]");if(m){m.textContent=t||"";m.style.color=bad?"#f87171":"#94a3b8"}}
+  function count(){
+    var n=0;$$("[data-cms]").forEach(function(el){var k=keyOf(el),o=ORIG[k];if(!o)return;var bl=isBlock(el),pub=has(DOC.text,k)?clean(DOC.text[k],bl):clean(o.html,bl),ph=(has(DOC.href,k)?safeHref(DOC.href[k]):"")||o.href||"";   /* changed = differs from what is live now */
+      var ch=clean(el.innerHTML,bl)!==pub||(hrefEditable(el)&&(el.getAttribute("href")||"")!==ph);el.classList.toggle("lc89-changed",ch);if(ch)n++});
+    return n;
+  }
+  function touch(){dirty=true;paintBar()}
+  function paintBar(){
+    if(!bar)return;var n=count(),w=(WALL||[]).filter(function(x){return x._d}).length+WALLDEL.length,p=(PROOF||[]).filter(function(x){return x._d}).length+PROOFDEL.length;
+    var parts=[];if(n)parts.push(n+(n===1?" text":" texts"));if(w)parts.push(w+(w===1?" Wall card":" Wall cards"));if(p)parts.push(p+(p===1?" proof card":" proof cards"));
+    var s=bar.querySelector("[data-lc89-count]");if(s)s.textContent=dirty?(parts.length?parts.join(", ")+" changed":"Sections changed")+" · not published yet":"Everything is published";
+    var g=bar.querySelector('[data-lc89="publish"]');if(g)g.disabled=!dirty;
+  }
+  function enter(){
+    if(EDIT||!ADMIN)return;EDIT=true;css();
+    D.documentElement.classList.add("lc89-editing");
+    HIDE=JSON.parse(JSON.stringify(DOC.hide));BOX=JSON.parse(JSON.stringify(DOC.box));
+    /* sections that only show with live content (walkthrough, giveaway, ...) open up so their texts can be edited */
+    $$("[data-cms-sec].hide").forEach(function(s){s.classList.remove("hide");unhid.push(s)});
+    $$("[data-cms]").forEach(function(el){el.setAttribute("contenteditable","true");el.setAttribute("spellcheck","true")});
+    $$("details").forEach(function(d){d.open=true});                                   /* every FAQ answer and every device tab can be edited */
+    $$('[role="tabpanel"][hidden]').forEach(function(p){p.hidden=false});
+    $$("[data-cms-sec]").forEach(function(s){
+      var k=s.getAttribute("data-cms-sec"),b=D.createElement("div");b.className="lc89-secbar";b.setAttribute("data-lc89-ui","");
+      b.innerHTML='<span>'+esc(k)+'</span><button type="button" class="lc89-b is-sm" data-lc89="up" data-s="'+k+'" aria-label="Move the '+k+' section up">↑</button><button type="button" class="lc89-b is-sm" data-lc89="down" data-s="'+k+'" aria-label="Move the '+k+' section down">↓</button><button type="button" class="lc89-b is-sm" data-lc89="sec" data-s="'+k+'" aria-pressed="'+!HIDE[k]+'">'+(HIDE[k]?"Hidden":"Shown")+'</button>';
+      s.insertBefore(b,s.firstChild);
+    });
+    $$("[data-cms-box]").forEach(function(x){
+      var k=x.getAttribute("data-cms-box"),b=D.createElement("button");b.type="button";b.className="lc89-b is-sm lc89-boxbtn";b.setAttribute("data-lc89","box");b.setAttribute("data-s",k);b.setAttribute("data-lc89-ui","");
+      b.textContent=BOX[k]?"Hidden: show":"Hide this";var sm=x.tagName==="DETAILS"&&x.querySelector("summary");if(sm)sm.insertAdjacentElement("afterend",b);else x.insertBefore(b,x.firstChild);
+    });
+    bar=D.createElement("div");bar.className="lc89-bar";bar.setAttribute("role","region");bar.setAttribute("aria-label","Landing page editor");bar.setAttribute("data-lc89-ui","");
+    bar.innerHTML='<div class="lc89-st"><b>✎ Editing the landing page</b><small data-lc89-count>Everything is published</small><small class="lc89-msg" data-lc89-msg aria-live="polite"></small></div>'
+      +'<div class="lc89-btns"><button type="button" class="lc89-b" data-lc89="preview" aria-pressed="false">Preview</button><button type="button" class="lc89-b" data-lc89="history">History</button>'
+      +'<a class="lc89-b" style="display:inline-flex;align-items:center;text-decoration:none" href="/app.html#landing-editor">Screenshots &amp; video</a>'
+      +'<button type="button" class="lc89-b" data-lc89="exit">Exit</button><button type="button" class="lc89-b is-gold" data-lc89="publish" disabled>Save &amp; Publish</button></div>';
+    D.body.appendChild(bar);
+    fmt=D.createElement("div");fmt.className="lc89-fmt";fmt.hidden=true;fmt.setAttribute("data-lc89-ui","");
+    fmt.innerHTML='<button type="button" class="lc89-b is-sm" data-fmt="bold" aria-label="Bold"><b>B</b></button><button type="button" class="lc89-b is-sm" data-fmt="italic" aria-label="Italic"><i>I</i></button><button type="button" class="lc89-b is-sm" data-fmt="link">Link</button><button type="button" class="lc89-b is-sm" data-fmt="href" hidden>Button link</button><button type="button" class="lc89-b is-sm" data-fmt="reset">Original</button>';
+    D.body.appendChild(fmt);
+    D.addEventListener("click",onClick,true);D.addEventListener("input",onInput,true);D.addEventListener("paste",onPaste,true);D.addEventListener("keydown",onKey,true);
+    D.addEventListener("focusin",onFocus,true);D.addEventListener("focusout",function(){setTimeout(function(){var a=D.activeElement;if(fmt&&!(a&&(a.closest("[data-cms]")||a.closest(".lc89-fmt"))))fmt.hidden=true},150)},true);
+    W.addEventListener("beforeunload",function(e){if(dirty){e.preventDefault();e.returnValue=""}});
+    W.addEventListener("scroll",placeFmt,{passive:true});
+    loadCards();paintBar();say("Tap any text to change it. Nothing is live until you press Save & Publish.");
+  }
+  /* clicks inside the page: edit, never navigate or flip while editing */
+  function onClick(e){
+    var t=e.target;if(!t||!t.closest)return;
+    var ui=t.closest("[data-lc89],[data-fmt],[data-wl-a],[data-pc-a]");
+    if(ui){e.preventDefault();e.stopPropagation();act(ui);return}
+    if(t.closest(".lc89-ov,.lc89-bar,.lc89-own input,.lc89-own textarea,.lc89-own select,.lc89-own label"))return;
+    if(D.documentElement.classList.contains("lc89-preview"))return;
+    if(t.closest("[data-cms],.lc89-wl,#wl-grid"))  {var a=t.closest("a,summary,button,.flip,[data-wl],[data-detail]");if(a||t.closest("[data-cms]")){e.preventDefault();e.stopPropagation()}}
+  }
+  function onInput(e){var t=e.target;if(!t||!t.closest)return;
+    var f=t.closest(".lc89-wl [data-f]");if(f){var r=WALL[+f.closest(".lc89-wl").getAttribute("data-i")];if(r){r[f.getAttribute("data-f")]=f.textContent.replace(/\s+/g," ").trim();mark(r,"wall")}return}
+    var pc=t.closest(".lc89-pc [name]");if(pc&&!t.closest(".lc89-ov")){var row=PROOF[+pc.closest(".lc89-pc").getAttribute("data-i")];if(row){row[pc.name]=pc.type==="checkbox"?pc.checked:pc.value;mark(row,"proof")}return}
+    if(t.closest("[data-cms]"))touch();
+  }
+  function onPaste(e){var t=e.target&&e.target.closest&&e.target.closest("[data-cms],.lc89-wl [data-f]");if(!t)return;e.preventDefault();
+    var txt=(e.clipboardData||W.clipboardData).getData("text/plain")||"";try{D.execCommand("insertText",false,txt)}catch(x){}}
+  function onKey(e){var t=e.target&&e.target.closest&&e.target.closest("[data-cms],.lc89-wl [data-f]");if(!t||e.key!=="Enter")return;
+    if(t.hasAttribute("data-f")||!(isBlock(t)||e.shiftKey)){e.preventDefault();if(e.shiftKey&&!t.hasAttribute("data-f")){try{D.execCommand("insertLineBreak")}catch(x){}}}}
+  var focusEl=null;
+  function onFocus(e){var t=e.target&&e.target.closest&&e.target.closest("[data-cms]");if(!t||!EDIT||D.documentElement.classList.contains("lc89-preview"))return;focusEl=t;
+    fmt.querySelector('[data-fmt="href"]').hidden=!hrefEditable(t);fmt.hidden=false;placeFmt()}
+  function placeFmt(){if(!fmt||fmt.hidden||!focusEl)return;var r=focusEl.getBoundingClientRect(),h=fmt.offsetHeight||44;
+    fmt.style.top=Math.max(6,r.top-h-8<6?r.bottom+8:r.top-h-8)+"px";fmt.style.left=Math.max(6,Math.min(innerWidth-(fmt.offsetWidth||260)-6,r.left))+"px"}
+  function act(b){
+    var a=b.getAttribute("data-lc89")||"",k=b.getAttribute("data-s")||"";
+    if(b.hasAttribute("data-fmt"))return doFmt(b.getAttribute("data-fmt"));
+    if(b.hasAttribute("data-wl-a"))return wallAct(b);
+    if(b.hasAttribute("data-pc-a"))return proofAct(b);
+    if(a==="sec"){HIDE[k]=!HIDE[k];var s=secOf(k);if(HIDE[k])s.setAttribute("data-lc89-off","");else s.removeAttribute("data-lc89-off");b.textContent=HIDE[k]?"Hidden":"Shown";b.setAttribute("aria-pressed",String(!HIDE[k]));touch();return}
+    if(a==="box"){BOX[k]=!BOX[k];var x=D.querySelector('[data-cms-box="'+k+'"]');if(BOX[k])x.setAttribute("data-lc89-off","");else x.removeAttribute("data-lc89-off");b.textContent=BOX[k]?"Hidden: show":"Hide this";touch();return}
+    if(a==="up"||a==="down"){var m=main(),s2=secOf(k),list=$$("[data-cms-sec]",m),i=list.indexOf(s2),j=a==="up"?i-1:i+1;if(j<0||j>=list.length)return;
+      if(a==="up")m.insertBefore(s2,list[j]);else m.insertBefore(list[j],s2);s2.scrollIntoView({block:"start"});touch();return}
+    if(a==="preview"){var on=!D.documentElement.classList.contains("lc89-preview");D.documentElement.classList.toggle("lc89-preview",on);b.setAttribute("aria-pressed",String(on));b.textContent=on?"Back to editing":"Preview";
+      $$("[data-cms],.lc89-wl [data-f]").forEach(function(el){el.setAttribute("contenteditable",on?"false":"true")});if(fmt)fmt.hidden=true;return}
+    if(a==="history")return history();
+    if(a==="exit"){if(dirty&&!W.confirm("Leave without publishing? Your changes are lost."))return;dirty=false;location.href=location.pathname+location.hash;return}
+    if(a==="publish")return publish();
+  }
+  function doFmt(f){
+    var el=focusEl;if(!el)return;el.focus();
+    if(f==="bold"||f==="italic"){try{D.execCommand(f)}catch(e){}touch();return}
+    if(f==="link"){var u=safeHref(W.prompt("Link address (https://…, /page or #section):","https://"));if(!u){say("That link is not allowed: use https://, a /page or a #section.",true);return}try{D.execCommand("createLink",false,u)}catch(e){}touch();return}
+    if(f==="href"){var cur=el.getAttribute("href")||"",h=W.prompt("Where does this button go? (https://…, /page or #section)",cur);if(h==null)return;h=safeHref(h);if(!h){say("That link is not allowed: use https://, a /page or a #section.",true);return}
+      el.setAttribute("href",h);if(h!==(ORIG[keyOf(el)]||{}).href)el.setAttribute("data-lc89-href",h);else el.removeAttribute("data-lc89-href");touch();return}
+    if(f==="reset"){var o=ORIG[keyOf(el)];if(o){el.innerHTML=o.html;if(hrefEditable(el)){el.setAttribute("href",o.href||"#");el.setAttribute("data-lc89-href",o.href||"")}}touch();return}
+  }
+  function collect(){
+    var doc={v:1,text:{},href:{},hide:{},box:{},order:[]};
+    $$("[data-cms]").forEach(function(el){var k=keyOf(el),o=ORIG[k];if(!o)return;var b=isBlock(el),cur=clean(el.innerHTML,b);
+      if(cur!==clean(o.html,b))doc.text[k]=cur;
+      if(hrefEditable(el)){var h=el.hasAttribute("data-lc89-href")?safeHref(el.getAttribute("data-lc89-href")):(has(DOC.href,k)?safeHref(DOC.href[k]):"");if(h&&h!==o.href)doc.href[k]=h}});
+    Object.keys(HIDE).forEach(function(k){if(HIDE[k])doc.hide[k]=true});Object.keys(BOX).forEach(function(k){if(BOX[k])doc.box[k]=true});
+    var now=$$("[data-cms-sec]",main()).map(function(s){return s.getAttribute("data-cms-sec")});if(now.join()!==ORDER0.join())doc.order=now;
+    return doc;
+  }
+  var ERR={unsafe:"Something in a text looks like code (a script or an on…= handler). Remove it and try again.",too_big:"The page is too big to save (over 300 kB of text).",shape:"The page could not be read.",key:"Unknown setting."};
+  function publish(){
+    var g=bar.querySelector('[data-lc89="publish"]');g.disabled=true;say("Publishing…");
+    var doc=collect();
+    bearer().then(function(t){
+      if(!t){say("Your sign-in has expired. Open the app, sign in again, then come back.",true);g.disabled=false;return}
+      return rpc("lc89_cfg_save",{p_k:"landing",p_v:doc},t).then(function(r){
+        if(missing(r)){say("Run sql/20261116100000_lc89_lc90_inline_cms_founding_paywall.sql in the Supabase SQL editor first.",true);g.disabled=false;return}
+        if(!(r&&r.status===200&&r.data&&r.data.ok)){say(r&&r.data&&ERR[r.data.error]||(r&&(r.status===401||r.status===403)?"Only an admin can publish. Sign in with the owner account.":"Could not publish. Nothing changed. Try again."),true);g.disabled=false;return}
+        DOC=norm(doc);try{localStorage.setItem(CACHE,JSON.stringify(DOC))}catch(e){}
+        return saveCards(t).then(function(fails){
+          dirty=fails.length>0;paintBar();
+          say(fails.length?"Texts published. Not saved: "+fails.join(" · "):"Published. Every visitor sees it now.",!!fails.length);
+          if(!fails.length){$$("[data-lc89-href]").forEach(function(el){el.removeAttribute("data-lc89-href")})}
+        });
+      });
+    });
+  }
+  function overlay(html,onMount){
+    var ov=D.createElement("div");ov.className="lc89-ov";ov.setAttribute("data-lc89-ui","");
+    ov.innerHTML='<div class="lc89-dlg" role="dialog" aria-modal="true">'+html+"</div>";D.body.appendChild(ov);
+    var close=function(){ov.remove()};ov.addEventListener("click",function(e){if(e.target===ov||(e.target.closest&&e.target.closest("[data-close]")))close()});
+    D.addEventListener("keydown",function k(e){if(e.key==="Escape"&&D.body.contains(ov)){close();D.removeEventListener("keydown",k)}});
+    if(onMount)onMount(ov.firstChild,close);var f=ov.querySelector("input,textarea,button");if(f)f.focus();return close;
+  }
+  function history(){
+    bearer().then(function(t){return rpc("lc89_cfg_history",{p_k:"landing"},t)}).then(function(r){
+      var rows=r&&r.data&&r.data.ok?r.data.rows:null;
+      overlay("<h3>Earlier versions</h3>"+(rows&&rows.length?'<ul class="lc89-hist" style="list-style:none;margin:0;padding:0">'+rows.map(function(x){return"<li><span>"+esc(new Date(x.saved_at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))+'</span><button type="button" class="lc89-b is-sm" data-restore="'+(+x.id)+'">Restore</button></li>'}).join("")+"</ul>":"<p>"+(rows?"No earlier versions yet. Every publish keeps the one before it.":"The history could not load.")+"</p>")
+        +'<p style="color:#94a3b8;font-size:13px;margin:0">Restoring publishes that version right away. The Wall of Love and proof cards are not part of it.</p><div class="lc89-row"><button type="button" class="lc89-b" data-close>Close</button></div>',function(box,close){
+        box.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-restore]");if(!b)return;if(!W.confirm("Publish this earlier version now?"))return;b.disabled=true;
+          bearer().then(function(t){return rpc("lc89_cfg_restore",{p_id:+b.getAttribute("data-restore")},t)}).then(function(r){if(r&&r.data&&r.data.ok){dirty=false;try{localStorage.removeItem(CACHE)}catch(x){}location.reload()}else{b.disabled=false;say("Could not restore that version.",true);close()}})});
+      });
+    });
+  }
+
+  /* ---------- 5. Wall of Love and Proof Queue cards, inline ---------- */
+  var HTTPS=/^https:\/\/[^\s"'<>]{3,400}$/;
+  function initials(n){return String(n||"?").trim().split(/\s+/).map(function(w){return w.replace(/[^A-Za-z0-9À-ɏ]/g,"").charAt(0)}).filter(Boolean).slice(0,2).join("").toUpperCase()||"?"}
+  function mark(r,kind){r._d=true;if(kind==="wall"&&r._seed)(WALL||[]).forEach(function(x){if(x._seed)x._d=true});touch()}   /* a starter card edited: all starters become real rows */
+  function loadCards(){
+    bearer().then(function(t){return Promise.all([rpc("lc86_wall_admin",{},t),rpc("lc72_land_admin",{},t)])}).then(function(a){
+      var w=a[0],l=a[1];
+      if(w&&w.status===200&&w.data&&w.data.ok){WALL=(w.data.rows||[]).map(function(r){return{id:r.id,name:r.name,tag:r.tag||"",avatar:r.avatar||"",items:Array.isArray(r.items)?r.items:[],visible:r.visible!==false,sort:+r.sort||0}});WALLSTATE="ok"}
+      else WALLSTATE=missing(w)?"nosql":"error";
+      if(WALLSTATE==="ok"&&!WALL.length){var sd={};try{sd=W.__lcWall?W.__lcWall.seeds():{}}catch(e){sd={}}WALL=Object.keys(sd).map(function(k,i){var p=sd[k];return{id:null,name:p.name,tag:p.tag,avatar:p.avatar||"",items:(p.items||[]).slice(),visible:true,sort:i*10,_seed:true}})}
+      if(l&&l.status===200&&l.data&&l.data.ok){PROOF=(l.data.items||[]).filter(function(x){return x.kind==="proof"}).map(function(x){return{id:x.id,name:x.name||"",role:x.role||"",site:x.site||"",start:x.start_r==null?"":String(x.start_r),peak:x.peak_r==null?"":String(x.peak_r),days:x.days==null?"":String(x.days),body:x.body||"",shot:x.shot||"",link:x.link||"",pinned:!!x.pinned,visible:x.visible!==false,sort:+x.sort||0}});PROOFSTATE="ok"}
+      else PROOFSTATE=missing(l)?"nosql":"error";
+      paintWall();paintProof();
+    });
+  }
+  function paintWall(){
+    var g=D.getElementById("wl-grid");if(!g||!EDIT)return;
+    if(WALLSTATE!=="ok"){g.insertAdjacentHTML("beforebegin",'<p class="lc89-own" data-lc89-ui>'+(WALLSTATE==="nosql"?"The Wall of Love table is not set up: run sql/20261115140000_lc86_wall_people.sql.":"The Wall of Love could not load for editing. Reload the page.")+"</p>");return}
+    g.innerHTML=WALL.map(function(r,i){
+      var n=(r.items||[]).filter(function(x){return x.t==="img"}).length,m=(r.items||[]).filter(function(x){return x.t==="msg"}).length;
+      return'<div class="card wl-card lc89-wl'+(r.visible?"":" is-off")+'" role="listitem" data-i="'+i+'">'+(HTTPS.test(r.avatar||"")?'<img class="wl-av" src="'+esc(r.avatar)+'" alt="" loading="lazy">':'<span class="wl-av" aria-hidden="true">'+esc(initials(r.name))+"</span>")
+        +'<span class="wl-who"><b class="wl-name" contenteditable="true" data-f="name" aria-label="First name">'+esc(r.name)+'</b><span class="wl-tag" contenteditable="true" data-f="tag" aria-label="Result tag">'+esc(r.tag)+"</span></span>"
+        +'<div class="lc89-cardbar"><button type="button" class="lc89-b is-sm" data-wl-a="proof" data-i="'+i+'">Proof: '+n+" "+(n===1?"screenshot":"screenshots")+", "+m+" chat</button>"
+        +'<button type="button" class="lc89-b is-sm" data-wl-a="up" data-i="'+i+'" aria-label="Move left">↑</button><button type="button" class="lc89-b is-sm" data-wl-a="down" data-i="'+i+'" aria-label="Move right">↓</button>'
+        +'<button type="button" class="lc89-b is-sm" data-wl-a="vis" data-i="'+i+'">'+(r.visible?"Shown":"Hidden")+'</button><button type="button" class="lc89-b is-sm" data-wl-a="del" data-i="'+i+'" aria-label="Delete '+esc(r.name)+'">Delete</button></div></div>';
+    }).join("")+'<button type="button" class="lc89-add" data-wl-a="add">+ Add a person</button>';
+  }
+  function wallAct(b){
+    var a=b.getAttribute("data-wl-a"),i=+b.getAttribute("data-i"),r=WALL&&WALL[i];
+    if(a==="add"){WALL.push({id:null,name:"New member",tag:"+0 Elo",avatar:"",items:[],visible:true,sort:WALL.length*10});mark(WALL[WALL.length-1],"wall");paintWall();var c=D.querySelector('.lc89-wl[data-i="'+(WALL.length-1)+'"] [data-f="name"]');if(c){c.focus();try{D.execCommand("selectAll")}catch(e){}}return}
+    if(!r)return;
+    if(a==="up"||a==="down"){var j=a==="up"?i-1:i+1;if(j<0||j>=WALL.length)return;var x=WALL[j];WALL[j]=r;WALL[i]=x;WALL.forEach(function(w,n){if(w.sort!==n*10){w.sort=n*10;mark(w,"wall")}});paintWall();return}
+    if(a==="vis"){r.visible=!r.visible;mark(r,"wall");paintWall();return}
+    if(a==="del"){if(!W.confirm("Delete "+(r.name||"this person")+" from the Wall of Love? This happens when you publish."))return;if(r.id)WALLDEL.push(r.id);WALL.splice(i,1);if(r._seed)WALL.forEach(function(w){if(w._seed)w._d=true});touch();paintWall();return}
+    if(a==="proof")return wallDialog(r);
+  }
+  function upload(file,dir){
+    return bearer().then(function(t){
+      if(!t)return"";
+      return new Promise(function(res){
+        try{createImageBitmap(file).then(function(bm){var k=Math.min(1,1600/Math.max(bm.width,bm.height)),cv=D.createElement("canvas");cv.width=Math.round(bm.width*k);cv.height=Math.round(bm.height*k);cv.getContext("2d").drawImage(bm,0,0,cv.width,cv.height);cv.toBlob(function(b){res(b||file)},"image/webp",.85)},function(){res(file)})}catch(e){res(file)}
+      }).then(function(blob){
+        var ext=/webp/.test(blob.type||"")?"webp":/png/.test(blob.type||"")?"png":"jpg",path=dir+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;
+        return fetch(SB+"/storage/v1/object/lc72-landing/"+path,{method:"POST",headers:{Authorization:"Bearer "+t,apikey:KEY,"Content-Type":blob.type||"image/jpeg","x-upsert":"true"},body:blob})
+          .then(function(r){return r.ok?SB+"/storage/v1/object/public/lc72-landing/"+path:""}).catch(function(){return""});
+      });
+    });
+  }
+  function wallDialog(r){
+    var it=JSON.parse(JSON.stringify(r.items||[])),av=r.avatar||"";
+    function list(){return it.map(function(x,i){
+      var tools='<span class="lc89-row"><button type="button" class="lc89-b is-sm" data-it="up" data-n="'+i+'" aria-label="Up">↑</button><button type="button" class="lc89-b is-sm" data-it="down" data-n="'+i+'" aria-label="Down">↓</button><button type="button" class="lc89-b is-sm" data-it="del" data-n="'+i+'" aria-label="Remove">✕</button></span>';
+      if(x.t==="img")return'<div class="lc89-it"><img src="'+esc(x.url)+'" alt=""><input data-cap="'+i+'" placeholder="Caption (optional)" maxlength="140" value="'+esc(x.cap||"")+'">'+tools+"</div>";
+      return'<div class="lc89-it"><select data-from="'+i+'"><option value="member"'+(x.from!=="coach"?" selected":"")+'>Member</option><option value="coach"'+(x.from==="coach"?" selected":"")+'>Kyenzo</option></select><textarea data-text="'+i+'" rows="2" maxlength="1000">'+esc(x.text||"")+"</textarea>"+tools+"</div>";
+    }).join("")||'<p style="color:#94a3b8">No proof yet: add screenshots or chat lines.</p>'}
+    overlay("<h3>Proof for "+esc(r.name)+'</h3><label>Avatar (https:// address, or upload; empty = initials)<input data-av value="'+esc(av)+'" inputmode="url" placeholder="https://…"></label>'
+      +'<div class="lc89-row"><label class="lc89-b is-sm" style="display:inline-flex;align-items:center;cursor:pointer">Upload avatar<input type="file" accept="image/*" data-up="av" hidden></label></div>'
+      +'<div data-items>'+list()+'</div><div class="lc89-row"><label class="lc89-b is-sm" style="display:inline-flex;align-items:center;cursor:pointer">+ Screenshots<input type="file" accept="image/*" multiple data-up="img" hidden></label><button type="button" class="lc89-b is-sm" data-add="url">+ Screenshot by URL</button><button type="button" class="lc89-b is-sm" data-add="msg">+ Chat line</button></div>'
+      +'<p class="lc89-msg" data-dmsg aria-live="polite" style="color:#94a3b8"></p><div class="lc89-row"><button type="button" class="lc89-b is-gold" data-done>Done</button><button type="button" class="lc89-b" data-close>Cancel</button></div>',function(box,close){
+      var paint=function(){box.querySelector("[data-items]").innerHTML=list()},dm=function(t){box.querySelector("[data-dmsg]").textContent=t||""};
+      var sync=function(){$$("[data-cap]",box).forEach(function(x){it[+x.getAttribute("data-cap")].cap=x.value});$$("[data-text]",box).forEach(function(x){it[+x.getAttribute("data-text")].text=x.value});$$("[data-from]",box).forEach(function(x){it[+x.getAttribute("data-from")].from=x.value})};
+      box.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-it],[data-add],[data-done]");if(!b)return;sync();
+        if(b.hasAttribute("data-it")){var n=+b.getAttribute("data-n"),k=b.getAttribute("data-it");if(k==="del")it.splice(n,1);else{var j=k==="up"?n-1:n+1;if(j>=0&&j<it.length){var x=it[j];it[j]=it[n];it[n]=x}}paint();return}
+        if(b.getAttribute("data-add")==="msg"){if(it.length>=24){dm("24 items is the maximum.");return}it.push({t:"msg",from:"member",text:""});paint();return}
+        if(b.getAttribute("data-add")==="url"){var u=W.prompt("Screenshot address (https://…)","https://");if(u&&HTTPS.test(u.trim())&&it.length<24){it.push({t:"img",url:u.trim(),cap:""});paint()}else if(u)dm("Use an https:// address.");return}
+        if(b.hasAttribute("data-done")){var a=box.querySelector("[data-av]").value.trim();if(a&&!HTTPS.test(a)){dm("The avatar must be an https:// address.");return}
+          r.avatar=a;r.items=it.filter(function(x){return x.t==="img"?HTTPS.test(x.url||""):String(x.text||"").trim()}).slice(0,24).map(function(x){return x.t==="img"?{t:"img",url:x.url,cap:String(x.cap||"").replace(/[<>]/g,"").slice(0,140)}:{t:"msg",from:x.from==="coach"?"coach":"member",text:String(x.text).replace(/[<>]/g,"").trim().slice(0,1000)}});
+          mark(r,"wall");paintWall();close()}
+      });
+      box.addEventListener("change",function(e){var f=e.target;if(!f||!f.getAttribute||!f.getAttribute("data-up"))return;var files=Array.prototype.slice.call(f.files||[]);if(!files.length)return;sync();dm("Uploading…");
+        if(f.getAttribute("data-up")==="av")upload(files[0],"wall").then(function(u){if(u){box.querySelector("[data-av]").value=u;dm("Avatar uploaded.")}else dm("The upload failed. Try again or paste an https:// address.")});
+        else files.slice(0,24-it.length).reduce(function(p,file){return p.then(function(){return upload(file,"wall").then(function(u){if(u)it.push({t:"img",url:u,cap:""})})})},Promise.resolve()).then(function(){paint();dm("Uploaded.")});
+        f.value=""});
+    });
+  }
+  function paintProof(){
+    var pl=D.getElementById("proof-list");if(!pl||!EDIT)return;var host=D.getElementById("lc89-proof-own");
+    if(!host){host=D.createElement("div");host.id="lc89-proof-own";host.className="lc89-own";host.setAttribute("data-lc89-ui","");pl.parentNode.insertBefore(host,pl)}
+    if(PROOFSTATE!=="ok"){host.innerHTML="<p>"+(PROOFSTATE==="nosql"?"The proof cards table is not set up: run sql/20261113100000_lc72_lc73_launch_funnels.sql.":"Your proof cards could not load for editing. Reload the page.")+"</p>";return}
+    var I=function(r,i,n,l,t,x){return"<label>"+l+'<input name="'+n+'" '+(t||"")+' value="'+esc(r[n])+'" '+(x||"")+"></label>"};
+    host.innerHTML="<h3>Your proof cards</h3><p style=\"margin:0;color:#94a3b8;font-size:13px\">Cards you add yourself (“Shared by Kyenzo”). Member results come from the members and are approved in the app (Admin, Proof Queue).</p><div class=\"lc89-grid\">"+PROOF.map(function(r,i){
+      return'<div class="lc89-pc'+(r.visible?"":" is-off")+'" data-i="'+i+'">'+I(r,i,"name","First name",'maxlength="60"')+I(r,i,"role","Line under the name (optional)",'maxlength="120"')
+        +'<label>Site<select name="site"><option value=""'+(r.site?"":" selected")+'>None</option><option value="chesscom"'+(r.site==="chesscom"?" selected":"")+'>Chess.com</option><option value="lichess"'+(r.site==="lichess"?" selected":"")+'>Lichess</option><option value="other"'+(r.site==="other"?" selected":"")+">Other</option></select></label>"
+        +'<div class="lc89-3">'+I(r,i,"start","Start Elo",'inputmode="numeric"')+I(r,i,"peak","Peak Elo",'inputmode="numeric"')+I(r,i,"days","Days",'inputmode="numeric"')+"</div>"
+        +'<label>Quote (optional)<textarea name="body" rows="3" maxlength="1200">'+esc(r.body)+"</textarea></label>"+I(r,i,"link","Public profile link (https://, optional)",'inputmode="url"')
+        +(HTTPS.test(r.shot||"")?'<img src="'+esc(r.shot)+'" alt="">':"")+'<div class="lc89-row" style="display:flex;flex-wrap:wrap;gap:6px"><label class="lc89-b is-sm" style="display:inline-flex;align-items:center;cursor:pointer">'+(r.shot?"Change screenshot":"Add screenshot")+'<input type="file" accept="image/*" data-pc-up="'+i+'" hidden></label>'
+        +(r.shot?'<button type="button" class="lc89-b is-sm" data-pc-a="noshot" data-i="'+i+'">Remove screenshot</button>':"")
+        +'<button type="button" class="lc89-b is-sm" data-pc-a="pin" data-i="'+i+'" aria-pressed="'+r.pinned+'">'+(r.pinned?"Pinned first":"Pin first")+'</button><button type="button" class="lc89-b is-sm" data-pc-a="up" data-i="'+i+'" aria-label="Move up">↑</button><button type="button" class="lc89-b is-sm" data-pc-a="down" data-i="'+i+'" aria-label="Move down">↓</button>'
+        +'<button type="button" class="lc89-b is-sm" data-pc-a="vis" data-i="'+i+'">'+(r.visible?"Shown":"Hidden")+'</button><button type="button" class="lc89-b is-sm" data-pc-a="del" data-i="'+i+'">Delete</button></div></div>';
+    }).join("")+'<button type="button" class="lc89-add" data-pc-a="add">+ Add a proof card</button></div>';
+    if(!host.__up){host.__up=1;host.addEventListener("change",function(e){var f=e.target;if(!f||!f.getAttribute)return;var i=f.getAttribute("data-pc-up");if(i==null||!f.files||!f.files[0])return;var r=PROOF[+i];say("Uploading…");
+      upload(f.files[0],"proof").then(function(u){if(u){r.shot=u;mark(r,"proof");paintProof();say("Screenshot uploaded. Publish to make it live.")}else say("The upload failed. Try again.",true)});f.value=""})}
+  }
+  function proofAct(b){
+    var a=b.getAttribute("data-pc-a"),i=+b.getAttribute("data-i"),r=PROOF&&PROOF[i];
+    if(a==="add"){PROOF.push({id:null,name:"",role:"",site:"",start:"",peak:"",days:"",body:"",shot:"",link:"",pinned:false,visible:true,sort:PROOF.length*10});mark(PROOF[PROOF.length-1],"proof");paintProof();var c=D.querySelector('.lc89-pc[data-i="'+(PROOF.length-1)+'"] [name="name"]');if(c)c.focus();return}
+    if(!r)return;
+    if(a==="up"||a==="down"){var j=a==="up"?i-1:i+1;if(j<0||j>=PROOF.length)return;var x=PROOF[j];PROOF[j]=r;PROOF[i]=x;PROOF.forEach(function(w,n){if(w.sort!==n*10){w.sort=n*10;mark(w,"proof")}});paintProof();return}
+    if(a==="vis"){r.visible=!r.visible;mark(r,"proof");paintProof();return}
+    if(a==="pin"){r.pinned=!r.pinned;mark(r,"proof");paintProof();return}
+    if(a==="noshot"){r.shot="";mark(r,"proof");paintProof();return}
+    if(a==="del"){if(!W.confirm("Delete this proof card? This happens when you publish."))return;if(r.id)PROOFDEL.push(r.id);PROOF.splice(i,1);touch();paintProof();return}
+  }
+  var WERR={name:"a first name is missing",avatar:"an avatar is not https://",wording:"no “lifetime”, “forever” or “guaranteed”",full:"the maximum is reached",invalid:"something is not valid"};
+  function saveCards(t){
+    var fails=[],p=Promise.resolve();
+    WALLDEL.slice().forEach(function(id){p=p.then(function(){return rpc("lc86_wall_del",{p_id:id},t).then(function(r){if(r&&r.data&&r.data.ok!==undefined){WALLDEL.splice(WALLDEL.indexOf(id),1)}else fails.push("a Wall delete")})})});
+    (WALL||[]).forEach(function(r,i){if(!r._d)return;p=p.then(function(){
+      var body={id:r.id||null,name:String(r.name||"").trim(),tag:String(r.tag||"").trim(),avatar:String(r.avatar||"").trim(),items:r.items||[],visible:r.visible!==false,sort:i*10};
+      return rpc("lc86_wall_save",{p:body},t).then(function(x){if(x&&x.data&&x.data.ok){r.id=x.data.id;r._d=false;r._seed=false}else fails.push((r.name||"a Wall card")+": "+(WERR[x&&x.data&&x.data.error]||"not saved"))});
+    })});
+    PROOFDEL.slice().forEach(function(id){p=p.then(function(){return rpc("lc72_land_del",{p_id:id},t).then(function(r){if(r&&r.data&&r.data.ok!==undefined)PROOFDEL.splice(PROOFDEL.indexOf(id),1);else fails.push("a proof delete")})})});
+    (PROOF||[]).forEach(function(r,i){if(!r._d)return;p=p.then(function(){
+      var num=function(v){v=String(v||"").replace(/[^0-9]/g,"");return v?String(Math.min(+v,4000)):""};
+      var body={id:r.id||null,kind:"proof",visible:r.visible!==false,pinned:!!r.pinned,sort:i*10,name:r.name,role:r.role,site:r.site,start:num(r.start),peak:num(r.peak),days:num(r.days),body:r.body,shot:HTTPS.test(r.shot||"")?r.shot:"",link:HTTPS.test(r.link||"")?r.link:""};
+      return rpc("lc72_land_save",{p:body},t).then(function(x){if(x&&x.data&&x.data.ok){r.id=x.data.id;r._d=false}else fails.push((r.name||"a proof card")+": "+(WERR[x&&x.data&&x.data.error]||"not saved"))});
+    })});
+    return p.then(function(){try{if(W.__lcWall&&!fails.length)W.__lcWall.saved()}catch(e){}paintWall();paintProof();return fails});
+  }
+
+  /* ---------- boot ---------- */
+  snapshot();load();
+  W.__lc89={version:VERSION,has:function(el){var k=el&&el.getAttribute&&el.getAttribute("data-cms");return!!(k&&has(DOC.text,k))},rebase:rebase,editing:function(){return EDIT},
+    _t:{clean:clean,safeHref:safeHref,norm:norm,collect:collect,apply:apply,orig:function(){return ORIG}}};
+  if(D.readyState==="loading")D.addEventListener("DOMContentLoaded",gate);else setTimeout(gate,0);
+})();
+/*@@end lc89*/
+</script>
 
 <script>
 "use strict";
@@ -634,7 +1081,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       try{(navigator.clipboard?navigator.clipboard.writeText(abs):Promise.reject()).then(function(){instMsg("Link copied. Tap ⋯ at the top and choose Open in browser (or paste it in Safari), then Share → Add to Home Screen.")},function(){instMsg("Tap ⋯ at the top and choose Open in browser. In Safari: Share → Add to Home Screen.")})}catch(x){instMsg("Tap ⋯ at the top and choose Open in browser. In Safari: Share → Add to Home Screen.")}
     },IOS&&iosV>=17?1200:0);
   }
-  /* 9.49.0: the in-app browsers never get here (LC87 covers the page and sends people to Chrome / Safari). In a real browser the button
+  /* 9.48.0: the in-app browsers never get here (LC87 covers the page and sends people to Chrome / Safari). In a real browser the button
      opens the browser's own install prompt the moment the browser offers it. Chrome only offers it after a tap and some time on the page, so
      until then the button shows the two taps of the browser's own menu, right here: no detour into the app, no form. The steps sheet keeps
      listening: if Chrome offers its prompt while it is open, a big "Install now" button appears in it. */
@@ -707,7 +1154,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   syncLabels();
 
   /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
-  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.49.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.52.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -899,16 +1346,17 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
      screenshots and chat. The two starter cards in the HTML stay until the first person is saved. ?admin=1 (owner signed in) shows Add / Edit. */
   var WL={"seed-igor":{name:"Igor P.",tag:"+630 Elo in 6 weeks",avatar:"",items:[{t:"msg",from:"coach",text:"585 → 1214 Elo in 6 weeks. The first student to run the full MSPC system, move by move."}]},
           "seed-mathijs":{name:"Mathijs",tag:"Hit 1500 Elo",avatar:"",items:[]}};
-  var wlAdmin=false;
-  try{var wa=JSON.parse(localStorage.getItem("lc26-auth")||"null"),own=!!(wa&&String(wa.email||"").toLowerCase()==="lanckrietchess@gmail.com");
-    if(own&&/[?&]admin=1/.test(location.search))sessionStorage.setItem("lc86-admin","1");
-    if(own&&/[?&]admin=0/.test(location.search))sessionStorage.removeItem("lc86-admin");
-    wlAdmin=own&&sessionStorage.getItem("lc86-admin")==="1"}catch(e){wlAdmin=false}
+  /* 9.52.0 LC89: admin mode no longer trusts the e-mail in localStorage. ?admin=1 only asks for it; LC89 turns it on after the SERVER
+     confirmed an admin session (lc89_whoami), through window.__lcWall.admin(true). */
+  var wlAdmin=false,wlAsk=false,WL0=JSON.parse(JSON.stringify(WL));
+  try{if(/[?&]admin=1/.test(location.search))sessionStorage.setItem("lc86-admin","1");
+    if(/[?&]admin=0/.test(location.search))sessionStorage.removeItem("lc86-admin");
+    wlAsk=sessionStorage.getItem("lc86-admin")==="1"}catch(e){wlAsk=false}
   function wlIni(n){return String(n||"?").trim().split(/\s+/).map(function(w){return w.replace(/[^A-Za-z0-9\u00C0-\u024F]/g,"").charAt(0)}).filter(Boolean).slice(0,2).join("").toUpperCase()||"?"}
   function wlAv(p,cls){return/^https:\/\//.test(p.avatar||"")?'<img class="'+cls+'" src="'+esc(p.avatar)+'" alt="" loading="lazy">':'<span class="'+cls+'" aria-hidden="true">'+esc(wlIni(p.name))+"</span>"}
   function wlCard(id,p){var n=(p.items||[]).filter(function(x){return x.t==="img"}).length,edit=wlAdmin?'<a class="wl-edit" href="/app.html?lc86='+(/^seed-/.test(id)?id.replace("seed-","seed-"):"edit-"+esc(id))+'#wall-cms">✎ Edit</a>':"";
     return'<button type="button" class="card wl-card" role="listitem" data-wl="'+esc(id)+'">'+wlAv(p,"wl-av")+'<span class="wl-who"><b class="wl-name">'+esc(p.name)+"</b>"+(p.tag?'<span class="wl-tag">'+esc(p.tag)+"</span>":"")+'</span><span class="wl-cta">'+(n?"See the chat & "+n+(n===1?" screenshot":" screenshots")+" →":"See the proof →")+"</span>"+edit+"</button>"}
-  function wlPaint(){var g=$("wl-grid");if(!g)return;g.innerHTML=Object.keys(WL).map(function(k){return wlCard(k,WL[k])}).join("");if(wlAdmin){var ad=$("wl-admin");if(ad)ad.classList.remove("hide")}}
+  function wlPaint(){var g=$("wl-grid");if(!g||(window.__lc89&&window.__lc89.editing()))return;g.innerHTML=Object.keys(WL).map(function(k){return wlCard(k,WL[k])}).join("");if(wlAdmin){var ad=$("wl-admin");if(ad)ad.classList.remove("hide")}}
   var wlLast=null;
   function wlOpen(id,from){var p=WL[id];if(!p)return;wlLast=from||null;
     $("wl-av").innerHTML=wlAv(p,"wl-av");$("wl-h").textContent=p.name;var t=$("wl-t");t.textContent=p.tag||"";t.hidden=!p.tag;
@@ -923,9 +1371,11 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   document.addEventListener("keydown",function(e){var ov=$("wl-ov");if(!ov||ov.hidden)return;if(e.key==="Escape"){e.preventDefault();wlClose();return}
     if(e.key==="Tab"){var f=[].slice.call(ov.querySelectorAll("button,a[href]")),a=f[0],z=f[f.length-1];if(!f.length)return;if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}});
   wlPaint();
-  rpc("lc86_wall_public",{}).then(function(r){if(!r||!r.ok||!Array.isArray(r.rows)||!r.rows.length)return;var o={};
+  function wlLoad(){rpc("lc86_wall_public",{}).then(function(r){if(!r||!r.ok||!Array.isArray(r.rows)||!r.rows.length)return;var o={};
     r.rows.forEach(function(p){if(p&&p.name)o[String(p.id)]={name:String(p.name),tag:String(p.tag||""),avatar:String(p.avatar||""),items:Array.isArray(p.items)?p.items:[]}});
-    if(Object.keys(o).length){WL=o;wlPaint()}});
+    if(Object.keys(o).length){WL=o;wlPaint()}})}
+  wlLoad();
+  window.__lcWall={admin:function(v){wlAdmin=!!v&&wlAsk;wlPaint()},seeds:function(){return JSON.parse(JSON.stringify(WL0))},saved:wlLoad};
   /* the account data behind a card, in a dialog */
   var last=null;
   function closeDlg(){var d=$("dlg");if(d){d.remove();document.body.style.overflow="";if(last&&last.focus)last.focus()}}
@@ -996,16 +1446,17 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   });
   rpc("lc69_landing_public").then(function(j){
     if(!j||!j.ok||!j.values)return;var v=j.values;
-    var t=document.querySelector('[data-lc-key="hero_title"]');if(t&&v.hero_title)t.textContent=v.hero_title;
-    var s=document.querySelector('[data-lc-key="hero_sub"]');if(s&&v.hero_sub)s.textContent=v.hero_sub;
-    var st=document.querySelector('[data-lc-key="story"]');if(st&&v.story)st.innerHTML=String(v.story).split(/\n+/).filter(function(x){return x.trim()}).map(function(x){return"<p>"+esc(x)+"</p>"}).join("");
+    var L9=window.__lc89,own=function(el){return!!(L9&&L9.has(el))},base=function(el){try{if(L9)L9.rebase(el)}catch(e){}};   /* 9.52.0: a text edited on the page (LC89) wins */
+    var t=document.querySelector('[data-lc-key="hero_title"]');if(t&&v.hero_title&&!own(t)){t.textContent=v.hero_title;base(t)}
+    var s=document.querySelector('[data-lc-key="hero_sub"]');if(s&&v.hero_sub&&!own(s)){s.textContent=v.hero_sub;base(s)}
+    var st=document.querySelector('[data-lc-key="story"]');if(st&&v.story&&!own(st)){st.innerHTML=String(v.story).split(/\n+/).filter(function(x){return x.trim()}).map(function(x){return"<p>"+esc(x)+"</p>"}).join("");base(st)}
     if(v.video&&window.__lcShowVideo)window.__lcShowVideo(v.video);
     setTimeout(size,0);
   });
 })();
 </script>
 <script>
-/* 9.49.0: the quiet in-app browser bar of 9.43.0 is replaced by the LC87 gate in the <head>. */
+/* 9.48.0: the quiet in-app browser bar of 9.43.0 is replaced by the LC87 gate in the <head>. */
 (function(){
 })();
 </script>
@@ -1056,7 +1507,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   if(u&&k&&!/preview=/.test(location.search)){var dk="lc73-land-day";var last="";try{last=localStorage.getItem(dk)||""}catch(e){}
     if(last!==day){try{localStorage.setItem(dk,day)}catch(e){}fetch(u+"/rest/v1/rpc/lc73_hit",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:JSON.stringify({p:{kind:"landing",device:cur.device,code:cur.code||"",utm_source:cur.utm_source||""}})}).catch(function(){})}}
   window.addEventListener("appinstalled",function(){if(u&&k)fetch(u+"/rest/v1/rpc/lc73_hit",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:JSON.stringify({p:{kind:"install",device:cur.device,code:cur.code||""}})}).catch(function(){})});
-  try{var a=JSON.parse(localStorage.getItem("lc26-auth")||"null");if(a&&String(a.email||"").toLowerCase()==="lanckrietchess@gmail.com"&&!/preview=/.test(location.search)){var b=document.createElement("a");b.className="lc72-edit";b.href="/app.html#landing-editor";b.textContent="✎ Edit this page";document.body.appendChild(b)}}catch(e){}
+  /* 9.52.0: the owner's "Edit this page" button moved to LC89: hidden by default, shown only after the server confirmed an admin session */
 })();
 </script>
 </body>
