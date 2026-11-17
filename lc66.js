@@ -158,12 +158,16 @@
   function flagged(id){
     try{const m=rd(DK,{})||{},t=+m[id];if(!t)return false;const pr=(App.progress&&App.progress[id])||{};return!(+pr.last>t&&+pr.best>=.8)}catch(e){return false}
   }
-  function onGoto(fen,it,user,moves){
+  function onGoto(fen,it,user,moves,fens){
     try{
       const host=Q(".board-shell",Q("#view"))||Q(".board-shell");if(!host||!fen||!it)return;
       let c=Q("#lc66-coach");if(!c){c=document.createElement("section");c.id="lc66-coach";c.className="panel pad lc66-card";host.insertAdjacentElement("afterend",c)}
       const color=it.color==="b"?"b":"w";
-      const tail=LC61.tail({fen:fen,color:color,k:it.k||"S",why:String(it.text||""),ps:it.san});
+      /* 9.56.0: the coach card reads THIS mistake (the move played, Stockfish's better move and refutation, their last move and threat) */
+      const pm=moves&&it.i>0?moves[it.i-1]:null,mm=moves&&moves[it.i];
+      const tail=LC61.tail({fen:fen,color:color,k:it.k||"S",why:String(it.text||""),ps:it.san,diag:it.diag||null,
+        played:it.from?{from:it.from,to:it.to,promotion:(mm&&mm.promotion)||"q",san:it.san}:null,bestUci:it.best||"",replyUci:it.reply||"",
+        prevFen:fens&&it.i>0?fens[it.i-1]:null,oppUci:pm&&pm.from?pm.from+pm.to+(pm.promotion||""):null,threatUci:it.threat&&it.threat.best||""});
       try{saveCase(fen,it,user,moves)}catch(e){}
       let dev=null;try{dev=deviation((moves||[]).map(m=>m.san),user)}catch(e){}
       let devHTML="";

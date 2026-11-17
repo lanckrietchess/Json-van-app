@@ -163,6 +163,138 @@ const LC83=(()=>{
     P:"Before a quiet move, list your checks, your captures that win something and your real threats. The strongest move is often one of them.",
     C:"Before you play it, look one move further: what is their best reply, and does your move still work after it?"};
   const NEXT_PLAN="Before every quiet move, name the pawn structure and your worst-placed piece, then pick the move that improves that piece.";
+  /* ======================= 1b. DIAGNOSE (9.56.0): the human error behind an engine mistake =======================
+     Input: the position before the mistake (fen), the move played, Stockfish's better move (bestUci), Stockfish's refutation (replyUci),
+     and when known the opponent's last move (prevFen + oppUci) and their threat (threatUci, Stockfish's best move for them with a null move).
+     It answers the four coaching questions with facts from THIS position, never a stock sentence:
+       why     why the opponent played their last move (what it changed, what it threatened)
+       error   what the human missed (one concrete cause, with squares)
+       alarm   which Alarm Signal should have gone off, worded for this position
+       wp      the Working Point (MSPC letter + a rule that fits this cause)
+       action  the Action Step that would have prevented exactly this mistake
+       find    how a human finds the better move
+     The causes are checked in a fixed order, the first that is TRUE on the board wins:
+       allowed mate · missed mate · a blocker that left its line · their threat was ignored · a defender walked away ·
+       the moved piece was left en prise · the reply hits two things · a forcing move was missed · otherwise a positional comparison. */
+  function playOn(fen,u){try{const g=new Chess(fen),m=g.move(typeof u==="string"?uciMove(u):u);return m?{m:m,after:g.fen(),mate:g.in_checkmate(),check:g.in_check()}:null}catch(e){return null}}
+  function withSide(fen,c){const p=String(fen).split(" ");p[1]=c;p[3]="-";return p.join(" ")}
+  function between(a,b){
+    const f0=FILES.indexOf(a[0]),r0=+a[1],f1=FILES.indexOf(b[0]),r1=+b[1],df=Math.sign(f1-f0),dr=Math.sign(r1-r0);
+    if(!(f0===f1||r0===r1||Math.abs(f1-f0)===Math.abs(r1-r0)))return null;
+    const out=[];let f=f0+df,r=r0+dr;while(f!==f1||r!==r1){out.push(FILES[f]+r);f+=df;r+=dr}return out;
+  }
+  const PN=(B,sq,own)=>(own?own+" ":"the ")+(B[sq]?NAME[B[sq].t]:"piece")+" on "+sq;
+  const list=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+  /* what side `c` would win if it could move again right now (1 ply, facts only): mate, or a capture that wins material */
+  function threatOf(fen,c){
+    let g=null;try{g=new Chess();if(!g.load(withSide(fen,c)))return null}catch(e){return null}
+    const B=parse(fen),ms=g.moves({verbose:true});
+    for(const m of ms){const t=new Chess(g.fen());t.move(m);if(t.in_checkmate())return{uci:m.from+m.to,san:m.san,kind:"mate",text:m.san+" would be checkmate"}}
+    let best=null;
+    ms.filter(m=>m.captured&&m.captured!=="k").forEach(m=>{const def=attackers(B,m.to,other(c)).length,gain=def?VAL[m.captured]-VAL[m.piece]:VAL[m.captured];
+      if(gain>=2&&(!best||gain>best.gain))best={uci:m.from+m.to,san:m.san,kind:"win",gain:gain,text:m.san+" would win the "+NAME[m.captured]+" on "+m.to+(def?" for a "+NAME[m.piece]:", which has no defender")}});
+    return best;
+  }
+  function kingRoom(fen,c){try{const g=new Chess();if(!g.load(withSide(fen,c)))return 0;return g.moves({verbose:true}).filter(m=>m.piece==="k").length}catch(e){return 0}}
+  function mobility(fen,sq){try{const B=new Chess(fen),p=B.get(sq);if(!p)return 0;const g=new Chess();if(!g.load(withSide(fen,p.color)))return 0;return g.moves({square:sq,verbose:true}).length}catch(e){return 0}}
+  function diagnose(r){
+    try{
+      const fen=r.fen,me=r.color||(String(fen).split(" ")[1]||"w"),them=other(me);
+      const pu=r.played&&r.played.from?{from:r.played.from,to:r.played.to,promotion:r.played.promotion||"q"}:r.playedUci;
+      const P=pu?playOn(fen,pu):null;if(!P)return null;
+      const R=r.replyUci?playOn(P.after,r.replyUci):null,Bm=r.bestUci?playOn(fen,r.bestUci):null;
+      const ps=P.m.san,rs=R?R.m.san:"",bs=Bm?Bm.m.san:"";
+      const B0=parse(fen),B1=parse(P.after),B2=R?parse(R.after):null;
+      const mover=NAME[P.m.piece],ksq=kingSq(B1,me);
+      const out={k:"S",id:"positional",why:"",error:"",alarm:null,wp:null,action:"",find:"",refute:"",played:ps,best:bs,reply:rs};
+      /* why: their last move */
+      const opp=r.prevFen&&r.oppUci?moveFacts(r.prevFen,r.oppUci,me):null;
+      let th=null;
+      if(r.threatUci){const t=playOn(withSide(fen,them),r.threatUci);if(t&&(t.mate||t.m.captured||t.check))th={uci:String(r.threatUci).slice(0,4),san:t.m.san,kind:t.mate?"mate":"win",text:t.m.san+(t.mate?" would be checkmate":t.m.captured?" would take the "+NAME[t.m.captured]+" on "+t.m.to:" would give check")}}
+      if(!th)th=threatOf(fen,them);
+      if(opp)out.why=opp.san+": "+(opp.quiet?"a quiet move that attacks nothing you can lose at once.":factText(opp,2).replace(/^It /,"it "))+(th?" Its point: "+th.text+" if you let it.":" It threatens nothing concrete, so you had time for your own idea.");
+      else out.why=th?"Their threat in this position: "+th.text+".":"No direct threat from their side here.";
+      out.refute=rs?(R.mate?rs+" is checkmate.":"After "+ps+", "+rs+" is their best answer."):"";
+      const set=(id,k,error,alarm,wp,action,find)=>Object.assign(out,{id:id,k:k,error:error,alarm:alarm,wp:{k:k,text:wp},action:action,find:find});
+      /* 1. allowed mate */
+      if(R&&R.mate){const room=kingRoom(P.after,me);
+        return set("allowedMate","C",ps+" allows "+rs+": checkmate. Your king on "+ksq+" had "+(room?room+" free square"+(room===1?"":"s"):"no free square")+" and their "+NAME[R.m.piece]+" could reach a checking square.",
+          {label:"A king with no air",say:"Your king on "+ksq+" had "+(room?"only "+room:"no")+" escape square"+(room===1?"":"s")+" while their "+NAME[R.m.piece]+" could give check."},
+          "After my move, list every check they have before I let go of the piece.","Before "+ps+", look at their checks: "+rs+" was one of them, and it mates. Make room for the king or cover "+R.m.to+" first.",
+          bs?"Count their checks after your candidate move. "+bs+" keeps "+R.m.to+" covered or gives the king air.":"Count their checks after your candidate move.")}
+      /* 2. missed mate */
+      if(Bm&&Bm.mate){const ek=kingSq(B0,them),room=kingRoom(fen,them);
+        return set("missedMate","P","You had mate: "+bs+". Their king on "+ek+" had "+(room||"no")+" escape square"+(room===1?"":"s")+".",
+          {label:"Their king has no escape",say:"Their king on "+ek+" had "+(room?"only "+room:"no")+" free square"+(room===1?"":"s")+": every check is a mate candidate."},
+          "Start every move with my own checks, most forcing first.","When their king has no air, play through every check before anything else: "+bs+" was mate.",
+          "List your checks first ("+bs+" is one), then ask for each one: where can the king go?")}
+      /* 3. a blocker left its line: the refutation runs through the square the moved piece left */
+      if(R&&/[brq]/.test(R.m.piece)){
+        let tgt=null;
+        const path=between(R.m.from,R.m.to);if(path&&path.indexOf(P.m.from)>=0)tgt={sq:R.m.to,how:"path"};
+        if(!tgt){attacksFrom(B2,R.m.to).forEach(s=>{if(tgt||!B2[s]||B2[s].c!==me||(B2[s].t!=="k"&&VAL[B2[s].t]<3))return;const bt=between(R.m.to,s);if(bt&&bt.indexOf(P.m.from)>=0)tgt={sq:s,how:"line"}})}
+        if(tgt){
+          const hits=attacksFrom(B2,R.m.to).filter(s=>B2[s]&&B2[s].c===me&&(B2[s].t==="k"||VAL[B2[s].t]>=3)).map(s=>(B2[s].t==="k"?"your king":"your "+NAME[B2[s].t])+" on "+s);
+          const lineName=R.m.from[0]===R.m.to[0]?"the "+R.m.from[0]+"-file":R.m.from[1]===R.m.to[1]?"rank "+R.m.from[1]:"the diagonal";
+          return set("blocker","C","Your "+mover+" on "+P.m.from+" was the piece blocking "+lineName+" between their "+NAME[R.m.piece]+" on "+R.m.from+" and "+(tgt.how==="path"&&B1[R.m.to]?"your "+NAME[B1[R.m.to].t]+" on "+R.m.to:tgt.sq)+". "+ps+" moved it away, so "+rs+(R.check?" comes with check":"")+(hits.length?" and hits "+list(hits):"")+".",
+            {label:"A blocker on a line",say:"Your "+mover+" on "+P.m.from+" stood between their "+NAME[R.m.piece]+" on "+R.m.from+" and your camp. A blocker may only leave when nothing behind it can be hit."},
+            "Before a piece leaves its square, check what it was shielding.","Before "+ps+", look along "+lineName+" through "+P.m.from+": their "+NAME[R.m.piece]+" on "+R.m.from+" is waiting behind your "+mover+". Keep the "+mover+" there, or move the targets first"+(bs?" ("+bs+" does that)":"")+".",
+            "Ask of every candidate move: which line does this piece open when it leaves? Then calculate their capture or check down that line."+(bs?" "+bs+" passes that test.":""))}
+      }
+      /* 4. their threat was already there and the move ignored it */
+      if(R&&th&&String(th.uci).slice(0,4)===R.m.from+R.m.to)
+        return set("ignoredThreat","M",(opp?opp.san+" set up "+th.san+". ":"Their threat was "+th.san+". ")+ps+" did nothing about it, and "+rs+" came anyway.",
+          {label:"Their last move made a threat",say:(opp?opp.san+" ":"Their position ")+"aimed at "+th.text.replace(/^\S+ would /,"")+"."},
+          "After every move of theirs, name their threat before I think about my own plan.","When they moved, ask “what do they want to play next?” Here the answer was "+th.san+". Stop it first"+(bs?" ("+bs+")":"")+", then go on with your plan.",
+          (bs?bs+" deals with "+th.san+". ":"")+"A human finds it by asking the M question first: what does their last move threaten?")
+      /* 5. a defender walked away */
+      if(R&&R.m.captured&&B0[R.m.to]&&B0[R.m.to].c===me&&attacksFrom(B0,P.m.from).indexOf(R.m.to)>=0&&attacksFrom(B1,P.m.to).indexOf(R.m.to)<0){
+        const left=attackers(B1,R.m.to,me).length;
+        return set("leftDefence","S","Your "+mover+" on "+P.m.from+" was "+(left?"one of the defenders":"the only defender")+" of your "+NAME[R.m.captured]+" on "+R.m.to+". "+ps+" took it away, and "+rs+" wins it.",
+          {label:"A defender with a job",say:"The "+mover+" on "+P.m.from+" was guarding the "+NAME[R.m.captured]+" on "+R.m.to+". A piece with a job cannot just leave."},
+          "Before I move a piece, name what it defends.","Before "+ps+", ask: what does my "+mover+" defend right now? The "+NAME[R.m.captured]+" on "+R.m.to+". Who defends it after my move? "+(left?"Not enough.":"Nobody.")+" Then pick another move"+(bs?" ("+bs+")":"")+".",
+          "Make a quick list of your loose pieces after each candidate move."+(bs?" After "+bs+" nothing of yours hangs.":""))}
+      /* 6. the moved piece itself was left en prise */
+      if(R&&R.m.captured&&R.m.to===P.m.to){
+        const att=attackers(B1,P.m.to,them).length,def=attackers(B1,P.m.to,me).length;
+        return set("hanging","C",ps+" put the "+mover+" on "+P.m.to+", where "+(def?"it is attacked "+att+" time"+(att===1?"":"s")+" and defended "+def+" time"+(def===1?"":"s")+" by more valuable pieces":"it has no defender")+". "+rs+" takes it.",
+          {label:"A square they control",say:P.m.to+" was covered by "+att+" of their piece"+(att===1?"":"s")+(def?" and only "+def+" of yours":" and none of yours")+"."},
+          "Before I put a piece on a square, count its attackers and defenders.","Before "+ps+", count on "+P.m.to+": "+att+" attacker"+(att===1?"":"s")+" against "+def+" defender"+(def===1?"":"s")+". With fewer defenders, choose another square"+(bs?" ("+bs+")":"")+".",
+          "Count attackers and defenders on the target square of every candidate move.")}
+      /* 7. the reply hits two things at once */
+      if(R&&B2){
+        const hits=attacksFrom(B2,R.m.to).filter(s=>B2[s]&&B2[s].c===me&&(B2[s].t==="k"||VAL[B2[s].t]>VAL[R.m.piece]||!attackers(B2,s,me).length));
+        if(hits.length>=2&&hits.some(s=>B2[s].t==="k"||VAL[B2[s].t]>=3)){const names=hits.map(s=>(B2[s].t==="k"?"your king":"your "+NAME[B2[s].t])+" on "+s);
+          return set("doubleAttack","C","After "+ps+", "+rs+" hits "+list(names)+" at once"+(R.check?" (with check)":"")+". One of them falls.",
+            {label:"Two targets for one piece",say:list(names.map(x=>x.replace(/^your /,"")))+" stood where one "+NAME[R.m.piece]+" on "+R.m.to+" could reach both."},
+            "After my move, check every square from which one of their pieces hits two of mine.","Before "+ps+", ask what their most forcing reply is: "+rs+" hits two of your pieces at once. Move one of the targets, or take control of "+R.m.to+" first"+(bs?" ("+bs+")":"")+".",
+            "For each candidate move, look one move deeper at their checks, captures and attacks on two pieces."+(bs?" After "+bs+" no such double attack exists.":""))}
+      }
+      /* 8. a forcing move was missed */
+      if(Bm){const bf=moveFacts(fen,r.bestUci,me),sf=solutionFacts(fen,[r.bestUci],me);
+        const win=Bm.m.captured&&(!attackers(B0,Bm.m.to,them).length||VAL[Bm.m.captured]>VAL[Bm.m.piece]);
+        if(win||Bm.check||(sf&&sf.motif==="double attack")||(bf&&bf.facts.some(x=>x.k==="threat"||x.k==="line"))){
+          const what=sf&&sf.motif==="double attack"?sf.text:bs+": "+(factText(bf,2)||"a forcing move");
+          const cc=cca(fen);
+          return set("missedTactic","P","You had a forcing move: "+what+" "+ps+" is quieter and lets them off the hook.",
+            {label:win?"A loose piece on their side":"A forcing move is available",say:win?"Their "+NAME[Bm.m.captured]+" on "+Bm.m.to+" could be won.":"You had "+cc.checks.length+" check"+(cc.checks.length===1?"":"s")+" and "+cc.wins.length+" winning capture"+(cc.wins.length===1?"":"s")+" here."},
+            "Before a quiet move, list my checks, captures and threats.","Before "+ps+", go through your checks and captures one by one: "+bs+" was among them"+(win?" and it wins material":"")+".",
+            "Scan forcing moves first: "+(cc.checks.length?"checks "+cc.checks.slice(0,3).join(", ")+"; ":"")+(cc.wins.length?"captures "+cc.wins.slice(0,3).join(", "):"captures that win something")+". "+bs+" is the one that works.")}
+      }
+      /* 9. positional: compare what the better move does with what the played move does */
+      const bfx=Bm?moveFacts(fen,r.bestUci,me):null,pfx=moveFacts(fen,pu,me);
+      const kf=bfx&&bfx.facts.filter(x=>/king|file|opened|passed|threat|capture/.test(x.k))[0];
+      let mob="";if(Bm){const m0=mobility(fen,Bm.m.from),m1=mobility(Bm.after,Bm.m.to);if(m1>=m0+3)mob="It brings the "+NAME[Bm.m.piece]+" from "+m0+" to "+m1+" squares."}
+      const shield=pfx&&pfx.facts.filter(x=>x.k==="shield"||x.k==="undefend"||x.k==="hang")[0];
+      const lc=t=>String(t||"").replace(/^It /,"it ");
+      const reason=shield?shield.t:kf?bs+" was better: "+lc(kf.t):mob?bs+" was better. "+mob:bs?bs+" was better: "+(lc(factText(bfx,1))||"it keeps your pieces working together."):"Another move was better.";
+      return set("positional","S","No tactic punishes "+ps+" at once, but it gives something away. "+reason+(rs?" After "+ps+", "+rs+" improves their position.":""),
+        shield?{label:"A move that weakens your camp",say:shield.t}:kf?{label:"Where the play is",say:kf.t}:mob?{label:"A passive piece",say:"Your "+NAME[Bm.m.piece]+" on "+Bm.m.from+" had only "+mobility(fen,Bm.m.from)+" squares."}:{label:"No forcing move on either side",say:"Nothing hangs and no check works: the game is about improving pieces."},
+        shield?"Before a pawn or piece move near my king, ask what it weakens.":mob?"In quiet positions, improve my worst piece first.":"In quiet positions, compare two candidate moves before I play.",
+        shield?"Before "+ps+", ask what it gives up: "+shield.t.replace(/^It /,"it ")+(bs?" "+bs+" keeps everything protected.":""):mob?"Ask “which piece is doing the least?”. Here: the "+NAME[Bm.m.piece]+" on "+Bm.m.from+". "+bs+" activates it.":"Pick two candidate moves and compare them on one question: which piece improves?"+(bs?" "+bs+" wins that comparison.":""),
+        bs?"Compare "+ps+" with "+bs+": "+(kf?lc(kf.t):mob?lc(mob):lc(factText(bfx,1))||"which one improves a piece without giving anything away?"):"");
+    }catch(e){return null}
+  }
   function explain(r){
     const me=r.color||(String(r.fen).split(" ")[1]||"w"),out={k:"S",M:"",S:"",P:"",C:"",next:""};
     try{
@@ -207,6 +339,8 @@ const LC83=(()=>{
         out.next=NEXT_PLAN;
       }
     }catch(e){out.M=out.M||"Look at what their last move changed.";out.next=NEXT[out.k]}
+    /* 9.56.0: the concrete diagnosis wins over the stock lines (letter, alarm, how to find the move, the next-game step) */
+    try{const d=diagnose(r);if(d){out.diag=d;out.k=d.k;if(d.why)out.M=d.why;out.S=d.alarm.label+": "+d.alarm.say;if(d.find)out.P=d.find;if(d.error)out.C=d.error;out.next=d.action;out.plan=d.id==="positional"}}catch(e){}
     return out;
   }
   /* one sentence about a move for the "M" step when only the position after it is known (no fen before it) */
@@ -354,6 +488,6 @@ const LC83=(()=>{
     ["pointerdown","keydown","touchstart"].forEach(n=>document.addEventListener(n,()=>{gestAt=Date.now()},true));
     setTimeout(iabBar,1500);
   }
-  return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,solutionFacts:solutionFacts,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
+  return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,solutionFacts:solutionFacts,diagnose:diagnose,threatOf:threatOf,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
     NEXT:NEXT,inApp:inApp,intentUrl:intentUrl,allow:allow,keepBoard:keepBoard,_t:{held:()=>held,release:release,iabBar:iabBar,blocked:blocked,gap:()=>autoAt,touch:t=>{gestAt=t==null?Date.now():t},reset:()=>{autoAt=0;held=[];clearTimeout(relT)}},version:VERSION};
 })(); /*@@end lc83*/

@@ -1265,6 +1265,12 @@
   function hdr(pgn){const h={};String(pgn||"").replace(/\[(\w+)\s+"([^"]*)"\]/g,(m,k,v)=>{h[k]=v;return m});return h}
   function socratic(g,it,c){
     const fen=g.fens[it.i],prev=it.i>0?g.moves[it.i-1]:null,out=[];
+    if(c.diag){const d=c.diag;   /* 9.56.0: four questions answered for THIS position */
+      if(prev)out.push(["M","Why did they play "+prev.san+"?",d.why]);
+      out.push(["S","Which Alarm Signal should have gone off?",d.alarm.label+": "+d.alarm.say]);
+      out.push(["P","How does a human find "+(it.bestSan||"the better move")+"?",d.find||"Compare your candidate moves on what they leave behind."]);
+      out.push(["C","What does "+it.san+" allow?",d.error]);
+      return out}
     if(prev){
       /* 9.43.0: only facts. A move "attacks" a piece only when that piece can be won (no defender, or a cheaper attacker): LC83 when loaded */
       let said="";
@@ -1362,12 +1368,18 @@
     }catch(e){if(!AI.cancel)status(e.message||"The analysis failed.",true);AI.busy=false;return}
     AI.busy=false;paintAi();status("");findSimilar();cloudEval();
   }
+  /* 9.56.0: the diagnosis of THIS mistake (LC83.diagnose: the board, Stockfish's better move and refutation, their last move and threat) */
+  function diagOf(g,it){
+    try{if(typeof LC83==="undefined"||!LC83.diagnose)return null;const m=g.moves[it.i],pm=it.i>0?g.moves[it.i-1]:null;if(!m)return null;
+      return LC83.diagnose({fen:g.fens[it.i],color:it.color,played:{from:m.from,to:m.to,promotion:m.promotion||"q",san:m.san},bestUci:it.best||"",replyUci:it.reply||"",
+        prevFen:it.i>0?g.fens[it.i-1]:null,oppUci:pm&&pm.from?pm.from+pm.to+(pm.promotion||""):null,threatUci:it.threat&&it.threat.best||""})}catch(e){return null}
+  }
   function makeCase(g,it){
-    const fen=g.fens[it.i],color=it.color;
-    const letter=it.k&&LN[it.k]?it.k:(it.cls==="blunder"?"M":"S"),al=pickAlarm(fen,color,letter),motif=motifOf(g,it);
-    let action="";try{action=LC64.actionOf(al&&al.id,letter)}catch(e){action=""}if(!action||action===WP[letter])action=MACT[motif.id]||MACT.plan;
+    const fen=g.fens[it.i],color=it.color,dg=diagOf(g,it);
+    const letter=dg?dg.k:it.k&&LN[it.k]?it.k:(it.cls==="blunder"?"M":"S"),al=dg?{id:dg.id,label:dg.alarm.label,say:dg.alarm.say}:pickAlarm(fen,color,letter),motif=motifOf(g,it);
+    let action="";if(dg)action=dg.action;else{try{action=LC64.actionOf(al&&al.id,letter)}catch(e){action=""}if(!action||action===WP[letter])action=MACT[motif.id]||MACT.plan}
     const h=g.headers||{},rating=+(color==="w"?h.WhiteElo:h.BlackElo)||0;
-    const c={it:it,fen:fen,color:color,letter:letter,alarm:al,motif:motif,wp:WP[letter],action:action,rating:rating,student:color==="w"?(h.White||"White"):(h.Black||"Black"),
+    const c={it:it,fen:fen,color:color,letter:letter,alarm:al,motif:motif,wp:dg?dg.wp.text:WP[letter],action:action,diag:dg,error:dg?dg.error:"",rating:rating,student:color==="w"?(h.White||"White"):(h.Black||"Black"),
       opp:color==="w"?(h.Black||"Black"):(h.White||"White"),start:Math.max(1,(it.num||Math.ceil((it.i+1)/2))-3)};
     c.qs=socratic(g,it,c);c.pgn=trimmedPgn(g,it);c.change=boardChange(g,it);
     return c;
@@ -1401,7 +1413,8 @@
       +'</div><div class="lc79-row"><button type="button" class="lc79-b gold" data-a="mkall">Make a project for every mistake ('+AI.list.filter(x=>!projectFor(key,x.i)).length+' new)</button><button type="button" class="lc79-b sm" data-a="toprojects">Open Projects</button></div></section>';
     h+='<section class="lc79-sec" aria-labelledby="lc79-s2"><h3 id="lc79-s2">3. '+esc(mvLabel(it))+' in detail</h3><div class="lc79-case"><div>'+boardSVG(c.fen,c.color,arr)+'<p class="lc79-hint" style="margin:6px 0 0">Red: the move played. Blue: the better move. '+esc(c.student)+' ('+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+').</p></div><div class="lc79-facts">'
       +'<div class="lc79-fact mo"><b>'+esc(mv+it.san)+(it.cls==="blunder"?"??":"?")+'</b>'+(it.bestSan?' Better: <b>'+esc(it.bestSan)+'</b>.':'')+' It cost about '+loss+'% win chance.</div>'
-      +(c.change&&c.change.length?'<div class="lc79-fact mo"><b>What it changed:</b> '+esc(c.change.join(" "))+'</div>':'')+'<div class="lc79-fact mo"><b>Motif: '+esc(c.motif.label)+'.</b> '+esc(c.motif.text)+'</div>'
+      +(c.error?'<div class="lc79-fact mo"><b>What went wrong:</b> '+esc(c.error)+'</div>':c.change&&c.change.length?'<div class="lc79-fact mo"><b>What it changed:</b> '+esc(c.change.join(" "))+'</div>':'')+'<div class="lc79-fact mo"><b>Motif: '+esc(c.motif.label)+'.</b> '+esc(c.motif.text)+'</div>'
+      +(c.diag&&c.diag.why?'<div class="lc79-fact"><b>Their last move:</b> '+esc(c.diag.why)+'</div>':'')
       +'<div class="lc79-fact al"><b>Alarm Signal:</b> '+(c.alarm?esc(c.alarm.label)+". "+esc(c.alarm.say):"none of the standard alarms; the error came from skipping an MSPC step.")+'</div>'
       +'<div class="lc79-fact wp"><b>Working Point ('+LN[c.letter]+'):</b> '+esc(c.wp)+'</div>'
       +'<div class="lc79-fact"><b>Action Step:</b> '+esc(c.action)+'</div>'
@@ -1488,6 +1501,8 @@
 "- Alarm Signal: "+(c.alarm?c.alarm.label+". "+c.alarm.say:"none of the standard alarms; the error came from skipping an MSPC step."),
 "- Working Point ("+LN[c.letter]+"): "+c.wp,
 "- Action Step: "+c.action,
+(c.error?"- What went wrong: "+c.error:null),
+(c.diag&&c.diag.find?"- How a human finds the better move: "+c.diag.find:null),
 "",
 "LICHESS SIMILAR POSITION",
 (s?"- Puzzle: "+s.id+" (rating "+s.rating+", themes "+s.themes.slice(0,6).join(", ")+"), https://lichess.org/training/"+s.id:"- Puzzle: none found right now (same motif: "+c.motif.label+")"),
