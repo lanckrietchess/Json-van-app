@@ -16,6 +16,13 @@ const LC42=(()=>{
   const admin=()=>{try{return !!Admin.active}catch(e){return false}};
   const hashNow=()=>{let h="";try{h=decodeURIComponent((location.hash||"").replace(/^#/,"")).toLowerCase()}catch(e){h=""}return h.split("/")[0].split("?")[0]};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  /* 9.59.0: a mate score is not "99.6 pawns". Engine.toCp turns a mate into +-(10000 - 10 per move): say what it means instead. */
+  const MATE=9000,pw=x=>(Math.round(Math.abs(+x||0)/10)/10).toFixed(1);
+  const evalWords=cp=>{cp=+cp||0;return cp>=MATE?"winning by force (a checkmate was there)":cp<=-MATE?"getting checkmated":cp>=0?"about "+pw(cp)+" pawns better":"about "+pw(cp)+" pawns worse"};
+  const costLine=(r,you)=>{const a=+r.after||0,b=+r.before||0,rs=String(r.replySan||"");
+    if(a<=-MATE)return /#$/.test(rs)?"It allowed checkmate: "+rs+".":"It allowed a forced checkmate.";
+    if(b>=MATE)return "It let a forced checkmate slip away.";
+    return "It cost "+(you?"you ":"")+"about "+pw(r.loss)+" pawns.";};
   const KEY="lc42-onb",KG="lc42-games",XP=100;
   const NAMES={M:"Move",S:"Specifics",P:"Priorities",C:"Calculation"};
   const WHY={M:"You miss what your opponent just threatened or changed on the board.",S:"You overlook loose pieces, weak squares or the structure.",P:"You skip checks, captures and attacks before you decide.",C:"Your calculation stops early or misses their best reply."};
@@ -149,10 +156,9 @@ const LC42=(()=>{
   }
   function card(el,g,r){
     const w=g.color==="w",fen=r.fen,best=r.bestUci||"",bestSan=r.bestSan||"the best move",ps=r.played.san,y=why(r);
-    const pawns=x=>(Math.round(x/10)/10).toFixed(1);
     el.innerHTML='<div class="lc52-card">'
       +'<p class="lc52-kick">Your first quick win · move '+r.no+'</p>'
-      +'<h3 class="lc52-h">You played <b>'+E(ps)+'</b>. It cost you about '+pawns(r.loss)+' pawns.</h3>'
+      +'<h3 class="lc52-h">You played <b>'+E(ps)+'</b>. '+E(costLine(r,true))+'</h3>'
       +'<p class="lc52-lead">What were you thinking here? Look at the position, then move a piece on the board to try a better move.'+(r.oppLast?' Your opponent had just played <b>'+E(r.oppLast)+'</b>.':'')+'</p>'
       +'<div class="lc52-boardwrap"><div data-lc42-board class="lc25-pb lc52-board"></div></div>'
       +'<p data-lc42-fb aria-live="polite" class="lc52-fb"></p>'
@@ -166,7 +172,7 @@ const LC42=(()=>{
       /* 9.56.0: THIS mistake, read from the board and Stockfish (LC83.diagnose); the stock lines are only the fallback */
       let dg=null;try{dg=LC83.diagnose({fen:fen,color:g.color,played:r.played,bestUci:r.bestUci,replyUci:r.replyUci})}catch(e){dg=null}
       box.innerHTML='<h4>What went wrong</h4><p>'+E(dg&&dg.error||y.d)+'</p>'
-        +'<h4>The better move: '+E(bestSan)+'</h4><p>'+E(bestSan)+' '+bk+'. Before your move you were about '+pawns(r.before)+' pawns better; after '+E(ps)+' you were about '+pawns(r.after)+'.</p>'
+        +'<h4>The better move: '+E(bestSan)+'</h4><p>'+E(bestSan)+' '+bk+'. Before your move you were '+E(evalWords(r.before))+'; after '+E(ps)+' you were '+E(evalWords(r.after))+'.</p>'
         +'<h4>How you could have found it</h4><p>'+E(dg&&dg.find||THINKK[y.k])+'</p>'
         +'<p class="lc52-next"><b>In your next game:</b> '+E(dg?dg.action:NEXTK[y.k])+'</p>'+(()=>{try{return LC61.tail({fen:fen,color:g.color,k:dg?dg.k:y.k,why:y.d,ps:ps,diag:dg})}catch(e){return""}})();
       box.hidden=false;
@@ -323,7 +329,7 @@ const LC42=(()=>{
   const LETTER={M:"Move",S:"Specifics",P:"Priorities",C:"Calculation"};
   function mPaint(soft){
     if(!MR)return;const el=MR.el,s=st(),m=s.m,g=MR.g;if(!m||!el.isConnected)return;
-    const n=m.list.length,pawns=x=>(Math.round(Math.abs(x)/10)/10).toFixed(1);
+    const n=m.list.length;
     if(m.idx>=n){
       if(!m.fin){                                   /* the next mistake is still being looked for */
         MR.waiting=true;
@@ -348,7 +354,7 @@ const LC42=(()=>{
     const row=(k,txt)=>txt?'<li class="lc42-ml'+(X.k===k?" is-k":"")+'"><b>'+k+' · '+LETTER[k]+'</b>'+(X.k===k?' <span class="lc42-here">this is where it went wrong</span>':"")+'<p>'+E(txt)+'</p></li>':"";
     el.innerHTML='<div class="lc42-m">'
       +'<p class="lc52-kick">Mistake '+(m.idx+1)+(m.fin?" of "+n:"")+' · move '+r.no+'</p>'
-      +'<h3 class="lc52-h">You played <b>'+E(r.played.san)+'</b>. It cost about '+pawns(r.loss)+' pawns.</h3>'
+      +'<h3 class="lc52-h">You played <b>'+E(r.played.san)+'</b>. '+E(costLine(r))+'</h3>'
       +'<div class="lc52-boardwrap"><div data-lc42-mb class="lc25-pb lc52-board"></div></div>'
       +'<p class="small muted lc42-leg"><span class="lc42-red">Red</span> your move · <span class="lc42-blue">Blue</span> the better move'+(r.oppSan?' · their last move '+E(r.oppSan)+' is highlighted':'')+'</p>'
       +'<ol class="lc42-mspc">'+row("M",X.M)+row("S",X.S)+row("P",X.P)+row("C",X.C)+'</ol>'

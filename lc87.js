@@ -1,7 +1,7 @@
 /*@@module lc87*/
 (function(){
   "use strict";
-  /* LC87 (build 9.47.0, soft since 9.58.0): the in-app browser helper. Instagram, TikTok, Facebook, Messenger, Snapchat, X, LinkedIn, Pinterest
+  /* LC87 (build 9.47.0, soft since 9.58.0, 9.59.0: no Google button in an in-app browser): the in-app browser helper. Instagram, TikTok, Facebook, Messenger, Snapchat, X, LinkedIn, Pinterest
      and LINE open links in their own browser, and those browsers cannot install a web app. This script runs first, in the <head> of BOTH the
      landing page (index.html) and the app (app.html), with the same text.
      9.58.0, value first: nothing is blocked any more. In such a browser the landing page and the app work as normal (window.__lcIab = "soft",
@@ -18,7 +18,7 @@
      as soon as Chrome offers its prompt again, which Chrome only does when the app is NOT installed; it also runs out after 60 days without a launch). Android and desktop Chrome share
      that storage between the browser and the installed app, so the landing page can say "Open the app" instead of a dead Install button.
      LC87.installed(), LC87.bip(), LC87.standalone(), LC87.gate(), LC87.out(url). */
-  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.58.0";
+  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.59.0";
   var RE=/FBAN|FBAV|FB_IAB|FBIOS|FB4A|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|trill_|Snapchat|Twitter|LinkedInApp|Pinterest|Line\//i;
   function isIab(ua){return RE.test(String(ua||""))}
   function appOf(ua){ua=String(ua||"");return/Instagram/i.test(ua)?"Instagram":/TikTok|musical_ly|Bytedance|trill_/i.test(ua)?"TikTok":/FBAN|FBAV|FB_IAB|FBIOS|FB4A/i.test(ua)?"Facebook":/Snapchat/i.test(ua)?"Snapchat":/Twitter/i.test(ua)?"X":/LinkedIn/i.test(ua)?"LinkedIn":/Pinterest/i.test(ua)?"Pinterest":/Line\//i.test(ua)?"LINE":"this app"}
@@ -48,7 +48,9 @@
   if(!on)return;
   W.__lcIab="soft";
   var H=D.documentElement;H.classList.add("lc-iab");
-  var css="#lc87{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));background:rgba(15,23,42,.96);color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;overflow-y:auto}"
+  /* 9.59.0: Google refuses sign-in inside in-app browsers ("disallowed_useragent"), so its button is hidden here; the e-mail code works */
+  var css="html.lc-iab [data-lc39-google],html.lc-iab .lc39-or{display:none!important}"
+    +"#lc87{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));background:rgba(15,23,42,.96);color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;overflow-y:auto}"
     +"#lc87[hidden]{display:none}"
     +"#lc87 .b{position:relative;width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px;padding:22px 18px;border-radius:20px;background:radial-gradient(120% 80% at 50% 0%,#14304a 0%,#0f172a 60%);border:1px solid rgba(148,163,184,.22);box-sizing:border-box}"
     +"#lc87 img{width:64px;height:64px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.45)}"

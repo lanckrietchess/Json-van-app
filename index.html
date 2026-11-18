@@ -4,7 +4,7 @@
 <script>/*@@module lc87*/
 (function(){
   "use strict";
-  /* LC87 (build 9.47.0, soft since 9.58.0): the in-app browser helper. Instagram, TikTok, Facebook, Messenger, Snapchat, X, LinkedIn, Pinterest
+  /* LC87 (build 9.47.0, soft since 9.58.0, 9.59.0: no Google button in an in-app browser): the in-app browser helper. Instagram, TikTok, Facebook, Messenger, Snapchat, X, LinkedIn, Pinterest
      and LINE open links in their own browser, and those browsers cannot install a web app. This script runs first, in the <head> of BOTH the
      landing page (index.html) and the app (app.html), with the same text.
      9.58.0, value first: nothing is blocked any more. In such a browser the landing page and the app work as normal (window.__lcIab = "soft",
@@ -21,7 +21,7 @@
      as soon as Chrome offers its prompt again, which Chrome only does when the app is NOT installed; it also runs out after 60 days without a launch). Android and desktop Chrome share
      that storage between the browser and the installed app, so the landing page can say "Open the app" instead of a dead Install button.
      LC87.installed(), LC87.bip(), LC87.standalone(), LC87.gate(), LC87.out(url). */
-  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.58.0";
+  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.59.0";
   var RE=/FBAN|FBAV|FB_IAB|FBIOS|FB4A|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|trill_|Snapchat|Twitter|LinkedInApp|Pinterest|Line\//i;
   function isIab(ua){return RE.test(String(ua||""))}
   function appOf(ua){ua=String(ua||"");return/Instagram/i.test(ua)?"Instagram":/TikTok|musical_ly|Bytedance|trill_/i.test(ua)?"TikTok":/FBAN|FBAV|FB_IAB|FBIOS|FB4A/i.test(ua)?"Facebook":/Snapchat/i.test(ua)?"Snapchat":/Twitter/i.test(ua)?"X":/LinkedIn/i.test(ua)?"LinkedIn":/Pinterest/i.test(ua)?"Pinterest":/Line\//i.test(ua)?"LINE":"this app"}
@@ -51,7 +51,9 @@
   if(!on)return;
   W.__lcIab="soft";
   var H=D.documentElement;H.classList.add("lc-iab");
-  var css="#lc87{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));background:rgba(15,23,42,.96);color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;overflow-y:auto}"
+  /* 9.59.0: Google refuses sign-in inside in-app browsers ("disallowed_useragent"), so its button is hidden here; the e-mail code works */
+  var css="html.lc-iab [data-lc39-google],html.lc-iab .lc39-or{display:none!important}"
+    +"#lc87{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));background:rgba(15,23,42,.96);color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;overflow-y:auto}"
     +"#lc87[hidden]{display:none}"
     +"#lc87 .b{position:relative;width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px;padding:22px 18px;border-radius:20px;background:radial-gradient(120% 80% at 50% 0%,#14304a 0%,#0f172a 60%);border:1px solid rgba(148,163,184,.22);box-sizing:border-box}"
     +"#lc87 img{width:64px;height:64px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.45)}"
@@ -127,15 +129,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.58.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.59.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.58.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.58.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.59.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.59.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.58.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.59.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -275,6 +277,17 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .mission-band h1.mission{margin:0;font-size:clamp(1.45rem,4.2vw,2.5rem)}
 .mission-band .mcount{margin:0;min-width:230px;max-width:320px;background:rgba(15,23,42,.6);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
 @media (max-width:760px){.mission-band .mb-in{grid-template-columns:1fr}.mission-band .mcount{max-width:none;min-width:0}}
+/* 9.59.0 LC94 quick start: the name in, straight to the first mistake (no install, no account, no question first) */
+.qs{grid-column:1/-1;margin:2px 0 0;padding:14px;border-radius:16px;background:rgba(15,23,42,.72);border:1px solid rgba(56,189,248,.45);max-width:620px}
+.qs .qs-h{margin:0 0 8px;font-weight:800;font-size:1.06rem;color:#fff}
+.qs .qs-row{display:flex;gap:8px;align-items:stretch}
+.qs .qs-row input{flex:1;min-width:0;margin:0;min-height:52px;font-size:max(16px,1em)}
+.qs .qs-row .btn{min-height:52px;margin:0;white-space:nowrap}
+.qs .qs-f{margin:8px 0 0;font-size:.9rem;color:var(--mute,#94a3b8);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.qs .qs-sw{background:none;border:0;padding:6px 0;min-height:36px;color:var(--blue);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.qs .qs-msg{margin:6px 0 0;color:#fda4af;font-size:.9rem;min-height:0}
+@media (max-width:420px){.qs .qs-row{flex-direction:column}.qs .qs-row .btn{width:100%}}
+@media (max-width:760px){.mission-band h1.mission{order:1}.mission-band .qs{order:2}.mission-band .mcount{order:3}}
 .hero .hook{font-size:clamp(1.5rem,4.6vw,2.4rem);margin:0 0 .4rem}
 .tt-flow{display:grid;grid-template-columns:1.45fr 1fr 1fr;gap:16px;margin-top:22px}
 @media (max-width:900px){.tt-flow{grid-template-columns:1fr}}
@@ -362,6 +375,12 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   <div class="wrap mb-in">
     <h1 data-cms="mission.1" id="h-hero" class="mission" data-lc-key="hero_title">My goal is to save <span style="color:var(--blue)">20,000 people</span> out of the lies and chaos by the end of 2027.</h1>
     <div class="mcount" id="mcount" role="status" aria-live="polite"><div class="mc-top"><b id="mc-n">…</b><span id="mc-t">of 20,000 players have started</span></div><div class="bar" aria-hidden="true"><i id="mc-bar" style="width:1%"></i></div></div>
+    <form class="qs" id="lc94-qs" data-cms-box="quick" novalidate autocomplete="off">
+      <p data-cms="quick.1" class="qs-h">See the move that cost you the most. Free, 30 seconds.</p>
+      <div class="qs-row"><input name="u" type="text" inputmode="text" autocapitalize="off" spellcheck="false" maxlength="80" placeholder="Your Chess.com username" aria-label="Your Chess.com or Lichess username"><button data-cms="quick.2" class="btn primary big" type="submit">Show me</button></div>
+      <p class="qs-msg" data-qs-msg role="status" aria-live="polite"></p>
+      <p class="qs-f"><span data-cms="quick.3">No account, no download. I read your latest game on your own device.</span><button type="button" class="qs-sw" data-qs-site>I play on Lichess</button></p>
+    </form>
   </div>
 </section>
 <section data-cms-sec="story" class="hero" aria-labelledby="h-story">
@@ -582,7 +601,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p data-cms="foot.1"><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p data-cms="foot.2"><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.58.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.59.0</p></footer>
 <button type="button" class="lc72-edit" id="lc89-edit" hidden>✎ Edit this page</button>
 <script>
 /*@@module lc89*/
@@ -1169,7 +1188,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   syncLabels();
 
   /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
-  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.58.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.59.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -1541,7 +1560,7 @@ const LC94=(()=>{
         (LC42.begin -> LC50 scans the latest game on the device with Stockfish). The parameters leave the address bar so a reload does not restart it.
      4. In an Instagram / TikTok / Facebook browser (LC87 soft mode) one LC88 step after the first review: "Keep this review", which opens the same
         game in Chrome / Safari (the in-app browser keeps nothing once it is closed). */
-  const W=window,D=document,VERSION="9.58.0";
+  const W=window,D=document,VERSION="9.59.0";
   const STEPS=["landing","iab_open","first_open","name_entered","first_review_done","signed_in","install","day2_return","paywall_seen","checkout_started","paid"];
   const K_DONE="lc94-done",K_SRC="lc94-src",K_FIRST="lc94-first",K_DEEP="lc94-deep",K_IABX="lc94-iab-x",K_DEV="lc-hub-device";
   const NAME=/^[A-Za-z0-9_-]{2,30}$/,DEV_RE=/^d-[a-z0-9]{12,40}$/;
@@ -1575,7 +1594,7 @@ const LC94=(()=>{
   /* the platform a source names, for the app's own "How did you find us?" answer (LC30) */
   function platformOf(s){
     s=String(s||"");
-    return/^(mc_)?(ig|insta)/.test(s)?"instagram":/^(mc_)?(tt|tk|tiktok)/.test(s)?"tiktok":/^(mc_)?(yt|youtube)/.test(s)?"youtube":/^(mc_)?(fb|facebook)/.test(s)?"facebook":/^(mc_)?(x|tw)([_.-]|$)/.test(s)?"x":"";
+    return/^(mc_)?(ig|insta)/.test(s)?"instagram":/^(mc_)?(tt|tk|tiktok)/.test(s)?"tiktok":/^(mc_)?(yt|youtube)/.test(s)?"youtube":/^(mc_)?(fb|facebook)/.test(s)?"facebook":/^(mc_)?(x|tw)([_.-]|p$|$)/.test(s)?"x":"";
   }
 
   /* ---------- the funnel ---------- */
@@ -1620,6 +1639,15 @@ const LC94=(()=>{
     }catch(e){}
   }
   const trimCount=()=>{try{const s=Store.get("lc-hub-trim-stats-v1",{})||{};return Object.keys(s.games||{}).length}catch(e){return 0}};
+  /* 9.59.0: "How did you find this app?" is not asked when the link already says it (?src=ig_bio, ?src=mc_ig, an LC73 short link).
+     LC30 then opens straight on "Connect your Chess.com or Lichess account": one question less before the first review. */
+  function attrFromSource(){
+    try{
+      const pl=platformOf(src());
+      if(pl&&typeof LC30!=="undefined"&&LC30.attribution&&!(LC30.state()||{}).attr)return LC30.attribution.save({source:"social",detail:pl,creator:LC30.attribution.DEFAULT_CREATOR});
+    }catch(e){}
+    return false;
+  }
   /* called by boot() right before the first-run sheet would open. true = the deep link took over (no first-run sheet). */
   function deepStart(){
     const d=ssGet(K_DEEP);if(!d||!NAME.test(d.u||""))return false;
@@ -1636,8 +1664,10 @@ const LC94=(()=>{
       }
       const pl=platformOf(src());
       try{if(!Store.get("lc80-onb",null))Store.set("lc80-onb",{done:true,at:Date.now(),platform:pl,code:"",creator:"",mspc:"",pain:"",v:"8.0",via:"deeplink"})}catch(e){}
-      try{if(pl&&typeof LC30!=="undefined"&&LC30.attribution&&!(LC30.state()||{}).attr)LC30.attribution.save({source:"social",detail:pl})}catch(e){}
+      attrFromSource();
       try{if(typeof LC50!=="undefined")LC50.pre.start(d.site,d.u)}catch(e){}
+      /* 9.59.0: the rating too, like LC30's Connect does (the Learn page's "Active ELO" and the coach's level read it) */
+      try{if(typeof Elo!=="undefined"&&Elo.fetchProfile)Elo.fetchProfile(d.site,d.u).then(pr=>{const r=pr&&(pr.rapid||pr.blitz||pr.bullet);if(r&&typeof App!=="undefined"&&!(App.profile||{}).elo){App.profile=Object.assign({},App.profile,{elo:r});try{App.save()}catch(e){}}}).catch(()=>{})}catch(e){}
       setTimeout(()=>{try{if(typeof LC42!=="undefined"&&LC42.begin(d.site==="lichess"?{li:d.u}:{cc:d.u}))step("name_entered")}catch(e){console.error("lc94 deep",e)}},600);
       return true;
     }catch(e){console.error("lc94 deep",e);return false}
@@ -1664,6 +1694,29 @@ const LC94=(()=>{
     const L=W.LC87||{},label=L.android?"Open in Chrome":(L.ios&&L.iosV>=17)?"Open in Safari":"Copy the link",app=L.app||"this app";
     return{html:"<b>Keep this review.</b> <span class=\"lc88-s\">The browser inside "+String(app).replace(/[<>&"]/g,"")+" forgets everything when you close it. Open the app in your own browser: your game comes along.</span>",
       acts:[{label:label,run:openOutside,primary:true},{label:"×",dismiss:true,run:()=>lsSet(K_IABX,Date.now())}],sig:"iab"};
+  }
+
+  /* ---------- the landing page's quick start (9.59.0): the name in, straight to the first mistake ----------
+     <form id="lc94-qs"> under the hero title: a Chess.com name (or Lichess, one tap) goes to /app.html?u=<name>&site=...&src=<first source>.
+     No install, no account, no question first; it works inside Instagram / TikTok too (LC87 soft mode). */
+  function quickStart(){
+    const f=D.getElementById("lc94-qs");if(!f||f.__lc94)return;f.__lc94=1;
+    const inp=f.querySelector("input[name=u]"),msg=f.querySelector("[data-qs-msg]"),sw=f.querySelector("[data-qs-site]");
+    let site="chesscom";
+    const label=()=>{if(inp)inp.placeholder=site==="lichess"?"Your Lichess username":"Your Chess.com username";if(sw)sw.textContent=site==="lichess"?"I play on Chess.com":"I play on Lichess"};
+    if(sw)sw.addEventListener("click",e=>{e.preventDefault();site=site==="lichess"?"chesscom":"lichess";label();try{inp.focus()}catch(x){}});
+    f.addEventListener("submit",e=>{
+      e.preventDefault();
+      let u=String(inp&&inp.value||"").trim().replace(/^@/,"");
+      const m=/(?:chess\.com\/(?:member|\w+\/member)\/|lichess\.org\/(?:@\/)?)([A-Za-z0-9_-]{2,30})/i.exec(u);
+      if(m){if(/lichess/i.test(u))site="lichess";u=m[1]}
+      if(!NAME.test(u)){if(msg)msg.textContent="Type your "+(site==="lichess"?"Lichess":"Chess.com")+" username: letters, numbers, - and _.";try{inp.focus()}catch(x){}return}
+      const url=new URL("/app.html",location.href);url.searchParams.set("u",u);url.searchParams.set("site",site);
+      const s=src();if(s)url.searchParams.set("src",s);
+      step("name_entered");
+      (W.__lcNav||function(x){location.href=x})(url.pathname+url.search);
+    });
+    label();
   }
 
   /* ---------- watchers ---------- */
@@ -1695,7 +1748,7 @@ const LC94=(()=>{
       const standalone=(()=>{try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}})();
       if(iab())step("iab_open");
       W.addEventListener("appinstalled",()=>step("install"));
-      if(!isApp()){step("landing");return}
+      if(!isApp()){step("landing");quickStart();return}
       /* the app */
       const d=readDeep();
       if(d){ssSet(K_DEEP,d);stripDeep();
@@ -1703,6 +1756,7 @@ const LC94=(()=>{
         try{if(typeof LC30!=="undefined"&&LC30.level0&&!LC30.level0.s().choice)LC30.level0.set({choice:"know",auto:true,via:"deeplink"})}catch(e){}}
       const first=+lsGet(K_FIRST,0)||0;
       if(!first)lsSet(K_FIRST,Date.now());else if(Date.now()-first>=20*36e5)step("day2_return");
+      attrFromSource();
       step("first_open");
       if(standalone)step("install");
       W.addEventListener("lc39-signed-in",()=>step("signed_in"));
@@ -1711,7 +1765,7 @@ const LC94=(()=>{
     }catch(e){console.error("lc94",e)}
   }
   return{VERSION:VERSION,STEPS:STEPS,init:init,step:step,deepStart:deepStart,iabStep:iabStep,src:src,
-    _t:{captureSource:captureSource,platformOf:platformOf,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
+    _t:{captureSource:captureSource,platformOf:platformOf,attrFromSource:attrFromSource,quickStart:quickStart,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
 })();
 /*@@end lc94*/
 try{LC94.init()}catch(e){}

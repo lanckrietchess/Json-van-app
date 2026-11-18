@@ -34,6 +34,7 @@ const LC88=(()=>{
     {id:"level",model:levelModel,kind:"Quest",page:"quests"},
     {id:"quest",sel:"#lc39-q",kind:"Quest"},
     {id:"done",sel:"#lc71-road-done",kind:"Today"},
+    {id:"kick",sel:"#lc37-kick",kind:"Coach"},   /* 9.59.0: Coach Lanckriet's daily tip on Home was a second guide next to the road */
     {id:"hero",sel:"[data-lc62-card]",kind:"Your story"},
     {id:"save",sel:"#lc40-nudge",kind:"Tip"},
     {id:"upgrade",sel:"#lc45-banner",kind:"Pro",late:true},
@@ -67,7 +68,7 @@ const LC88=(()=>{
     QA("[class]",c).forEach(x=>{const k=x.className&&x.className.baseVal==null?String(x.className):"";x.removeAttribute("class");if(/small|muted|lc39-qn|lc84-n/.test(k))x.setAttribute("class","lc88-s")});
     QA("*",c).forEach(x=>{[].slice.call(x.attributes).forEach(a=>{if(a.name!=="class")x.removeAttribute(a.name)})});
     /* a space after every closing tag, so "MSPC Wizard" and "Step 1" never run together once the layout is gone */
-    let h=c.innerHTML.replace(/\s+/g," ").replace(/(<\/(?:b|strong|em|span|div|p|h\d|small|label)>)(?=[^\s<])/g,"$1 ").replace(/(<\/(?:b|strong|em|span|div|p|h\d|small|label)>)(<(?!\/))/g,"$1 $2").trim();
+    let h=c.innerHTML.replace(/\s+/g," ").replace(/(<\/(?:b|strong|em|span|div|p|h\d|small|label)>)(?=[^\s<,.;:!?)])/g,"$1 ").replace(/(<\/(?:b|strong|em|span|div|p|h\d|small|label)>)(<(?!\/))/g,"$1 $2").trim();
     if(!c.textContent.trim())h="";
     return h;
   }
@@ -75,7 +76,7 @@ const LC88=(()=>{
   function actionsOf(el){
     return QA("button,a[href],a.btn",el).filter(b=>!b.disabled&&b.offsetParent!==undefined).map(b=>{
       const label=(b.getAttribute("aria-label")&&!b.textContent.trim()?b.getAttribute("aria-label"):b.textContent).replace(/\s+/g," ").trim();
-      const dismiss=/^(×|x|✕)$/i.test(b.textContent.trim())||/hide|dismiss|close|not now/i.test(b.getAttribute("aria-label")||"")||b.matches(".lc39-qskip,[data-lc40-nx],.lc45-x,[data-lc45-x],.lc19-x");
+      const dismiss=/^(×|x|✕)$/i.test(b.textContent.trim())||/hide|dismiss|close|not now/i.test(b.getAttribute("aria-label")||"")||b.matches(".lc39-qskip,[data-lc40-nx],.lc45-x,[data-lc45-x],.lc19-x,[data-lc37-hide]");
       return{el:b,label:label.slice(0,60),primary:b.classList.contains("btn-primary")||b.classList.contains("btn-gold"),dismiss:dismiss}}).filter(a=>a.label).slice(0,4);
   }
 

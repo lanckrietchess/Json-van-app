@@ -176,10 +176,15 @@ const LC90=(()=>{
     try{return LC36.support.checkout(plan,tier)}catch(e){say("Checkout could not start. Nothing was charged. Try again.","bad");return false}
   }
   async function open(o){
-    o=o||{};const preview=!!o.preview,c=o.cfg?clean(o.cfg):await cfg(),p=await pricing(),n=numbers(c,p);
-    if(!preview)log("shown");
+    o=o||{};const preview=!!o.preview,man=!preview&&/^[a-z]{2,20}$/.test(String(o.from||""));let c=o.cfg?clean(o.cfg):await cfg();const p=await pricing(),n=numbers(c,p);
+    /* 9.59.0: opened by the player (the Upgrades page's "Try Pro free"), not by the end of the intro week: no "your intro week is over",
+       and it does not count as the Day-7 pop-up (that one still comes once, later) */
+    if(man)c=Object.assign({},c,{title:c.trial_days>0?"Try Pro free for "+c.trial_days+" days":"Lock in the {rate_name} rate",
+      subtitle:c.trial_days>0?"Cancel any time before the trial ends and you pay nothing.":"",
+      body:"Lock in the {rate_name} rate while it is open: {pct}% off the yearly plan, and your rate stays the same for as long as your subscription stays active.",cta_later:"Not now"});
+    if(!preview&&!man)log("shown");
     let picked=false;
-    return openSheet({title:fill(c.title,n),cls:"lc90-sheet",noFocus:true,html:html(c,n,preview),onClose(){if(!preview&&!picked)log("closed")},onMount(s){
+    return openSheet({title:fill(c.title,n),cls:"lc90-sheet",noFocus:true,html:html(c,n,preview),onClose(){if(!preview&&!picked&&!man)log("closed")},onMount(s){
       const el=s.el,msg=t=>{const m=Q("[data-lc90-msg]",el);if(m)m.textContent=t||""},plan=nm=>{const r=Q('input[name="'+(nm||"lc90-plan")+'"]:checked',el);return r&&r.value==="monthly"?"monthly":"yearly"};
       const ok=Q("[data-lc90-ok]",el),goBtn=Q('[data-lc90="go"]',el);
       if(ok)ok.addEventListener("change",()=>{goBtn.disabled=!ok.checked});
@@ -188,14 +193,14 @@ const LC90=(()=>{
         if(nm==="lc90-tier"){const t=e.target.value;QA(".lc90-tier",el).forEach(l=>l.classList.toggle("is-on",!!Q("input:checked",l)));QA("[data-tierbox]",el).forEach(b=>{b.hidden=b.getAttribute("data-tierbox")!==t});msg("")}});
       el.addEventListener("click",async e=>{
         const b=e.target.closest&&e.target.closest("[data-lc90]");if(!b)return;const a=b.getAttribute("data-lc90");e.preventDefault();
-        if(a==="later"){if(!preview){picked=true;log("later")}s.close();return}
+        if(a==="later"){if(!preview){picked=true;if(!man)log("later")}s.close();return}
         if(preview){msg("Preview: in the real pop-up this "+(a==="vip"?"opens the VIP checkout":a==="go"&&c.trial_days>0?"opens the "+c.trial_days+"-day trial checkout":"opens Stripe checkout")+" for the "+(a==="vip"?plan("lc90-vplan"):plan())+" plan.");return}
         if(a==="vip"){picked=true;log("vip");s.close();checkout(plan("lc90-vplan"),3);return}
         const pl=plan();picked=true;log(a==="go"&&c.trial_days>0?"trial":pl);
         if(a==="buy"||c.trial_days===0){s.close();checkout(pl);return}
         if(!sess()){msg(WHY.sign_in);b.insertAdjacentHTML("afterend",'<a class="btn btn-primary" href="#account" data-close>Sign in</a>');return}
         b.disabled=true;msg("Opening secure checkout…");
-        const j=await stripeCall("trial",{token:await tok(),device:dev(),plan:pl,src:"day7"});
+        const j=await stripeCall("trial",{token:await tok(),device:dev(),plan:pl,src:man?o.from:"day7"});
         if(j.ok&&/^https:\/\/[a-z0-9.-]+\.stripe\.com\//i.test(j.url||"")){go(j.url);return}
         b.disabled=false;msg((WHY[j.reason]||"Checkout could not start. Nothing was charged. Try again."));
         if(j.reason==="trial_used"||j.reason==="no_trial"){const bb=Q('[data-lc90="buy"]',el);if(bb)bb.focus()}
