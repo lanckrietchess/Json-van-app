@@ -38,7 +38,7 @@ with sync_playwright() as p:
     # A. free player
     c = ctx(br); pg = c.new_page(); watch(pg, 'free')
     pg.goto('http://127.0.0.1:8765/app.html#home'); pg.wait_for_timeout(2500)
-    out('LC95 [embedded copy equals lc95.js, build, in the Think menu]', [open(REPO + '/lc95.js', encoding='utf-8').read().rstrip('\n') in open(REPO + '/app.html', encoding='utf-8').read(), pg.evaluate('LC95.version'), pg.evaluate("Nav5._t.GROUPS[0].sections[0].items.some(x => x.href === '#kgames' && x.label === 'Kyenzo’s games')")])
+    out('LC95 [embedded copy equals lc95.js, build, is the MSPC trainer in the Think menu]', [open(REPO + '/lc95.js', encoding='utf-8').read().rstrip('\n') in open(REPO + '/app.html', encoding='utf-8').read(), pg.evaluate('LC95.version'), pg.evaluate("Nav5._t.GROUPS[0].sections[0].items.some(x => x.href === '#think' && x.label === 'MSPC trainer')")])
     pg.evaluate("location.hash = '#kgames'"); pg.wait_for_timeout(2500)
     out('free page [title, tabs, climb strip, board, first prompt]', pg.evaluate("[document.querySelector('.lc95 h1').childNodes[0].textContent, [...document.querySelectorAll('[data-lc95-tab]')].map(b => b.textContent), document.querySelectorAll('.lc95-tier').length, !!document.querySelector('[data-lc95-board] .lc-board'), document.querySelector('[data-lc95-panel] h2').textContent]"))
     out('free page [asked the daily set, not the full list]', [x[0] for x in CALLS if x[0] in ('mg_daily', 'mg_puzzles')][:1])
@@ -66,7 +66,6 @@ with sync_playwright() as p:
     c = ctx(br, OWNER); pg = c.new_page(); watch(pg, 'pro')
     pg.goto('http://127.0.0.1:8765/app.html#think'); pg.wait_for_timeout(4000)
     pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())"); pg.wait_for_timeout(1200)
-    out('#think [card to my games]', pg.evaluate("(() => { const a = document.querySelector('[data-lc95-card]'); return a ? [a.getAttribute('href'), a.querySelector('b').textContent] : null; })()"))
     pg.evaluate("location.hash = '#openings'"); pg.wait_for_timeout(2500)
     out('#openings [card with my top opening]', pg.evaluate("(() => { const a = document.querySelector('[data-lc95-card]'); return a ? [a.getAttribute('href'), a.getAttribute('data-lc95-intent'), a.querySelector('small').textContent.slice(0, 26)] : null; })()"))
     pg.evaluate("App.isPro = () => true; App.profile.elo = 1700; sessionStorage.setItem('lc95-open', JSON.stringify({ tab: 'mist' })); location.hash = '#kgames'"); pg.wait_for_timeout(2500)
