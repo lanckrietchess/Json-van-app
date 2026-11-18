@@ -1,0 +1,188 @@
+/*@@module lc94*/
+const LC94=(()=>{
+  "use strict";
+  /* LC94 (build 9.58.0): the funnel, the first-click source and the ?u= deep link. Same text in index.html (the landing page) and app.html.
+     1. Funnel: 11 steps, each sent ONCE per device to public.lc94_step (sql/20261118100000_lc94_funnel.sql). The device id is the app's own
+        deviceId() (localStorage "lc-hub-device"), the same id the checkout sends to Stripe, so the server can add the last step ("paid").
+          landing, iab_open, first_open, name_entered, first_review_done, signed_in, install, day2_return, paywall_seen, checkout_started, paid
+        Nothing is sent for the owner in admin mode. A failed call is retried on the next page load (a step counts as sent only on HTTP 2xx).
+     2. Source: the first non-empty ?src=, ?utm_source=, ?ref= or LC73 short-link code this device ever saw (localStorage "lc94-src"),
+        sent with every step. ?source=iab (LC87's "open outside" link) is not a source: it keeps the original one.
+     3. Deep link (app only): /app.html?u=<Chess.com or Lichess name>&site=chesscom|lichess&src=mc_ig. The name is taken as the answer to the
+        first-run question, the "How did you find us?" step is filled from ?src= when it names a platform, and the first review starts at once
+        (LC42.begin -> LC50 scans the latest game on the device with Stockfish). The parameters leave the address bar so a reload does not restart it.
+     4. In an Instagram / TikTok / Facebook browser (LC87 soft mode) one LC88 step after the first review: "Keep this review", which opens the same
+        game in Chrome / Safari (the in-app browser keeps nothing once it is closed). */
+  const W=window,D=document,VERSION="9.58.0";
+  const STEPS=["landing","iab_open","first_open","name_entered","first_review_done","signed_in","install","day2_return","paywall_seen","checkout_started","paid"];
+  const K_DONE="lc94-done",K_SRC="lc94-src",K_FIRST="lc94-first",K_DEEP="lc94-deep",K_IABX="lc94-iab-x",K_DEV="lc-hub-device";
+  const NAME=/^[A-Za-z0-9_-]{2,30}$/,DEV_RE=/^d-[a-z0-9]{12,40}$/;
+  const isApp=()=>/\/app(\.html)?$/.test(location.pathname);
+  const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+  const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+  const ssGet=k=>{try{return JSON.parse(sessionStorage.getItem(k)||"null")}catch(e){return null}};
+  const ssSet=(k,v)=>{try{if(v==null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+  const clean=(v,n)=>String(v==null?"":v).toLowerCase().replace(/[^a-z0-9_.-]/g,"").slice(0,n||40);
+  const admin=()=>{try{return typeof Admin!=="undefined"&&!!Admin.active}catch(e){return false}};
+  const iab=()=>W.__lcIab==="soft";
+
+  /* ---------- the device id: the app's deviceId(), or the same format on the landing page (same storage, so both pages agree) ---------- */
+  function dev(){
+    try{if(typeof deviceId==="function")return deviceId()}catch(e){}
+    let id=lsGet(K_DEV,"");
+    if(!DEV_RE.test(id||"")){id="d-"+Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>(b<36?"0":"")+b.toString(36)).join("").slice(0,20);lsSet(K_DEV,id)}
+    return id;
+  }
+  /* ---------- the first-click source ---------- */
+  function captureSource(search){
+    if(lsGet(K_SRC,""))return lsGet(K_SRC,"");
+    let s="";
+    try{const P=new URLSearchParams(search==null?location.search:search);s=clean(P.get("src"))||clean(P.get("utm_source"))||clean(P.get("ref"))}catch(e){}
+    if(!s){const c=lsGet("lc73-src",null);if(c&&typeof c==="object")s=clean(c.code)||clean(c.utm_source)||clean(c.ref)}
+    if(s==="iab")s="";
+    if(s)lsSet(K_SRC,s);
+    return s;
+  }
+  const src=()=>lsGet(K_SRC,"")||"";
+  /* the platform a source names, for the app's own "How did you find us?" answer (LC30) */
+  function platformOf(s){
+    s=String(s||"");
+    return/^(mc_)?(ig|insta)/.test(s)?"instagram":/^(mc_)?(tt|tk|tiktok)/.test(s)?"tiktok":/^(mc_)?(yt|youtube)/.test(s)?"youtube":/^(mc_)?(fb|facebook)/.test(s)?"facebook":/^(mc_)?(x|tw)([_.-]|$)/.test(s)?"x":"";
+  }
+
+  /* ---------- the funnel ---------- */
+  function endpoint(){
+    let u="",k="";
+    try{const c=CONFIG.features.supabase;u=c.url;k=c.anonKey}catch(e){}
+    if(!u||!k){try{u=D.querySelector('meta[name="lc-sb-url"]').getAttribute("content");k=D.querySelector('meta[name="lc-sb-key"]').getAttribute("content")}catch(e){}}
+    return/^https:\/\//.test(u||"")&&k?{u:String(u).replace(/\/+$/,""),k:k}:null;
+  }
+  const sent=()=>lsGet(K_DONE,{})||{};
+  const pending={};
+  function step(name){
+    try{
+      if(STEPS.indexOf(name)<0||name==="paid"||admin())return false;
+      if(sent()[name]||pending[name])return false;
+      const ep=endpoint();if(!ep||typeof fetch!=="function")return false;
+      pending[name]=1;
+      fetch(ep.u+"/rest/v1/rpc/lc94_step",{method:"POST",keepalive:true,credentials:"omit",
+        headers:{"Content-Type":"application/json",apikey:ep.k,Authorization:"Bearer "+ep.k},
+        body:JSON.stringify({p_aid:dev(),p_step:name,p_src:src()||null})})
+        .then(r=>{if(r&&r.ok){const d=sent();d[name]=Date.now();lsSet(K_DONE,d)}})
+        .catch(()=>{})
+        .then(()=>{delete pending[name]});
+      return true;
+    }catch(e){return false}
+  }
+
+  /* ---------- the deep link (app.html?u=...) ---------- */
+  function readDeep(search){
+    try{
+      const P=new URLSearchParams(search==null?location.search:search),u=String(P.get("u")||"").trim();
+      if(!NAME.test(u))return null;
+      const site=/^li/i.test(String(P.get("site")||""))?"lichess":"chesscom";
+      return{u:u,site:site};
+    }catch(e){return null}
+  }
+  function stripDeep(){
+    try{
+      const url=new URL(location.href);let ch=false;
+      ["u","site","resume"].forEach(k=>{if(url.searchParams.has(k)){url.searchParams.delete(k);ch=true}});
+      if(ch)history.replaceState(history.state,"",url.pathname+(url.searchParams.toString()?"?"+url.searchParams.toString():"")+url.hash);
+    }catch(e){}
+  }
+  const trimCount=()=>{try{const s=Store.get("lc-hub-trim-stats-v1",{})||{};return Object.keys(s.games||{}).length}catch(e){return 0}};
+  /* called by boot() right before the first-run sheet would open. true = the deep link took over (no first-run sheet). */
+  function deepStart(){
+    const d=ssGet(K_DEEP);if(!d||!NAME.test(d.u||""))return false;
+    ssSet(K_DEEP,null);
+    try{
+      if(typeof LC42!=="undefined"&&LC42.owns())return false;   /* already on the road: nothing to restart */
+      const onb=!!(typeof App!=="undefined"&&App.onboarded);
+      if(onb&&trimCount()>0)return false;                          /* a returning player with reviews: the link changes nothing */
+      if(typeof App!=="undefined"){
+        const p=Object.assign({},App.profile||{});
+        if(d.site==="lichess")p.lichess_username=d.u;else p.chess_com_username=d.u;
+        try{App.profile=typeof sanitizeProfile==="function"?sanitizeProfile(p):p}catch(e){App.profile=p}
+        App.onboarded=true;try{App.save()}catch(e){}
+      }
+      const pl=platformOf(src());
+      try{if(!Store.get("lc80-onb",null))Store.set("lc80-onb",{done:true,at:Date.now(),platform:pl,code:"",creator:"",mspc:"",pain:"",v:"8.0",via:"deeplink"})}catch(e){}
+      try{if(pl&&typeof LC30!=="undefined"&&LC30.attribution&&!(LC30.state()||{}).attr)LC30.attribution.save({source:"social",detail:pl})}catch(e){}
+      try{if(typeof LC50!=="undefined")LC50.pre.start(d.site,d.u)}catch(e){}
+      setTimeout(()=>{try{if(typeof LC42!=="undefined"&&LC42.begin(d.site==="lichess"?{li:d.u}:{cc:d.u}))step("name_entered")}catch(e){console.error("lc94 deep",e)}},600);
+      return true;
+    }catch(e){console.error("lc94 deep",e);return false}
+  }
+
+  /* ---------- the in-app browser step (LC88 source "iab"): keep this review, open it in Chrome / Safari ---------- */
+  function reviewDone(){
+    try{if(typeof LC42!=="undefined"&&/^(sys|libq|second|done)$/.test(String(LC42._t.st().step||"")))return true}catch(e){}
+    return trimCount()>0;
+  }
+  function resumeUrl(){
+    let site="",user="";
+    try{const s=LC42._t.st();site=s.site||"";user=s.user||""}catch(e){}
+    if(!user){try{const p=App.profile||{};if(p.chess_com_username){site="chesscom";user=p.chess_com_username}else if(p.lichess_username){site="lichess";user=p.lichess_username}}catch(e){}}
+    const u=new URL("/app.html",location.href);
+    if(NAME.test(user)){u.searchParams.set("u",user);u.searchParams.set("site",site==="lichess"?"lichess":"chesscom");u.searchParams.set("resume","1")}
+    const s=src();if(s)u.searchParams.set("src",s);
+    return u.href;
+  }
+  function openOutside(){try{if(W.LC87&&LC87.out)return LC87.out(resumeUrl())}catch(e){}location.href=resumeUrl()}
+  function iabStep(){
+    if(!iab()||!reviewDone())return null;
+    const x=+lsGet(K_IABX,0)||0;if(x&&Date.now()-x<3*864e5)return null;
+    const L=W.LC87||{},label=L.android?"Open in Chrome":(L.ios&&L.iosV>=17)?"Open in Safari":"Copy the link",app=L.app||"this app";
+    return{html:"<b>Keep this review.</b> <span class=\"lc88-s\">The browser inside "+String(app).replace(/[<>&"]/g,"")+" forgets everything when you close it. Open the app in your own browser: your game comes along.</span>",
+      acts:[{label:label,run:openOutside,primary:true},{label:"×",dismiss:true,run:()=>lsSet(K_IABX,Date.now())}],sig:"iab"};
+  }
+
+  /* ---------- watchers ---------- */
+  let tick=0;
+  function watch(){
+    if(D.hidden)return;
+    const s=sent();
+    if(!s.first_review_done&&reviewDone())step("first_review_done");
+    if(!s.paywall_seen&&D.querySelector(".lc90-sheet")&&!admin())step("paywall_seen");
+  }
+  function wrapCheckout(){
+    try{
+      if(typeof LC36==="undefined"||!LC36.support||typeof LC36.support.go!=="function"||LC36.support.go.__lc94)return;
+      const g=LC36.support.go,f=function(u){try{if(/^https:\/\/[a-z0-9.-]*stripe\.com\//i.test(String(u||"")))step("checkout_started")}catch(e){}return g.apply(this,arguments)};
+      f.__lc94=1;LC36.support.go=f;
+    }catch(e){}
+  }
+  function wrapBegin(){
+    try{
+      if(typeof LC42==="undefined"||typeof LC42.begin!=="function"||LC42.begin.__lc94)return;
+      const b=LC42.begin,f=function(){const r=b.apply(this,arguments);if(r)step("name_entered");return r};
+      f.__lc94=1;LC42.begin=f;
+    }catch(e){}
+  }
+
+  function init(){
+    try{
+      captureSource();
+      const standalone=(()=>{try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}})();
+      if(iab())step("iab_open");
+      W.addEventListener("appinstalled",()=>step("install"));
+      if(!isApp()){step("landing");return}
+      /* the app */
+      const d=readDeep();
+      if(d){ssSet(K_DEEP,d);stripDeep();
+        /* LC30 asks "How familiar are you with chess?" on a brand-new install 600 ms after start: the link already answered it */
+        try{if(typeof LC30!=="undefined"&&LC30.level0&&!LC30.level0.s().choice)LC30.level0.set({choice:"know",auto:true,via:"deeplink"})}catch(e){}}
+      const first=+lsGet(K_FIRST,0)||0;
+      if(!first)lsSet(K_FIRST,Date.now());else if(Date.now()-first>=20*36e5)step("day2_return");
+      step("first_open");
+      if(standalone)step("install");
+      W.addEventListener("lc39-signed-in",()=>step("signed_in"));
+      wrapCheckout();wrapBegin();
+      if(!tick)tick=setInterval(watch,4000);
+    }catch(e){console.error("lc94",e)}
+  }
+  return{VERSION:VERSION,STEPS:STEPS,init:init,step:step,deepStart:deepStart,iabStep:iabStep,src:src,
+    _t:{captureSource:captureSource,platformOf:platformOf,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
+})();
+/*@@end lc94*/

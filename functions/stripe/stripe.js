@@ -41,6 +41,7 @@ export function verifySignature(raw, header, secret, nowMs, tolSec) {
   const want = createHmac('sha256', secret).update(t + '.' + raw).digest();
   return (parts.v1 || []).some((h) => { try { const b = Buffer.from(h, 'hex'); return b.length === want.length && timingSafeEqual(b, want); } catch (e) { return false; } });
 }
+export const WEBHOOK_MAX = 524288;   /* 512 KB: the largest body /webhook accepts (9.58.0) */
 const eqSecret = (a, b) => { const x = Buffer.from(String(a || '')), y = Buffer.from(String(b || '')); return y.length >= 16 && x.length === y.length && timingSafeEqual(x, y); };
 
 export function makeStripeHandler(sql, env, fetchImpl) {
@@ -101,7 +102,11 @@ export function makeStripeHandler(sql, env, fetchImpl) {
   let pwMem = { at: 0, v: null };
   async function paywallCfg() {
     if (pwMem.v && now() - pwMem.at < 6e4) return pwMem.v;
-    const r = await q1("SELECT v FROM public.lc89_cfg WHERE k = 'paywall'");
+    /* 9.58.0: the table may be missing (its SQL not run yet) or the database may hiccup. That never breaks a checkout (the trial and the
+       prices fall back to the built-in defaults: 7 days, the built-in prices), but it is no longer silent: the reason goes to the logs once a minute. */
+    let r = null;
+    try { r = await DB.prepare("SELECT v FROM public.lc89_cfg WHERE k = 'paywall'").first(); }   /* not q1: q1 swallows the error, and a missing table must show in the logs */
+    catch (e) { console.error('LC90: the paywall settings could not be read (' + ((e && e.code) || '') + ' ' + String((e && e.message) || e).slice(0, 120) + '); the defaults are used. Run sql/20261116100000_lc89_lc90_inline_cms_founding_paywall.sql if lc89_cfg is missing.'); }
     let v = r && r.v; if (typeof v === 'string') { try { v = JSON.parse(v); } catch (e) { v = null; } }
     pwMem = { at: now(), v: v && typeof v === 'object' ? v : {} };
     return pwMem.v;
@@ -359,6 +364,14 @@ export function makeStripeHandler(sql, env, fetchImpl) {
   }
   const trialLen = (m) => { const d = Math.floor(+(m && m.trial_days)); return d >= 1 && d <= 30 ? d : 7; };   /* LC90: older sessions carry no trial_days: 7 */
   const licenseUntil = (sale, periodEndMs) => (periodEndMs || (now() + (sale.plan === 'yearly' ? 365 : 30) * 864e5)) + P34().graceMs;
+  /* LC94 (9.58.0): the last step of the funnel, on the same device id the app sent with the checkout. Best effort: a missing table or a
+     database hiccup is logged and never stops the licence. */
+  async function funnelPaid(device) {
+    const aid = String(device || '');
+    if (!/^[A-Za-z0-9_-]{8,64}$/.test(aid)) return;
+    try { await DB.prepare("INSERT INTO public.lc94_funnel (aid, step, src) VALUES (?, 'paid', NULL) ON CONFLICT DO NOTHING").bind(aid).run(); }
+    catch (e) { console.error('LC94: the paid step was not stored: ' + String((e && e.message) || e).slice(0, 120)); }
+  }
   async function proPaid(o) {
     const sale = await DB.prepare('SELECT * FROM arena.lc34_pro_sales WHERE session_id = ?').bind(o.id).first();
     if (!sale) { console.error('LC34: paid session without a sale row ' + o.id); return; }
@@ -369,6 +382,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       else throw e;
     }
     await vipCredit(sale, email, o.id);
+    await funnelPaid(sale.device);
     await afterPaid(o, email);
     const m = o.metadata || {};
     if (m.trial === '1') {
@@ -476,7 +490,9 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (req.method !== 'POST') return json({ ok: false, reason: 'method' }, 405, h);
     try {
       const raw = await req.text();
-      if (raw.length > 20000) return json({ ok: false, reason: 'too_large' }, 413, h);
+      /* 9.58.0: Stripe's own events (an invoice with lines, discounts and tax) can be far bigger than 20 KB; a 413 there made Stripe retry
+         for three days and then give up, so a buyer paid without a licence. The webhook gets 512 KB, the browser routes keep 20 KB. */
+      if (raw.length > (path === 'webhook' ? WEBHOOK_MAX : 20000)) return json({ ok: false, reason: 'too_large' }, 413, h);
       let r;
       if (path === 'webhook') r = await webhook(raw, req.headers.get('stripe-signature'));
       else { let body; try { body = JSON.parse(raw || '{}'); } catch (e) { return json({ ok: false, reason: 'bad_json' }, 400, h); }
