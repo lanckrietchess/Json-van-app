@@ -13,7 +13,7 @@ const LC94=(()=>{
         (LC42.begin -> LC50 scans the latest game on the device with Stockfish). The parameters leave the address bar so a reload does not restart it.
      4. In an Instagram / TikTok / Facebook browser (LC87 soft mode) one LC88 step after the first review: "Keep this review", which opens the same
         game in Chrome / Safari (the in-app browser keeps nothing once it is closed). */
-  const W=window,D=document,VERSION="9.58.0";
+  const W=window,D=document,VERSION="9.59.0";
   const STEPS=["landing","iab_open","first_open","name_entered","first_review_done","signed_in","install","day2_return","paywall_seen","checkout_started","paid"];
   const K_DONE="lc94-done",K_SRC="lc94-src",K_FIRST="lc94-first",K_DEEP="lc94-deep",K_IABX="lc94-iab-x",K_DEV="lc-hub-device";
   const NAME=/^[A-Za-z0-9_-]{2,30}$/,DEV_RE=/^d-[a-z0-9]{12,40}$/;
@@ -47,7 +47,7 @@ const LC94=(()=>{
   /* the platform a source names, for the app's own "How did you find us?" answer (LC30) */
   function platformOf(s){
     s=String(s||"");
-    return/^(mc_)?(ig|insta)/.test(s)?"instagram":/^(mc_)?(tt|tk|tiktok)/.test(s)?"tiktok":/^(mc_)?(yt|youtube)/.test(s)?"youtube":/^(mc_)?(fb|facebook)/.test(s)?"facebook":/^(mc_)?(x|tw)([_.-]|$)/.test(s)?"x":"";
+    return/^(mc_)?(ig|insta)/.test(s)?"instagram":/^(mc_)?(tt|tk|tiktok)/.test(s)?"tiktok":/^(mc_)?(yt|youtube)/.test(s)?"youtube":/^(mc_)?(fb|facebook)/.test(s)?"facebook":/^(mc_)?(x|tw)([_.-]|p$|$)/.test(s)?"x":"";
   }
 
   /* ---------- the funnel ---------- */
@@ -92,6 +92,15 @@ const LC94=(()=>{
     }catch(e){}
   }
   const trimCount=()=>{try{const s=Store.get("lc-hub-trim-stats-v1",{})||{};return Object.keys(s.games||{}).length}catch(e){return 0}};
+  /* 9.59.0: "How did you find this app?" is not asked when the link already says it (?src=ig_bio, ?src=mc_ig, an LC73 short link).
+     LC30 then opens straight on "Connect your Chess.com or Lichess account": one question less before the first review. */
+  function attrFromSource(){
+    try{
+      const pl=platformOf(src());
+      if(pl&&typeof LC30!=="undefined"&&LC30.attribution&&!(LC30.state()||{}).attr)return LC30.attribution.save({source:"social",detail:pl,creator:LC30.attribution.DEFAULT_CREATOR});
+    }catch(e){}
+    return false;
+  }
   /* called by boot() right before the first-run sheet would open. true = the deep link took over (no first-run sheet). */
   function deepStart(){
     const d=ssGet(K_DEEP);if(!d||!NAME.test(d.u||""))return false;
@@ -108,8 +117,10 @@ const LC94=(()=>{
       }
       const pl=platformOf(src());
       try{if(!Store.get("lc80-onb",null))Store.set("lc80-onb",{done:true,at:Date.now(),platform:pl,code:"",creator:"",mspc:"",pain:"",v:"8.0",via:"deeplink"})}catch(e){}
-      try{if(pl&&typeof LC30!=="undefined"&&LC30.attribution&&!(LC30.state()||{}).attr)LC30.attribution.save({source:"social",detail:pl})}catch(e){}
+      attrFromSource();
       try{if(typeof LC50!=="undefined")LC50.pre.start(d.site,d.u)}catch(e){}
+      /* 9.59.0: the rating too, like LC30's Connect does (the Learn page's "Active ELO" and the coach's level read it) */
+      try{if(typeof Elo!=="undefined"&&Elo.fetchProfile)Elo.fetchProfile(d.site,d.u).then(pr=>{const r=pr&&(pr.rapid||pr.blitz||pr.bullet);if(r&&typeof App!=="undefined"&&!(App.profile||{}).elo){App.profile=Object.assign({},App.profile,{elo:r});try{App.save()}catch(e){}}}).catch(()=>{})}catch(e){}
       setTimeout(()=>{try{if(typeof LC42!=="undefined"&&LC42.begin(d.site==="lichess"?{li:d.u}:{cc:d.u}))step("name_entered")}catch(e){console.error("lc94 deep",e)}},600);
       return true;
     }catch(e){console.error("lc94 deep",e);return false}
@@ -136,6 +147,29 @@ const LC94=(()=>{
     const L=W.LC87||{},label=L.android?"Open in Chrome":(L.ios&&L.iosV>=17)?"Open in Safari":"Copy the link",app=L.app||"this app";
     return{html:"<b>Keep this review.</b> <span class=\"lc88-s\">The browser inside "+String(app).replace(/[<>&"]/g,"")+" forgets everything when you close it. Open the app in your own browser: your game comes along.</span>",
       acts:[{label:label,run:openOutside,primary:true},{label:"×",dismiss:true,run:()=>lsSet(K_IABX,Date.now())}],sig:"iab"};
+  }
+
+  /* ---------- the landing page's quick start (9.59.0): the name in, straight to the first mistake ----------
+     <form id="lc94-qs"> under the hero title: a Chess.com name (or Lichess, one tap) goes to /app.html?u=<name>&site=...&src=<first source>.
+     No install, no account, no question first; it works inside Instagram / TikTok too (LC87 soft mode). */
+  function quickStart(){
+    const f=D.getElementById("lc94-qs");if(!f||f.__lc94)return;f.__lc94=1;
+    const inp=f.querySelector("input[name=u]"),msg=f.querySelector("[data-qs-msg]"),sw=f.querySelector("[data-qs-site]");
+    let site="chesscom";
+    const label=()=>{if(inp)inp.placeholder=site==="lichess"?"Your Lichess username":"Your Chess.com username";if(sw)sw.textContent=site==="lichess"?"I play on Chess.com":"I play on Lichess"};
+    if(sw)sw.addEventListener("click",e=>{e.preventDefault();site=site==="lichess"?"chesscom":"lichess";label();try{inp.focus()}catch(x){}});
+    f.addEventListener("submit",e=>{
+      e.preventDefault();
+      let u=String(inp&&inp.value||"").trim().replace(/^@/,"");
+      const m=/(?:chess\.com\/(?:member|\w+\/member)\/|lichess\.org\/(?:@\/)?)([A-Za-z0-9_-]{2,30})/i.exec(u);
+      if(m){if(/lichess/i.test(u))site="lichess";u=m[1]}
+      if(!NAME.test(u)){if(msg)msg.textContent="Type your "+(site==="lichess"?"Lichess":"Chess.com")+" username: letters, numbers, - and _.";try{inp.focus()}catch(x){}return}
+      const url=new URL("/app.html",location.href);url.searchParams.set("u",u);url.searchParams.set("site",site);
+      const s=src();if(s)url.searchParams.set("src",s);
+      step("name_entered");
+      (W.__lcNav||function(x){location.href=x})(url.pathname+url.search);
+    });
+    label();
   }
 
   /* ---------- watchers ---------- */
@@ -167,7 +201,7 @@ const LC94=(()=>{
       const standalone=(()=>{try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}})();
       if(iab())step("iab_open");
       W.addEventListener("appinstalled",()=>step("install"));
-      if(!isApp()){step("landing");return}
+      if(!isApp()){step("landing");quickStart();return}
       /* the app */
       const d=readDeep();
       if(d){ssSet(K_DEEP,d);stripDeep();
@@ -175,6 +209,7 @@ const LC94=(()=>{
         try{if(typeof LC30!=="undefined"&&LC30.level0&&!LC30.level0.s().choice)LC30.level0.set({choice:"know",auto:true,via:"deeplink"})}catch(e){}}
       const first=+lsGet(K_FIRST,0)||0;
       if(!first)lsSet(K_FIRST,Date.now());else if(Date.now()-first>=20*36e5)step("day2_return");
+      attrFromSource();
       step("first_open");
       if(standalone)step("install");
       W.addEventListener("lc39-signed-in",()=>step("signed_in"));
@@ -183,6 +218,6 @@ const LC94=(()=>{
     }catch(e){console.error("lc94",e)}
   }
   return{VERSION:VERSION,STEPS:STEPS,init:init,step:step,deepStart:deepStart,iabStep:iabStep,src:src,
-    _t:{captureSource:captureSource,platformOf:platformOf,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
+    _t:{captureSource:captureSource,platformOf:platformOf,attrFromSource:attrFromSource,quickStart:quickStart,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
 })();
 /*@@end lc94*/
