@@ -137,13 +137,15 @@ declare n int;
 begin
   insert into public.master_puzzles as p (id, game_id, ply, kind, fen, side, played, played_san, best, best_san, solution, line, reply,
     prev, prev_fen, eval_before, eval_after, loss, gap, my_rating, tier, eco, opening, phase, tags, time_class, end_time)
-  select r->>'id', r->>'game_id', (r->>'ply')::int, r->>'kind', r->>'fen', r->>'side', r->>'played', r->>'played_san', r->>'best', r->>'best_san',
+  select r->>'id', r->>'game_id', (r->>'ply')::int,
+    -- a king step is an only move at most, never a brilliant sacrifice (the analysis before 18 Nov 2026 labelled 23 of them brilliant)
+    case when r->>'kind' = 'brilliant' and r->>'played_san' like 'K%' then 'great' else r->>'kind' end, r->>'fen', r->>'side', r->>'played', r->>'played_san', r->>'best', r->>'best_san',
     array(select x from jsonb_array_elements_text(coalesce(r->'solution','[]')) x),
     array(select x from jsonb_array_elements_text(coalesce(r->'line','[]')) x),
     array(select x from jsonb_array_elements_text(coalesce(r->'reply','[]')) x),
     r->>'prev', r->>'prev_fen', (r->>'eval_before')::int, (r->>'eval_after')::int, (r->>'loss')::numeric, (r->>'gap')::numeric,
     (r->>'my_rating')::int, r->>'tier', r->>'eco', left(r->>'opening', 160), r->>'phase',
-    array(select x from jsonb_array_elements_text(coalesce(r->'tags','[]')) x), r->>'time_class', to_timestamp((r->>'end_time')::bigint)
+    array(select x from jsonb_array_elements_text(coalesce(r->'tags','[]')) x where not (x = 'sacrifice' and r->>'played_san' like 'K%')), r->>'time_class', to_timestamp((r->>'end_time')::bigint)
   from jsonb_array_elements(j) r
   where r->>'id' is not null and r->>'kind' in ('brilliant','great','punish','missed','blunder','mistake')
     -- a mistake that still left Kyenzo clearly better (+1.7 or more) teaches little: not a training position
