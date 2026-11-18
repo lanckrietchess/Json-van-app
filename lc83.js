@@ -258,7 +258,9 @@ const LC83=(()=>{
         else M.push({id:"mateNet",ply:i,label:"Mating net",text:m.san+" is checkmate."});return}
       if(m.promotion){M.push({id:"promotion",ply:i,label:"Promotion",text:"The pawn promotes with "+m.san+"."});}
       const tg=targetsOf(B1,m.to);
-      if(tg.length>=2&&tg.some(q=>B1[q].t==="k"||VAL[B1[q].t]>=3))M.push({id:"fork",ply:i,label:m.piece==="n"?"Knight fork":m.piece==="p"?"Pawn fork":"Fork",text:m.san+" forks "+list(tg.map(q=>nm(B1,q,vic)))+"."});
+      /* a real fork: they cannot just take the forking piece (a defended piece that only something bigger can take is fine) */
+      const fa=attackers(B1,m.to,other(s)),safe=!fa.length||(defended(B1,m.to)&&fa.every(a=>VAL[B1[a].t]>VAL[m.piece]));
+      if(safe&&tg.length>=2&&tg.some(q=>B1[q].t==="k"||VAL[B1[q].t]>=3))M.push({id:"fork",ply:i,label:m.piece==="n"?"Knight fork":m.piece==="p"?"Pawn fork":"Fork",text:m.san+" forks "+list(tg.map(q=>nm(B1,q,vic)))+"."});
       /* discovered attack: another long-range piece of `s` now hits something big */
       Object.keys(B1).forEach(q=>{const x=B1[q];if(x.c!==s||q===m.to||!SLIDE[x.t])return;const a0=B0[q]&&B0[q].t===x.t?attacksFrom(B0,q):[];
         attacksFrom(B1,q).filter(t=>a0.indexOf(t)<0&&B1[t]&&B1[t].c!==s&&(B1[t].t==="k"||VAL[B1[t].t]>=3)).slice(0,1).forEach(t=>{
@@ -755,6 +757,6 @@ const LC83=(()=>{
     ["pointerdown","keydown","touchstart"].forEach(n=>document.addEventListener(n,()=>{gestAt=Date.now()},true));
     setTimeout(iabBar,1500);
   }
-  return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,solutionFacts:solutionFacts,diagnose:diagnose,threatOf:threatOf,walk:walk,motifsOf:motifsOf,remember:remember,patternOf:patternOf,quietFacts:quietFacts,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
+  return{init:init,afterRender:afterRender,moveFacts:moveFacts,factText:factText,solutionFacts:solutionFacts,diagnose:diagnose,threatOf:threatOf,walk:walk,motifsOf:motifsOf,swingOf:swingOf,sanLine:sanLine,lineTricks:lineTricks,trappedIn:trappedIn,attackers:attackers,kingRoom:kingRoom,passed:passed,playOn:playOn,withSide:withSide,kingSq:kingSq,remember:remember,patternOf:patternOf,quietFacts:quietFacts,explain:explain,cca:cca,threatsBy:threatsBy,loose:loose,parse:parse,attacksFrom:attacksFrom,
     NEXT:NEXT,inApp:inApp,intentUrl:intentUrl,allow:allow,keepBoard:keepBoard,_t:{held:()=>held,release:release,iabBar:iabBar,blocked:blocked,gap:()=>autoAt,touch:t=>{gestAt=t==null?Date.now():t},reset:()=>{autoAt=0;held=[];clearTimeout(relT)}},version:VERSION};
 })(); /*@@end lc83*/
