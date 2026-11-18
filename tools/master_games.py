@@ -206,7 +206,8 @@ def _analyse_game(args):
             continue
         if loss >= 0.10: counts['inaccuracy'] += 1; continue
         # good moves: only look deeper where it can matter
-        sac = _is_sacrifice(boards[i], m, pvs[i + 1], my_side)
+        # a king step is never a sacrifice, even when the line loses material after it (it is an only move at most)
+        sac = boards[i].piece_type_at(m.from_square) != chess.KING and _is_sacrifice(boards[i], m, pvs[i + 1], my_side)
         if not (sac or prev_blunder or (abs(before) < 400 and loss < 0.02 and boards[i].is_capture(m) is False and played == best)): continue
         deep = _look(boards[i], nodes * (4 if (sac or prev_blunder) else 2), multipv=2)
         if len(deep) < 2: continue
