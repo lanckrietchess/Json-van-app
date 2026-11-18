@@ -26,6 +26,7 @@ const LC88=(()=>{
   const NOBAR=/^(admin|privacy|level0|studio|wall-cms|social-proof|giveaway-admin|landing-editor|reset)$/;
   /* the guiding blocks, highest priority first. sel: where it lives; kind: shown in the banner's small label */
   const SOURCES=[
+    {id:"iab",model:()=>{try{return typeof LC94!=="undefined"?LC94.iabStep():null}catch(e){return null}},kind:"Keep it"},   /* 9.58.0: in an Instagram / TikTok browser, after the first review */
     {id:"claim",sel:"#lc42-claim",kind:"Level up"},
     {id:"note",sel:"#lc19-banners>.lc19-b:not([data-b=quest])",kind:"Coach"},
     {id:"road",sel:"#lc42-strip",kind:"Your road"},
@@ -95,6 +96,7 @@ const LC88=(()=>{
     const b=e.target.closest&&e.target.closest("[data-lc88-i]");if(!b)return;e.preventDefault();
     const a=cur.acts[+b.getAttribute("data-lc88-i")];if(!a){update(true);return}
     if(a.href){if(/^#/.test(a.href)){if(location.hash===a.href){try{window.dispatchEvent(new HashChangeEvent("hashchange"))}catch(x){}}else location.hash=a.href}else location.href=a.href}
+    else if(typeof a.run==="function"){try{a.run()}catch(x){}}   /* 9.58.0: a model step can run a function (LC94: open this game in Chrome / Safari) */
     else{if(!a.el||!a.el.isConnected){update(true);return}try{a.el.click()}catch(x){}}
     setTimeout(()=>update(true),60);setTimeout(()=>update(true),600);
   }
@@ -201,7 +203,7 @@ const LC88=(()=>{
   }
   function init(){
     try{
-      if(window.__lcIab)return;
+      if(window.__lcIab===true)return;   /* 9.58.0: the soft in-app browser mode ("soft") keeps the one guide */
       css();document.documentElement.classList.add("lc88-on");wrapSheets();guardCele();
       mo=new MutationObserver(ms=>{for(const m of ms){if(bar&&(m.target===bar||bar.contains(m.target)))continue;schedule();return}});
       mo.observe(document.body,{childList:true,subtree:true});

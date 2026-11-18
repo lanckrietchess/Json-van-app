@@ -4,22 +4,24 @@
 <script>/*@@module lc87*/
 (function(){
   "use strict";
-  /* LC87 (build 9.47.0): the in-app browser gate. Instagram, TikTok, Facebook, Messenger, Snapchat, X, LinkedIn, Pinterest and LINE open links
-     in their own browser, and those browsers cannot install a web app. This script runs first, in the <head> of BOTH the landing page
-     (index.html) and the app (app.html), with the same text. In such a browser it covers the whole page with one screen: "Open this page in
-     Google Chrome or Safari to install the app." and one big button:
-       - Android: "Open in Chrome" (an intent link; Chrome opens this same page). On Instagram and Facebook it is also tried once by itself.
-       - iPhone / iPad, iOS 17 and newer: "Open in Safari" (x-safari-https link).
-       - Everything else: "Copy link", plus the two taps of that app's own menu (⋯ / ⋮ → Open in browser).
-     Nothing behind it can be used: the page under it is hidden, and the app does not start (window.__lcIab, read by the boot line of app.html).
-     Not shown in an installed app (standalone) or in a normal browser. ?lc_iab=0 switches it off for this tab (owner testing only).
-     9.49.0, the install state (every browser, also when the gate is off): this script runs before anything else, so it catches Chrome's
+  /* LC87 (build 9.47.0, soft since 9.58.0): the in-app browser helper. Instagram, TikTok, Facebook, Messenger, Snapchat, X, LinkedIn, Pinterest
+     and LINE open links in their own browser, and those browsers cannot install a web app. This script runs first, in the <head> of BOTH the
+     landing page (index.html) and the app (app.html), with the same text.
+     9.58.0, value first: nothing is blocked any more. In such a browser the landing page and the app work as normal (window.__lcIab = "soft",
+     so the app boots and the first game review runs right here, Stockfish on the device). The "Open in Chrome / Safari" screen only shows
+     when it helps:
+       - on the landing page, a tap on an Install button: "Open in Chrome" (Android intent) / "Open in Safari" (iOS 17+, x-safari-https) /
+         "Copy the link", plus "Review my last game here" (the app in this same browser) and a close button
+       - LC87.out(url): opens url in the real browser (the app's "Keep this review" step, LC94); where no app link exists it shows the copy screen
+       - Android Instagram and Facebook still try Chrome once by themselves (they hand intent links to Chrome); if that does not happen the page simply works here.
+     Not used in an installed app (standalone) or in a normal browser. ?lc_iab=0 switches it off for this tab (owner testing only).
+     9.49.0, the install state (every browser, also when the helper is off): this script runs before anything else, so it catches Chrome's
      install prompt (beforeinstallprompt) the moment Chrome offers it and keeps it in window.__lcBip for the Install buttons. It also
      remembers that the app is installed (localStorage "lc-pwa-installed": set when the app runs standalone or after appinstalled, cleared
      as soon as Chrome offers its prompt again, which Chrome only does when the app is NOT installed; it also runs out after 60 days without a launch). Android and desktop Chrome share
      that storage between the browser and the installed app, so the landing page can say "Open the app" instead of a dead Install button.
-     LC87.installed(), LC87.bip(), LC87.standalone(). */
-  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.49.0";
+     LC87.installed(), LC87.bip(), LC87.standalone(), LC87.gate(), LC87.out(url). */
+  var W=window,D=document,UA=String(navigator.userAgent||""),VERSION="9.58.0";
   var RE=/FBAN|FBAV|FB_IAB|FBIOS|FB4A|Instagram|TikTok|musical_ly|BytedanceWebview|Bytedance|trill_|Snapchat|Twitter|LinkedInApp|Pinterest|Line\//i;
   function isIab(ua){return RE.test(String(ua||""))}
   function appOf(ua){ua=String(ua||"");return/Instagram/i.test(ua)?"Instagram":/TikTok|musical_ly|Bytedance|trill_/i.test(ua)?"TikTok":/FBAN|FBAV|FB_IAB|FBIOS|FB4A/i.test(ua)?"Facebook":/Snapchat/i.test(ua)?"Snapchat":/Twitter/i.test(ua)?"X":/LinkedIn/i.test(ua)?"LinkedIn":/Pinterest/i.test(ua)?"Pinterest":/Line\//i.test(ua)?"LINE":"this app"}
@@ -28,10 +30,10 @@
   function standalone(){try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
   var off=false;try{if(/[?&]lc_iab=0(&|$)/.test(location.search))sessionStorage.setItem("lc87-off","1");off=sessionStorage.getItem("lc87-off")==="1"}catch(e){}
   /* the address to open outside: this same page, marked as coming from the in-app browser */
-  function target(){var u;try{u=new URL(location.href);u.searchParams.delete("lc_iab");u.searchParams.set("source","iab");return u.href}catch(e){return location.href}}
-  function intentUrl(){var u;try{u=new URL(target())}catch(e){return target()}
-    return"intent://"+u.host+u.pathname+u.search+"#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(u.href)+";end"}
-  function safariUrl(){return"x-safari-"+target()}
+  function target(x){var u;try{u=new URL(x||location.href,location.href);u.searchParams.delete("lc_iab");u.searchParams.set("source","iab");return u.href}catch(e){return x||location.href}}
+  function intentUrl(x){var t=target(x),u;try{u=new URL(t)}catch(e){return t}
+    return"intent://"+u.host+u.pathname+u.search+u.hash+"#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(u.href)+";end"}
+  function safariUrl(x){return"x-safari-"+target(x)}
   var app=appOf(UA),on=isIab(UA)&&!standalone()&&!off;
   /* 9.49.0: the install state (see the header) */
   var IK="lc-pwa-installed";
@@ -41,41 +43,46 @@
   if(!("__lcBip" in W))W.__lcBip=null;
   try{W.addEventListener("beforeinstallprompt",function(e){try{e.preventDefault()}catch(x){}W.__lcBip=e;setInstalled(false)});
     W.addEventListener("appinstalled",function(){W.__lcBip=null;setInstalled(true)})}catch(e){}
-  W.LC87={on:on,app:app,ios:ios,android:android,isIab:isIab,appOf:appOf,target:target,intentUrl:intentUrl,safariUrl:safariUrl,version:VERSION,
-    standalone:standalone,installed:installed,setInstalled:setInstalled,bip:function(){return W.__lcBip||null}};
+  var landing=!/\/app(\.html)?$/.test(location.pathname);
+  var nav=function(x){(W.__lcNav||function(y){location.href=y})(x)};
+  W.LC87={on:on,app:app,ios:ios,android:android,iosV:iosV,isIab:isIab,appOf:appOf,target:target,intentUrl:intentUrl,safariUrl:safariUrl,version:VERSION,
+    standalone:standalone,installed:installed,setInstalled:setInstalled,bip:function(){return W.__lcBip||null},
+    gate:function(){},out:function(x){location.href=x||location.href}};
   if(!on)return;
-  W.__lcIab=true;
+  W.__lcIab="soft";
   var H=D.documentElement;H.classList.add("lc-iab");
-  var css="html.lc-iab,html.lc-iab body{overflow:hidden!important;height:100%!important;background:#0f172a!important}"
-    +"html.lc-iab body>*:not(#lc87){display:none!important}"
-    +"#lc87{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));background:radial-gradient(120% 80% at 50% 0%,#14304a 0%,#0f172a 55%);color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;overflow-y:auto}"
-    +"#lc87 .b{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px}"
-    +"#lc87 img{width:76px;height:76px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.45)}"
-    +"#lc87 h1{margin:4px 0 0;font-size:1.55rem;line-height:1.2;color:#fff;font-weight:800}"
+  var css="#lc87{position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));background:rgba(15,23,42,.96);color:#e2e8f0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;overflow-y:auto}"
+    +"#lc87[hidden]{display:none}"
+    +"#lc87 .b{position:relative;width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px;padding:22px 18px;border-radius:20px;background:radial-gradient(120% 80% at 50% 0%,#14304a 0%,#0f172a 60%);border:1px solid rgba(148,163,184,.22);box-sizing:border-box}"
+    +"#lc87 img{width:64px;height:64px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.45)}"
+    +"#lc87 h1{margin:2px 0 0;font-size:1.4rem;line-height:1.2;color:#fff;font-weight:800}"
     +"#lc87 p{margin:0;color:#cbd5e1}#lc87 p b{color:#fff}"
-    +"#lc87 .go{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;border-radius:16px;border:0;background:#38bdf8;color:#04121c;font-family:inherit;font-weight:800;font-size:1.15rem;line-height:1;text-decoration:none;cursor:pointer;box-shadow:0 10px 30px rgba(56,189,248,.35)}"
-    +"#lc87 .go:focus-visible,#lc87 .cp:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}"
-    +"#lc87 .cp{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;border-radius:14px;border:1px solid rgba(148,163,184,.45);background:transparent;color:#e2e8f0;font-family:inherit;font-weight:700;font-size:1rem;line-height:1;cursor:pointer}"
+    +"#lc87 .go{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;border-radius:16px;border:0;background:#38bdf8;color:#04121c;font-family:inherit;font-weight:800;font-size:1.1rem;line-height:1;text-decoration:none;cursor:pointer;box-shadow:0 10px 30px rgba(56,189,248,.35)}"
+    +"#lc87 .go:focus-visible,#lc87 .cp:focus-visible,#lc87 .x:focus-visible{outline:3px solid #fbbf24;outline-offset:3px}"
+    +"#lc87 .cp{display:flex;align-items:center;justify-content:center;width:100%;min-height:50px;border-radius:14px;border:1px solid rgba(148,163,184,.45);background:transparent;color:#e2e8f0;font-family:inherit;font-weight:700;font-size:1rem;line-height:1;cursor:pointer;text-decoration:none}"
+    +"#lc87 .x{position:absolute;top:8px;right:8px;width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#cbd5e1;font-size:1.6rem;line-height:1;cursor:pointer}"
     +"#lc87 ol{margin:4px 0 0;padding:12px 14px 12px 34px;text-align:left;border-radius:14px;background:rgba(30,41,59,.85);border:1px solid rgba(148,163,184,.22);width:100%;box-sizing:border-box}"
     +"#lc87 li{margin:4px 0}#lc87 .lk{width:100%;box-sizing:border-box;min-height:44px;padding:0 12px;border-radius:12px;border:1px solid rgba(148,163,184,.4);background:#0b1222;color:#e2e8f0;font:14px ui-monospace,Menlo,monospace}"
     +"#lc87 .ok{color:#4ade80;font-weight:700;min-height:1.5em}";
   var st=D.createElement("style");st.id="lc87-css";st.textContent=css;(D.head||H).appendChild(st);
   var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
-  function html(){
-    var big=android?'<a class="go" id="lc87-go" href="'+esc(intentUrl())+'">Open in Chrome</a>'
-      :(ios&&iosV>=17)?'<a class="go" id="lc87-go" href="'+esc(safariUrl())+'">Open in Safari</a>'
+  var cur={url:"",here:false};
+  function html(o){
+    var big=android?'<a class="go" id="lc87-go" href="'+esc(intentUrl(o.url))+'">Open in Chrome</a>'
+      :(ios&&iosV>=17)?'<a class="go" id="lc87-go" href="'+esc(safariUrl(o.url))+'">Open in Safari</a>'
       :'<button type="button" class="go" id="lc87-go" data-lc87-copy>Copy the link</button>';
     var steps=ios?"<li>Tap <b>⋯</b> (top right) in "+esc(app)+".</li><li>Choose <b>Open in browser</b> (or <b>Open in Safari</b>).</li><li>In Safari: <b>Share</b> → <b>Add to Home Screen</b>.</li>"
       :"<li>Tap <b>⋮</b> (top right) in "+esc(app)+".</li><li>Choose <b>Open in Chrome</b> (or <b>Open in browser</b>).</li><li>In Chrome: tap <b>Install app</b>.</li>";
-    return'<div class="b" role="dialog" aria-modal="true" aria-labelledby="lc87-h"><img src="/icons/icon-192.png" alt="Lanckriet Chess" width="76" height="76">'
-      +'<h1 id="lc87-h">Open in Chrome or Safari</h1>'
-      +'<p><b>Open this page in Google Chrome or Safari to install the app.</b> The built-in browser of '+esc(app)+' cannot install apps.</p>'
-      +big+(android||(ios&&iosV>=17)?'<button type="button" class="cp" data-lc87-copy>Copy the link</button>':"")
+    var here=o.here?'<a class="cp" id="lc87-here" href="'+esc(o.hereUrl)+'">Review my last game here</a>':"";
+    return'<div class="b" role="dialog" aria-modal="true" aria-labelledby="lc87-h"><button type="button" class="x" data-lc87-x aria-label="Close">×</button><img src="/icons/icon-192.png" alt="Lanckriet Chess" width="64" height="64">'
+      +'<h1 id="lc87-h">'+(o.here?"Install from Chrome or Safari":"Open in Chrome or Safari")+'</h1>'
+      +'<p><b>The built-in browser of '+esc(app)+' cannot install apps.</b> '+(o.here?"Open this page in Chrome or Safari to install it, or try it right here first.":"Open the app in Chrome or Safari: your game comes along.")+'</p>'
+      +big+(android||(ios&&iosV>=17)?'<button type="button" class="cp" data-lc87-copy>Copy the link</button>':"")+here
       +'<p class="ok" id="lc87-ok" role="status" aria-live="polite"></p>'
       +'<ol>'+steps+"</ol></div>";
   }
   function copy(btn){
-    var u=target(),ok=D.getElementById("lc87-ok");
+    var u=target(cur.url),ok=D.getElementById("lc87-ok");
     var done=function(){if(ok)ok.textContent="Link copied. Paste it in Chrome or Safari.";if(btn)btn.textContent="Copied ✓"};
     var manual=function(){if(!ok)return;ok.innerHTML='<input class="lk" readonly aria-label="The link to open in your browser" value="'+esc(u)+'">';var i=ok.querySelector("input");try{i.focus();i.select()}catch(e){}};
     try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(u).then(done,manual);return}}catch(e){}
@@ -83,20 +90,28 @@
     manual();
   }
   var box=null;
-  function mount(){
+  function close(){if(box){box.hidden=true;try{box.remove()}catch(e){}}}
+  /* the "Open in Chrome / Safari" screen, on demand. o.url = the address to open (default: this page), o.here = offer "Review my last game here" */
+  function gate(o){
     if(!D.body)return;
-    if(!box){box=D.createElement("div");box.id="lc87";box.innerHTML=html();
-      box.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest("[data-lc87-copy]");if(c){e.preventDefault();copy(c)}});}
-    if(box.parentNode!==D.body||D.body.lastElementChild!==box)D.body.appendChild(box);
-    try{var g=D.getElementById("lc87-go");if(g&&!g.__f){g.__f=1;setTimeout(function(){try{g.focus()}catch(e){}},50)}}catch(e){}
+    o=o||{};cur={url:o.url||"",here:!!o.here};
+    var hereUrl="/app.html"+location.search;
+    if(!box){box=D.createElement("div");box.id="lc87";
+      box.addEventListener("click",function(e){var c=e.target.closest&&e.target.closest("[data-lc87-copy]");if(c){e.preventDefault();copy(c);return}
+        if(e.target===box||(e.target.closest&&e.target.closest("[data-lc87-x]"))){e.preventDefault();close()}});
+      D.addEventListener("keydown",function(e){if(e.key==="Escape"&&box&&box.isConnected)close()});}
+    box.innerHTML=html({url:o.url,here:cur.here,hereUrl:hereUrl});box.hidden=false;
+    if(box.parentNode!==D.body)D.body.appendChild(box);
+    try{var g=D.getElementById("lc87-go");setTimeout(function(){try{g.focus()}catch(e){}},50)}catch(e){}
   }
-  if(D.body)mount();else D.addEventListener("DOMContentLoaded",mount);
-  W.addEventListener("load",mount);
-  try{new MutationObserver(function(){if(box&&(box.parentNode!==D.body))mount()}).observe(H,{childList:true,subtree:false})}catch(e){}
-  setInterval(mount,1500);                                         /* nothing the page adds later can cover it */
-  /* Android, Instagram and Facebook: try Chrome once by itself (they hand intent links to Chrome); the button stays for a second try */
+  /* open an address in the real browser: Chrome (Android intent), Safari (iOS 17+), otherwise the copy screen */
+  function out(x){var u=x||location.href;if(android)return nav(intentUrl(u));if(ios&&iosV>=17)return nav(safariUrl(u));gate({url:u})}
+  W.LC87.gate=gate;W.LC87.out=out;W.LC87.close=close;
+  /* the landing page: an Install button opens the screen (with "Review my last game here") instead of steps that cannot work in this browser */
+  if(landing)D.addEventListener("click",function(e){var a=e.target.closest&&e.target.closest("[data-install]");if(!a)return;e.preventDefault();e.stopImmediatePropagation();gate({here:true})},true);
+  /* Android, Instagram and Facebook: try Chrome once by itself (they hand intent links to Chrome); when nothing happens, the page works here */
   try{if(android&&/Instagram|FBAN|FBAV|FB_IAB|FB4A/i.test(UA)&&!sessionStorage.getItem("lc87-auto")){sessionStorage.setItem("lc87-auto","1");
-    setTimeout(function(){var nav=W.__lcNav||function(x){location.href=x};nav(intentUrl())},600)}}catch(e){}
+    setTimeout(function(){nav(intentUrl())},600)}}catch(e){}
 })(); /*@@end lc87*/</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
@@ -112,15 +127,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.57.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.58.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.57.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.57.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.58.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.58.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.57.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.58.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -567,7 +582,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p data-cms="foot.1"><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p data-cms="foot.2"><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.57.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.58.0</p></footer>
 <button type="button" class="lc72-edit" id="lc89-edit" hidden>✎ Edit this page</button>
 <script>
 /*@@module lc89*/
@@ -1154,7 +1169,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   syncLabels();
 
   /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
-  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.57.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.58.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -1509,6 +1524,197 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   window.addEventListener("appinstalled",function(){if(u&&k)fetch(u+"/rest/v1/rpc/lc73_hit",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:JSON.stringify({p:{kind:"install",device:cur.device,code:cur.code||""}})}).catch(function(){})});
   /* 9.52.0: the owner's "Edit this page" button moved to LC89: hidden by default, shown only after the server confirmed an admin session */
 })();
+</script>
+<script>
+/*@@module lc94*/
+const LC94=(()=>{
+  "use strict";
+  /* LC94 (build 9.58.0): the funnel, the first-click source and the ?u= deep link. Same text in index.html (the landing page) and app.html.
+     1. Funnel: 11 steps, each sent ONCE per device to public.lc94_step (sql/20261118100000_lc94_funnel.sql). The device id is the app's own
+        deviceId() (localStorage "lc-hub-device"), the same id the checkout sends to Stripe, so the server can add the last step ("paid").
+          landing, iab_open, first_open, name_entered, first_review_done, signed_in, install, day2_return, paywall_seen, checkout_started, paid
+        Nothing is sent for the owner in admin mode. A failed call is retried on the next page load (a step counts as sent only on HTTP 2xx).
+     2. Source: the first non-empty ?src=, ?utm_source=, ?ref= or LC73 short-link code this device ever saw (localStorage "lc94-src"),
+        sent with every step. ?source=iab (LC87's "open outside" link) is not a source: it keeps the original one.
+     3. Deep link (app only): /app.html?u=<Chess.com or Lichess name>&site=chesscom|lichess&src=mc_ig. The name is taken as the answer to the
+        first-run question, the "How did you find us?" step is filled from ?src= when it names a platform, and the first review starts at once
+        (LC42.begin -> LC50 scans the latest game on the device with Stockfish). The parameters leave the address bar so a reload does not restart it.
+     4. In an Instagram / TikTok / Facebook browser (LC87 soft mode) one LC88 step after the first review: "Keep this review", which opens the same
+        game in Chrome / Safari (the in-app browser keeps nothing once it is closed). */
+  const W=window,D=document,VERSION="9.58.0";
+  const STEPS=["landing","iab_open","first_open","name_entered","first_review_done","signed_in","install","day2_return","paywall_seen","checkout_started","paid"];
+  const K_DONE="lc94-done",K_SRC="lc94-src",K_FIRST="lc94-first",K_DEEP="lc94-deep",K_IABX="lc94-iab-x",K_DEV="lc-hub-device";
+  const NAME=/^[A-Za-z0-9_-]{2,30}$/,DEV_RE=/^d-[a-z0-9]{12,40}$/;
+  const isApp=()=>/\/app(\.html)?$/.test(location.pathname);
+  const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
+  const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+  const ssGet=k=>{try{return JSON.parse(sessionStorage.getItem(k)||"null")}catch(e){return null}};
+  const ssSet=(k,v)=>{try{if(v==null)sessionStorage.removeItem(k);else sessionStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+  const clean=(v,n)=>String(v==null?"":v).toLowerCase().replace(/[^a-z0-9_.-]/g,"").slice(0,n||40);
+  const admin=()=>{try{return typeof Admin!=="undefined"&&!!Admin.active}catch(e){return false}};
+  const iab=()=>W.__lcIab==="soft";
+
+  /* ---------- the device id: the app's deviceId(), or the same format on the landing page (same storage, so both pages agree) ---------- */
+  function dev(){
+    try{if(typeof deviceId==="function")return deviceId()}catch(e){}
+    let id=lsGet(K_DEV,"");
+    if(!DEV_RE.test(id||"")){id="d-"+Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>(b<36?"0":"")+b.toString(36)).join("").slice(0,20);lsSet(K_DEV,id)}
+    return id;
+  }
+  /* ---------- the first-click source ---------- */
+  function captureSource(search){
+    if(lsGet(K_SRC,""))return lsGet(K_SRC,"");
+    let s="";
+    try{const P=new URLSearchParams(search==null?location.search:search);s=clean(P.get("src"))||clean(P.get("utm_source"))||clean(P.get("ref"))}catch(e){}
+    if(!s){const c=lsGet("lc73-src",null);if(c&&typeof c==="object")s=clean(c.code)||clean(c.utm_source)||clean(c.ref)}
+    if(s==="iab")s="";
+    if(s)lsSet(K_SRC,s);
+    return s;
+  }
+  const src=()=>lsGet(K_SRC,"")||"";
+  /* the platform a source names, for the app's own "How did you find us?" answer (LC30) */
+  function platformOf(s){
+    s=String(s||"");
+    return/^(mc_)?(ig|insta)/.test(s)?"instagram":/^(mc_)?(tt|tk|tiktok)/.test(s)?"tiktok":/^(mc_)?(yt|youtube)/.test(s)?"youtube":/^(mc_)?(fb|facebook)/.test(s)?"facebook":/^(mc_)?(x|tw)([_.-]|$)/.test(s)?"x":"";
+  }
+
+  /* ---------- the funnel ---------- */
+  function endpoint(){
+    let u="",k="";
+    try{const c=CONFIG.features.supabase;u=c.url;k=c.anonKey}catch(e){}
+    if(!u||!k){try{u=D.querySelector('meta[name="lc-sb-url"]').getAttribute("content");k=D.querySelector('meta[name="lc-sb-key"]').getAttribute("content")}catch(e){}}
+    return/^https:\/\//.test(u||"")&&k?{u:String(u).replace(/\/+$/,""),k:k}:null;
+  }
+  const sent=()=>lsGet(K_DONE,{})||{};
+  const pending={};
+  function step(name){
+    try{
+      if(STEPS.indexOf(name)<0||name==="paid"||admin())return false;
+      if(sent()[name]||pending[name])return false;
+      const ep=endpoint();if(!ep||typeof fetch!=="function")return false;
+      pending[name]=1;
+      fetch(ep.u+"/rest/v1/rpc/lc94_step",{method:"POST",keepalive:true,credentials:"omit",
+        headers:{"Content-Type":"application/json",apikey:ep.k,Authorization:"Bearer "+ep.k},
+        body:JSON.stringify({p_aid:dev(),p_step:name,p_src:src()||null})})
+        .then(r=>{if(r&&r.ok){const d=sent();d[name]=Date.now();lsSet(K_DONE,d)}})
+        .catch(()=>{})
+        .then(()=>{delete pending[name]});
+      return true;
+    }catch(e){return false}
+  }
+
+  /* ---------- the deep link (app.html?u=...) ---------- */
+  function readDeep(search){
+    try{
+      const P=new URLSearchParams(search==null?location.search:search),u=String(P.get("u")||"").trim();
+      if(!NAME.test(u))return null;
+      const site=/^li/i.test(String(P.get("site")||""))?"lichess":"chesscom";
+      return{u:u,site:site};
+    }catch(e){return null}
+  }
+  function stripDeep(){
+    try{
+      const url=new URL(location.href);let ch=false;
+      ["u","site","resume"].forEach(k=>{if(url.searchParams.has(k)){url.searchParams.delete(k);ch=true}});
+      if(ch)history.replaceState(history.state,"",url.pathname+(url.searchParams.toString()?"?"+url.searchParams.toString():"")+url.hash);
+    }catch(e){}
+  }
+  const trimCount=()=>{try{const s=Store.get("lc-hub-trim-stats-v1",{})||{};return Object.keys(s.games||{}).length}catch(e){return 0}};
+  /* called by boot() right before the first-run sheet would open. true = the deep link took over (no first-run sheet). */
+  function deepStart(){
+    const d=ssGet(K_DEEP);if(!d||!NAME.test(d.u||""))return false;
+    ssSet(K_DEEP,null);
+    try{
+      if(typeof LC42!=="undefined"&&LC42.owns())return false;   /* already on the road: nothing to restart */
+      const onb=!!(typeof App!=="undefined"&&App.onboarded);
+      if(onb&&trimCount()>0)return false;                          /* a returning player with reviews: the link changes nothing */
+      if(typeof App!=="undefined"){
+        const p=Object.assign({},App.profile||{});
+        if(d.site==="lichess")p.lichess_username=d.u;else p.chess_com_username=d.u;
+        try{App.profile=typeof sanitizeProfile==="function"?sanitizeProfile(p):p}catch(e){App.profile=p}
+        App.onboarded=true;try{App.save()}catch(e){}
+      }
+      const pl=platformOf(src());
+      try{if(!Store.get("lc80-onb",null))Store.set("lc80-onb",{done:true,at:Date.now(),platform:pl,code:"",creator:"",mspc:"",pain:"",v:"8.0",via:"deeplink"})}catch(e){}
+      try{if(pl&&typeof LC30!=="undefined"&&LC30.attribution&&!(LC30.state()||{}).attr)LC30.attribution.save({source:"social",detail:pl})}catch(e){}
+      try{if(typeof LC50!=="undefined")LC50.pre.start(d.site,d.u)}catch(e){}
+      setTimeout(()=>{try{if(typeof LC42!=="undefined"&&LC42.begin(d.site==="lichess"?{li:d.u}:{cc:d.u}))step("name_entered")}catch(e){console.error("lc94 deep",e)}},600);
+      return true;
+    }catch(e){console.error("lc94 deep",e);return false}
+  }
+
+  /* ---------- the in-app browser step (LC88 source "iab"): keep this review, open it in Chrome / Safari ---------- */
+  function reviewDone(){
+    try{if(typeof LC42!=="undefined"&&/^(sys|libq|second|done)$/.test(String(LC42._t.st().step||"")))return true}catch(e){}
+    return trimCount()>0;
+  }
+  function resumeUrl(){
+    let site="",user="";
+    try{const s=LC42._t.st();site=s.site||"";user=s.user||""}catch(e){}
+    if(!user){try{const p=App.profile||{};if(p.chess_com_username){site="chesscom";user=p.chess_com_username}else if(p.lichess_username){site="lichess";user=p.lichess_username}}catch(e){}}
+    const u=new URL("/app.html",location.href);
+    if(NAME.test(user)){u.searchParams.set("u",user);u.searchParams.set("site",site==="lichess"?"lichess":"chesscom");u.searchParams.set("resume","1")}
+    const s=src();if(s)u.searchParams.set("src",s);
+    return u.href;
+  }
+  function openOutside(){try{if(W.LC87&&LC87.out)return LC87.out(resumeUrl())}catch(e){}location.href=resumeUrl()}
+  function iabStep(){
+    if(!iab()||!reviewDone())return null;
+    const x=+lsGet(K_IABX,0)||0;if(x&&Date.now()-x<3*864e5)return null;
+    const L=W.LC87||{},label=L.android?"Open in Chrome":(L.ios&&L.iosV>=17)?"Open in Safari":"Copy the link",app=L.app||"this app";
+    return{html:"<b>Keep this review.</b> <span class=\"lc88-s\">The browser inside "+String(app).replace(/[<>&"]/g,"")+" forgets everything when you close it. Open the app in your own browser: your game comes along.</span>",
+      acts:[{label:label,run:openOutside,primary:true},{label:"×",dismiss:true,run:()=>lsSet(K_IABX,Date.now())}],sig:"iab"};
+  }
+
+  /* ---------- watchers ---------- */
+  let tick=0;
+  function watch(){
+    if(D.hidden)return;
+    const s=sent();
+    if(!s.first_review_done&&reviewDone())step("first_review_done");
+    if(!s.paywall_seen&&D.querySelector(".lc90-sheet")&&!admin())step("paywall_seen");
+  }
+  function wrapCheckout(){
+    try{
+      if(typeof LC36==="undefined"||!LC36.support||typeof LC36.support.go!=="function"||LC36.support.go.__lc94)return;
+      const g=LC36.support.go,f=function(u){try{if(/^https:\/\/[a-z0-9.-]*stripe\.com\//i.test(String(u||"")))step("checkout_started")}catch(e){}return g.apply(this,arguments)};
+      f.__lc94=1;LC36.support.go=f;
+    }catch(e){}
+  }
+  function wrapBegin(){
+    try{
+      if(typeof LC42==="undefined"||typeof LC42.begin!=="function"||LC42.begin.__lc94)return;
+      const b=LC42.begin,f=function(){const r=b.apply(this,arguments);if(r)step("name_entered");return r};
+      f.__lc94=1;LC42.begin=f;
+    }catch(e){}
+  }
+
+  function init(){
+    try{
+      captureSource();
+      const standalone=(()=>{try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}})();
+      if(iab())step("iab_open");
+      W.addEventListener("appinstalled",()=>step("install"));
+      if(!isApp()){step("landing");return}
+      /* the app */
+      const d=readDeep();
+      if(d){ssSet(K_DEEP,d);stripDeep();
+        /* LC30 asks "How familiar are you with chess?" on a brand-new install 600 ms after start: the link already answered it */
+        try{if(typeof LC30!=="undefined"&&LC30.level0&&!LC30.level0.s().choice)LC30.level0.set({choice:"know",auto:true,via:"deeplink"})}catch(e){}}
+      const first=+lsGet(K_FIRST,0)||0;
+      if(!first)lsSet(K_FIRST,Date.now());else if(Date.now()-first>=20*36e5)step("day2_return");
+      step("first_open");
+      if(standalone)step("install");
+      W.addEventListener("lc39-signed-in",()=>step("signed_in"));
+      wrapCheckout();wrapBegin();
+      if(!tick)tick=setInterval(watch,4000);
+    }catch(e){console.error("lc94",e)}
+  }
+  return{VERSION:VERSION,STEPS:STEPS,init:init,step:step,deepStart:deepStart,iabStep:iabStep,src:src,
+    _t:{captureSource:captureSource,platformOf:platformOf,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
+})();
+/*@@end lc94*/
+try{LC94.init()}catch(e){}
 </script>
 </body>
 </html>

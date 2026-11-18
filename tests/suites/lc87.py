@@ -1,7 +1,7 @@
 # lc87 (9.47.0, install state 9.49.0): the in-app browser gate and the install button. Real Chromium with the user agents of the real in-app browsers.
-# In Instagram / TikTok / Facebook (Android and iPhone) the landing page AND the app are covered by one screen (nothing under it can be
-# tapped, the app does not boot), with "Open in Chrome" (intent) or "Open in Safari" (x-safari) and Copy the link; Android Instagram tries
-# Chrome once by itself. Normal Chrome, Safari and the installed app never see it; ?lc_iab=0 switches it off for the tab. In a real browser
+# 9.58.0 soft mode: in Instagram / TikTok / Facebook (Android and iPhone) the landing page and the app work (the app boots); an Install
+# button opens one screen with "Open in Chrome" (intent) or "Open in Safari" (x-safari), Copy the link and "Review my last game here";
+# Android Instagram and Facebook try Chrome once by themselves. Normal Chrome, Safari and the installed app never see it; ?lc_iab=0 switches it off for the tab. In a real browser
 # the Install button opens the native prompt at once when the browser offered it, otherwise the browser's own steps on the landing page.
 UAS = {
   'ig-android': 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/AP1A; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.82 Mobile Safari/537.36 Instagram 330.0.0.40.92 Android (34/14; 420dpi; 1080x2400; Google; Pixel 8; shiba; shiba; en_US; 599382017)',
@@ -11,7 +11,7 @@ UAS = {
   'chrome-android': 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Mobile Safari/537.36',
   'safari-iphone': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
 }
-GATE = "(() => { const g = document.getElementById('lc87'); if (!g) return 'none'; const r = g.getBoundingClientRect(); const go = document.getElementById('lc87-go'); const top = document.elementFromPoint(innerWidth / 2, innerHeight - 30); const vis = [...document.body.children].filter(x => x.id !== 'lc87' && getComputedStyle(x).display !== 'none').length; return [r.width >= innerWidth - 1 && r.height >= innerHeight - 1, go ? go.textContent : '', go ? (go.getAttribute('href') || '').split(':')[0] : '', !!top && g.contains(top), vis, document.getElementById('lc87-h').textContent]; })()"
+GATE = "(() => { const g = document.getElementById('lc87'); if (!g) return 'none'; const r = g.getBoundingClientRect(); const go = document.getElementById('lc87-go'); const top = document.elementFromPoint(innerWidth / 2, innerHeight - 30); const here = document.getElementById('lc87-here'); return [r.width >= innerWidth - 1 && r.height >= innerHeight - 1, go ? go.textContent : '', go ? (go.getAttribute('href') || '').split(':')[0] : '', !!top && g.contains(top), here ? here.getAttribute('href') : '', document.getElementById('lc87-h').textContent]; })()"
 def ctx(br, ua, w=390, h=844):
     c = br.new_context(viewport={'width': w, 'height': h}, is_mobile=True, has_touch=True, device_scale_factor=1, user_agent=ua)
     c.route('**/*', route); c.add_init_script(script=INIT); return c
@@ -21,23 +21,26 @@ with sync_playwright() as p:
         c = ctx(br, UAS[k]); pg = c.new_page(); watch(pg, k)
         pg.add_init_script("window.__navs = []; window.__lcNav = (u) => window.__navs.push(u);")
         pg.goto('http://127.0.0.1:8765/index.html'); pg.wait_for_timeout(1500)
-        out(k + ' landing gate [full screen, button, link scheme, on top, nothing else visible, title]', pg.evaluate(GATE))
-        out(k + ' landing [the text]', pg.evaluate("document.querySelector('#lc87 p').textContent"))
+        out(k + ' landing works [soft, no screen, hero visible, LC87.on]', pg.evaluate("[window.__lcIab, !document.getElementById('lc87'), getComputedStyle(document.querySelector('.hero')).display !== 'none', LC87.on]"))
         out(k + ' auto-try Chrome once [intent tries]', pg.evaluate("window.__navs.filter(u => u.indexOf('intent://') === 0).length"))
         pg.reload(); pg.wait_for_timeout(1200)
         out(k + ' after a reload [no second auto-try]', pg.evaluate("window.__navs.filter(u => u.indexOf('intent://') === 0).length"))
-        pg.goto('http://127.0.0.1:8765/app.html#home'); pg.wait_for_timeout(3000)
-        out(k + ' app gate [full screen, button, link scheme, on top, nothing else visible, title]', pg.evaluate(GATE))
-        out(k + ' app did not boot [__lcIab, no navigation rendered, no sheet open]', pg.evaluate("[window.__lcIab === true, !(document.getElementById('tabs') || {}).innerHTML, document.querySelectorAll('.sheet-wrap').length]"))
+        pg.click('.hero [data-install]'); pg.wait_for_timeout(400)
+        out(k + ' Install [full screen, button, link scheme, on top, here link, title]', pg.evaluate(GATE))
+        out(k + ' Install [the text]', pg.evaluate("document.querySelector('#lc87 p').textContent"))
         if k == 'ig-android':
-            out(k + ' intent [Chrome package, fallback is this page, marked source=iab]', pg.evaluate("(() => { const h = document.getElementById('lc87-go').getAttribute('href'); return [/package=com\\.android\\.chrome/.test(h), decodeURIComponent((/browser_fallback_url=([^;]+)/.exec(h) || [])[1] || '').replace(location.origin, ''), h.indexOf('intent://127.0.0.1:8765/app.html?source=iab') === 0]; })()"))
+            out(k + ' intent [Chrome package, fallback is this page, marked source=iab]', pg.evaluate("(() => { const h = document.getElementById('lc87-go').getAttribute('href'); return [/package=com\\.android\\.chrome/.test(h), decodeURIComponent((/browser_fallback_url=([^;]+)/.exec(h) || [])[1] || '').replace(location.origin, ''), h.indexOf('intent://127.0.0.1:8765/index.html?source=iab') === 0]; })()"))
             c.grant_permissions(['clipboard-read', 'clipboard-write'], origin='http://127.0.0.1:8765')
-            pg.click('#lc87 .cp'); pg.wait_for_timeout(400)
+            pg.click('#lc87 .cp[data-lc87-copy]'); pg.wait_for_timeout(400)
             out(k + ' copy [message, clipboard is this page marked source=iab]', [pg.evaluate("document.getElementById('lc87-ok').textContent"), pg.evaluate("navigator.clipboard.readText()").replace('http://127.0.0.1:8765', '').split('#')[0]])
         if k == 'ig-iphone':
             out(k + ' Safari link', pg.evaluate("document.getElementById('lc87-go').getAttribute('href').replace(location.origin, '')"))
         if k == 'fb-iphone-ios16':
             out(k + ' iOS 16 [copy is the big button, steps]', pg.evaluate("[!!document.querySelector('#lc87-go[data-lc87-copy]'), [...document.querySelectorAll('#lc87 li')].map(l => l.textContent)]"))
+        pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+        out(k + ' Escape closes the screen', pg.evaluate("!document.getElementById('lc87')"))
+        pg.goto('http://127.0.0.1:8765/app.html#home'); pg.wait_for_timeout(3000)
+        out(k + ' app boots in the in-app browser [soft, navigation rendered, no screen]', pg.evaluate("[window.__lcIab, !!(document.getElementById('tabs') || {}).innerHTML, !document.getElementById('lc87')]"))
         c.close()
     # normal browsers: no gate
     for k in ['chrome-android', 'safari-iphone']:
