@@ -100,7 +100,9 @@ jobs:
           EOF
           cd ../..
           printf '# master-data\nResults of tools/master_games.py (Kyenzo'"'"'s Games, LC95). Written by the workflow "Kyenzo'"'"'s Games (analysis)"; do not edit by hand.\n' > README.md
-          git add master/data README.md
+          # this branch only holds data: Vercel must never build or promote it (a promoted data deploy replaced the live site on 18 Nov 2026)
+          printf '{\n  "git": { "deploymentEnabled": false }\n}\n' > vercel.json
+          git add master/data README.md vercel.json
           if git diff --cached --quiet; then echo "Nothing new."; exit 0; fi
           git commit -qm "Kyenzo's Games: analysed games ($(date -u +%F))"
           git push -q origin master-data
