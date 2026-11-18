@@ -1,0 +1,50 @@
+[
+ {
+  "url": "https://www.chess.com/game/live/186390149978",
+  "eco": "https://www.chess.com/openings/Caro-Kann-Defense-Advance-Botvinnik-Carls-Defense-4.c3-Nc6-5.Nf3-Bg4",
+  "pgn": "[Event \"Live Chess\"]\n[Site \"Chess.com\"]\n[White \"abdjarrahmani\"]\n[Black \"Lanckrietchess_YT\"]\n[Result \"0-1\"]\n[ECO \"B12\"]\n[WhiteElo \"1695\"]\n[BlackElo \"1732\"]\n[TimeControl \"300\"]\n[Link \"https://www.chess.com/game/live/186390149978\"]\n\n1. e4 {[%clk 0:04:59.4]} 1... c6 {[%clk 0:04:59.9]} 2. d4 2... d5 3. e5 3... c5 4. c3 4... Nc6 5. Nf3 5... Bg4 6. Be2 6... cxd4 7. cxd4 7... e6 8. O-O 8... Nge7 9. Bg5 9... Qb6 10. Be3 10... Nf5 11. b3 11... Be7 12. Nc3 12... O-O 13. Na4 13... Qd8 14. h3 14... Bxf3 15. Bxf3 15... Bg5 16. g4 16... Nxe3 17. fxe3 17... Bxe3+ 18. Kg2 18... Bxd4 19. Rc1 19... Qh4 20. Rxc6 20... Bxe5 21. Kh1 21... Qxh3+ 22. Kg1 22... Qh2# 0-1\n",
+  "white": {
+   "username": "abdjarrahmani",
+   "rating": 1695,
+   "result": "checkmated"
+  },
+  "black": {
+   "username": "Lanckrietchess_YT",
+   "rating": 1732,
+   "result": "win"
+  },
+  "rated": true,
+  "rules": "chess",
+  "time_class": "blitz",
+  "time_control": "300",
+  "end_time": 1793616366,
+  "accuracies": {
+   "black": 82.36,
+   "white": 65.88
+  }
+ },
+ {
+  "url": "https://www.chess.com/game/live/186463891360",
+  "eco": "https://www.chess.com/openings/Caro-Kann-Defense-Advance-Botvinnik-Carls-Defense-4.c3-Nc6-5.Nf3",
+  "pgn": "[Event \"Live Chess\"]\n[Site \"Chess.com\"]\n[White \"Steph175\"]\n[Black \"Lanckrietchess_YT\"]\n[Result \"1-0\"]\n[ECO \"B12\"]\n[WhiteElo \"1784\"]\n[BlackElo \"1694\"]\n[TimeControl \"180\"]\n[Link \"https://www.chess.com/game/live/186463891360\"]\n\n1. e4 c6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 cxd4 6. cxd4 Bg4 7. a3 e6 8. b4 Nge7 9. Nbd2 Nf5 10. Bb2 Be7 11. Nb3 Bxf3 12. Qxf3 Rc8 13. Bd3 g6 14. Bxf5 gxf5 15. O-O Rg8 16. Qh5 Rg7 17. Rac1 Kd7 18. Rc2 Qg8 19. g3 f4 20. Rfc1 fxg3 21. fxg3 a6 22. Qe2 Bh4 23. Rc3 Na7 24. Nc5+ Ke7 25. Qh5 Rg4 26. Kf2 Rf4+ 27. Kg2 Nb5 28. Rf3 Rg4 29. Rxf7+ Qxf7 30. Qxg4 Rg8 31. Qxh4+ Ke8 32. Rf1 Qg6 33. Qf6 Qc2+ 34. Rf2 Qe4+ 1-0\n",
+  "white": {
+   "username": "Steph175",
+   "rating": 1784,
+   "result": "win"
+  },
+  "black": {
+   "username": "Lanckrietchess_YT",
+   "rating": 1694,
+   "result": "resigned"
+  },
+  "rated": true,
+  "rules": "chess",
+  "time_class": "blitz",
+  "time_control": "180",
+  "end_time": 1793716019,
+  "accuracies": {
+   "black": 65.47,
+   "white": 78.38
+  }
+ }
+]

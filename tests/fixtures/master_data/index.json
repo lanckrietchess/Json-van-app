@@ -1,0 +1,18 @@
+{
+ "version": 1,
+ "built": 0,
+ "files": [
+  {
+   "name": "games-2026-2.json",
+   "rows": 2
+  },
+  {
+   "name": "puzzles-2026-2.json",
+   "rows": 9
+  },
+  {
+   "name": "../evil.json",
+   "rows": 1
+  }
+ ]
+}

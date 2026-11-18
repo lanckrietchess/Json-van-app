@@ -1,0 +1,106 @@
+# Kyenzo's Games (LC95, 9.60.0): downloads the rated rapid + blitz games of Lanckrietchess_YT from the public Chess.com API,
+# analyses every position with Stockfish (tools/master_games.py) and publishes the results to the branch `master-data`
+# (master/data/games-YYYY-H.json, puzzles-YYYY-H.json, index.json). Supabase pulls them from there with
+# `select public.mg_pull();` then `select public.mg_collect();` (pg_cron does both every Monday).
+# Incremental: every job starts from what `master-data` already holds and analyses only the new games.
+# Needs no secret: Chess.com's API is public and the results go to this public repository (no opponent names are stored).
+name: Kyenzo's Games (analysis)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 2 * * 1'
+  push:
+    branches-ignore: [main, master-data]
+    paths: [tools/master_games.py, .github/workflows/master-games.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: master-games
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.m.outputs.matrix }}
+    steps:
+      - id: m
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'EOF'
+          import json, datetime
+          now = datetime.date.today()
+          inc = [{"year": y, "half": h} for y in range(2023, now.year + 1) for h in (1, 2)
+                 if not (y == now.year and h == 2 and now.month <= 6) and not (y == 2023 and h == 1)]
+          print("matrix=" + json.dumps({"include": inc}))
+          EOF
+
+  analyse:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tools
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q stockfish
+          pip install -q python-chess
+          python3 tools/master_games.py --self-test
+      - name: Start from the published results
+        run: |
+          mkdir -p master/data
+          F=master/data/games-${{ matrix.year }}-${{ matrix.half }}.json; P=master/data/puzzles-${{ matrix.year }}-${{ matrix.half }}.json
+          if git fetch -q --depth 1 origin master-data 2>/dev/null; then
+            git show FETCH_HEAD:$F > $F 2>/dev/null || rm -f $F
+            git show FETCH_HEAD:$P > $P 2>/dev/null || rm -f $P
+          fi
+          ls -la master/data
+      - name: Analyse ${{ matrix.year }} half ${{ matrix.half }}
+        env:
+          STOCKFISH: /usr/games/stockfish
+        run: python3 tools/master_games.py run --year ${{ matrix.year }} --half ${{ matrix.half }} --workers 4 --nodes 60000
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: master-${{ matrix.year }}-${{ matrix.half }}
+          path: master/data/*-${{ matrix.year }}-${{ matrix.half }}.json
+          if-no-files-found: ignore
+
+  publish:
+    needs: analyse
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: parts
+          pattern: master-*
+          merge-multiple: true
+      - name: Commit to master-data
+        run: |
+          git config user.name "master-games-bot"
+          git config user.email "master-games-bot@users.noreply.github.com"
+          mkdir -p /tmp/pub && cp tools/master_games.py /tmp/pub/
+          if git fetch -q origin master-data 2>/dev/null; then git checkout -q -B master-data FETCH_HEAD; else git checkout -q --orphan master-data; git rm -rq --cached . ; find . -mindepth 1 -maxdepth 1 ! -name .git ! -name parts -exec rm -rf {} +; fi
+          mkdir -p master/data
+          cp parts/*.json master/data/ 2>/dev/null || true
+          cd master/data && python3 - <<'EOF'
+          import json, os, re, time
+          files = sorted(f for f in os.listdir('.') if re.match(r'(games|puzzles)-\d{4}(-[12])?\.json$', f))
+          idx = {'version': 1, 'built': int(time.time()), 'files': [{'name': f, 'rows': len(json.load(open(f)))} for f in files]}
+          json.dump(idx, open('index.json', 'w'), indent=1)
+          print(json.dumps(idx, indent=1))
+          EOF
+          cd ../..
+          printf '# master-data\nResults of tools/master_games.py (Kyenzo'"'"'s Games, LC95). Written by the workflow "Kyenzo'"'"'s Games (analysis)"; do not edit by hand.\n' > README.md
+          git add master/data README.md
+          if git diff --cached --quiet; then echo "Nothing new."; exit 0; fi
+          git commit -qm "Kyenzo's Games: analysed games ($(date -u +%F))"
+          git push -q origin master-data
