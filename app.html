@@ -28932,6 +28932,7 @@ const LC83=(()=>{
   }
   function iabBar(){
     if(!inApp()||standalone()||Q(".lc83-iab"))return;
+    if(window.__lcIab==="soft")return;   /* 9.59.0: in LC87's soft mode the player first gets the review here; LC94's "Keep this review" step sends them to Chrome / Safari after it */
     if(Date.now()-(+rd("lc83-iab",0)||0)<864e5)return;
     const b=document.createElement("div");b.className="lc83-iab";b.setAttribute("role","note");
     const steps=isIOS()?"Tap <b>⋯</b> (top right), then <b>Open in browser</b>. In Safari: <b>Share</b> → <b>Add to Home Screen</b>."

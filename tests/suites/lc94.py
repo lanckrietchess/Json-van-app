@@ -113,6 +113,7 @@ with sync_playwright() as p:
     out('ig-android close [screen gone]', pg.evaluate("!document.getElementById('lc87')"))
     pg.goto('http://127.0.0.1:8765/app.html#home'); pg.wait_for_timeout(3500)
     out('ig-android app boots [soft, navigation rendered, no screen]', pg.evaluate("[window.__lcIab, !!(document.getElementById('tabs') || {}).innerHTML, !document.getElementById('lc87')]"))
+    out('ig-android app first open [no install bar before the first review]', pg.evaluate("!document.querySelector('.lc83-iab')"))
     out('ig-android app, before a review [no Keep step]', pg.evaluate("LC94.iabStep()"))
     out('ig-android sign-in gate [Google hidden (Google refuses in-app browsers), e-mail field shown]', pg.evaluate("(() => { const d = document.createElement('div'); d.innerHTML = LC53.gateHTML(); document.body.appendChild(d); const g = d.querySelector('[data-lc39-google]'), m = d.querySelector('input[type=email]'); const r = [getComputedStyle(g).display, getComputedStyle(m).display !== 'none']; d.remove(); return r; })()"))
     pg.evaluate("App.profile = Object.assign({}, App.profile, { chess_com_username: 'kyenzotest' }); Store.set('lc-hub-trim-stats-v1', { games: { g1: { t: Date.now() } } }); [...document.querySelectorAll('.sheet-wrap')].forEach(w => w.remove()); LC88.update(true); undefined"); pg.wait_for_timeout(900)
