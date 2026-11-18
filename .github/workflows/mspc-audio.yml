@@ -1,0 +1,49 @@
+# Coach Lanckriet's voice for the MSPC System page (#learn-mspc). Run by hand AFTER you published your texts in the app
+# (Actions > MSPC audio > Run workflow). It reads the published texts, makes the missing clips with ElevenLabs
+# (same voice and model as the ? help clips) and opens a pull request with them; merge it and the page plays them.
+# Needs ONE repository secret: ELEVENLABS_API_KEY. Without it the job only prints what it would make.
+name: MSPC audio (Coach Lanckriet)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    env:
+      ELEVENLABS_VOICE_ID: jfIS2w2yJi0grJZPyEsk
+      ELEVENLABS_MODEL: eleven_multilingual_v2
+      HAS_KEY: ${{ secrets.ELEVENLABS_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: What would be made
+        run: node scripts/build-mspc-audio.mjs --dry
+      - name: Make the clips
+        if: env.HAS_KEY == 'true'
+        env:
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: node scripts/build-mspc-audio.mjs --budget 20000
+      - name: Open a pull request with the clips
+        if: env.HAS_KEY == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "mspc-audio-bot"
+          git config user.email "mspc-audio-bot@users.noreply.github.com"
+          git add assets/audio/mspc
+          if git diff --cached --quiet; then echo "Nothing new."; exit 0; fi
+          B="mspc-audio-$(date -u +%Y%m%d-%H%M)"
+          git checkout -b "$B"
+          git commit -m "MSPC System page: Coach Lanckriet audio"
+          git push -u origin "$B"
+          gh pr create --base "${GITHUB_REF_NAME}" --head "$B" --title "MSPC System page: Coach Lanckriet audio" --body "Clips made from the texts published on the MSPC System page. Merge to make them play."
+      - name: No key yet
+        if: env.HAS_KEY != 'true'
+        run: echo "Add the repository secret ELEVENLABS_API_KEY, then run this workflow again."

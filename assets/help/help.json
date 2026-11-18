@@ -17,16 +17,26 @@
       "text_hash": "e7252a9da4bcad40"
     },
     {
+      "feature_id": "learn-mspc",
+      "title": "The MSPC System",
+      "emotion": "happy",
+      "what": "This is where you learn MSPC: Move, Specifics, Priorities, Calculation, the four questions I ask before every move.",
+      "how": "Read the four steps, then open an example from my games. Try the move first, then walk through how I found it, step by step.",
+      "why": "A method only works when you know why each step is there. These are positions where the right move was hard to find.",
+      "ranks": "The whole page is free. When it clicks, use it in the MSPC trainer.",
+      "text_content": "This is where you learn MSPC: Move, Specifics, Priorities, Calculation, the four questions I ask before every move. Read the four steps, then open an example from my games. Try the move first, then walk through how I found it, step by step. A method only works when you know why each step is there. These are positions where the right move was hard to find. The whole page is free. When it clicks, use it in the MSPC trainer."
+    },
+    {
       "feature_id": "think",
-      "title": "Think: MSPC trainer",
+      "title": "MSPC trainer",
       "emotion": "thinking",
-      "what": "The MSPC trainer drills the four questions you ask before every move, on positions where the answer is positional, not only tactical.",
-      "how": "Read the position, then answer Move, Specifics, Priorities and Calculation in that order. Check the feedback before the next one.",
-      "why": "Most blunders come from skipping one of the four questions. Asking them in order turns it into a habit that runs in your games.",
-      "ranks": "Each difficulty level has a free sample set. Your Think rank grows with accuracy and streaks.",
-      "text_content": "The MSPC trainer drills the four questions you ask before every move, on positions where the answer is positional, not only tactical. Read the position, then answer Move, Specifics, Priorities and Calculation in that order. Check the feedback before the next one. Most blunders come from skipping one of the four questions. Asking them in order turns it into a habit that runs in your games. Each difficulty level has a free sample set. Your Think rank grows with accuracy and streaks.",
+      "what": "The MSPC trainer gives you real positions from my own games, on the climb from 355 to 2105: moves I found, and moves I missed.",
+      "how": "Tap M, S, P and C in that order. M and S show what the board says, P lists your checks and captures, C tells you how to check a candidate. Then play the move.",
+      "why": "Most blunders come from skipping one of the four questions. Running them on positions that were hard for me turns them into a habit that runs in your games.",
+      "ranks": "Free players get three positions a day. Pro opens every position, my mistakes at your level and my openings.",
+      "text_content": "The MSPC trainer gives you real positions from my own games, on the climb from 355 to 2105: moves I found, and moves I missed. Tap M, S, P and C in that order. M and S show what the board says, P lists your checks and captures, C tells you how to check a candidate. Then play the move. Most blunders come from skipping one of the four questions. Running them on positions that were hard for me turns them into a habit that runs in your games. Free players get three positions a day. Pro opens every position, my mistakes at your level and my openings.",
       "voice_id": "jfIS2w2yJi0grJZPyEsk",
-      "audio_cached": true,
+      "audio_cached": false,
       "audio_url": "assets/audio/help/think.mp3",
       "text_hash": "c58fde0e33930886"
     },

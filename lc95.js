@@ -1,7 +1,11 @@
 /*@@module lc95*/
 const LC95=(()=>{
   "use strict";
-  /* LC95 (build 9.60.0): Kyenzo's Games. Real positions from Kyenzo's own rated rapid + blitz games on Chess.com (355 -> 2105),
+  /* 9.61.0: this page is now THE MSPC trainer (#think; the old case player is gone from the app, #kgames is an old address of
+     the same page). Every position has an M / S / P / C bar: M and S say what the board shows, P lists your checks and captures
+     (never which one), C says how to check a candidate, and after the move what the line does (LC93). Learning the method itself
+     is LC96, #learn-mspc.
+     LC95 (build 9.60.0): Kyenzo's Games. Real positions from Kyenzo's own rated rapid + blitz games on Chess.com (355 -> 2105),
      analysed once by Stockfish (tools/master_games.py, GitHub workflow "Kyenzo's Games (analysis)") and stored in Supabase
      (public.my_master_games, public.master_puzzles; sql/20261118150000_lc95_master_games.sql).
      #kgames has three tabs:
@@ -15,7 +19,7 @@ const LC95=(()=>{
      A different move than Kyenzo's is judged by the browser's own Stockfish (LC25.alt.check): "Also good" when it keeps the result.
      Entry points: Train > Think > "Kyenzo's games", a card on #think and a card with his top openings on #openings.
      Owner: Sync now (mg_admin_sync), hide / feature a position (mg_curate). */
-  const VERSION="9.60.0";
+  const VERSION="9.61.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const say=(m,k,ms)=>{try{toast(m,k||"",ms)}catch(e){}};
@@ -24,6 +28,7 @@ const LC95=(()=>{
   const TIERS=["0-799","800-1199","1200-1599","1600-1999","2000+"];
   const GOOD=["brilliant","great","punish"],BAD=["blunder","mistake","missed"];
   const FREE_N=3;
+  const STEPNAME={M:"Their move",S:"The position",P:"Checks, captures, attacks",C:"Calculate"};
   const route=()=>{let h="";try{h=decodeURIComponent(String(location.hash||"").replace(/^#/,""))}catch(e){h=""}return h};
   const routeName=()=>route().toLowerCase().split(/[\/?&]/)[0];
   /* the router takes the whole hash as the route, so a card that opens a tab leaves its wish in sessionStorage "lc95-open" ({tab, eco, tier}) */
@@ -97,8 +102,8 @@ const LC95=(()=>{
   async function mount(view){
     css();S.view=view;const pr=params();
     S.tab=pr.tab==="mist"||pr.tab==="open"?pr.tab:pr.eco?"open":"find";S.eco=/^[A-E]\d{0,2}$/.test(pr.eco||"")?pr.eco:"";S.tier=TIERS.indexOf(pr.tier)>=0?pr.tier:"";
-    view.innerHTML='<div class="lc95"><header class="lc95-hd"><p class="lc95-tag">Kyenzo’s Games</p><h1>Train on my real games</h1>'
-      +'<p class="muted">Every position comes from my own rated games on the climb from 355 to 2105. Stockfish checked every move, so the answer is the truth, not my opinion.</p></header>'
+    view.innerHTML='<div class="lc95"><header class="lc95-hd"><p class="lc95-tag">MSPC trainer</p><h1>Find the moves I found</h1>'
+      +'<p class="muted">Real positions from my own rated games on the climb from 355 to 2105. Run M, S, P and C first, then play the move. Stockfish checked every answer, so it is the truth, not my opinion. New to MSPC? <a href="#learn-mspc">Learn the system first</a>.</p></header>'
       +'<div class="lc95-climb" data-lc95-climb></div>'
       +'<div class="seg lc95-tabs" role="tablist">'+[["find","Find my move"],["mist","Spot my mistake"],["open","By opening"]].map(t=>'<button type="button" role="tab" data-lc95-tab="'+t[0]+'" aria-pressed="'+(S.tab===t[0])+'">'+t[1]+"</button>").join("")+"</div>"
       +'<div data-lc95-body><p class="small muted">Loading…</p></div>'
@@ -145,6 +150,7 @@ const LC95=(()=>{
     S.board.setInteractive(p.side);S.board.setOnMove(onMove);
     const pr=prompt(p);
     pn.innerHTML='<p class="lc95-kind is-'+E(p.kind)+'">'+E(p.kind)+(p.tier?" · "+E(p.tier):"")+(p.opening?" · "+E(p.opening):"")+'</p><h2>'+E(pr.h)+'</h2><p>'+E(pr.t)+'</p><p class="small muted">'+(p.side==="w"?"White":"Black")+" to move.</p>"
+      +'<div class="lc95-mspc" role="group" aria-label="Run MSPC">'+["M","S","P","C"].map(k=>'<button type="button" class="lc95-mk" data-lc95-k="'+k+'"><b>'+k+'</b><span>'+E(STEPNAME[k])+"</span></button>").join("")+'</div><div class="lc95-mf" data-lc95-mf></div>'
       +'<div class="lc95-fb" data-lc95-fb></div><div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-lc95="hint">'+ic("lightbulb")+' Hint</button><button type="button" class="btn btn-quiet btn-sm" data-lc95="show" hidden>'+ic("eye")+' Show me</button><button type="button" class="btn btn-primary btn-sm" data-lc95="next" hidden>Next '+ic("arrow-right")+"</button></div>"
       +'<p class="small muted lc95-count">'+(S.i+1)+" / "+S.list.length+(pro()?"":" · free today: "+freeLeft()+" left")+"</p>"
       +(owner()?'<p class="small"><button type="button" class="btn btn-quiet btn-sm" data-lc95="hide">Hide this one</button> <button type="button" class="btn btn-quiet btn-sm" data-lc95="feature">Feature it</button></p>':"");
@@ -167,6 +173,18 @@ const LC95=(()=>{
     try{const pr=LC25&&LC25.alt&&LC25.alt.check?LC25.alt.check({fen:p.fen,from:mv.from,to:mv.to,promotion:mv.promotion||"",san:mv.san}):null;
       if(pr&&pr.then){pr.then(fin,()=>fin(null));setTimeout(()=>fin(null),9000)}else fin(null)}catch(e){fin(null)}
   }
+  /* MSPC before the move: M and S from the board, P your checks and captures (not which one), C how to check a candidate;
+     after the move, C shows what the line does. Never the answer before the move. */
+  function mspcStep(k){
+    const p=S.list[S.i],el=Q("[data-lc95-mf]",S.view);if(!p||!el)return;
+    QA("[data-lc95-k]",S.view).forEach(b=>b.classList.toggle("is-on",b.getAttribute("data-lc95-k")===k));
+    const pv=uciToMove(p.prev),o={fen:p.fen,lastMove:pv?{from:pv.from,to:pv.to}:null,side:p.side};
+    let h="";
+    try{if(k==="P")h=LC93.html("P",Object.assign(o,{ucis:[]}));else if(k==="C")h=S.done?LC93.html("C",Object.assign(o,{ucis:p.solution||[]})):"";else h=LC93.html(k,o)}catch(e){h=""}
+    if(k==="C"&&!S.done)h='<div class="lc93"><p class="lc93-h"><b>Calculate</b></p><ul><li>Take your best candidate and find their best answer to it: their checks and captures first.</li><li>Still good after their best answer? Play it on the board. If not, the next candidate.</li></ul></div>';
+    el.innerHTML=h||'<p class="small muted">Nothing to add from the board here.</p>';
+    try{Telemetry.log({e:"q",x:"lc95-mspc-"+k})}catch(e){}
+  }
   function more(){if(S.misses>=2){const b=Q('[data-lc95="show"]',S.view);if(b)b.hidden=false}}
   function solved(clean,alt){
     const p=S.list[S.i];S.done=true;S.board.setInteractive(null);S.board.setOnMove(null);
@@ -181,6 +199,7 @@ const LC95=(()=>{
     const hb=Q('[data-lc95="hint"]',S.view);if(hb)hb.hidden=true;
     if(p.game_id){const pn=Q("[data-lc95-panel]",S.view);if(pn&&!Q("[data-lc95-game]",pn))pn.insertAdjacentHTML("beforeend",'<p class="small"><a data-lc95-game href="https://www.chess.com/game/live/'+encodeURIComponent(p.game_id)+'" target="_blank" rel="noopener">Open the whole game '+ic("arrow-up-right-from-square")+"</a></p>")}
     if(!pro())freeMark(p.id);
+    try{FeatureChecklist.mark("mspc")}catch(e){}try{if(clean&&!S.misses&&!S.hints)V6.addXp("think",10)}catch(e){}
     try{Telemetry.log({e:"q",x:"lc95-"+p.kind+(clean&&!S.misses?"-ok":"-seen")})}catch(e){}
   }
   function hint(){
@@ -202,10 +221,11 @@ const LC95=(()=>{
     if(r&&r.data&&r.data.ok){say(hidden?"Hidden from players.":"Featured: it comes first.","good");if(hidden){S.list.splice(S.i,1);if(S.i>=S.list.length)S.i=0;S.list.length?show():body()}}else say("Could not save. Sign in with the owner account.","bad")}
   function onClick(e){
     const it=e.target.closest&&e.target.closest("[data-lc95-intent]");if(it){try{sessionStorage.setItem("lc95-open",it.getAttribute("data-lc95-intent"))}catch(x){}return}
-    const b=e.target.closest&&e.target.closest("[data-lc95],[data-lc95-tab],[data-lc95-tier],[data-lc95-eco]");if(!b||!S.view||!S.view.contains(b))return;
+    const b=e.target.closest&&e.target.closest("[data-lc95],[data-lc95-tab],[data-lc95-tier],[data-lc95-eco],[data-lc95-k]");if(!b||!S.view||!S.view.contains(b))return;
     if(b.hasAttribute("data-lc95-tab")){S.tab=b.getAttribute("data-lc95-tab");S.eco="";body();return}
     if(b.hasAttribute("data-lc95-tier")){const t=b.getAttribute("data-lc95-tier");S.tier=S.tier===t&&S.tab!=="mist"?"":t;if(S.tab!=="mist")S.tab="mist";paintClimb();body();return}
     if(b.hasAttribute("data-lc95-eco")){S.eco=b.getAttribute("data-lc95-eco");body();return}
+    if(b.hasAttribute("data-lc95-k"))return mspcStep(b.getAttribute("data-lc95-k"));
     const a=b.getAttribute("data-lc95");
     if(a==="next"){S.i++;if(S.i>=S.list.length){if(!pro()){body();return}S.i=0}show();return}
     if(a==="hint")return hint();
@@ -221,9 +241,8 @@ const LC95=(()=>{
   function cardHTML(title,text,href,btn,intent){return'<a class="lc95-card" data-lc95-card href="'+href+'"'+(intent?" data-lc95-intent='"+E(JSON.stringify(intent))+"'":"")+'><span class="lc95-card-ic">'+ic("chess-king")+'</span><span><b>'+E(title)+"</b><small>"+E(text)+"</small></span><span class=\"lc95-card-go\">"+E(btn)+" "+ic("arrow-right")+"</span></a>"}
   async function entry(r){
     const v=Q("#view");if(!v||Q("[data-lc95-card]",v))return;
-    if(r==="think"){const h=Q("h1",v);if(!h)return;const box=h.closest("header")||h;box.insertAdjacentHTML("afterend",cardHTML("Now on my real games","The same MSPC thinking, on positions from my own climb from 355 to 2105.","#kgames","Train"));return}
     if(r==="openings"){const o=await loadOpenings();if(!o||!o.length||Q("[data-lc95-card]",v))return;const h=Q("h1",v);if(!h)return;const top=o.slice(0,3).map(x=>x.opening||x.eco).join(", ");
-      (h.closest("header")||h).insertAdjacentHTML("afterend",cardHTML("My own games in these openings",top+": the positions that decided my games.","#kgames","Open",{tab:"open",eco:String(o[0].eco).slice(0,2)}))}
+      (h.closest("header")||h).insertAdjacentHTML("afterend",cardHTML("My own games in these openings",top+": the positions that decided my games.","#think","Open",{tab:"open",eco:String(o[0].eco).slice(0,2)}))}
   }
   let deb=0;
   function afterRender(r){clearTimeout(deb);deb=setTimeout(()=>{try{entry(r||routeName())}catch(e){}},300)}
@@ -236,15 +255,15 @@ const LC95=(()=>{
       +".lc95-pn h2{margin:4px 0 6px;font-size:20px}.lc95-kind{margin:0;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8}.lc95-kind.is-brilliant{color:#22d3ee}.lc95-kind.is-great{color:#38bdf8}.lc95-kind.is-punish{color:#4ade80}.lc95-kind.is-blunder,.lc95-kind.is-missed{color:#f87171}.lc95-kind.is-mistake{color:#fb923c}"
       +".lc95-msg{margin:8px 0;padding:10px 12px;border-radius:12px;background:#0f172a;border:1px solid #334155}.lc95-msg.is-good{border-color:#22c55e}.lc95-msg.is-off{border-color:#f87171}.lc95-msg.is-alt{border-color:#38bdf8}.lc95-msg.is-hint{border-color:#fbbf24}"
       +".lc95 .btn-row .btn{min-height:44px}.lc95-ops{list-style:none;margin:0;padding:0;display:grid;gap:8px}.lc95-ops button{width:100%;display:flex;flex-direction:column;gap:2px;text-align:left;padding:12px 14px;border-radius:14px;background:#1e293b;border:1px solid rgba(148,163,184,.2);color:inherit;min-height:44px;cursor:pointer}.lc95-ops span{color:#94a3b8;font-size:13px}.lc95-ops small{color:#38bdf8;font-weight:700}"
-      +".lc95-lock{text-align:center;display:grid;gap:8px;justify-items:center}.lc95-lock h2{margin:0}.lc95-own{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.lc95-eco{margin:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}"
+      +".lc95-mspc{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 4px}.lc95-mk{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:12px;background:#0f172a;border:1px solid #334155;color:inherit;min-height:44px;cursor:pointer}.lc95-mk b{color:#38bdf8;font-size:18px}.lc95-mk span{font-size:11px;color:#94a3b8;text-align:center}.lc95-mk.is-on{border-color:#38bdf8}.lc95-lock{text-align:center;display:grid;gap:8px;justify-items:center}.lc95-lock h2{margin:0}.lc95-own{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.lc95-eco{margin:0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}"
       +".lc95-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;margin:10px 0;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,rgba(56,189,248,.14),rgba(30,41,59,.9));border:1px solid rgba(56,189,248,.35);color:inherit;text-decoration:none;min-height:44px}.lc95-card b{display:block}.lc95-card small{display:block;color:#94a3b8}.lc95-card-ic{font-size:22px;color:#38bdf8}.lc95-card-go{color:#38bdf8;font-weight:800;white-space:nowrap}";
     document.head.appendChild(s);
   }
   function init(){
     try{
-      if(typeof MOUNT!=="undefined"){MOUNT[ROUTE]=mount;try{DOC_TITLES[ROUTE]="Kyenzo’s games";ROUTE_TITLES[ROUTE]="Kyenzo’s games"}catch(e){}}
+      /* 9.61.0: this page IS the MSPC trainer (#think); #kgames stays as an old address of the same page */
+      if(typeof MOUNT!=="undefined"){MOUNT[ROUTE]=mount;MOUNT.think=mount;try{DOC_TITLES[ROUTE]="MSPC trainer";DOC_TITLES.think="MSPC trainer";ROUTE_TITLES[ROUTE]="the MSPC trainer";ROUTE_TITLES.think="the MSPC trainer"}catch(e){}}
       try{const lv=LC26.levels,o=lv.minLevel;if(lv&&!lv.__lc95){lv.__lc95=1;lv.minLevel=r=>r===ROUTE?1:o(r)}}catch(e){}
-      try{const G=Nav5._t.GROUPS.filter(g=>g.id==="3t")[0],think=G&&G.sections[0].items;if(think&&!think.some(x=>x.href==="#kgames"))think.push({href:"#kgames",icon:"chess-king",label:"Kyenzo’s games",note:"My real positions from 355 to 2105, checked by Stockfish"})}catch(e){}
       document.addEventListener("click",onClick);
     }catch(e){console.error("lc95",e)}
   }
