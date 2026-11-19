@@ -20,7 +20,10 @@ const LC90=(()=>{
      and feature list. The access rules live here too (window.__lcAccess, read by Levels.open): Level 1 is always open; Level 2 (Beginner) is
      open to a free player during the intro week (owner switch "beginner_in_week"); Levels 3 to 5 (Intermediate, Advanced, Master) stay locked
      for anyone without Pro or VIP, and with "strict_lock" on they cannot be unlocked one by one with credits either. SQL for the VIP counter:
-     sql/20261116150000_lc91_layered_access.sql. */
+     sql/20261116150000_lc91_layered_access.sql.
+     9.62.0 (LC97): the trial is offered only while the server says it is unused (LC97.trialEligible: lc97_state); with the trial used the
+     same pop-up shows the plans without the trial, and the Day-7 pop-up itself waits when the account already had a trial (LC97's
+     post-trial pop-up takes over). A clear trial line (owner-editable, "trial_line") sits under the body while the trial is on. */
   const VERSION="9.53.0",DAY=864e5,SEEN="lc90-seen",CACHE="lc90-cfg";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -57,12 +60,13 @@ const LC90=(()=>{
     vip_price_yearly:"€299.50",vip_price_yearly_old:"€599",vip_price_month_equiv:"€24.96",vip_price_monthly:"€59",
     cta_vip:"Become VIP",vip_note:"VIP starts right away (no trial: the bonus tokens arrive at once).",
     beginner_in_week:true,strict_lock:true,
+    trial_line:"Try every Pro feature free for {days} days: €0 today, cancel any time before day {days_after} and nothing is charged. Or keep training on Free with 1 token a day.",
     cta_trial:"Start my {days}-day €0 Founding Trial",cta_buy:"Skip the trial: pay now",cta_later:"Not now, continue with 1 token a day",
     consent:"I want Pro to start right away. €0 today, then the plan I picked from day {days_after} until I cancel. Because Pro starts at once, I give up my 14-day right of withdrawal for the paid period, so a payment that has gone through is not refunded.",
     fine:"Your card is kept by Stripe (we never see it). Cancel any time before the trial ends in Account > Manage subscription and nothing is charged. The yearly launch rate stays the same for as long as your subscription stays active."};
-  const TEXT=["eyebrow","title","subtitle","body","badge","price_yearly","price_yearly_old","price_month_equiv","price_monthly","cta_trial","cta_buy","cta_later","consent","fine",
+  const TEXT=["eyebrow","title","subtitle","body","trial_line","badge","price_yearly","price_yearly_old","price_month_equiv","price_monthly","cta_trial","cta_buy","cta_later","consent","fine",
     "pro_name","pro_tag","vip_name","vip_tag","vip_lead","vip_price_yearly","vip_price_yearly_old","vip_price_month_equiv","vip_price_monthly","cta_vip","vip_note"];
-  const LIM={eyebrow:60,title:90,subtitle:160,body:700,badge:90,price_yearly:20,price_yearly_old:20,price_month_equiv:20,price_monthly:20,cta_trial:70,cta_buy:60,cta_later:70,consent:500,fine:500,
+  const LIM={eyebrow:60,title:90,subtitle:160,body:700,trial_line:240,badge:90,price_yearly:20,price_yearly_old:20,price_month_equiv:20,price_monthly:20,cta_trial:70,cta_buy:60,cta_later:70,consent:500,fine:500,
     pro_name:50,pro_tag:80,vip_name:50,vip_tag:80,vip_lead:80,vip_price_yearly:20,vip_price_yearly_old:20,vip_price_month_equiv:20,vip_price_monthly:20,cta_vip:60,vip_note:200};
   const LISTS=["features","vip_features"];
   const BANNED=/\b(lifetime|for life|forever)\b/i;   /* the launch rate holds while the subscription stays active, never "for life" (the server refuses it too) */
@@ -133,6 +137,7 @@ const LC90=(()=>{
     try{
       const c=await cfg();if(!c.on)return;
       if(sess()){const s=await rpc("lc89_paywall_seen",{});if(s&&s.data&&s.data.ok&&s.data.seen){wr(SEEN,Date.now());return}}
+      if(sess()&&typeof LC97!=="undefined"){try{const t=await LC97.state();if(t&&t.ok&&t.trial&&t.trial.used)return}catch(e){}}   /* 9.62.0: had a trial: LC97's post-trial pop-up takes over */
       if(Q(".sheet-wrap")||paid())return;
       wr(SEEN,Date.now());open({src:why||"day7"});
     }finally{busy=false}
@@ -149,7 +154,7 @@ const LC90=(()=>{
   function html(c,n,preview){
     const trial=c.trial_days>0,vip=c.vip_on;
     return'<div class="lc90">'+(preview?'<p class="lc90-pv">'+ic("eye")+" Preview: this is what a student sees. Buttons do not open checkout.</p>":"")
-      +'<p class="lc90-eye">'+E(fill(c.eyebrow,n))+"</p>"+'<p class="lc90-sub">'+E(fill(c.subtitle,n))+"</p>"+'<p class="lc90-body">'+E(fill(c.body,n))+"</p>"
+      +'<p class="lc90-eye">'+E(fill(c.eyebrow,n))+"</p>"+'<p class="lc90-sub">'+E(fill(c.subtitle,n))+"</p>"+'<p class="lc90-body">'+E(fill(c.body,n))+"</p>"+(trial?'<p class="lc90-trial">'+ic("gift")+" "+E(fill(c.trial_line,n))+"</p>":"")
       +(n.tranche<4&&n.pct>0?'<p class="lc90-badge">'+E(fill(c.badge,n).replace(/\s*·\s*$/,"").replace(/·\s*places left$/,""))+"</p>":"")
       +(vip?'<div class="lc90-tiers" role="radiogroup" aria-label="Choose Pro or VIP">'
         +'<label class="lc90-tier is-on"><input type="radio" name="lc90-tier" value="pro" checked><span><b>'+E(fill(c.pro_name,n))+"</b><small>"+E(fill(c.pro_tag,n))+"</small><em>"+E(n.yearly)+" a year · "+E(n.monthly)+" a month</em></span></label>"
@@ -177,6 +182,8 @@ const LC90=(()=>{
   }
   async function open(o){
     o=o||{};const preview=!!o.preview,man=!preview&&/^[a-z]{2,20}$/.test(String(o.from||""));let c=o.cfg?clean(o.cfg):await cfg();const p=await pricing(),n=numbers(c,p);
+    /* 9.62.0: the trial only while the server says it is unused (LC97); otherwise the same plans without it */
+    if(!preview&&c.trial_days>0){let te=null;try{if(typeof LC97!=="undefined")te=await LC97.trialEligible(1500)}catch(e){te=null}if(te===false)c=Object.assign({},c,{trial_days:0})}
     /* 9.59.0: opened by the player (the Upgrades page's "Try Pro free"), not by the end of the intro week: no "your intro week is over",
        and it does not count as the Day-7 pop-up (that one still comes once, later) */
     if(man)c=Object.assign({},c,{title:c.trial_days>0?"Try Pro free for "+c.trial_days+" days":"Lock in the {rate_name} rate",
@@ -225,7 +232,7 @@ const LC90=(()=>{
       +'<div class="panel pad stack"><label class="lc90-sw"><input type="checkbox" data-k="on"'+(ED.on?" checked":"")+"><span><b>Pop-up on</b><small>Off = nobody sees it. The 1-token drop after day 7 happens either way.</small></span></label>"
       +'<div class="lc90-stats" data-lc90-stats><p class="small muted">Counters loading…</p></div></div>'
       +'<div class="panel pad stack"><h2>Texts</h2><p class="small muted">Placeholders: {days} {days_after} {yearly} {yearly_old} {month_equiv} {monthly} {pct} {left} {rate_name}. Never write “lifetime”, “for life” or “forever”: the rate holds for as long as the subscription stays active.</p>'
-      +field("eyebrow","Small line on top")+field("title","Title")+field("subtitle","Subtitle")+field("body","Body",true)+field("badge","Badge","shows only while a launch rate is open")
+      +field("eyebrow","Small line on top")+field("title","Title")+field("subtitle","Subtitle")+field("body","Body",true)+field("trial_line","Trial line","shows under the body while the trial is on",true)+field("badge","Badge","shows only while a launch rate is open")
       +field("pro_name","Pro card: name")+field("pro_tag","Pro card: one line")
       +field("cta_trial","Trial button")+field("cta_buy","Pay-now button")+field("cta_later","“Not now” button")+field("consent","Consent checkbox (legal: keep the meaning)",true)+field("fine","Fine print",true)+"</div>"
       +'<div class="panel pad stack"><h2>Prices and trial</h2><label class="lc90-sw"><input type="checkbox" data-k="use_live"'+(ED.use_live?" checked":"")+"><span><b>Use the live prices</b><small>Recommended: the pop-up shows the rate Stripe really charges now (Founding, then Early Adopter, …).</small></span></label>"
@@ -329,7 +336,7 @@ const LC90=(()=>{
   function css(){
     if(Q("#lc90-css"))return;const s=document.createElement("style");s.id="lc90-css";
     s.textContent=".lc90{display:grid;gap:10px}.lc90-pv{margin:0;padding:8px 10px;border-radius:10px;background:rgba(56,189,248,.12);color:#38bdf8;font-weight:700;font-size:13px}"
-      +".lc90-eye{margin:0;color:#fbbf24;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.lc90-sub{margin:0;font-weight:700;font-size:16px}.lc90-body{margin:0;color:#cbd5e1}"
+      +".lc90-eye{margin:0;color:#fbbf24;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}.lc90-sub{margin:0;font-weight:700;font-size:16px}.lc90-body{margin:0;color:#cbd5e1}.lc90-trial{margin:0;padding:10px 12px;border-radius:12px;border:1px solid #38bdf8;background:rgba(56,189,248,.08);color:#e2e8f0;font-weight:700}"
       +".lc90-badge{margin:0;align-self:start;justify-self:start;padding:4px 12px;border-radius:999px;background:rgba(251,191,36,.16);color:#fbbf24;font-weight:800;font-size:13px}"
       +".lc90-plans{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media (max-width:420px){.lc90-plans{grid-template-columns:1fr}}"
       +".lc90-plan{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:14px;border:2px solid #334155;background:#0f172a;cursor:pointer;min-height:44px}.lc90-plan.is-on{border-color:#fbbf24;background:rgba(251,191,36,.06)}"
