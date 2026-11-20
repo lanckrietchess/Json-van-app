@@ -107,6 +107,7 @@ const LC85=(()=>{
     if(label&&label!=="this feature")h+='<p class="lc85-kick">'+ic("lock")+" "+E(label)+(isVip?" is part of VIP.":" is part of Pro.")+"</p>";
     h+=soft?'<p class="lc85-lead">You are in your first days. Level 1 of everything stays free, so take your time. When you want the full system, it is one tap away.</p>'
            :'<p class="lc85-lead">The full MSPC system: every repertoire, the Masterclass, the full Trim report and the 24/7 coach. Secure checkout with Stripe.</p>';
+    h+='<div data-lc97-slot hidden></div>';   /* 9.62.0: LC97 fills a "Try Pro free" row while the trial is unused */
     h+='<div class="lc85-proof" data-lc85-proof hidden></div>';
     h+='<div class="lc85-plan is-pro">'+(soft?'<h3>'+ic("sparkles")+' Pro</h3>':proCard(p))
       +'<div class="btn-row"><button type="button" class="btn btn-primary" data-lc85-plan="yearly" data-tier="2">'+E(!soft&&p&&p.tranche===1?"Lock in my Founding rate":!soft&&p&&p.tranche===2?"Lock in my Early Adopter rate":"Upgrade to Pro, yearly")+'</button>'
@@ -127,6 +128,7 @@ const LC85=(()=>{
     try{Telemetry.log({e:"lc85-up",x:(soft?"soft-":"full-")+String(o.src).slice(0,12)})}catch(e){}
     openSheet({title:Number(o.tier)===3?"Become VIP":soft?"This is a Pro feature":"Unlock Pro",cls:"lc85-upsheet",noFocus:true,html:upHTML(o,p,soft),onMount(s){
       fillProof(Q("[data-lc85-proof]",s.el),o.feature,o.label);
+      try{if(typeof LC97!=="undefined"&&Number(o.tier)!==3)LC97.slot(Q("[data-lc97-slot]",s.el),s)}catch(e){}
       s.el.addEventListener("click",e=>{
         const b=e.target.closest&&e.target.closest("[data-lc85-plan]");
         if(b){e.preventDefault();const plan=b.getAttribute("data-lc85-plan"),tier=+b.getAttribute("data-tier")||2;try{s.close()}catch(x){}checkout(plan,tier);return}
