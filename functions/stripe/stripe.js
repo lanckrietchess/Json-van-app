@@ -244,7 +244,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
   const PV = () => { const p = P34(), base = num(E.VIP_YEARLY_BASE_CENTS, 59900); return Object.assign({}, p, { base, monthly: num(E.VIP_MONTHLY_CENTS, 5900), prices: ladder(base, 'VIP_TRANCHE') }); };
   const PT = (tier) => (tier === 3 ? PV() : P34());
   /* token packs: fixed here, never taken from the browser */
-  const PACKS = { t3: { cents: 100, tokens: 3 }, t100: { cents: 1000, tokens: 100 }, t300: { cents: 2000, tokens: 300 }, t1000: { cents: 5000, tokens: 1000 } };
+  const PACKS = { t3: { cents: 100, tokens: 3 }, t100: { cents: 1000, tokens: 100 }, t300: { cents: 1999, tokens: 300 }, t1000: { cents: 4999, tokens: 1000 } };
   const KEY34 = /^LC-[A-Za-z0-9_-]{2,200}$/i, SESSION34 = /^cs_[A-Za-z0-9_]{8,200}$/, EMAIL34 = /^[^@\s]{1,64}@[^@\s]{1,120}\.[^@\s]{2,24}$/;
   const rnd = () => Array.from(globalThis.crypto.getRandomValues(new Uint8Array(9)), (b) => b.toString(16).padStart(2, '0')).join('');
   async function expireOpen() { await DB.prepare("UPDATE arena.lc34_pro_sales SET status = 'expired' WHERE status = 'open' AND expires < ?").bind(now()).run(); }

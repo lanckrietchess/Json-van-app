@@ -75,6 +75,7 @@ t('an amount sent by the browser is ignored', f.get('line_items[0][price_data][u
 delete env.DOWNSELL_CENTS; h = makeStripeHandler(fakeSql, env, fetchImpl);
 j = await call('pricing', {});
 t('pricing tells the app the downsell numbers (25 vs 39, 30 days)', j.downsell && j.downsell.cents === 2500 && j.downsell.anchor_cents === 3900 && j.downsell.days === 30);
+t('token packs cost the same as the Payment Links and the app (EUR 1, 10, 19.99, 49.99)', JSON.stringify((j.packs || []).map((x) => x.cents)) === '[100,1000,1999,4999]');
 
 // webhook
 const hook = async (ev) => { const raw = JSON.stringify(ev), ts = Math.floor(Date.now() / 1000), sig = 't=' + ts + ',v1=' + createHmac('sha256', env.STRIPE_WEBHOOK_SECRET).update(ts + '.' + raw).digest('hex');
