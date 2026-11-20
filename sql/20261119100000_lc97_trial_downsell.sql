@@ -1,6 +1,6 @@
 -- LC97 (build 9.62.0, 19 Nov 2026): the Pro trial lifecycle and the post-trial downsell. Idempotent: safe to run twice.
--- Never applied by the assistant: the owner runs it in the Supabase SQL editor, AFTER
--- sql/20261113100000_lc72_lc73_launch_funnels.sql (lc73_trials) and sql/20261116100000_lc89_lc90_inline_cms_founding_paywall.sql.
+-- LIVE since 20 Nov 2026 (applied by Claude through the Supabase connector, migration "lc97_trial_downsell", with the owner's go).
+-- Needs sql/20261113100000_lc72_lc73_launch_funnels.sql (lc73_trials) and sql/20261116100000_lc89_lc90_inline_cms_founding_paywall.sql first.
 --
 -- What it stores, per account (e-mail, lower case):
 --   lc97_member_state: subscription state (free / trialing / trial_cancelled / trial_ended / active / downsell_month / canceled),
