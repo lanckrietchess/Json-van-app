@@ -125,9 +125,11 @@ const LC75=(()=>{
       +'<details class="panel pad lc75-in"'+(+A.views?"":" open")+'><summary><b>Views per day and channel</b> <small class="muted">(type them in; an API job can fill the same table later)</small></summary><form data-lc75-views class="lc75-vf"><label class="field"><span class="field-label">Day</span><input class="input" type="date" name="day" value="'+new Date().toISOString().slice(0,10)+'"></label>'
         +["tiktok","instagram","youtube","facebook","reddit","x","other"].map(c=>'<label class="field"><span class="field-label">'+c+'</span><input class="input" type="number" min="0" name="'+c+'" inputmode="numeric"></label>').join("")
         +'<button class="btn btn-primary" type="submit">Save the day</button></form><label class="field"><span class="field-label">Or paste a CSV export: date,channel,views (one per line)</span><textarea class="input" rows="3" data-lc75-csv placeholder="2026-11-12,tiktok,5400"></textarea></label><button type="button" class="btn btn-ghost btn-sm" data-lc75="csv">Import the CSV</button></details>'
+      +(d.admin?'<h2>Sources &amp; lanes</h2><section data-lc98-src></section>':"")   /* 9.63.0 LC98: a copy link per source row, New source / lane */
       +'<h2>Short links, sources and partners</h2><section data-lc73-dash data-lc73-lite></section>';
     wr("lc73-range",rg==="all"?"30":rg);wr("lc73-all",rg==="all");
     try{LC73.paintDash()}catch(e){}
+    try{if(typeof LC98!=="undefined")LC98.paintSources()}catch(e){}
   }
   async function saveGoal(inp){
     const k=inp.getAttribute("data-lc75-goal"),v=+inp.value;if(!(v>=0)||!CC.d)return;
