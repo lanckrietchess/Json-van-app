@@ -21,7 +21,7 @@ const LC99=(()=>{
      The withdrawal function (Consumer Rights Directive art. 11a): "Withdraw from contract here" on #withdraw (Account, Upgrades, the
      landing footer): name, contract, e-mail, one confirmation tap; the stripe function stores the statement with date and time and
      e-mails the acknowledgement; the owner sees every statement on #consents with the refund deadline. */
-  const VERSION="9.65.0",CONSENT_V="w2-2026-11-23",SQLF="sql/20261122100000_lc99_withdrawal_consent_annual25.sql",SQLW="sql/20261123100000_lc100_withdraw_games_community.sql";
+  const VERSION="9.66.0",CONSENT_V="w2-2026-11-23",SQLF="sql/20261122100000_lc99_withdrawal_consent_annual25.sql",SQLW="sql/20261123100000_lc100_withdraw_games_community.sql";
   const KEEP14="I can still withdraw within 14 days with “Withdraw from contract here” (Account); I then pay only for the days I used and get the rest back.";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -147,7 +147,7 @@ const LC99=(()=>{
     out.innerHTML='<h2 class="lc99-h2">Withdrawal statements'+(open?' <span class="lc99-badge">'+open+" to handle</span>":"")+"</h2>"
       +(l.length?'<ul class="lc99-list">'+l.map(x=>{const late=x.status==="received"&&Date.now()>+new Date(x.refund_by);
         return'<li data-wid="'+E(x.id)+'"><div><b>W'+E(x.id)+" · "+E(x.name)+"</b> · "+E(x.email)+(x.account&&x.account!==x.email?" (account "+E(x.account)+")":"")+" · "+E(CONTRACT[x.contract]||x.contract)+"</div>"
-          +"<small>Received "+E(new Date(x.created_at).toLocaleString("en-GB"))+" · refund by <b"+(late?' class="lc99-late"':"")+">"+E(new Date(x.refund_by).toLocaleDateString("en-GB",{day:"numeric",month:"short"}))+"</b> · "+(x.mailed?"acknowledgement e-mailed":"not e-mailed: send the acknowledgement yourself")+(x.note?" · “"+E(x.note)+"”":"")+"</small>"
+          +"<small>Received "+E(new Date(x.created_at).toLocaleString("en-GB"))+" · refund by <b"+(late?' class="lc99-late"':"")+">"+E(new Date(x.refund_by).toLocaleDateString("en-GB",{day:"numeric",month:"short"}))+"</b> · "+(x.dm?"acknowledgement in their chat":x.mailed?"acknowledgement e-mailed":"guest: acknowledgement shown on screen with a download")+(x.note?" · “"+E(x.note)+"”":"")+"</small>"
           +'<div class="lc99-row"><select class="input" data-wst>'+["received","refunded","partly_refunded","declined","duplicate"].map(k=>'<option value="'+k+'"'+(x.status===k?" selected":"")+">"+k.replace("_"," ")+"</option>").join("")+'</select><input class="input" data-wnote maxlength="500" placeholder="Stripe refund id or a note" value="'+E(x.handled_note||"")+'"><button type="button" class="btn btn-ghost btn-sm" data-lc99s="wsave">Save</button></div></li>'}).join("")+"</ul>"
         :'<p class="small muted">No withdrawal statements yet.</p>');
   }
@@ -215,22 +215,23 @@ const LC99=(()=>{
     return'<section class="lc99-wd"><p class="lc99-kick">Your right of withdrawal</p><h1>Withdraw from contract here</h1>'
       +'<p class="muted">Bought Pro, VIP, a one-time month or tokens in the last 14 days? You can withdraw without giving a reason. Fill in three things, check them, then confirm. You get a confirmation with the date and time right away.</p>'
       +'<form class="lc99-wdf" data-lc99-wdf novalidate><label class="field"><span class="field-label">Your name</span><input class="input" name="name" maxlength="80" autocomplete="name" value="'+E(myName())+'"></label>'
-      +'<label class="field"><span class="field-label">The e-mail you used to buy (the confirmation goes here)</span><input class="input" name="email" type="email" maxlength="200" autocomplete="email" value="'+E(myMail())+'"></label>'
+      +'<label class="field"><span class="field-label">The e-mail you used to buy</span><input class="input" name="email" type="email" maxlength="200" autocomplete="email" value="'+E(myMail())+'"></label>'
       +'<label class="field"><span class="field-label">The purchase you withdraw from</span><select class="input" name="contract"><option value="">Choose…</option>'+Object.keys(CONTRACT).map(k=>'<option value="'+k+'">'+E(CONTRACT[k])+"</option>").join("")+"</select></label>"
       +'<label class="field"><span class="field-label">Anything to add? <small class="muted">(optional)</small></span><textarea class="input" name="note" rows="2" maxlength="500"></textarea></label>'
+      +'<p class="small muted" data-lc99-wdwhere>'+(myMail()?"The confirmation appears here and in your chat with Kyenzo (Coach Kyenzo), where it stays.":'The confirmation appears here, to download. <a href="#account">Sign in</a> first and it also lands in your chat with Kyenzo. You do not have to.')+"</p>"
       +'<p class="form-msg" data-lc99-wdmsg aria-live="polite"></p><div class="lc99-btns"><button type="submit" class="btn btn-primary">Continue</button></div></form>'
       +'<p class="small muted">What happens next: we stop any renewal and refund you within 14 days, to the card you paid with. For Pro or VIP that started at your request, the days you used are kept and the rest is refunded; for tokens, the unused tokens. A free trial costs nothing. Only want to stop the next renewal? Use Account > Manage subscription instead.</p></section>';
   }
   function wdStepHTML(d){
-    return'<div class="lc99-wdc"><h2>Check and confirm</h2><ul class="lc99-terms"><li>I withdraw from my contract for <b>'+E(CONTRACT[d.contract])+"</b>.</li><li>Name: <b>"+E(d.name)+"</b></li><li>Confirmation to: <b>"+E(d.email)+"</b></li>"+(d.note?"<li>Note: "+E(d.note)+"</li>":"")+"</ul>"
+    return'<div class="lc99-wdc"><h2>Check and confirm</h2><ul class="lc99-terms"><li>I withdraw from my contract for <b>'+E(CONTRACT[d.contract])+"</b>.</li><li>Name: <b>"+E(d.name)+"</b></li><li>E-mail of the purchase: <b>"+E(d.email)+"</b></li>"+(d.note?"<li>Note: "+E(d.note)+"</li>":"")+"</ul>"
       +'<div class="lc99-btns"><button type="button" class="btn btn-primary" data-lc99-wdgo>Confirm withdrawal</button><button type="button" class="btn btn-quiet" data-lc99-wdback>Change</button></div><p class="form-msg" data-lc99-wdmsg2 aria-live="polite"></p></div>';
   }
   function wdDoneHTML(j,d){
     const when=j.at?new Date(j.at).toLocaleString("en-GB",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"}):"";
     return'<div class="lc99-wdc is-done"><h2>'+ic("circle-check")+" Your withdrawal is received</h2><p>Reference <b>"+E(j.ref||"")+"</b> · "+E(when)+".</p>"
-      +"<p>"+(j.mailed?"We e-mailed this confirmation to <b>"+E(d.email)+"</b>. Keep it.":"Save this confirmation: download it or e-mail it to yourself. We have it too.")+"</p>"
+      +"<p>"+(j.dm?"This confirmation is also in your chat with Kyenzo, where it stays. Kyenzo sees your withdrawal on top of his inbox.":j.mailed?"We e-mailed this confirmation to <b>"+E(d.email)+"</b>. Keep it.":"Save this confirmation: download it or e-mail it to yourself. We have it too.")+"</p>"
       +'<pre class="lc99-ack" data-lc99-ack>'+E(j.text||"")+"</pre>"
-      +'<div class="lc99-btns"><button type="button" class="btn btn-primary" data-lc99-wddl>'+ic("download")+' Download the confirmation</button><a class="btn btn-ghost" href="mailto:'+E(d.email)+"?subject="+encodeURIComponent("Withdrawal "+(j.ref||""))+"&body="+encodeURIComponent(j.text||"")+'">'+ic("envelope")+" E-mail it to myself</a></div></div>";
+      +'<div class="lc99-btns"><button type="button" class="btn btn-primary" data-lc99-wddl>'+ic("download")+' Download the confirmation</button>'+(j.dm?'<a class="btn btn-ghost" href="#coach-chat">'+ic("comments")+" Open my chat</a>":"")+'<a class="btn btn-ghost" href="mailto:'+E(d.email)+"?subject="+encodeURIComponent("Withdrawal "+(j.ref||""))+"&body="+encodeURIComponent(j.text||"")+'">'+ic("envelope")+" E-mail it to myself</a></div></div>";
   }
   async function mountWithdraw(view){
     css();view.innerHTML=wdFormHTML();
