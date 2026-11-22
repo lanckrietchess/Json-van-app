@@ -9,7 +9,10 @@ const LC72=(()=>{
         editable shelf, so everything can be edited and deleted.
      3. Titles: Pro and library buyers are "Lanckriet Chess Apprentice", VIP is "Lanckriet Chess Student" (the database decides, lc72_titles / lc72_me).
      4. Coach chat (#coach-chat): Kyenzo talks with paying members and buyers; members can pin a message to the top for tokens; automated welcome
-        messages after a trial, Pro, VIP or a purchase (lc72_auto_check). SQL: sql/20261113100000_lc72_lc73_launch_funnels.sql. */
+        messages after a trial, Pro, VIP or a purchase (lc72_auto_check). SQL: sql/20261113100000_lc72_lc73_launch_funnels.sql.
+        9.66.0 (LC101): the chat is open to every signed-in member, and every member gets Kyenzo's welcome message once, the first time
+        they are signed in (lc101_welcome, the owner edits it under Automated messages). A withdrawal's acknowledgement lands here too.
+        SQL: sql/20261124100000_lc101_welcome_dm.sql. */
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -259,17 +262,17 @@ const LC72=(()=>{
       const l=Q(".lc72-msgs",host);if(l)l.scrollTop=l.scrollHeight;return;
     }
     const r=await rpc("lc72_inbox",{p_filter:ownerFilter});const d=r.data||{};
-    host.innerHTML='<header class="lc72-ch"><span class="lc69-face">'+face(["calm"],48)+'</span><div><h1>Coach inbox</h1><p class="small muted">Paying members, trials and buyers. Pinned messages (paid with tokens) stay on top until you answer. '+(+d.unread||0)+' unread.</p></div></header>'
+    host.innerHTML='<header class="lc72-ch"><span class="lc69-face">'+face(["calm"],48)+'</span><div><h1>Coach inbox</h1><p class="small muted">Every member who wrote to you or got a message from you. Pinned messages (tokens or a withdrawal) stay on top until you answer. '+(+d.unread||0)+' unread.</p></div></header>'
       +'<div class="lc72-tabs">'+[["inbox","Inbox"],["auto","Automated messages"]].map(x=>'<button type="button" class="lc72-tab'+(chatTab===x[0]?" is-on":"")+'" data-lc72="ctab" data-t="'+x[0]+'">'+x[1]+"</button>").join("")+"</div>"
       +'<div class="lc70-filter">'+[["all","All"],["unread","Unread"],["priority","Pinned"],["vip","VIP"],["pro","Pro"],["trial","Trial"],["buyers","Buyers"]].map(x=>'<button type="button" class="lc70-f'+(ownerFilter===x[0]?" is-on":"")+'" data-lc72="filter" data-f="'+x[0]+'">'+x[1]+"</button>").join("")+"</div>"
       +(missing(r)?'<p class="lc70-warn">Run the 9.37.0 SQL file first.</p>':(d.rows||[]).length?'<ul class="lc72-inbox">'+d.rows.map(x=>'<li><button type="button" data-lc72="open" data-uid="'+esc(x.uid)+'" data-name="'+esc(x.name)+'" class="'+(x.priority?"is-prio":"")+'"><b>'+(x.priority?"📌 ":"")+esc(x.name)+'</b>'+(x.code?' <span class="lc72-t is-'+x.code+'">'+SHORT[x.code]+"</span>":"")+(x.trial?' <span class="lc72-pill">Trial</span>':"")+(+x.unread?' <span class="lc72-badge">'+x.unread+"</span>":"")+'<small>'+esc(x.last||"No messages yet: start the conversation")+"</small></button></li>").join("")+"</ul>":'<p class="muted">Nobody here yet.</p>');
   }
   async function paintAuto(host){
     const r=await rpc("lc72_auto_get",{}),d=r.data||{},m=await me();
-    const L={trial:"After the 7-day trial starts",pro:"After Pro starts",vip:"After VIP starts",buyer:"After a book or course purchase"};
+    const L={welcome:"Welcome: the first time a member is signed in",trial:"After the 7-day trial starts",pro:"After Pro starts",vip:"After VIP starts",buyer:"After a book or course purchase"};
     host.innerHTML='<div class="lc72-tabs">'+[["inbox","Inbox"],["auto","Automated messages"]].map(x=>'<button type="button" class="lc72-tab'+(chatTab===x[0]?" is-on":"")+'" data-lc72="ctab" data-t="'+x[0]+'">'+x[1]+"</button>").join("")+"</div>"
       +'<p class="small muted">Sent once per member, in the app, from you. {name} = first name, {item} = what they bought. A button can point to #books, #upgrades or a https link.</p>'
-      +(d.rows||[]).map(a=>'<form class="panel pad stack lc72-auto" data-lc72-auto="'+a.event+'"><h3>'+esc(L[a.event]||a.event)+' <small class="muted">sent '+((d.sent||{})[a.event]||0)+"×</small></h3><label class=\"lc70-check\"><input type=\"checkbox\" name=\"enabled\""+(a.enabled?" checked":"")+'> <span>On</span></label><textarea class="input" name="body" rows="5" maxlength="1500">'+esc(a.body)+'</textarea><div class="lc72-two"><input class="input" name="cta_label" maxlength="40" value="'+esc(a.cta_label)+'" placeholder="Button text"><input class="input" name="cta_href" maxlength="300" value="'+esc(a.cta_href)+'" placeholder="#upgrades"></div><button class="btn btn-primary btn-sm" type="submit">Save</button></form>').join("")
+      +(d.rows||[]).slice().sort((x,y)=>(x.event==="welcome"?0:1)-(y.event==="welcome"?0:1)).map(a=>'<form class="panel pad stack lc72-auto" data-lc72-auto="'+a.event+'"><h3>'+esc(L[a.event]||a.event)+' <small class="muted">sent '+((d.sent||{})[a.event]||0)+"×</small></h3><label class=\"lc70-check\"><input type=\"checkbox\" name=\"enabled\""+(a.enabled?" checked":"")+'> <span>On</span></label><textarea class="input" name="body" rows="5" maxlength="1500">'+esc(a.body)+'</textarea><div class="lc72-two"><input class="input" name="cta_label" maxlength="40" value="'+esc(a.cta_label)+'" placeholder="Button text"><input class="input" name="cta_href" maxlength="300" value="'+esc(a.cta_href)+'" placeholder="#upgrades"></div><button class="btn btn-primary btn-sm" type="submit">Save</button></form>').join("")
       +'<form class="panel pad stack" data-lc72-prices><h3>Token prices</h3><div class="lc72-two"><label class="field"><span class="field-label">Pin a message to the top</span><input class="input" name="pt" type="number" min="1" value="'+((m&&m.priority_tokens)||5)+'"></label><label class="field"><span class="field-label">Priority Game Review</span><input class="input" name="rt" type="number" min="1" value="'+((m&&m.review_tokens)||20)+'"></label></div><button class="btn btn-primary btn-sm" type="submit">Save prices</button></form>';
   }
   async function spend(n,refBase){
@@ -279,8 +282,9 @@ const LC72=(()=>{
   }
   async function autoCheck(){
     if(!sess())return;const last=+rd("lc72-auto-at",0)||0;if(Date.now()-last<600000&&!/paid=/.test(location.hash))return;wr("lc72-auto-at",Date.now());
+    let hi=false;try{const w=await rpc("lc101_welcome",{p_name:myName()});hi=!!(w.data&&w.data.sent)}catch(e){}
     const r=await rpc("lc72_auto_check",{p_name:myName()});const d=r.data||{};
-    if(d.ok&&d.sent&&d.sent.length)notice(true);else notice(false);
+    if(hi||(d.ok&&d.sent&&d.sent.length))notice(true);else notice(false);
   }
   async function notice(force){
     if(route()==="coach-chat"||Q("#lc72-note"))return;const m=await me(force);if(!m||!(+m.unread>0))return;
@@ -385,7 +389,7 @@ const LC72=(()=>{
   }
   let deb=0;
   function scan(){ownerRows();if(/^(community|coach-chat)$/.test(route())||Q(".sheet-wrap"))decorate(Q("#view"));QA(".sheet-wrap").forEach(decorate);if(Q(".lc30-pmhead"))profileTitle()}
-  function afterRender(r){clearTimeout(deb);deb=setTimeout(()=>{try{scan()}catch(e){}},200);if(r!=="coach-chat")clearInterval(poll);if(r==="upgrades"||r==="home"||r==="quests")autoCheck()}
+  function afterRender(r){if(r==="coach-chat"){const n=Q("#lc72-note");if(n)n.remove()}clearTimeout(deb);deb=setTimeout(()=>{try{scan()}catch(e){}},200);if(r!=="coach-chat")clearInterval(poll);if(r==="upgrades"||r==="home"||r==="quests")autoCheck()}
   function init(){
     css();
     try{if(typeof MOUNT!=="undefined"){MOUNT["landing-editor"]=mountEditor;MOUNT["coach-chat"]=mountChat;try{DOC_TITLES["coach-chat"]="Coach Kyenzo";ROUTE_TITLES["coach-chat"]="the coach chat";DOC_TITLES["landing-editor"]="Landing page editor";ALIASES.coach="coach-chat";ALIASES.inbox="coach-chat"}catch(e){}}}catch(e){}

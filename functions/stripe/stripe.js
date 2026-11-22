@@ -186,7 +186,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       'Statement: I withdraw from my contract for "' + (CONTRACTS[r.contract] || r.contract) + '".',
       'Name: ' + r.name, 'E-mail: ' + r.email, 'Received: ' + (bxl || utc) + (bxl ? ' = ' + utc : ''), 'Reference: W' + r.id + (note ? '\nYour note: ' + note : ''), '',
       'What happens next: we stop the renewal and refund you within 14 days of this message, to the card you paid with. For Pro or VIP that started at your request, the days you used are kept and the rest is refunded; for tokens, the unused tokens are refunded. A free trial costs nothing.',
-      '', 'Lanckriet Chess, Kyenzo Lanckriet. Reply to this e-mail with any question.'].join('\n');
+      '', 'Lanckriet Chess, Kyenzo Lanckriet. Questions? Write to me in the app, under Coach Kyenzo.'].join('\n');
   }
   async function withdraw(body, ip) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
@@ -202,6 +202,13 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     let r = row && row.r; if (typeof r === 'string') { try { r = JSON.parse(r); } catch (e) { r = null; } }
     if (!r || !r.ok) return { status: r && r.reason === 'slow_down' ? 429 : 400, body: { ok: false, reason: (r && r.reason) || 'not_ready' } };
     const text = ackText(r, note);
+    // LC101 (9.66.0): a signed-in member gets the statement and this acknowledgement in their chat with Kyenzo (kept, never edited)
+    let dm = false;
+    if (account) {
+      const statement = 'I withdraw from my contract for "' + (CONTRACTS[r.contract] || r.contract) + '". Reference W' + r.id + '.' + (note ? '\n' + note : '');
+      try { const d = await DB.prepare('SELECT public._lc101_withdraw_dm(?, ?, ?) AS r').bind(r.id, statement, text).first(); dm = !!(d && (d.r === true || d.r === 't')); }
+      catch (e) { console.error('LC101: the acknowledgement could not go into the chat: ' + String((e && e.message) || e).slice(0, 160) + '. Run sql/20261124100000_lc101_welcome_dm.sql.'); }
+    }
     let mailed = false;
     if (E.RESEND_API_KEY && E.WELCOME_FROM) {
       try {
@@ -212,7 +219,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       } catch (e) { console.error('LC100: the acknowledgement e-mail failed: ' + String((e && e.message) || e).slice(0, 120)); }
       if (mailed) await run1('SELECT public._lc100_withdraw_mailed(?)', r.id);
     }
-    return { status: 200, body: { ok: true, id: r.id, ref: 'W' + r.id, at: r.at, mailed, text } };
+    return { status: 200, body: { ok: true, id: r.id, ref: 'W' + r.id, at: r.at, mailed, dm, text } };
   }
   async function rescue(body, ip) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
