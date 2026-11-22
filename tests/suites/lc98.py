@@ -1,6 +1,6 @@
 # lc98 (9.63.0): the landing page's Elo segment selector above the hero video, the owner's "Landing videos per Elo" page, and the
 # Sources & lanes panel (copy link per source row, New source / lane). Real Chromium, 390x844 and 1280x800, Supabase stubbed.
-# Landing: no segment live = the page is as before (no bar, coach card); live segments = the bar with the 5 exact labels right above the
+# Landing: no segment live = since 9.65.0 the bar with "coming soon" (before: no bar, coach card); live segments = the bar with the 5 exact labels right above the
 # player, the default segment, a click switches the video (and keeps playing when a video was already playing), fullscreen allowed, a
 # segment that is not live shows the walkthrough with a note or a "coming soon" card, ?elo= opens a segment, the pick is remembered,
 # arrow keys work, the left-hand story and the install button are untouched, nothing scrolls sideways.
@@ -72,7 +72,7 @@ with sync_playwright() as p:
     br = p.chromium.launch()
     # ---------- landing: nothing live = as before ----------
     c, pg, calls, box = land(br, 390, 844, True, 'none', {}, walk=False)
-    out('landing, no segment live [bar hidden, coach card shown, segvideo asked]', [pg.evaluate("document.getElementById('seg-box').classList.contains('hide')"), pg.evaluate("!document.getElementById('coach-card').classList.contains('hide')"), any(x[0] == 'lc89_cfg_public' and x[1].get('p_k') == 'segvideo' for x in calls)])
+    out('landing, no segment saved (9.65.0: the bar is always there) [bar shown, coach card hidden, segvideo asked]', [pg.evaluate("!document.getElementById('seg-box').classList.contains('hide')"), pg.evaluate("document.getElementById('coach-card').classList.contains('hide')"), any(x[0] == 'lc89_cfg_public' and x[1].get('p_k') == 'segvideo' for x in calls)])
     c.close()
     for w, hh, mob, tag in [(390, 844, True, 'phone'), (1280, 800, False, 'desktop')]:
         c, pg, calls, box = land(br, w, hh, mob, tag, CFG)

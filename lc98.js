@@ -275,7 +275,8 @@ const LC98=(()=>{
         try{DOC_TITLES["seg-videos"]="Landing videos per Elo";DOC_TITLES.lanes="Sources & lanes";ROUTE_TITLES["seg-videos"]="the landing videos";ROUTE_TITLES.lanes="the sources"}catch(e){}}
       try{const lv=LC26.levels,o=lv.minLevel;if(lv&&!lv.__lc98){lv.__lc98=1;lv.minLevel=r=>r==="seg-videos"||r==="lanes"?1:o(r)}}catch(e){}
       document.addEventListener("click",onClick);document.addEventListener("submit",onSubmit,true);document.addEventListener("input",onInput);document.addEventListener("change",onInput);document.addEventListener("toggle",onToggle,true);
-      let d2=0;new MutationObserver(()=>{clearTimeout(d2);d2=setTimeout(ownerRows,250)}).observe(document.body,{childList:true,subtree:true});
+      /* 9.65.0: a throttle, not a debounce: the page never stops changing, so a reset timer never fired and the owner menu missed its rows */
+      let d2=0;new MutationObserver(()=>{if(d2)return;d2=setTimeout(()=>{d2=0;ownerRows()},250)}).observe(document.body,{childList:true,subtree:true});
     }catch(e){console.error("lc98",e)}
   }
   return{init:init,afterRender:afterRender,version:VERSION,paintSources:paintSources,landingLink:landingLink,appLink:appLink,

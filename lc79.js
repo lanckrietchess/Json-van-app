@@ -279,6 +279,90 @@
     if(noOverlay)return;
     if(!(p&&p.capsOff))try{drawCaption(g,W,H,capLine(take,ct),capStyle(p,W,H),ct)}catch(e){}
     if(p)coOrder(p).forEach(c=>{if(!coOn(p,c))return;try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
+    if(p&&p.wmcta&&p.wmcta.on)try{drawWmCta(g,W,H,p,Tp)}catch(e){}
+  }
+  /* ---------- 9.65.0: the watermark CTA. A short line next to the watermark ("Get your own personalized roadmap — comment RM"), shown
+     at the times you set (or the last seconds of the video), drawn on the frame like the captions: the same in the preview and the
+     export. One text per platform: Instagram / Facebook and TikTok; "Export IG/FB + TikTok" renders the project twice in a row. ---------- */
+  const WMC_DEF={ig:"Get your own personalized roadmap — comment RM",tt:"Get your own personalized roadmap — link in bio"};
+  const WMC_SETS=[["ig","Instagram / Facebook"],["tt","TikTok"]];
+  const wmcText=s=>String(s==null?"":s).replace(/[\u0000-\u001f<>]/g," ").replace(/\s+/g," ").trim().slice(0,90);
+  function wmcNorm(w){
+    w=w&&typeof w==="object"?w:{};const tx=w.texts&&typeof w.texts==="object"?w.texts:{};
+    const cues=(Array.isArray(w.cues)&&w.cues.length?w.cues:[{t:0,d:6,end:true}]).slice(0,8).map(c=>({id:String(c&&c.id||uid()),t:clamp(+(c&&c.t)||0,0,36000),d:clamp(+(c&&c.d)||5,1,120),end:!!(c&&c.end)}));
+    return{on:!!w.on,set:w.set==="tt"?"tt":"ig",texts:{ig:wmcText(tx.ig)||WMC_DEF.ig,tt:wmcText(tx.tt)||WMC_DEF.tt},cues:cues};
+  }
+  function wmcActive(w,Tp,total){
+    for(const c of w.cues){const s=c.end?Math.max(0,(total||0)-c.d):c.t;if(Tp>=s&&Tp<s+c.d)return{s:s,d:c.d,age:Tp-s}}
+    return null;
+  }
+  const TOTC=new WeakMap();
+  function projTotal(p){const k=(p.clips||[]).map(c=>c.id+":"+c.s+":"+c.e+(c.hidden?"h":"")).join("|"),m=TOTC.get(p);if(m&&m.k===k)return m.v;let v=0;try{v=segments(p).total||0}catch(e){v=0}TOTC.set(p,{k:k,v:v});return v}
+  /* where the line goes: right above the watermark when it sits in the lower half, right under it otherwise; centred on it */
+  function wmcPlace(W,H,wm,bw,bh){
+    const m=Math.round(Math.min(W,H)*.03),gap=Math.round(bh*.35);let cx=W/2,y=H-m-bh-Math.round(H*.08);
+    if(wm&&wm.w>0){cx=wm.x+wm.w/2;y=wm.y+wm.h/2>H/2?wm.y-gap-bh:wm.y+wm.h+gap}
+    return{x:Math.round(clamp(cx-bw/2,m,Math.max(m,W-m-bw))),y:Math.round(clamp(y,m,Math.max(m,H-m-bh)))};
+  }
+  function drawWmCta(g,W,H,p,Tp){
+    const w=wmcNorm(p.wmcta),a=wmcActive(w,Tp,projTotal(p));if(!a)return;
+    const text=w.texts[w.set];if(!text)return;
+    let wm=null;try{const t=T(),spec=t&&t.Tier&&t.Tier.wm();if(spec&&t.wmGeom)wm=t.wmGeom(W,H,spec)}catch(e){wm=null}
+    const base=Math.min(W,H);let fs=Math.max(12,Math.round(base*.036));const maxW=W-2*Math.round(base*.05);
+    g.save();g.setTransform&&g.setTransform(1,0,0,1,0,0);g.font="700 "+fs+"px Sora,system-ui,sans-serif";
+    let lines=[text],tw=g.measureText(text).width;
+    if(tw+fs*1.6>maxW){const f2=Math.max(11,Math.floor(fs*(maxW-fs*1.6)/tw));if(f2>=fs*.78){fs=f2;g.font="700 "+fs+"px Sora,system-ui,sans-serif"}
+      else{const ws=text.split(" ");let best=1,bd=1e9;for(let i=1;i<ws.length;i++){const d=Math.abs(g.measureText(ws.slice(0,i).join(" ")).width-g.measureText(ws.slice(i).join(" ")).width);if(d<bd){bd=d;best=i}}
+        lines=[ws.slice(0,best).join(" "),ws.slice(best).join(" ")];tw=Math.max(g.measureText(lines[0]).width,g.measureText(lines[1]).width);
+        if(tw+fs*1.6>maxW){fs=Math.max(10,Math.floor(fs*(maxW-fs*1.6)/tw));g.font="700 "+fs+"px Sora,system-ui,sans-serif"}}}
+    tw=Math.max.apply(null,lines.map(l=>g.measureText(l).width));
+    const lh=Math.round(fs*1.25),bw=Math.round(tw+fs*1.6),bh=Math.round(lh*lines.length+fs*.7),pos=wmcPlace(W,H,wm,bw,bh);
+    const fade=Math.min(1,a.age/.3,Math.max(0,(a.d-a.age)/.3)),rise=Math.round((1-Math.min(1,a.age/.3))*fs*.4);
+    g.globalAlpha=clamp(fade,0,1);
+    g.shadowColor="rgba(0,229,255,.35)";g.shadowBlur=fs*.8;rr(g,pos.x,pos.y+rise,bw,bh,bh/2);g.fillStyle="rgba(10,14,20,.93)";g.fill();
+    g.shadowBlur=0;g.lineWidth=Math.max(2,fs*.1);g.strokeStyle="rgba(0,229,255,.8)";g.stroke();
+    g.fillStyle="#E8F4FA";g.textAlign="center";g.textBaseline="middle";
+    lines.forEach((l,i)=>g.fillText(l,pos.x+bw/2,pos.y+rise+fs*.35+lh*(i+.5)+1));
+    g.restore();
+  }
+  function paintWmc(){
+    const box=ED.el&&Q(".lc79-wmc",ED.el),p=cur();if(!box)return;if(!p){box.innerHTML="";return}
+    const w=wmcNorm(p.wmcta);
+    box.innerHTML='<div class="lc79-layhead"><b>Watermark CTA</b><span class="lc79-hint">A line next to the watermark, in the preview and the export. One text for Instagram / Facebook, one for TikTok.</span></div>'
+      +'<div class="lc79-wmcrow"><label class="lc79-wmcon"><input type="checkbox" data-w="on"'+(w.on?" checked":"")+'> Show it</label>'
+      +'<span class="lc79-wmcset" role="group" aria-label="Preview the text for">'+WMC_SETS.map(x=>'<button type="button" class="lc79-b sm'+(w.set===x[0]?" pri":"")+'" data-w="set" data-v="'+x[0]+'" aria-pressed="'+(w.set===x[0])+'">'+esc(x[1])+"</button>").join("")+"</span></div>"
+      +WMC_SETS.map(x=>'<label class="lc79-wmct"><span>'+esc(x[1])+'</span><input type="text" maxlength="90" data-w="text" data-v="'+x[0]+'" value="'+esc(w.texts[x[0]])+'"></label>').join("")
+      +'<div class="lc79-wmccues"><span class="lc79-hint">When:</span>'+w.cues.map(c=>'<span class="lc79-wmccue" data-id="'+esc(c.id)+'"><select data-w="cend" aria-label="Start"><option value="t"'+(c.end?"":" selected")+'>from</option><option value="end"'+(c.end?" selected":"")+'>the last</option></select>'
+        +(c.end?"":'<input type="number" min="0" step="0.5" data-w="ct" value="'+c.t+'" aria-label="Start, in seconds"> s for')+'<input type="number" min="1" max="120" step="0.5" data-w="cd" value="'+c.d+'" aria-label="Length, in seconds"> s'
+        +(w.cues.length>1?'<button type="button" class="x" data-w="cdel" aria-label="Remove this time">×</button>':"")+"</span>").join("")
+      +(w.cues.length<8?'<button type="button" class="lc79-b sm" data-w="cadd">+ Another time</button>':"")+'<button type="button" class="lc79-b sm" data-w="here">Show it from the playhead</button></div>'
+      +'<div class="lc79-laylist"><button type="button" class="lc79-b sm pri" data-w="export2"'+(ED.busy||!w.on?" disabled":"")+'>Export IG/FB + TikTok</button><span class="lc79-hint">Renders the project twice: first with the Instagram / Facebook text, then with the TikTok text.</span></div>';
+  }
+  function wmcEdit(fn){const p=cur();if(!p)return;const w=wmcNorm(p.wmcta);fn(w,p);p.wmcta=w;save(p);showFrame()}
+  function bindWmc(el){
+    const box=Q(".lc79-wmc",el);if(!box)return;
+    box.addEventListener("change",e=>{const k=e.target.getAttribute("data-w");if(!k)return;const id=(e.target.closest("[data-id]")||{}).getAttribute?e.target.closest("[data-id]").getAttribute("data-id"):"";
+      if(k==="on")wmcEdit(w=>{w.on=!!e.target.checked});
+      else if(k==="text")wmcEdit(w=>{w.texts[e.target.getAttribute("data-v")==="tt"?"tt":"ig"]=wmcText(e.target.value)||WMC_DEF[e.target.getAttribute("data-v")==="tt"?"tt":"ig"]});
+      else if(k==="cend")wmcEdit(w=>{w.cues.forEach(c=>{if(c.id===id){c.end=e.target.value==="end";if(!c.end)c.t=clamp(+ED.T||0,0,36000)}})});
+      else if(k==="ct"||k==="cd")wmcEdit(w=>{w.cues.forEach(c=>{if(c.id===id){if(k==="ct")c.t=clamp(+e.target.value||0,0,36000);else c.d=clamp(+e.target.value||5,1,120)}})});
+      paintWmc();paintTop()});
+    box.addEventListener("click",e=>{const b=e.target.closest("button[data-w]");if(!b)return;const k=b.getAttribute("data-w"),id=(b.closest("[data-id]")||{}).getAttribute?b.closest("[data-id]").getAttribute("data-id"):"";
+      if(k==="set")wmcEdit(w=>{w.set=b.getAttribute("data-v")==="tt"?"tt":"ig"});
+      else if(k==="cadd")wmcEdit(w=>{w.cues.push({id:uid(),t:clamp(+ED.T||0,0,36000),d:5,end:false})});
+      else if(k==="cdel")wmcEdit(w=>{w.cues=w.cues.filter(c=>c.id!==id)});
+      else if(k==="here")wmcEdit(w=>{w.on=true;const c=w.cues[0];c.end=false;c.t=Math.round((+ED.T||0)*10)/10});
+      else if(k==="export2"){exportCtas();return}
+      paintWmc()});
+  }
+  async function exportCtas(){
+    const p=cur();if(!p||ED.busy)return;if(!segments(p).length){say("Add at least one take to the timeline first.","err",3500);return}
+    const keep=wmcNorm(p.wmcta);if(!keep.on){say("Switch the watermark CTA on first.","err",3000);return}
+    let n=0;
+    for(const x of WMC_SETS){const w=wmcNorm(p.wmcta);w.set=x[0];p.wmcta=w;save(p);paintWmc();
+      const r=await exportProject({suffix:x[0]==="ig"?"IG + FB":"TikTok",quiet:true});if(r==="cancel")break;if(r==="ok")n++}
+    p.wmcta=keep;save(p);ED.paint();
+    say(n?n+" of 2 exported to your takes archive (“"+p.name+" – IG + FB (export)” and “… – TikTok (export)”). Use Share on each one.":"Nothing was exported.",n?"ok":"err",7000);
   }
   function mkVideo(src,muted){const v=document.createElement("video");v.playsInline=true;v.setAttribute("playsinline","");v.preload="auto";v.muted=!!muted;if(src)v.src=src;v.style.cssText="position:fixed;left:-9999px;top:0;width:2px;height:2px;opacity:0;pointer-events:none";document.body.appendChild(v);return v}
   const once=(el,ev,ms)=>new Promise(r=>{let d=false;const f=()=>{if(d)return;d=true;el.removeEventListener(ev,f);r(true)};el.addEventListener(ev,f);if(ms)setTimeout(()=>{if(!d){d=true;el.removeEventListener(ev,f);r(false)}},ms)});
@@ -431,7 +515,10 @@
       ".lc79-toasts{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(560px,92vw)}",
       ".lc79-toast{background:#0b1222;border:1px solid rgba(0,229,255,.45);color:#e5e7eb;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13.5px;box-shadow:0 12px 30px rgba(0,0,0,.55);text-align:center}.lc79-toast.err{border-color:rgba(239,68,68,.7);color:#fecaca}.lc79-toast.ok{border-color:rgba(34,197,94,.6)}",
       /* 9.54.0 layers and versions */
-      ".lc79-layers{padding:8px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(255,255,255,.06)}.lc79-layhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}.lc79-layhead b{color:#fff;font-size:13px}",
+      ".lc79-wmcrow,.lc79-wmccues{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.lc79-wmcon{display:inline-flex;gap:6px;align-items:center;min-height:40px;font-weight:700}.lc79-wmcon input{width:20px;height:20px;accent-color:#00E5FF}.lc79-wmcset{display:inline-flex;gap:6px;flex-wrap:wrap}"
+      +".lc79-wmct{display:grid;gap:3px;font-size:12px;color:#94a3b8}.lc79-wmct input{min-height:40px;border-radius:10px;background:#14171d;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 10px;font:600 14px Sora,system-ui,sans-serif}"
+      +".lc79-wmccue{display:inline-flex;gap:4px;align-items:center;padding:4px 6px;border-radius:10px;background:#14171d;border:1px solid rgba(255,255,255,.12);font-size:12.5px;color:#cbd5e1}.lc79-wmccue select,.lc79-wmccue input{min-height:34px;border-radius:8px;background:#0A0B0E;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 6px;font:600 13px Sora,system-ui,sans-serif}.lc79-wmccue input{width:64px}.lc79-wmccue .x{background:none;border:0;color:#fca5a5;font-size:18px;min-width:32px;min-height:32px;cursor:pointer}"
+      +".lc79-layers{padding:8px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(255,255,255,.06)}.lc79-layhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}.lc79-layhead b{color:#fff;font-size:13px}",
       ".lc79-laylist{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.lc79-vlab{color:#cbd5e1;font-size:12.5px;margin-right:4px}",
       ".lc79-lay{min-height:40px;padding:0 10px;border-radius:999px;border:1px solid rgba(0,229,255,.45);background:rgba(0,229,255,.08);color:#e5e7eb;font:600 12.5px/1 inherit;cursor:pointer;display:inline-flex;gap:6px;align-items:center}",
       ".lc79-lay.off{border-style:dashed;border-color:rgba(148,163,184,.5);background:transparent;color:#94a3b8;text-decoration:line-through}.lc79-lay b{font-weight:400;text-decoration:none}",
@@ -590,14 +677,14 @@
         +'<p class="lc79-capst" data-capst aria-live="polite" hidden></p>'
         +'<div class="lc79-tlwrap"><div class="lc79-heads" aria-label="Tracks"></div><div class="lc79-scroll"><div class="lc79-lane"><div class="lc79-ruler" aria-hidden="true"></div><div class="lc79-rows"></div><div class="lc79-ph"></div></div></div></div>'
         +'<div class="lc79-tl-label"><span>Tap a track name to make it the target for new callouts. Drag a callout up or down to move it to another track. Eye = hide the whole track. S split · Delete · H hide · Space play · Ctrl+Z undo.</span></div></div>'
-        +'<section class="lc79-layers" aria-label="Versions"></section></div>';
+        +'<section class="lc79-layers" aria-label="Versions"></section><section class="lc79-layers lc79-wmc" aria-label="Watermark call to action"></section></div>';
       el._close=()=>{stopPlay();ED.open=false;Object.keys(ED.scrubV).forEach(k=>{try{ED.scrubV[k].removeAttribute("src");ED.scrubV[k].load();ED.scrubV[k].remove()}catch(e){}});ED.scrubV={};ED.base=null};
       el.addEventListener("click",onEdClick);el.addEventListener("change",onEdChange);el.addEventListener("input",onEdInput);
-      bindTimeline(el);bindCanvas(el);
+      bindTimeline(el);bindCanvas(el);bindWmc(el);
     });
     ED.open=true;ED.paint();
   }
-  ED.paint=function(){if(!ED.el||!ED.el.isConnected)return;paintTop();paintCalls();paintTimeline();paintLayers();paintInsp();paintArchive();showFrame()};
+  ED.paint=function(){if(!ED.el||!ED.el.isConnected)return;paintTop();paintCalls();paintTimeline();paintLayers();paintWmc();paintInsp();paintArchive();showFrame()};
   /* ---------- 9.54.0: layers (hide without deleting) and versions (named sets of hidden layers, exported one after the other) ---------- */
   const visOf=p=>({clips:(p.clips||[]).filter(c=>c.hidden).map(c=>c.id),co:(p.callouts||[]).filter(c=>c.hidden).map(c=>c.id),tracks:tracksOf(p).filter(t=>t.hidden).map(t=>t.id),capsOff:!!p.capsOff});
   function applyVis(p,v){const hc={},ho={};(v.clips||[]).forEach(id=>{hc[id]=1});(v.co||[]).forEach(id=>{ho[id]=1});
@@ -1517,7 +1604,7 @@
 CLOSE];
     if(bul){
       let pc=[],pa=[];try{pc=pawnCheck(c.fen);pa=g.fens[it.i+1]?pawnCheck(g.fens[it.i+1]):[]}catch(e){}
-      let gl="Release Giveaway: a 15-day ELO-gain challenge in the Lanckriet Chess app. Link your Chess.com or Lichess account, the app reads your public Rapid rating, and the top 5 ELO gainers win 1 month of Pro.";
+      let gl="Release Giveaway: an ELO-gain challenge in the Lanckriet Chess app, running until 9 December. Link your Chess.com or Lichess account, the app reads your public Rapid rating, and the top 5 ELO gainers win 1 month of Pro.";
       try{if(typeof LC82!=="undefined"&&LC82.giveawayLine)gl=LC82.giveawayLine()}catch(e){}
       L.splice(L.length-1,1,
 "PAWN CHECK (undefended pieces and pawns, kings left out)",
@@ -2188,19 +2275,38 @@ BCLOSE);
   function dockFit(sr){
     const dock=Q("#lc54-dock",sr),st=Q("#stage",sr),wrap=st&&st.closest(".stage-wrap");if(!dock||!wrap)return;
     dock.classList.add("lc79-docked");
-    const col=wrap.parentNode,row=Q("#lc79-scn",sr)||wrap;
+    const col=wrap.parentNode,row=wrap;
+    /* 9.65.0: on a computer the scene bar goes into the stage's tool row (one line less above the stage) */
+    {const scn=Q("#lc79-scn",sr),tools=Q("#lc54-bar",col);const ph=!!(Q(".lcs",sr)&&Q(".lcs",sr).classList.contains("compact"));
+      if(scn&&tools&&!ph&&scn.parentNode!==tools){const first=tools.firstElementChild;if(first)first.insertAdjacentElement("afterend",scn);else tools.appendChild(scn);scn.classList.add("lc79-inrow")}
+      else if(scn&&ph&&scn.parentNode===tools){col.insertBefore(scn,Q("#lc79-xf",sr)||wrap);scn.classList.remove("lc79-inrow")}}
     ["#lc79-post","#lc79-live"].forEach(id=>{const el=Q(id,sr);if(el&&el.parentNode!==col)col.insertBefore(el,row)});
     let rec="idle";try{rec=api().rec.state}catch(e){}
     if(rec!=="idle")return;                                             /* never resize the stage while a take is running */
     const dr=dock.getBoundingClientRect();if(dr.height<10)return;
     const L=LAY(),ar=L&&L.aspect==="9:16"?9/16:16/9,cs=getComputedStyle(wrap),pl=parseFloat(cs.paddingLeft)||0,pr=parseFloat(cs.paddingRight)||0,pt=parseFloat(cs.paddingTop)||0;
     const top0=wrap.getBoundingClientRect().top+(window.scrollY||0)+pt;  /* where the stage starts with the page at the top */
-    const room=dr.top-8-top0,pad=Math.ceil(window.innerHeight-dr.top+10);
-    let mw=0;if(room>=180&&wrap.getBoundingClientRect().width>0){const w=Math.floor(room*ar+pl+pr);if(w<col.clientWidth)mw=w}
+    const pb=parseFloat(cs.paddingBottom)||0,cr=col.getBoundingClientRect(),cb=cr.bottom+(window.scrollY||0);
+    /* 9.65.0: the stage was a stamp in the middle of the screen (158 x 281 px on a 1440 x 900 screen, 56 x 101 on 1280 x 720): the column
+       reserved the whole space under the dock (innerHeight - dock top) although the panel ends earlier, and the stage shared what was left
+       with the bars above it (flex: 1). Now the stage gets an exact height: from its own top to just above the dock (or the panel's
+       bottom, whichever comes first); the width follows the format (9:16 or 16:9) and never passes the column. The scene bar sits on one
+       line. The camera zoom (Crop & zoom, 1.00x) only changes what is drawn inside the stage, never its size. */
+    const dockTop=dr.top+(window.scrollY||0),bottom=dockTop-8,pad=Math.max(0,Math.ceil(cb-dockTop+8)),padS=Math.ceil(dr.height+24);
+    const lcs=Q(".lcs",sr),phone=!!(lcs&&lcs.classList.contains("compact"));
+    const fit0=Math.floor(bottom-top0-pb);
+    /* desktop: the Scene / Input / Crop & zoom bar sits in the stage's own tool row and the Crop & zoom panel floats over the empty
+       side of the stage area, so neither pushes the stage down (opening Crop & zoom used to shrink the stage to a stamp) */
+    const compact=phone;
+    const H=phone?Math.max(220,Math.floor(dr.top-24-pt-pb)):Math.max(160,fit0);
+    const cw=(col.clientWidth||cr.width)-(parseFloat(getComputedStyle(col).paddingLeft)||0)-(parseFloat(getComputedStyle(col).paddingRight)||0);
+    let hh=H,w=Math.floor(hh*ar+pl+pr);if(w>cw){w=Math.floor(cw);hh=Math.floor((cw-pl-pr)/ar)}
     /* one style rule in the Studio's own shadow root: the Studio's layout code can rewrite the element styles, never this rule */
     let fs=Q("#lc79-fit",sr);if(!fs){fs=document.createElement("style");fs.id="lc79-fit";sr.appendChild(fs)}
     col.classList.add("lc79-fitcol");
-    const css=".lc79-fitcol{padding-bottom:"+pad+"px!important}"+(mw?".lc79-fitcol>.stage-wrap{max-width:"+mw+"px!important;width:100%;margin-left:auto!important;margin-right:auto!important}":"");
+    const xfTop=Math.round(wrap.offsetTop+pt);
+    const css=(phone?"":".lc79-fitcol{position:relative}.lc79-fitcol>#lc79-xf:not([hidden]){position:absolute;z-index:30;left:10px;top:"+xfTop+"px;width:min(300px,calc(100% - 20px));max-height:calc(100% - "+(xfTop+pad+10)+"px);overflow:auto;margin:0;padding:10px;border-radius:12px;background:rgba(10,11,14,.94);border:1px solid rgba(0,229,255,.35);box-shadow:0 12px 30px rgba(0,0,0,.5)}.lc79-fitcol>#lc79-xf .lc79-xrow{flex-direction:column;align-items:stretch}")+(compact?".lc79-fitcol{padding-bottom:"+padS+"px!important;height:auto!important}.panel:has(.lc79-fitcol),.p-body:has(.lc79-fitcol){height:auto!important;max-height:none!important}.panel:has(.lc79-fitcol){bottom:auto!important}.canvas:has(.lc79-fitcol){overflow-y:auto!important}":".lc79-fitcol{padding-bottom:"+pad+"px!important}")
+      +".lc79-fitcol>.stage-wrap{flex:none!important;height:"+Math.round(hh+pt+pb)+"px!important;max-width:"+w+"px!important;width:100%;margin-left:auto!important;margin-right:auto!important}";
     if(fs.textContent!==css&&Date.now()-fitAt>250){fitAt=Date.now();fs.textContent=css}
   }
   function sceneTick(sr){
@@ -2354,7 +2460,9 @@ BCLOSE);
     if(txt){lm.textContent=txt;lm.className="eg-last "+cls}else if(o.done){lm.textContent="";lm.className="eg-last"}
   }
   /* ---------- Studio wiring (shadow root) ---------- */
-  const SR_CSS=".lc79-dockb{min-height:44px!important;padding:0 14px!important;border-radius:12px!important;font-weight:700!important}#lc54-dock{flex-wrap:wrap;max-width:calc(100vw - 16px);row-gap:6px}#lc54-dock.lc79-docked{left:8px!important;right:8px!important;transform:none!important;max-width:none!important;width:auto!important;box-sizing:border-box;justify-content:flex-start;border-radius:14px!important}@media (max-width:700px){#lc54-dock.lc79-docked{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}#lc54-dock.lc79-docked>*{flex:none}}.lc79-scn{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin:0 0 8px}.lc79-sl{display:flex;flex-direction:column;gap:2px;font:600 11px Sora,system-ui,sans-serif;color:#94a3b8;letter-spacing:.02em}.lc79-sl[hidden]{display:none}.lc79-scn .lc79-dsel,.lc79-xf .lc79-dsel{max-width:min(300px,86vw)}.lc79-xf{margin:0 0 8px;padding:6px 10px;border-radius:14px;background:#0f141b;border:1px solid rgba(0,229,255,.3)}.lc79-xf[hidden]{display:none}.lc79-xrow{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.lc79-xs{flex:1 1 160px;min-width:140px}.lc79-xs input{width:100%;min-height:44px}.lc79-xs b{color:#00E5FF}.lc79-xnote{margin:4px 0 0;font-size:12px}#lc79-xfh{position:absolute;z-index:45;cursor:grab;touch-action:none;outline:2px dashed #00E5FF;outline-offset:-2px;background:rgba(0,229,255,.06)}#lc79-xfh:active{cursor:grabbing}#lc54-dock .btn{min-height:44px}.lc79-dsel{min-height:44px;max-width:220px;border-radius:12px;background:#14171d;color:#e5e7eb;border:1px solid rgba(0,229,255,.45);padding:0 8px;font:600 13px Sora,system-ui,sans-serif}.lc79-flow{display:inline-flex;gap:4px;align-items:center}#lc79-step{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+  const SR_CSS="#lc79-paused{display:none;position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:40;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 20px);padding:8px 12px;border-radius:14px;background:rgba(10,11,14,.92);border:1px solid #fbbf24;color:#e5e7eb;font:600 13px/1.35 Sora,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}"
+    +"#lc79-paused b{color:#fbbf24}#lcs.is-paused #lc79-paused{display:flex}#lc54-pause{min-height:44px!important;padding:0 16px!important;font-weight:800!important;border-radius:12px!important}#lcs.is-paused #lc54-pause{background:#fbbf24!important;color:#0f172a!important;border-color:#fbbf24!important}#lcs.is-paused #lc54-time{animation:lc54blink 1s steps(2) infinite}"
+    +".lc79-dockb{min-height:44px!important;padding:0 14px!important;border-radius:12px!important;font-weight:700!important}#lc54-dock{flex-wrap:wrap;max-width:calc(100vw - 16px);row-gap:6px}#lc54-dock.lc79-docked{left:8px!important;right:8px!important;transform:none!important;max-width:none!important;width:auto!important;box-sizing:border-box;justify-content:flex-start;border-radius:14px!important}@media (max-width:700px){#lc54-dock.lc79-docked{flex-wrap:nowrap!important;overflow-x:auto;scrollbar-width:thin}#lc54-dock.lc79-docked>*{flex:none}}.lc79-scn{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 6px}.lc79-scn>.lc79-sl{display:flex!important;flex-direction:row!important;align-items:center;gap:6px}.lc79-scn>.lc79-sl>span{white-space:nowrap}.lc79-scn.lc79-inrow{margin:0;flex:0 1 auto;min-width:0}#lc54-bar:has(.lc79-inrow){flex-wrap:wrap;height:auto!important;row-gap:6px}#lc79-xf .lc79-xrow>*{flex:none}.lc79-sl{display:flex;flex-direction:column;gap:2px;font:600 11px Sora,system-ui,sans-serif;color:#94a3b8;letter-spacing:.02em}.lc79-sl[hidden]{display:none}.lc79-scn .lc79-dsel,.lc79-xf .lc79-dsel{max-width:min(300px,86vw)}.lc79-xf{margin:0 0 8px;padding:6px 10px;border-radius:14px;background:#0f141b;border:1px solid rgba(0,229,255,.3)}.lc79-xf[hidden]{display:none}.lc79-xrow{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}.lc79-xs{flex:1 1 160px;min-width:140px}.lc79-xs input{width:100%;min-height:44px}.lc79-xs b{color:#00E5FF}.lc79-xnote{margin:4px 0 0;font-size:12px}#lc79-xfh{position:absolute;z-index:45;cursor:grab;touch-action:none;outline:2px dashed #00E5FF;outline-offset:-2px;background:rgba(0,229,255,.06)}#lc79-xfh:active{cursor:grabbing}#lc54-dock .btn{min-height:44px}.lc79-dsel{min-height:44px;max-width:220px;border-radius:12px;background:#14171d;color:#e5e7eb;border:1px solid rgba(0,229,255,.45);padding:0 8px;font:600 13px Sora,system-ui,sans-serif}.lc79-flow{display:inline-flex;gap:4px;align-items:center}#lc79-step{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
     +"#lc79-post{position:relative;left:auto;transform:none;bottom:auto;z-index:6;margin:0 auto 8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:min(720px,94%);padding:8px 12px;border-radius:12px;background:#0f172a;border:1px solid rgba(0,229,255,.5);color:#fff;font:600 13px Sora,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)}#lc79-post .btn,#lc79-post select{min-height:44px}#lc79-post select{border-radius:10px;background:#14171d;color:#e5e7eb;border:1px solid rgba(255,255,255,.2);padding:0 8px}"
     +".lc79-dockb.lc79-on{background:#fbbf24!important;color:#0f172a!important;border-color:#fbbf24!important}"
     +".lc79-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}.lc79-bar .btn{min-height:44px}.lc79-bar .lc79-go{background:#00E5FF;color:#04141a;border-color:#00E5FF;font-weight:700}"
@@ -2414,6 +2522,14 @@ BCLOSE);
       [["projects","Edit Projects","Several reels, each with its own timeline, callouts and export",openProjects],["script","Game-to-Script AI","PGN to crucial mistake to master prompt for Claude",openScript]].forEach(o=>{
         const b=document.createElement("button");b.type="button";b.className="lc79-opt";b.setAttribute("role","menuitem");b.innerHTML=esc(o[1])+"<small>"+esc(o[2])+"</small>";
         b.onclick=e=>{e.stopPropagation();menu.hidden=true;const dd=Q(".lc66-dd",sr);if(dd)dd.setAttribute("aria-expanded","false");o[3]()};menu.appendChild(b)})}
+    /* 9.65.0: Pause / Resume, labelled and in reach. MediaRecorder pauses the picture and the sound together (they stay in sync), the
+       timer, the audio-level line and the live captions stop with it, and the take remembers where it was paused, so "Cut silences"
+       also tightens the quiet bit right after each seam (pauseSeams). The banner is on the page, never in the recording. */
+    const stw=Q("#stage",sr)&&Q("#stage",sr).closest(".stage-wrap");
+    if(stw&&!Q("#lc79-paused",sr)){const pb=document.createElement("div");pb.id="lc79-paused";pb.setAttribute("role","status");
+      pb.innerHTML='<b>⏸ Paused</b><span>The take goes on where you left it: picture and sound stay in sync.</span><button type="button" class="btn sm lc79-dockb">▶ Resume (P)</button>';
+      pb.querySelector("button").onclick=()=>{try{api().rec.resume()}catch(e){}};
+      if(getComputedStyle(stw).position==="static")stw.style.position="relative";stw.appendChild(pb)}
     const lcs=Q("#lcs",sr);
     if(lcs&&!Q("#lc79-live",sr)){const d=document.createElement("div");d.id="lc79-live";d.hidden=true;d.setAttribute("aria-live","off");lcs.appendChild(d)}
     try{menuBar(sr)}catch(e){console.error("lc79 menu",e)}
@@ -2449,6 +2565,6 @@ BCLOSE);
     window.addEventListener("pointerdown",()=>{if(route()==="studio"&&Date.now()-lastTick>1500)loopTick()},true);   /* watchdog */
   }
   return{camSrc:camSrc,drawUnder:drawUnder,applyScene:applyScene,scene:scS,srcRect:srcRect,sceneRects:sceneRects,boardIn:boardIn,shareScreen:shareScreen,inState:()=>({kind:IN.kind,live:IN.live,snap:!!IN.snap,shot:!!IN.shotV,el:!!IN.el}),writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
-    segments:segments,run:run,envThr:envThr,findQuiet:findQuiet,envDt:envDt,speechRanges:speechRanges,minus:minus,complement:complement,clipsFor:clipsFor,splitClip:splitClip,splitAt:splitAt,trimClip:trimClip,deleteClip:deleteClip,cutSilences:cutSilences,autoSilence:autoSilence,envOf:envOf,capStyle:capStyle,capLine:capLine,drawCaption:drawCaption,nle:nle,undo:undo,drawCallout:drawCallout,makeCallout:makeCallout,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,pawnCheck:pawnCheck,BCLOSE:BCLOSE,boardSVG:boardSVG,sfx:sfx,
+    segments:segments,run:run,envThr:envThr,findQuiet:findQuiet,envDt:envDt,speechRanges:speechRanges,minus:minus,complement:complement,clipsFor:clipsFor,splitClip:splitClip,splitAt:splitAt,trimClip:trimClip,deleteClip:deleteClip,cutSilences:cutSilences,autoSilence:autoSilence,envOf:envOf,capStyle:capStyle,capLine:capLine,drawCaption:drawCaption,nle:nle,undo:undo,drawCallout:drawCallout,makeCallout:makeCallout,wmcNorm:wmcNorm,wmcActive:wmcActive,wmcPlace:wmcPlace,drawWmCta:drawWmCta,WMC_DEF:WMC_DEF,drawFrame:drawFrame,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,pawnCheck:pawnCheck,BCLOSE:BCLOSE,boardSVG:boardSVG,sfx:sfx,
     BUILT:BUILT,db:db,newProject:newProject,tracksOf:tracksOf,coOn:coOn,capItems:capItems,visOf:visOf,applyVis:applyVis,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/

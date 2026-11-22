@@ -2,7 +2,7 @@
 const LC82=(()=>{
   "use strict";
   /* LC82 (build 9.42.0): the Release Giveaway, its public Proof Queue board and the social-proof counters.
-     1. #giveaway (Social menu, a slim banner on the calm pages): a 15-day ELO-gain challenge. Sign in, link Chess.com / Lichess (the Edge Function
+     1. #giveaway (Social menu, a slim banner on the calm pages): an ELO-gain challenge (the release giveaway ends on 9 December 2026). Sign in, link Chess.com / Lichess (the Edge Function
         elo-verify reads the PUBLIC Rapid rating, the browser never sends one), join with one tap. Start = the verified rating at that moment, gain =
         latest verified rating minus start (the owner can switch to peak). The top 5 win 1 month of Pro. Showing the first name and the gain on the
         public board is a separate tick, OFF by default (GDPR opt-in).
@@ -48,10 +48,12 @@ const LC82=(()=>{
   }
   async function board(){const r=await rpc("lc82_board_public",{},true);return okData(r)}
   const G=()=>{const c=rd("lc82-proof",null);return c&&c.d&&c.d.giveaway||null};
+  /* 9.65.0: the end date comes from the giveaway row (ends_at); "9 December" (the release giveaway) until it is loaded */
+  const until=g=>{const x=g||G();if(x&&x.ends_at){try{return new Date(x.ends_at).toLocaleDateString("en-GB",{day:"numeric",month:"long",timeZone:"Europe/Brussels"})}catch(e){}}return"9 December"};
   /* one line for the script prompts (LC79 Bullet Points mode, LC64 Content Trim) */
   function giveawayLine(){
     const g=G(),n=g&&g.winners||5,prize=g&&g.prize||"1 month of Pro";
-    return"Release Giveaway: a 15-day ELO-gain challenge in the Lanckriet Chess app. Link your Chess.com or Lichess account, the app reads your public Rapid rating, and the top "+n+" ELO gainers win "+prize+"."
+    return"Release Giveaway: an ELO-gain challenge in the Lanckriet Chess app, running until "+until()+". Link your Chess.com or Lichess account, the app reads your public Rapid rating, and the top "+n+" ELO gainers win "+prize+"."
       +(g&&g.ends_at&&!g.ended?" It ends on "+day(g.ends_at)+".":"");
   }
   function left(g){
@@ -83,7 +85,7 @@ const LC82=(()=>{
     if(ST&&ST.entry)wr("lc82-me",{gain:ST.entry.gain,rank:ST.entry.rank,id:(ST.giveaway||{}).id,at:Date.now()});
   }
   async function mountPage(view){
-    view.innerHTML='<div class="lc82 lc82-page"><p class="lc82-tag">Release Giveaway</p><h1>Gain the most ELO in 15 days</h1><p class="lead">Play your normal games and train the way you train. Your verified Rapid rating on Chess.com or Lichess does the talking. The top 5 ELO gainers win 1 month of Pro.</p><div data-lc82-body><p class="small muted">Loading…</p></div></div>';
+    view.innerHTML='<div class="lc82 lc82-page"><p class="lc82-tag">Release Giveaway</p><h1>Gain the most ELO by '+esc(until())+'</h1><p class="lead">Play your normal games and train the way you train. Your verified Rapid rating on Chess.com or Lichess does the talking. The top 5 ELO gainers win 1 month of Pro.</p><div data-lc82-body><p class="small muted">Loading…</p></div></div>';
     await load();paint();
   }
   function paint(){
@@ -188,7 +190,7 @@ const LC82=(()=>{
     const me=rd("lc82-me",null),mine=me&&me.id===g.id;
     const d=document.createElement("div");d.className="lc82-ban";d.setAttribute("role","note");
     d.innerHTML='<span class="lc82-ic" aria-hidden="true">🎁</span><p><b>'+(mine?"Release Giveaway: you are in":"Release Giveaway")+'</b> '
-      +(mine?"Your gain: <b>"+sgn(me.gain)+"</b>"+(me.rank?" · rank #"+me.rank:"")+" · "+esc(left(g)):"Gain the most ELO in 15 days: the top "+(+g.winners||5)+" win "+esc(g.prize||"1 month of Pro")+". "+esc(left(g))+".")
+      +(mine?"Your gain: <b>"+sgn(me.gain)+"</b>"+(me.rank?" · rank #"+me.rank:"")+" · "+esc(left(g)):"Gain the most ELO by "+esc(until(g))+": the top "+(+g.winners||5)+" win "+esc(g.prize||"1 month of Pro")+". "+esc(left(g))+".")
       +'</p><a class="btn btn-primary btn-sm" href="#giveaway">'+(mine?"See the board":"Join")+'</a><button type="button" class="lc82-x" data-lc82="x" aria-label="Hide for 3 days">×</button>';
     v.insertAdjacentElement("afterbegin",d);
   }

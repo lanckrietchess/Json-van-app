@@ -21,7 +21,7 @@ with sync_playwright() as p:
         st(pg,"const b = [...R.querySelectorAll('*')].find(x => x.textContent.trim().startsWith('Short / Reel') && x.closest('button,[role=button]')); if (b) b.closest('button,[role=button]').click(); return 1");pg.wait_for_timeout(1800)
         st(pg,"try{LC66.setTab(R,'shoot')}catch(e){};return 1");pg.wait_for_timeout(1200)
         pg.evaluate("window.scrollTo(0,0)");pg.wait_for_timeout(600)
-        print(tag+' top: [dock fixed, stage bottom <= dock top, board bottom <= dock top, scene row]:',st(pg,"const d=R.getElementById('lc54-dock').getBoundingClientRect(),s=R.getElementById('stage').getBoundingClientRect(),b=R.querySelector('.layer[data-layer=\"board\"]');const br=b?b.getBoundingClientRect():null;return [getComputedStyle(R.getElementById('lc54-dock')).position, s.bottom<=d.top+1, br?br.bottom<=d.top+1:'no board layer', !!R.getElementById('lc79-scn')]"),flush=True)
+        print(tag+' top: [dock fixed, stage bottom <= dock top, board bottom <= dock top, scene row]:',st(pg,"const d=R.getElementById('lc54-dock').getBoundingClientRect(),s=R.getElementById('stage').getBoundingClientRect(),b=R.querySelector('.layer[data-layer=\"board\"]');const br=b?b.getBoundingClientRect():null;const ph=R.querySelector('.lcs').classList.contains('compact');/* 9.65.0: on a phone the stage is full width and the page scrolls: it must FIT above the dock, not start above it */return [getComputedStyle(R.getElementById('lc54-dock')).position, ph?s.height<=d.top-8&&s.width>=R.getElementById('stage').closest('.stage-wrap').parentNode.clientWidth-40:s.bottom<=d.top+1, br?(ph?br.height<=d.top:br.bottom<=d.top+1):'no board layer', !!R.getElementById('lc79-scn')]"),flush=True)
         pg.screenshot(path=SHOTS+'/lc85-studio-'+tag+'.png')
         pg.evaluate("window.scrollTo(0, document.body.scrollHeight)");pg.wait_for_timeout(400);pg.evaluate("document.querySelectorAll('.toast').forEach(t => t.remove())")
         print(tag+' record button after scroll [label,h,inside,nothing on top]:',st(pg,"const b = R.getElementById('lc54-rec'); const r = b.getBoundingClientRect(); const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return [b.textContent, Math.round(r.height), r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth, !!top && top.shadowRoot === R]"),flush=True)
@@ -71,6 +71,9 @@ with sync_playwright() as p:
     pg.evaluate("document.body.insertAdjacentHTML('beforeend', LC36.support.button('btn-gold'))");pg.evaluate("document.querySelector('body > .lc36-support').click()");pg.wait_for_timeout(2200)
     print('soft upgrade sheet [open, title, VIP folded, scarcity card absent, proof slot]:',pg.evaluate("(()=>{const s=document.querySelector('.lc85-upsheet');return [!!s, s&&s.getAttribute('aria-label'), !!(s&&s.querySelector('details.lc85-more .is-vip')), !(s&&s.querySelector('.lc34-card')), !!(s&&s.querySelector('[data-lc85-proof]'))]})()"))
     pg.evaluate("document.querySelector('.lc85-upsheet [data-lc85-plan=\"monthly\"][data-tier=\"2\"]').click()");pg.wait_for_timeout(2500)
+    # 9.65.0: every Payment Link first passes the consent step (LC99.confirm): tick the box, then pay
+    pg.evaluate("document.querySelector('.lc99-cf-sheet [data-lc99-cfok]').click()");pg.wait_for_timeout(600)
+    pg.evaluate("document.querySelector('.lc99-cf-sheet [data-lc99-cfpay]').click()");pg.wait_for_timeout(3500)
     print('Pro monthly -> Stripe [url]:',pg.evaluate("window.__go.slice(-1)[0]||''"))
     pg.evaluate("Store.set('lc85-force','open')")
     pg.evaluate("document.querySelector('body > .lc36-support').click()");pg.wait_for_timeout(2200)

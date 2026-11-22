@@ -1,4 +1,4 @@
-# lc99 (9.64.0): the withdrawal waiver on every step of the trial -> one-time month -> yearly road, and "your €25 counts toward the year".
+# lc99 (9.64.0, wording w2 since 9.65.0): the withdrawal waiver on every step of the trial -> one-time month -> yearly road, and "your €25 counts toward the year".
 # Real Chromium, 390x844 and 1280x800, Supabase and the Stripe function stubbed.
 # Post-trial pop-up: picking the one-time month or yearly opens a confirm step (terms: price today, renewal, how to cancel) with an UNCHECKED
 # waiver box; the pay button is off until it is ticked; Back returns to the options without marking anything; the choice is marked only on
@@ -149,6 +149,6 @@ app_ = open(REPO + '/app.html', encoding='utf-8').read()
 same = [open(REPO + '/' + n + '.js', encoding='utf-8').read().strip() in app_ for n in ('lc73', 'lc90', 'lc97', 'lc99')]
 srv = open(REPO + '/functions/stripe/stripe.js', encoding='utf-8').read()
 out('LC99 [embedded copies equal lc73 / lc90 / lc97 / lc99, init + afterRender wired, one waiver version everywhere, build]', same + ['try{LC99.init()}' in app_, 'LC99.afterRender(route)' in app_,
-    app_.count('"w1-2026-11-22"') >= 4 and "CONSENT_V = 'w1-2026-11-22'" in srv, __import__('re').search(r'CONFIG=\{version:"([^"]+)"', app_).group(1)])
+    app_.count('"w2-2026-11-23"') >= 4 and "CONSENT_V = 'w2-2026-11-23'" in srv and '"w1-2026-11-22"' not in app_, __import__('re').search(r'CONFIG=\{version:"([^"]+)"', app_).group(1)])
 bad = [e for e in errs if 'PAGEERROR' in e]
 print('ERRORS', len(bad)); [print(' ', e[:300]) for e in bad][:8]

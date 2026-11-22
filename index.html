@@ -129,15 +129,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.64.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.65.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.64.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.64.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.65.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.65.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.64.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.65.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -272,6 +272,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .seg-b[aria-selected=true]{background:var(--blue);border-color:var(--blue);color:#06202e}
 .seg-b.soon:not([aria-selected=true]){color:var(--mute)}
 .seg-on #walk-hero{margin:0 0 8px}.seg-note{margin:0 0 16px;font-size:.88rem;color:var(--mute)}
+.seg-admin{display:inline-block;margin-top:8px;color:#fbbf24;font-weight:700;font-size:.85rem}
 .walk .seg-soon{position:absolute;inset:0;display:grid;place-content:center;gap:6px;padding:18px;text-align:center;background:linear-gradient(160deg,#0b1222,#1e293b);color:var(--text)}
 .walk .seg-soon span{font-size:2rem}.walk .seg-soon b{font-size:1.05rem}.walk .seg-soon small{color:var(--mute);font-size:.9rem}
 .cards .card.wide{grid-column:1/-1}
@@ -482,7 +483,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 <section data-cms-sec="giveaway" id="giveaway" class="hide" aria-labelledby="h-giveaway">
   <div class="wrap">
     <span data-cms="giveaway.1" class="eyebrow">Release Giveaway</span>
-    <h2 id="h-giveaway">Gain the most ELO in 15 days. The top 5 win 1 month of Pro.</h2>
+    <h2 id="h-giveaway">Gain the most ELO by 9 December. The top 5 win 1 month of Pro.</h2>
     <p data-cms="giveaway.2" class="lead">Play your normal games, train in the Hub, and let your public rating do the talking. Link your Chess.com or Lichess account in the app: our server reads your Rapid rating the moment you join, and again while the challenge runs.</p>
     <p class="gw-when" id="gw-when"></p>
     <ol class="gw-board" id="gw-board" aria-live="polite"></ol>
@@ -620,8 +621,10 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   <div class="wrap">
     <p data-cms="foot.1"><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p data-cms="foot.2"><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
+    <!-- 9.65.0: the EU withdrawal function (CRD art. 11a), outside the CMS so it can never be hidden -->
+    <p class="lc-withdraw"><a href="/app.html#withdraw">Withdraw from contract here</a> <span class="mute">(within 14 days of a purchase)</span></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.64.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.65.0</p></footer>
 <button type="button" class="lc72-edit" id="lc89-edit" hidden>✎ Edit this page</button>
 <script>
 /*@@module lc89*/
@@ -757,6 +760,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       ADMIN=ok;var b=D.getElementById("lc89-edit");
       if(!ok){if(b){b.classList.remove("is-on");b.hidden=true}return}
       try{if(W.__lcWall)W.__lcWall.admin(true)}catch(e){}
+      try{if(W.__lcSegAdmin)W.__lcSegAdmin()}catch(e){}   /* 9.65.0: the link to the Elo videos editor under the segment bar */
       if(b){b.hidden=false;b.classList.add("is-on");b.addEventListener("click",function(){enter()})}
       if(/[?&]edit=1(&|$)/.test(location.search))enter();
     });
@@ -1208,7 +1212,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   syncLabels();
 
   /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
-  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.64.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.65.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -1332,7 +1336,10 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   var bi=$("brand-img");if(bi)bi.addEventListener("error",function(){bi.replaceWith(document.createTextNode("♞ "))});
   /* 3d. (9.63.0 LC98) the Elo segment selector right above the hero video. The owner sets one video per segment in the app
      (owner menu > Landing videos per Elo, lc89_cfg 'segvideo': {on, label, def, segs: {<id>: {url, yt, live}}}). The bar shows only when
-     at least one segment is live; a segment that is not live yet shows the walkthrough (or a short "coming soon" card). ?elo=1350 or
+     at least one segment is live; a segment that is not live yet shows the walkthrough (or a short "coming soon" card).
+     9.65.0: the bar with its five segments is ALWAYS there (Kyenzo: the videos belong on the right, not the MSPC card), unless the owner
+     switched the whole bar off ({on:false}); a segment without a live video shows "coming soon" (or the walkthrough). The owner, once the
+     server confirmed the admin session (lc89), sees a link to the editor in the app right under the bar. ?elo=1350 or
      ?elo=800-1200 (a lane link from the app) opens on that segment; the visitor's own pick is remembered on this device. The text and the
      install button on the left are never touched. */
   var SEGS=[["0-800","0 - 800 Elo",0,800],["800-1200","800 - 1200 Elo",800,1200],["1200-1600","1200 - 1600 Elo",1200,1600],["1600-2000","1600 - 2000 Elo",1600,2000],["2000-plus","2000+ Elo",2000,1e9]];
@@ -1362,25 +1369,27 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     segCfg=cfg&&typeof cfg==="object"?cfg:null;
     var box=$("seg-box"),hero=$("walk-hero"),side=$("hero-side");if(!box||!hero)return;
     var live=segCfg&&segCfg.on!==false?segLive():[],was=!!window.__lc98on;
-    window.__lc98on=live.length>0;
+    window.__lc98on=!(segCfg&&segCfg.on===false);
     if(!window.__lc98on){
       if(was){box.classList.add("hide");if(side)side.classList.remove("seg-on");hero.className="walk hide";hero.innerHTML="";var n0=$("seg-note");if(n0)n0.classList.add("hide");var cc=$("coach-card");if(cc)cc.classList.remove("hide");if(window.__lcWalkUrl)showVideo(window.__lcWalkUrl,0)}
       return}
-    var h=$("seg-h"),lb=segCfg.label&&typeof segCfg.label==="string"?segCfg.label.slice(0,80):"Pick your rating";if(h&&h.textContent!==lb)h.textContent=lb;
+    var h=$("seg-h"),lb=segCfg&&segCfg.label&&typeof segCfg.label==="string"?segCfg.label.slice(0,80):"Pick your rating";if(h&&h.textContent!==lb)h.textContent=lb;
     box.classList.remove("hide");if(side)side.classList.add("seg-on");
     var p="";try{p=segOf(new URLSearchParams(location.search).get("elo"))}catch(e){}
     var st="";try{st=segOf(localStorage.getItem(SEGP))}catch(e){}
-    var d=segOf(segCfg.def);d=d&&live.indexOf(d)>=0?d:"";
-    var pick=segCur||p||st||d||live[0];
+    var d=segOf(segCfg&&segCfg.def);d=d&&live.indexOf(d)>=0?d:"";
+    var pick=segCur||p||st||d||live[0]||"800-1200";
     segSelect(pick,false);
   }
   window.__lc98walk=function(){if(segCur&&!segVideo(segCur))segSelect(segCur,false)};
+  window.__lcSegAdmin=function(){var box=$("seg-box");if(!box||$("seg-admin"))return;var a=document.createElement("a");a.id="seg-admin";a.className="seg-admin";a.href="/app.html#seg-videos";
+    a.textContent="Owner: set the YouTube video for each rating →";box.appendChild(a)};
   (function(){
     var box=$("seg-box");if(!box)return;
     box.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-seg]");if(!b)return;var id=b.getAttribute("data-seg");if(id!==segCur||!$("walk-hero").querySelector("iframe,video"))segSelect(id,true)});
     box.addEventListener("keydown",function(e){var b=e.target.closest&&e.target.closest("[data-seg]");if(!b||!/^(ArrowRight|ArrowLeft|Home|End)$/.test(e.key))return;e.preventDefault();
       var all=[].slice.call(box.querySelectorAll("[data-seg]")),i=all.indexOf(b),n=e.key==="Home"?0:e.key==="End"?all.length-1:(i+(e.key==="ArrowRight"?1:-1)+all.length)%all.length;all[n].focus();segSelect(all[n].getAttribute("data-seg"),true)});
-    try{var c=JSON.parse(localStorage.getItem(SEGC)||"null");if(c&&c.v)segApply(c.v)}catch(e){}
+    try{var c=JSON.parse(localStorage.getItem(SEGC)||"null");segApply(c&&c.v||null)}catch(e){segApply(null)}
     var su=meta("lc-sb-url").replace(/\/+$/,""),sk=meta("lc-sb-key");if(!su||!sk)return;
     fetch(su+"/rest/v1/rpc/lc89_cfg_public",{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json",apikey:sk,Authorization:"Bearer "+sk},body:JSON.stringify({p_k:"segvideo"})})
       .then(function(r){return r.ok?r.json():null}).then(function(j){if(!j||!j.ok||!j.v||typeof j.v!=="object")return;try{localStorage.setItem(SEGC,JSON.stringify({v:j.v,at:Date.now()}))}catch(e){}segApply(j.v)}).catch(function(){});
@@ -1592,7 +1601,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       if(h.length){box.innerHTML=h.join("");box.classList.remove("hide")}}
     var g=b&&b.giveaway;if(!g||g.ended)return;
     var sec=document.getElementById("giveaway"),w=document.getElementById("gw-when"),ol=document.getElementById("gw-board");if(!sec)return;
-    var h2=document.getElementById("h-giveaway");if(h2)h2.textContent="Gain the most ELO in 15 days. The top "+(+g.winners||5)+" win "+(g.prize||"1 month of Pro")+".";
+    var h2=document.getElementById("h-giveaway");if(h2)h2.textContent="Gain the most ELO by "+(function(){try{return new Date(g.ends_at).toLocaleDateString("en-GB",{day:"numeric",month:"long",timeZone:"Europe/Brussels"})}catch(e){return"9 December"}})()+". The top "+(+g.winners||5)+" win "+(g.prize||"1 month of Pro")+".";
     if(w){var left=Math.ceil((Date.parse(g.ends_at)-Date.now())/864e5);w.textContent=g.upcoming?"Starts on "+day(g.starts_at)+".":(day(g.starts_at)+" to "+day(g.ends_at)+" · "+(left<=1?"last day":left+" days left")+" · "+nf(b.entries)+" players in")}
     var rows=b.rows||[];
     if(ol)ol.innerHTML=rows.length?rows.map(function(r){return'<li class="'+(r.rank<=(+g.winners||5)?"top":"")+'"><span class="rk">#'+r.rank+'</span><span class="nm">'+esc(r.first_name)+' <small>'+esc(SITE[r.site]||"")+'</small></span><span class="rt">'+r.start+' → '+r.now+'</span><span class="gn'+(r.gain<0?" neg":"")+'">'+sg(r.gain)+'</span></li>'}).join(""):'<li><span class="rk">–</span><span class="nm">Be the first on the board.</span></li>';

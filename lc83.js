@@ -623,7 +623,7 @@ const LC83=(()=>{
   }
 
   /* ======================= 2. CALM GUIDE ======================= */
-  const ALLOW=/lc42|lc84|lc40-auth|lc53|lc39|lc26/;
+  const ALLOW=/lc42|lc84|lc40-auth|lc53|lc39|lc26|lc99-cf/;   /* 9.65.0: the consent step before a payment always follows a tap on Pay: never held back */
   const PROMO=/lc34|lc43|lc45|lc72|lc82|upsell|promo|install/;
   const TASKR=/^(trim|think|bot|shuffle|ranked-shuffle|themes|puzzles|mspc-rep|vision|survival|clinic)$/;
   const GAP=20000,USER_MS=3000;
