@@ -129,15 +129,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.62.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.63.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.62.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.62.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.63.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.63.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.62.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.63.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -264,6 +264,16 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
 .mcount{margin:14px 0 6px;max-width:460px}.mcount .mc-top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.mcount b{font-size:1.6rem;color:var(--gold);font-variant-numeric:tabular-nums}.mcount span{color:var(--mute);font-size:.95rem}
 .story-h{font-size:clamp(1.75rem,5vw,2.7rem);line-height:1.12;letter-spacing:-.015em;margin:0 0 1.1rem;color:#fff;max-width:20ch}.story-t{margin:0 0 1.2rem}.story-t p{margin:0 0 .9rem;color:var(--text);font-size:1.06rem;line-height:1.68;max-width:62ch}.story-t p:first-child{font-size:1.14rem}.hero .grid{align-items:start}#hero-side{position:sticky;top:88px}@media (max-width:880px){#hero-side{position:static}}
 #walk-hero{margin:0 0 16px}
+/* 9.63.0 LC98: the Elo segment selector right above the hero video (the owner sets one video per segment in the app) */
+.seg{margin:0 0 10px}.seg-h{margin:0 0 8px;font-weight:800;font-size:.95rem;color:#fff}
+.seg-bar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.seg-b{grid-column:span 2}.seg-b:nth-child(n+4){grid-column:span 3}
+.seg-b{min-height:44px;padding:6px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:clamp(.8rem,2.6vw,.9rem);line-height:1.2;cursor:pointer;text-align:center;overflow-wrap:anywhere}
+.seg-b:hover{border-color:rgba(56,189,248,.6)}.seg-b:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.seg-b[aria-selected=true]{background:var(--blue);border-color:var(--blue);color:#06202e}
+.seg-b.soon:not([aria-selected=true]){color:var(--mute)}
+.seg-on #walk-hero{margin:0 0 8px}.seg-note{margin:0 0 16px;font-size:.88rem;color:var(--mute)}
+.walk .seg-soon{position:absolute;inset:0;display:grid;place-content:center;gap:6px;padding:18px;text-align:center;background:linear-gradient(160deg,#0b1222,#1e293b);color:var(--text)}
+.walk .seg-soon span{font-size:2rem}.walk .seg-soon b{font-size:1.05rem}.walk .seg-soon small{color:var(--mute);font-size:.9rem}
 .cards .card.wide{grid-column:1/-1}
 .flip{position:relative;perspective:1200px;cursor:pointer;padding:0;background:none;border:0;min-height:300px}.flip .fside{position:absolute;inset:0;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;transition:transform .55s ease;overflow:auto}
 .flip .back{transform:rotateY(180deg);border-color:rgba(248,113,113,.55);background:linear-gradient(160deg,#2a1620,var(--card))}.flip .back li{margin:.45rem 0}
@@ -407,7 +417,17 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       </div>
     </div>
     <div id="hero-side"><figure class="shot hide" id="shot-hero"></figure>
-    <div class="walk hide" id="walk-hero"></div>
+    <div class="seg hide" id="seg-box"><p class="seg-h" id="seg-h">Pick your rating</p>
+      <div class="seg-bar" id="seg-bar" role="tablist" aria-labelledby="seg-h">
+        <button type="button" role="tab" class="seg-b" data-seg="0-800" aria-selected="false" aria-controls="walk-hero" tabindex="-1">0 - 800 Elo</button>
+        <button type="button" role="tab" class="seg-b" data-seg="800-1200" aria-selected="false" aria-controls="walk-hero" tabindex="-1">800 - 1200 Elo</button>
+        <button type="button" role="tab" class="seg-b" data-seg="1200-1600" aria-selected="false" aria-controls="walk-hero" tabindex="-1">1200 - 1600 Elo</button>
+        <button type="button" role="tab" class="seg-b" data-seg="1600-2000" aria-selected="false" aria-controls="walk-hero" tabindex="-1">1600 - 2000 Elo</button>
+        <button type="button" role="tab" class="seg-b" data-seg="2000-plus" aria-selected="false" aria-controls="walk-hero" tabindex="-1">2000+ Elo</button>
+      </div>
+    </div>
+    <div class="walk hide" id="walk-hero" role="tabpanel" aria-labelledby="seg-h"></div>
+    <p class="seg-note hide" id="seg-note" role="status" aria-live="polite"></p>
     <div class="coach" id="coach-card" aria-label="What the coach does">
       <div class="who"><span class="dot" aria-hidden="true">♞</span><span>Coach Lanckriet</span></div>
       <div data-cms="story.8" class="msg"><b>M · Move.</b> What did your opponent just change? A threat? A new weakness?</div>
@@ -601,7 +621,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <p data-cms="foot.1"><b style="color:var(--text)">Lanckriet Chess</b> by Kyenzo Lanckriet. Peak 2105 on Chess.com.</p>
     <p data-cms="foot.2"><a href="/privacy.html">Privacy</a> · <a href="/delete-account.html">Delete my account</a></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.62.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.63.0</p></footer>
 <button type="button" class="lc72-edit" id="lc89-edit" hidden>✎ Edit this page</button>
 <script>
 /*@@module lc89*/
@@ -1188,7 +1208,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   syncLabels();
 
   /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
-  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.62.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.63.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -1286,13 +1306,15 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     if(/^[\w-]{11}$/.test(id))return{t:"yt",id:id,src:"https://www.youtube-nocookie.com/embed/"+id+"?rel=0&modestbranding=1&playsinline=1&autoplay=1"};
     if(h==="vimeo.com"||h==="player.vimeo.com"){m=/(\d{6,12})/.exec(p);if(m)return{t:"vm",src:"https://player.vimeo.com/video/"+m[1]+"?autoplay=1&playsinline=1"}}
     if(/\.(mp4|webm)$/i.test(p))return{t:"file",src:u};return null}
-  function mountVideo(box,v){
-    if(v.t==="file"){box.innerHTML='<video controls playsinline preload="metadata" src="'+esc(v.src)+'"></video>';return}
-    var bg=v.t==="yt"?"background-image:url(https://i.ytimg.com/vi/"+v.id+"/hqdefault.jpg)":"";
-    box.innerHTML='<button type="button" class="play" data-play="'+esc(v.src)+'" style="'+bg+'" aria-label="Play the walkthrough video"><span aria-hidden="true">▶</span><b class="cap">Watch the walkthrough</b></button>'}
-  document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-play]");if(!b)return;var src=b.getAttribute("data-play");if(!/^https:\/\/(www\.youtube-nocookie\.com|player\.vimeo\.com)\//.test(src))return;b.parentNode.innerHTML='<iframe src="'+esc(src)+'" title="Walkthrough video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'});
-  window.__lcShowVideo=function(url){var v=parseVideo(url),hero=$("walk-hero");if(!v||!hero||hero.className==="walk")return;mountVideo(hero,v);hero.className="walk";var cc=$("coach-card");if(cc)cc.classList.add("hide");var sec=$("walkthrough");if(sec)sec.className="alt hide"};
+  function mountVideo(box,v,cap){   /* 9.63.0: cap = the caption (LC98 names the Elo segment); without it: the walkthrough */
+    if(v.t==="file"){box.innerHTML='<video controls playsinline preload="metadata" src="'+esc(v.src)+'"'+(cap?' title="'+esc(cap)+'"':'')+'></video>';return}
+    var bg=v.t==="yt"?"background-image:url(https://i.ytimg.com/vi/"+v.id+"/hqdefault.jpg)":"",c=cap||"Watch the walkthrough";
+    box.innerHTML='<button type="button" class="play" data-play="'+esc(v.src)+'" data-title="'+esc(c)+'" style="'+bg+'" aria-label="'+esc(cap?"Play: "+cap:"Play the walkthrough video")+'"><span aria-hidden="true">▶</span><b class="cap">'+esc(c)+'</b></button>'}
+  function frameHTML(src,title){return'<iframe src="'+esc(src)+'" title="'+esc(title||"Walkthrough video")+'" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>'}
+  document.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-play]");if(!b)return;var src=b.getAttribute("data-play");if(!/^https:\/\/(www\.youtube-nocookie\.com|player\.vimeo\.com)\//.test(src))return;b.parentNode.innerHTML=frameHTML(src,b.getAttribute("data-title")==="Watch the walkthrough"?"Walkthrough video":b.getAttribute("data-title"))});
+  window.__lcShowVideo=function(url){window.__lcWalkUrl=url;if(window.__lc98on){try{window.__lc98walk()}catch(e){}return}var v=parseVideo(url),hero=$("walk-hero");if(!v||!hero||hero.className==="walk")return;mountVideo(hero,v);hero.className="walk";var cc=$("coach-card");if(cc)cc.classList.add("hide");var sec=$("walkthrough");if(sec)sec.className="alt hide"};
   function showVideo(url,updated){
+    window.__lcWalkUrl=url;if(window.__lc98on){try{window.__lc98walk()}catch(e){}return}   /* 9.63.0: LC98's Elo segments own the hero player */
     var v=parseVideo(url);if(!v)return;
     var fresh=updated>0&&Date.now()-updated<7*864e5,hero=$("walk-hero"),coach=$("coach-card"),sec=$("walkthrough");
     if(hero&&hero.className==="walk")return;
@@ -1308,6 +1330,61 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       try{localStorage.setItem(VM,String(Date.now()+6*36e5))}catch(e){}
     }).catch(function(){});
   var bi=$("brand-img");if(bi)bi.addEventListener("error",function(){bi.replaceWith(document.createTextNode("♞ "))});
+  /* 3d. (9.63.0 LC98) the Elo segment selector right above the hero video. The owner sets one video per segment in the app
+     (owner menu > Landing videos per Elo, lc89_cfg 'segvideo': {on, label, def, segs: {<id>: {url, yt, live}}}). The bar shows only when
+     at least one segment is live; a segment that is not live yet shows the walkthrough (or a short "coming soon" card). ?elo=1350 or
+     ?elo=800-1200 (a lane link from the app) opens on that segment; the visitor's own pick is remembered on this device. The text and the
+     install button on the left are never touched. */
+  var SEGS=[["0-800","0 - 800 Elo",0,800],["800-1200","800 - 1200 Elo",800,1200],["1200-1600","1200 - 1600 Elo",1200,1600],["1600-2000","1600 - 2000 Elo",1600,2000],["2000-plus","2000+ Elo",2000,1e9]];
+  var SEGC="lc98-segcfg",SEGP="lc98-seg",segCfg=null,segCur="";
+  function segOf(x){
+    x=String(x==null?"":x).toLowerCase().replace(/\s+/g,"").replace(/elo$/,"");if(!x)return"";
+    for(var i=0;i<SEGS.length;i++)if(SEGS[i][0]===x)return x;
+    if(/^2000(\+|plus)?$/.test(x))return"2000-plus";
+    if(!/^\d{1,4}$/.test(x))return"";var n=+x;
+    for(var k=0;k<SEGS.length;k++)if(n>=SEGS[k][2]&&n<SEGS[k][3])return SEGS[k][0];return""}
+  function segName(id){for(var i=0;i<SEGS.length;i++)if(SEGS[i][0]===id)return SEGS[i][1];return""}
+  function segVideo(id){var c=segCfg&&segCfg.segs&&segCfg.segs[id];return c&&c.live===true&&typeof c.url==="string"?parseVideo(c.url):null}
+  function segLive(){return SEGS.filter(function(x){return!!segVideo(x[0])}).map(function(x){return x[0]})}
+  function segSelect(id,user){
+    var box=$("seg-box"),hero=$("walk-hero"),note=$("seg-note");if(!box||!hero)return;segCur=id;
+    [].forEach.call(box.querySelectorAll("[data-seg]"),function(b){var on=b.getAttribute("data-seg")===id;b.setAttribute("aria-selected",on?"true":"false");b.tabIndex=on?0:-1;b.classList.toggle("soon",!segVideo(b.getAttribute("data-seg")))});
+    if(user)try{localStorage.setItem(SEGP,id)}catch(e){}
+    var cc=$("coach-card"),sh=$("shot-hero");if(cc)cc.classList.add("hide");if(sh)sh.classList.add("hide");
+    var name=segName(id),v=segVideo(id),playing=user&&!!hero.querySelector("iframe,video");hero.className="walk";
+    if(v){if(playing&&v.t!=="file")hero.innerHTML=frameHTML(v.src,name+" video");else mountVideo(hero,v,"Watch: "+name);note.textContent="";note.classList.add("hide");return}
+    var w=window.__lcWalkUrl?parseVideo(window.__lcWalkUrl):null;
+    if(w){mountVideo(hero,w);note.textContent="The "+name+" video is coming soon. Here is the walkthrough meanwhile."}
+    else{hero.innerHTML='<div class="seg-soon"><span aria-hidden="true">♞</span><b>The '+esc(name)+' video is coming soon.</b><small>Until then: install the app and let it scan your last 10 games.</small></div>';note.textContent=""}
+    note.classList.toggle("hide",!note.textContent);
+  }
+  function segApply(cfg){
+    segCfg=cfg&&typeof cfg==="object"?cfg:null;
+    var box=$("seg-box"),hero=$("walk-hero"),side=$("hero-side");if(!box||!hero)return;
+    var live=segCfg&&segCfg.on!==false?segLive():[],was=!!window.__lc98on;
+    window.__lc98on=live.length>0;
+    if(!window.__lc98on){
+      if(was){box.classList.add("hide");if(side)side.classList.remove("seg-on");hero.className="walk hide";hero.innerHTML="";var n0=$("seg-note");if(n0)n0.classList.add("hide");var cc=$("coach-card");if(cc)cc.classList.remove("hide");if(window.__lcWalkUrl)showVideo(window.__lcWalkUrl,0)}
+      return}
+    var h=$("seg-h"),lb=segCfg.label&&typeof segCfg.label==="string"?segCfg.label.slice(0,80):"Pick your rating";if(h&&h.textContent!==lb)h.textContent=lb;
+    box.classList.remove("hide");if(side)side.classList.add("seg-on");
+    var p="";try{p=segOf(new URLSearchParams(location.search).get("elo"))}catch(e){}
+    var st="";try{st=segOf(localStorage.getItem(SEGP))}catch(e){}
+    var d=segOf(segCfg.def);d=d&&live.indexOf(d)>=0?d:"";
+    var pick=segCur||p||st||d||live[0];
+    segSelect(pick,false);
+  }
+  window.__lc98walk=function(){if(segCur&&!segVideo(segCur))segSelect(segCur,false)};
+  (function(){
+    var box=$("seg-box");if(!box)return;
+    box.addEventListener("click",function(e){var b=e.target.closest&&e.target.closest("[data-seg]");if(!b)return;var id=b.getAttribute("data-seg");if(id!==segCur||!$("walk-hero").querySelector("iframe,video"))segSelect(id,true)});
+    box.addEventListener("keydown",function(e){var b=e.target.closest&&e.target.closest("[data-seg]");if(!b||!/^(ArrowRight|ArrowLeft|Home|End)$/.test(e.key))return;e.preventDefault();
+      var all=[].slice.call(box.querySelectorAll("[data-seg]")),i=all.indexOf(b),n=e.key==="Home"?0:e.key==="End"?all.length-1:(i+(e.key==="ArrowRight"?1:-1)+all.length)%all.length;all[n].focus();segSelect(all[n].getAttribute("data-seg"),true)});
+    try{var c=JSON.parse(localStorage.getItem(SEGC)||"null");if(c&&c.v)segApply(c.v)}catch(e){}
+    var su=meta("lc-sb-url").replace(/\/+$/,""),sk=meta("lc-sb-key");if(!su||!sk)return;
+    fetch(su+"/rest/v1/rpc/lc89_cfg_public",{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json",apikey:sk,Authorization:"Bearer "+sk},body:JSON.stringify({p_k:"segvideo"})})
+      .then(function(r){return r.ok?r.json():null}).then(function(j){if(!j||!j.ok||!j.v||typeof j.v!=="object")return;try{localStorage.setItem(SEGC,JSON.stringify({v:j.v,at:Date.now()}))}catch(e){}segApply(j.v)}).catch(function(){});
+  })();
 
   /* 4. verified student results: only members the owner switched on, first name, ratings and graph */
   function graph(points,joined){
