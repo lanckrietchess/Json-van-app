@@ -34,15 +34,15 @@ const ran = (re) => seen.filter(([q]) => re.test(q));
 let j = await call('downsell', {});
 t('signed out: the downsell asks for a sign-in', j.ok === false && j.reason === 'sign_in');
 for (const why of ['no_trial', 'trial_running', 'not_offered', 'dismissed', 'offer_expired', 'used', 'already_member']) {
-  S.ok = why; j = await call('downsell', { token: TOK });
+  S.ok = why; j = await call('downsell', { consent: true, token: TOK });
   t('the database says "' + why + '": refused with that reason, no checkout', j.ok === false && j.reason === why);
 }
 t('no Stripe checkout was created for any refusal', forms.length === 0);
-S.ok = 'ok'; S.okThrows = true; j = await call('downsell', { token: TOK });
+S.ok = 'ok'; S.okThrows = true; j = await call('downsell', { consent: true, token: TOK });
 t('LC97 SQL not run yet: refused (fails closed, never a free discount)', j.ok === false && j.reason === 'not_ready' && forms.length === 0);
 S.okThrows = false;
 
-seen.length = 0; j = await call('downsell', { token: TOK, device: 'dev_abcdefgh1' }); let f = forms.pop();
+seen.length = 0; j = await call('downsell', { consent: true, token: TOK, device: 'dev_abcdefgh1' }); let f = forms.pop();
 t('eligible: a Stripe checkout opens', j.ok === true && /^https:\/\/checkout\.stripe\.com\//.test(j.url) && j.amount_cents === 2500 && j.anchor_cents === 3900 && j.days === 30);
 t('a one-time payment (no subscription, no renewal) of EUR 25.00 in euro', f.get('mode') === 'payment' && f.get('line_items[0][price_data][unit_amount]') === '2500' && f.get('line_items[0][price_data][currency]') === 'eur' && !f.get('line_items[0][price_data][recurring][interval]'));
 t('the product says one month, one-time', /1 month \(one-time offer\)/.test(f.get('line_items[0][price_data][product_data][name]') || ''));
@@ -56,21 +56,21 @@ t('a row is reserved, then given the session id and url', ran(/INSERT INTO publi
 t('stale open checkouts are expired first', ran(/SET status = 'expired' WHERE email = \$1 AND status = 'open' AND expires_at < now\(\)/).length === 1);
 
 h = makeStripeHandler(fakeSql, env, fetchImpl);   /* a fresh rate limit (10 tries a minute per address) */
-S.open = { session_id: 'cs_test_down1234567', url: 'https://checkout.stripe.com/c/pay/down' }; j = await call('downsell', { token: TOK });
+S.open = { session_id: 'cs_test_down1234567', url: 'https://checkout.stripe.com/c/pay/down' }; j = await call('downsell', { consent: true, token: TOK });
 t('an open checkout is reused (tapping twice never opens two)', j.ok === true && j.reused === true && forms.length === 0);
-S.open = { session_id: 'tmp_x', url: '' }; j = await call('downsell', { token: TOK });
+S.open = { session_id: 'tmp_x', url: '' }; j = await call('downsell', { consent: true, token: TOK });
 t('a checkout being created right now: in_progress', j.ok === false && j.reason === 'in_progress');
-S.open = null; S.insertDup = true; j = await call('downsell', { token: TOK });
+S.open = null; S.insertDup = true; j = await call('downsell', { consent: true, token: TOK });
 t('a parallel second checkout hits the unique index: in_progress, no Stripe call', j.ok === false && j.reason === 'in_progress' && forms.length === 0);
 S.insertDup = false; stripeFail = true; seen.length = 0;
-const res = await h(new Request('https://x.supabase.co/functions/v1/stripe/downsell', { method: 'POST', body: JSON.stringify({ token: TOK }) }));
+const res = await h(new Request('https://x.supabase.co/functions/v1/stripe/downsell', { method: 'POST', body: JSON.stringify({ consent: true, token: TOK }) }));
 t('Stripe fails: an error, and the reserved row is removed again', res.status === 502 && ran(/DELETE FROM public\.lc97_downsell WHERE session_id/).length === 1);
 stripeFail = false;
 
 env.DOWNSELL_CENTS = '1999'; h = makeStripeHandler(fakeSql, env, fetchImpl);
-j = await call('downsell', { token: TOK }); f = forms.pop();
+j = await call('downsell', { consent: true, token: TOK }); f = forms.pop();
 t('DOWNSELL_CENTS sets the price on the server (the browser never does)', j.amount_cents === 1999 && f.get('line_items[0][price_data][unit_amount]') === '1999');
-j = await call('downsell', { token: TOK, amount_cents: 1 }); f = forms.pop();
+j = await call('downsell', { consent: true, token: TOK, amount_cents: 1 }); f = forms.pop();
 t('an amount sent by the browser is ignored', f.get('line_items[0][price_data][unit_amount]') === '1999');
 delete env.DOWNSELL_CENTS; h = makeStripeHandler(fakeSql, env, fetchImpl);
 j = await call('pricing', {});

@@ -16,7 +16,12 @@ const LC97=(()=>{
      Owner: #trial-lab (owner menu > Trial & Downsell Simulator): the live state of any account, a day-by-day simulation of the whole road built
      on the same decide() the app uses, previews of both pop-ups without checkout, test-account resets and the counters.
      SIM_ENABLED=false hides the simulator page and its menu row (the owner-only gate stays either way). */
-  const VERSION="9.62.0",DAY=864e5,CACHE="lc97-state",REOPEN="lc97-reopen",TSYNC="lc97-tsync",SIM_ENABLED=true;
+  /* 9.64.0 (LC99): picking a paid option no longer jumps straight to Stripe. It opens a confirm step in the same pop-up: what is paid today,
+     whether it renews and how to cancel, and an UNCHECKED box "Pro starts right away, I give up my 14-day right of withdrawal" (the same
+     pattern as the trial). The pay button stays off until the box is ticked; the choice is marked on the server only when it is confirmed
+     (Back returns to the three options). The one-time month sends the consent to the stripe function, which refuses a checkout without it;
+     the yearly plan goes to its Payment Link after the consent is logged on the account (lc99_consent_note). */
+  const VERSION="9.64.0",CONSENT_V="w1-2026-11-22",DAY=864e5,CACHE="lc97-state",REOPEN="lc97-reopen",TSYNC="lc97-tsync",SIM_ENABLED=true;
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -102,11 +107,27 @@ const LC97=(()=>{
         +"<small>"+E(n.yearlyTxt)+" a year"+(n.tranche<4?" · "+E(n.rate)+" rate, kept for as long as your subscription stays active":"")+"</small></button>"
       +'<button type="button" class="lc97-opt lc97-disc" data-lc97="discount"><span class="lc97-tag">One-time offer · only here</span><span class="lc97-t">Get 1 month of full Pro for an exclusive discount</span>'
         +'<span class="lc97-p"><s>'+E(n.dlAnchor)+"/month</s> <strong>"+E(n.dl)+"/month</strong></span><small>One payment for "+E(n.dlDays)+" days. No subscription: it does not renew.</small></button>"
+      +'<div class="lc97-cf" data-lc97-cf hidden></div>'
       +'<p class="form-msg" data-lc97-msg aria-live="polite"></p>'
       +'<button type="button" class="lc97-free" data-lc97="free">Free <span>· continue with 1 token a day</span></button>'
       +'<p class="small muted lc97-fine">Payment is handled by Stripe; we never see your card. The one-month offer is available once per account and only from this screen.</p></div>';
   }
-  const WHY={sign_in:"Sign in first: the offer is tied to your account.",used:"You already used this one-time offer.",already_member:"You already have Pro.",
+  /* the confirm step (9.64.0): the plain terms, then the unchecked withdrawal box; the wording is sent along and stored as shown */
+  function wording(kind,n){
+    return kind==="discount"?"I want my Pro month to start right away. I pay "+n.dl+" once for "+n.dlDays+" days of full Pro; it does not renew. Because Pro starts at once, I give up my 14-day right of withdrawal, so this payment is not refunded once it has gone through."
+      :"I want Pro to start right away. I pay "+n.yearlyTxt+" today for one year, then the same each year until I cancel. Because Pro starts at once, I give up my 14-day right of withdrawal, so a payment that has gone through is not refunded.";
+  }
+  function cfHTML(kind,n){
+    const terms=kind==="discount"?[n.dl+" today, paid once. No subscription: it does not renew and nothing else is charged.",n.dlDays+" days of full Pro, starting the moment you pay.",
+        "Want to keep Pro after that? During your month (and 7 days after it) you can switch to yearly, and your "+n.dl+" counts toward the first year."]
+      :[n.yearlyTxt+" today for your first year (about "+n.month+" a month)"+(n.tranche<4?", at the "+n.rate+" rate":"")+".",
+        "It renews at the same rate every year until you cancel. Cancel any time in Account > Manage subscription; cancel before the renewal date and nothing more is charged."];
+    return'<p class="lc97-cfh">'+(kind==="discount"?"Your one-time Pro month":"Pro for 1 year")+'</p><ul class="lc97-terms">'+terms.map(x=>"<li>"+E(x)+"</li>").join("")+"</ul>"
+      +'<label class="lc97-ok"><input type="checkbox" data-lc97-ok> <span>'+E(wording(kind,n))+"</span></label>"
+      +'<div class="lc97-cfb"><button type="button" class="btn btn-primary" data-lc97="pay" data-k="'+kind+'" disabled>'+ic("lock")+" "+E(kind==="discount"?"Pay "+n.dl+" securely":"Continue to secure payment")+"</button>"
+      +'<button type="button" class="btn btn-quiet" data-lc97="back">Back</button></div>';
+  }
+  const WHY={sign_in:"Sign in first: the offer is tied to your account.",consent:"Tick the box first: it confirms Pro may start right away.",used:"You already used this one-time offer.",already_member:"You already have Pro.",
     dismissed:"This offer was closed.",offer_expired:"This offer has ended.",not_offered:"This offer is not open on your account.",trial_running:"Your trial is still running.",
     no_trial:"This offer is for members whose trial ended.",in_progress:"A checkout for this offer is already being opened. Try again in a moment.",
     not_ready:"The offer is not switched on on the server yet (sql/20261119100000_lc97_trial_downsell.sql).",slow_down:"Too many tries. Wait a minute.",
@@ -133,15 +154,25 @@ const LC97=(()=>{
     const n=numbers(await pricing());let picked=false;
     try{Telemetry.log({e:"lc97",x:preview?"preview":"shown"})}catch(e){}
     return openSheet({title:"Your Pro trial has ended",cls:"lc97-sheet",noFocus:true,html:dsHTML(n,s,preview),onClose(){if(!preview&&!picked)mark("closed").catch(()=>{})},onMount(sh){
-      const el=sh.el,msg=t=>{const m=Q("[data-lc97-msg]",el);if(m)m.textContent=t||""};
+      const el=sh.el,msg=t=>{const m=Q("[data-lc97-msg]",el);if(m)m.textContent=t||""},cf=Q("[data-lc97-cf]",el);
+      const step=kind=>{QA(".lc97-opt,.lc97-free,.lc97-lead",el).forEach(x=>{x.hidden=!!kind});cf.hidden=!kind;cf.innerHTML=kind?cfHTML(kind,n):"";msg("");
+        if(kind){const ok=Q("[data-lc97-ok]",cf),pay=Q('[data-lc97="pay"]',cf);ok.addEventListener("change",()=>{pay.disabled=!ok.checked});try{ok.focus({preventScroll:true})}catch(x){}}};
       el.addEventListener("click",async e=>{
         const b=e.target.closest&&e.target.closest("[data-lc97]");if(!b)return;const a=b.getAttribute("data-lc97");e.preventDefault();
-        if(preview){msg(a==="yearly"?"Preview: opens the yearly Pro checkout ("+n.yearlyTxt+" a year).":a==="discount"?"Preview: opens the one-time "+n.dl+" checkout for "+n.dlDays+" days (once per account).":"Preview: closes the pop-up; the student stays on Free with 1 token a day.");return}
+        if(a==="yearly"||a==="discount"){step(a);return}
+        if(a==="back"){step("");return}
+        if(preview){msg(a==="pay"?(b.getAttribute("data-k")==="discount"?"Preview: opens the one-time "+n.dl+" checkout for "+n.dlDays+" days (once per account), with the consent.":"Preview: opens the yearly Pro checkout ("+n.yearlyTxt+" a year), with the consent."):"Preview: closes the pop-up; the student stays on Free with 1 token a day.");return}
         if(a==="free"){picked=true;mark("free").catch(()=>{});sh.close();say("You are on Free: 1 token a day. Pro stays one tap away in Upgrades.");return}
-        if(a==="yearly"){picked=true;mark("yearly").catch(()=>{});try{sessionStorage.setItem(REOPEN,String(Date.now()))}catch(x){}sh.close();checkout("yearly",2);return}
-        if(a==="discount"){
+        if(a!=="pay")return;
+        const kind=b.getAttribute("data-k"),ok=Q("[data-lc97-ok]",el);
+        if(!ok||!ok.checked){msg(WHY.consent);return}
+        const text=wording(kind,n);
+        if(kind==="yearly"){picked=true;b.disabled=true;mark("yearly").catch(()=>{});
+          await Promise.race([rpc("lc99_consent_note",{p_flow:"yearly",p_version:CONSENT_V,p_wording:text,p_device:dev()}),new Promise(res=>setTimeout(res,1500))]).catch(()=>{});
+          try{sessionStorage.setItem(REOPEN,String(Date.now()))}catch(x){}sh.close();checkout("yearly",2);return}
+        if(kind==="discount"){
           picked=true;b.disabled=true;msg("Opening secure checkout…");mark("discount").catch(()=>{});
-          const j=await stripeCall("downsell",{token:await tok(),device:dev()});
+          const j=await stripeCall("downsell",{token:await tok(),device:dev(),consent:true,consent_v:CONSENT_V,consent_text:text});
           if(j.ok&&/^https:\/\/checkout\.stripe\.com\//i.test(j.url||"")){try{sessionStorage.setItem(REOPEN,String(Date.now()))}catch(x){}go(j.url);return}
           b.disabled=false;picked=false;
           const why=WHY[j.reason]||("Checkout could not start (HTTP "+(j.status||0)+(j.reason?", "+j.reason:"")+"). Nothing was charged.");
@@ -196,7 +227,7 @@ const LC97=(()=>{
     if(!s||!s.ok||!s.signed_in)return"";const t=s.trial||{},st=s.sub_status;
     if(st==="trialing")return'<div class="lc97-st is-on">'+ic("rocket")+" <span><b>Your free Pro trial: "+E(t.days_left)+" day"+(t.days_left===1?"":"s")+" left</b><small>It ends on "+E(day(t.ends_at))+". Cancel any time before then in Manage subscription and nothing is charged.</small></span></div>";
     if(st==="trial_cancelled")return'<div class="lc97-st">'+ic("calendar")+" <span><b>Your trial is cancelled</b><small>Pro stays on until "+E(day(t.ends_at))+". Nothing is charged.</small></span></div>";
-    if(st==="downsell_month")return'<div class="lc97-st is-on">'+ic("crown")+" <span><b>Your one-time Pro month is on</b><small>Paid once, it does not renew. You can lock in a yearly rate any time below.</small></span></div>";
+    if(st==="downsell_month")return'<div class="lc97-st is-on">'+ic("crown")+" <span><b>Your one-time Pro month is on</b><small>Paid once, it does not renew. Switch to yearly during your month and what you paid counts toward the first year.</small></span></div>";
     if(st==="trial_ended")return'<div class="lc97-st">'+ic("clock")+" <span><b>Your free trial has ended</b><small>You are on Free (1 token a day). Pick a plan below to switch Pro back on.</small></span></div>";
     return"";
   }
@@ -264,7 +295,7 @@ const LC97=(()=>{
     view.innerHTML='<section class="lc97-lab"><p class="lc97-kick">Owner · testing aid</p><h1>Trial &amp; Downsell Simulator</h1>'
       +'<p class="muted">Walk the whole road without waiting real days: intro week → day 8 (1 token) → trial → trial end → post-trial pop-up → one-time offer lock. Switch this page off before launch with <code>SIM_ENABLED=false</code> in lc97.js (the owner gate stays either way).</p>'
       +'<div class="panel pad stack"><h2>1. The road, day by day</h2><div data-lc97-sim>'+simHTML()+"</div></div>"
-      +'<div class="panel pad stack"><h2>2. Pop-up previews</h2><div class="btn-row"><button type="button" class="btn btn-ghost" data-lc97s="pv90">Day-7 trial pop-up</button><button type="button" class="btn btn-ghost" data-lc97s="pv97">Post-trial pop-up</button></div></div>'
+      +'<div class="panel pad stack"><h2>2. Pop-up previews</h2><div class="btn-row"><button type="button" class="btn btn-ghost" data-lc97s="pv90">Day-7 trial pop-up</button><button type="button" class="btn btn-ghost" data-lc97s="pv97">Post-trial pop-up</button><button type="button" class="btn btn-ghost" data-lc97s="pv99">“Your €25 counts” yearly switch</button></div></div>'
       +'<div class="panel pad stack"><h2>3. A real account</h2><p class="small muted">The server state (lc97_state) and what the app decides for it. Use a TEST account for resets: “all” also deletes its trial row so it can start a new trial.</p>'
       +'<div class="lc97-row"><input class="input" type="email" data-lc97-em placeholder="e-mail (empty = my own account)"><button type="button" class="btn btn-primary" data-lc97s="look">Look up</button></div>'
       +'<div class="btn-row"><button type="button" class="btn btn-quiet" data-lc97s="reset" data-k="popup">Reset pop-up flags</button><button type="button" class="btn btn-quiet" data-lc97s="reset" data-k="discount">Reset the one-time offer</button><button type="button" class="btn btn-quiet" data-lc97s="reset" data-k="all">Reset all (incl. the trial)</button></div>'
@@ -293,6 +324,7 @@ const LC97=(()=>{
     if(a==="scen"){LAB.scen=b.getAttribute("data-k");const h=Q("[data-lc97-sim]",view);if(h)h.innerHTML=simHTML();return}
     if(a==="pv90"){try{LC90.preview()}catch(x){say("The Day-7 pop-up (LC90) is not loaded.","bad")}return}
     if(a==="pv97"){openDownsell({preview:true,state:{trial:{started_at:Date.now()-7*DAY,ends_at:Date.now()}}});return}
+    if(a==="pv99"){try{LC99.preview()}catch(x){say("The yearly switch (LC99) is not loaded.","bad")}return}
     const em=String((Q("[data-lc97-em]",view)||{}).value||"").trim().toLowerCase();
     if(a==="look"){look(view,em);return}
     if(a==="reset"){
@@ -319,6 +351,9 @@ const LC97=(()=>{
       +".lc97-main{background:#38bdf8;border:2px solid #38bdf8;color:#0f172a;box-shadow:0 8px 24px rgba(56,189,248,.25)}.lc97-main .lc97-t{font-size:17px;font-weight:800}.lc97-main small{color:#0f172a;opacity:.8}.lc97-main strong{font-size:26px}"
       +".lc97-disc{background:#1e293b;border:2px solid #fbbf24}.lc97-disc .lc97-t{font-size:15px;font-weight:800}.lc97-disc strong{font-size:22px;color:#fbbf24}.lc97-disc s{color:#94a3b8}.lc97-disc small{color:#94a3b8}"
       +".lc97-tag{justify-self:start;padding:2px 10px;border-radius:999px;background:rgba(251,191,36,.16);color:#fbbf24;font-weight:800;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}"
+      +".lc97-cf{display:grid;gap:10px}.lc97-cf[hidden]{display:none}.lc97-cfh{margin:0;font-weight:800;font-size:16px}.lc97-terms{margin:0;padding-left:18px;display:grid;gap:6px;color:#cbd5e1;font-size:14px}"
+      +".lc97-ok{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;cursor:pointer;font-size:13.5px;line-height:1.45}.lc97-ok input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:#38bdf8}"
+      +".lc97-cfb{display:flex;gap:8px;flex-wrap:wrap}.lc97-cfb .btn{min-height:44px}.lc97-cfb .btn-primary{flex:1 1 200px}.lc97-cfb .btn:disabled{opacity:.5;cursor:not-allowed}"
       +".lc97-opt:disabled{opacity:.6;cursor:wait}.lc97-opt[hidden]{display:none}.lc97-p{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}"
       +".lc97-free{justify-self:center;background:none;border:0;color:#94a3b8;font:inherit;font-size:13px;padding:10px 14px;min-height:44px;cursor:pointer;text-decoration:underline}.lc97-free span{text-decoration:none}.lc97-fine{margin:0;text-align:center}"
       +".lc97-st{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;margin:0 0 12px;border-radius:14px;border:1px solid #334155;background:#1e293b}.lc97-st.is-on{border-color:#38bdf8}.lc97-st span{display:grid;gap:2px}.lc97-st small{color:#94a3b8}"
