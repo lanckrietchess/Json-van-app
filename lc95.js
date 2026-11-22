@@ -19,7 +19,7 @@ const LC95=(()=>{
      A different move than Kyenzo's is judged by the browser's own Stockfish (LC25.alt.check): "Also good" when it keeps the result.
      Entry points: Train > Think > "Kyenzo's games", a card on #think and a card with his top openings on #openings.
      Owner: Sync now (mg_admin_sync), hide / feature a position (mg_curate). */
-  const VERSION="9.61.0";
+  const VERSION="9.65.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const say=(m,k,ms)=>{try{toast(m,k||"",ms)}catch(e){}};
@@ -90,6 +90,10 @@ const LC95=(()=>{
   async function loadTiers(){if(C.tiers)return C.tiers;const r=await rpc("mg_tiers",{});if(missing(r)){C.state="nosql";return null}C.tiers=Array.isArray(r.data)?r.data:[];return C.tiers}
   async function loadOpenings(){if(C.openings)return C.openings;const r=await rpc("mg_openings",{p_color:null,p_min:5});if(missing(r)){C.state="nosql";return null}C.openings=Array.isArray(r.data)?r.data:[];return C.openings}
   async function loadList(tab,tier,eco){
+    /* 9.65.0 (LC100): a set of positions by id (the Hall of Fame, the Theory examples) or one phase (the Middlegame / Endgame cards);
+       a free player plays them inside the same 3 a day */
+    if(S.ids&&S.ids.length){const r=await rpc("mg_by_ids",{p_ids:S.ids});if(missing(r)){C.state="nosql";return[]}const l=Array.isArray(r.data)?r.data:[];return pro()?l:l.slice(0,Math.max(0,freeLeft()))}
+    if(S.phase){const r=await rpc("mg_puzzles",{p_kinds:GOOD,p_tier:null,p_phase:S.phase,p_eco:null,p_limit:pro()?40:FREE_N,p_offset:0,p_seed:today()+"ph"+S.phase});if(missing(r)){C.state="nosql";return[]}const l=Array.isArray(r.data)?r.data:[];return pro()?l:l.slice(0,Math.max(0,freeLeft()))}
     if(!pro()){if(tab!=="find")return[];const r=await rpc("mg_daily",{p_n:FREE_N});return Array.isArray(r.data)?r.data:[]}
     const kinds=tab==="mist"?BAD:tab==="open"?GOOD.concat(BAD):GOOD;
     const r=await rpc("mg_puzzles",{p_kinds:kinds,p_tier:tier||null,p_phase:null,p_eco:eco||null,p_limit:40,p_offset:0,p_seed:today()+tab+(tier||"")+(eco||"")});
@@ -98,10 +102,12 @@ const LC95=(()=>{
   }
 
   /* ---------- page ---------- */
-  const S={tab:"find",tier:"",eco:"",list:[],i:0,board:null,view:null,done:false,misses:0,hints:0};
+  const S={tab:"find",tier:"",eco:"",phase:"",ids:[],list:[],i:0,board:null,view:null,done:false,misses:0,hints:0};
   async function mount(view){
     css();S.view=view;const pr=params();
     S.tab=pr.tab==="mist"||pr.tab==="open"?pr.tab:pr.eco?"open":"find";S.eco=/^[A-E]\d{0,2}$/.test(pr.eco||"")?pr.eco:"";S.tier=TIERS.indexOf(pr.tier)>=0?pr.tier:"";
+    S.phase=/^(opening|middlegame|endgame)$/.test(pr.phase||"")?pr.phase:"";S.ids=Array.isArray(pr.ids)?pr.ids.map(String).filter(x=>/^[A-Za-z0-9_-]{1,40}$/.test(x)).slice(0,40):[];
+    if(S.ids.length||S.phase){S.tab="find";S.eco="";S.tier=""}
     view.innerHTML='<div class="lc95"><header class="lc95-hd"><p class="lc95-tag">MSPC trainer</p><h1>Find the moves I found</h1>'
       +'<p class="muted">Real positions from my own rated games on the climb from 355 to 2105. Run M, S, P and C first, then play the move. Stockfish checked every answer, so it is the truth, not my opinion. New to MSPC? <a href="#learn-mspc">Learn the system first</a>.</p></header>'
       +'<div class="lc95-climb" data-lc95-climb></div>'
@@ -128,7 +134,7 @@ const LC95=(()=>{
     if(C.state==="nosql"){b.innerHTML='<div class="panel pad"><p>'+(owner()?"Run sql/20261118150000_lc95_master_games.sql in Supabase, then Sync now.":"My games are being prepared. Check back soon.")+"</p></div>";return}
     if(!pro()){const done=store.get("lc95-free",{});const ids=done.day===today()?done.done||[]:[];S.list=S.list.filter(p=>ids.indexOf(p.id)<0);if(!S.list.length){b.innerHTML=lockCard("done");return}}
     if(!S.list.length){b.innerHTML='<div class="panel pad"><p>No positions here yet.'+(S.tab==="mist"&&S.tier?" Try another level.":"")+"</p>"+(S.tab==="mist"?tierPicker():"")+(S.eco?'<button type="button" class="btn btn-ghost" data-lc95="openings">All openings</button>':"")+"</div>";return}
-    b.innerHTML=(S.tab==="mist"?tierPicker():"")+(S.eco?'<p class="lc95-eco">'+E(S.eco)+" · "+E(S.list[0].opening||"")+' <button type="button" class="btn btn-quiet btn-sm" data-lc95="openings">All openings</button></p>':"")
+    b.innerHTML=(S.ids.length||S.phase?'<p class="lc95-eco">'+E(S.ids.length?"Picked from Kyenzo’s Gems":"My "+S.phase+" positions")+' <button type="button" class="btn btn-quiet btn-sm" data-lc95-tab="find">All positions</button></p>':"")+(S.tab==="mist"?tierPicker():"")+(S.eco?'<p class="lc95-eco">'+E(S.eco)+" · "+E(S.list[0].opening||"")+' <button type="button" class="btn btn-quiet btn-sm" data-lc95="openings">All openings</button></p>':"")
       +'<div class="lc95-run"><div class="lc95-bd"><div data-lc95-board></div></div><div class="lc95-pn panel pad" data-lc95-panel aria-live="polite"></div></div>';
     S.board=Board(Q("[data-lc95-board]",b),{});show();
   }
@@ -222,7 +228,7 @@ const LC95=(()=>{
   function onClick(e){
     const it=e.target.closest&&e.target.closest("[data-lc95-intent]");if(it){try{sessionStorage.setItem("lc95-open",it.getAttribute("data-lc95-intent"))}catch(x){}return}
     const b=e.target.closest&&e.target.closest("[data-lc95],[data-lc95-tab],[data-lc95-tier],[data-lc95-eco],[data-lc95-k]");if(!b||!S.view||!S.view.contains(b))return;
-    if(b.hasAttribute("data-lc95-tab")){S.tab=b.getAttribute("data-lc95-tab");S.eco="";body();return}
+    if(b.hasAttribute("data-lc95-tab")){S.tab=b.getAttribute("data-lc95-tab");S.eco="";S.ids=[];S.phase="";body();return}
     if(b.hasAttribute("data-lc95-tier")){const t=b.getAttribute("data-lc95-tier");S.tier=S.tier===t&&S.tab!=="mist"?"":t;if(S.tab!=="mist")S.tab="mist";paintClimb();body();return}
     if(b.hasAttribute("data-lc95-eco")){S.eco=b.getAttribute("data-lc95-eco");body();return}
     if(b.hasAttribute("data-lc95-k"))return mspcStep(b.getAttribute("data-lc95-k"));

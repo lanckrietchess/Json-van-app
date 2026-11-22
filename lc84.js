@@ -44,7 +44,7 @@ const LC84=(()=>{
     {id:"bot",label:"Test your framework against a bot",grp:"learn",href:"#bot",routes:["bot"],help:["bot"],ex:true,note:"Play Stockfish at your level and think before you move."},
     {id:"community",label:"Community",grp:"social",href:"#community",routes:["community"],help:["community"],note:"Posts, wins and questions."},
     {id:"friends",label:"Friends",grp:"social",href:"#friends",routes:["friends"],help:["friends","account"],note:"Follow each other’s progress."},
-    {id:"giveaway",label:"Release Giveaway",grp:"social",href:"#giveaway",routes:["giveaway"],help:["giveaway"],when:()=>has("giveaway"),note:"15 days, the top 5 ELO gainers win a month of Pro."},
+    {id:"giveaway",label:"Release Giveaway",grp:"social",href:"#giveaway",routes:["giveaway"],help:["giveaway"],when:()=>has("giveaway"),note:"Until 9 December, the top 5 ELO gainers win a month of Pro."},
     {id:"coach-chat",label:"Coach Kyenzo",grp:"social",href:"#coach-chat",routes:["coach-chat"],help:["coach-chat"],when:()=>has("coach-chat"),note:"Direct messages with Kyenzo."}
   ];
   const tour=()=>TOUR.filter(t=>!t.when||t.when());

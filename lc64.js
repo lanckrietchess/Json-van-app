@@ -361,7 +361,7 @@
   /* 9.42.0: Bullet Points mode: the same facts and mistake, a freestyle 5-part skeleton instead of a written script (LC79.BCLOSE when present) */
   function bulletPrompt(c,game){
     const full=buildPrompt(c,game).split("\n"),a=full.indexOf("STRUCTURE:");
-    let gl="Release Giveaway: a 15-day ELO-gain challenge in the Lanckriet Chess app. Link your Chess.com or Lichess account, the app reads your public Rapid rating, and the top 5 ELO gainers win 1 month of Pro.";
+    let gl="Release Giveaway: an ELO-gain challenge in the Lanckriet Chess app, running until 9 December. Link your Chess.com or Lichess account, the app reads your public Rapid rating, and the top 5 ELO gainers win 1 month of Pro.";
     try{if(typeof LC82!=="undefined"&&LC82.giveawayLine)gl=LC82.giveawayLine()}catch(e){}
     let pc=[];try{if(typeof LC79!=="undefined"&&LC79.pawnCheck)pc=LC79.pawnCheck(c.fen)}catch(e){}
     let close="";try{if(typeof LC79!=="undefined"&&LC79.BCLOSE)close=LC79.BCLOSE}catch(e){}

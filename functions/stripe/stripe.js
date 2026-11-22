@@ -135,13 +135,18 @@ export function makeStripeHandler(sql, env, fetchImpl) {
      (sql/20261122100000_lc99_withdrawal_consent_annual25.sql; best effort: a missing table is logged, never blocks a payment). The one-time
      month and the yearly switch with the month's credit REFUSE a checkout without it (reason 'consent'); the trial records it when sent (the
      app always sends it; an old cached app without it still gets its trial, with a log line). ----- */
-  const CONSENT_V = 'w1-2026-11-22';
+  /* 9.65.0 (LC100): Pro is a personalised digital service, so after the CJEU's Sky Österreich judgment (C-234/25, 9 July 2026) the member does
+     NOT give up the right of withdrawal by starting at once: they ASK for Pro to start during the 14 days and, when they withdraw, pay only for
+     the days they used (Consumer Rights Directive art. 14(3)); withdrawing is one button, "Withdraw from contract here" (art. 11a, route
+     "withdraw" below). Wording version w2-2026-11-23 (w1 rows stay valid evidence of the request to start at once). */
+  const CONSENT_V = 'w2-2026-11-23';
+  const KEEP14 = 'I can still withdraw within 14 days with "Withdraw from contract here" (Account); I then pay only for the days I used and get the rest back.';
   const CONSENT_TXT = {
-    trial: 'I want Pro to start right away. EUR 0 today, then the plan I picked when the trial ends until I cancel. Because Pro starts at once, I give up my 14-day right of withdrawal for the paid period, so a payment that has gone through is not refunded.',
-    downsell: 'I want my Pro month to start right away. I pay EUR 25 once for 30 days of full Pro; it does not renew. Because Pro starts at once, I give up my 14-day right of withdrawal, so this payment is not refunded once it has gone through.',
-    annual25: 'I want the yearly plan to start right away. Today I pay the first year minus what I paid for my Pro month, then the yearly rate each year until I cancel. Because Pro starts at once, I give up my 14-day right of withdrawal, so a payment that has gone through is not refunded.'
+    trial: 'I ask for Pro to start right away. EUR 0 today, then the plan I picked when the trial ends until I cancel. ' + KEEP14,
+    downsell: 'I ask for my Pro month to start right away. I pay EUR 25 once for 30 days of full Pro; it does not renew. ' + KEEP14,
+    annual25: 'I ask for the yearly plan to start right away. Today I pay the first year minus what I paid for my Pro month, then the yearly rate each year until I cancel. ' + KEEP14
   };
-  const RECEIPT_WAIVER = 'You asked for Pro to start right away and agreed to give up your 14-day right of withdrawal (EU consumer law) for this payment.';
+  const RECEIPT_WAIVER = 'You asked for Pro to start right away. You can withdraw within 14 days of the purchase ("Withdraw from contract here" in the app, Account); you then pay only for the days you used and get the rest back.';
   function consentOf(body, flow) {
     if (!body || body.consent !== true) return null;
     const v = /^[A-Za-z0-9._-]{1,40}$/.test(String(body.consent_v || '')) ? String(body.consent_v) : CONSENT_V;
@@ -165,6 +170,49 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const plan = body.plan === 'yearly' ? 'yearly' : 'monthly', c = consentOf(body, 'trial');
     if (!c) console.error('LC99: a trial checkout without the withdrawal waiver (an old app?) for ' + email.replace(/^(.).*@/, '$1…@'));
     return subscribe({ plan, tier: 2, email, ret: body.ret, device: body.device }, ip, { trial: true, trialDays: days, email, consent: c, meta: { trial: '1', trial_days: String(days), src: clean(body.src, 20) || undefined } });
+  }
+  /* ----- LC100 (9.65.0): the withdrawal function (Consumer Rights Directive art. 11a). The app's "Withdraw from contract here" sends a name, the
+     contract and an e-mail after ONE confirmation tap; the statement is stored with its date and time (public._lc100_withdraw) and the
+     acknowledgement goes to that e-mail (Resend: RESEND_API_KEY + WELCOME_FROM, the owner in bcc via WITHDRAW_BCC, default the owner's
+     address). Works signed out (a buyer of a Payment Link may have no account); signed in, the account is stored too. Without the mail
+     secrets the statement is still stored and the app shows the acknowledgement on screen with a download (the owner sees it either way).
+     Refunds are made by the owner in Stripe within 14 days: the paid days used are kept (art. 14(3)), the rest goes back. ----- */
+  const CONTRACTS = { pro_trial: 'Pro, free trial', pro_monthly: 'Pro, monthly', pro_yearly: 'Pro, yearly', pro_month_once: 'Pro, one month (one-time)',
+    vip_monthly: 'VIP, monthly', vip_yearly: 'VIP, yearly', tokens: 'Token pack', other: 'Another purchase' };
+  function ackText(r, note) {
+    const at = new Date(r.at || now()), utc = at.toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
+    let bxl = ''; try { bxl = at.toLocaleString('en-GB', { timeZone: 'Europe/Brussels', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' (Brussels)'; } catch (e) { bxl = ''; }
+    return ['We received your withdrawal.', '',
+      'Statement: I withdraw from my contract for "' + (CONTRACTS[r.contract] || r.contract) + '".',
+      'Name: ' + r.name, 'E-mail: ' + r.email, 'Received: ' + (bxl || utc) + (bxl ? ' = ' + utc : ''), 'Reference: W' + r.id + (note ? '\nYour note: ' + note : ''), '',
+      'What happens next: we stop the renewal and refund you within 14 days of this message, to the card you paid with. For Pro or VIP that started at your request, the days you used are kept and the rest is refunded; for tokens, the unused tokens are refunded. A free trial costs nothing.',
+      '', 'Lanckriet Chess, Kyenzo Lanckriet. Reply to this e-mail with any question.'].join('\n');
+  }
+  async function withdraw(body, ip) {
+    if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
+    const email = clean(body.email, 200).trim().toLowerCase(), name = clean(body.name, 80).replace(/[<>]/g, '').trim(), contract = clean(body.contract, 20), note = clean(body.note, 500).replace(/[<>]/g, '').trim();
+    if (!EMAIL34.test(email)) return { status: 400, body: { ok: false, reason: 'email' } };
+    if (!name) return { status: 400, body: { ok: false, reason: 'name' } };
+    if (!CONTRACTS[contract]) return { status: 400, body: { ok: false, reason: 'contract' } };
+    if (body.confirm !== true) return { status: 400, body: { ok: false, reason: 'confirm' } };
+    const account = body.token ? await userEmail(body.token) : '';
+    let row = null;
+    try { row = await DB.prepare('SELECT public._lc100_withdraw(?, ?, ?, ?, ?, ?) AS r').bind(email, name, contract, note, clean(body.device, 64).replace(/[^A-Za-z0-9_-]/g, ''), account || '').first(); }
+    catch (e) { console.error('LC100: a withdrawal could not be stored: ' + String((e && e.message) || e).slice(0, 160) + '. Run sql/20261123100000_lc100_withdraw_games_community.sql.'); return { status: 503, body: { ok: false, reason: 'not_ready' } }; }
+    let r = row && row.r; if (typeof r === 'string') { try { r = JSON.parse(r); } catch (e) { r = null; } }
+    if (!r || !r.ok) return { status: r && r.reason === 'slow_down' ? 429 : 400, body: { ok: false, reason: (r && r.reason) || 'not_ready' } };
+    const text = ackText(r, note);
+    let mailed = false;
+    if (E.RESEND_API_KEY && E.WELCOME_FROM) {
+      try {
+        const bcc = String(E.WITHDRAW_BCC || 'lanckrietchess@gmail.com').split(',').map((x) => x.trim()).filter((x) => EMAIL34.test(x) && x !== email);
+        const res = await doFetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: 'Bearer ' + E.RESEND_API_KEY, 'content-type': 'application/json' },
+          body: JSON.stringify({ from: E.WELCOME_FROM, to: [email], bcc: bcc.length ? bcc : undefined, reply_to: E.WELCOME_REPLY_TO || undefined, subject: 'Your withdrawal is received (W' + r.id + ')', text }) });
+        mailed = res.ok; if (!res.ok) console.error('LC100: the acknowledgement e-mail was refused (' + res.status + ')');
+      } catch (e) { console.error('LC100: the acknowledgement e-mail failed: ' + String((e && e.message) || e).slice(0, 120)); }
+      if (mailed) await run1('SELECT public._lc100_withdraw_mailed(?)', r.id);
+    }
+    return { status: 200, body: { ok: true, id: r.id, ref: 'W' + r.id, at: r.at, mailed, text } };
   }
   async function rescue(body, ip) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
@@ -191,7 +239,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     return subscribe({ plan: 'yearly', tier: 2, email, ret: body.ret, device: body.device }, ip, { email, consent: c, minus: credit,
       coupon: { id: 'LC-MONTH' + credit, name: 'Your Pro month counts toward the year' }, meta: { annual25: '1', credit_cents: String(credit) },
       submit: (amount) => 'Today: EUR ' + eur(Math.max(0, amount - credit)) + ' for your first year (EUR ' + eur(amount) + ' minus the EUR ' + eur(credit) + ' you paid for your Pro month). Then EUR ' + eur(amount)
-        + ' a year until you cancel (Account > Manage subscription; cancel before the renewal date and nothing more is charged). Pro starts right away: you agreed in the app to give up your 14-day right of withdrawal, so a payment that has gone through is not refunded.' });
+        + ' a year until you cancel (Account > Manage subscription; cancel before the renewal date and nothing more is charged). Pro starts right away, as you asked in the app. You can withdraw within 14 days and then pay only for the days you used.' });
   }
   /* ----- LC97 (9.62.0): the post-trial downsell. ONE month of Pro, paid once (no subscription, no renewal), at DOWNSELL_CENTS (default 2500)
      instead of the monthly price (PRO_MONTHLY_CENTS, default 3900, shown struck through). Only for an account whose trial ended without
@@ -225,7 +273,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const form = { mode: 'payment', customer_email: email, client_reference_id: device || undefined, metadata: meta,
       payment_intent_data: { metadata: meta, description: 'Lanckriet Chess Pro, 1 month (one-time, does not renew). ' + RECEIPT_WAIVER },
       success_url: app + '?lc97=paid#upgrades', cancel_url: app + '?lc97=cancel#upgrades', expires_at: Math.floor((t0 + hold) / 1000), automatic_tax: tax ? { enabled: true } : undefined,
-      custom_text: { submit: { message: 'One payment of EUR ' + (d.cents / 100).toFixed(2) + ' for ' + d.days + ' days of full Pro. It does not renew and nothing else is charged. Pro starts right away: you agreed in the app to give up your 14-day right of withdrawal, so this payment is not refunded once it has gone through. This offer is available once per account.' } },
+      custom_text: { submit: { message: 'One payment of EUR ' + (d.cents / 100).toFixed(2) + ' for ' + d.days + ' days of full Pro. It does not renew and nothing else is charged. Pro starts right away, as you asked in the app. You can withdraw within 14 days and then pay only for the days you used. This offer is available once per account.' } },
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: d.cents, tax_behavior: tax ? 'inclusive' : undefined,
         product_data: { name: 'Lanckriet Chess Pro, 1 month (one-time offer)', description: d.days + ' days of full Pro: the whole library, the 24/7 AI coach and 10 tokens a day. Paid once, no subscription.' } } }] };
     await personalise(form, email, meta, false);   /* the saved card, no referral discount on top of this one */
@@ -356,7 +404,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       form.payment_method_collection = 'always';
       form.subscription_data.trial_period_days = days;
       form.subscription_data.trial_settings = { end_behavior: { missing_payment_method: 'cancel' } };
-      form.custom_text = { submit: { message: 'EUR 0 today. From day ' + (days + 1) + ' Pro costs EUR ' + (amount / 100).toFixed(2) + (plan === 'yearly' ? ' a year' : ' a month') + ' until you cancel. Cancel any time before the trial ends (Account > Manage subscription) and nothing is charged. Pro starts right away, so payments after the trial are not refunded (you agreed to this in the app).' } };
+      form.custom_text = { submit: { message: 'EUR 0 today. From day ' + (days + 1) + ' Pro costs EUR ' + (amount / 100).toFixed(2) + (plan === 'yearly' ? ' a year' : ' a month') + ' until you cancel. Cancel any time before the trial ends (Account > Manage subscription) and nothing is charged. Withdraw within 14 days of today and you pay only for the paid days you used (Withdraw from contract here, in the app).' } };
     }
     if (opt.minus) {   /* LC73 rescue: a one-time EUR 39 off the first year; LC99: the one-time month's credit; renewals are at the normal yearly rate */
       const cp = opt.coupon || { id: 'LC-RESCUE39', name: 'Your first month counts toward the year' };
@@ -627,6 +675,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
         else if (path === 'trial') r = await trial(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'rescue') r = await rescue(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'annual25') r = await annual25(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
+        else if (path === 'withdraw') r = await withdraw(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'downsell') r = await downsell(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'pricing') r = readLimited((req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim()) ? { status: 429, body: { ok: false, reason: 'slow_down' } } : { status: 200, body: Object.assign(await pricingState(2), { vip: await pricingState(3), downsell: { cents: DL().cents, anchor_cents: DL().anchor, days: DL().days }, packs: Object.keys(PACKS).map((k) => ({ id: k, cents: PACKS[k].cents, tokens: PACKS[k].tokens })), portal: /^https:\/\/[^\s]{4,300}$/.test(String(E.BILLING_PORTAL_URL || '')) ? String(E.BILLING_PORTAL_URL) : '' }) };
         else if (path === 'claim') r = await claim(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());

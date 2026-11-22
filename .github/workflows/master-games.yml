@@ -1,6 +1,6 @@
 # Kyenzo's Games (LC95, 9.60.0): downloads the rated rapid + blitz games of Lanckrietchess_YT from the public Chess.com API,
 # analyses every position with Stockfish (tools/master_games.py) and publishes the results to the branch `master-data`
-# (master/data/games-YYYY-H.json, puzzles-YYYY-H.json, index.json). Supabase pulls them from there with
+# (master/data/games-YYYY-H.json, puzzles-YYYY-H.json, index.json, and since 9.65.0 positions.json: tools/master_positions.py). Supabase pulls them from there with
 # `select public.mg_pull();` then `select public.mg_collect();` (pg_cron does both every Monday).
 # Incremental: every job starts from what `master-data` already holds and analyses only the new games.
 # Needs no secret: Chess.com's API is public and the results go to this public repository (no opponent names are stored).
@@ -12,7 +12,7 @@ on:
     - cron: '17 2 * * 1'
   push:
     branches-ignore: [main, master-data]
-    paths: [tools/master_games.py, .github/workflows/master-games.yml]
+    paths: [tools/master_games.py, tools/master_positions.py, .github/workflows/master-games.yml]
 
 permissions:
   contents: write
@@ -87,10 +87,13 @@ jobs:
         run: |
           git config user.name "master-games-bot"
           git config user.email "master-games-bot@users.noreply.github.com"
-          mkdir -p /tmp/pub && cp tools/master_games.py /tmp/pub/
+          mkdir -p /tmp/pub && cp tools/master_games.py tools/master_positions.py /tmp/pub/
+          pip install -q python-chess
           if git fetch -q origin master-data 2>/dev/null; then git checkout -q -B master-data FETCH_HEAD; else git checkout -q --orphan master-data; git rm -rq --cached . ; find . -mindepth 1 -maxdepth 1 ! -name .git ! -name parts -exec rm -rf {} +; fi
           mkdir -p master/data
           cp parts/*.json master/data/ 2>/dev/null || true
+          # LC100 (9.65.0): Kyenzo's opening positions for the Theory counter, from every games file on the branch
+          python3 /tmp/pub/master_positions.py --self-test && python3 /tmp/pub/master_positions.py master/data
           cd master/data && python3 - <<'EOF'
           import json, os, re, time
           files = sorted(f for f in os.listdir('.') if re.match(r'(games|puzzles)-\d{4}(-[12])?\.json$', f))

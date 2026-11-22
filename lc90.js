@@ -62,7 +62,7 @@ const LC90=(()=>{
     beginner_in_week:true,strict_lock:true,
     trial_line:"Try every Pro feature free for {days} days: €0 today, cancel any time before day {days_after} and nothing is charged. Or keep training on Free with 1 token a day.",
     cta_trial:"Start my {days}-day €0 Founding Trial",cta_buy:"Skip the trial: pay now",cta_later:"Not now, continue with 1 token a day",
-    consent:"I want Pro to start right away. €0 today, then the plan I picked from day {days_after} until I cancel. Because Pro starts at once, I give up my 14-day right of withdrawal for the paid period, so a payment that has gone through is not refunded.",
+    consent:"I ask for Pro to start right away. €0 today, then the plan I picked from day {days_after} until I cancel. I can still withdraw within 14 days with “Withdraw from contract here” (Account); I then pay only for the days I used and get the rest back.",
     fine:"Your card is kept by Stripe (we never see it). Cancel any time before the trial ends in Account > Manage subscription and nothing is charged. The yearly launch rate stays the same for as long as your subscription stays active."};
   const TEXT=["eyebrow","title","subtitle","body","trial_line","badge","price_yearly","price_yearly_old","price_month_equiv","price_monthly","cta_trial","cta_buy","cta_later","consent","fine",
     "pro_name","pro_tag","vip_name","vip_tag","vip_lead","vip_price_yearly","vip_price_yearly_old","vip_price_month_equiv","vip_price_monthly","cta_vip","vip_note"];
@@ -74,6 +74,8 @@ const LC90=(()=>{
     c=c&&typeof c==="object"?c:{};const o={};
     o.on=c.on!==false;o.use_live=c.use_live!==false;o.vip_on=c.vip_on!==false;o.beginner_in_week=c.beginner_in_week!==false;o.strict_lock=c.strict_lock!==false;
     TEXT.forEach(k=>{const v=typeof c[k]==="string"?c[k].replace(/[<>]/g,"").trim().slice(0,LIM[k]):"";o[k]=v||DEF[k]});
+    /* 9.65.0: a saved consent text from before the w2 wording ("I give up my 14-day right") is replaced: Pro is a digital service, the right stays */
+    if(/give up|not refunded|lose my right/i.test(o.consent))o.consent=DEF.consent;
     const pct=Math.round(+c.discount_pct);o.discount_pct=pct>=0&&pct<=90?pct:DEF.discount_pct;
     const d=c.trial_days;o.trial_days=Number.isInteger(d)&&d>=0&&d<=30?d:DEF.trial_days;
     ["stripe_price_yearly","stripe_price_monthly"].forEach(k=>{o[k]=/^price_[A-Za-z0-9]{6,80}$/.test(String(c[k]||""))?String(c[k]):""});
@@ -208,7 +210,7 @@ const LC90=(()=>{
         if(ok&&!ok.checked){msg("Tick the box first: it confirms Pro may start right away.");return}
         if(!sess()){msg(WHY.sign_in);b.insertAdjacentHTML("afterend",'<a class="btn btn-primary" href="#account" data-close>Sign in</a>');return}
         b.disabled=true;msg("Opening secure checkout…");
-        const j=await stripeCall("trial",{token:await tok(),device:dev(),plan:pl,src:man?o.from:"day7",consent:!!(ok&&ok.checked),consent_v:"w1-2026-11-22",consent_text:fill(c.consent,n)});   /* 9.64.0: the ticked waiver, as shown (LC99) */
+        const j=await stripeCall("trial",{token:await tok(),device:dev(),plan:pl,src:man?o.from:"day7",consent:!!(ok&&ok.checked),consent_v:"w2-2026-11-23",consent_text:fill(c.consent,n)});   /* 9.64.0: the ticked waiver, as shown (LC99) */
         if(j.ok&&/^https:\/\/[a-z0-9.-]+\.stripe\.com\//i.test(j.url||"")){go(j.url);return}
         b.disabled=false;msg((WHY[j.reason]||"Checkout could not start. Nothing was charged. Try again."));
         if(j.reason==="trial_used"||j.reason==="no_trial"){const bb=Q('[data-lc90="buy"]',el);if(bb)bb.focus()}
@@ -362,6 +364,8 @@ const LC90=(()=>{
   function init(){
     try{
       css();
+      /* 9.65.0: the owner menu row also when the menu opens (before, only 2.5 s after a page render, so the rows that hang under it were missing) */
+      let d9=0;new MutationObserver(()=>{if(d9)return;d9=setTimeout(()=>{d9=0;ownerRows()},150)}).observe(document.body,{childList:true,subtree:true});
       if(typeof MOUNT!=="undefined"){MOUNT["paywall-editor"]=mount;try{DOC_TITLES["paywall-editor"]="Paywall & Founding Offer Editor";ROUTE_TITLES["paywall-editor"]="the paywall editor"}catch(e){}}
       try{const lv=LC26.levels,o=lv.minLevel;if(lv&&!lv.__lc90){lv.__lc90=1;lv.minLevel=r=>r==="paywall-editor"?1:o(r)}}catch(e){}
       document.addEventListener("click",onClick);

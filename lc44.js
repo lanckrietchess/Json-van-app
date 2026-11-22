@@ -42,15 +42,19 @@ const LC44=(()=>{
   }
   /* LC36.support.checkout(plan,tier) and LC34 buy() end up here */
   let orig=null;
-  async function checkout(plan,tier){
+  /* 9.65.0: every Payment Link first passes LC99's consent step (the terms and the unchecked box; the consent is logged), unless the
+     caller already showed it ({confirmed:true}, LC97's post-trial offer) */
+  async function ask(o){try{if(typeof LC99!=="undefined"&&LC99.confirm)return await LC99.confirm(o)}catch(e){console.error("lc44 confirm",e)}return true}
+  async function checkout(plan,tier,o){
+    if(!(o&&o.confirmed)&&!(await ask({plan:plan==="monthly"?"monthly":"yearly",tier:Number(tier)===3?3:2})))return false;
     toast2("Opening secure checkout…");
     const u=await urlFor(plan,tier,mail());
     if(u){if(!mail())toast2("Use the email you sign in with, so your membership switches on.");go(u);return true}
-    return orig?orig(plan,tier):false;
+    return orig?orig(plan,tier,{confirmed:true}):false;
   }
   function buy(plan,btn,msgEl){
     const p=plan==="monthly"?"monthly":"yearly";
-    urlFor(p,2,mail()).then(u=>{if(u)go(u);else if(msgEl)msgEl.textContent="Opening secure checkout…"});
+    urlFor(p,2,mail()).then(async u=>{if(u){if(await ask({plan:p,tier:2}))go(u)}else if(msgEl)msgEl.textContent="Opening secure checkout…"});
     return true;
   }
 
@@ -78,7 +82,8 @@ const LC44=(()=>{
         let em=mail();
         if(!em){const i=Q("input[name=email]",s.el);em=i?String(i.value||"").trim().toLowerCase():"";
           if(!EMAIL.test(em)){const m=Q("[data-lc44-msg]",s.el);if(m){m.textContent="Enter your email first: the tokens are added to that account when you sign in.";m.className="form-msg lc44-msg is-bad"}if(i)i.focus();return}}
-        go(withMail(k.url,em));
+        try{s.close()}catch(x){}   /* one sheet at a time: the consent step replaces the shop */
+        ask({flow:"tokens",tokens:k.tokens,price:k.price,email:em}).then(y=>{if(y)go(withMail(k.url,em))});
       });
     }});
   }

@@ -17,11 +17,11 @@ const LC97=(()=>{
      on the same decide() the app uses, previews of both pop-ups without checkout, test-account resets and the counters.
      SIM_ENABLED=false hides the simulator page and its menu row (the owner-only gate stays either way). */
   /* 9.64.0 (LC99): picking a paid option no longer jumps straight to Stripe. It opens a confirm step in the same pop-up: what is paid today,
-     whether it renews and how to cancel, and an UNCHECKED box "Pro starts right away, I give up my 14-day right of withdrawal" (the same
+     whether it renews and how to cancel, and an UNCHECKED box (9.65.0 wording w2: "I ask for Pro to start right away … I can still withdraw within 14 days") (the same
      pattern as the trial). The pay button stays off until the box is ticked; the choice is marked on the server only when it is confirmed
      (Back returns to the three options). The one-time month sends the consent to the stripe function, which refuses a checkout without it;
      the yearly plan goes to its Payment Link after the consent is logged on the account (lc99_consent_note). */
-  const VERSION="9.64.0",CONSENT_V="w1-2026-11-22",DAY=864e5,CACHE="lc97-state",REOPEN="lc97-reopen",TSYNC="lc97-tsync",SIM_ENABLED=true;
+  const VERSION="9.65.0",CONSENT_V="w2-2026-11-23",DAY=864e5,CACHE="lc97-state",REOPEN="lc97-reopen",TSYNC="lc97-tsync",SIM_ENABLED=true;
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const rd=(k,d)=>{try{const v=Store.get(k,d);return v==null?d:v}catch(e){return d}},wr=(k,v)=>{try{Store.set(k,v)}catch(e){}};
@@ -114,8 +114,8 @@ const LC97=(()=>{
   }
   /* the confirm step (9.64.0): the plain terms, then the unchecked withdrawal box; the wording is sent along and stored as shown */
   function wording(kind,n){
-    return kind==="discount"?"I want my Pro month to start right away. I pay "+n.dl+" once for "+n.dlDays+" days of full Pro; it does not renew. Because Pro starts at once, I give up my 14-day right of withdrawal, so this payment is not refunded once it has gone through."
-      :"I want Pro to start right away. I pay "+n.yearlyTxt+" today for one year, then the same each year until I cancel. Because Pro starts at once, I give up my 14-day right of withdrawal, so a payment that has gone through is not refunded.";
+    return kind==="discount"?"I ask for my Pro month to start right away. I pay "+n.dl+" once for "+n.dlDays+" days of full Pro; it does not renew. I can still withdraw within 14 days with “Withdraw from contract here” (Account); I then pay only for the days I used and get the rest back."
+      :"I ask for Pro to start right away. I pay "+n.yearlyTxt+" today for one year, then the same each year until I cancel. I can still withdraw within 14 days with “Withdraw from contract here” (Account); I then pay only for the days I used and get the rest back.";
   }
   function cfHTML(kind,n){
     const terms=kind==="discount"?[n.dl+" today, paid once. No subscription: it does not renew and nothing else is charged.",n.dlDays+" days of full Pro, starting the moment you pay.",
@@ -138,9 +138,9 @@ const LC97=(()=>{
     catch(e){console.error("[LC97] downsell checkout:",e);return{ok:false,reason:navigator.onLine===false?"network":"server",status:0,detail:String(e&&e.message||e)}}
   }
   const go=u=>{try{LC36.support.go(u)}catch(e){location.href=u}};
-  function checkout(plan,tier){
-    try{if(typeof LC44!=="undefined"&&LC44.checkout)return LC44.checkout(plan,tier)}catch(e){}
-    try{return LC36.support.checkout(plan,tier)}catch(e){say("Checkout could not start. Nothing was charged. Try again.","bad");return false}
+  function checkout(plan,tier){   /* the confirm step above already showed the terms and the box: LC44 must not ask again (9.65.0) */
+    try{if(typeof LC44!=="undefined"&&LC44.checkout)return LC44.checkout(plan,tier,{confirmed:true})}catch(e){}
+    try{return LC36.support.checkout(plan,tier,{confirmed:true})}catch(e){say("Checkout could not start. Nothing was charged. Try again.","bad");return false}
   }
   async function mark(ev){const r=await rpc("lc97_mark",{p_event:ev,p_device:dev()});if(r&&r.status===200&&r.data){if(r.data.ok){MEM=r.data;memAt=Date.now();wr(CACHE,{at:memAt,v:MEM})}return r.data}return{ok:false,error:"http_"+(r&&r.status)}}
   async function openDownsell(o){
@@ -373,7 +373,8 @@ const LC97=(()=>{
       if(typeof MOUNT!=="undefined"&&SIM_ENABLED){MOUNT["trial-lab"]=mount;try{DOC_TITLES["trial-lab"]="Trial & Downsell Simulator";ROUTE_TITLES["trial-lab"]="the trial simulator"}catch(e){}}
       try{const lv=LC26.levels,o=lv.minLevel;if(lv&&!lv.__lc97){lv.__lc97=1;lv.minLevel=r=>r==="trial-lab"?1:o(r)}}catch(e){}
       document.addEventListener("click",onLab);
-      let d2=0;new MutationObserver(()=>{clearTimeout(d2);d2=setTimeout(ownerRows,250)}).observe(document.body,{childList:true,subtree:true});
+      /* 9.65.0: a throttle, not a debounce: the page never stops changing, so a reset timer never fired and the owner menu missed its rows */
+      let d2=0;new MutationObserver(()=>{if(d2)return;d2=setTimeout(()=>{d2=0;ownerRows()},250)}).observe(document.body,{childList:true,subtree:true});
       clearInterval(tick);tick=setInterval(()=>{if(document.visibilityState==="visible")check("tick")},5*60e3);
       setTimeout(handleReturn,1200);
     }catch(e){console.error("lc97",e)}

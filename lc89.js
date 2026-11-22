@@ -131,6 +131,7 @@
       ADMIN=ok;var b=D.getElementById("lc89-edit");
       if(!ok){if(b){b.classList.remove("is-on");b.hidden=true}return}
       try{if(W.__lcWall)W.__lcWall.admin(true)}catch(e){}
+      try{if(W.__lcSegAdmin)W.__lcSegAdmin()}catch(e){}   /* 9.65.0: the link to the Elo videos editor under the segment bar */
       if(b){b.hidden=false;b.classList.add("is-on");b.addEventListener("click",function(){enter()})}
       if(/[?&]edit=1(&|$)/.test(location.search))enter();
     });
