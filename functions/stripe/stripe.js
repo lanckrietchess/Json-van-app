@@ -129,6 +129,30 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (!good) console.error('LC90: the Price ID ' + id + ' is not an active recurring euro price; the built-in price is used');
     return good && good.recurring.interval === interval ? good : null;
   }
+  /* ----- LC99 (9.64.0): the withdrawal waiver. Pro starts at once, so before a paid checkout the member ticks an UNCHECKED box: "Pro starts right
+     away, I give up my 14-day right of withdrawal". The app sends consent: true + the wording version + the exact wording it showed; the server
+     puts the version in Stripe's metadata and on the receipt text, and stores the wording with the Stripe session in public.lc99_consents
+     (sql/20261122100000_lc99_withdrawal_consent_annual25.sql; best effort: a missing table is logged, never blocks a payment). The one-time
+     month and the yearly switch with the month's credit REFUSE a checkout without it (reason 'consent'); the trial records it when sent (the
+     app always sends it; an old cached app without it still gets its trial, with a log line). ----- */
+  const CONSENT_V = 'w1-2026-11-22';
+  const CONSENT_TXT = {
+    trial: 'I want Pro to start right away. EUR 0 today, then the plan I picked when the trial ends until I cancel. Because Pro starts at once, I give up my 14-day right of withdrawal for the paid period, so a payment that has gone through is not refunded.',
+    downsell: 'I want my Pro month to start right away. I pay EUR 25 once for 30 days of full Pro; it does not renew. Because Pro starts at once, I give up my 14-day right of withdrawal, so this payment is not refunded once it has gone through.',
+    annual25: 'I want the yearly plan to start right away. Today I pay the first year minus what I paid for my Pro month, then the yearly rate each year until I cancel. Because Pro starts at once, I give up my 14-day right of withdrawal, so a payment that has gone through is not refunded.'
+  };
+  const RECEIPT_WAIVER = 'You asked for Pro to start right away and agreed to give up your 14-day right of withdrawal (EU consumer law) for this payment.';
+  function consentOf(body, flow) {
+    if (!body || body.consent !== true) return null;
+    const v = /^[A-Za-z0-9._-]{1,40}$/.test(String(body.consent_v || '')) ? String(body.consent_v) : CONSENT_V;
+    const shown = clean(body.consent_text, 1200).replace(/[<>]/g, '').trim();
+    return { flow, v, text: shown.length >= 40 ? shown : CONSENT_TXT[flow] || CONSENT_TXT.trial, at: new Date(now()).toISOString() };
+  }
+  async function logConsent(email, c, session, device) {
+    if (!c || !EMAIL34.test(email || '')) return;
+    try { await DB.prepare('SELECT public._lc99_consent(?, ?, ?, ?, ?, ?)').bind(email, c.flow, c.v, c.text, session || '', clean(device, 64)).run(); }
+    catch (e) { console.error('LC99: the withdrawal waiver for ' + c.flow + ' was not stored (' + String((e && e.message) || e).slice(0, 120) + '); it is still in the Stripe metadata. Run sql/20261122100000_lc99_withdrawal_consent_annual25.sql.'); }
+  }
   async function trial(body, ip) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
     const email = await userEmail(body.token);
@@ -138,8 +162,9 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (await q1('SELECT 1 AS ok FROM public.lc73_trials WHERE email = ?', email)) return { status: 409, body: { ok: false, reason: 'trial_used' } };
     if (await q1("SELECT 1 AS ok FROM public.licenses WHERE lower(email) = ? AND tier >= 2 AND coalesce(revoked, false) = false AND expires_at > now()", email)) return { status: 409, body: { ok: false, reason: 'already_member' } };
     /* LC90: the Founding Trial can start on the yearly plan (the live launch rate, a Founding place is held) or the monthly plan */
-    const plan = body.plan === 'yearly' ? 'yearly' : 'monthly';
-    return subscribe({ plan, tier: 2, email, ret: body.ret, device: body.device }, ip, { trial: true, trialDays: days, email, meta: { trial: '1', trial_days: String(days), src: clean(body.src, 20) || undefined } });
+    const plan = body.plan === 'yearly' ? 'yearly' : 'monthly', c = consentOf(body, 'trial');
+    if (!c) console.error('LC99: a trial checkout without the withdrawal waiver (an old app?) for ' + email.replace(/^(.).*@/, '$1…@'));
+    return subscribe({ plan, tier: 2, email, ret: body.ret, device: body.device }, ip, { trial: true, trialDays: days, email, consent: c, meta: { trial: '1', trial_days: String(days), src: clean(body.src, 20) || undefined } });
   }
   async function rescue(body, ip) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
@@ -148,6 +173,25 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const t = await q1('SELECT subscription_id FROM public.lc73_trials WHERE email = ? AND rescue_until > now() AND rescue_used = false ORDER BY started_at DESC LIMIT 1', email);
     if (!t) return { status: 409, body: { ok: false, reason: 'no_offer' } };
     return subscribe({ plan: 'yearly', tier: 2, email, ret: body.ret, device: body.device }, ip, { email, minus: num(E.RESCUE_CENTS, 3900), meta: { rescue: '1', cancel_sub: t.subscription_id || '' } });
+  }
+  /* ----- LC99 (9.64.0): "your EUR 25 counts toward the year". A member who paid the one-time Pro month (LC97 downsell) may switch to the yearly
+     plan during that month and 7 days after it, with what they paid for the month taken off the first year (a Stripe coupon, once); renewals are
+     at the yearly rate they locked. The database decides (public._lc99_annual25_ok) and the webhook marks it used. Needs the withdrawal waiver. ----- */
+  async function annual25(body, ip) {
+    if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
+    const email = await userEmail(body.token);
+    if (!email) return { status: 401, body: { ok: false, reason: 'sign_in' } };
+    const c = consentOf(body, 'annual25');
+    if (!c) return { status: 409, body: { ok: false, reason: 'consent' } };
+    const okRow = await q1('SELECT public._lc99_annual25_ok(?) AS r', email), why = okRow && okRow.r;
+    if (why !== 'ok') return { status: 409, body: { ok: false, reason: why || 'not_ready' } };
+    const cr = await q1('SELECT public._lc99_annual25_credit(?) AS c', email), credit = Math.round(+(cr && cr.c) || 0);
+    if (!(credit >= 100)) return { status: 409, body: { ok: false, reason: 'not_ready' } };
+    const eur = (x) => (x / 100).toFixed(2);
+    return subscribe({ plan: 'yearly', tier: 2, email, ret: body.ret, device: body.device }, ip, { email, consent: c, minus: credit,
+      coupon: { id: 'LC-MONTH' + credit, name: 'Your Pro month counts toward the year' }, meta: { annual25: '1', credit_cents: String(credit) },
+      submit: (amount) => 'Today: EUR ' + eur(Math.max(0, amount - credit)) + ' for your first year (EUR ' + eur(amount) + ' minus the EUR ' + eur(credit) + ' you paid for your Pro month). Then EUR ' + eur(amount)
+        + ' a year until you cancel (Account > Manage subscription; cancel before the renewal date and nothing more is charged). Pro starts right away: you agreed in the app to give up your 14-day right of withdrawal, so a payment that has gone through is not refunded.' });
   }
   /* ----- LC97 (9.62.0): the post-trial downsell. ONE month of Pro, paid once (no subscription, no renewal), at DOWNSELL_CENTS (default 2500)
      instead of the monthly price (PRO_MONTHLY_CENTS, default 3900, shown struck through). Only for an account whose trial ended without
@@ -164,6 +208,8 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
     const email = await userEmail(body.token);
     if (!email) return { status: 401, body: { ok: false, reason: 'sign_in' } };
+    const c = consentOf(body, 'downsell');   /* LC99: no checkout without the ticked withdrawal waiver */
+    if (!c) return { status: 409, body: { ok: false, reason: 'consent' } };
     const okRow = await q1('SELECT public._lc97_downsell_ok(?) AS r', email), why = okRow && okRow.r;
     if (why !== 'ok') return { status: 409, body: { ok: false, reason: why || 'not_ready' } };
     const d = DL();
@@ -175,10 +221,11 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     catch (e) { if (e && (e.code === '23505' || /duplicate key/i.test(String(e.message)))) return { status: 409, body: { ok: false, reason: 'in_progress' } };
       console.error('LC97: the downsell row could not be stored: ' + String((e && e.message) || e).slice(0, 120)); return { status: 503, body: { ok: false, reason: 'not_ready' } }; }
     const app = String(E.APP_URL).replace(/[?#].*$/, ''), device = clean(body.device, 64).replace(/[^A-Za-z0-9_-]/g, ''), tax = String(E.STRIPE_TAX || '') === 'inclusive';
-    const meta = { lc: 'downsell', email, days: String(d.days), anchor_cents: String(d.anchor), device: device || undefined };
-    const form = { mode: 'payment', customer_email: email, client_reference_id: device || undefined, metadata: meta, payment_intent_data: { metadata: meta },
+    const meta = { lc: 'downsell', email, days: String(d.days), anchor_cents: String(d.anchor), device: device || undefined, withdrawal_waiver: c.v, consent_at: c.at };
+    const form = { mode: 'payment', customer_email: email, client_reference_id: device || undefined, metadata: meta,
+      payment_intent_data: { metadata: meta, description: 'Lanckriet Chess Pro, 1 month (one-time, does not renew). ' + RECEIPT_WAIVER },
       success_url: app + '?lc97=paid#upgrades', cancel_url: app + '?lc97=cancel#upgrades', expires_at: Math.floor((t0 + hold) / 1000), automatic_tax: tax ? { enabled: true } : undefined,
-      custom_text: { submit: { message: 'One payment of EUR ' + (d.cents / 100).toFixed(2) + ' for ' + d.days + ' days of full Pro. It does not renew and nothing else is charged. This offer is available once per account.' } },
+      custom_text: { submit: { message: 'One payment of EUR ' + (d.cents / 100).toFixed(2) + ' for ' + d.days + ' days of full Pro. It does not renew and nothing else is charged. Pro starts right away: you agreed in the app to give up your 14-day right of withdrawal, so this payment is not refunded once it has gone through. This offer is available once per account.' } },
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: d.cents, tax_behavior: tax ? 'inclusive' : undefined,
         product_data: { name: 'Lanckriet Chess Pro, 1 month (one-time offer)', description: d.days + ' days of full Pro: the whole library, the 24/7 AI coach and 10 tokens a day. Paid once, no subscription.' } } }] };
     await personalise(form, email, meta, false);   /* the saved card, no referral discount on top of this one */
@@ -186,6 +233,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     try { sess = await stripe('POST', 'checkout/sessions', form); }
     catch (e) { await run1('DELETE FROM public.lc97_downsell WHERE session_id = ?', tmp); throw e; }
     await DB.prepare('UPDATE public.lc97_downsell SET session_id = ?, url = ? WHERE session_id = ?').bind(sess.id, String(sess.url || '').slice(0, 2000), tmp).run();
+    await logConsent(email, c, sess.id, device);
     return { status: 200, body: { ok: true, url: sess.url, session: sess.id, amount_cents: d.cents, anchor_cents: d.anchor, days: d.days } };
   }
   async function downsellPaid(o) {
@@ -292,7 +340,8 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       const v = await paywallCfg(), pr = await checkedPrice(plan === 'yearly' ? v.stripe_price_yearly : v.stripe_price_monthly, plan === 'yearly' ? 'year' : 'month');
       if (pr) { priceId = pr.id; if (+pr.unit_amount !== amount) { amount = +pr.unit_amount; await DB.prepare('UPDATE arena.lc34_pro_sales SET amount_cents = ? WHERE session_id = ?').bind(amount, tmp).run(); } }
     }
-    const base = String(E.APP_URL), meta = Object.assign({ lc: 'pro', plan, tier, tranche: tranche || '', slot: slot || '', locked_cents: amount }, opt.meta || {});
+    const base = String(E.APP_URL), meta = Object.assign({ lc: 'pro', plan, tier, tranche: tranche || '', slot: slot || '', locked_cents: amount }, opt.meta || {},
+      opt.consent ? { withdrawal_waiver: opt.consent.v, consent_at: opt.consent.at } : {});
     const tax = String(E.STRIPE_TAX || '') === 'inclusive';
     const names = { 1: 'Founding Member rate', 2: 'Early Adopter rate', 3: 'Launch rate', 4: 'Standard rate' };
     const form = { mode: 'subscription', customer_email: email || undefined, client_reference_id: row.device || undefined, metadata: meta,
@@ -301,6 +350,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       line_items: [{ quantity: 1, price_data: { currency: 'eur', unit_amount: amount, tax_behavior: tax ? 'inclusive' : undefined, recurring: { interval: plan === 'yearly' ? 'year' : 'month' },
         product_data: { name: 'Lanckriet Chess ' + (tier === 3 ? 'VIP' : 'Pro') + ', ' + (plan === 'yearly' ? 'yearly' : 'monthly') + (tranche ? ' (' + names[tranche] + ')' : ''), description: (tier === 3 ? 'Everything in Pro, plus your tokens credited upfront (500 a month, or 7,000 on the yearly plan), the Lanckriet Chess Student title, a blue profile border and priority in live streams and the community.' : 'The whole library, the 24/7 AI coach and 10 tokens a day, refreshed daily.') + (tranche && tranche < 4 ? ' Your ' + names[tranche] + ' stays the same for as long as your subscription stays active.' : '') } } }] };
     if (priceId) form.line_items = [{ quantity: 1, price: priceId }];
+    if (opt.consent) form.subscription_data.description = (tier === 3 ? 'Lanckriet Chess VIP' : 'Lanckriet Chess Pro') + ', ' + plan + '. ' + RECEIPT_WAIVER;   /* LC99: on the invoices */
     if (opt.trial) {   /* LC73: 7 days at EUR 0 with the card on file, then the plan's price until cancelled; Checkout shows "7 days, then EUR 39.00 / month" */
       const days = Number.isInteger(opt.trialDays) && opt.trialDays >= 1 && opt.trialDays <= 30 ? opt.trialDays : 7;   /* LC90: the owner sets the length */
       form.payment_method_collection = 'always';
@@ -308,8 +358,10 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       form.subscription_data.trial_settings = { end_behavior: { missing_payment_method: 'cancel' } };
       form.custom_text = { submit: { message: 'EUR 0 today. From day ' + (days + 1) + ' Pro costs EUR ' + (amount / 100).toFixed(2) + (plan === 'yearly' ? ' a year' : ' a month') + ' until you cancel. Cancel any time before the trial ends (Account > Manage subscription) and nothing is charged. Pro starts right away, so payments after the trial are not refunded (you agreed to this in the app).' } };
     }
-    if (opt.minus) {   /* LC73 rescue: a one-time EUR 39 off the first year; renewals are at the normal yearly rate */
-      const c = await fixedCoupon('LC-RESCUE39', opt.minus, 'Your first month counts toward the year');
+    if (opt.minus) {   /* LC73 rescue: a one-time EUR 39 off the first year; LC99: the one-time month's credit; renewals are at the normal yearly rate */
+      const cp = opt.coupon || { id: 'LC-RESCUE39', name: 'Your first month counts toward the year' };
+      const c = await fixedCoupon(cp.id, opt.minus, cp.name);
+      if (typeof opt.submit === 'function') form.custom_text = { submit: { message: opt.submit(amount) } };
       if (c) form.discounts = [{ coupon: c }];
       const cus = await customerOf(row.email); if (cus) { form.customer = cus; delete form.customer_email; }
     } else await personalise(form, row.email, meta, plan === 'yearly' || !opt.trial);
@@ -317,6 +369,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     try { sess = await stripe('POST', 'checkout/sessions', form); }
     catch (e) { await DB.prepare('DELETE FROM arena.lc34_pro_sales WHERE session_id = ?').bind(tmp).run(); throw e; }
     await DB.prepare('UPDATE arena.lc34_pro_sales SET session_id = ? WHERE session_id = ?').bind(sess.id, tmp).run();
+    if (opt.consent) await logConsent(row.email, opt.consent, sess.id, row.device);
     const st = await pricingState(tier);
     return { status: 200, body: { ok: true, url: sess.url, session: sess.id, plan, tier, tranche, amount_cents: amount, left: st.left, locked: !!(tranche && tranche < 4) } };
   }
@@ -452,6 +505,10 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       await run1("INSERT INTO public.lc73_sub_events (kind, email, amount_cents, ref) VALUES ('rescue', ?, ?, ?) ON CONFLICT DO NOTHING", email, o.amount_total || 0, o.id);
       if (/^sub_[A-Za-z0-9]+$/.test(m.cancel_sub || '') && m.cancel_sub !== o.subscription) { try { await stripe('DELETE', 'subscriptions/' + m.cancel_sub); } catch (e) { console.error('LC73: could not cancel the monthly plan ' + m.cancel_sub); } }
     }
+    if (m.annual25 === '1') {   /* LC99: the yearly plan with the one-time month's credit is paid: the credit is used, once */
+      try { await DB.prepare('SELECT public._lc99_note(?, ?, ?)').bind(email, 'annual25_paid', o.id).run(); }
+      catch (e) { console.error('LC99: the credit was not marked used for ' + o.id + ': ' + String((e && e.message) || e).slice(0, 120)); }
+    }
     if (sale.license_key) return;
     const until = m.trial === '1' ? now() + (trialLen(m) + 1) * 864e5 + P34().graceMs : licenseUntil(sale), flags = { source: 'stripe', plan: sale.plan, vip: sale.tier === 3, tranche: sale.tranche || 0, founding: sale.tranche === 1, early: sale.tranche === 1 || sale.tranche === 2, locked_cents: sale.amount_cents, session: o.id };
     const lic = await DB.prepare('SELECT license_key FROM public._lc_create_license(?, ?, ?, ?, ?, ?, ?, ?::jsonb, ?)')
@@ -569,6 +626,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
         else if (path === 'gift_quote') r = readLimited((req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim()) ? { status: 429, body: { ok: false, reason: 'slow_down' } } : { status: 200, body: Object.assign({ ok: true }, await giftRate(body)) };
         else if (path === 'trial') r = await trial(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'rescue') r = await rescue(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
+        else if (path === 'annual25') r = await annual25(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'downsell') r = await downsell(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'pricing') r = readLimited((req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim()) ? { status: 429, body: { ok: false, reason: 'slow_down' } } : { status: 200, body: Object.assign(await pricingState(2), { vip: await pricingState(3), downsell: { cents: DL().cents, anchor_cents: DL().anchor, days: DL().days }, packs: Object.keys(PACKS).map((k) => ({ id: k, cents: PACKS[k].cents, tokens: PACKS[k].tokens })), portal: /^https:\/\/[^\s]{4,300}$/.test(String(E.BILLING_PORTAL_URL || '')) ? String(E.BILLING_PORTAL_URL) : '' }) };
         else if (path === 'claim') r = await claim(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());

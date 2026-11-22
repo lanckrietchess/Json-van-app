@@ -55,6 +55,10 @@ def stub(pg, calls, box, downsell=None):
 def boot(pg, *js):
     pg.goto('http://127.0.0.1:8765/version.json')
     for x in js: pg.evaluate(x)
+def buy(pg):   # 9.64.0: the one-time month = pick it, tick the waiver, pay (three taps, like a member)
+    pg.evaluate(SH + ".querySelector('[data-lc97=\"discount\"]').click()"); pg.wait_for_timeout(600)
+    pg.evaluate(SH + ".querySelector('[data-lc97-ok]').click()"); pg.wait_for_timeout(600)
+    pg.evaluate(SH + ".querySelector('[data-lc97=\"pay\"]').click()")
 def calm(pg): pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())"); pg.wait_for_timeout(350)
 SH = "document.querySelector('.lc97-sheet')"
 def fresh(br, w, hh, mob, tag, state, downsell=None, owner=False, hash='#home', extra=()):
@@ -76,7 +80,7 @@ with sync_playwright() as p:
         pg.screenshot(path=SHOTS + '/lc97-popup-' + tag + '.png')
         names = [x[0] for x in calls]
         out(tag + ' marked shown before it opened [mark shown sent, one mark]', [any(x[0] == 'lc97_mark' and x[1].get('p_event') == 'shown' for x in calls), names.count('lc97_mark')])
-        pg.evaluate(SH + ".querySelector('[data-lc97=\"discount\"]').click()"); pg.wait_for_timeout(1500)
+        buy(pg); pg.wait_for_timeout(1500)
         ds = [x[1] for x in calls if x[0] == 'stripe/downsell']
         out(tag + ' discount [choice marked, downsell called with token + device, opened Stripe]', [any(x[0] == 'lc97_mark' and x[1].get('p_event') == 'discount' for x in calls), bool(ds and ds[0].get('token') and ds[0].get('device')), pg.evaluate("location.host")])
         c.close()
@@ -97,7 +101,7 @@ with sync_playwright() as p:
     # the server refuses the discount
     c, pg, calls, box = fresh(br, 390, 844, True, 'used', S(**ENDED), downsell={'ok': False, 'reason': 'used'})
     pg.evaluate("LC97._t.reset(); LC97.check('test')"); pg.wait_for_timeout(2000)
-    pg.evaluate(SH + ".querySelector('[data-lc97=\"discount\"]').click()"); pg.wait_for_timeout(1200)
+    buy(pg); pg.wait_for_timeout(1200)
     out('refused [message, discount hidden, still on the app]', pg.evaluate("[" + SH + ".querySelector('[data-lc97-msg]').textContent, " + SH + ".querySelector('[data-lc97=\"discount\"]').hidden, location.host]"))
     c.close()
     # not due / owner / paying: nothing opens
@@ -155,7 +159,7 @@ with sync_playwright() as p:
     out('simulator scenario Free [after the pop-up: 1 a day]', pg.evaluate("[...document.querySelectorAll('.lc97-tr')].some(x => /picks Free/.test(x.textContent))"))
     n0 = len(calls)
     pg.evaluate("document.querySelector('.lc97-lab [data-lc97s=\"pv97\"]').click()"); pg.wait_for_timeout(1500)
-    pg.evaluate(SH + ".querySelector('[data-lc97=\"discount\"]').click()"); pg.wait_for_timeout(500)
+    buy(pg); pg.wait_for_timeout(500)
     out('simulator preview [open, preview note, no mark, no checkout, message]', pg.evaluate("[!!" + SH + ", !!" + SH + ".querySelector('.lc97-pv')]") + [not any(x[0] in ('lc97_mark', 'stripe/downsell') for x in calls[n0:]), pg.evaluate(SH + ".querySelector('[data-lc97-msg]').textContent")])
     calm(pg)
     pg.evaluate("document.querySelector('[data-lc97s=\"reset\"][data-k=\"discount\"]').click()"); pg.wait_for_timeout(300)

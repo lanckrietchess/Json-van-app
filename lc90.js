@@ -205,9 +205,10 @@ const LC90=(()=>{
         if(a==="vip"){picked=true;log("vip");s.close();checkout(plan("lc90-vplan"),3);return}
         const pl=plan();picked=true;log(a==="go"&&c.trial_days>0?"trial":pl);
         if(a==="buy"||c.trial_days===0){s.close();checkout(pl);return}
+        if(ok&&!ok.checked){msg("Tick the box first: it confirms Pro may start right away.");return}
         if(!sess()){msg(WHY.sign_in);b.insertAdjacentHTML("afterend",'<a class="btn btn-primary" href="#account" data-close>Sign in</a>');return}
         b.disabled=true;msg("Opening secure checkout…");
-        const j=await stripeCall("trial",{token:await tok(),device:dev(),plan:pl,src:man?o.from:"day7"});
+        const j=await stripeCall("trial",{token:await tok(),device:dev(),plan:pl,src:man?o.from:"day7",consent:!!(ok&&ok.checked),consent_v:"w1-2026-11-22",consent_text:fill(c.consent,n)});   /* 9.64.0: the ticked waiver, as shown (LC99) */
         if(j.ok&&/^https:\/\/[a-z0-9.-]+\.stripe\.com\//i.test(j.url||"")){go(j.url);return}
         b.disabled=false;msg((WHY[j.reason]||"Checkout could not start. Nothing was charged. Try again."));
         if(j.reason==="trial_used"||j.reason==="no_trial"){const bb=Q('[data-lc90="buy"]',el);if(bb)bb.focus()}
