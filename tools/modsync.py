@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Keeps the inline modules equal to their readable root files (9.65.0).
   python3 tools/modsync.py check lc99 lc100     report which inline copies differ from lc99.js / lc100.js
-  python3 tools/modsync.py write lc99 lc100     copy the root files into app.html (and index.html for lc87 / lc89 / lc94)
+  python3 tools/modsync.py write lc99 lc100     copy the root files into app.html (and index.html for lc87 / lc89 / lc94; lc102 lives only in index.html)
 A root file without the /*@@module lcNN*/ markers is wrapped in them. Run it from the repository root."""
 import sys
 mode=sys.argv[1]; names=sys.argv[2:]
-targets={'lc87':['app.html','index.html'],'lc89':['index.html'],'lc94':['app.html','index.html']}
+targets={'lc87':['app.html','index.html'],'lc89':['index.html'],'lc94':['app.html','index.html'],'lc102':['index.html']}
 bad=0
 for n in names:
     src=open(n+'.js').read().rstrip('\n')
