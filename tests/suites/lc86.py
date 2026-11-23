@@ -34,7 +34,7 @@ with sync_playwright() as p:
         c = mkctx(br, w, hh, mob); pg = c.new_page(); watch(pg, 'wall-' + tag); stub(pg)
         pg.goto('http://127.0.0.1:8765/index.html'); pg.wait_for_timeout(1500)
         out(tag + ' starters [section shown, directly above the Proof Queue, names, tags, admin bar hidden]', pg.evaluate("(() => { const l = document.getElementById('love'); let n = l.nextElementSibling; while (n && n.tagName !== 'SECTION') n = n.nextElementSibling; return [!l.classList.contains('hide'), n && n.id, [...document.querySelectorAll('#wl-grid .wl-name')].map(x => x.textContent), [...document.querySelectorAll('#wl-grid .wl-tag')].map(x => x.textContent), document.getElementById('wl-admin').classList.contains('hide')]; })()"))
-        pg.click('#wl-grid [data-wl="seed-igor"]'); pg.wait_for_timeout(300)
+        pg.click('#wl-grid [data-wl="seed-mathijs"]'); pg.wait_for_timeout(300)
         out(tag + ' starter gallery [open, name, chat line from Kyenzo, focus on close]', pg.evaluate("[" + VIS + ", document.getElementById('wl-h').textContent, document.querySelectorAll('#wl-body .wl-msg.coach').length, document.activeElement && document.activeElement.id]"))
         pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
         out(tag + ' Esc closes, focus back on the card', pg.evaluate("[" + VIS + ", document.activeElement && document.activeElement.getAttribute('data-wl')]"))

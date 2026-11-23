@@ -5,7 +5,7 @@ const LC95=(()=>{
      the same page). Every position has an M / S / P / C bar: M and S say what the board shows, P lists your checks and captures
      (never which one), C says how to check a candidate, and after the move what the line does (LC93). Learning the method itself
      is LC96, #learn-mspc.
-     LC95 (build 9.60.0): Kyenzo's Games. Real positions from Kyenzo's own rated rapid + blitz games on Chess.com (355 -> 2105),
+     LC95 (build 9.60.0): Kyenzo's Games. Real positions from Kyenzo's own rated rapid + blitz games on Chess.com (304 -> 2105),
      analysed once by Stockfish (tools/master_games.py, GitHub workflow "Kyenzo's Games (analysis)") and stored in Supabase
      (public.my_master_games, public.master_puzzles; sql/20261118150000_lc95_master_games.sql).
      #kgames has three tabs:
@@ -109,7 +109,7 @@ const LC95=(()=>{
     S.phase=/^(opening|middlegame|endgame)$/.test(pr.phase||"")?pr.phase:"";S.ids=Array.isArray(pr.ids)?pr.ids.map(String).filter(x=>/^[A-Za-z0-9_-]{1,40}$/.test(x)).slice(0,40):[];
     if(S.ids.length||S.phase){S.tab="find";S.eco="";S.tier=""}
     view.innerHTML='<div class="lc95"><header class="lc95-hd"><p class="lc95-tag">MSPC trainer</p><h1>Find the moves I found</h1>'
-      +'<p class="muted">Real positions from my own rated games on the climb from 355 to 2105. Run M, S, P and C first, then play the move. Stockfish checked every answer, so it is the truth, not my opinion. New to MSPC? <a href="#learn-mspc">Learn the system first</a>.</p></header>'
+      +'<p class="muted">Real positions from my own rated games on the climb from 304 to 2105. Run M, S, P and C first, then play the move. Stockfish checked every answer, so it is the truth, not my opinion. New to MSPC? <a href="#learn-mspc">Learn the system first</a>.</p></header>'
       +'<div class="lc95-climb" data-lc95-climb></div>'
       +'<div class="seg lc95-tabs" role="tablist">'+[["find","Find my move"],["mist","Spot my mistake"],["open","By opening"]].map(t=>'<button type="button" role="tab" data-lc95-tab="'+t[0]+'" aria-pressed="'+(S.tab===t[0])+'">'+t[1]+"</button>").join("")+"</div>"
       +'<div data-lc95-body><p class="small muted">Loading…</p></div>'

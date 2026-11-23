@@ -331,7 +331,7 @@
 "You are my Shorts & Reels scriptwriter for Lanckriet Chess. Write ONE vertical video script of about 90 seconds in spoken English, in my voice (direct, calm, coach-like). Give the spoken words, then [on-screen text] and [visual] cues for every part. Use exactly these 5 parts and timings.",
 "",
 "FACTS YOU MAY USE (do not invent others):",
-"- Kyenzo Lanckriet, certified chess coach, 2105 Rapid on Chess.com, top 0.1%. He went from 355 to 2105 in 2 years and 10 months.",
+"- Kyenzo Lanckriet, certified chess coach, 2105 Rapid on Chess.com, top 0.1%. He went from 304 to 2105 in 2 years and 10 months.",
 "- Proof: a student gained +630 ELO in 6 weeks (585 to 1214), confirmed.",
 "- Private coaching costs about EUR 80 an hour. The Lanckriet Chess app is an AI coaching hub that is there 24/7.",
 "- Method: MSPC (Move, Specifics, Priorities, Calculation) and Triple-T (Think, Theory, Trim). Alarm Signals tell you when to stop and run a Working Point.",

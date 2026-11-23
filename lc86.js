@@ -33,8 +33,8 @@ const LC86=(()=>{
   const MAXI=24;
   /* the two starter cards the landing page shows until the first person is saved (the same text as in index.html) */
   const SEED={
-    igor:{name:"Igor P.",tag:"+630 Elo in 6 weeks",avatar:"",items:[{t:"msg",from:"coach",text:"585 → 1214 Elo in 6 weeks. The first student to run the full MSPC system, move by move."}]},
-    mathijs:{name:"Mathijs",tag:"Hit 1500 Elo",avatar:"",items:[]}
+    mathijs:{name:"Mathijs",tag:"+630 Elo in 6 weeks",avatar:"",items:[{t:"msg",from:"coach",text:"585 → 1214 Elo in 6 weeks. The first student to run the full MSPC system, move by move."}]},
+    igor:{name:"Igor P.",tag:"Hit 1500 Elo",avatar:"",items:[]}
   };
   const initials=n=>String(n||"?").trim().split(/\s+/).map(w=>w.replace(/[^\p{L}\p{N}]/gu,"").charAt(0)).filter(Boolean).slice(0,2).join("").toUpperCase()||"?";
   /* pure: keep only the item shapes the server accepts (the server cleans again) */
@@ -94,7 +94,7 @@ const LC86=(()=>{
     if(STATE==="nosql"){host.innerHTML='<p class="form-msg is-bad">'+E(NOSQL)+"</p>";return}
     if(STATE==="auth"){host.innerHTML='<p class="form-msg is-bad">Sign in with the owner account (lanckrietchess@gmail.com) to manage the Wall of Love.</p>';return}
     if(STATE!=="ok"){host.innerHTML='<p class="form-msg is-bad">Could not load the list. Check the connection and reload.</p>';return}
-    if(!ROWS.length){host.innerHTML='<div class="panel pad"><p>No people yet. The landing page shows its two starter cards (Igor P. and Mathijs) until you save the first person.</p><div class="btn-row"><button type="button" class="btn btn-ghost" data-lc86="seed" data-k="igor">Start from “Igor P.”</button><button type="button" class="btn btn-ghost" data-lc86="seed" data-k="mathijs">Start from “Mathijs”</button></div></div>';return}
+    if(!ROWS.length){host.innerHTML='<div class="panel pad"><p>No people yet. The landing page shows its two starter cards (Mathijs and Igor P.) until you save the first person.</p><div class="btn-row"><button type="button" class="btn btn-ghost" data-lc86="seed" data-k="igor">Start from “Igor P.”</button><button type="button" class="btn btn-ghost" data-lc86="seed" data-k="mathijs">Start from “Mathijs”</button></div></div>';return}
     host.innerHTML='<ul class="lc86-list">'+ROWS.map((p,i)=>{const n=(p.items||[]).length,shots=(p.items||[]).filter(x=>x.t==="img").length;
       return'<li class="'+(p.visible?"":"is-off")+'">'+avatarHTML(p)+'<div class="lc86-who"><b>'+E(p.name)+"</b>"+(p.tag?'<span class="lc86-pill">'+E(p.tag)+"</span>":"")+'<small class="muted">'+shots+(shots===1?" screenshot":" screenshots")+" · "+(n-shots)+(n-shots===1?" chat line":" chat lines")+(p.visible?"":" · hidden")+"</small></div>"
         +'<div class="lc86-act"><button type="button" class="btn btn-quiet btn-sm" data-lc86="up" data-i="'+i+'" aria-label="Move up"'+(i?"":" disabled")+">"+ic("arrow-up")+'</button><button type="button" class="btn btn-quiet btn-sm" data-lc86="down" data-i="'+i+'" aria-label="Move down"'+(i<ROWS.length-1?"":" disabled")+">"+ic("arrow-down")+"</button>"
