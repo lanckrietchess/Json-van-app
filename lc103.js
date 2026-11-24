@@ -142,6 +142,7 @@ const LC103=(()=>{
     let pc=inst.piece||"";if(!pc){try{pc=(new Chess(fen).get(m.from)||{}).type||""}catch(e){}}
     const full=m.num||1,out={i:i,num:m.num,color:me,san:m.san,uci:played,fen:fen,types:[],loss:Math.round(loss*10)/10,gap:Math.round(gap*10)/10,rank:rank,legal:E0.legal,
       tags:inst.tags||[],wBefore:Math.round(wBest),wAfter:Math.round(wPlayed),best:bestU,bestSan:bestU?sanOf(fen,bestU):"",bestLine:bestU?sanLine(fen,(E0.map[bestU]||{}).pv,6):"",
+      bestPv:bestU&&E0.map[bestU]?(E0.map[bestU].pv||[]).slice(0,12):null,replyPv:E1.order[0]&&E1.map[E1.order[0]]?(E1.map[E1.order[0]].pv||[]).slice(0,12):null,replyMate:E1.order[0]&&E1.map[E1.order[0]]?E1.map[E1.order[0]].mate:null,
       reply:E1.order[0]||"",replySan:E1.order[0]?sanOf(g.fens[i+1],E1.order[0]):"",replyLine:E1.order[0]?sanLine(g.fens[i+1],(E1.map[E1.order[0]]||{}).pv,6):""};
     const crushing=E0.cp*pov>900&&cpPlayed*pov>500,lostAlready=wBest<6&&!(E1.map[E1.order[0]]&&E1.map[E1.order[0]].mate!=null);
     /* 1. the move itself: a mistake, or a good move that was hard to find */
@@ -280,7 +281,7 @@ const LC103=(()=>{
     remember(CUR);return CUR;
   }
   function stop(){if(RUN){RUN.stop=true;try{Engine.stop()}catch(e){}}}
-  const MKEYS=["topTrap","i","num","color","san","uci","fen","types","primary","loss","gap","rank","legal","tags","wBefore","wAfter","best","bestSan","bestLine","reply","replySan","replyLine","traps","natural","safe","fell","sac","punish","letter","reason","score","form","bestMotif","swing"];
+  const MKEYS=["bestPv","replyPv","replyMate","topTrap","i","num","color","san","uci","fen","types","primary","loss","gap","rank","legal","tags","wBefore","wAfter","best","bestSan","bestLine","reply","replySan","replyLine","traps","natural","safe","fell","sac","punish","letter","reason","score","form","bestMotif","swing"];
   function slimMoment(j){const o={};MKEYS.forEach(k=>{if(j[k]!=null)o[k]=j[k]});
     if(j.diag)o.diag={id:j.diag.id,k:j.diag.k,error:j.diag.error,alarm:j.diag.alarm,why:j.diag.why,find:j.diag.find,blind:j.diag.blind?{label:j.diag.blind.label,text:j.diag.blind.text}:null,line:j.diag.line?{ref:j.diag.line.ref,best:j.diag.line.best,lost:j.diag.line.lost,won:j.diag.line.won}:null,action:j.diag.action,train:j.diag.train||null};
     return o}

@@ -1,4 +1,4 @@
-# lc103 (9.69.0): the Moment Finder and the Showbar in the Creator Studio. Real Chromium, real Stockfish on the device, a real game
+# lc103 (9.69.0): the Moment Finder and the Showbar in the Creator Studio, and the same moments inside Game-to-Script. Real Chromium, real Stockfish on the device, a real game
 # (Morphy's Opera Game). Checks: every kind of moment is found and explained; the Showbar sits in the free band under the record bar and
 # never moves the record bar or shrinks the stage; a chip, ] and [ jump the Studio board; type toggles, fold, order; Game-to-Script hands over;
 # a mistake becomes a video project; the scan is back after a reload; the phone layout has no sideways scroll and 44 px targets.
@@ -125,6 +125,46 @@ with sync_playwright() as p:
     out('instinct [the free capture is ranked high, the hanging move low]', pg.evaluate("(() => { const r = LC103._t.instinct('rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3', null); const k = s => r.findIndex(x => x.san === s); return [k('Nxe5') < 3, k('Ng5') > k('Nxe5')]; })()"))
     out('sacrifice [Qb8+ Nxb8 Rd8#, a quiet developing move is none]', pg.evaluate("(() => { const g = LC80.scan.parseGame(%r); return [JSON.stringify(LC103._t.sacOf(g.fens[30], ['b3b8','d7b8','d1d8'], 'w')), LC103._t.sacOf(g.fens[2], ['g1f3','b8c6'], 'w')]; })()" % OPERA))
     out('LC103 [same text in lc103.js and app.html, init, Studio hooks, build]', [open(REPO + '/lc103.js', encoding='utf-8').read().rstrip('\n') in open(REPO + '/app.html', encoding='utf-8').read(), 'LC103.init()' in open(REPO + '/app.html', encoding='utf-8').read(), 'data-mb="moments"' in open(REPO + '/lc79.js', encoding='utf-8').read() and 'data-a="moments"' in open(REPO + '/lc79.js', encoding='utf-8').read(), pg.evaluate("LC103.version")])
+    c.close(); br.close()
+# Game-to-Script: the analysis is the full moment scan, split into mistakes and good moves; project, Load and go to Shoot, the flow card
+for w, hh, mob, tag in [(1280, 800, False, 'desktop'), (390, 844, True, 'phone')]:
+  with sync_playwright() as p:
+    br = p.chromium.launch(args=['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'])
+    c = mkctx(br, w, hh, mob); pg = c.new_page(); watch(pg, 'g2s-' + tag)
+    pg.goto('http://127.0.0.1:8765/version.json'); pg.evaluate(OWNER); pg.evaluate("localStorage.setItem('lc103-ui', JSON.stringify({depth: 'fast'}))")
+    pg.goto(APP + '#studio'); pg.wait_for_function("!!(" + _SR + ")", timeout=30000); pg.wait_for_timeout(3500)
+    pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())")
+    st(pg, "const f = R.querySelector('.lc31-fmt'); if (f) f.click(); return 1"); pg.wait_for_timeout(500)
+    st(pg, "R.querySelector('[data-mb=script]').click(); return 1"); pg.wait_for_timeout(800)
+    pg.evaluate("LC79._ai.games = [%r, %r]; LC79.openScript()" % (OPERA, TRAP)); pg.wait_for_timeout(600)
+    out(tag + ' g2s [games listed, button, side and depth]', pg.evaluate("[document.querySelectorAll('#lc79-ai [data-a=usegame]').length, document.querySelector('#lc79-ai [data-a=analyse]').textContent, document.querySelector('#lc79-ai select[data-f=side] option').textContent, !!document.querySelector('#lc79-ai select[data-f=depth]')]"))
+    pg.click('#lc79-ai [data-a=usegame][data-i="0"]'); pg.wait_for_timeout(3000)
+    out(tag + ' g2s scanning [status]', pg.evaluate("document.querySelector('#lc79-ai [data-st]').textContent.slice(0, 16)"))
+    pg.wait_for_function("!!document.querySelector('#lc79-ai #lc79-sb')", timeout=240000); pg.wait_for_timeout(800)
+    out(tag + ' g2s list [title, mistakes h4, good h4, rows, kind toggles]', pg.evaluate("(() => { const s = document.querySelector('#lc79-ai #lc79-sb').closest('section'); return [s.querySelector('h3').textContent.replace(/\\d+/, 'N'), [...s.querySelectorAll('h4')].map(h => h.textContent.replace(/\\d+/, 'N')), s.querySelectorAll('.lc79-mo').length === LC79._ai.list.length, s.querySelectorAll('.lc79-kt').length]; })()"))
+    gi = pg.evaluate("LC79._ai.list.findIndex(x => x.san === 'Qb8+')")
+    pg.click('#lc79-ai [data-a=case][data-i="%d"]' % gi); pg.wait_for_timeout(1200)
+    out(tag + ' good move case [title, Brilliant line, no cost line, why it matters]', pg.evaluate("(() => { const s = document.querySelector('#lc79-ai #lc79-s2').closest('section'); const t = s.textContent; return [s.querySelector('h3').textContent, /Brilliant/.test(t) && /first choice/.test(t), !/It cost about/.test(t), /Why it matters/.test(t)]; })()"))
+    out(tag + ' good move prompt [not a mistake]', pg.evaluate("(() => { const t = LC79.buildPrompt('full'); return [/Instructive good move \\(Brilliant/.test(t), /Crucial mistake/.test(t), /Player: Paul Morphy/.test(t)]; })()"))
+    pg.click('#lc79-ai #lc79-s2 ~ * [data-a=mkproj], #lc79-ai section:has(#lc79-s2) [data-a=mkproj]'); pg.wait_for_timeout(500)
+    out(tag + ' project [name, kind kept, record bar set to it]', pg.evaluate("(() => { const p = LC79.db().list[0]; return [p.name, p.src.item.kind, localStorage.getItem('lc79-recto') === JSON.stringify(p.id)]; })()"))
+    pg.click('#lc79-ai [data-a=toshoot]'); pg.wait_for_timeout(1200)
+    out(tag + ' load and go to Shoot [layer closed, board on the move, Shoot tab, Showbar]', [pg.evaluate("!document.getElementById('lc79-ai')"), pg.evaluate("LanckrietStudio.board.idx") == pg.evaluate("LC79._ai.list[%d].i" % gi), pg.evaluate("JSON.parse(localStorage.getItem('lc66-tab'))"), st(pg, "const b = R.querySelector('#lc103-sb'); return !!b && !b.hidden")])
+    pg.evaluate("LC79.setStep(2)"); pg.wait_for_timeout(500)
+    out(tag + ' recording flow card [good move, tag, rows]', pg.evaluate("(() => { const c = LC79.flow().card; return c ? [c.good, c.tag, c.rows.map(r => r[0])] : null; })()"))
+    pg.evaluate("LC79.setStep(1)")
+    # a mistake from the second game
+    pg.evaluate("LC79.openScript()"); pg.wait_for_timeout(500); pg.click('#lc79-ai [data-a=usegame][data-i="1"]')
+    pg.wait_for_function("LC79._ai.list && LC79._ai.list.some(x => x.san === 'Nxf7') && !LC79._ai.busy", timeout=240000); pg.wait_for_timeout(800)
+    bi = pg.evaluate("LC79._ai.list.findIndex(x => x.san === 'Nxf7')")
+    pg.click('#lc79-ai [data-a=case][data-i="%d"]' % bi); pg.wait_for_timeout(1000)
+    out(tag + ' mistake case [title, cost line, what went wrong, in Mistakes group]', pg.evaluate("(() => { const s = document.querySelector('#lc79-ai #lc79-s2').closest('section').textContent; const g = [...document.querySelectorAll('#lc79-ai #lc79-sb ~ h4, #lc79-ai section:has(#lc79-sb) h4')][0]; return [document.querySelector('#lc79-ai #lc79-s2').textContent, /It cost about/.test(s), /What went wrong/.test(s), !!g && g.nextElementSibling.textContent.includes('Nxf7')]; })()"))
+    n0 = pg.evaluate("document.querySelectorAll('#lc79-ai .lc79-mo').length"); kt = pg.evaluate("(LC79._ai.list.find(x => x.types.length === 1) || LC79._ai.list[0]).types[0]")
+    pg.click('#lc79-ai [data-a=kflt][data-t=%s]' % kt); pg.wait_for_timeout(400)
+    out(tag + ' kind toggle [rows = moments with another kind on, toggle off]', [pg.evaluate("document.querySelectorAll('#lc79-ai .lc79-mo').length === LC79._ai.list.filter(x => x.types.some(t => t !== '%s')).length" % kt), pg.evaluate("document.querySelector('#lc79-ai [data-a=kflt][data-t=%s]').getAttribute('aria-pressed')" % kt)])
+    pg.click('#lc79-ai [data-a=kflt][data-t=%s]' % kt); pg.wait_for_timeout(300)
+    out(tag + ' layout [overflow-x in the layer]', pg.evaluate("Math.max(0, document.querySelector('#lc79-ai').scrollWidth - innerWidth)"))
+    pg.evaluate("document.querySelector('#lc79-ai #lc79-sb').scrollIntoView()"); pg.wait_for_timeout(300); pg.screenshot(path=SHOTS + '/lc103-g2s-' + tag + '.png')
     c.close(); br.close()
 bad = [e for e in errs if ('PAGEERROR' in e or 'console' in e) and 'Failed to load' not in e and 'navigator.vibrate' not in e]
 print('ERRORS', len(bad)); [print(' ', e[:300]) for e in bad[:8]]
