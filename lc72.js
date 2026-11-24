@@ -52,7 +52,7 @@ const LC72=(()=>{
     const c=land.cfg||{};
     if(tab==="sections"){
       const sw=(k,l,d)=>'<label class="lc72-sw"><input type="checkbox" data-k="'+k+'"'+(c[k]!==false?" checked":"")+'><span><b>'+l+"</b><small>"+d+"</small></span></label>";
-      b.innerHTML='<div class="panel pad stack">'+sw("love_on","Wall of Love","Approved member messages plus the cards you add")+sw("proof_on","Proof Queue","Verified member results plus the results you add")+sw("builtin_on","Your Founder and proof-of-concept cards","355 → 2105 and +630 in 6 weeks, at the end of the Proof Queue")+sw("shots_on","Screenshots","The pictures you upload under Screenshots")
+      b.innerHTML='<div class="panel pad stack">'+sw("love_on","Wall of Love","Approved member messages plus the cards you add")+sw("proof_on","Proof Queue","Verified member results plus the results you add")+sw("builtin_on","Your Founder and proof-of-concept cards","304 → 2105 and +630 in 6 weeks, at the end of the Proof Queue")+sw("shots_on","Screenshots","The pictures you upload under Screenshots")
         +'<div class="btn-row"><button type="button" class="btn btn-primary" data-lc72="cfg-save">Save and publish</button></div><p class="small muted">Member messages and verified results are approved in the owner menu: Student proofs and messages.</p></div>';
       return;
     }
@@ -175,7 +175,7 @@ const LC72=(()=>{
   async function pageSheet(id){
     const it=itemOfAny(id);if(!it)return;const ex=((await extras(true)).extras||{})[id]||{};
     const courses=[];QA("[data-lc70-shelf]").forEach(h=>{((h.__d||{}).items||[]).forEach(x=>{if(x.id!==id)courses.push(x)})});
-    sheet("Page: "+it.title,'<form class="stack" data-lc72-page novalidate><label class="field"><span class="field-label">Credentials (one per line, max 5)</span><textarea class="input" name="credentials" rows="4" maxlength="600" placeholder="355 → 2105 Rapid in 2 years and 10 months\nTop 0.1% on Chess.com\nCertified chess coach">'+esc(ex.credentials||"")+'</textarea></label>'
+    sheet("Page: "+it.title,'<form class="stack" data-lc72-page novalidate><label class="field"><span class="field-label">Credentials (one per line, max 5)</span><textarea class="input" name="credentials" rows="4" maxlength="600" placeholder="304 → 2105 Rapid in 2 years and 10 months\nTop 0.1% on Chess.com\nCertified chess coach">'+esc(ex.credentials||"")+'</textarea></label>'
       +'<label class="field"><span class="field-label">Free summary (everybody can read it; one paragraph per line)</span><textarea class="input" name="summary" rows="8" maxlength="6000">'+esc(ex.summary||"")+'</textarea></label>'
       +'<label class="field"><span class="field-label">The video course behind the lock (right side)</span><select class="input" name="course_id"><option value="">This item itself</option>'+courses.map(c=>'<option value="'+esc(c.id)+'"'+(ex.course_id===c.id?" selected":"")+">"+esc(c.title)+" ("+esc(c.kind)+")</option>").join("")+"</select></label>"
       +'<label class="lc70-check"><input type="checkbox" name="lead"'+(ex.lead?" checked":"")+'> <span>Lead magnet: any signed-in account opens it with one tap (no card, no tokens). Publish it in Edit.</span></label>'

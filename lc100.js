@@ -152,7 +152,7 @@ const LC100=(()=>{
   const G={tab:"brilliant",cache:{}};
   async function mountGems(view){
     css();
-    view.innerHTML='<section class="lc100"><p class="lc100-tag">Trim · Hall of Fame</p><h1>Kyenzo’s Gems</h1><p class="muted">The best moments from my own rated games on the climb from 355 to 2105: the brilliant moves, the only moves that held, my most accurate wins and my biggest upsets. Play a position yourself, or replay the whole game.</p>'
+    view.innerHTML='<section class="lc100"><p class="lc100-tag">Trim · Hall of Fame</p><h1>Kyenzo’s Gems</h1><p class="muted">The best moments from my own rated games on the climb from 304 to 2105: the brilliant moves, the only moves that held, my most accurate wins and my biggest upsets. Play a position yourself, or replay the whole game.</p>'
       +'<div class="seg lc100-tabs" role="tablist">'+TABS.map(t=>'<button type="button" role="tab" data-lc100-tab="'+t[0]+'" aria-pressed="'+(G.tab===t[0])+'">'+t[1]+"</button>").join("")+"</div>"
       +'<div data-lc100-body><p class="small muted">Loading…</p></div></section>';
     await gemsBody(view);return null;
@@ -173,7 +173,7 @@ const LC100=(()=>{
   }
   function trimCard(r){
     const v=Q("#view");if(!v||Q("[data-lc100-gemcard]",v))return;const h=Q("h1",v);if(!h)return;
-    (h.closest("header")||h).insertAdjacentHTML("afterend",'<a class="lc100-card" data-lc100-gemcard href="#kgems"><span class="lc100-ic">'+ic("gem")+'</span><span><b>Kyenzo’s Gems</b><small>My brilliant moves, best games and biggest upsets, from 355 to 2105.</small></span><span class="btn btn-ghost btn-sm">Open</span></a>');
+    (h.closest("header")||h).insertAdjacentHTML("afterend",'<a class="lc100-card" data-lc100-gemcard href="#kgems"><span class="lc100-ic">'+ic("gem")+'</span><span><b>Kyenzo’s Gems</b><small>My brilliant moves, best games and biggest upsets, from 304 to 2105.</small></span><span class="btn btn-ghost btn-sm">Open</span></a>');
   }
 
   /* ---------- 5. Ranked: one puzzle in four from Kyenzo's games ---------- */

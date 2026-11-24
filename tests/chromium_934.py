@@ -82,7 +82,7 @@ async def main():
         h=await lp.evaluate("document.querySelector('#h-hero').textContent")
         chk('landing: mission title',h.startswith('My goal is to save 20,000 people'),h)
         chk('landing: live counter 1,234 of 20,000',await lp.evaluate("!document.querySelector('#mcount').classList.contains('hide')&&document.querySelector('#mc-n').textContent==='1,234'"))
-        chk('landing: story (355, 500, 2105)',await lp.evaluate("(()=>{const t=document.querySelector('#story-t').textContent;return /355/.test(t)&&/500/.test(t)&&/2105/.test(t)})()"))
+        chk('landing: story (304, 500, 2105)',await lp.evaluate("(()=>{const t=document.querySelector('#story-t').textContent;return /304/.test(t)&&/500/.test(t)&&/2105/.test(t)})()"))
         order=await lp.evaluate("['love','proof','how','price-contrast','pricing'].map(id=>Math.round(document.getElementById(id).getBoundingClientRect().top+scrollY))")
         chk('landing order: Wall of Love, Proof, Method, contrast, pricing',order==sorted(order),order)
         sw=await lp.evaluate("document.documentElement.scrollWidth"); chk('landing: no horizontal scroll at 390px',sw<=390,sw)

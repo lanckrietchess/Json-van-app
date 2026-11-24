@@ -51,7 +51,7 @@ with sync_playwright() as p:
     out('results copy (9.35.0) [habits, Working Points, openings, endgames, no rating promise]', [k in ft for k in ('habit', 'Working Point', 'openings', 'endgames', 'nothing here is a promise of a rating')])
     out('Founding line [EUR 199.50, EUR 16.63 a month, under EUR 0.55 a day, shown while the first launch tier is open]', pg.evaluate("[!document.getElementById('ds-founding').classList.contains('hide'), /199\\.50/.test(document.getElementById('ds-founding').innerText), /16\\.63/.test(document.getElementById('ds-founding').innerText), /0\\.55/.test(document.getElementById('ds-founding').innerText)]"))
     txt = pg.evaluate("document.body.innerText")
-    out('copy [hero: 355 to 2105 and +630 in 6 weeks; no "2 months"; method line; no lifetime / forever; no promise of a rating]', ['355 to 2105' in txt, '+630' in txt and '6 weeks' in txt, '2 months' not in txt, 'Think the same way every time' in txt, 'lifetime' not in txt.lower() and 'forever' not in txt.lower(), 'impossible' not in txt.lower(), 'Nothing here is a promise of a rating' in txt]); c.close()
+    out('copy [hero: 304 to 2105 and +630 in 6 weeks; no "2 months"; method line; no lifetime / forever; no promise of a rating]', ['304 to 2105' in txt, '+630' in txt and '6 weeks' in txt, '2 months' not in txt, 'Think the same way every time' in txt, 'lifetime' not in txt.lower() and 'forever' not in txt.lower(), 'impossible' not in txt.lower(), 'Nothing here is a promise of a rating' in txt]); c.close()
     br.close()
 bad = [e for e in errs if 'PAGEERROR' in e]
 print('ERRORS', len(bad)); [print(' ', e[:300]) for e in bad][:8]

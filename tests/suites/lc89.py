@@ -61,7 +61,7 @@ with sync_playwright() as p:
         pg.evaluate("document.querySelector('[data-lc89=\"up\"][data-s=\"proof\"]').click()")
         pg.evaluate("document.querySelector('[data-cms-box=\"proof.founder\"] [data-lc89=\"box\"]').click()")
         out(tag + ' editing [counter, publish enabled, link click did not navigate]', [pg.evaluate("document.querySelector('[data-lc89-count]').textContent"), pg.evaluate("!document.querySelector('[data-lc89=\"publish\"]').disabled"), (pg.evaluate("document.querySelector('[data-cms=\"giveaway.3\"]').click(), location.pathname"))])
-        pg.evaluate("(() => { const n = document.querySelector('.lc89-wl[data-i=\"0\"] [data-f=\"name\"]'); n.focus(); n.textContent = 'Igor P.'; n.dispatchEvent(new InputEvent('input', { bubbles: true })); })()")
+        pg.evaluate("(() => { const n = document.querySelector('.lc89-wl[data-i=\"0\"] [data-f=\"name\"]'); n.focus(); n.textContent = 'Mathijs'; n.dispatchEvent(new InputEvent('input', { bubbles: true })); })()")
         pg.evaluate("document.querySelector('[data-wl-a=\"add\"]').click()"); pg.wait_for_timeout(200)
         pg.evaluate("(() => { const n = document.querySelector('.lc89-wl[data-i=\"2\"] [data-f=\"name\"]'); n.textContent = 'Lotte'; n.dispatchEvent(new InputEvent('input', { bubbles: true })); const t = document.querySelector('.lc89-wl[data-i=\"2\"] [data-f=\"tag\"]'); t.textContent = '+180 Elo in 5 weeks'; t.dispatchEvent(new InputEvent('input', { bubbles: true })); })()")
         pg.evaluate("document.querySelector('[data-pc-a=\"add\"]').click()"); pg.wait_for_timeout(200)
