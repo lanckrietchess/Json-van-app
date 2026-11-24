@@ -53,7 +53,10 @@
         (text, timing, split, delete) and placed by dragging it in the viewer. Every take shows its caption state (writing / done / failed with
         the engine's own reason). Before, a failure was swallowed, and every message in the Edit Studio sat under it (toasts at z-index 90):
         LC79's messages now show inside the open layer. T1's eye replaces the old "Burn captions into Render edit" switch for this editor.
-    18. ⬇ Download on every take in the media pool and in the take inspector. */
+    18. ⬇ Download on every take in the media pool and in the take inspector.
+     Moments (9.69.0):
+    19. The menu bar has "◆ Moments" and Game-to-Script has "Find every moment (Showbar)": both open LC103's Moment Finder (lc103.js), which
+        scans the whole game and fills the Showbar under the record bar. Game-to-Script's own crucial-mistake flow is unchanged. */
   const VERSION="9.55.0";
   const Q=(s,r)=>(r||document).querySelector(s),QA=(s,r)=>[].slice.call((r||document).querySelectorAll(s));
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1426,7 +1429,7 @@
       +(own?'<button type="button" class="lc79-b sm" data-a="mine">My last games ('+esc(own.user)+')</button>':'')
       +'<select data-f="site" aria-label="Site"><option value="chesscom">Chess.com</option><option value="lichess">Lichess</option></select><input type="text" data-f="user" placeholder="Any player’s name" aria-label="Player name" style="width:170px"><button type="button" class="lc79-b sm" data-a="theirs">Their last games</button></div>'
       +'<div class="lc79-games" data-games>'+gamesHTML()+'</div>'
-      +'<div class="lc79-row"><label class="lc79-f"><span>Whose mistakes?</span><select data-f="side"><option value="auto"'+(AI.side==="auto"?" selected":"")+'>Auto (my side, else the biggest mistake)</option><option value="w"'+(AI.side==="w"?" selected":"")+'>White</option><option value="b"'+(AI.side==="b"?" selected":"")+'>Black</option></select></label><span class="lc79-grow"></span><button type="button" class="lc79-b pri" data-a="analyse"'+(AI.busy?" disabled":"")+'>Find the crucial mistake</button></div><p class="lc79-hint" data-st aria-live="polite"></p></section>';
+      +'<div class="lc79-row"><label class="lc79-f"><span>Whose mistakes?</span><select data-f="side"><option value="auto"'+(AI.side==="auto"?" selected":"")+'>Auto (my side, else the biggest mistake)</option><option value="w"'+(AI.side==="w"?" selected":"")+'>White</option><option value="b"'+(AI.side==="b"?" selected":"")+'>Black</option></select></label><span class="lc79-grow"></span><button type="button" class="lc79-b" data-a="moments"'+(AI.busy?" disabled":"")+' title="Scan the whole game for every instructive moment and put them on the Showbar">Find every moment (Showbar)</button><button type="button" class="lc79-b pri" data-a="analyse"'+(AI.busy?" disabled":"")+'>Find the crucial mistake</button></div><p class="lc79-hint" data-st aria-live="polite"></p></section>';
     if(AI.cs)h+=caseHTML();
     box.innerHTML=h;
   }
@@ -1630,6 +1633,7 @@ BCLOSE);
     if(a==="theirs"){const u=Q('#lc79-ai [data-f="user"]').value,s=Q('#lc79-ai [data-f="site"]').value;return loadGames(s,u)}
     if(a==="usegame"){AI.pgn=AI.games[+b.getAttribute("data-i")]||"";const t=Q('#lc79-ai [data-f="pgn"]');if(t)t.value=AI.pgn;return analyse()}
     if(a==="analyse"){const t=Q('#lc79-ai [data-f="pgn"]');AI.pgn=t?t.value:AI.pgn;return analyse()}
+    if(a==="moments"){const t=Q('#lc79-ai [data-f="pgn"]');AI.pgn=t?t.value:AI.pgn;if(typeof LC103==="undefined"){say("The Moment Finder is not in this build.","err");return}closeLayer("lc79-ai");return LC103.open({pgn:AI.pgn,side:AI.side==="w"||AI.side==="b"?AI.side:"",auto:!!String(AI.pgn||"").trim()})}
     if(a==="case"){AI.ci=+b.getAttribute("data-i")||0;AI.whoAuto=true;buildCase();AI.cloud=null;paintAi();findSimilar();cloudEval();return}
     if(a==="sim")return findSimilar();
     if(a==="copypgn"){const ok=await copyText(AI.cs.pgn);return say(ok?"PGN copied.":"Could not copy. Select the text and copy it.",ok?"ok":"err")}
@@ -2332,6 +2336,7 @@ BCLOSE);
         +'<div class="mb-g" role="group" aria-label="Studio tools">'
         +'<button type="button" class="mb-b mb-pri" data-mb="projects" title="The timeline: cut, layers, versions, callouts and export">✂ Edit Studio</button>'
         +'<button type="button" class="mb-b" data-mb="script" title="PGN in: crucial mistake, similar Lichess position and a master prompt">Game-to-Script</button>'
+        +'<button type="button" class="mb-b" data-mb="moments" title="Every instructive moment of a game on the Showbar: minefields, blunders, mistakes, great, brilliant and top engine moves">◆ Moments</button>'
         +'<button type="button" class="mb-b" data-mb="devices" aria-expanded="false" title="Choose your camera and microphone">🎙 Devices</button>'
         +'<button type="button" class="mb-b" data-mb="engine" aria-pressed="false" title="Stockfish checks the Studio board while you talk. Only you see it: it is not recorded.">♞ Live engine</button>'
         +'<button type="button" class="mb-b" data-mb="cta" title="Landing page in the picture: what it shows and where">CTA settings</button>'
@@ -2344,6 +2349,7 @@ BCLOSE);
         const b=e.target.closest("[data-mb]");if(!b)return;const a=b.getAttribute("data-mb");
         if(a==="projects")return openProjects();
         if(a==="script")return openScript();
+        if(a==="moments"){try{if(typeof LC103!=="undefined")return LC103.open()}catch(x){console.error(x)}return}
         if(a==="devices")return toggleDevices(sr);
         if(a==="engine")return toggleEngine(sr);
         if(a==="cta")return openCtaSettings();
