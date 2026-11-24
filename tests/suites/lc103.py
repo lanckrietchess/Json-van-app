@@ -166,5 +166,39 @@ for w, hh, mob, tag in [(1280, 800, False, 'desktop'), (390, 844, True, 'phone')
     out(tag + ' layout [overflow-x in the layer]', pg.evaluate("Math.max(0, document.querySelector('#lc79-ai').scrollWidth - innerWidth)"))
     pg.evaluate("document.querySelector('#lc79-ai #lc79-sb').scrollIntoView()"); pg.wait_for_timeout(300); pg.screenshot(path=SHOTS + '/lc103-g2s-' + tag + '.png')
     c.close(); br.close()
-bad = [e for e in errs if ('PAGEERROR' in e or 'console' in e) and 'Failed to load' not in e and 'navigator.vibrate' not in e]
-print('ERRORS', len(bad)); [print(' ', e[:300]) for e in bad[:8]]
+# 9.70.0: Game-to-Script analyses the PLAYER's side. The name whose games were loaded wins, then the owner's own accounts (case-insensitive);
+# Auto never mixes in the opponent's moves; "Both sides" is a choice; no match = both sides with a note.
+MINE = '[Event "Live Chess"]\n[Site "Chess.com"]\n[White "Opp_Player"]\n[Black "Lanckrietchess_YT"]\n[Result "1-0"]\n\n' + OPERA.split('\n\n', 1)[1]
+STUD = MINE.replace('Lanckrietchess_YT', 'BotjeMathijs')
+with sync_playwright() as p:
+    br = p.chromium.launch()
+    c = mkctx(br, 1280, 800); pg = c.new_page(); watch(pg, 'lc103-side')
+    pg.goto('http://127.0.0.1:8765/version.json'); pg.evaluate(OWNER); pg.evaluate("localStorage.setItem('lc103-ui', JSON.stringify({depth: 'deep'}))")
+    pg.goto(APP + '#studio'); pg.wait_for_function("!!(" + _SR + ")", timeout=30000); pg.wait_for_timeout(3500)
+    pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())")
+    st(pg, "const f = R.querySelector('.lc31-fmt'); if (f) f.click(); return 1"); pg.wait_for_timeout(400)
+    def run_game(pgn, player, side='auto'):
+        pg.evaluate("([g, pl]) => { LC79._ai.games = [g]; LC79._ai.player = pl; LC79._ai.side = %r; LC79._ai.list = []; LC79._ai.moments = null; LC79.openScript(); }" % side, [pgn, player]); pg.wait_for_timeout(500)
+        row = pg.evaluate("document.querySelector('#lc79-ai .lc79-game').textContent")
+        pg.click('#lc79-ai [data-a=usegame][data-i="0"]')
+        pg.wait_for_timeout(1500); pg.wait_for_function("!LC79._ai.busy", timeout=400000); pg.wait_for_timeout(500)
+        if not pg.evaluate("!!document.querySelector('#lc79-ai [data-lc79-side]')"):
+            msg = pg.evaluate("(document.querySelector('#lc79-ai [data-st]') || {}).textContent || ''"); pg.evaluate("document.querySelector('#lc79-ai [data-a=close]').click()"); return row, ['none', '', '', '', msg]
+        r = pg.evaluate("[document.querySelector('#lc79-ai [data-lc79-side]').getAttribute('data-lc79-side'), [...new Set(LC79._ai.list.map(x => x.color))].join(''), LC79._ai.cs.color, LC79._ai.cs.student, document.querySelector('#lc79-ai [data-lc79-side]').textContent.slice(0, 40)]")
+        pg.evaluate("document.querySelector('#lc79-ai [data-a=close]').click()"); pg.wait_for_timeout(400)
+        return row, r
+    row, r = run_game(MINE, {'site': 'chesscom', 'user': 'lanckrietchess_yt'})
+    out('my game as Black [list row, side line, only Black moves, case side, student]', ['Lanckrietchess_YT as Black' in row, r[0], r[1], r[2], r[3]])
+    out('my game [Showbar has only my moves]', pg.evaluate("[...new Set(LC103.cur().moments.map(m => m.color))].join('')"))
+    row, r = run_game(STUD, {'site': 'chesscom', 'user': 'BotjeMathijs'})
+    out('a student\'s game [the typed name decides: Black]', [r[0], r[1], r[3]])
+    pg.evaluate("Elo.acct = s => s === 'chesscom' ? {user: 'LANCKRIETCHESS_YT'} : null")
+    row, r = run_game(MINE, None)
+    out('pasted game, no name loaded [own account decides, case-insensitive]', [r[0], r[1]])
+    row, r = run_game(MINE, None, 'both')
+    out('Both sides on purpose [both colours]', [r[0], ''.join(sorted(r[1]))])
+    row, r = run_game(MINE.replace('Lanckrietchess_YT', 'SomeoneElse'), {'site': 'chesscom', 'user': 'nobody_here'})
+    out('no name matches [both sides with a note]', [r[0], 'Both sides:' in r[4]])
+    c.close(); br.close()
+bad2 = [e for e in errs if ('PAGEERROR' in e or 'console' in e) and 'Failed to load' not in e and 'navigator.vibrate' not in e]
+print('ERRORS', len(bad2)); [print(' ', e[:300]) for e in bad2[:8]]

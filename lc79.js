@@ -1412,7 +1412,26 @@
     try{const u=App.profile&&(App.profile.chess_com_username||App.profile.cc);if(u)return{site:"chesscom",user:u}}catch(e){}
     return null;
   }
-  const AI={pgn:"",side:"auto",g:null,items:null,list:[],ci:0,cs:null,sim:null,cloud:null,cancel:false,busy:false,who:"",games:[]};
+  const AI={pgn:"",side:"auto",g:null,items:null,list:[],ci:0,cs:null,sim:null,cloud:null,cancel:false,busy:false,who:"",games:[],player:null,mySide:"",myName:""};
+  /* 9.70.0: whose game is it? The name whose games were just loaded ("My last games" or a typed name) comes first, then the owner's
+     own accounts (Elo.acct, the Sparring handles, the profile). Before, LC80 only knew the Sparring / profile names, so a game loaded
+     through Elo.acct often had no side, the scan ran for both sides and the top moment could be the opponent's. */
+  const normName=x=>String(x||"").trim().toLowerCase();
+  function myNames(){
+    const L=[];const add=x=>{const v=normName(x);if(v.length>1&&L.indexOf(v)<0)L.push(v)};
+    try{const c=Elo.acct("chesscom");if(c&&c.user)add(c.user)}catch(e){}
+    try{const l=Elo.acct("lichess");if(l&&l.user)add(l.user)}catch(e){}
+    try{const h=window.LC79T&&LC79T.handles?LC79T.handles():null;if(h){add(h.cc);add(h.li)}}catch(e){}
+    try{add(App.profile&&(App.profile.chess_com_username||App.profile.cc));add(App.profile&&App.profile.lichess_username);add(App.profile&&App.profile.name)}catch(e){}
+    return L;
+  }
+  function sideOf(headers){
+    const w=normName(headers&&headers.White),b=normName(headers&&headers.Black),pick=names=>{const iw=names.indexOf(w)>=0,ib=names.indexOf(b)>=0;return iw&&!ib?"w":ib&&!iw?"b":""};
+    const pl=AI.player&&normName(AI.player.user);
+    if(pl){const s1=pick([pl]);if(s1)return{side:s1,name:s1==="w"?headers.White:headers.Black,from:"loaded"}}
+    const s2=pick(myNames());if(s2)return{side:s2,name:s2==="w"?headers.White:headers.Black,from:"mine"};
+    return{side:"",name:"",from:""};
+  }
   function openScript(){
     AI.cancel=false;
     openLayer("lc79-ai","Game-to-Script AI",el=>{
@@ -1432,15 +1451,16 @@
       +(own?'<button type="button" class="lc79-b sm" data-a="mine">My last games ('+esc(own.user)+')</button>':'')
       +'<select data-f="site" aria-label="Site"><option value="chesscom">Chess.com</option><option value="lichess">Lichess</option></select><input type="text" data-f="user" placeholder="Any player’s name" aria-label="Player name" style="width:170px"><button type="button" class="lc79-b sm" data-a="theirs">Their last games</button></div>'
       +'<div class="lc79-games" data-games>'+gamesHTML()+'</div>'
-      +'<div class="lc79-row"><label class="lc79-f"><span>'+(HASM()?"Whose moves?":"Whose mistakes?")+'</span><select data-f="side"><option value="auto"'+(AI.side==="auto"?" selected":"")+'>'+(HASM()?"Both sides":"Auto (my side, else the biggest mistake)")+'</option><option value="w"'+(AI.side==="w"?" selected":"")+'>White</option><option value="b"'+(AI.side==="b"?" selected":"")+'>Black</option></select></label>'+(HASM()?'<label class="lc79-f"><span>Depth</span><select data-f="depth"><option value="deep"'+(LC103.ui().depth!=="fast"?" selected":"")+'>Thorough (about 1 s a move)</option><option value="fast"'+(LC103.ui().depth==="fast"?" selected":"")+'>Fast (about 0.4 s a move)</option></select></label>':'')+'<span class="lc79-grow"></span><button type="button" class="lc79-b" data-a="moments"'+(AI.busy?" disabled":"")+' title="Scan the whole game for every instructive moment and put them on the Showbar">Find every moment (Showbar)</button><button type="button" class="lc79-b pri" data-a="analyse"'+(AI.busy?" disabled":"")+'>'+(HASM()?"Analyse the whole game":"Find the crucial mistake")+'</button></div><p class="lc79-hint" data-st aria-live="polite"></p></section>';
+      +'<div class="lc79-row"><label class="lc79-f"><span>'+(HASM()?"Whose moves?":"Whose mistakes?")+'</span><select data-f="side"><option value="auto"'+(AI.side==="auto"?" selected":"")+'>'+(HASM()?"Auto: the player of this game":"Auto (my side, else the biggest mistake)")+'</option>'+(HASM()?'<option value="both"'+(AI.side==="both"?" selected":"")+'>Both sides</option>':'')+'<option value="w"'+(AI.side==="w"?" selected":"")+'>White</option><option value="b"'+(AI.side==="b"?" selected":"")+'>Black</option></select></label>'+(HASM()?'<label class="lc79-f"><span>Depth</span><select data-f="depth"><option value="deep"'+(LC103.ui().depth!=="fast"?" selected":"")+'>Thorough (about 1 s a move)</option><option value="fast"'+(LC103.ui().depth==="fast"?" selected":"")+'>Fast (about 0.4 s a move)</option></select></label>':'')+'<span class="lc79-grow"></span><button type="button" class="lc79-b" data-a="moments"'+(AI.busy?" disabled":"")+' title="Scan the whole game for every instructive moment and put them on the Showbar">Find every moment (Showbar)</button><button type="button" class="lc79-b pri" data-a="analyse"'+(AI.busy?" disabled":"")+'>'+(HASM()?"Analyse the whole game":"Find the crucial mistake")+'</button></div><p class="lc79-hint" data-st aria-live="polite"></p></section>';
     if(AI.cs)h+=caseHTML();
     box.innerHTML=h;
   }
   function gamesHTML(){
-    return(AI.games||[]).map((p,i)=>{const h=hdr(p);return'<div class="lc79-game"><span>'+esc((h.White||"?")+(h.WhiteElo?" ("+h.WhiteElo+")":"")+" vs "+(h.Black||"?")+(h.BlackElo?" ("+h.BlackElo+")":"")+" · "+(h.Result||"")+" · "+String(h.Date||h.UTCDate||"").replace(/\./g,"-"))+'</span><button type="button" class="lc79-b sm" data-a="usegame" data-i="'+i+'">Use this game</button></div>'}).join("");
+    return(AI.games||[]).map((p,i)=>{const h=hdr(p);return'<div class="lc79-game"><span>'+esc((h.White||"?")+(h.WhiteElo?" ("+h.WhiteElo+")":"")+" vs "+(h.Black||"?")+(h.BlackElo?" ("+h.BlackElo+")":"")+" · "+(h.Result||"")+" · "+String(h.Date||h.UTCDate||"").replace(/\./g,"-"))+(()=>{const w=sideOf(h);return w.side?' · <b>'+esc(w.name)+' as '+(w.side==="w"?"White":"Black")+'</b>':''})()+'</span><button type="button" class="lc79-b sm" data-a="usegame" data-i="'+i+'">Use this game</button></div>'}).join("");
   }
   function status(t,bad){const s=Q("#lc79-ai [data-st]");if(s){s.textContent=t||"";s.classList.toggle("lc79-err",!!bad)}}
   async function loadGames(site,user){
+    AI.player={site:site,user:String(user||"").trim()};
     status("Loading games…");
     try{AI.games=await recentGames(site,user,10);const g=Q("#lc79-ai [data-games]");if(g)g.innerHTML=gamesHTML();status(AI.games.length?"Pick a game.":"No games found for that name.",!AI.games.length)}
     catch(e){status("Could not load games ("+(e.message||"no connection")+"). Paste the PGN instead.",true)}
@@ -1461,16 +1481,18 @@
     AI.busy=true;AI.cancel=false;AI.cs=null;AI.sim=null;AI.cloud=null;AI.moments=null;paintAi();status("Starting Stockfish…");
     try{
       const g=LC80.scan.parseGame(pgn);if(!g)throw new Error("That PGN could not be read, or it has fewer than 8 moves.");
+      const who=sideOf(g.headers);
+      AI.mySide=AI.side==="w"||AI.side==="b"?AI.side:AI.side==="both"?"":who.side;AI.myName=AI.mySide?(AI.side==="w"||AI.side==="b"?(AI.side==="w"?g.headers.White:g.headers.Black)||"":who.name):"";
+      if(AI.mySide)g.color=AI.mySide;
       if(typeof LC103!=="undefined"&&LC103.scan){
-        const side=AI.side==="w"||AI.side==="b"?AI.side:"both";
+        const side=AI.mySide||"both";
         const cur=await LC103.scan(pgn,{depth:LC103.ui().depth||"deep",side:side,
           onTick:(i,n,ms)=>{const left=i>2?Math.round(ms/i*(n-i)/1000):null;status("Stockfish: move "+Math.ceil((i+1)/2)+" of "+Math.ceil(n/2)+" · "+((LC103.cur()||{}).moments||[]).length+" moments so far"+(left!=null?" · about "+left+" s left":"")+"…")},
           onVerify:(q,t)=>status("Checking every moment deeper ("+(q+1)+" of "+t+")…")});
-        if(!cur.moments.length)throw new Error("No moment worth a video in this game. Try another one.");
+        if(!cur.moments.length)throw new Error("No moment worth a video for "+(AI.mySide?(AI.myName||(AI.mySide==="w"?"White":"Black"))+" ("+(AI.mySide==="w"?"White":"Black")+")":"either side")+" in this game. Try another one.");
         AI.g=g;AI.items=[];AI.moments=cur.moments;AI.list=cur.moments.map(itemOf);
         let top=0;AI.list.forEach((x,k)=>{if((x.score||0)>(AI.list[top].score||0))top=k});AI.ci=top;buildCase();
       }else{
-        if(AI.side==="w"||AI.side==="b")g.color=AI.side;
         if(!(await Engine.load()))throw new Error("Stockfish could not start on this device.");
         const items=await LC80.scan.analyseGame(g,(k,t)=>status("Stockfish: move "+Math.ceil((k+1)/2)+" of "+Math.ceil(t/2)+"…"),()=>AI.cancel);
         let list=items.filter(it=>it.cls==="blunder"||it.cls==="mistake").sort((a,b)=>b.loss-a.loss);
@@ -1572,7 +1594,9 @@
     const bad=rows.filter(r=>!isGood(r.x)),gd=rows.filter(r=>isGood(r.x));
     const sec=(t,L,empty)=>'<h4 style="margin:8px 0 4px">'+t+' ('+L.length+')</h4><div class="lc79-games">'+(L.length?L.map(row).join(""):'<p class="lc79-hint" style="margin:0">'+empty+'</p>')+'</div>';
     const newN=rows.filter(r=>!projectFor(key,r.x.i)).length;
-    return'<section class="lc79-sec" aria-labelledby="lc79-sb"><h3 id="lc79-sb">2. Every moment in this game ('+AI.list.length+')</h3><p class="lc79-hint" style="margin:0">Pick a moment, make a video project, load it into the Studio board and go to Shoot. Mistakes and good moves are split; turn kinds on or off. They are on the Showbar in the Studio too.</p>'
+    const whoLine=AI.mySide?'<p class="lc79-hint" style="margin:0" data-lc79-side="'+AI.mySide+'"><b>Moves of '+esc(AI.myName||"the player")+' ('+(AI.mySide==="w"?"White":"Black")+')</b>. Want the other side too? Pick “Both sides” above and analyse again.</p>'
+      :'<p class="lc79-hint" style="margin:0" data-lc79-side="both">'+(AI.side==="both"?'<b>Both sides.</b>':'<b>Both sides:</b> no name in this game matches the games you loaded or your linked account. Pick White or Black above and analyse again for one side.')+'</p>';
+    return'<section class="lc79-sec" aria-labelledby="lc79-sb"><h3 id="lc79-sb">2. Every moment in this game ('+AI.list.length+')</h3>'+whoLine+'<p class="lc79-hint" style="margin:0">Pick a moment, make a video project, load it into the Studio board and go to Shoot. Mistakes and good moves are split; turn kinds on or off. They are on the Showbar in the Studio too.</p>'
       +'<div class="lc79-row" role="group" aria-label="Kinds of moments">'+Object.keys(KIND).map(k=>'<button type="button" class="lc79-b sm lc79-kt" data-a="kflt" data-t="'+k+'" style="--c:'+KIND[k][2]+'" aria-pressed="'+(F[k]!==false)+'">'+esc(KSYM[k]+" "+KIND[k][1])+' '+(cnt[k]||0)+'</button>').join("")+'</div>'
       +'<div class="lc79-row"><label class="lc79-f"><span>Order</span><select data-f="korder"><option value="score"'+(ord==="score"?" selected":"")+'>Best clips first</option><option value="game"'+(ord==="game"?" selected":"")+'>Game order</option></select></label></div>'
       +sec("Mistakes",bad,"No mistake of the kinds you turned on.")+sec("Good moves",gd,"No good move of the kinds you turned on.")
