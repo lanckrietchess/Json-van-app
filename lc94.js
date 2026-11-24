@@ -11,6 +11,8 @@ const LC94=(()=>{
      3. Deep link (app only): /app.html?u=<Chess.com or Lichess name>&site=chesscom|lichess&src=mc_ig. The name is taken as the answer to the
         first-run question, the "How did you find us?" step is filled from ?src= when it names a platform, and the first review starts at once
         (LC42.begin -> LC50 scans the latest game on the device with Stockfish). The parameters leave the address bar so a reload does not restart it.
+     3b. (9.67.0) The landing's quick start no longer jumps into the app: LC102 keeps the name (localStorage "lc102-handoff"), starts the
+        install and shows an "Open the app" card. The app reads that handoff when it is opened without ?u= (readHand), once, 7 days max.
      4. In an Instagram / TikTok / Facebook browser (LC87 soft mode) one LC88 step after the first review: "Keep this review", which opens the same
         game in Chrome / Safari (the in-app browser keeps nothing once it is closed). */
   const W=window,D=document,VERSION="9.59.0";
@@ -82,6 +84,17 @@ const LC94=(()=>{
       if(!NAME.test(u))return null;
       const site=/^li/i.test(String(P.get("site")||""))?"lichess":"chesscom";
       return{u:u,site:site};
+    }catch(e){return null}
+  }
+  /* 9.67.0: the landing's quick start (LC102) keeps the name in localStorage "lc102-handoff". An installed app opens on its own start
+     address (no ?u=), so the app reads it here: used once, at most 7 days old. A real ?u= link wins and clears it. */
+  const K_HAND="lc102-handoff";
+  function readHand(){
+    try{
+      const h=lsGet(K_HAND,null);if(!h)return null;
+      localStorage.removeItem(K_HAND);
+      if(!h||typeof h!=="object"||!NAME.test(h.u||"")||!(Date.now()-(+h.at||0)<7*864e5))return null;
+      return{u:h.u,site:h.site==="lichess"?"lichess":"chesscom",via:"handoff"};
     }catch(e){return null}
   }
   function stripDeep(){
@@ -167,6 +180,9 @@ const LC94=(()=>{
       const url=new URL("/app.html",location.href);url.searchParams.set("u",u);url.searchParams.set("site",site);
       const s=src();if(s)url.searchParams.set("src",s);
       step("name_entered");
+      /* 9.67.0: LC102 (landing only) keeps the name on the device, starts the install from this same tap and shows a small "Open the app"
+         card once that is done (never over a playing video). No jump into the app and no review on submit. Without LC102: the old jump. */
+      try{if(typeof LC102!=="undefined"&&typeof LC102.submit==="function"&&LC102.submit({u:u,site:site,src:s,url:url.pathname+url.search}))return}catch(x){}
       (W.__lcNav||function(x){location.href=x})(url.pathname+url.search);
     });
     label();
@@ -203,7 +219,8 @@ const LC94=(()=>{
       W.addEventListener("appinstalled",()=>step("install"));
       if(!isApp()){step("landing");quickStart();return}
       /* the app */
-      const d=readDeep();
+      let d=readDeep();
+      if(d){try{localStorage.removeItem(K_HAND)}catch(e){}}else d=readHand();
       if(d){ssSet(K_DEEP,d);stripDeep();
         /* LC30 asks "How familiar are you with chess?" on a brand-new install 600 ms after start: the link already answered it */
         try{if(typeof LC30!=="undefined"&&LC30.level0&&!LC30.level0.s().choice)LC30.level0.set({choice:"know",auto:true,via:"deeplink"})}catch(e){}}
@@ -218,6 +235,6 @@ const LC94=(()=>{
     }catch(e){console.error("lc94",e)}
   }
   return{VERSION:VERSION,STEPS:STEPS,init:init,step:step,deepStart:deepStart,iabStep:iabStep,src:src,
-    _t:{captureSource:captureSource,platformOf:platformOf,attrFromSource:attrFromSource,quickStart:quickStart,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
+    _t:{readHand:readHand,captureSource:captureSource,platformOf:platformOf,attrFromSource:attrFromSource,quickStart:quickStart,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
 })();
 /*@@end lc94*/

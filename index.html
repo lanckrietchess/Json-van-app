@@ -129,15 +129,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.67.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.68.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.67.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.67.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.68.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.68.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.67.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.68.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -390,7 +390,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
       <p data-cms="quick.1" class="qs-h">See the move that cost you the most. Free, 30 seconds.</p>
       <div class="qs-row"><input name="u" type="text" inputmode="text" autocapitalize="off" spellcheck="false" maxlength="80" placeholder="Your Chess.com username" aria-label="Your Chess.com or Lichess username"><button data-cms="quick.2" class="btn primary big" type="submit">Show me</button></div>
       <p class="qs-msg" data-qs-msg role="status" aria-live="polite"></p>
-      <p class="qs-f"><span data-cms="quick.3">No account, no download. I read your latest game on your own device.</span><button type="button" class="qs-sw" data-qs-site>I play on Lichess</button></p>
+      <p class="qs-f"><span data-cms="quick.3">No account needed. One tap installs the app, then I read your latest game on your own device.</span><button type="button" class="qs-sw" data-qs-site>I play on Lichess</button></p>
     </form>
   </div>
 </section>
@@ -624,7 +624,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <!-- 9.65.0: the EU withdrawal function (CRD art. 11a), outside the CMS so it can never be hidden -->
     <p class="lc-withdraw"><a href="/app.html#withdraw">Withdraw from contract here</a> <span class="mute">(within 14 days of a purchase)</span></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.67.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.68.0</p></footer>
 <button type="button" class="lc72-edit" id="lc89-edit" hidden>✎ Edit this page</button>
 <script>
 /*@@module lc89*/
@@ -1113,13 +1113,15 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     m.textContent=text;m.hidden=false;clearTimeout(instMsg.t);instMsg.t=setTimeout(function(){m.hidden=true},9000);
   }
   window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();bip=e;document.documentElement.classList.add("can-install");syncLabels()});
-  window.addEventListener("appinstalled",function(){bip=null;document.documentElement.classList.remove("can-install");syncLabels();instMsg("Installed. Open Lanckriet Chess from your home screen or app list.")});
-  function promptNow(){
+  window.addEventListener("appinstalled",function(){bip=null;document.documentElement.classList.remove("can-install");syncLabels();if(!window.__lc102q)instMsg("Installed. Open Lanckriet Chess from your home screen or app list.")});
+  function promptNow(cb){
     var ev=bip;bip=null;window.__lcBip=null;document.documentElement.classList.remove("can-install");
     try{ev.prompt();ev.userChoice.then(function(c){
-      if(c&&c.outcome==="accepted")instMsg("Installing… Open Lanckriet Chess from your home screen or app list.");
+      var ok=!!(c&&c.outcome==="accepted");
+      if(cb){cb(ok?"accepted":"dismissed");return}             /* 9.67.0: LC102's quick start shows its own "Open the app" card */
+      if(ok)instMsg("Installing… Open Lanckriet Chess from your home screen or app list.");
       else instMsg("No problem. Tap Install on my device any time.");
-    },function(){})}catch(err){}
+    },function(){if(cb)cb("dismissed")})}catch(err){if(cb)cb("dismissed")}
   }
   function waitPrompt(ms){return new Promise(function(res){if(bip)return res(true);var t=setTimeout(function(){res(!!bip)},ms);window.addEventListener("beforeinstallprompt",function(){clearTimeout(t);setTimeout(function(){res(true)},0)},{once:true})})}
   /* 9.44.0: inside Instagram / TikTok / Facebook the button breaks out of the in-app browser at once: Android opens the app page in
@@ -1181,12 +1183,14 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     return'<ol class="ins-steps ins-one"><li><span class="ic">'+ICO_INSTALL+'</span><span>Click the <b>install icon</b> at the right of the address bar, then <b>Install</b>.</span></li></ol>'
       +'<p class="ins-note">No icon? Open the <b>⋮</b> menu → <b>Cast, save and share</b> → <b>Install page as app</b>.</p>';
   }
-  function insClose(){var o=$("ins-ov");if(o)o.hidden=true;document.documentElement.style.overflow=""}
-  function insOpen(){
+  var insCb=null;                                               /* 9.67.0: LC102 waits for the guide to close before its card */
+  function insClose(){var o=$("ins-ov");if(o)o.hidden=true;document.documentElement.style.overflow="";var cb=insCb;insCb=null;if(cb)cb("guide")}
+  function insOpen(cb){
+    if(typeof cb==="function")insCb=cb;
     var o=$("ins-ov");
     if(!o){o=document.createElement("div");o.id="ins-ov";o.className="wl-ov";o.innerHTML='<div class="wl-box ins-box" role="dialog" aria-modal="true" aria-labelledby="ins-h"><header class="wl-head"><img src="/icons/icon-192.png" alt="" width="44" height="44" style="border-radius:12px"><div><h3 id="ins-h">Install Lanckriet Chess</h3><p class="small mute" style="margin:2px 0 0" id="ins-sub">Two taps, no store, no account needed.</p></div><button type="button" class="wl-x" data-ins-x aria-label="Close">×</button></header><div class="wl-body" id="ins-body"></div></div>';
       document.body.appendChild(o);
-      o.addEventListener("click",function(e){if(e.target===o||e.target.closest("[data-ins-x]")){insClose();return}if(e.target.closest("[data-ins-now]")){insClose();promptNow();return}if(e.target.closest("[data-ins-open]")){e.preventDefault();insClose();openApp(null)}});
+      o.addEventListener("click",function(e){if(e.target===o||e.target.closest("[data-ins-x]")){insClose();return}if(e.target.closest("[data-ins-now]")){var cb=insCb;insCb=null;insClose();promptNow(cb?afterPrompt(cb):undefined);return}if(e.target.closest("[data-ins-open]")){e.preventDefault();insClose();openApp(null)}});
       document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!o.hidden)insClose()})}
     var inst=isInstalled();
     $("ins-sub").textContent=IOS?"Two taps in Safari. No store, no account needed.":"One step, no store, no account needed.";
@@ -1209,10 +1213,27 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     if(CHR&&!a.__lcWaited){a.__lcWaited=true;waitPrompt(1200).then(function(ok){if(ok&&bip)promptNow();else insOpen()});return}
     insOpen();                                                   /* iPhone / iPad: the 2-step guide; elsewhere: the one step in the browser menu */
   });
+  /* 9.67.0 (LC102): the quick start's submit starts the install from the same tap. done(kind) is called once the install step is over:
+     "iab" (Instagram / TikTok browser: no install there), "standalone", "installed" (already on this device), "installed-now" (the native
+     prompt was accepted and the browser reported the install, or 6 s passed), "dismissed" (prompt declined) or "guide" (the steps sheet
+     was closed: iPhone / iPad, Firefox, or Chrome that did not offer its prompt yet). Returns what it started. */
+  function afterPrompt(done){return function(o){
+    if(o!=="accepted"){done("dismissed");return}
+    var fired=false,f=function(){if(fired)return;fired=true;window.removeEventListener("appinstalled",f);done("installed-now")};
+    window.addEventListener("appinstalled",f);setTimeout(f,6000)}}
+  window.__lcInstall=function(done){
+    done=typeof done==="function"?done:function(){};
+    if(IAB){done("iab");return"iab"}
+    if(standaloneNow()){done("standalone");return"standalone"}
+    if(bip){promptNow(afterPrompt(done));return"prompt"}
+    if(isInstalled()){done("installed");return"installed"}
+    if(CHR){waitPrompt(1200).then(function(ok){if(ok&&bip)promptNow(afterPrompt(done));else insOpen(done)});return"wait"}
+    insOpen(done);return"guide";
+  };
   syncLabels();
 
   /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
-  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.67.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.68.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -1307,7 +1328,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   /* 3c. the walkthrough video: its address is set in the app in admin mode and read here; the first week it replaces the coach card in the hero */
   function parseVideo(u){var x;try{x=new URL(u)}catch(e){return null}var h=x.hostname.replace(/^www\./,"").toLowerCase(),p=x.pathname,id="",m;
     if(h==="youtu.be")id=p.slice(1);else if(h==="youtube.com"||h==="m.youtube.com"||h==="youtube-nocookie.com")id=p==="/watch"?(x.searchParams.get("v")||""):((m=/^\/(?:embed|shorts|live)\/([\w-]{11})/.exec(p))?m[1]:"");
-    if(/^[\w-]{11}$/.test(id))return{t:"yt",id:id,src:"https://www.youtube-nocookie.com/embed/"+id+"?rel=0&modestbranding=1&playsinline=1&autoplay=1"};
+    if(/^[\w-]{11}$/.test(id))return{t:"yt",id:id,src:"https://www.youtube-nocookie.com/embed/"+id+"?rel=0&modestbranding=1&playsinline=1&autoplay=1&enablejsapi=1&origin="+encodeURIComponent(location.origin)};
     if(h==="vimeo.com"||h==="player.vimeo.com"){m=/(\d{6,12})/.exec(p);if(m)return{t:"vm",src:"https://player.vimeo.com/video/"+m[1]+"?autoplay=1&playsinline=1"}}
     if(/\.(mp4|webm)$/i.test(p))return{t:"file",src:u};return null}
   function mountVideo(box,v,cap){   /* 9.63.0: cap = the caption (LC98 names the Elo segment); without it: the walkthrough */
@@ -1644,6 +1665,8 @@ const LC94=(()=>{
      3. Deep link (app only): /app.html?u=<Chess.com or Lichess name>&site=chesscom|lichess&src=mc_ig. The name is taken as the answer to the
         first-run question, the "How did you find us?" step is filled from ?src= when it names a platform, and the first review starts at once
         (LC42.begin -> LC50 scans the latest game on the device with Stockfish). The parameters leave the address bar so a reload does not restart it.
+     3b. (9.67.0) The landing's quick start no longer jumps into the app: LC102 keeps the name (localStorage "lc102-handoff"), starts the
+        install and shows an "Open the app" card. The app reads that handoff when it is opened without ?u= (readHand), once, 7 days max.
      4. In an Instagram / TikTok / Facebook browser (LC87 soft mode) one LC88 step after the first review: "Keep this review", which opens the same
         game in Chrome / Safari (the in-app browser keeps nothing once it is closed). */
   const W=window,D=document,VERSION="9.59.0";
@@ -1715,6 +1738,17 @@ const LC94=(()=>{
       if(!NAME.test(u))return null;
       const site=/^li/i.test(String(P.get("site")||""))?"lichess":"chesscom";
       return{u:u,site:site};
+    }catch(e){return null}
+  }
+  /* 9.67.0: the landing's quick start (LC102) keeps the name in localStorage "lc102-handoff". An installed app opens on its own start
+     address (no ?u=), so the app reads it here: used once, at most 7 days old. A real ?u= link wins and clears it. */
+  const K_HAND="lc102-handoff";
+  function readHand(){
+    try{
+      const h=lsGet(K_HAND,null);if(!h)return null;
+      localStorage.removeItem(K_HAND);
+      if(!h||typeof h!=="object"||!NAME.test(h.u||"")||!(Date.now()-(+h.at||0)<7*864e5))return null;
+      return{u:h.u,site:h.site==="lichess"?"lichess":"chesscom",via:"handoff"};
     }catch(e){return null}
   }
   function stripDeep(){
@@ -1800,6 +1834,9 @@ const LC94=(()=>{
       const url=new URL("/app.html",location.href);url.searchParams.set("u",u);url.searchParams.set("site",site);
       const s=src();if(s)url.searchParams.set("src",s);
       step("name_entered");
+      /* 9.67.0: LC102 (landing only) keeps the name on the device, starts the install from this same tap and shows a small "Open the app"
+         card once that is done (never over a playing video). No jump into the app and no review on submit. Without LC102: the old jump. */
+      try{if(typeof LC102!=="undefined"&&typeof LC102.submit==="function"&&LC102.submit({u:u,site:site,src:s,url:url.pathname+url.search}))return}catch(x){}
       (W.__lcNav||function(x){location.href=x})(url.pathname+url.search);
     });
     label();
@@ -1836,7 +1873,8 @@ const LC94=(()=>{
       W.addEventListener("appinstalled",()=>step("install"));
       if(!isApp()){step("landing");quickStart();return}
       /* the app */
-      const d=readDeep();
+      let d=readDeep();
+      if(d){try{localStorage.removeItem(K_HAND)}catch(e){}}else d=readHand();
       if(d){ssSet(K_DEEP,d);stripDeep();
         /* LC30 asks "How familiar are you with chess?" on a brand-new install 600 ms after start: the link already answered it */
         try{if(typeof LC30!=="undefined"&&LC30.level0&&!LC30.level0.s().choice)LC30.level0.set({choice:"know",auto:true,via:"deeplink"})}catch(e){}}
@@ -1851,10 +1889,172 @@ const LC94=(()=>{
     }catch(e){console.error("lc94",e)}
   }
   return{VERSION:VERSION,STEPS:STEPS,init:init,step:step,deepStart:deepStart,iabStep:iabStep,src:src,
-    _t:{captureSource:captureSource,platformOf:platformOf,attrFromSource:attrFromSource,quickStart:quickStart,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
+    _t:{readHand:readHand,captureSource:captureSource,platformOf:platformOf,attrFromSource:attrFromSource,quickStart:quickStart,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
 })();
 /*@@end lc94*/
 try{LC94.init()}catch(e){}
+</script>
+<script>
+/*@@module lc102*/
+/* LC102 (build 9.67.0): the landing page's quick start -> install -> "Open the app" card, never over a playing video. index.html only.
+   1. Submit (LC94's form #lc94-qs hands over to LC102.submit): the name is checked by LC94, then
+        - kept on this device in localStorage "lc102-handoff" {u, site, src, at}: the app (LC94.init) reads it when it is opened WITHOUT
+          ?u= (an installed app starts on /app.html?source=pwa), so the name still comes along; it is used once and expires after 7 days.
+          Android and computers share this storage between the browser and the installed app; iPhone does not (there the card's link
+          carries the name);
+        - the page does NOT jump into the app and no review starts on submit (the review starts when the person opens the app);
+        - the install starts from the same tap (window.__lcInstall in the landing's install script: the native prompt, the 2-tap
+          iPhone guide, or nothing when the app is already installed or we are inside Instagram / TikTok).
+   2. Once the install step is over, ONE small card at the bottom (not a modal): "Your review is ready, <name>." + "Open the app"
+      (the deep link /app.html?u=&site=&src=) + a close button.
+   3. Video rule: the card is never on screen while the hero video (or any video on the page) plays. YouTube (enablejsapi=1) and Vimeo
+      report their state over postMessage, <video> elements over their own events. While a video plays the card waits; it shows the
+      moment the video is paused or ended (or the iframe is gone, e.g. a segment without a video). A player that never answers is
+      treated as playing while it is on screen. While the install guide is open the card waits too.
+   Testing: window.__lcNav(url) replaces navigation; LC102._t exposes the state. */
+const LC102=(function(){
+  "use strict";
+  const W=window,D=document,VERSION="9.67.0",K_HAND="lc102-handoff",NAME=/^[A-Za-z0-9_-]{2,30}$/,HAND_MS=7*864e5,API_WAIT=10000;
+  const lsSet=(k,v)=>{try{if(v==null)localStorage.removeItem(k);else localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+  /* ---------- 1. the handoff ---------- */
+  function save(u,site,src){if(!NAME.test(u||""))return false;lsSet(K_HAND,{u:u,site:site==="lichess"?"lichess":"chesscom",src:String(src||"").slice(0,40),at:Date.now(),v:1});return true}
+
+  /* ---------- 2. is a video playing? ---------- */
+  const st=new WeakMap();   /* iframe -> {k:"yt"|"vm", s:"unknown"|"playing"|"paused"|"ended"|"idle"|"noapi", at, tries} */
+  let seq=0;
+  const kindOf=src=>/^https:\/\/(www\.)?(youtube-nocookie\.com|youtube\.com)\/embed\//.test(src||"")?"yt":/^https:\/\/player\.vimeo\.com\/video\//.test(src||"")?"vm":"";
+  function frames(){return[].slice.call(D.querySelectorAll("iframe")).filter(f=>!!kindOf(f.getAttribute("src")))}
+  function post(f,msg){try{const k=kindOf(f.getAttribute("src"));f.contentWindow.postMessage(k==="vm"?msg:JSON.stringify(msg),k==="vm"?"https://player.vimeo.com":"*")}catch(e){}}
+  function hello(f){
+    const r=st.get(f);if(!r||r.s!=="unknown")return;
+    if(r.k==="yt"){post(f,{event:"listening",id:r.id,channel:"widget"});post(f,{event:"command",func:"addEventListener",args:["onStateChange"],id:r.id,channel:"widget"})}
+    else["play","pause","ended","finish"].forEach(v=>post(f,{method:"addEventListener",value:v}));
+    if(++r.tries<Math.ceil(API_WAIT/400))setTimeout(()=>hello(f),400);
+  }
+  function hook(f){
+    if(st.has(f))return;
+    const k=kindOf(f.getAttribute("src"));if(!k)return;
+    /* the player was started by a click (autoplay=1): count it as playing until it says otherwise */
+    st.set(f,{k:k,s:"unknown",at:Date.now(),tries:0,id:"lc102-"+(++seq)});
+    f.addEventListener("load",()=>{const r=st.get(f);if(r){r.tries=0;hello(f)}});
+    hello(f);
+  }
+  function scan(){frames().forEach(hook)}
+  function frameOf(win){const all=frames();for(let i=0;i<all.length;i++)if(all[i].contentWindow===win)return all[i];return null}
+  function onMsg(e){
+    if(!/^https:\/\/(www\.)?(youtube-nocookie\.com|youtube\.com|player\.vimeo\.com)$/.test(e.origin||""))return;
+    const f=frameOf(e.source);if(!f)return;hook(f);
+    let d=e.data;if(typeof d==="string"){try{d=JSON.parse(d)}catch(x){return}}
+    if(!d||typeof d!=="object")return;
+    const r=st.get(f);let s="";
+    if(r.k==="yt"){
+      let ps=null;
+      if(d.event==="onStateChange")ps=+d.info;
+      else if((d.event==="infoDelivery"||d.event==="initialDelivery")&&d.info&&typeof d.info.playerState==="number")ps=d.info.playerState;
+      else if(d.event==="onReady"&&r.s==="unknown")s="idle";
+      if(ps!=null)s=ps===1||ps===3?"playing":ps===2?"paused":ps===0?"ended":"idle";
+    }else{
+      if(d.event==="ready"){r.tries=0;r.s="unknown";hello(f);return}
+      s=d.event==="play"||d.event==="playing"?"playing":d.event==="pause"?"paused":d.event==="ended"||d.event==="finish"?"ended":"";
+    }
+    if(s&&s!==r.s){r.s=s;r.at=Date.now();tick()}
+  }
+  function visible(el){try{const b=el.getBoundingClientRect(),h=W.innerHeight||D.documentElement.clientHeight;if(!b.height)return false;const v=Math.min(b.bottom,h)-Math.max(b.top,0);return v/b.height>=.4}catch(e){return false}}
+  function frameState(f){
+    const r=st.get(f);if(!r)return"unknown";
+    if(r.s==="unknown"&&Date.now()-r.at>API_WAIT)r.s="noapi";
+    /* "ready" / "cued" comes a moment before autoplay starts: only a player that stays idle for 1.5 s is really not playing (no flash) */
+    if(r.s==="idle"&&Date.now()-r.at<1500)return"unknown";
+    return r.s;
+  }
+  function playing(){
+    const vids=[].slice.call(D.querySelectorAll("video"));
+    if(vids.some(v=>!v.paused&&!v.ended))return true;
+    return frames().some(f=>{const s=frameState(f);return s==="playing"||s==="unknown"||(s==="noapi"&&visible(f))});
+  }
+  function guideOpen(){const o=D.getElementById("ins-ov");return!!(o&&!o.hidden)}
+  const blocked=()=>playing()||guideOpen();
+
+  /* ---------- 3. the card ---------- */
+  let want=null,timer=0,shown=false;
+  function css(){
+    if(D.getElementById("lc102-css"))return;
+    const s=D.createElement("style");s.id="lc102-css";
+    s.textContent=".lc102{position:fixed;left:12px;right:12px;bottom:12px;z-index:61;max-width:460px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:14px;background:#1e293b;border:1px solid rgba(56,189,248,.55);color:#e2e8f0;box-shadow:0 10px 30px rgba(0,0,0,.45);transform:translateY(0);opacity:1;transition:transform .2s ease,opacity .2s ease}"
+      +".lc102[hidden]{display:none}.lc102 img{width:36px;height:36px;border-radius:9px;flex:none}"
+      +".lc102 .t{flex:1;min-width:0;font-size:.92rem;line-height:1.3}.lc102 .t b{display:block;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lc102 .t small{display:block;color:#94a3b8;font-size:.82rem}"
+      +".lc102 .go{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:10px;background:#38bdf8;color:#0f172a;font-weight:800;text-decoration:none;white-space:nowrap}"
+      +".lc102 .x{flex:none;width:36px;height:44px;border:0;background:none;color:#94a3b8;font-size:1.4rem;cursor:pointer}"
+      +"@media (prefers-reduced-motion:reduce){.lc102{transition:none}}";
+    D.head.appendChild(s);
+  }
+  const LINES={
+    "installed":["Your review is ready, NAME.","Open Lanckriet Chess: your last game is waiting."],
+    "installed-now":["Installed. Your review is ready, NAME.","Open it from your home screen, or tap here."],
+    "dismissed":["Your review is ready, NAME.","No install needed: it runs in your browser too."],
+    "guide":["Your review is ready, NAME.","Added it? Open it from your home screen, or tap here."],
+    "iab":["Your review is ready, NAME.","Opens right here, no install needed."]
+  };
+  function card(){
+    let c=D.getElementById("lc102-card");
+    if(!c){
+      css();c=D.createElement("div");c.id="lc102-card";c.className="lc102";c.hidden=true;c.setAttribute("role","status");c.setAttribute("aria-live","polite");
+      D.body.appendChild(c);
+      c.addEventListener("click",e=>{
+        if(e.target.closest("[data-lc102-x]")){want=null;render();return}
+        const a=e.target.closest("[data-lc102-open]");if(!a)return;
+        if(W.__lcNav){e.preventDefault();W.__lcNav(a.getAttribute("href"))}
+      });
+    }
+    return c;
+  }
+  function render(){
+    const c=want?card():D.getElementById("lc102-card");if(!c)return;
+    if(!want){c.hidden=true;shown=false;W.__lc102q=false;stop();return}
+    const on=!blocked();
+    if(on&&!shown){
+      const L=LINES[want.kind]||LINES.installed;
+      c.innerHTML='<img src="/icons/icon-192.png" alt="" width="36" height="36"><span class="t"><b>'+esc(L[0].replace("NAME",want.u))+'</b><small>'+esc(L[1])+'</small></span>'
+        +'<a class="go" data-lc102-open href="'+esc(want.url)+'">Open the app</a><button type="button" class="x" data-lc102-x aria-label="Close">×</button>';
+      const m=D.getElementById("lc-inst");if(m)m.hidden=true;                 /* never two messages at the bottom */
+    }
+    if(on!==shown){c.hidden=!on;shown=on}
+  }
+  function tick(){if(want)render()}
+  function start(){if(!timer)timer=setInterval(()=>{scan();tick()},500)}
+  function stop(){if(timer){clearInterval(timer);timer=0}}
+  function queue(kind,u,url){want={kind:kind,u:u,url:url,at:Date.now()};W.__lc102q=true;start();scan();render()}
+
+  /* ---------- the submit (called by LC94's quick start inside the click / Enter gesture) ---------- */
+  function submit(o){
+    try{
+      if(!o||!NAME.test(o.u||"")||typeof o.url!=="string"||!/^\/app\.html\?/.test(o.url))return false;
+      save(o.u,o.site,o.src);
+      let standalone=false;try{standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){}
+      if(standalone||typeof W.__lcInstall!=="function")return false;          /* inside the installed app: LC94 opens the review at once */
+      W.__lc102q=true;
+      const r=W.__lcInstall(kind=>{if(kind==="standalone"){(W.__lcNav||(x=>{location.href=x}))(o.url);return}queue(kind,o.u,o.url)});
+      const m=D.querySelector("#lc94-qs [data-qs-msg]");
+      if(m)m.textContent=r==="iab"||r==="installed"?"":"Installing the app… your game comes along.";
+      return true;
+    }catch(e){console.error("lc102",e);return false}
+  }
+  function init(){
+    try{
+      if(/\/app(\.html)?$/.test(location.pathname))return;
+      W.addEventListener("message",onMsg);
+      ["play","playing","pause","ended"].forEach(t=>D.addEventListener(t,tick,true));
+      D.addEventListener("visibilitychange",tick);W.addEventListener("scroll",tick,{passive:true});
+      scan();
+    }catch(e){console.error("lc102",e)}
+  }
+  return{VERSION:VERSION,init:init,submit:submit,playing:playing,
+    _t:{save:save,want:()=>want,shown:()=>shown,frames:frames,state:f=>frameState(f),blocked:blocked,onMsg:onMsg,queue:queue,K_HAND:K_HAND}};
+})();
+/*@@end lc102*/
+try{LC102.init()}catch(e){}
 </script>
 </body>
 </html>

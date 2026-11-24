@@ -80,10 +80,12 @@ with sync_playwright() as p:
     out('quick start [on the first screen, placeholder, button]', pg.evaluate("(f => [f.getBoundingClientRect().bottom <= innerHeight, f.querySelector('input').placeholder, f.querySelector('button[type=submit]').textContent])(document.getElementById('lc94-qs'))"))
     pg.click('#lc94-qs button[type=submit]'); pg.wait_for_timeout(200)
     out('quick start, empty [message, no navigation]', [pg.evaluate("document.querySelector('[data-qs-msg]').textContent"), pg.evaluate("window.__navs.length")])
-    pg.fill('#lc94-qs input', 'https://www.chess.com/member/kyenzotest'); pg.click('#lc94-qs button[type=submit]'); pg.wait_for_timeout(300)
-    out('quick start, profile link [goes to the deep link with the first source]', pg.evaluate("window.__navs.pop()"))
-    pg.click('[data-qs-site]'); pg.fill('#lc94-qs input', 'some_lichess'); pg.click('#lc94-qs button[type=submit]'); pg.wait_for_timeout(300)
-    out('quick start, Lichess [placeholder, link]', [pg.evaluate("document.querySelector('#lc94-qs input').placeholder"), pg.evaluate("window.__navs.pop()")])
+    # 9.67.0: LC102 takes the submit over: no jump; the install guide opens, then the "Open the app" card carries the deep link
+    QSLINK = "(() => { const o = document.getElementById('ins-ov'); if (o && !o.hidden) o.querySelector('.wl-x').click(); return new Promise(r => setTimeout(() => { const a = document.querySelector('#lc102-card [data-lc102-open]'); r([window.__navs.length, a ? a.getAttribute('href') : null]); }, 700)); })()"
+    pg.fill('#lc94-qs input', 'https://www.chess.com/member/kyenzotest'); pg.click('#lc94-qs button[type=submit]'); pg.wait_for_timeout(1700)
+    out('quick start, profile link [no jump, the card goes to the deep link with the first source]', pg.evaluate(QSLINK))
+    pg.click('[data-qs-site]'); pg.fill('#lc94-qs input', 'some_lichess'); pg.click('#lc94-qs button[type=submit]'); pg.wait_for_timeout(1700)
+    out('quick start, Lichess [placeholder, link]', [pg.evaluate("document.querySelector('#lc94-qs input').placeholder"), pg.evaluate(QSLINK)[1]])
     out('quick start [name_entered sent from the landing page]', steps().count('name_entered'))
     c.close()
     # B3. 9.59.0: a known source answers "How did you find this app?" (the first question is the account), and Upgrades starts with Try Pro free
