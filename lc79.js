@@ -542,7 +542,8 @@
       ".lc79-ai{max-width:1080px;margin:0 auto;padding:12px;display:grid;gap:12px}",
       ".lc79-sec{background:#0f1217;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}",
       ".lc79-sec h3{margin:0;font-size:15px;color:#fff}.lc79-sec h4{margin:0;font-size:13.5px;color:#e2e8f0}",
-      ".lc79-games{display:grid;gap:6px}.lc79-game{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 6px 6px 12px;font-size:13px}",
+      ".lc79-kb{font-style:normal;font-size:11px;font-weight:800;padding:1px 7px;margin-left:4px;border-radius:999px;color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);border:1px solid color-mix(in srgb,var(--c) 50%,transparent);white-space:nowrap}.lc79-kt{border-color:color-mix(in srgb,var(--c) 60%,transparent)!important}.lc79-kt[aria-pressed=false]{opacity:.42;border-style:dashed!important}.lc79-mo{flex-wrap:wrap}.lc79-mo-t{flex:1 1 260px;min-width:0;overflow-wrap:anywhere}"
+      +".lc79-games{display:grid;gap:6px}.lc79-game{display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px 6px 6px 12px;font-size:13px}",
       ".lc79-case{display:grid;grid-template-columns:minmax(220px,320px) 1fr;gap:14px}.lc79-bd{width:100%;height:auto;border-radius:8px;display:block}",
       ".lc79-facts{display:grid;gap:8px}.lc79-fact{border-left:3px solid #00E5FF;padding:2px 0 2px 10px}.lc79-fact b{color:#fff}.lc79-fact.al{border-color:#f97316}.lc79-fact.wp{border-color:#38bdf8}.lc79-fact.mo{border-color:#ef4444}",
       ".lc79-q{display:grid;gap:6px;margin:0;padding:0;list-style:none}.lc79-q li{background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px}.lc79-q li b{color:#00E5FF;margin-right:6px}",
@@ -1381,7 +1382,8 @@
     let s=plain?"":keep.filter(k=>h[k]).map(k=>'['+k+' "'+String(h[k]).replace(/"/g,"'")+'"]').join("\n")+"\n\n";
     const last=Math.min(g.moves.length-1,it.i+1),parts=[];
     for(let i=0;i<=last;i++){const m=g.moves[i];let t=(m.color==="w"?m.num+". ":(i===0?m.num+"... ":""))+m.san;
-      if(!plain&&i===it.i){t+=(it.cls==="blunder"?"??":"?");if(it.bestSan)t+=" ("+(m.color==="w"?m.num+". ":m.num+"... ")+it.bestSan+")";if(it.replySan)t+=" {Punished by "+it.replySan+"}"}
+      if(!plain&&i===it.i&&isGood(it)){t+=markOf(it)}
+      else if(!plain&&i===it.i){t+=(it.cls==="blunder"?"??":"?");if(it.bestSan)t+=" ("+(m.color==="w"?m.num+". ":m.num+"... ")+it.bestSan+")";if(it.replySan)t+=" {Punished by "+it.replySan+"}"}
       parts.push(t)}
     return s+parts.join(" ")+(plain?"":" *");
   }
@@ -1410,17 +1412,37 @@
     try{const u=App.profile&&(App.profile.chess_com_username||App.profile.cc);if(u)return{site:"chesscom",user:u}}catch(e){}
     return null;
   }
-  const AI={pgn:"",side:"auto",g:null,items:null,list:[],ci:0,cs:null,sim:null,cloud:null,cancel:false,busy:false,who:"",games:[]};
+  const AI={pgn:"",side:"auto",g:null,items:null,list:[],ci:0,cs:null,sim:null,cloud:null,cancel:false,busy:false,who:"",games:[],player:null,mySide:"",myName:""};
+  /* 9.70.0: whose game is it? The name whose games were just loaded ("My last games" or a typed name) comes first, then the owner's
+     own accounts (Elo.acct, the Sparring handles, the profile). Before, LC80 only knew the Sparring / profile names, so a game loaded
+     through Elo.acct often had no side, the scan ran for both sides and the top moment could be the opponent's. */
+  const normName=x=>String(x||"").trim().toLowerCase();
+  function myNames(){
+    const L=[];const add=x=>{const v=normName(x);if(v.length>1&&L.indexOf(v)<0)L.push(v)};
+    try{const c=Elo.acct("chesscom");if(c&&c.user)add(c.user)}catch(e){}
+    try{const l=Elo.acct("lichess");if(l&&l.user)add(l.user)}catch(e){}
+    try{const h=window.LC79T&&LC79T.handles?LC79T.handles():null;if(h){add(h.cc);add(h.li)}}catch(e){}
+    try{add(App.profile&&(App.profile.chess_com_username||App.profile.cc));add(App.profile&&App.profile.lichess_username);add(App.profile&&App.profile.name)}catch(e){}
+    return L;
+  }
+  function sideOf(headers){
+    const w=normName(headers&&headers.White),b=normName(headers&&headers.Black),pick=names=>{const iw=names.indexOf(w)>=0,ib=names.indexOf(b)>=0;return iw&&!ib?"w":ib&&!iw?"b":""};
+    const pl=AI.player&&normName(AI.player.user);
+    if(pl){const s1=pick([pl]);if(s1)return{side:s1,name:s1==="w"?headers.White:headers.Black,from:"loaded"}}
+    const s2=pick(myNames());if(s2)return{side:s2,name:s2==="w"?headers.White:headers.Black,from:"mine"};
+    return{side:"",name:"",from:""};
+  }
   function openScript(){
     AI.cancel=false;
     openLayer("lc79-ai","Game-to-Script AI",el=>{
       el.innerHTML='<header class="lc79-top"><button type="button" class="lc79-b" data-a="close" data-autofocus aria-label="Back to the Studio">← Studio</button><h2>Game-to-Script AI</h2><span class="lc79-grow"></span><button type="button" class="lc79-b sm" data-a="toprojects">Projects</button><button type="button" class="lc79-b sm" data-a="toedit">Edit Studio and captions</button></header><div class="lc79-body"><div class="lc79-ai"></div></div>';
-      el._close=()=>{AI.cancel=true};
+      el._close=()=>{AI.cancel=true;try{if(AI.busy&&HASM())LC103.stop()}catch(e){}};
       el.addEventListener("click",onAiClick);el.addEventListener("change",onAiChange);
     });
     paintAi();
   }
   function aiBox(){return Q("#lc79-ai .lc79-ai")}
+  const HASM=()=>typeof LC103!=="undefined"&&!!LC103.scan;
   function paintAi(){
     const box=aiBox();if(!box)return;const own=ownAcct();
     let h='<section class="lc79-sec" aria-labelledby="lc79-s1"><h3 id="lc79-s1">1. The game</h3>'
@@ -1429,33 +1451,56 @@
       +(own?'<button type="button" class="lc79-b sm" data-a="mine">My last games ('+esc(own.user)+')</button>':'')
       +'<select data-f="site" aria-label="Site"><option value="chesscom">Chess.com</option><option value="lichess">Lichess</option></select><input type="text" data-f="user" placeholder="Any player’s name" aria-label="Player name" style="width:170px"><button type="button" class="lc79-b sm" data-a="theirs">Their last games</button></div>'
       +'<div class="lc79-games" data-games>'+gamesHTML()+'</div>'
-      +'<div class="lc79-row"><label class="lc79-f"><span>Whose mistakes?</span><select data-f="side"><option value="auto"'+(AI.side==="auto"?" selected":"")+'>Auto (my side, else the biggest mistake)</option><option value="w"'+(AI.side==="w"?" selected":"")+'>White</option><option value="b"'+(AI.side==="b"?" selected":"")+'>Black</option></select></label><span class="lc79-grow"></span><button type="button" class="lc79-b" data-a="moments"'+(AI.busy?" disabled":"")+' title="Scan the whole game for every instructive moment and put them on the Showbar">Find every moment (Showbar)</button><button type="button" class="lc79-b pri" data-a="analyse"'+(AI.busy?" disabled":"")+'>Find the crucial mistake</button></div><p class="lc79-hint" data-st aria-live="polite"></p></section>';
+      +'<div class="lc79-row"><label class="lc79-f"><span>'+(HASM()?"Whose moves?":"Whose mistakes?")+'</span><select data-f="side"><option value="auto"'+(AI.side==="auto"?" selected":"")+'>'+(HASM()?"Auto: the player of this game":"Auto (my side, else the biggest mistake)")+'</option>'+(HASM()?'<option value="both"'+(AI.side==="both"?" selected":"")+'>Both sides</option>':'')+'<option value="w"'+(AI.side==="w"?" selected":"")+'>White</option><option value="b"'+(AI.side==="b"?" selected":"")+'>Black</option></select></label>'+(HASM()?'<label class="lc79-f"><span>Depth</span><select data-f="depth"><option value="deep"'+(LC103.ui().depth!=="fast"?" selected":"")+'>Thorough (about 1 s a move)</option><option value="fast"'+(LC103.ui().depth==="fast"?" selected":"")+'>Fast (about 0.4 s a move)</option></select></label>':'')+'<span class="lc79-grow"></span><button type="button" class="lc79-b" data-a="moments"'+(AI.busy?" disabled":"")+' title="Scan the whole game for every instructive moment and put them on the Showbar">Find every moment (Showbar)</button><button type="button" class="lc79-b pri" data-a="analyse"'+(AI.busy?" disabled":"")+'>'+(HASM()?"Analyse the whole game":"Find the crucial mistake")+'</button></div><p class="lc79-hint" data-st aria-live="polite"></p></section>';
     if(AI.cs)h+=caseHTML();
     box.innerHTML=h;
   }
   function gamesHTML(){
-    return(AI.games||[]).map((p,i)=>{const h=hdr(p);return'<div class="lc79-game"><span>'+esc((h.White||"?")+(h.WhiteElo?" ("+h.WhiteElo+")":"")+" vs "+(h.Black||"?")+(h.BlackElo?" ("+h.BlackElo+")":"")+" · "+(h.Result||"")+" · "+String(h.Date||h.UTCDate||"").replace(/\./g,"-"))+'</span><button type="button" class="lc79-b sm" data-a="usegame" data-i="'+i+'">Use this game</button></div>'}).join("");
+    return(AI.games||[]).map((p,i)=>{const h=hdr(p);return'<div class="lc79-game"><span>'+esc((h.White||"?")+(h.WhiteElo?" ("+h.WhiteElo+")":"")+" vs "+(h.Black||"?")+(h.BlackElo?" ("+h.BlackElo+")":"")+" · "+(h.Result||"")+" · "+String(h.Date||h.UTCDate||"").replace(/\./g,"-"))+(()=>{const w=sideOf(h);return w.side?' · <b>'+esc(w.name)+' as '+(w.side==="w"?"White":"Black")+'</b>':''})()+'</span><button type="button" class="lc79-b sm" data-a="usegame" data-i="'+i+'">Use this game</button></div>'}).join("");
   }
   function status(t,bad){const s=Q("#lc79-ai [data-st]");if(s){s.textContent=t||"";s.classList.toggle("lc79-err",!!bad)}}
   async function loadGames(site,user){
+    AI.player={site:site,user:String(user||"").trim()};
     status("Loading games…");
     try{AI.games=await recentGames(site,user,10);const g=Q("#lc79-ai [data-games]");if(g)g.innerHTML=gamesHTML();status(AI.games.length?"Pick a game.":"No games found for that name.",!AI.games.length)}
     catch(e){status("Could not load games ("+(e.message||"no connection")+"). Paste the PGN instead.",true)}
   }
+  /* 9.69.0: with LC103 in the build, the analysis is the full moment scan (every position, both sides, every kind of moment): the list
+     below is split into mistakes and good moves, and every moment can become a video project. Without LC103: the old crucial-mistake scan. */
+  const KIND={blunder:["??","Blunder","#ef4444"],mistake:["?","Mistake","#fb923c"],inaccuracy:["?!","Inaccuracy","#facc15"],minefield:["","Minefield","#f59e0b"],great:["!","Great","#38bdf8"],brilliant:["!!","Brilliant","#2dd4bf"],top:["","Top Engine","#a78bfa"]};
+  const KSYM={blunder:"??",mistake:"?",inaccuracy:"?!",minefield:"◆",great:"!",brilliant:"!!",top:"★"};
+  const BADK=/blunder|mistake|inaccuracy/;
+  const isGood=it=>!!(it&&it.kind&&!BADK.test((it.types||[]).join(" ")));
+  function itemOf(m){const t=m.types||[];
+    return{i:m.i,color:m.color,san:m.san,num:m.num,loss:m.loss||0,cls:t.indexOf("blunder")>=0?"blunder":t.indexOf("mistake")>=0?"mistake":t.indexOf("inaccuracy")>=0?"inaccuracy":"good",
+      best:m.best,bestSan:m.bestSan,reply:m.reply,replySan:m.replySan,k:m.letter,bestPv:m.bestPv||null,replyPv:m.replyPv||null,replyMate:m.replyMate,
+      kind:m.primary,types:t,reason:m.reason,score:m.score,form:m.form,bestLine:m.bestLine||"",gap:m.gap||0,fell:!!m.fell,traps:m.traps||null,safe:m.safe||null,rank:m.rank,legal:m.legal,bestMotif:m.bestMotif||null}}
   async function analyse(){
     const pgn=String(AI.pgn||"").trim();if(!pgn){status("Paste a PGN or pick a game first.",true);return}
     if(typeof LC80==="undefined"||!LC80.scan||typeof Engine==="undefined"){status("The analysis engine is not available in this build.",true);return}
-    AI.busy=true;AI.cancel=false;AI.cs=null;AI.sim=null;AI.cloud=null;paintAi();status("Starting Stockfish…");
+    AI.busy=true;AI.cancel=false;AI.cs=null;AI.sim=null;AI.cloud=null;AI.moments=null;paintAi();status("Starting Stockfish…");
     try{
       const g=LC80.scan.parseGame(pgn);if(!g)throw new Error("That PGN could not be read, or it has fewer than 8 moves.");
-      if(AI.side==="w"||AI.side==="b")g.color=AI.side;
-      if(!(await Engine.load()))throw new Error("Stockfish could not start on this device.");
-      const items=await LC80.scan.analyseGame(g,(k,t)=>status("Stockfish: move "+Math.ceil((k+1)/2)+" of "+Math.ceil(t/2)+"…"),()=>AI.cancel);
-      let list=items.filter(it=>it.cls==="blunder"||it.cls==="mistake").sort((a,b)=>b.loss-a.loss);
-      if(!list.length)list=items.filter(it=>it.cls==="inaccuracy").sort((a,b)=>b.loss-a.loss);
-      if(!list.length)throw new Error("No mistake worth a video in this game. Try another one.");
-      AI.g=g;AI.items=items;AI.list=list.slice(0,12);AI.ci=0;buildCase();
-    }catch(e){if(!AI.cancel)status(e.message||"The analysis failed.",true);AI.busy=false;return}
+      const who=sideOf(g.headers);
+      AI.mySide=AI.side==="w"||AI.side==="b"?AI.side:AI.side==="both"?"":who.side;AI.myName=AI.mySide?(AI.side==="w"||AI.side==="b"?(AI.side==="w"?g.headers.White:g.headers.Black)||"":who.name):"";
+      if(AI.mySide)g.color=AI.mySide;
+      if(typeof LC103!=="undefined"&&LC103.scan){
+        const side=AI.mySide||"both";
+        const cur=await LC103.scan(pgn,{depth:LC103.ui().depth||"deep",side:side,
+          onTick:(i,n,ms)=>{const left=i>2?Math.round(ms/i*(n-i)/1000):null;status("Stockfish: move "+Math.ceil((i+1)/2)+" of "+Math.ceil(n/2)+" · "+((LC103.cur()||{}).moments||[]).length+" moments so far"+(left!=null?" · about "+left+" s left":"")+"…")},
+          onVerify:(q,t)=>status("Checking every moment deeper ("+(q+1)+" of "+t+")…")});
+        if(!cur.moments.length)throw new Error("No moment worth a video for "+(AI.mySide?(AI.myName||(AI.mySide==="w"?"White":"Black"))+" ("+(AI.mySide==="w"?"White":"Black")+")":"either side")+" in this game. Try another one.");
+        AI.g=g;AI.items=[];AI.moments=cur.moments;AI.list=cur.moments.map(itemOf);
+        let top=0;AI.list.forEach((x,k)=>{if((x.score||0)>(AI.list[top].score||0))top=k});AI.ci=top;buildCase();
+      }else{
+        if(!(await Engine.load()))throw new Error("Stockfish could not start on this device.");
+        const items=await LC80.scan.analyseGame(g,(k,t)=>status("Stockfish: move "+Math.ceil((k+1)/2)+" of "+Math.ceil(t/2)+"…"),()=>AI.cancel);
+        let list=items.filter(it=>it.cls==="blunder"||it.cls==="mistake").sort((a,b)=>b.loss-a.loss);
+        if(!list.length)list=items.filter(it=>it.cls==="inaccuracy").sort((a,b)=>b.loss-a.loss);
+        if(!list.length)throw new Error("No mistake worth a video in this game. Try another one.");
+        AI.g=g;AI.items=items;AI.list=list.slice(0,12);AI.ci=0;buildCase();
+      }
+    }catch(e){if(!AI.cancel){const m=String(e&&e.message||e);status(/stopped/.test(m)?"Stopped.":m||"The analysis failed.",!/stopped/.test(m));if(!/stopped/.test(m))console.error("[Game-to-Script] analysis",e)}AI.busy=false;paintAi();return}
     AI.busy=false;paintAi();status("");findSimilar();cloudEval();
   }
   /* 9.56.0: the diagnosis of THIS mistake (LC83.diagnose: the board, Stockfish's better move and refutation, their last move and threat) */
@@ -1465,18 +1510,24 @@
         prevFen:it.i>0?g.fens[it.i-1]:null,oppUci:pm&&pm.from?pm.from+pm.to+(pm.promotion||""):null,threatUci:it.threat&&it.threat.best||""})}catch(e){return null}
   }
   function makeCase(g,it){
-    const fen=g.fens[it.i],color=it.color,dg=diagOf(g,it);
-    const letter=dg?dg.k:it.k&&LN[it.k]?it.k:(it.cls==="blunder"?"M":"S"),al=dg?{id:dg.id,label:dg.alarm.label,say:dg.alarm.say}:pickAlarm(fen,color,letter),motif=motifOf(g,it);
+    const fen=g.fens[it.i],color=it.color,good=isGood(it),dg=good?null:diagOf(g,it);
+    const letter=dg?dg.k:it.k&&LN[it.k]?it.k:(it.cls==="blunder"?"M":"S"),al=dg?{id:dg.id,label:dg.alarm.label,say:dg.alarm.say}:pickAlarm(fen,color,letter),motif=good?goodMotif(it):motifOf(g,it);
     let action="";if(dg)action=dg.action;else{try{action=LC64.actionOf(al&&al.id,letter)}catch(e){action=""}if(!action||action===WP[letter])action=MACT[motif.id]||MACT.plan}
     const h=g.headers||{},rating=+(color==="w"?h.WhiteElo:h.BlackElo)||0;
     const c={it:it,fen:fen,color:color,letter:letter,alarm:al,motif:motif,wp:dg?dg.wp.text:WP[letter],action:action,diag:dg,error:dg?dg.error:"",rating:rating,student:color==="w"?(h.White||"White"):(h.Black||"Black"),
       opp:color==="w"?(h.Black||"Black"):(h.White||"White"),start:Math.max(1,(it.num||Math.ceil((it.i+1)/2))-3)};
-    c.qs=socratic(g,it,c);c.pgn=trimmedPgn(g,it);c.change=boardChange(g,it);
+    c.good=good;
+    if(good){const K=KIND[it.kind]||KIND.great;c.action=it.kind==="minefield"?"Before you play the move that jumps out, check what it allows: here "+(it.traps&&it.traps.length?it.traps.map(t=>t.san).slice(0,3).join(", "):"the natural moves")+" lose.":"Before you settle for the obvious move, list your checks, captures and attacks: "+it.san+" was the one that works.";
+      c.wp=WP[letter]||WP.C;c.error="";}
+    c.qs=socratic(g,it,c);c.pgn=trimmedPgn(g,it);c.change=good?[]:boardChange(g,it);
+    if(good){c.qs=c.qs.filter(q=>q[0]!=="C").concat([["C","Why does "+it.san+" work?",(it.bestLine?"Stockfish's line: "+it.bestLine+". ":"")+(it.reason||"")]])}
     return c;
   }
+  function goodMotif(it){const K=KIND[it.kind]||KIND.great,bm=it.bestMotif;return{id:"good",label:K[1]+(bm&&bm.id!=="quiet"&&bm.label?" ("+bm.label+")":""),text:it.reason||"",theme:bm&&THEME[bm.id]||""}}
   function buildCase(){AI.cs=makeCase(AI.g,AI.list[AI.ci])}
-  const mvLabel=it=>(it.color==="w"?it.num+". ":it.num+"... ")+it.san+(it.cls==="blunder"?"??":it.cls==="mistake"?"?":"?!");
-  const ITEM_KEYS=["i","color","san","num","loss","cls","best","bestSan","reply","replySan","k"];
+  const markOf=it=>isGood(it)?(KIND[it.kind]||[""])[0]:it.cls==="blunder"?"??":it.cls==="mistake"?"?":"?!";
+  const mvLabel=it=>(it.color==="w"?it.num+". ":it.num+"... ")+it.san+markOf(it);
+  const ITEM_KEYS=["i","color","san","num","loss","cls","best","bestSan","reply","replySan","k","kind","types","reason","score","form","bestLine","gap","fell","traps","safe","rank","legal","bestMotif","bestPv","replyPv","replyMate"];
   const slimItem=it=>{const o={};ITEM_KEYS.forEach(k=>{if(it[k]!=null)o[k]=it[k]});return o};
   function pgnKey(p){let h=0;const t=String(p||"").replace(/\s+/g," ");for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return"g"+(h>>>0).toString(36)}
   function projectFor(key,i){return db().list.filter(p=>p.src&&p.src.key===key&&p.src.item&&p.src.item.i===i)[0]||null}
@@ -1491,18 +1542,23 @@
   }
   const simSlim=s=>({id:s.id,rating:s.rating,themes:(s.themes||[]).slice(0,6),fen:s.fen,side:s.side,line:s.line||"",solSan:s.solSan||[]});
   function caseHTML(){
-    const c=AI.cs,it=c.it,arr=[{from:it.i!=null&&AI.g.moves[it.i].from,to:AI.g.moves[it.i].to,color:"#ef4444"}];
-    if(it.best)arr.push({from:it.best.slice(0,2),to:it.best.slice(2,4),color:"#38bdf8"});
+    const c=AI.cs,it=c.it,good=!!c.good,arr=[{from:it.i!=null&&AI.g.moves[it.i].from,to:AI.g.moves[it.i].to,color:good?"#22c55e":"#ef4444"}];
+    if(it.best&&!good)arr.push({from:it.best.slice(0,2),to:it.best.slice(2,4),color:"#38bdf8"});
     const loss=Math.round(it.loss),mv=(c.color==="w"?it.num+". ":it.num+"... ");
     const key=pgnKey(AI.pgn);
-    let h='<section class="lc79-sec" aria-labelledby="lc79-sb"><h3 id="lc79-sb">2. Every crucial mistake in this game ('+AI.list.length+')</h3><p class="lc79-hint" style="margin:0">One game, several reels: make a video project for each mistake you want to film. Each project keeps the game for the recording flow and the master prompt.</p><div class="lc79-games">'
+    let h=AI.moments?momentsHTML(key):'';
+    if(!AI.moments)h+='<section class="lc79-sec" aria-labelledby="lc79-sb"><h3 id="lc79-sb">2. Every crucial mistake in this game ('+AI.list.length+')</h3><p class="lc79-hint" style="margin:0">One game, several reels: make a video project for each mistake you want to film. Each project keeps the game for the recording flow and the master prompt.</p><div class="lc79-games">'
       +AI.list.map((x,i)=>{const pr=projectFor(key,x.i);let mo="";try{mo=motifOf(AI.g,x).label}catch(e){}
         return'<div class="lc79-game'+(i===AI.ci?'" style="border-color:#00E5FF':'')+'"><span><b>'+esc(mvLabel(x))+'</b> · '+(x.color==="w"?"White":"Black")+' · '+Math.round(x.loss)+'% · '+esc(mo)+'</span><span class="lc79-row">'
         +'<button type="button" class="lc79-b sm" data-a="case" data-i="'+i+'"'+(i===AI.ci?' aria-pressed="true"':'')+'>'+(i===AI.ci?"Shown":"Show")+'</button>'
         +(pr?'<button type="button" class="lc79-b sm" data-a="openproj" data-p="'+esc(pr.id)+'">Project made: open</button>':'<button type="button" class="lc79-b sm pri" data-a="mkproj" data-i="'+i+'">Make a video project</button>')+'</span></div>'}).join("")
       +'</div><div class="lc79-row"><button type="button" class="lc79-b gold" data-a="mkall">Make a project for every mistake ('+AI.list.filter(x=>!projectFor(key,x.i)).length+' new)</button><button type="button" class="lc79-b sm" data-a="toprojects">Open Projects</button></div></section>';
-    h+='<section class="lc79-sec" aria-labelledby="lc79-s2"><h3 id="lc79-s2">3. '+esc(mvLabel(it))+' in detail</h3><div class="lc79-case"><div>'+boardSVG(c.fen,c.color,arr)+'<p class="lc79-hint" style="margin:6px 0 0">Red: the move played. Blue: the better move. '+esc(c.student)+' ('+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+').</p></div><div class="lc79-facts">'
-      +'<div class="lc79-fact mo"><b>'+esc(mv+it.san)+(it.cls==="blunder"?"??":"?")+'</b>'+(it.bestSan?' Better: <b>'+esc(it.bestSan)+'</b>.':'')+' It cost about '+loss+'% win chance.</div>'
+    h+='<section class="lc79-sec" aria-labelledby="lc79-s2"><h3 id="lc79-s2">3. '+esc(mvLabel(it))+' in detail</h3><div class="lc79-case"><div>'+boardSVG(c.fen,c.color,arr)+'<p class="lc79-hint" style="margin:6px 0 0">'+(good?'Green: the move played, Stockfish’s choice. ':'Red: the move played. Blue: the better move. ')+esc(c.student)+' ('+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+').</p></div><div class="lc79-facts">'
+      +(good?'<div class="lc79-fact" style="border-color:'+esc((KIND[it.kind]||KIND.great)[2])+'"><b>'+esc(mv+it.san+markOf(it))+'</b> '+esc((it.types||[]).map(t=>(KIND[t]||[0,t])[1]).join(" + "))+'. Stockfish’s first choice'+(it.gap?'; the next best move drops '+Math.round(it.gap)+' points':'')+'.</div>'
+        :'<div class="lc79-fact mo"><b>'+esc(mv+it.san+markOf(it))+'</b>'+(it.bestSan?' Better: <b>'+esc(it.bestSan)+'</b>.':'')+' It cost about '+loss+'% win chance.</div>')
+      +(it.reason?'<div class="lc79-fact"><b>Why it matters'+(it.score!=null?' (clip score '+it.score+(it.form?', '+(it.form==="mid"?"Mid 1–3 min":"Short under 60 s"):'')+')':'')+':</b> '+esc(it.reason)+'</div>':'')
+      +(it.traps&&it.traps.length?'<div class="lc79-fact"><b>Natural moves that lose:</b> '+esc(it.traps.map(t=>t.san+" (−"+t.loss+")").join(", "))+(it.safe&&it.safe.length?'. <b>Only these hold:</b> '+esc(it.safe.join(" / ")):'')+'.</div>':'')
+      +(good&&it.bestLine?'<div class="lc79-fact"><b>Stockfish’s line:</b> '+esc(it.bestLine)+'</div>':'')
       +(c.error?'<div class="lc79-fact mo"><b>What went wrong:</b> '+esc(c.error)+'</div>':c.change&&c.change.length?'<div class="lc79-fact mo"><b>What it changed:</b> '+esc(c.change.join(" "))+'</div>':'')+'<div class="lc79-fact mo"><b>Motif: '+esc(c.motif.label)+'.</b> '+esc(c.motif.text)+'</div>'
       +(c.diag&&c.diag.why?'<div class="lc79-fact"><b>Their last move:</b> '+esc(c.diag.why)+'</div>':'')
       +(c.diag&&c.diag.blind?'<div class="lc79-fact"><b>Why a human misses it ('+esc(c.diag.blind.label)+'):</b> '+esc(c.diag.blind.text)+'</div>':'')
@@ -1515,12 +1571,36 @@
       +'<div class="lc79-fact" data-cloud>'+cloudHTML()+'</div></div></div>'
       +'<h4>The Socratic trim: the questions that would have saved the game</h4><ol class="lc79-q">'+c.qs.map(q=>'<li><b>'+q[0]+'</b>'+esc(q[1])+' <span class="lc79-hint">'+esc(q[2])+'</span></li>').join("")+'</ol>'
       +'<h4>Trimmed game (the video starts at move '+c.start+')</h4><div class="lc79-pre" tabindex="0">'+esc(c.pgn)+'</div>'
-      +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="toboard">Load into the Studio board</button><button type="button" class="lc79-b sm" data-a="copypgn">Copy PGN</button></div></section>';
+      +'<div class="lc79-row">'+(projectFor(key,it.i)?'<button type="button" class="lc79-b sm" data-a="openproj" data-p="'+esc(projectFor(key,it.i).id)+'">Project made: open</button>':'<button type="button" class="lc79-b sm pri" data-a="mkproj" data-i="'+AI.ci+'">Make a video project</button>')+'<button type="button" class="lc79-b sm" data-a="toboard">Load into the Studio board</button><button type="button" class="lc79-b sm gold" data-a="toshoot">Load and go to Shoot</button><button type="button" class="lc79-b sm" data-a="copypgn">Copy PGN</button></div></section>';
     h+='<section class="lc79-sec" aria-labelledby="lc79-s3"><h3 id="lc79-s3">4. A similar position for the re-hook</h3><div data-sim>'+simHTML()+'</div><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="sim">Find another one</button></div></section>';
     h+='<section class="lc79-sec" aria-labelledby="lc79-s4"><h3 id="lc79-s4">5. Prompt for Claude</h3><p class="lc79-hint" style="margin:0">The game data goes out: game context, the MSPC diagnosis and the Lichess position (Bullet Points adds the pawn check and the Release Giveaway). The script style comes from your own Claude instructions.</p>'
       +'<div class="lc79-row"><button type="button" class="lc79-b pri" data-a="copyprompt">Get Prompt: Full Script</button><button type="button" class="lc79-b gold" data-a="copybullets">Get Prompt: Bullet Points</button><button type="button" class="lc79-b sm" data-a="showprompt">Show the prompt</button></div><p class="lc79-hint" style="margin:0"><b>Full Script</b>: Claude writes every word. <b>Bullet Points</b>: a freestyle skeleton (the exact hook, 2 to 3 core points with the pawn check, the aha moment, the bridge to the app, the Release Giveaway CTA) so you talk freely on camera.</p><div class="lc79-pre" data-prompt hidden tabindex="0"></div>'
       +'<label class="lc79-f"><span>Paste Claude’s script here</span><textarea data-f="answer" placeholder="Paste the script Claude wrote, then press Use as my script."></textarea></label><div class="lc79-row"><button type="button" class="lc79-b gold" data-a="usescript">Use as my script</button><span class="lc79-hint">It replaces the text in the Studio’s script panel and prompter.</span></div></section>';
     return h;
+  }
+  /* 9.69.0: every moment of the game, split into mistakes and good moves, with the same kind toggles as the Showbar (LC103's filters) */
+  function momentsHTML(key){
+    const ui=(typeof LC103!=="undefined"&&LC103.ui)?LC103.ui():{filters:{},lorder:"score"},F=ui.filters||{},ord=AI.korder||ui.lorder||"score";
+    const cnt={};Object.keys(KIND).forEach(k=>{cnt[k]=0});AI.list.forEach(x=>(x.types||[]).forEach(t=>{cnt[t]=(cnt[t]||0)+1}));
+    const on=x=>(x.types||[]).some(t=>F[t]!==false),rows=AI.list.map((x,i)=>({x:x,i:i})).filter(r=>on(r.x));
+    rows.sort(ord==="game"?(a,b)=>a.x.i-b.x.i:(a,b)=>(b.x.score||0)-(a.x.score||0)||a.x.i-b.x.i);
+    const tops=AI.list.slice().sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,5).map(x=>x.i);
+    const row=r=>{const x=r.x,i=r.i,pr=projectFor(key,x.i),K=KIND[x.kind]||KIND.mistake;
+      return'<div class="lc79-game lc79-mo'+(i===AI.ci?' on':'')+'" style="border-left:4px solid '+K[2]+(i===AI.ci?';border-color:#00E5FF;border-left-color:'+K[2]:'')+'"><span class="lc79-mo-t"><b>'+esc(mvLabel(x))+'</b> · '+(x.color==="w"?"White":"Black")+' '
+        +(x.types||[]).map(t=>'<i class="lc79-kb" style="--c:'+(KIND[t]||K)[2]+'">'+esc((KSYM[t]||"")+" "+(KIND[t]||[0,t])[1])+'</i>').join("")+' <span class="lc79-hint">'+(x.form==="mid"?"Mid 1–3 min":"Short &lt;60 s")+'</span> <b style="color:#00E5FF">'+(tops.indexOf(x.i)>=0?"★ ":"")+(x.score!=null?x.score:"")+'</b>'
+        +'<br><span class="lc79-hint">'+esc(x.reason||"")+'</span></span><span class="lc79-row">'
+        +'<button type="button" class="lc79-b sm" data-a="case" data-i="'+i+'"'+(i===AI.ci?' aria-pressed="true"':'')+'>'+(i===AI.ci?"Shown":"Show")+'</button>'
+        +(pr?'<button type="button" class="lc79-b sm" data-a="openproj" data-p="'+esc(pr.id)+'">Project made: open</button>':'<button type="button" class="lc79-b sm pri" data-a="mkproj" data-i="'+i+'">Make a video project</button>')+'</span></div>'};
+    const bad=rows.filter(r=>!isGood(r.x)),gd=rows.filter(r=>isGood(r.x));
+    const sec=(t,L,empty)=>'<h4 style="margin:8px 0 4px">'+t+' ('+L.length+')</h4><div class="lc79-games">'+(L.length?L.map(row).join(""):'<p class="lc79-hint" style="margin:0">'+empty+'</p>')+'</div>';
+    const newN=rows.filter(r=>!projectFor(key,r.x.i)).length;
+    const whoLine=AI.mySide?'<p class="lc79-hint" style="margin:0" data-lc79-side="'+AI.mySide+'"><b>Moves of '+esc(AI.myName||"the player")+' ('+(AI.mySide==="w"?"White":"Black")+')</b>. Want the other side too? Pick “Both sides” above and analyse again.</p>'
+      :'<p class="lc79-hint" style="margin:0" data-lc79-side="both">'+(AI.side==="both"?'<b>Both sides.</b>':'<b>Both sides:</b> no name in this game matches the games you loaded or your linked account. Pick White or Black above and analyse again for one side.')+'</p>';
+    return'<section class="lc79-sec" aria-labelledby="lc79-sb"><h3 id="lc79-sb">2. Every moment in this game ('+AI.list.length+')</h3>'+whoLine+'<p class="lc79-hint" style="margin:0">Pick a moment, make a video project, load it into the Studio board and go to Shoot. Mistakes and good moves are split; turn kinds on or off. They are on the Showbar in the Studio too.</p>'
+      +'<div class="lc79-row" role="group" aria-label="Kinds of moments">'+Object.keys(KIND).map(k=>'<button type="button" class="lc79-b sm lc79-kt" data-a="kflt" data-t="'+k+'" style="--c:'+KIND[k][2]+'" aria-pressed="'+(F[k]!==false)+'">'+esc(KSYM[k]+" "+KIND[k][1])+' '+(cnt[k]||0)+'</button>').join("")+'</div>'
+      +'<div class="lc79-row"><label class="lc79-f"><span>Order</span><select data-f="korder"><option value="score"'+(ord==="score"?" selected":"")+'>Best clips first</option><option value="game"'+(ord==="game"?" selected":"")+'>Game order</option></select></label></div>'
+      +sec("Mistakes",bad,"No mistake of the kinds you turned on.")+sec("Good moves",gd,"No good move of the kinds you turned on.")
+      +'<div class="lc79-row"><button type="button" class="lc79-b gold" data-a="mkall">Make a project for every moment shown ('+newN+' new)</button><button type="button" class="lc79-b sm" data-a="toprojects">Open Projects</button></div></section>';
   }
   function cloudHTML(){const c=AI.cloud;if(!c)return'<span class="lc79-hint">Lichess cloud evaluation: checking…</span>';if(c.none)return'<span class="lc79-hint">Lichess cloud evaluation: this position is not in the Lichess cloud.</span>';return'<b>Lichess cloud agrees?</b> Best '+esc(c.san||c.uci)+', '+esc(c.ev)+' (depth '+c.depth+').'}
   function simHTML(){
@@ -1571,7 +1651,7 @@
   }
   function buildPrompt(mode){
     const c=AI.cs,g=AI.g,it=c.it,h=g.headers||{},s=AI.sim&&!AI.sim.err?AI.sim:null,bul=mode==="bullets";
-    const mv=(c.color==="w"?it.num+". ":it.num+"... ")+it.san+(it.cls==="blunder"?"??":"?"),bm=it.bestSan?(c.color==="w"?it.num+". ":it.num+"... ")+it.bestSan:"";
+    const mv=(c.color==="w"?it.num+". ":it.num+"... ")+it.san+markOf(it),bm=it.bestSan?(c.color==="w"?it.num+". ":it.num+"... ")+it.bestSan:"";
     const elo=(n,e)=>n+(e?" ("+e+")":"");
     const q=k=>(c.qs.filter(x=>x[0]===k)[0]||[]);
     let feats=[];try{feats=(LC61.detect(c.fen,c.color)||[]).map(a=>a.label)}catch(e){}
@@ -1580,9 +1660,9 @@
 "- White: "+elo(h.White||"White",h.WhiteElo),
 "- Black: "+elo(h.Black||"Black",h.BlackElo),
 (h.Result||h.Site||h.Date?"- Game: "+[h.Result?"result "+h.Result:"",h.Site||"",h.Date||h.UTCDate||""].filter(Boolean).join(", "):null),
-"- Player with the mistake: "+c.student+" ("+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+")",
+(c.good?"- Player: ":"- Player with the mistake: ")+c.student+" ("+(c.color==="w"?"White":"Black")+(c.rating?", "+c.rating:"")+")",
 "- Moment: move "+it.num+", "+(c.color==="w"?"White":"Black")+" to move",
-"- Crucial mistake: "+mv+(bm?" (better: "+bm+")":"")+", about "+Math.round(it.loss)+"% win chance lost",
+(c.good?"- Instructive good move ("+(it.types||[]).map(t=>(KIND[t]||[0,t])[1]).join(" + ")+"): "+mv+", Stockfish's first choice"+(it.gap?"; the next best move drops about "+Math.round(it.gap)+"% win chance":"")+(it.reason?". Why it matters: "+it.reason:""):"- Crucial mistake: "+mv+(bm?" (better: "+bm+")":"")+", about "+Math.round(it.loss)+"% win chance lost"),
 "- What it changed on the board: "+(c.change&&c.change.length?c.change.join(" "):"no single piece lost its defender; the move changed the plan, not the material."),
 (it.replySan?"- Their best reply: "+it.replySan:null),
 "- Motif: "+c.motif.label+". "+c.motif.text,
@@ -1646,8 +1726,16 @@ BCLOSE);
     if(a==="showprompt"){const p=Q("#lc79-ai [data-prompt]");p.hidden=!p.hidden;if(!p.hidden)p.textContent=buildPrompt(AI.pmode);b.textContent=p.hidden?"Show the prompt":"Hide the prompt";return}
     if(a==="copyprompt"||a==="copybullets"){AI.pmode=a==="copybullets"?"bullets":"full";const t=buildPrompt(AI.pmode),ok=await copyText(t);const p=Q("#lc79-ai [data-prompt]");if(p&&!p.hidden)p.textContent=t;
       return say(ok?(AI.pmode==="bullets"?"Bullet Points prompt copied. Paste it into Claude.":"Full Script prompt copied. Paste it into Claude."):"Could not copy. Press Show the prompt and copy it by hand.",ok?"ok":"err",3500)}
-    if(a==="mkproj"){mkProject(+b.getAttribute("data-i"));return paintAi()}
-    if(a==="mkall"){let n=0;AI.list.forEach((x,i)=>{if(!projectFor(pgnKey(AI.pgn),x.i)){mkProject(i,true);n++}});say(n?n+" video project"+(n===1?"":"s")+" made. They are in Projects and in the record bar.":"Every mistake already has a project.","ok",4000);return paintAi()}
+    if(a==="mkproj"){const p=mkProject(+b.getAttribute("data-i"));if(p){wr(RK,p.id);try{paintDock()}catch(x){}}return paintAi()}
+    if(a==="kflt"){const t=b.getAttribute("data-t"),f=Object.assign({},(LC103.ui()||{}).filters||{});f[t]=f[t]===false;LC103.setUI({filters:f});return paintAi()}
+    if(a==="toshoot"){
+      const B=api()&&api().board;if(!B){say("Open the Creator Studio first.","err");return}
+      const r=B.loadPGN(trimmedPgn(AI.g,AI.cs.it,true));if(!r||!r.ok){say("The Studio board could not load this game.","err");return}
+      try{B.goto(AI.cs.it.i);if(B.orient!==AI.cs.color)B.flip()}catch(x){}
+      const pr=projectFor(pgnKey(AI.pgn),AI.cs.it.i);if(pr){wr(RK,pr.id);try{paintDock()}catch(x){}}
+      closeLayer("lc79-ai");try{const sr=studioRoot();LC66.setTab(sr,"shoot");paintMenu(sr)}catch(x){}
+      say("On the Studio board: the position before "+mvLabel(AI.cs.it)+"."+(pr?" Takes go to “"+pr.name+"”; keys 1–4 run the recording flow.":" Make a video project first if you want the recording flow (keys 1–4)."),"ok",5000);return}
+    if(a==="mkall"){let n=0;const F=HASM()&&AI.moments?((LC103.ui()||{}).filters||{}):null;AI.list.forEach((x,i)=>{if(F&&!(x.types||[]).some(t=>F[t]!==false))return;if(!projectFor(pgnKey(AI.pgn),x.i)){mkProject(i,true);n++}});say(n?n+" video project"+(n===1?"":"s")+" made. They are in Projects and in the record bar.":"Every mistake already has a project.","ok",4000);return paintAi()}
     if(a==="openproj"){db().cur=b.getAttribute("data-p");persist();closeLayer("lc79-ai");return openProjects()}
     if(a==="toprojects"){closeLayer("lc79-ai");return openProjects()}
     if(a==="toedit"){return gotoCaptions(null)}
@@ -1658,6 +1746,8 @@ BCLOSE);
     const el=e.target,f=el.getAttribute("data-f");
     if(f==="pgn")AI.pgn=el.value;
     else if(f==="side")AI.side=el.value;
+    else if(f==="depth"){if(HASM())LC103.setUI({depth:el.value})}
+    else if(f==="korder"){AI.korder=el.value;if(HASM())LC103.setUI({lorder:el.value});paintAi()}
     else if(f==="who"){AI.who=String(el.value||"").slice(0,140);AI.whoAuto=false}
     else if(f==="file"&&el.files&&el.files[0]){const fl=el.files[0];if(fl.size>5e6){status("That file is too large (max 5 MB).",true);return}
       fl.text().then(t=>{let pg=[];try{pg=LC80.scan.splitGames(t).pgns}catch(x){pg=[t]}if(pg.length>1){AI.games=pg.slice(0,40);const g=Q("#lc79-ai [data-games]");if(g)g.innerHTML=gamesHTML();status(pg.length+" games in the file. Pick one.")}else{AI.pgn=pg[0]||t;const ta=Q('#lc79-ai [data-f="pgn"]');if(ta)ta.value=AI.pgn;status("Game loaded. Press Find the crucial mistake.")}})}
@@ -1755,6 +1845,8 @@ BCLOSE);
   const STEPS=[["1","Game board"],["2","Feedback card"],["3","Lichess position"],["4","Landing page"]];
   function cardData(p){
     try{const g=LC80.scan.parseGame(p.src.pgn),it=p.src.item,c=makeCase(g,it);
+      if(c.good){const K=KIND[it.kind]||KIND.great;return{mv:mvLabel(it),good:true,tag:K[1],tagColor:K[2],better:"",loss:0,motif:c.motif.label,student:c.student,
+        rows:[["Why it works",K[2],it.reason||c.motif.text||""],["Stockfish’s line","#38bdf8",it.bestLine||it.bestSan||""],["Action Step","#00E5FF",c.action]].filter(r=>r[2])}}
       return{mv:mvLabel(it),better:it.bestSan||"",loss:Math.round(it.loss||0),alarm:c.alarm?c.alarm.label:"No standard alarm",motif:c.motif.label,wp:c.wp,action:c.action,student:c.student}}catch(e){return null}
   }
   async function simFor(p){
@@ -1790,21 +1882,23 @@ BCLOSE);
   function renderCard(W,H,d){
     const port=H>=W,cw=port?W*.9:W*.44,fs=Math.round(cw*.05),pad=fs*1.1,cv=document.createElement("canvas"),ctx0=cv.getContext("2d");
     ctx0.font="600 "+Math.round(fs*.82)+"px Sora,system-ui,sans-serif";
-    const rows0=[["Alarm Signal","#f97316",d.alarm],["Working Point","#38bdf8",d.wp],["Action Step","#00E5FF",d.action]].map(r=>({lines:wrapText(ctx0,r[2],cw-pad*2)}));
+    const RW=d.rows||[["Alarm Signal","#f97316",d.alarm],["Working Point","#38bdf8",d.wp],["Action Step","#00E5FF",d.action]];
+    const rows0=RW.map(r=>({lines:wrapText(ctx0,r[2],cw-pad*2)}));
     const ch0=pad*2+fs*1.1+fs*1.6+rows0.reduce((a,r)=>a+fs*1.05+r.lines.length*fs*1.15+fs*.5,0),m=Math.ceil(fs*1.2);
     cv.width=Math.ceil(cw+m*2);cv.height=Math.ceil(ch0+m*2);
     const bx=port?(W-cw)/2:W-cw-W*.04,by=port?H-ch0-H*.06:(H-ch0)/2;
     const ctx=cv.getContext("2d");ctx.translate(m-bx,m-by);
     const p=1;
     ctx.save();ctx.font="600 "+Math.round(fs*.82)+"px Sora,system-ui,sans-serif";
-    const rows=[["Alarm Signal","#f97316",d.alarm],["Working Point","#38bdf8",d.wp],["Action Step","#00E5FF",d.action]].map(r=>({l:r[0],c:r[1],lines:wrapText(ctx,r[2],cw-pad*2)}));
+    const rows=RW.map(r=>({l:r[0],c:r[1],lines:wrapText(ctx,r[2],cw-pad*2)}));
     const ch=pad*2+fs*1.1+fs*1.6+rows.reduce((a,r)=>a+fs*1.05+r.lines.length*fs*1.15+fs*.5,0);
     const x=bx,y=by;
     ctx.shadowColor="rgba(0,0,0,.55)";ctx.shadowBlur=fs;rr(ctx,x,y,cw,ch,fs*.7);ctx.fillStyle="rgba(15,23,42,.96)";ctx.fill();ctx.shadowBlur=0;ctx.shadowColor="transparent";
     ctx.lineWidth=Math.max(2,fs*.08);ctx.strokeStyle="rgba(56,189,248,.6)";ctx.stroke();
     let yy=y+pad;ctx.textBaseline="top";ctx.textAlign="left";
     ctx.fillStyle="#38bdf8";ctx.font="700 "+Math.round(fs*.72)+"px Sora,system-ui,sans-serif";ctx.fillText("Lanckriet Chess · Game review",x+pad,yy);yy+=fs*1.1;
-    ctx.font="800 "+Math.round(fs*1.15)+"px Sora,system-ui,sans-serif";ctx.fillStyle="#f87171";ctx.fillText(d.mv,x+pad,yy);const mw=ctx.measureText(d.mv+"  ").width;
+    ctx.font="800 "+Math.round(fs*1.15)+"px Sora,system-ui,sans-serif";ctx.fillStyle=d.good?"#4ade80":"#f87171";ctx.fillText(d.mv,x+pad,yy);const mw=ctx.measureText(d.mv+"  ").width;
+    if(d.good&&d.tag){ctx.fillStyle=d.tagColor||"#7dd3fc";ctx.font="700 "+Math.round(fs*.9)+"px Sora,system-ui,sans-serif";ctx.fillText(d.tag,x+pad+mw,yy+fs*.2,cw-pad*2-mw)}
     if(d.better){ctx.fillStyle="#7dd3fc";ctx.font="700 "+Math.round(fs*.9)+"px Sora,system-ui,sans-serif";ctx.fillText("Better: "+d.better+"  ·  −"+d.loss+"%",x+pad+mw,yy+fs*.2,cw-pad*2-mw)}yy+=fs*1.6;
     rows.forEach(r=>{ctx.fillStyle=r.c;ctx.font="700 "+Math.round(fs*.75)+"px Sora,system-ui,sans-serif";ctx.fillText(r.l,x+pad,yy);yy+=fs*1.05;ctx.fillStyle="#e2e8f0";ctx.font="600 "+Math.round(fs*.82)+"px Sora,system-ui,sans-serif";r.lines.forEach(l=>{ctx.fillText(l,x+pad,yy);yy+=fs*1.15});yy+=fs*.5});
     ctx.restore();
