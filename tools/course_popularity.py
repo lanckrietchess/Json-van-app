@@ -98,7 +98,9 @@ def fetch(a):
             r = ask(LICHESS, {"variant": "standard", "speeds": "blitz,rapid,classical", "ratings": RATINGS, "fen": fen,
                               "moves": 30, "topGames": 0, "recentGames": 0}, token)
             row["l"] = slim(r)
-            if row["l"] is None: errs["l"] += 1
+            if row["l"] is None:
+                errs["l"] += 1
+                if isinstance(r, dict) and "_error" in r: errs["last_l"] = r["_error"]
             time.sleep(0.6)
         if "m" not in row:
             row["m"] = slim(ask(MASTERS, {"fen": fen, "moves": 30, "topGames": 0}, None))
@@ -109,6 +111,7 @@ def fetch(a):
             json.dump(cache, open(a.out, "w"), separators=(",", ":"))
             print(f"  {i + 1} / {len(todo)}  errors {errs}", flush=True)
     cache["built"] = int(time.time()); cache["ratings"] = RATINGS
+    cache["status"] = {"token": bool(token), "errors": errs}   # so the result can be read without the Actions log
     json.dump(cache, open(a.out, "w"), separators=(",", ":"))
     print("done", errs, flush=True)
 
