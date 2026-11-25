@@ -7,6 +7,7 @@
 #       --games: Kyenzo's games-*.json (branch master-data); used for a position where the players' database has no answer
 #       (no LICHESS_TOKEN yet), so the order is then "what his club opponents played", masters breaking ties
 #
+# (re-run 25 Nov 2026 once the LICHESS_TOKEN secret was added)
 # fetch: every position of the four opening courses where the tree branches (or a chapter starts), up to move 15, is asked
 #   twice: the Lichess players' database, rated 1000-1800 (blitz, rapid, classical: the "under 2000" players the app is for), and
 #   the masters database (2200+ over the board). Results are cached in the --out file, so a re-run only asks what is new; the
