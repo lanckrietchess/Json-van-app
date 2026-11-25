@@ -114,7 +114,7 @@ def fetch(a):
             json.dump(cache, open(a.out, "w"), separators=(",", ":"))
             print(f"  {i + 1} / {len(todo)}  errors {errs}", flush=True)
     cache["built"] = int(time.time()); cache["ratings"] = RATINGS
-    cache["status"] = {"token": bool(token), "errors": errs}   # so the result can be read without the Actions log
+    cache["status"] = {"token": bool(token), "from": os.environ.get("LICHESS_TOKEN_FROM", ""), "errors": errs}   # so the result can be read without the Actions log
     json.dump(cache, open(a.out, "w"), separators=(",", ":"))
     print("done", errs, flush=True)
 

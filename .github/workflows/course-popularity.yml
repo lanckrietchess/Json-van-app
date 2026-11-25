@@ -29,7 +29,8 @@ jobs:
       - run: pip install -q python-chess
       - name: Ask the explorer
         env:
-          LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
+          LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN || vars.LICHESS_TOKEN }}
+          LICHESS_TOKEN_FROM: ${{ secrets.LICHESS_TOKEN != '' && 'secret' || (vars.LICHESS_TOKEN != '' && 'variable' || 'none') }}
         run: timeout 320m python3 tools/course_popularity.py fetch || true
       - name: Commit the file to this branch
         run: |
