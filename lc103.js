@@ -256,12 +256,17 @@ const LC103=(()=>{
     CUR={key:key,label:(h.White||"White")+(h.WhiteElo?" ("+h.WhiteElo+")":"")+" vs "+(h.Black||"Black")+(h.BlackElo?" ("+h.BlackElo+")":"")+(h.Result?" · "+h.Result:""),pgn:String(pgn).slice(0,6e4),plain:plainPgn(g),g:slimG(g),fens:g.fens,moments:[],series:[],at:Date.now(),opts:{depth:o.depth||UI.depth,side:side},done:false,ply:0,n:n};
     const t0=Date.now();
     try{
+      /* 9.73.0: o.only = move indexes to judge (Game-to-Script's "instructive moment"): only those positions, the one
+         before and the one after are analysed, so one moment takes a few seconds instead of the whole game */
+      const ONLY=Array.isArray(o.only)&&o.only.length?o.only.reduce((m,k)=>{m[k]=1;return m},{}):null;
+      const NEED=ONLY?Object.keys(ONLY).reduce((m,k)=>{k=+k;m[k-1]=m[k]=m[k+1]=1;return m},{}):null;
       for(let i=0;i<=n;i++){
         if(run.stop)throw new Error("stopped");
+        if(NEED&&!NEED[i]){S.R[i]=[];S.E[i]=null;CUR.series[i]=0;continue}
         S.R[i]=i<n?instinct(g.fens[i],i>0?g.moves[i-1]&&{to:g.moves[i-1].to,captured:new Chess(g.fens[i-1]).get(g.moves[i-1].to)?"x":""}:null):[];
         S.E[i]=await evalAt(g.fens[i],P,S.R[i].slice(0,P.nat).map(x=>x.uci));
         CUR.series[i]=S.E[i]?clamp(Math.round(S.E[i].cp),-900,900):0;CUR.ply=i;
-        if(i>0){const j=judge(S,i-1);S.J[i-1]=j;
+        if(i>0&&(!ONLY||ONLY[i-1])){const j=judge(S,i-1);S.J[i-1]=j;
           if(j&&j.types.length&&(side==="both"||side===j.color)){explain(S,j);const slim=slimMoment(j);S.moments.push(slim);CUR.moments.push(slim);if(o.onMoment)try{o.onMoment(slim)}catch(e){}}}
         if(o.onTick)try{o.onTick(i,n,Date.now()-t0)}catch(e){}
       }
@@ -275,7 +280,7 @@ const LC103=(()=>{
         if(E&&!E.term&&S.E[i]&&!S.E[i].term)Object.keys(S.E[i].map).forEach(u=>{if(!E.map[u])E.map[u]=S.E[i].map[u]});
         if(E)S.E[i]=E;CUR.series[i]=E?clamp(Math.round(E.cp),-900,900):CUR.series[i]}
       S.J=[];S.moments=[];CUR.moments=[];
-      for(let i=0;i<n;i++){const j=judge(S,i);S.J[i]=j;if(j&&j.types.length&&(side==="both"||side===j.color)){explain(S,j);const slim=slimMoment(j);S.moments.push(slim);CUR.moments.push(slim)}}
+      for(let i=0;i<n;i++){if(ONLY&&!ONLY[i])continue;const j=judge(S,i);S.J[i]=j;if(j&&j.types.length&&(side==="both"||side===j.color)){explain(S,j);const slim=slimMoment(j);S.moments.push(slim);CUR.moments.push(slim)}}
       CUR.done=true;
     }finally{RUN=null}
     remember(CUR);return CUR;

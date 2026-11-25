@@ -89,6 +89,7 @@ def fetch(a):
     token = os.environ.get("LICHESS_TOKEN", "").strip()
     todo = [k for k in want if k not in cache["pos"] or cache["pos"][k].get("l") is None and token]
     print(f"{len(want)} positions, {len(todo)} to ask, token: {'yes' if token else 'no'}", flush=True)
+    if not token: print("WARNING: no LICHESS_TOKEN secret: only the masters database is asked (the players' database needs a token)", flush=True)
     errs = {"l": 0, "m": 0}
     for i, k in enumerate(todo):
         fen = want[k]

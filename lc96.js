@@ -107,10 +107,21 @@ const LC96=(()=>{
     const body=s.t?s.t.split(/\n{2,}/).map(p=>"<p>"+E(p).replace(/\n/g,"<br>")+"</p>").join(""):(fallback?'<p class="lc96-fb">'+E(fallback)+"</p>":"");
     return(au?'<button type="button" class="btn btn-ghost btn-sm lc96-play" data-lc96-play="'+E(au)+'">'+ic("play")+" Coach Lanckriet</button>":"")+body;
   }
+  /* 9.73.0: a draft for the owner only (button "Fill empty fields with a draft" in Edit mode): it fills EMPTY fields, the owner
+     rewrites it in his own words and publishes; players never see it before Save & Publish. Written from his MSPC definitions. */
+  const DRAFT={
+    intro:"Most games under 2000 are not lost to a lack of knowledge. They are lost to one move played without a check. MSPC is the check: four questions, always in the same order, before every move that matters. Move, Specifics, Priorities, Calculation.\n\nIt took me from 304 to 2105 in under three years. Not because it finds genius moves, but because it stops the moves that lose. The good moves come by themselves once the bad ones are gone.",
+    M:"Move: what did their last move change?\n\nEvery move does something. It attacks a piece, it defends one, it opens a line, or it prepares a plan. Before you think about your own move, name what theirs did. Then look at what it stopped doing: the piece that moved no longer guards the squares it guarded before.\n\nAsk two things: what does it threaten now, and what did it leave undefended? Most blunders happen because this step was skipped.",
+    S:"Specifics: what is this position about?\n\nPart one is noticing. Which phase is it? What is the pawn structure? Which pieces are loose? Where are the kings, and how safe are they? Which files and diagonals are open?\n\nPart two is the plan. The structure tells you where to play: the pawn break, the outpost, the weak square, the side of the board where you are stronger. A move that fits the plan of the structure is almost always better than a move that only looks active.",
+    P:"Priorities: checks, captures and attacks.\n\nFirst list every forcing move for you: every check, every capture, every move that attacks something. Then do the same for your opponent. Forcing moves come first because they limit the answers.\n\nIf one of your forcing moves wins something, look at it first. If one of theirs hurts you, deal with it first. Only when nothing forcing works, play the quiet move from your plan.",
+    C:"Calculation: check your move to the end.\n\nPick your candidate and play it out in your head. After every move, ask what their best answer is, not the answer you hope for. Keep going until the position is quiet: no more checks, captures or threats.\n\nIf the line ends well, play it. If you find a hole, go back to Priorities and take the next candidate. Never stop halfway out of hope: the reply you skipped is the one that beats you.",
+    use:"In a real game I do not run all four steps on every move. On a quiet move, M and a quick P are enough. When something changes (a capture, a pawn break, a piece coming close to my king, or a moment where I feel there must be something), I run the full loop.\n\nIn my own games you can see it: the good moves in the MSPC trainer are the moments where the loop found the only move, and the mistakes are the moments where I skipped a step.",
+    you:"Start with M only. For one week, before every move, say out loud what their last move did. That alone removes most hanging pieces.\n\nThen add P: list the checks, captures and attacks for both sides. After that S, and only then full calculation. Train it on positions from my games in the MSPC trainer, and use the Trim review on your own games to see which step you skipped when you lost."
+  };
   function paint(){
     if(!view)return;const c=D.cfg,own=owner();
     const head='<header class="lc96-hd"><p class="lc96-tag">The MSPC System</p><h1>How I find the right move</h1>'
-      +(own?'<div class="btn-row lc96-own">'+(D.edit?'<button type="button" class="btn btn-primary" data-lc96="save">'+ic("cloud-arrow-up")+' Save & Publish</button><button type="button" class="btn btn-quiet" data-lc96="cancel">Cancel</button>':'<button type="button" class="btn btn-ghost" data-lc96="edit">'+ic("pen")+" Edit this page</button>")+"</div>":"")
+      +(own?'<div class="btn-row lc96-own">'+(D.edit?'<button type="button" class="btn btn-primary" data-lc96="save">'+ic("cloud-arrow-up")+' Save & Publish</button><button type="button" class="btn btn-quiet" data-lc96="draft" title="Fills only the empty fields; nothing is live before Save & Publish">Fill empty fields with a draft</button><button type="button" class="btn btn-quiet" data-lc96="cancel">Cancel</button>':'<button type="button" class="btn btn-ghost" data-lc96="edit">'+ic("pen")+" Edit this page</button>")+"</div>":"")
       +textBlock("intro",c.intro,"Four questions before every move: Move, Specifics, Priorities, Calculation. Below: what each one asks, and real positions from my games where MSPC found the move.","The intro: what MSPC is and why it works.")+"</header>";
     const steps='<section class="lc96-steps">'+STEPS.map(k=>{const l=letter(k);return'<article class="lc96-step"><p class="lc96-k">'+k+'</p><h2>'+E(l.name)+"</h2>"+textBlock("step-"+k,c.steps[k],l.text,"What "+k+" asks, and how you answer it.")+"</article>"}).join("")+"</section>";
     const use=(c.use.t||D.edit?'<section class="panel pad lc96-sec"><h2>How I use it</h2>'+textBlock("use",c.use,"","How you use MSPC in your own games, move by move.")+"</section>":"")
@@ -224,6 +235,9 @@ const LC96=(()=>{
     if(a==="next")return nextStep();
     if(a==="close"){const h=Q("[data-lc96-view]",view);if(h){h.hidden=true;h.innerHTML=""}D.cur=null;board=null;return}
     if(a==="edit"){D.edit=true;D.cur=null;paint();return}
+    if(a==="draft"){collect();const c=D.cfg;let n=0;const fill=(o,t)=>{if(o&&!String(o.t||"").trim()){o.t=t;n++}};
+      fill(c.intro,DRAFT.intro);fill(c.use,DRAFT.use);fill(c.you,DRAFT.you);["M","S","P","C"].forEach(L=>fill(c.steps[L],DRAFT[L]));
+      paint();say(n?"Draft put in "+n+" empty field"+(n===1?"":"s")+". Read it, change it into your own words, then Save & Publish.":"Every field already has your text: nothing changed.","good");return}
     if(a==="cancel"){D.edit=false;D.cfg=clean(D.raw);if(!D.cfg.examples.length)D.cfg.examples=pickDefaults(D.cands,2);paint();return}
     if(a==="save")return save();
     if(a==="write")return writeSheet(+b.getAttribute("data-i"));

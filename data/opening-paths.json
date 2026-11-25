@@ -1,0 +1,1463 @@
+{
+ "v": 1,
+ "courses": [
+  {
+   "group": "Vienna & 1.e4",
+   "side": "w",
+   "games": 2101,
+   "mg": [
+    {
+     "id": "mg-ch-t0-01-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t0-02-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t0-05-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-planning-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t1-05-l2",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t1-04-l2",
+     "why": "441 of my 2101 Vienna & 1.e4 games reach it at move 15: half-open f-file for you (the f-pawn was exchanged).",
+     "n": 441
+    },
+    {
+     "id": "mg-ch-t1-03-l2",
+     "why": "441 of my 2101 Vienna & 1.e4 games reach it at move 15: half-open f-file for you (the f-pawn was exchanged). Also: kings castled on opposite wings: pawn storms (277).",
+     "n": 441
+    },
+    {
+     "id": "mg-ch-t3a-06-l4",
+     "why": "277 of my 2101 Vienna & 1.e4 games reach it at move 15: kings castled on opposite wings: pawn storms.",
+     "n": 277
+    },
+    {
+     "id": "mg-transitions-l5",
+     "why": "261 of my 2101 Vienna & 1.e4 games reach it at move 15: queenless middlegame (queens traded by move 15).",
+     "n": 261
+    },
+    {
+     "id": "mg-ch-t2-04-l3",
+     "why": "126 of my 2101 Vienna & 1.e4 games reach it at move 15: you have hanging pawns (c + d).",
+     "n": 126
+    },
+    {
+     "id": "mg-ch-t2-03-l3",
+     "why": "109 of my 2101 Vienna & 1.e4 games reach it at move 15: they have the isolated queen's pawn.",
+     "n": 109
+    },
+    {
+     "id": "mg-ch-t2-05-l3",
+     "why": "109 of my 2101 Vienna & 1.e4 games reach it at move 15: they have the isolated queen's pawn.",
+     "n": 109
+    },
+    {
+     "id": "mg-ch-t2-08-l3",
+     "why": "103 of my 2101 Vienna & 1.e4 games reach it at move 15: open centre (no d- or e-pawns left).",
+     "n": 103
+    }
+   ],
+   "eg": [
+    {
+     "id": "eg-bp-laws-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-wincondition-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-mates-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-principles-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-conversion-l2",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-pieces-vs-l3",
+     "why": "Rook and minor piece endings: 68% of the endgames in my Vienna & 1.e4 games (357).",
+     "n": 357
+    },
+    {
+     "id": "eg-bp-conversion-l3",
+     "why": "Rook and minor piece endings: 68% of the endgames in my Vienna & 1.e4 games (357).",
+     "n": 357
+    },
+    {
+     "id": "eg-bp-rook-l2",
+     "why": "Rook endings: 14% of the endgames in my Vienna & 1.e4 games (75).",
+     "n": 75
+    },
+    {
+     "id": "eg-bp-rook-l3",
+     "why": "Rook endings: 14% of the endgames in my Vienna & 1.e4 games (75).",
+     "n": 75
+    },
+    {
+     "id": "eg-bp-rook-l4",
+     "why": "Rook endings: 14% of the endgames in my Vienna & 1.e4 games (75).",
+     "n": 75
+    },
+    {
+     "id": "eg-bp-queen-l2",
+     "why": "Queen endings: 13% of the endgames in my Vienna & 1.e4 games (67).",
+     "n": 67
+    },
+    {
+     "id": "eg-bp-queen-l4",
+     "why": "Queen endings: 13% of the endgames in my Vienna & 1.e4 games (67).",
+     "n": 67
+    },
+    {
+     "id": "eg-bp-bishop-knight-l2",
+     "why": "Bishop and knight endings: 5% of the endgames in my Vienna & 1.e4 games (25).",
+     "n": 25
+    },
+    {
+     "id": "eg-bp-bishop-knight-l3",
+     "why": "Bishop and knight endings: 5% of the endgames in my Vienna & 1.e4 games (25).",
+     "n": 25
+    },
+    {
+     "id": "eg-bp-bishop-knight-l4",
+     "why": "Bishop and knight endings: 5% of the endgames in my Vienna & 1.e4 games (25).",
+     "n": 25
+    }
+   ],
+   "egDrills": [
+    "bp-p2-4",
+    "lc-RNV8z",
+    "lc-d49wh",
+    "lc-hMBSh",
+    "lc-ovWEy",
+    "lc-z0AeB",
+    "lc-0MLAj",
+    "lc-62rXy",
+    "lc-9PWGI",
+    "lc-9d8PX",
+    "lc-XwK8x",
+    "lc-kPDuf",
+    "lc-mSGv8",
+    "lc-tquEH",
+    "lc-1yHog",
+    "lc-8mDNj",
+    "lc-AUCkJ",
+    "lc-DXU3a",
+    "lc-FAFlE",
+    "lc-aUNuB",
+    "lc-r4PXY",
+    "lc-s49pZ",
+    "lc-xRbrL",
+    "lc-1lOKk",
+    "lc-As6Kk",
+    "lc-GxCfh",
+    "lc-MrC8W",
+    "lc-cM39C",
+    "lc-fReXg",
+    "bp-p1-4",
+    "bp-p1-5",
+    "bp-p3a-1",
+    "bp-p3a-3",
+    "lc-Cal8F",
+    "lc-XTJuF",
+    "lc-baIaG",
+    "lc-e104b",
+    "lc-9eXvi",
+    "lc-ALGsV",
+    "lc-E9Hod",
+    "lc-ISOAr",
+    "lc-L3GIc",
+    "lc-PqQcL",
+    "lc-TIRyk",
+    "lc-5STDu",
+    "lc-AvAxT",
+    "lc-VtvcA",
+    "th-rvp-cut-1",
+    "th-rvp-cut-2",
+    "th-rvp-cut-3",
+    "th-rvp-cut-4",
+    "th-rvp-cut-5",
+    "bp-p3a-2",
+    "bp-p3a-4",
+    "lc-49ebp",
+    "lc-Iibap",
+    "lc-JNCCq",
+    "lc-NTIrG",
+    "lc-Pr6Kd",
+    "lc-Y7onQ",
+    "lc-buuLc",
+    "lc-qahW4",
+    "lc-MwuyV",
+    "lc-Tgcth",
+    "lc-wUIPK",
+    "lc-e8NRx",
+    "lc-l9zPV",
+    "lc-pFMJj",
+    "th-qvp-7th-1",
+    "th-qvp-7th-2",
+    "th-qvp-7th-3",
+    "th-qvp-7th-4",
+    "th-qvp-7th-5",
+    "bp-p1-3",
+    "lc-5cyUn",
+    "lc-D8wyK",
+    "lc-GYdPX",
+    "lc-NHH1j",
+    "lc-dMENY",
+    "lc-gLl9q"
+   ],
+   "mgStructures": [
+    {
+     "id": "f-file",
+     "name": "Half-open f-file for you (the f-pawn was exchanged)",
+     "n": 441
+    },
+    {
+     "id": "opposite",
+     "name": "Kings castled on opposite wings: pawn storms",
+     "n": 277
+    },
+    {
+     "id": "queenless",
+     "name": "Queenless middlegame (queens traded by move 15)",
+     "n": 261
+    },
+    {
+     "id": "hanging-mine",
+     "name": "You have hanging pawns (c + d)",
+     "n": 126
+    },
+    {
+     "id": "iqp-theirs",
+     "name": "They have the isolated queen's pawn",
+     "n": 109
+    },
+    {
+     "id": "open-centre",
+     "name": "Open centre (no d- or e-pawns left)",
+     "n": 103
+    }
+   ],
+   "egTypes": [
+    {
+     "id": "rook-minor",
+     "name": "Rook and minor piece endings",
+     "n": 357
+    },
+    {
+     "id": "rook",
+     "name": "Rook endings",
+     "n": 75
+    },
+    {
+     "id": "queen",
+     "name": "Queen endings",
+     "n": 67
+    },
+    {
+     "id": "minor",
+     "name": "Bishop and knight endings",
+     "n": 25
+    }
+   ],
+   "mgIds": [
+    "174126542058-40",
+    "174322181660-32",
+    "173694101558-20",
+    "147745822782-58",
+    "170380966396-20",
+    "171018252178-40",
+    "173228208188-36",
+    "168611113334-30",
+    "142795417900-40",
+    "172835591328-40",
+    "136771414554-40",
+    "137738253494-30",
+    "145591583942-26",
+    "145336004368-20",
+    "130697379097-54",
+    "172534668384-52",
+    "124637396641-26",
+    "124208933869-56",
+    "172188819298-54",
+    "122835851625-20",
+    "123093600601-24",
+    "117060655267-28",
+    "120688255757-38",
+    "120226788759-24",
+    "121376399105-24",
+    "118071034023-56",
+    "142887919292-58",
+    "113768424675-26",
+    "144124134246-38",
+    "108244195569-30",
+    "104512806257-20",
+    "97725555671-48",
+    "95807942916-28",
+    "184064619042-76",
+    "184066232732-26",
+    "174376801088-36",
+    "174410301520-70",
+    "174329658090-22",
+    "173984958128-40",
+    "174048463810-46"
+   ],
+   "egIds": [
+    "174410301520-122",
+    "174169793606-78",
+    "173928899960-102",
+    "173655386584-74",
+    "169355731336-142",
+    "170418080032-100",
+    "173369553034-100",
+    "172656514060-66",
+    "168603284274-52",
+    "172839738884-94",
+    "166370582398-106",
+    "136798328538-56",
+    "136817540486-66",
+    "137124834034-90",
+    "136878671744-98",
+    "136145360518-104",
+    "136147592896-104",
+    "136071834682-82",
+    "145232891398-66",
+    "145001446258-86",
+    "125936931413-136",
+    "125094015859-106",
+    "124811421409-94",
+    "123610287971-86",
+    "171579937380-72",
+    "172348522684-92",
+    "171578258652-86",
+    "124395578249-68",
+    "124219789417-84",
+    "124655992395-78",
+    "123082266419-58",
+    "121808971217-98",
+    "115653509717-150",
+    "115934384085-112",
+    "115416547301-56",
+    "115418895421-118",
+    "113488157221-68",
+    "118068545043-104",
+    "119739049573-90",
+    "118072196149-86"
+   ]
+  },
+  {
+   "group": "Colle-Koltanowski",
+   "side": "w",
+   "games": 447,
+   "mg": [
+    {
+     "id": "mg-ch-t0-01-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t0-02-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t0-05-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-planning-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t1-05-l2",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t3a-06-l4",
+     "why": "37 of my 447 Colle-Koltanowski games reach it at move 15: kings castled on opposite wings: pawn storms.",
+     "n": 37
+    },
+    {
+     "id": "mg-ch-t1-03-l2",
+     "why": "37 of my 447 Colle-Koltanowski games reach it at move 15: kings castled on opposite wings: pawn storms. Also: half-open f-file for you (the f-pawn was exchanged) (23).",
+     "n": 37
+    },
+    {
+     "id": "mg-transitions-l5",
+     "why": "31 of my 447 Colle-Koltanowski games reach it at move 15: queenless middlegame (queens traded by move 15).",
+     "n": 31
+    },
+    {
+     "id": "mg-ch-t2-03-l3",
+     "why": "24 of my 447 Colle-Koltanowski games reach it at move 15: they have the isolated queen's pawn. Also: you have the isolated queen's pawn (20).",
+     "n": 24
+    },
+    {
+     "id": "mg-ch-t2-05-l3",
+     "why": "24 of my 447 Colle-Koltanowski games reach it at move 15: they have the isolated queen's pawn.",
+     "n": 24
+    },
+    {
+     "id": "mg-ch-t1-04-l2",
+     "why": "23 of my 447 Colle-Koltanowski games reach it at move 15: half-open f-file for you (the f-pawn was exchanged).",
+     "n": 23
+    },
+    {
+     "id": "mg-ch-t2-08-l3",
+     "why": "22 of my 447 Colle-Koltanowski games reach it at move 15: open centre (no d- or e-pawns left).",
+     "n": 22
+    },
+    {
+     "id": "mg-ch-t2-07-l3",
+     "why": "15 of my 447 Colle-Koltanowski games reach it at move 15: pawn chain d4-e5 against e6-d5 (Advance Caro / French).",
+     "n": 15
+    }
+   ],
+   "eg": [
+    {
+     "id": "eg-bp-laws-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-wincondition-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-mates-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-principles-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-conversion-l2",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-pieces-vs-l3",
+     "why": "Rook and minor piece endings: 64% of the endgames in my Colle-Koltanowski games (69).",
+     "n": 69
+    },
+    {
+     "id": "eg-bp-conversion-l3",
+     "why": "Rook and minor piece endings: 64% of the endgames in my Colle-Koltanowski games (69).",
+     "n": 69
+    },
+    {
+     "id": "eg-bp-queen-l2",
+     "why": "Queen endings: 15% of the endgames in my Colle-Koltanowski games (16).",
+     "n": 16
+    },
+    {
+     "id": "eg-bp-queen-l4",
+     "why": "Queen endings: 15% of the endgames in my Colle-Koltanowski games (16).",
+     "n": 16
+    },
+    {
+     "id": "eg-bp-rook-l2",
+     "why": "Rook endings: 12% of the endgames in my Colle-Koltanowski games (13).",
+     "n": 13
+    },
+    {
+     "id": "eg-bp-rook-l3",
+     "why": "Rook endings: 12% of the endgames in my Colle-Koltanowski games (13).",
+     "n": 13
+    },
+    {
+     "id": "eg-bp-rook-l4",
+     "why": "Rook endings: 12% of the endgames in my Colle-Koltanowski games (13).",
+     "n": 13
+    },
+    {
+     "id": "eg-bp-bishop-knight-l2",
+     "why": "Bishop and knight endings: 8% of the endgames in my Colle-Koltanowski games (9).",
+     "n": 9
+    },
+    {
+     "id": "eg-bp-bishop-knight-l3",
+     "why": "Bishop and knight endings: 8% of the endgames in my Colle-Koltanowski games (9).",
+     "n": 9
+    },
+    {
+     "id": "eg-bp-bishop-knight-l4",
+     "why": "Bishop and knight endings: 8% of the endgames in my Colle-Koltanowski games (9).",
+     "n": 9
+    }
+   ],
+   "egDrills": [
+    "bp-p2-4",
+    "lc-RNV8z",
+    "lc-d49wh",
+    "lc-hMBSh",
+    "lc-ovWEy",
+    "lc-z0AeB",
+    "lc-0MLAj",
+    "lc-62rXy",
+    "lc-9PWGI",
+    "lc-9d8PX",
+    "lc-XwK8x",
+    "lc-kPDuf",
+    "lc-mSGv8",
+    "lc-tquEH",
+    "lc-1yHog",
+    "lc-8mDNj",
+    "lc-AUCkJ",
+    "lc-DXU3a",
+    "lc-FAFlE",
+    "lc-aUNuB",
+    "lc-r4PXY",
+    "lc-s49pZ",
+    "lc-xRbrL",
+    "lc-1lOKk",
+    "lc-As6Kk",
+    "lc-GxCfh",
+    "lc-MrC8W",
+    "lc-cM39C",
+    "lc-fReXg",
+    "bp-p3a-2",
+    "bp-p3a-4",
+    "lc-49ebp",
+    "lc-Iibap",
+    "lc-JNCCq",
+    "lc-NTIrG",
+    "lc-Pr6Kd",
+    "lc-Y7onQ",
+    "lc-buuLc",
+    "lc-qahW4",
+    "lc-MwuyV",
+    "lc-Tgcth",
+    "lc-wUIPK",
+    "lc-e8NRx",
+    "lc-l9zPV",
+    "lc-pFMJj",
+    "th-qvp-7th-1",
+    "th-qvp-7th-2",
+    "th-qvp-7th-3",
+    "th-qvp-7th-4",
+    "th-qvp-7th-5",
+    "bp-p1-4",
+    "bp-p1-5",
+    "bp-p3a-1",
+    "bp-p3a-3",
+    "lc-Cal8F",
+    "lc-XTJuF",
+    "lc-baIaG",
+    "lc-e104b",
+    "lc-9eXvi",
+    "lc-ALGsV",
+    "lc-E9Hod",
+    "lc-ISOAr",
+    "lc-L3GIc",
+    "lc-PqQcL",
+    "lc-TIRyk",
+    "lc-5STDu",
+    "lc-AvAxT",
+    "lc-VtvcA",
+    "th-rvp-cut-1",
+    "th-rvp-cut-2",
+    "th-rvp-cut-3",
+    "th-rvp-cut-4",
+    "th-rvp-cut-5",
+    "bp-p1-3",
+    "lc-5cyUn",
+    "lc-D8wyK",
+    "lc-GYdPX",
+    "lc-NHH1j",
+    "lc-dMENY",
+    "lc-gLl9q"
+   ],
+   "mgStructures": [
+    {
+     "id": "opposite",
+     "name": "Kings castled on opposite wings: pawn storms",
+     "n": 37
+    },
+    {
+     "id": "queenless",
+     "name": "Queenless middlegame (queens traded by move 15)",
+     "n": 31
+    },
+    {
+     "id": "iqp-theirs",
+     "name": "They have the isolated queen's pawn",
+     "n": 24
+    },
+    {
+     "id": "f-file",
+     "name": "Half-open f-file for you (the f-pawn was exchanged)",
+     "n": 23
+    },
+    {
+     "id": "open-centre",
+     "name": "Open centre (no d- or e-pawns left)",
+     "n": 22
+    },
+    {
+     "id": "iqp-mine",
+     "name": "You have the isolated queen's pawn",
+     "n": 20
+    },
+    {
+     "id": "chain-e5",
+     "name": "Pawn chain d4-e5 against e6-d5 (Advance Caro / French)",
+     "n": 15
+    }
+   ],
+   "egTypes": [
+    {
+     "id": "rook-minor",
+     "name": "Rook and minor piece endings",
+     "n": 69
+    },
+    {
+     "id": "queen",
+     "name": "Queen endings",
+     "n": 16
+    },
+    {
+     "id": "rook",
+     "name": "Rook endings",
+     "n": 13
+    },
+    {
+     "id": "minor",
+     "name": "Bishop and knight endings",
+     "n": 9
+    }
+   ],
+   "mgIds": [
+    "185637987464-66",
+    "186083816974-58",
+    "184589327050-52",
+    "187535970256-40",
+    "185654843256-34",
+    "185643196666-34",
+    "185988998500-64",
+    "185736501996-32",
+    "185749533028-48",
+    "186079776498-42",
+    "185913854528-54",
+    "185921194824-34",
+    "185921902574-56",
+    "185817479712-32",
+    "185633229544-38",
+    "185816141724-56",
+    "185592228582-44",
+    "185632228204-24",
+    "186107385798-26",
+    "186139222586-64",
+    "186285502764-62",
+    "186337576860-38",
+    "185579322690-22",
+    "186356099320-48",
+    "186335943352-24",
+    "186390726028-38",
+    "186464245010-26",
+    "185576285262-44",
+    "184973787628-76",
+    "184975396854-48",
+    "184897820262-40",
+    "184959407322-42",
+    "184967545600-34",
+    "184975007584-60",
+    "184618063722-38",
+    "184807099754-38",
+    "184260342644-34",
+    "185574613416-32",
+    "184663072772-48",
+    "184263881242-54"
+   ],
+   "egIds": [
+    "185649748750-108",
+    "185749533028-96",
+    "185639479976-130",
+    "185815112248-98",
+    "186083816974-84",
+    "184446019390-72",
+    "187395488832-112",
+    "184670247024-112",
+    "187189801450-74",
+    "185100776126-86",
+    "101439175390-82",
+    "82176550190-230",
+    "94131245360-64",
+    "185477151014-128",
+    "184445377108-96",
+    "185063618532-84",
+    "186660547490-120",
+    "101439023346-60",
+    "82189006250-78"
+   ]
+  },
+  {
+   "group": "Caro-Kann",
+   "side": "b",
+   "games": 1641,
+   "mg": [
+    {
+     "id": "mg-ch-t0-01-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t0-02-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t0-05-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-planning-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t1-05-l2",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t2-02-l3",
+     "why": "156 of my 1641 Caro-Kann games reach it at move 15: carlsbad structure (you have d4 against their d5 + c6, or the mirror). Also: carlsbad with your queenside pawns: the minority attack (146).",
+     "n": 156
+    },
+    {
+     "id": "mg-transitions-l5",
+     "why": "143 of my 1641 Caro-Kann games reach it at move 15: queenless middlegame (queens traded by move 15).",
+     "n": 143
+    },
+    {
+     "id": "mg-ch-t2-07-l3",
+     "why": "139 of my 1641 Caro-Kann games reach it at move 15: pawn chain d4-e5 against e6-d5 (Advance Caro / French).",
+     "n": 139
+    },
+    {
+     "id": "mg-ch-t2-03-l3",
+     "why": "137 of my 1641 Caro-Kann games reach it at move 15: they have the isolated queen's pawn. Also: you have the isolated queen's pawn (77).",
+     "n": 137
+    },
+    {
+     "id": "mg-ch-t2-05-l3",
+     "why": "137 of my 1641 Caro-Kann games reach it at move 15: they have the isolated queen's pawn.",
+     "n": 137
+    },
+    {
+     "id": "mg-ch-t3a-06-l4",
+     "why": "98 of my 1641 Caro-Kann games reach it at move 15: kings castled on opposite wings: pawn storms.",
+     "n": 98
+    },
+    {
+     "id": "mg-ch-t1-03-l2",
+     "why": "98 of my 1641 Caro-Kann games reach it at move 15: kings castled on opposite wings: pawn storms. Also: half-open f-file for you (the f-pawn was exchanged) (86).",
+     "n": 98
+    },
+    {
+     "id": "mg-ch-t1-04-l2",
+     "why": "86 of my 1641 Caro-Kann games reach it at move 15: half-open f-file for you (the f-pawn was exchanged).",
+     "n": 86
+    }
+   ],
+   "eg": [
+    {
+     "id": "eg-bp-laws-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-wincondition-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-mates-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-principles-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-conversion-l2",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-pieces-vs-l3",
+     "why": "Rook and minor piece endings: 64% of the endgames in my Caro-Kann games (286).",
+     "n": 286
+    },
+    {
+     "id": "eg-bp-conversion-l3",
+     "why": "Rook and minor piece endings: 64% of the endgames in my Caro-Kann games (286).",
+     "n": 286
+    },
+    {
+     "id": "eg-bp-rook-l2",
+     "why": "Rook endings: 17% of the endgames in my Caro-Kann games (77).",
+     "n": 77
+    },
+    {
+     "id": "eg-bp-rook-l3",
+     "why": "Rook endings: 17% of the endgames in my Caro-Kann games (77).",
+     "n": 77
+    },
+    {
+     "id": "eg-bp-rook-l4",
+     "why": "Rook endings: 17% of the endgames in my Caro-Kann games (77).",
+     "n": 77
+    },
+    {
+     "id": "eg-bp-queen-l2",
+     "why": "Queen endings: 13% of the endgames in my Caro-Kann games (60).",
+     "n": 60
+    },
+    {
+     "id": "eg-bp-queen-l4",
+     "why": "Queen endings: 13% of the endgames in my Caro-Kann games (60).",
+     "n": 60
+    },
+    {
+     "id": "eg-bp-bishop-knight-l2",
+     "why": "Bishop and knight endings: 5% of the endgames in my Caro-Kann games (23).",
+     "n": 23
+    },
+    {
+     "id": "eg-bp-bishop-knight-l3",
+     "why": "Bishop and knight endings: 5% of the endgames in my Caro-Kann games (23).",
+     "n": 23
+    },
+    {
+     "id": "eg-bp-bishop-knight-l4",
+     "why": "Bishop and knight endings: 5% of the endgames in my Caro-Kann games (23).",
+     "n": 23
+    },
+    {
+     "id": "eg-bp-opposite-l3",
+     "why": "Opposite-coloured bishops: 1% of the endgames in my Caro-Kann games (3).",
+     "n": 3
+    }
+   ],
+   "egDrills": [
+    "bp-p2-4",
+    "lc-RNV8z",
+    "lc-d49wh",
+    "lc-hMBSh",
+    "lc-ovWEy",
+    "lc-z0AeB",
+    "lc-0MLAj",
+    "lc-62rXy",
+    "lc-9PWGI",
+    "lc-9d8PX",
+    "lc-XwK8x",
+    "lc-kPDuf",
+    "lc-mSGv8",
+    "lc-tquEH",
+    "lc-1yHog",
+    "lc-8mDNj",
+    "lc-AUCkJ",
+    "lc-DXU3a",
+    "lc-FAFlE",
+    "lc-aUNuB",
+    "lc-r4PXY",
+    "lc-s49pZ",
+    "lc-xRbrL",
+    "lc-1lOKk",
+    "lc-As6Kk",
+    "lc-GxCfh",
+    "lc-MrC8W",
+    "lc-cM39C",
+    "lc-fReXg",
+    "bp-p1-4",
+    "bp-p1-5",
+    "bp-p3a-1",
+    "bp-p3a-3",
+    "lc-Cal8F",
+    "lc-XTJuF",
+    "lc-baIaG",
+    "lc-e104b",
+    "lc-9eXvi",
+    "lc-ALGsV",
+    "lc-E9Hod",
+    "lc-ISOAr",
+    "lc-L3GIc",
+    "lc-PqQcL",
+    "lc-TIRyk",
+    "lc-5STDu",
+    "lc-AvAxT",
+    "lc-VtvcA",
+    "th-rvp-cut-1",
+    "th-rvp-cut-2",
+    "th-rvp-cut-3",
+    "th-rvp-cut-4",
+    "th-rvp-cut-5",
+    "bp-p3a-2",
+    "bp-p3a-4",
+    "lc-49ebp",
+    "lc-Iibap",
+    "lc-JNCCq",
+    "lc-NTIrG",
+    "lc-Pr6Kd",
+    "lc-Y7onQ",
+    "lc-buuLc",
+    "lc-qahW4",
+    "lc-MwuyV",
+    "lc-Tgcth",
+    "lc-wUIPK",
+    "lc-e8NRx",
+    "lc-l9zPV",
+    "lc-pFMJj",
+    "th-qvp-7th-1",
+    "th-qvp-7th-2",
+    "th-qvp-7th-3",
+    "th-qvp-7th-4",
+    "th-qvp-7th-5",
+    "bp-p1-3",
+    "lc-5cyUn",
+    "lc-D8wyK",
+    "lc-GYdPX",
+    "lc-NHH1j",
+    "lc-dMENY",
+    "lc-gLl9q"
+   ],
+   "mgStructures": [
+    {
+     "id": "carlsbad",
+     "name": "Carlsbad structure (you have d4 against their d5 + c6, or the mirror)",
+     "n": 156
+    },
+    {
+     "id": "minority",
+     "name": "Carlsbad with your queenside pawns: the minority attack",
+     "n": 146
+    },
+    {
+     "id": "queenless",
+     "name": "Queenless middlegame (queens traded by move 15)",
+     "n": 143
+    },
+    {
+     "id": "chain-e5",
+     "name": "Pawn chain d4-e5 against e6-d5 (Advance Caro / French)",
+     "n": 139
+    },
+    {
+     "id": "iqp-theirs",
+     "name": "They have the isolated queen's pawn",
+     "n": 137
+    },
+    {
+     "id": "opposite",
+     "name": "Kings castled on opposite wings: pawn storms",
+     "n": 98
+    },
+    {
+     "id": "f-file",
+     "name": "Half-open f-file for you (the f-pawn was exchanged)",
+     "n": 86
+    },
+    {
+     "id": "iqp-mine",
+     "name": "You have the isolated queen's pawn",
+     "n": 77
+    }
+   ],
+   "egTypes": [
+    {
+     "id": "rook-minor",
+     "name": "Rook and minor piece endings",
+     "n": 286
+    },
+    {
+     "id": "rook",
+     "name": "Rook endings",
+     "n": 77
+    },
+    {
+     "id": "queen",
+     "name": "Queen endings",
+     "n": 60
+    },
+    {
+     "id": "minor",
+     "name": "Bishop and knight endings",
+     "n": 23
+    },
+    {
+     "id": "opposite",
+     "name": "Opposite-coloured bishops",
+     "n": 3
+    }
+   ],
+   "mgIds": [
+    "173838357374-51",
+    "170417563346-59",
+    "138097152512-53",
+    "166717706430-43",
+    "145704919904-65",
+    "136976390646-53",
+    "145424401406-39",
+    "124394404673-53",
+    "143544998318-47",
+    "115420729883-45",
+    "113490004561-55",
+    "115409385107-33",
+    "119974820297-23",
+    "113834999237-95",
+    "113767193447-73",
+    "144012923062-25",
+    "109187492441-35",
+    "108845555055-31",
+    "165840590334-53",
+    "105812482807-45",
+    "104499621759-55",
+    "82182496172-37",
+    "174527620416-63",
+    "174412987018-25",
+    "174419031530-43",
+    "174332570588-27",
+    "174366384598-39",
+    "174330535664-37",
+    "174047603856-97",
+    "174126148394-23",
+    "173990300252-29",
+    "174140375996-43",
+    "174185306814-21",
+    "174142198060-85",
+    "174187036848-27",
+    "174217788014-39",
+    "173899055586-45",
+    "174216732214-85",
+    "173890774378-33",
+    "173625133366-49"
+   ],
+   "egIds": [
+    "130628998055-89",
+    "174142198060-199",
+    "174217788014-107",
+    "173656688896-93",
+    "171567644960-75",
+    "147197934480-97",
+    "172604947926-81",
+    "146030666952-79",
+    "136688726580-59",
+    "186079873906-87",
+    "136481429576-79",
+    "136976390646-83",
+    "145540556038-103",
+    "186349830858-53",
+    "144827592474-89",
+    "145301084848-93",
+    "173767537722-71",
+    "184400452358-63",
+    "125856555819-77",
+    "186858718290-63",
+    "173816807644-85",
+    "186659963834-77",
+    "125161716081-89",
+    "123614501423-99",
+    "172536858052-93",
+    "123968486431-121",
+    "123432656681-85",
+    "122904868623-81",
+    "115420729883-61",
+    "115412374605-77",
+    "170519936438-75",
+    "119900969261-107",
+    "113500186637-67",
+    "166449564764-81",
+    "114296395837-83",
+    "113854242447-73",
+    "113574595445-79",
+    "144125714110-79",
+    "113512781355-95",
+    "143850627920-73"
+   ]
+  },
+  {
+   "group": "Semi-Slav",
+   "side": "b",
+   "games": 508,
+   "mg": [
+    {
+     "id": "mg-ch-t0-01-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t0-02-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t0-05-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-planning-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t1-05-l2",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "mg-ch-t2-03-l3",
+     "why": "35 of my 508 Semi-Slav games reach it at move 15: they have the isolated queen's pawn. Also: you have the isolated queen's pawn (18).",
+     "n": 35
+    },
+    {
+     "id": "mg-ch-t2-05-l3",
+     "why": "35 of my 508 Semi-Slav games reach it at move 15: they have the isolated queen's pawn. Also: doubled g-pawns after ...hxg6 / Bxg6 recaptures (28). Also: stonewall (d4-e3-f4 or d5-e6-f5) (21).",
+     "n": 35
+    },
+    {
+     "id": "mg-ch-t3a-06-l4",
+     "why": "34 of my 508 Semi-Slav games reach it at move 15: kings castled on opposite wings: pawn storms.",
+     "n": 34
+    },
+    {
+     "id": "mg-ch-t1-03-l2",
+     "why": "34 of my 508 Semi-Slav games reach it at move 15: kings castled on opposite wings: pawn storms. Also: half-open f-file for you (the f-pawn was exchanged) (29).",
+     "n": 34
+    },
+    {
+     "id": "mg-transitions-l5",
+     "why": "34 of my 508 Semi-Slav games reach it at move 15: queenless middlegame (queens traded by move 15).",
+     "n": 34
+    },
+    {
+     "id": "mg-ch-t1-04-l2",
+     "why": "29 of my 508 Semi-Slav games reach it at move 15: half-open f-file for you (the f-pawn was exchanged).",
+     "n": 29
+    }
+   ],
+   "eg": [
+    {
+     "id": "eg-bp-laws-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-wincondition-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-mates-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-principles-l1",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-conversion-l2",
+     "why": "Every opening needs it."
+    },
+    {
+     "id": "eg-bp-pieces-vs-l3",
+     "why": "Rook and minor piece endings: 66% of the endgames in my Semi-Slav games (93).",
+     "n": 93
+    },
+    {
+     "id": "eg-bp-conversion-l3",
+     "why": "Rook and minor piece endings: 66% of the endgames in my Semi-Slav games (93).",
+     "n": 93
+    },
+    {
+     "id": "eg-bp-rook-l2",
+     "why": "Rook endings: 14% of the endgames in my Semi-Slav games (20).",
+     "n": 20
+    },
+    {
+     "id": "eg-bp-rook-l3",
+     "why": "Rook endings: 14% of the endgames in my Semi-Slav games (20).",
+     "n": 20
+    },
+    {
+     "id": "eg-bp-rook-l4",
+     "why": "Rook endings: 14% of the endgames in my Semi-Slav games (20).",
+     "n": 20
+    },
+    {
+     "id": "eg-bp-queen-l2",
+     "why": "Queen endings: 13% of the endgames in my Semi-Slav games (18).",
+     "n": 18
+    },
+    {
+     "id": "eg-bp-queen-l4",
+     "why": "Queen endings: 13% of the endgames in my Semi-Slav games (18).",
+     "n": 18
+    },
+    {
+     "id": "eg-bp-bishop-knight-l2",
+     "why": "Bishop and knight endings: 6% of the endgames in my Semi-Slav games (9).",
+     "n": 9
+    },
+    {
+     "id": "eg-bp-bishop-knight-l3",
+     "why": "Bishop and knight endings: 6% of the endgames in my Semi-Slav games (9).",
+     "n": 9
+    },
+    {
+     "id": "eg-bp-bishop-knight-l4",
+     "why": "Bishop and knight endings: 6% of the endgames in my Semi-Slav games (9).",
+     "n": 9
+    }
+   ],
+   "egDrills": [
+    "bp-p2-4",
+    "lc-RNV8z",
+    "lc-d49wh",
+    "lc-hMBSh",
+    "lc-ovWEy",
+    "lc-z0AeB",
+    "lc-0MLAj",
+    "lc-62rXy",
+    "lc-9PWGI",
+    "lc-9d8PX",
+    "lc-XwK8x",
+    "lc-kPDuf",
+    "lc-mSGv8",
+    "lc-tquEH",
+    "lc-1yHog",
+    "lc-8mDNj",
+    "lc-AUCkJ",
+    "lc-DXU3a",
+    "lc-FAFlE",
+    "lc-aUNuB",
+    "lc-r4PXY",
+    "lc-s49pZ",
+    "lc-xRbrL",
+    "lc-1lOKk",
+    "lc-As6Kk",
+    "lc-GxCfh",
+    "lc-MrC8W",
+    "lc-cM39C",
+    "lc-fReXg",
+    "bp-p1-4",
+    "bp-p1-5",
+    "bp-p3a-1",
+    "bp-p3a-3",
+    "lc-Cal8F",
+    "lc-XTJuF",
+    "lc-baIaG",
+    "lc-e104b",
+    "lc-9eXvi",
+    "lc-ALGsV",
+    "lc-E9Hod",
+    "lc-ISOAr",
+    "lc-L3GIc",
+    "lc-PqQcL",
+    "lc-TIRyk",
+    "lc-5STDu",
+    "lc-AvAxT",
+    "lc-VtvcA",
+    "th-rvp-cut-1",
+    "th-rvp-cut-2",
+    "th-rvp-cut-3",
+    "th-rvp-cut-4",
+    "th-rvp-cut-5",
+    "bp-p3a-2",
+    "bp-p3a-4",
+    "lc-49ebp",
+    "lc-Iibap",
+    "lc-JNCCq",
+    "lc-NTIrG",
+    "lc-Pr6Kd",
+    "lc-Y7onQ",
+    "lc-buuLc",
+    "lc-qahW4",
+    "lc-MwuyV",
+    "lc-Tgcth",
+    "lc-wUIPK",
+    "lc-e8NRx",
+    "lc-l9zPV",
+    "lc-pFMJj",
+    "th-qvp-7th-1",
+    "th-qvp-7th-2",
+    "th-qvp-7th-3",
+    "th-qvp-7th-4",
+    "th-qvp-7th-5",
+    "bp-p1-3",
+    "lc-5cyUn",
+    "lc-D8wyK",
+    "lc-GYdPX",
+    "lc-NHH1j",
+    "lc-dMENY",
+    "lc-gLl9q"
+   ],
+   "mgStructures": [
+    {
+     "id": "iqp-theirs",
+     "name": "They have the isolated queen's pawn",
+     "n": 35
+    },
+    {
+     "id": "opposite",
+     "name": "Kings castled on opposite wings: pawn storms",
+     "n": 34
+    },
+    {
+     "id": "queenless",
+     "name": "Queenless middlegame (queens traded by move 15)",
+     "n": 34
+    },
+    {
+     "id": "f-file",
+     "name": "Half-open f-file for you (the f-pawn was exchanged)",
+     "n": 29
+    },
+    {
+     "id": "doubled-g",
+     "name": "Doubled g-pawns after ...hxg6 / Bxg6 recaptures",
+     "n": 28
+    },
+    {
+     "id": "stonewall",
+     "name": "Stonewall (d4-e3-f4 or d5-e6-f5)",
+     "n": 21
+    },
+    {
+     "id": "iqp-mine",
+     "name": "You have the isolated queen's pawn",
+     "n": 18
+    }
+   ],
+   "egTypes": [
+    {
+     "id": "rook-minor",
+     "name": "Rook and minor piece endings",
+     "n": 93
+    },
+    {
+     "id": "rook",
+     "name": "Rook endings",
+     "n": 20
+    },
+    {
+     "id": "queen",
+     "name": "Queen endings",
+     "n": 18
+    },
+    {
+     "id": "minor",
+     "name": "Bishop and knight endings",
+     "n": 9
+    }
+   ],
+   "mgIds": [
+    "184056134368-49",
+    "185685991862-47",
+    "144130080230-43",
+    "185575427938-41",
+    "184564575802-55",
+    "185479614024-37",
+    "171579830744-37",
+    "170526954094-67",
+    "143462964508-39",
+    "95754787870-45",
+    "174460833408-61",
+    "174127039288-49",
+    "174124754182-45",
+    "174125271110-33",
+    "173931787814-65",
+    "174170619968-53",
+    "174185771078-39",
+    "174312969636-41",
+    "174285526430-41",
+    "174276168826-25",
+    "173885986200-49",
+    "173625433632-41",
+    "173627901784-37",
+    "170332022278-51",
+    "147247549982-45",
+    "169355572598-23",
+    "171568789566-35",
+    "171520880548-25",
+    "173753086706-43",
+    "173649900860-39",
+    "170421521386-25",
+    "173647330274-21",
+    "173267943032-59",
+    "164374828664-103",
+    "146925846966-21",
+    "165506489706-65",
+    "173306635750-33",
+    "173019988864-43",
+    "172799458018-67",
+    "164822232150-43"
+   ],
+   "egIds": [
+    "172698203830-53",
+    "172347976048-125",
+    "174277562840-109",
+    "173405120388-91",
+    "171568789566-95",
+    "172927225942-71",
+    "185640218878-71",
+    "184219743088-109",
+    "173323291218-127",
+    "171597951290-67",
+    "166450045716-75",
+    "109352394083-89",
+    "108932498215-79",
+    "97712507515-77",
+    "95808317302-75",
+    "174364203358-69",
+    "173697595440-97",
+    "173654631852-75",
+    "173019988864-109",
+    "185604311682-61",
+    "187460231868-91",
+    "187459982940-65",
+    "185542242628-69",
+    "172602763968-89",
+    "172557697546-79",
+    "171514066070-73",
+    "143545754212-47",
+    "143461563820-71",
+    "108232886769-69",
+    "102417618309-81"
+   ]
+  }
+ ],
+ "titles": {
+  "mg-ch-t0-01-l1": "The Blunder Check: Making M Automatic",
+  "mg-ch-t0-02-l1": "Loose Pieces and the CCA Scan",
+  "mg-ch-t0-05-l1": "Core Tactical Patterns",
+  "mg-planning-l1": "Trades, Material and Finding a Simple Plan",
+  "mg-ch-t1-05-l2": "Basic Pawn Breaks: Levers and Opening Lines",
+  "mg-ch-t1-04-l2": "Open Files and the Seventh Rank",
+  "mg-ch-t1-03-l2": "Attacking the Castled King: Mating Patterns and the Greek Gift",
+  "mg-ch-t3a-06-l4": "Opposite-Side Castling: Pawn Storms and Tempo Counting",
+  "mg-transitions-l5": "Middlegame-to-Endgame Transitions II: Conversion Technique",
+  "mg-ch-t2-04-l3": "Hanging Pawns",
+  "mg-ch-t2-03-l3": "The Isolated Queen's Pawn (Both Sides)",
+  "mg-ch-t2-05-l3": "Weak Squares, Outposts and Backward Pawns",
+  "mg-ch-t2-08-l3": "Minor-Piece Imbalances: Good Knight vs Bad Bishop, the Bishop Pair",
+  "eg-bp-laws-l1": "The laws that decide endgames (level 1)",
+  "eg-bp-wincondition-l1": "Winconditions: the two ways endgames end (level 1)",
+  "eg-bp-mates-l1": "Basic mates: queen, rook and the ladder (level 1)",
+  "eg-bp-principles-l1": "Core principles, typical errors and vocabulary (level 1)",
+  "eg-bp-conversion-l2": "Converting an extra pawn (Tier 1 checklist) (level 2)",
+  "eg-bp-pieces-vs-l3": "Rook versus a minor piece: the corner decides (level 3)",
+  "eg-bp-conversion-l3": "Two weaknesses, do not hurry and the pawn-ending test (Tier 2 checklist) (level 3)",
+  "eg-bp-rook-l2": "Lucena and Philidor (level 2)",
+  "eg-bp-rook-l3": "The practical rook ending (level 3)",
+  "eg-bp-rook-l4": "The rook canon: Rule of Five, Vančura and the g7/h7 rule (level 4)",
+  "eg-bp-queen-l2": "Queen versus a pawn on the seventh (level 2)",
+  "eg-bp-queen-l4": "Queen endings: winning zone, fortresses and cross-checks (level 4)",
+  "eg-bp-bishop-knight-l2": "The wrong bishop and minor pieces against passed pawns (level 2)",
+  "eg-bp-bishop-knight-l3": "Good bishop, bad bishop, bishop versus knight and the blockade (level 3)",
+  "eg-bp-bishop-knight-l4": "Knight, bishop and pawn endings (level 4)",
+  "mg-ch-t2-07-l3": "Pawn Chains: The Advance Structure and Attacking the Base",
+  "mg-ch-t2-02-l3": "The Carlsbad Structure and the Minority Attack",
+  "eg-bp-opposite-l3": "Opposite-coloured bishops (level 3)"
+ }
+}
