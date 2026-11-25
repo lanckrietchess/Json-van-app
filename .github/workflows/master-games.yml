@@ -64,6 +64,7 @@ jobs:
       - name: Analyse ${{ matrix.year }} half ${{ matrix.half }}
         env:
           STOCKFISH: /usr/games/stockfish
+          LICHESS_USER: ${{ vars.LICHESS_USER }}
         run: python3 tools/master_games.py run --year ${{ matrix.year }} --half ${{ matrix.half }} --workers 4 --nodes 60000
       - uses: actions/upload-artifact@v4
         if: always()
