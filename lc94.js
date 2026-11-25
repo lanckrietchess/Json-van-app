@@ -11,7 +11,7 @@ const LC94=(()=>{
      3. Deep link (app only): /app.html?u=<Chess.com or Lichess name>&site=chesscom|lichess&src=mc_ig. The name is taken as the answer to the
         first-run question, the "How did you find us?" step is filled from ?src= when it names a platform, and the first review starts at once
         (LC42.begin -> LC50 scans the latest game on the device with Stockfish). The parameters leave the address bar so a reload does not restart it.
-     3b. (9.67.0) The landing's quick start no longer jumps into the app: LC102 keeps the name (localStorage "lc102-handoff"), starts the
+     3b. (9.67.0, undone in 9.75.0: the quick start goes straight into the review again; LC102 only keeps the name) The landing's quick start no longer jumps into the app: LC102 keeps the name (localStorage "lc102-handoff"), starts the
         install and shows an "Open the app" card. The app reads that handoff when it is opened without ?u= (readHand), once, 7 days max.
      4. In an Instagram / TikTok / Facebook browser (LC87 soft mode) one LC88 step after the first review: "Keep this review", which opens the same
         game in Chrome / Safari (the in-app browser keeps nothing once it is closed).
@@ -19,7 +19,7 @@ const LC94=(()=>{
         that was marked as the owner's (localStorage "lc94-excluded"). A device is marked when the owner's account is signed in (LC49) or the
         landing editor (LC89) confirmed an admin session; excludeMe(token) also asks the server (lc94_exclude_me, admin only), which deletes
         the device's old rows and ignores it from then on. */
-  const W=window,D=document,VERSION="9.74.0";
+  const W=window,D=document,VERSION="9.75.0";
   const STEPS=["landing","iab_open","first_open","name_entered","first_review_done","signed_in","install","day2_return","paywall_seen","checkout_started","paid"];
   const K_X="lc94-excluded",K_DONE="lc94-done",K_SRC="lc94-src",K_FIRST="lc94-first",K_DEEP="lc94-deep",K_IABX="lc94-iab-x",K_DEV="lc-hub-device";
   const NAME=/^[A-Za-z0-9_-]{2,30}$/,DEV_RE=/^d-[a-z0-9]{12,40}$/;
@@ -210,7 +210,9 @@ const LC94=(()=>{
       step("name_entered");
       /* 9.67.0: LC102 (landing only) keeps the name on the device, starts the install from this same tap and shows a small "Open the app"
          card once that is done (never over a playing video). No jump into the app and no review on submit. Without LC102: the old jump. */
-      try{if(typeof LC102!=="undefined"&&typeof LC102.submit==="function"&&LC102.submit({u:u,site:site,src:s,url:url.pathname+url.search}))return}catch(x){}
+      /* 9.75.0: value first again: the name goes straight into the review (in this browser, no install, no account). LC102 only keeps
+         the name on the device, so an app installed later still opens on this player. The install comes after the review (LC107). */
+      try{if(typeof LC102!=="undefined"&&LC102._t&&LC102._t.save)LC102._t.save(u,site,s)}catch(x){}
       (W.__lcNav||function(x){location.href=x})(url.pathname+url.search);
     });
     label();

@@ -38,6 +38,7 @@ const LC88=(()=>{
     {id:"kick",sel:"#lc37-kick",kind:"Coach"},   /* 9.59.0: Coach Lanckriet's daily tip on Home was a second guide next to the road */
     {id:"hero",sel:"[data-lc62-card]",kind:"Your story"},
     {id:"save",sel:"#lc40-nudge",kind:"Tip"},
+    {id:"book",model:()=>{try{return typeof LC107!=="undefined"?LC107.bookStep():null}catch(e){return null}},kind:"Book",late:true},   /* 9.75.0: day 4+, no trial, no purchase */
     {id:"upgrade",sel:"#lc45-banner",kind:"Pro",late:true},
     {id:"mission",sel:".lc71-mission",kind:"Mission",late:true}
   ];

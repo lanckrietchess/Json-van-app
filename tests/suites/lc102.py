@@ -1,4 +1,4 @@
-# lc102 (9.67.0): the landing's quick start -> install -> "Open the app" card, never over a playing video, and the name handoff into the app.
+# lc102 (9.67.0; 9.75.0: the quick start goes straight into the review, LC102's own submit is driven directly): the landing's quick start -> install -> "Open the app" card, never over a playing video, and the name handoff into the app.
 # Real Chromium, 390x844 (phone) and 1280x800, the real landing page and app. Supabase is stubbed (segment videos, funnel steps), Chess.com is
 # the kyenzotest fixture. YouTube cannot load here, so the player's state messages are fed to LC102's own message handler with the
 # real iframe as their source (the same objects a real player's postMessage gives).
@@ -41,8 +41,16 @@ def ctx(br, ua=None, fresh=False, init='', w=390, h=844):
 CARD = "(() => { const c = document.getElementById('lc102-card'); if (!c || c.hidden) return null; const b = c.getBoundingClientRect(); return [c.querySelector('b').textContent, c.querySelector('small').textContent, c.querySelector('[data-lc102-open]').getAttribute('href'), b.left >= 0 && b.right <= innerWidth && b.bottom <= innerHeight]; })()"
 SHOWN = "!!(document.getElementById('lc102-card') && !document.getElementById('lc102-card').hidden)"
 HAND = "(h => h && [h.u, h.site, h.src])(JSON.parse(localStorage.getItem('lc102-handoff') || 'null'))"
-def submit(pg, name):
+def form(pg, name):
     pg.fill('#lc94-qs input', name); pg.click('#lc94-qs button[type=submit]')
+# 9.75.0: LC94's quick start no longer hands its submit to LC102 (it goes straight into the review). LC102's own submit (install, card,
+# video rule) stays in the build and is driven here directly, the way LC94 called it before; a bad name still goes through the form.
+SUBMIT = """n => { const m = /(?:chess\\.com\\/(?:member|\\w+\\/member)\\/|lichess\\.org\\/(?:@\\/)?)([A-Za-z0-9_-]{2,30})/i.exec(n), u = m ? m[1] : n;
+  const src = LC94.src() || '', url = '/app.html?u=' + u + '&site=chesscom' + (src ? '&src=' + src : '');
+  return LC102.submit({ u: u, site: 'chesscom', src: src, url: url }); }"""
+def submit(pg, name):
+    if name.startswith('<'): return form(pg, name)
+    pg.evaluate(SUBMIT, name)
 def yt(pg, state):  # a YouTube player state message, from the hero iframe itself
     pg.evaluate("s => { const f = document.querySelector('#walk-hero iframe'); LC102._t.onMsg({ origin: 'https://www.youtube-nocookie.com', source: f.contentWindow, data: JSON.stringify({ event: 'onStateChange', info: s, id: 1, channel: 'widget' }) }); }", state)
     pg.wait_for_timeout(250)
@@ -54,6 +62,9 @@ with sync_playwright() as p:
     c = ctx(br); pg = c.new_page(); watch(pg, 'chrome')
     pg.goto(LAND + '?src=tt_bio'); pg.wait_for_timeout(1200)
     out('quick start text [quick.3]', pg.evaluate("document.querySelector('[data-cms=\"quick.3\"]').textContent"))
+    form(pg, 'kyenzotest'); pg.wait_for_timeout(500)
+    out('quick start form, 9.75.0 [one jump into the review, no install guide, no card, name kept]', [pg.evaluate("window.__navs.pop()"), pg.evaluate("!!document.getElementById('ins-ov') && !document.getElementById('ins-ov').hidden"), pg.evaluate(SHOWN), pg.evaluate(HAND)])
+    pg.evaluate("localStorage.removeItem('lc102-handoff'); 0")
     submit(pg, 'https://www.chess.com/member/kyenzotest'); pg.wait_for_timeout(300)
     out('submit [no jump into the app, still on the landing, name kept, message]', [pg.evaluate("window.__navs.length"), pg.evaluate("location.pathname"), pg.evaluate(HAND), pg.evaluate("document.querySelector('[data-qs-msg]').textContent")])
     pg.wait_for_timeout(1500)
@@ -143,6 +154,6 @@ with sync_playwright() as p:
     c.close()
     br.close()
 l = open(REPO + '/index.html', encoding='utf-8').read(); a = open(REPO + '/app.html', encoding='utf-8').read(); m = open(REPO + '/lc102.js', encoding='utf-8').read().strip()
-out('LC102 [same text in lc102.js and index.html, init, not in the app, LC94 hands over, build]', [m in l, 'try{LC102.init()}catch(e){}' in l, '/*@@module lc102*/' not in a, 'LC102.submit({u:u,site:site,src:s,url:url.pathname+url.search})' in l, __import__('re').search(r'VERSION="([\d.]+)"', m).group(1)])
+out('LC102 [same text in lc102.js and index.html, init, not in the app, LC94 keeps the name with it, build]', [m in l, 'try{LC102.init()}catch(e){}' in l, '/*@@module lc102*/' not in a, 'LC102._t.save(u,site,s)' in l, __import__('re').search(r'VERSION="([\d.]+)"', m).group(1)])
 bad = [e for e in errs if 'PAGEERROR' in e]
 print('ERRORS', len(bad)); [print(' ', e[:300]) for e in bad][:8]

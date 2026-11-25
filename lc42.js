@@ -22,6 +22,16 @@ const LC42=(()=>{
   /* 9.74.0: the first review in the same frame as Kyenzo's reels: "instinct versus MSPC". LC103's instinct ranking says what kind of move
      the played one was (a recapture, a capture, a check, a quiet move ...) and where the better move sits on that list; nothing is
      claimed that the ranking did not find. Without LC103 the block is left out. */
+  /* 9.75.0: system words out of the first review (the explanations come from LC83, which also serves the trained player) */
+  function plain(t){
+    return String(t==null?"":t)
+      .replace(/\b(?:a|the|your)?\s*CCA scan\b/gi,"a look at every check, capture and attack").replace(/\bCCAs?\b/g,"checks, captures and attacks")
+      .replace(/\bAlarm Signals\b/gi,"warning signs").replace(/\bAlarm Signal\b/gi,"warning sign").replace(/\bWorking Points\b/gi,"habits").replace(/\bWorking Point\b/gi,"habit")
+      .replace(/\bAction Step\b/gi,"next step").replace(/\s*\((?:the )?[MSPC] of MSPC\)/g,"").replace(/\bthe [MSPC] of MSPC\b/g,"this step").replace(/\bMSPC\b ?(?:check|scan|steps?)?/g,"the check before you move")
+      .replace(/\s{2,}/g," ").trim().replace(/(^|[.!?]\s+)([a-z])/g,(m,p,c)=>p+c.toUpperCase());
+  }
+  /* 9.75.0: the first review looks at the last LOST game first (a game that was won in two moves or played at 99 % has little to teach) */
+  function gameOrder(gs){const l=(gs||[]).filter(g=>g&&g.pgn);return l.filter(g=>g.res==="loss").concat(l.filter(g=>g.res!=="loss"))}
   function instinctHTML(fen,r,ps,bestSan){
     try{
       const inst=typeof LC103!=="undefined"?(LC103.instinct||LC103._t&&LC103._t.instinct):null;   /* LC103 keeps it under _t */
@@ -32,8 +42,8 @@ const LC42=(()=>{
       if(bi<0)return"";
       const tag=pi>=0&&list[pi].tags&&list[pi].tags.length?list[pi].tags[0]:"";
       const kind=tag&&tag!=="quiet"?" (a "+tag+")":"";
-      const rank=bi>=2?" It is number "+(bi+1)+" of "+list.length+" on the list of moves that come to mind first: instinct skips it, the MSPC check finds it.":bi===1?" It was the second move that comes to mind: one check of their reply would have shown it.":" It was right there: the first move that comes to mind. The check before playing is what was missing.";
-      return'<h4>Instinct versus MSPC</h4><p><b>Instinct played '+E(ps)+'</b>'+E(kind)+'. <b>MSPC finds '+E(bestSan)+'</b>.'+E(rank)+'</p>';
+      const rank=bi>=2?" It is number "+(bi+1)+" of "+list.length+" on the list of moves that come to mind first: instinct skips it, one calm check before you move finds it.":bi===1?" It was the second move that comes to mind: one look at their reply would have shown it.":" It was right there: the first move that comes to mind. The check before playing is what was missing.";
+      return'<h4>Your instinct versus the better move</h4><p><b>Your instinct played '+E(ps)+'</b>'+E(kind)+'. <b>The better move was '+E(bestSan)+'</b>.'+E(rank)+'</p>';
     }catch(e){return""}
   }
   const costLine=(r,you)=>{const a=+r.after||0,b=+r.before||0,rs=String(r.replySan||"");
@@ -149,14 +159,15 @@ const LC42=(()=>{
     autoReview();poll();
   }
   const PN={p:"pawn",n:"knight",b:"bishop",r:"rook",q:"queen",k:"king"};
+  /* 9.75.0: the first review speaks plain chess, no system words (MSPC, Alarm Signals, Working Points come later, in the app) */
   const THINKK={
-    M:"Start every move with the M of MSPC: what did my opponent's last move change, and what does it threaten?",
-    S:"After the M, name the pawn structure and the Alarm Signals on the board (tension, a closed centre, an enemy outpost, an exposed king) before you pick a plan.",
-    P:"Before you decide, list your checks, captures and attacks (the P of MSPC). The strongest move is very often one of them.",
-    C:"Calculate their best reply to your move (the C of MSPC). If you only look at your own idea, you miss what they play next."};
+    M:"Start every move with your opponent's last move: what did it change, and what does it threaten?",
+    S:"Before you pick a plan, look at the whole board: which pieces are not protected, where is the tension, how safe are both kings?",
+    P:"Before you decide, list your checks, captures and attacks. The strongest move is very often one of them.",
+    C:"Look at their best reply to your move. If you only look at your own idea, you miss what they play next."};
   const NEXTK={
     M:"say out loud what your opponent's last move changed before you touch a piece.",
-    S:"before every move, name the Alarm Signal on the board and run the Working Point that belongs to it.",
+    S:"before every move, ask which of your pieces is not protected and what their next move threatens.",
     P:"write down your checks, captures and attacks first, then choose.",
     C:"look one move further: what is their best reply?"};
   /* what went wrong, in the app's own MSPC words (M / S / P / C) */
@@ -188,10 +199,10 @@ const LC42=(()=>{
       const bk=/#/.test(bestSan)?"gives checkmate":/\+/.test(bestSan)?"gives check":/x/.test(bestSan)?"is a capture":"is a quiet move";
       /* 9.56.0: THIS mistake, read from the board and Stockfish (LC83.diagnose); the stock lines are only the fallback */
       let dg=null;try{dg=LC83.diagnose({fen:fen,color:g.color,played:r.played,bestUci:r.bestUci,replyUci:r.replyUci})}catch(e){dg=null}
-      box.innerHTML=instinctHTML(fen,r,ps,bestSan)+'<h4>What went wrong</h4><p>'+E(dg&&dg.error||y.d)+'</p>'
+      box.innerHTML=instinctHTML(fen,r,ps,bestSan)+'<h4>What went wrong</h4><p>'+E(plain(dg&&dg.error||y.d))+'</p>'
         +'<h4>The better move: '+E(bestSan)+'</h4><p>'+E(bestSan)+' '+bk+'. Before your move you were '+E(evalWords(r.before))+'; after '+E(ps)+' you were '+E(evalWords(r.after))+'.</p>'
-        +'<h4>How you could have found it</h4><p>'+E(dg&&dg.find||THINKK[y.k])+'</p>'
-        +'<p class="lc52-next"><b>In your next game:</b> '+E(dg?dg.action:NEXTK[y.k])+'</p>'+(()=>{try{return LC61.tail({fen:fen,color:g.color,k:dg?dg.k:y.k,why:y.d,ps:ps,diag:dg})}catch(e){return""}})();
+        +'<h4>How you could have found it</h4><p>'+E(plain(dg&&dg.find||THINKK[y.k]))+'</p>'
+        +'<p class="lc52-next"><b>In your next game:</b> '+E(plain(dg?dg.action:NEXTK[y.k]))+'</p>';   /* 9.75.0: no LC61 tail (Alarm Signal / Working Point) in the first review */
       box.hidden=false;
     };
     let board=null,tries=0,finished=false;
@@ -243,7 +254,7 @@ const LC42=(()=>{
     try{ready=LC50.pre.ready(s0.site,s0.user)}catch(e){}   /* the first mistake was found while the first-run questions were going: no loading screen */
     try{importRest()}catch(e){}                              /* 9.36.0: the other recent games are fetched right away (network only, no engine) */
     const sh=openSheet({title:"Your first win",cls:"lc42-sheet lc42-tease",noFocus:true,
-      html:ready?'':'<p data-lc42-tmsg><b>Your latest game is on its way.</b> I replay it with Stockfish right here, and your first big mistake shows up the moment I find it.</p><div data-lc42-prev class="lc42-prev"></div><div class="lc39-prog"><span data-lc42-prog></span></div><p class="small muted">Meanwhile your other recent games are fetched in the background.</p>'+saveBlock(),
+      html:ready?'':'<p data-lc42-tmsg><b>Your last lost game is on its way.</b> I replay it with Stockfish right here, and the mistake that cost you shows up the moment I find it.</p><div data-lc42-prev class="lc42-prev"></div><div class="lc39-prog"><span data-lc42-prog></span></div><p class="small muted">Meanwhile your other recent games are fetched in the background.</p>'+saveBlock(),
       onClose:()=>{alive=false;if(st().step==="first")quizEnd()}});
     const el=sh&&sh.el;if(!el)return;
     const pv=preview(el),bar=p=>{const x=Q("[data-lc42-prog]",el);if(x)x.style.width=Math.round(Math.max(0,Math.min(1,p))*100)+"%"};
@@ -254,19 +265,19 @@ const LC42=(()=>{
     try{const w=await LC50.pre.wait(s0.site,s0.user);if(w&&w.g&&w.r&&alive&&el.isConnected){clearInterval(pt);finish(w.g,w.r);return}}catch(e){}    /* a scan that is already running: wait for it, do not start a second one */
     clearInterval(pt);
     let gs=[];
-    try{gs=(await LC39._t.games(s0.site,s0.user,2))||[]}catch(e){gs=[]}
+    try{gs=(await LC39._t.games(s0.site,s0.user,10))||[]}catch(e){gs=[]}
     if(!alive||!el.isConnected)return;
-    const list=gs.filter(x=>x&&x.pgn).slice(0,2);
+    const list=gameOrder(gs).slice(0,3);
     if(!list.length){stop("I could not load a recent game for "+s0.user+". You can check the username later in your account. Continue.");return}
     let g=list[0],r=null;
-    for(let k=0;k<list.length;k++){        /* the latest game, or the one before it when the latest was clean */
+    for(let k=0;k<list.length;k++){        /* the last lost game, or the next one when it was clean (9.75.0: up to 3) */
       const x=list[k];let rr=null;
       try{rr=await firstMistake(x,(p,i,fens)=>{bar(p);pv.set(fens,i,x.color)},()=>alive&&el.isConnected)}
       catch(e){if(alive&&el.isConnected)stop("Stockfish could not start on this device, so I cannot scan your game. Continue.");return}
       if(!alive||!el.isConnected||!rr)return;
       if(!r){g=x;r=rr}
       if(!rr.none){g=x;r=rr;break}
-      if(k===0&&list[1]){const m=Q("[data-lc42-tmsg]",el);if(m)m.innerHTML="<b>Your latest game was clean.</b> Let me check the one before it…"}
+      if(list[k+1]){const m=Q("[data-lc42-tmsg]",el);if(m)m.innerHTML="<b>That game was clean.</b> Let me check another one…"}
     }
     finish(g,r);
   }
@@ -344,6 +355,8 @@ const LC42=(()=>{
     try{const w=el.closest(".sheet-wrap");if(w&&!w.__lc42m){w.__lc42m=1;new MutationObserver(()=>{if(!w.isConnected)myMR.alive=false}).observe(document.body,{childList:true})}}catch(e){}
   }
   const LETTER={M:"Move",S:"Specifics",P:"Priorities",C:"Calculation"};
+  /* 9.75.0: the same four steps in plain words for the first review */
+  const PLAIN={M:"Their last move",S:"The whole board",P:"Your checks and captures",C:"Their reply"};
   function mPaint(soft){
     if(!MR)return;const el=MR.el,s=st(),m=s.m,g=MR.g;if(!m||!el.isConnected)return;
     const n=m.list.length;
@@ -357,8 +370,9 @@ const LC42=(()=>{
       const L=m.leaks||{},keys=Object.keys(L).filter(k=>LETTER[k]).sort((a,b)=>L[b]-L[a]);
       let signed=false;try{signed=!!LC26.sync.session()}catch(e){}
       el.innerHTML='<div class="lc42-m lc42-mend"><p class="lc52-kick">Game done</p><h3 class="lc52-h">You went through '+(n===1?"the one big mistake":"all "+n+" big mistakes")+' of this game.</h3>'
-        +'<ul class="lc42-ov">'+keys.map(k=>'<li><b>'+LETTER[k]+'</b> · '+L[k]+(L[k]===1?" mistake":" mistakes")+'<small>'+E(WHY[k])+'</small></li>').join("")+'</ul>'
-        +(keys.length?'<p>Your biggest leak in this game: <b>'+LETTER[keys[0]]+'</b>. It becomes one of your personal working points.</p>':"")
+        +'<ul class="lc42-ov">'+keys.map(k=>'<li><b>'+PLAIN[k]+'</b> · '+L[k]+(L[k]===1?" mistake":" mistakes")+'<small>'+E(WHY[k])+'</small></li>').join("")+'</ul>'
+        +(keys.length?'<p>The habit that cost you the most in this game: <b>'+PLAIN[keys[0]].toLowerCase()+'</b>. The app trains it with you from now on.</p>':"")
+        +(()=>{try{return typeof LC107!=="undefined"&&LC107.giftHTML?LC107.giftHTML():""}catch(e){return""}})()
         +'<div class="btn-row"><button type="button" class="btn btn-primary" data-lc42-mclaim>Claim Level 2</button>'+(signed?"":'<button type="button" class="btn btn-ghost" data-lc42-msave>Save my progress</button>')+'</div>'
         +(signed?"":'<p class="small muted">Saving is optional. It keeps your progress and feedback on every device.</p>')+'</div>';
       return;
@@ -368,14 +382,14 @@ const LC42=(()=>{
     const r=m.list[m.idx],w=g.color==="w";
     let X=null;try{X=LC83.explain(Object.assign({color:g.color},r))}catch(e){}
     if(!X){const y=why(Object.assign({},r,{oppLast:r.oppSan}));X={k:y.k,M:"",S:"",P:y.d,C:"",next:NEXTK[y.k]}}
-    const row=(k,txt)=>txt?'<li class="lc42-ml'+(X.k===k?" is-k":"")+'"><b>'+k+' · '+LETTER[k]+'</b>'+(X.k===k?' <span class="lc42-here">this is where it went wrong</span>':"")+'<p>'+E(txt)+'</p></li>':"";
+    const row=(k,txt)=>txt?'<li class="lc42-ml'+(X.k===k?" is-k":"")+'"><b>'+PLAIN[k]+'</b>'+(X.k===k?' <span class="lc42-here">this is where it went wrong</span>':"")+'<p>'+E(plain(txt))+'</p></li>':"";
     el.innerHTML='<div class="lc42-m">'
       +'<p class="lc52-kick">Mistake '+(m.idx+1)+(m.fin?" of "+n:"")+' · move '+r.no+'</p>'
       +'<h3 class="lc52-h">You played <b>'+E(r.played.san)+'</b>. '+E(costLine(r))+'</h3>'
       +'<div class="lc52-boardwrap"><div data-lc42-mb class="lc25-pb lc52-board"></div></div>'
       +'<p class="small muted lc42-leg"><span class="lc42-red">Red</span> your move · <span class="lc42-blue">Blue</span> the better move'+(r.oppSan?' · their last move '+E(r.oppSan)+' is highlighted':'')+'</p>'
       +'<ol class="lc42-mspc">'+row("M",X.M)+row("S",X.S)+row("P",X.P)+row("C",X.C)+'</ol>'
-      +'<p class="lc52-next"><b>Your rule for the next game:</b> '+E(X.next||NEXTK[X.k])+'</p>'
+      +'<p class="lc52-next"><b>Your rule for the next game:</b> '+E(plain(X.next||NEXTK[X.k]))+'</p>'
       +'<div class="btn-row"><button type="button" class="btn btn-primary lc42-yes" data-lc42-next>Yes, I’ll apply this</button></div>'
       +'<p class="small muted" data-lc42-mstat>'+(m.fin?(m.idx+1>=n?"That was the last one in this game.":(n-m.idx-1)+" more after this one."):"Still going through the rest of your game…")+'</p></div>';
     try{
@@ -666,6 +680,6 @@ const LC42=(()=>{
       }
     }catch(e){console.error("lc42",e)}
   }
-  return{init:init,afterRender:afterRender,begin:begin,startFirst:startFirst,fill:fill,owns:owns,eligible:eligible,_t:{instinctHTML:instinctHTML,st:st,put:put,tick:tick,firstDone:firstDone,secondDone:secondDone,onListened:onListened,scanRest:scanRest,paint:paint,stripHTML:stripHTML,teaser:teaser,importRest:importRest,firstMistake:firstMistake,leaksAll:leaksAll,marathon:marathon,mNext:mNext,scanMore:scanMore,enrich:enrich}};
+  return{init:init,afterRender:afterRender,begin:begin,startFirst:startFirst,fill:fill,owns:owns,eligible:eligible,_t:{plain:plain,gameOrder:gameOrder,instinctHTML:instinctHTML,st:st,put:put,tick:tick,firstDone:firstDone,secondDone:secondDone,onListened:onListened,scanRest:scanRest,paint:paint,stripHTML:stripHTML,teaser:teaser,importRest:importRest,firstMistake:firstMistake,leaksAll:leaksAll,marathon:marathon,mNext:mNext,scanMore:scanMore,enrich:enrich}};
 })();
 /*@@end lc42*/
