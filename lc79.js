@@ -1451,6 +1451,7 @@
       +(own?'<button type="button" class="lc79-b sm" data-a="mine">My last games ('+esc(own.user)+')</button>':'')
       +'<select data-f="site" aria-label="Site"><option value="chesscom">Chess.com</option><option value="lichess">Lichess</option></select><input type="text" data-f="user" placeholder="Any player’s name" aria-label="Player name" style="width:170px"><button type="button" class="lc79-b sm" data-a="theirs">Their last games</button></div>'
       +'<div class="lc79-games" data-games>'+gamesHTML()+'</div>'
+      +(HASM()?'<div class="lc79-row" data-lc79-quick><span class="lc79-hint" style="margin:0"><b>One moment, fast:</b> a random instructive position from my analysed games (only that position is checked again).</span><span class="lc79-grow"></span><select data-f="qscope" aria-label="Which games"><option value="recent"'+(AI.qscope!=="all"?" selected":"")+'>My recent games</option><option value="all"'+(AI.qscope==="all"?" selected":"")+'>All my 5,000+ games</option></select><button type="button" class="lc79-b sm" data-a="quick-good"'+(AI.busy?" disabled":"")+'>Instructive good moment</button><button type="button" class="lc79-b sm" data-a="quick-bad"'+(AI.busy?" disabled":"")+'>Instructive mistake</button></div>':'')
       +'<div class="lc79-row"><label class="lc79-f"><span>'+(HASM()?"Whose moves?":"Whose mistakes?")+'</span><select data-f="side"><option value="auto"'+(AI.side==="auto"?" selected":"")+'>'+(HASM()?"Auto: the player of this game":"Auto (my side, else the biggest mistake)")+'</option>'+(HASM()?'<option value="both"'+(AI.side==="both"?" selected":"")+'>Both sides</option>':'')+'<option value="w"'+(AI.side==="w"?" selected":"")+'>White</option><option value="b"'+(AI.side==="b"?" selected":"")+'>Black</option></select></label>'+(HASM()?'<label class="lc79-f"><span>Depth</span><select data-f="depth"><option value="deep"'+(LC103.ui().depth!=="fast"?" selected":"")+'>Thorough (about 1 s a move)</option><option value="fast"'+(LC103.ui().depth==="fast"?" selected":"")+'>Fast (about 0.4 s a move)</option></select></label>':'')+'<span class="lc79-grow"></span><button type="button" class="lc79-b" data-a="moments"'+(AI.busy?" disabled":"")+' title="Scan the whole game for every instructive moment and put them on the Showbar">Find every moment (Showbar)</button><button type="button" class="lc79-b pri" data-a="analyse"'+(AI.busy?" disabled":"")+'>'+(HASM()?"Analyse the whole game":"Find the crucial mistake")+'</button></div><p class="lc79-hint" data-st aria-live="polite"></p></section>';
     if(AI.cs)h+=caseHTML();
     box.innerHTML=h;
@@ -1475,6 +1476,49 @@
     return{i:m.i,color:m.color,san:m.san,num:m.num,loss:m.loss||0,cls:t.indexOf("blunder")>=0?"blunder":t.indexOf("mistake")>=0?"mistake":t.indexOf("inaccuracy")>=0?"inaccuracy":"good",
       best:m.best,bestSan:m.bestSan,reply:m.reply,replySan:m.replySan,k:m.letter,bestPv:m.bestPv||null,replyPv:m.replyPv||null,replyMate:m.replyMate,
       kind:m.primary,types:t,reason:m.reason,score:m.score,form:m.form,bestLine:m.bestLine||"",gap:m.gap||0,fell:!!m.fell,traps:m.traps||null,safe:m.safe||null,rank:m.rank,legal:m.legal,bestMotif:m.bestMotif||null}}
+  /* 9.73.0: "Instructive good moment" / "Instructive mistake". A random position from Kyenzo's own analysed games
+     (master/data on the branch master-data: puzzles-*.json = the positions Stockfish already flagged, games-*.json = the game),
+     recent = the newest half year, all = any half year. The game is loaded as usual, but LC103 scans ONLY that move (and the
+     positions around it), so it takes seconds; the moment then goes through the normal Game-to-Script flow (case, Make a video
+     project, Load and go to Shoot). Up to 4 tries when the deeper check does not confirm the moment. */
+  const MD=["https://cdn.jsdelivr.net/gh/lanckrietchess/Json-van-app@master-data/master/data/","https://raw.githubusercontent.com/lanckrietchess/Json-van-app/master-data/master/data/"];
+  const MDC={};
+  async function mdFetch(name){
+    if(MDC[name])return MDC[name];
+    let err=null;
+    for(const base of MD){try{const r=await fetch(base+name,{cache:"no-cache"});if(r.ok){const j=await r.json();MDC[name]=j;return j}err=new Error("HTTP "+r.status+" for "+name)}catch(e){err=e}}
+    throw err||new Error("Could not load "+name);
+  }
+  async function quickMoment(kind){
+    if(typeof LC103==="undefined"||!LC103.scan){status("This build has no moment scan.",true);return}
+    if(AI.busy)return;
+    const GOOD={great:1,brilliant:1,punish:1},BAD={blunder:1,mistake:1,missed:1},keep=AI.side;
+    try{
+      status("Picking one of my games…");
+      const idx=await mdFetch("index.json");
+      const files=(idx.files||[]).map(f=>f.name).filter(n=>/^puzzles-\d{4}/.test(n)).sort();
+      if(!files.length)throw new Error("No analysed games found on master-data.");
+      for(let tries=0;tries<4;tries++){
+        const pool=AI.qscope==="all"?files:files.slice(-1),f=pool[Math.floor(Math.random()*pool.length)];
+        const rows=await mdFetch(f);
+        const kindOk=p=>(kind==="good"?GOOD:BAD)[p.kind];
+        let cand=rows.filter(p=>kindOk(p)&&p.phase!=="opening"&&(kind==="good"?(+p.gap>=.2||p.kind==="brilliant"):(+p.loss>=.25&&Math.abs(+p.eval_before)<400)));
+        if(!cand.length)cand=rows.filter(kindOk);
+        if(!cand.length)continue;
+        const pz=cand[Math.floor(Math.random()*cand.length)];
+        status("Loading the game ("+(pz.opening||pz.eco||"")+", "+(pz.my_rating||"")+")…");
+        const games=await mdFetch(f.replace("puzzles-","games-"));
+        const g=games.find(x=>String(x.id)===String(pz.game_id));
+        if(!g||!g.pgn)continue;
+        AI.pgn=g.pgn;const t=Q('#lc79-ai [data-f="pgn"]');if(t)t.value=AI.pgn;
+        AI.side=g.color==="b"?"b":"w";AI.only=[+pz.ply];AI.list=[];AI.quick=true;
+        try{await analyse()}finally{AI.quick=false}
+        AI.side=keep;
+        if(AI.list&&AI.list.length){paintAi();status((kind==="good"?"An instructive good move":"An instructive mistake")+" from my game ("+(pz.opening||pz.eco||"")+", I was "+(pz.my_rating||"?")+"). Pick “Make a video project” to film it.");return}
+      }
+      throw new Error("No moment was confirmed in 4 tries. Try again.");
+    }catch(e){AI.side=keep;AI.only=null;AI.busy=false;status(String(e&&e.message||e),true);paintAi()}
+  }
   async function analyse(){
     const pgn=String(AI.pgn||"").trim();if(!pgn){status("Paste a PGN or pick a game first.",true);return}
     if(typeof LC80==="undefined"||!LC80.scan||typeof Engine==="undefined"){status("The analysis engine is not available in this build.",true);return}
@@ -1486,7 +1530,8 @@
       if(AI.mySide)g.color=AI.mySide;
       if(typeof LC103!=="undefined"&&LC103.scan){
         const side=AI.mySide||"both";
-        const cur=await LC103.scan(pgn,{depth:LC103.ui().depth||"deep",side:side,
+        const only=AI.only;AI.only=null;
+        const cur=await LC103.scan(pgn,{depth:LC103.ui().depth||"deep",side:side,only:only,
           onTick:(i,n,ms)=>{const left=i>2?Math.round(ms/i*(n-i)/1000):null;status("Stockfish: move "+Math.ceil((i+1)/2)+" of "+Math.ceil(n/2)+" · "+((LC103.cur()||{}).moments||[]).length+" moments so far"+(left!=null?" · about "+left+" s left":"")+"…")},
           onVerify:(q,t)=>status("Checking every moment deeper ("+(q+1)+" of "+t+")…")});
         if(!cur.moments.length)throw new Error("No moment worth a video for "+(AI.mySide?(AI.myName||(AI.mySide==="w"?"White":"Black"))+" ("+(AI.mySide==="w"?"White":"Black")+")":"either side")+" in this game. Try another one.");
@@ -1500,7 +1545,7 @@
         if(!list.length)throw new Error("No mistake worth a video in this game. Try another one.");
         AI.g=g;AI.items=items;AI.list=list.slice(0,12);AI.ci=0;buildCase();
       }
-    }catch(e){if(!AI.cancel){const m=String(e&&e.message||e);status(/stopped/.test(m)?"Stopped.":m||"The analysis failed.",!/stopped/.test(m));if(!/stopped/.test(m))console.error("[Game-to-Script] analysis",e)}AI.busy=false;paintAi();return}
+    }catch(e){if(!AI.cancel){const m=String(e&&e.message||e);status(/stopped/.test(m)?"Stopped.":m||"The analysis failed.",!/stopped/.test(m));if(!/stopped/.test(m))if(!AI.quick)console.error("[Game-to-Script] analysis",e)}AI.busy=false;paintAi();return}
     AI.busy=false;paintAi();status("");findSimilar();cloudEval();
   }
   /* 9.56.0: the diagnosis of THIS mistake (LC83.diagnose: the board, Stockfish's better move and refutation, their last move and threat) */
@@ -1713,6 +1758,7 @@ BCLOSE);
     if(a==="theirs"){const u=Q('#lc79-ai [data-f="user"]').value,s=Q('#lc79-ai [data-f="site"]').value;return loadGames(s,u)}
     if(a==="usegame"){AI.pgn=AI.games[+b.getAttribute("data-i")]||"";const t=Q('#lc79-ai [data-f="pgn"]');if(t)t.value=AI.pgn;return analyse()}
     if(a==="analyse"){const t=Q('#lc79-ai [data-f="pgn"]');AI.pgn=t?t.value:AI.pgn;return analyse()}
+    if(a==="quick-good"||a==="quick-bad"){const q=Q('#lc79-ai [data-f="qscope"]');AI.qscope=q?q.value:AI.qscope;return quickMoment(a==="quick-good"?"good":"bad")}
     if(a==="moments"){const t=Q('#lc79-ai [data-f="pgn"]');AI.pgn=t?t.value:AI.pgn;if(typeof LC103==="undefined"){say("The Moment Finder is not in this build.","err");return}closeLayer("lc79-ai");return LC103.open({pgn:AI.pgn,side:AI.side==="w"||AI.side==="b"?AI.side:"",auto:!!String(AI.pgn||"").trim()})}
     if(a==="case"){AI.ci=+b.getAttribute("data-i")||0;AI.whoAuto=true;buildCase();AI.cloud=null;paintAi();findSimilar();cloudEval();return}
     if(a==="sim")return findSimilar();

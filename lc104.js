@@ -48,7 +48,8 @@ const LC104=(()=>{
       '<p style="margin:0;font-weight:700">'+(typeof icon==="function"?icon("chess-pawn")+" ":"")+"Your White repertoire</p>"+
       '<p class="small muted" style="margin:0">'+H(lead)+" Your Black repertoire (Caro-Kann and Semi-Slav) always counts.</p>"+
       '<div class="btn-row" style="display:flex;flex-wrap:wrap;gap:6px">'+btn("d4")+btn("e4")+btn("both")+"</div>"+
-      '<p class="small muted" style="margin:0" data-lc104-note>'+(p?"Now testing: "+H(LONG[v])+".":"Not picked yet, so Ranked tests "+H(LONG[v])+". One tap changes it.")+"</p></div>";
+      '<p class="small muted" style="margin:0" data-lc104-note>'+(p?"Now testing: "+H(LONG[v])+".":"Not picked yet, so Ranked tests "+H(LONG[v])+". One tap changes it.")+"</p>"+
+      (route==="openings"?'<a class="small" href="#opening-path">Master one opening: the middlegames and endgames it leads to →</a>':"")+"</div>";
   }
   function paint(route){
     const view=Q("#view");if(!view||!ROUTES[route])return;

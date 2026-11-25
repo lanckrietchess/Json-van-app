@@ -106,7 +106,7 @@ const LC95=(()=>{
   async function mount(view){
     css();S.view=view;const pr=params();
     S.tab=pr.tab==="mist"||pr.tab==="open"?pr.tab:pr.eco?"open":"find";S.eco=/^[A-E]\d{0,2}$/.test(pr.eco||"")?pr.eco:"";S.tier=TIERS.indexOf(pr.tier)>=0?pr.tier:"";
-    S.phase=/^(opening|middlegame|endgame)$/.test(pr.phase||"")?pr.phase:"";S.ids=Array.isArray(pr.ids)?pr.ids.map(String).filter(x=>/^[A-Za-z0-9_-]{1,40}$/.test(x)).slice(0,40):[];
+    S.phase=/^(opening|middlegame|endgame)$/.test(pr.phase||"")?pr.phase:"";S.ids=Array.isArray(pr.ids)?pr.ids.map(String).filter(x=>/^[A-Za-z0-9_-]{1,40}$/.test(x)).slice(0,40):[];S.label=typeof pr.label==="string"?pr.label.replace(/[<>]/g,"").slice(0,60):"";
     if(S.ids.length||S.phase){S.tab="find";S.eco="";S.tier=""}
     view.innerHTML='<div class="lc95"><header class="lc95-hd"><p class="lc95-tag">MSPC trainer</p><h1>Find the moves I found</h1>'
       +'<p class="muted">Real positions from my own rated games on the climb from 304 to 2105. Run M, S, P and C first, then play the move. Stockfish checked every answer, so it is the truth, not my opinion. New to MSPC? <a href="#learn-mspc">Learn the system first</a>.</p></header>'
@@ -134,7 +134,7 @@ const LC95=(()=>{
     if(C.state==="nosql"){b.innerHTML='<div class="panel pad"><p>'+(owner()?"Run sql/20261118150000_lc95_master_games.sql in Supabase, then Sync now.":"My games are being prepared. Check back soon.")+"</p></div>";return}
     if(!pro()){const done=store.get("lc95-free",{});const ids=done.day===today()?done.done||[]:[];S.list=S.list.filter(p=>ids.indexOf(p.id)<0);if(!S.list.length){b.innerHTML=lockCard("done");return}}
     if(!S.list.length){b.innerHTML='<div class="panel pad"><p>No positions here yet.'+(S.tab==="mist"&&S.tier?" Try another level.":"")+"</p>"+(S.tab==="mist"?tierPicker():"")+(S.eco?'<button type="button" class="btn btn-ghost" data-lc95="openings">All openings</button>':"")+"</div>";return}
-    b.innerHTML=(S.ids.length||S.phase?'<p class="lc95-eco">'+E(S.ids.length?"Picked from Kyenzo’s Gems":"My "+S.phase+" positions")+' <button type="button" class="btn btn-quiet btn-sm" data-lc95-tab="find">All positions</button></p>':"")+(S.tab==="mist"?tierPicker():"")+(S.eco?'<p class="lc95-eco">'+E(S.eco)+" · "+E(S.list[0].opening||"")+' <button type="button" class="btn btn-quiet btn-sm" data-lc95="openings">All openings</button></p>':"")
+    b.innerHTML=(S.ids.length||S.phase?'<p class="lc95-eco">'+E(S.label||(S.ids.length?"Picked from Kyenzo’s Gems":"My "+S.phase+" positions"))+' <button type="button" class="btn btn-quiet btn-sm" data-lc95-tab="find">All positions</button></p>':"")+(S.tab==="mist"?tierPicker():"")+(S.eco?'<p class="lc95-eco">'+E(S.eco)+" · "+E(S.list[0].opening||"")+' <button type="button" class="btn btn-quiet btn-sm" data-lc95="openings">All openings</button></p>':"")
       +'<div class="lc95-run"><div class="lc95-bd"><div data-lc95-board></div></div><div class="lc95-pn panel pad" data-lc95-panel aria-live="polite"></div></div>';
     S.board=Board(Q("[data-lc95-board]",b),{});show();
   }
