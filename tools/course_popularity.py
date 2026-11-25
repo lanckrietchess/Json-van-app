@@ -3,7 +3,9 @@
 #
 #   python3 tools/course_popularity.py fetch [--content content.json] [--out tools/course_popularity.json]
 #       env LICHESS_TOKEN (the players' database needs a Lichess token since 2025; the masters database does not)
-#   python3 tools/course_popularity.py apply [--content content.json] [--pop tools/course_popularity.json] [--base FILE] [--write]
+#   python3 tools/course_popularity.py apply [--content content.json] [--pop tools/course_popularity.json] [--base FILE] [--games DIR] [--write]
+#       --games: Kyenzo's games-*.json (branch master-data); used for a position where the players' database has no answer
+#       (no LICHESS_TOKEN yet), so the order is then "what his club opponents played", masters breaking ties
 #
 # fetch: every position of the four opening courses where the tree branches (or a chapter starts), up to move 15, is asked
 #   twice: the Lichess players' database, rated 1000-1800 (blitz, rapid, classical: the "under 2000" players the app is for), and
@@ -117,9 +119,29 @@ def fetch(a):
 
 
 # ---------------------------------------------------------------- apply
+GAMES = {}   # key -> {"n": games, "m": {san: games}} from Kyenzo's own games (the fallback for the players' database)
+
+def load_games(d):
+    """His ~5,100 rated games (1200-2100, opponents of every level): what his opponents played, per position."""
+    import glob, re
+    for f in sorted(glob.glob(os.path.join(d, "games-*.json"))):
+        for g in json.load(open(f)):
+            body = g["pgn"].split("\n\n", 1)[-1]
+            body = re.sub(r"\{[^}]*\}", "", body); body = re.sub(r"\d+\.(\.\.)?", " ", body)
+            b = chess.Board()
+            for t in body.split()[:MAX_PLY]:
+                if t in ("1-0", "0-1", "1/2-1/2", "*"): break
+                try: mv = b.parse_san(t)
+                except Exception: break
+                k = key_of(b); row = GAMES.setdefault(k, {"n": 0, "m": {}})
+                row["n"] += 1; san = b.san(mv); row["m"][san] = row["m"].get(san, 0) + 1
+                b.push(mv)
+
 def pop_of(cache, b, san):
+    """(players under 2000, masters, players total, masters total): the Lichess players' database when it was asked,
+    otherwise Kyenzo's own games (his opponents are club players too)."""
     row = cache.get(key_of(b)) or {}
-    l, m = row.get("l") or {}, row.get("m") or {}
+    l, m = row.get("l") or GAMES.get(key_of(b)) or {}, row.get("m") or {}
     return (l.get("m", {}).get(san, 0), m.get("m", {}).get(san, 0), l.get("n", 0), m.get("n", 0))
 
 
@@ -131,6 +153,7 @@ def reach(cache, b):
 def apply(a):
     doc = json.load(open(a.content, encoding="utf-8"))
     cache = json.load(open(a.pop))["pos"]
+    if a.games: load_games(a.games); print(f"Kyenzo's games: {len(GAMES)} positions as the fallback for the players' database")
     base = set()
     if a.base:
         for t in json.load(open(a.base, encoding="utf-8"))["trees"]:
@@ -154,7 +177,7 @@ def apply(a):
                 L = o.get("l", parent_l)
                 if mover != side and (t["id"], p) not in base and a.base:
                     pl, pm, nl, nm = pop_of(cache, b, o["m"])
-                    sl = pl / nl if nl >= 200 else None
+                    sl = pl / nl if nl >= (200 if (cache.get(key_of(b)) or {}).get("l") else 12) else None
                     sm = pm / nm if nm >= 50 else None
                     if sl is not None or sm is not None:
                         bump = 0 if (sl or 0) >= 0.15 else 1 if (sl or 0) >= 0.04 else 2
@@ -207,6 +230,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(); ap.add_argument("mode", choices=["fetch", "apply"])
     ap.add_argument("--content", default="content.json"); ap.add_argument("--out", default="tools/course_popularity.json")
     ap.add_argument("--pop", default="tools/course_popularity.json"); ap.add_argument("--base", default="")
-    ap.add_argument("--write", action="store_true")
+    ap.add_argument("--write", action="store_true"); ap.add_argument("--games", default="", help="dir with games-*.json: fallback when the players' database was not asked")
     a = ap.parse_args()
     fetch(a) if a.mode == "fetch" else apply(a)
