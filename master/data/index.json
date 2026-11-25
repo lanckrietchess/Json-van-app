@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": 1795431748,
+ "built": 1795614275,
  "files": [
   {
    "name": "games-2023-2.json",
@@ -28,7 +28,7 @@
   },
   {
    "name": "games-2026-2.json",
-   "rows": 1442
+   "rows": 1473
   },
   {
    "name": "puzzles-2023-2.json",
@@ -56,7 +56,7 @@
   },
   {
    "name": "puzzles-2026-2.json",
-   "rows": 5426
+   "rows": 5564
   }
  ]
 }
