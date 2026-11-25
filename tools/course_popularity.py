@@ -17,7 +17,7 @@
 #      tie and decide where the players' database has no games); Kyenzo's own moves keep his order (his first move stays his main
 #      move). Walking a chapter from the top, and "Train now" (the first line not yet trained), therefore reach the most popular
 #      line first and the niche lines last.
-#   2. the chapters of a course are ordered by how often their start position is reached (players' database first).
+#   2. the chapters of a course are ordered as a tree, most played branch first, move by move (players' database first).
 #   3. levels, only for the lines added in 9.72.0 (--base = content.json before them; Kyenzo's earlier lines keep his levels):
 #      a reply played in at least 15 % of the players' games stays on its parent's level, 4-15 % goes up one, rarer goes up two,
 #      and a reply that masters play (>= 10 %) but club players hardly do (< 4 %) goes to Level 5 (Master).
@@ -195,25 +195,25 @@ def apply(a):
             if not any(L["k"] == k for L in t["levels"]) and any(o.get("l") == k for o in iter_nodes(t["tree"])):
                 t["levels"].append({"k": k, "rt": 2}); t["levels"].sort(key=lambda x: x["k"])
     # chapter order inside every course: how often the chapter's start position is reached
-    def start_reach(t):
-        """Games that reach the chapter's own lines: follow the single road from move 1; at the first branch, add the games
-        of every reply the chapter holds there (a chapter of rare second moves ranks by those rare moves, not by 1.e4 c6)."""
-        b, ns, score = chess.Board(), t["tree"], (0, 0)
+    def start_key(t):
+        """Chapters in tree order, most popular branch first: along the chapter's single road from move 1, every move adds
+        -(games of that move); at the first branch, -(games of all the replies the chapter holds there). Compared move by
+        move, so all chapters after 1...e5 come before those after 1...d5 when club players answer 1.e4 with 1...e5 more."""
+        b, ns, key = chess.Board(), t["tree"], []
         while ns:
             if len(ns) >= 2:
-                tot = [pop_of(cache, b, o["m"]) for o in ns]
-                return (sum(x[0] for x in tot), sum(x[1] for x in tot)) if any(x[0] or x[1] for x in tot) else score
+                key.append(-sum(pop_of(cache, b, o["m"])[0] or pop_of(cache, b, o["m"])[1] for o in ns)); break
             o = ns[0]
-            pl, pm, nl, nm = pop_of(cache, b, o["m"])
-            if key_of(b) in cache: score = (pl, pm)
+            pl, pm, _, _ = pop_of(cache, b, o["m"])
+            key.append(-(pl or pm))
             b.push_san(o["m"]); ns = o.get("c", [])
-        return score
+        return key
     trees = doc["trees"]
     for g in GROUPS:
         idx = [i for i, t in enumerate(trees) if t["group"] == g]
         chs = [trees[i] for i in idx]
-        sc = {t['id']: start_reach(t) for t in chs}
-        chs.sort(key=lambda t: (-sc[t['id']][0], -sc[t['id']][1]))
+        sc = {t['id']: start_key(t) for t in chs}
+        chs.sort(key=lambda t: sc[t['id']])
         for i, t in zip(idx, chs): trees[i] = t
     print(f"opponent replies reordered at {moved} positions, levels changed on {relev} new lines")
     if a.write:
