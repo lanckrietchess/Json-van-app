@@ -23,6 +23,8 @@ Definitions (from the board and Stockfish, never Chess.com's private labels: the
   accuracy      per move 103.1668 * exp(-0.04354 * (win% before - win% after)) - 3.1669 (Lichess), averaged
 Usage:
   python3 tools/master_games.py run --year 2024 [--half 1|2] [--user lanckrietchess_yt] [--workers 4] [--nodes 60000]
+    (9.72.0: with LICHESS_USER=<name> in the environment, that Lichess account's rated blitz + rapid games of the same
+     half year are added (row id = the Lichess game id); the workflow reads it from the repository variable LICHESS_USER)
   python3 tools/master_games.py index            (rebuilds master/data/index.json from the year files)
   python3 tools/master_games.py --self-test      (two sample games from tests/fixtures/master_games.json, no network)
 Needs: pip install python-chess, and a stockfish binary on PATH (or STOCKFISH=/path).
@@ -75,11 +77,68 @@ def opening_of(eco_url):
     if not eco_url: return ''
     slug = eco_url.rstrip('/').split('/')[-1]
     slug = re.split(r'-\d|\.\.\.', slug)[0]
-    return slug.replace('-', ' ').strip()
+    return slug.replace('-', ' ').replace('_', ' ').strip()
 
 def strip_pgn(pgn):
     """Movetext without clock comments, headers kept (the app's chess.js reads it)."""
     return re.sub(r'\s*\{\[%clk [^}]*\]\}', '', pgn).replace('\r', '')
+
+def anonymise(row):
+    """9.72.0: the opponent's name never reaches the public branch. Every header that holds it (White / Black, Termination,
+    a Lichess Site / Link to the game page keeps working) gets "Opponent" instead; Kyenzo's own name stays."""
+    pgn = row.get('pgn') or ''
+    m = re.search(r'\[%s "([^"]*)"\]' % ('Black' if row.get('color') == 'w' else 'White'), pgn)
+    if not m or not m.group(1) or m.group(1) == 'Opponent': return row
+    opp = m.group(1)
+    head, sep, body = pgn.partition('\n\n')
+    head = re.sub(r'"([^"]*)"', lambda h: '"' + re.sub(re.escape(opp), 'Opponent', h.group(1), flags=re.I) + '"', head)
+    row['pgn'] = head + sep + body
+    return row
+
+LICHESS_STATUS = {'mate': 'checkmated', 'resign': 'resigned', 'outoftime': 'timeout', 'timeout': 'abandoned', 'draw': 'agreed',
+                  'stalemate': 'stalemate', 'repetition': 'repetition', 'insufficientMaterial': 'insufficient', 'cheat': 'abandoned', 'noStart': 'abandoned'}
+
+def from_lichess(g, me_name):
+    """A Lichess API game (NDJSON, pgnInJson) in the Chess.com shape the analysis reads. Kyenzo's side gets `me_name` as its
+    username, so the analysis finds him under the same name as on Chess.com; the row id is the Lichess game id (8 letters and
+    digits), which never collides with Chess.com's numeric ids."""
+    pl = g.get('players', {})
+    wn = ((pl.get('white') or {}).get('user') or {}).get('name', '')
+    bn = ((pl.get('black') or {}).get('user') or {}).get('name', '')
+    status, winner = g.get('status', ''), g.get('winner')
+    def side(c, name):
+        r = 'win' if winner == c else (LICHESS_STATUS.get(status, 'resigned') if winner else ('stalemate' if status == 'stalemate' else 'agreed'))
+        return {'username': name, 'rating': (pl.get(c) or {}).get('rating') or 0, 'result': r}
+    me_is_white = wn.lower() == g.get('_me', '').lower()
+    clock = g.get('clock') or {}
+    op = g.get('opening') or {}
+    return {'url': 'https://lichess.org/' + g.get('id', ''), 'uuid': 'li-' + g.get('id', ''), 'pgn': g.get('pgn', ''),
+            'time_class': g.get('speed'), 'time_control': '%s+%s' % (clock.get('initial', ''), clock.get('increment', '')),
+            'end_time': int((g.get('lastMoveAt') or g.get('createdAt') or 0) / 1000), 'rules': 'chess', 'rated': True,
+            'eco': ('https://lichess.org/opening/' + op.get('name', '').replace(' ', '_').replace(':', '').replace(',', '')) if op.get('name') else '',
+            'white': side('white', me_name if me_is_white else wn), 'black': side('black', bn if me_is_white else me_name)}
+
+def fetch_lichess(user, year, half, me_name):
+    """Rated blitz + rapid games of a Lichess account in one half year, from the public games export (no token needed)."""
+    import datetime
+    lo = datetime.datetime(year, 1 if half != 2 else 7, 1, tzinfo=datetime.timezone.utc)
+    hi = datetime.datetime(year + (1 if half != 1 else 0), 1 if half != 1 else 7, 1, tzinfo=datetime.timezone.utc)
+    url = ('https://lichess.org/api/games/user/%s?rated=true&perfType=blitz,rapid&pgnInJson=true&clocks=false&evals=false'
+           '&opening=true&since=%d&until=%d' % (user, int(lo.timestamp() * 1000), int(hi.timestamp() * 1000)))
+    req = urllib.request.Request(url, headers={'User-Agent': UA, 'Accept': 'application/x-ndjson'})
+    out = []
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            for line in r:
+                line = line.strip()
+                if not line: continue
+                g = json.loads(line.decode('utf-8'))
+                if g.get('variant') not in (None, 'standard'): continue
+                g['_me'] = user
+                out.append(from_lichess(g, me_name))
+    except urllib.error.HTTPError as e:
+        print('lichess %s: HTTP %s, skipped' % (user, e.code), flush=True)
+    return out
 
 def get_json(url, tries=4):
     for i in range(tries):
@@ -280,7 +339,13 @@ def run_year(user, year, workers, nodes, games=None, half=0):
     gpath, ppath = os.path.join(OUT, 'games-%s.json' % tag), os.path.join(OUT, 'puzzles-%s.json' % tag)
     old_g = {r['id']: r for r in (json.load(open(gpath)) if os.path.exists(gpath) else []) if r.get('v') == VERSION}
     old_p = [p for p in (json.load(open(ppath)) if os.path.exists(ppath) else []) if p['game_id'] in old_g]
-    if games is None: games = fetch_year(user, year, half)
+    if games is None:
+        games = fetch_year(user, year, half)
+        li = os.environ.get('LICHESS_USER', '').strip()
+        if li and re.fullmatch(r'[A-Za-z0-9_-]{2,30}', li):
+            lg = fetch_lichess(li, year, half, user)
+            print('lichess %s: %d games' % (li, len(lg)), flush=True)
+            games = games + lg
     todo = [g for g in games if (g.get('url', '').rstrip('/').split('/')[-1] or g.get('uuid')) not in old_g]
     print('year %d: %d games, %d new' % (year, len(games), len(todo)), flush=True)
     rows, puzz = list(old_g.values()), list(old_p)
@@ -296,6 +361,7 @@ def run_year(user, year, workers, nodes, games=None, half=0):
     return rows, puzz
 
 def _save(gpath, ppath, rows, puzz):
+    rows = [anonymise(r) for r in rows]
     rows = sorted(rows, key=lambda r: r.get('end_time') or 0)
     puzz = sorted(puzz, key=lambda p: (p.get('end_time') or 0, p['ply']))
     json.dump(rows, open(gpath, 'w'), separators=(',', ':'))

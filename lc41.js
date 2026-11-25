@@ -4,7 +4,7 @@ const LC41=(()=>{
   /* LC41: the upgrade page answers "What do I get with Pro / VIP?" with fixed text and the questions people ask before they join. No bot, no AI cost. */
   const Q=(s,r)=>(r||document).querySelector(s);
   const PRO=[
-    "The whole library: every repertoire (Colle-Koltanowski, Caro-Kann, Semi-Slav), the Middlegame Foundations and Masterclass, the Opening Vault and the endgames",
+    "The whole library: every repertoire (Colle-Koltanowski, Vienna & 1.e4, Caro-Kann, Semi-Slav), the Middlegame Foundations and Masterclass, the Opening Vault and the endgames",
     "The Blunder Bootcamp and the MSPC training engine",
     "The full Trim report on your own games",
     "The 24/7 AI coach",
