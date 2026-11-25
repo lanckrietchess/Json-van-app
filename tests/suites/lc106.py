@@ -3,6 +3,7 @@
 # first review's "Instinct versus MSPC". Real Chromium, 390x844; Supabase and the Stripe function stubbed.
 import json as _json, datetime as _dt
 _S0 = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=6, hours=2)).strftime('%Y-%m-%dT%H:%M:%SZ')
+_UNTIL = (_dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(hours=47, minutes=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
 APP = 'http://127.0.0.1:8765/app.html'
 SB = 'https://wllljllajadiwjdsageu.supabase.co'
 MEMBER = "localStorage.setItem('lc26-auth', JSON.stringify({ access_token: 'm', refresh_token: '', exp: Date.now() + 36e5, email: 'free@example.com' }))"
@@ -17,7 +18,8 @@ def stub(pg, calls, box):
         if n == 'lc106_join':
             box['sprint'] = {'ok': True, 'joined': True, 'started_at': box['started'], 'ends_at': '2026-12-09T10:00:00Z', 'days_left': 8, 'over': False, 'site': 'chesscom', 'uname': 'free',
                              'start': 1180, 'now': 1215, 'gain': 35, 'target': 75, 'best': 1215, 'xp': 1600, 'xp_goal': 1500, 'xp_done': True, 'rating_done': False,
-                             'pct': 20, 'reward_until': '2026-12-23T10:00:00Z', 'reward_used': False}
+                             'pct': 20, 'reward_kind': 'month', 'reward_at': _S0, 'reward_active': True, 'reward_until': _UNTIL, 'reward_used': False,
+                             'week1_xp': 500, 'week1_tokens': 14, 'week1_done': True, 'week1_until': _S0}
             return J(box['sprint'])
         if n == 'lc106_progress': return J(box['sprint'])
         if n == 'lc106_admin': return J({'ok': True, 'cfg': {'on': True, 'xp_goal': 1500, 'pct': 20, 'days': 14, 'reward_days': 14, 'xp_day_max': 2500}, 'rows': [{'email': 'a@b.co', 'site': 'chesscom', 'uname': 'alpha', 'start': 950, 'now': 1010, 'target': 100, 'xp': 900, 'xp_goal': 1500, 'pct': 0}]})
@@ -59,12 +61,13 @@ with sync_playwright() as p:
     pg.click('[data-lc106-home] [data-lc106=start]'); pg.wait_for_timeout(1500)
     j = [b for n, b in calls if n == 'lc106_join']
     out('join [sent the week peak and the XP]', [len(j), j[0].get('p_peak') if j else None, isinstance(j[0].get('p_xp') if j else None, int)])
-    out('home progress [day, rating line, XP line, price, what changed]', pg.evaluate("""(() => { const c = document.querySelector('[data-lc106-home]'); const t = c ? c.textContent : '';
-      return [/Day 7 of 14/.test(t), /1180 → 1215/.test(t), /1,600 \\/ 1,500 XP/.test(t), /20 % off/.test(t), c.querySelectorAll('.lc106-ach li').length]; })()"""))
+    out('home progress [day, rating line, XP line, 13th month, countdown, what changed]', pg.evaluate("""(() => { const c = document.querySelector('[data-lc106-home]'); const t = c ? c.textContent : '';
+      return [/Day 7 of 14/.test(t), /1180 → 1215/.test(t), /1,600 \\/ 1,500 XP/.test(t), /13 months for the price of 12/.test(t), /47h \\d\\dm/.test(t), c.querySelectorAll('.lc106-ach li').length]; })()"""))
+    out('LC88 bonus step [countdown, claim]', pg.evaluate("(() => { const g = LC106.guide(); return [/Ends in/.test(g.html), g.acts[0].label, g.acts[0].href]; })()"))
     out('home phone [overflow-x]', pg.evaluate(OVER))
-    out('LC90 pop-up block [what changed, the rest of the Sprint, the price after a trial]', pg.evaluate("""(() => { const h = LC106.popupHTML(); return [/What changed in your first/.test(h), /8 days left/.test(h), /also after a trial/.test(h)]; })()"""))
+    out('LC90 pop-up block [what changed, the rest of the Sprint, the bonus]', pg.evaluate("""(() => { const h = LC106.popupHTML(); return [/What changed in your first/.test(h), /8 days left/.test(h), /Your Sprint bonus \\(13 months/.test(h)]; })()"""))
     pg.evaluate("location.hash = '#sprint'"); pg.wait_for_timeout(1500)
-    out('page [title, four plan buttons, how it works]', pg.evaluate("""[document.querySelector('[data-lc106-page] h1').textContent.trim(), document.querySelectorAll('[data-lc106-buy]').length, /How the Sprint works/.test(document.querySelector('[data-lc106-page]').textContent)]"""))
+    out('page [title, two yearly plan buttons, how it works]', pg.evaluate("""[document.querySelector('[data-lc106-page] h1').textContent.trim(), document.querySelectorAll('[data-lc106-buy]').length, /How the Sprint works/.test(document.querySelector('[data-lc106-page]').textContent)]"""))
     pg.click('[data-lc106-buy="yearly"][data-lc106-tier="2"]'); pg.wait_for_timeout(500)
     out('consent step [box unticked, pay off, 14 days kept]', pg.evaluate("""(() => { const s = document.querySelector('.lc106-sheet'); return [!!s, s.querySelector('[data-lc106-ok]').checked, s.querySelector('[data-lc106-pay]').disabled, /withdraw within 14 days/.test(s.textContent)]; })()"""))
     pg.check('.lc106-sheet [data-lc106-ok]'); pg.click('.lc106-sheet [data-lc106-pay]'); pg.wait_for_timeout(1500)
@@ -81,7 +84,7 @@ with sync_playwright() as p:
     out('a normal visitor still counts', 'first_open' in [b.get('p_step') for n, b in calls if n == 'lc94_step'])
     out('first review [Instinct versus MSPC block]', pg.evaluate("""(() => { const f = (LC42._t && LC42._t.instinctHTML) || null; if (!f) return 'not exported';
       const h = f('r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3', {played: {from: 'h2', to: 'h3'}, bestUci: 'f1b5'}, 'h3', 'Bb5');
-      return [/Instinct versus MSPC/.test(h), /Instinct played h3/.test(h), /MSPC finds Bb5/.test(h)]; })()"""))
+      return [/Your instinct versus the better move/.test(h), /Your instinct played h3/.test(h), /The better move was Bb5/.test(h) && !/MSPC/.test(h)]; })()"""))
     out('LC106 [embedded copy equals lc106.js, init, afterRender, route, LC88 step, LC90 hook, build]', pg.evaluate("""(async () => {
       const src = await (await fetch('lc106.js')).text(), html = await (await fetch('app.html')).text();
       const a = html.indexOf('/*@@module lc106*/'), b = html.indexOf('/*@@end lc106*/') + 15;

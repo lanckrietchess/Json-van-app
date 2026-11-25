@@ -37,10 +37,12 @@ const LC50=(()=>{
       preK=k;
       preP=(async()=>{
         try{
-          const gs=await LC39._t.games(site,user,1),g=gs&&gs[0];
-          if(!g||!g.pgn)return null;
+          /* 9.75.0: the last LOST game first, then the others, up to 3 games until one has a real mistake (LC42._t.gameOrder) */
+          const gs=await LC39._t.games(site,user,10),ord=(LC42._t&&LC42._t.gameOrder)||(l=>(l||[]).filter(x=>x&&x.pgn));
+          const list=ord(gs).slice(0,3);if(!list.length)return null;
           const fm=(LC42._t&&LC42._t.firstMistake)||LC42.firstMistake;if(typeof fm!=="function")return null;
-          const r=await fm(g,()=>{},()=>true);       /* the same scan the teaser does: depth 10, first big mistake of the latest game */
+          let g=null,r=null;
+          for(const x of list){const rr=await fm(x,()=>{},()=>true);if(!rr)return null;if(!r){g=x;r=rr}if(!rr.none){g=x;r=rr;break}}
           if(!r)return null;
           const rec={k:k,at:Date.now(),g:{pgn:String(g.pgn).slice(0,60000),color:g.color==="b"?"b":"w",res:g.res||"",opp:g.opp||"",t:+g.t||0},r:r};
           wr(PRE,rec);return rec;

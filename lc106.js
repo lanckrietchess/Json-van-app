@@ -13,8 +13,13 @@ const LC106=(()=>{
      Home (and the quest board, where Home leads while the quest levels run): one card (the Sprint, its two bars, from day 6 "What changed so far": the best TRUE numbers from the reviewed games, never a
      made-up one). Page #sprint: the whole Sprint, the Sprint price checkout (with the same consent step as LC99) and, for the owner,
      every Sprint and the settings. LC88 gets one step ("Start your Sprint") after the first review; no pop-up of its own.
-     LC90's Day-7 pop-up shows "What changed so far" and frames the trial as the rest of the Sprint (popupHTML). */
-  const VERSION="9.74.0",W=window,D=document;
+     LC90's Day-7 pop-up shows "What changed so far" and frames the trial as the rest of the Sprint (popupHTML).
+     9.75.0 (sql/20261126100000_lc107_sprint_month_week1.sql): the reward is a 13th month on the yearly plan (Pro or VIP: 13 months
+     for the price of 12), unlocked by EITHER goal (XP or rating), open until 48 hours after the later of the Sprint's end and the
+     trial's end (a live countdown in the LC88 step, on the card and in LC97's post-trial pop-up); the owner can switch back to a
+     percentage. Week 1: 500 XP in the first 7 days of the Sprint = 14 bonus tokens (the 3 a day kept for one more week), claimed at
+     once. Somebody who missed both goals never sees a "you missed it" message. */
+  const VERSION="9.75.0",W=window,D=document;
   const Q=(s,r)=>(r||D).querySelector(s),QA=(s,r)=>[].slice.call((r||D).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const ic=n=>{try{return typeof icon==="function"?icon(n)+" ":""}catch(e){return""}};
@@ -26,6 +31,13 @@ const LC106=(()=>{
   const authed=(n,a)=>{try{return LC30.authed(n,a||{})}catch(e){return Promise.resolve({ok:false,error:"server"})}};
   const xpNow=()=>{try{return Math.max(0,Math.round(+V6.state().total||0))}catch(e){return 0}};
   const nf=n=>Number(n||0).toLocaleString("en-GB");
+  const month=s=>!s||(s.reward_kind||"month")==="month";
+  const rewardTxt=s=>month(s)?"13 months for the price of 12 on the yearly Pro or VIP plan":(+(s&&s.pct)||20)+" % off your first Pro or VIP payment";
+  /* a live countdown: any element with data-lc106-cd="<ms>" shows the time left (ticks every second) */
+  function left(ms){const d=Math.max(0,ms-Date.now()),h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),x=Math.floor(d%6e4/1e3);return(h?h+"h ":"")+String(m).padStart(2,"0")+"m "+String(x).padStart(2,"0")+"s"}
+  const cd=until=>'<b class="lc106-cd" data-lc106-cd="'+Date.parse(until)+'">'+left(Date.parse(until))+"</b>";
+  function tickCd(){QA("[data-lc106-cd]").forEach(el=>{const t=+el.getAttribute("data-lc106-cd");if(t)el.textContent=left(t)})}
+  const active=s=>!!(s&&s.joined&&s.reward_active&&!s.reward_used&&s.reward_until&&Date.parse(s.reward_until)>Date.now());
 
   /* ---------- pure (tested) ---------- */
   const TARGETS=[[1000,100],[1400,75],[1800,50],[100000,30]];
@@ -83,6 +95,7 @@ const LC106=(()=>{
       let v=await authed("lc106_state");
       if(v&&v.ok&&v.joined&&!v.over)v=await authed("lc106_progress",{p_xp:xpNow()});
       if(v&&v.ok)remember(v);else if(v&&v.reason==="off"){S={ok:false,reason:"off"};ls.set(KEY,S)}
+      if(v&&v.week1_new){try{LC36.tokens.claim(true)}catch(e){}say("Week 1 done: you keep 3 tokens a day for one more week. "+(+v.week1_tokens||14)+" bonus tokens are in your wallet.","good")}
       await refreshAch();
     }catch(e){console.error("lc106",e)}
     busy=false;paintAll();return S;
@@ -103,7 +116,7 @@ const LC106=(()=>{
     const t=s&&s.target,rt=s&&s.rating,xg=nf(s&&s.xp_goal||1500),pct=s&&s.pct||20;
     return'<p class="lc106-k">'+ic("flag-checkered")+"2-Week Rating Sprint</p>"
       +'<p class="lc106-t">'+(t?"From "+rt+" to "+(rt+t)+" in 14 days.":"Two weeks, one clear target for your rating.")+"</p>"
-      +'<p class="small muted">Two goals. Your rating: '+(t?"+"+t:"a target that fits your level")+'. Your training: '+xg+' XP. Reach the XP goal and your Sprint price is '+pct+' % off Pro or VIP. Reach the rating goal and your result can go on the Wall of Love.</p>'
+      +'<p class="small muted">Two goals: your rating '+(t?"+"+t:"(a target that fits your level)")+', or '+xg+' XP of training. Reach either one and you get '+E(rewardTxt(s))+'. Reach the rating goal and your result can go on the Wall of Love. Bonus: '+nf(s&&s.week1_xp||500)+' XP in your first week keeps your 3 tokens a day for one more week.</p>'
       +'<div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-lc106="start">'+ic("play")+"Start my Sprint</button>"+(cur!=="sprint"?'<a class="btn btn-quiet btn-sm" href="#sprint">How it works</a>':"")+"</div>";
   }
   function achHTML(list,title){
@@ -116,11 +129,16 @@ const LC106=(()=>{
     let h='<p class="lc106-k">'+ic("flag-checkered")+"2-Week Rating Sprint · "+E(head)+"</p>"
       +'<div class="lc106-row"><span><b>Rating</b> '+E(s.start)+" → "+E(s.now)+" ("+(gain>=0?"+":"")+gain+" of +"+need+")</span>"+bar(Math.max(0,gain),need,s.rating_done?"is-done":"")+"</div>"
       +'<div class="lc106-row"><span><b>Training</b> '+nf(s.xp)+" / "+nf(s.xp_goal)+" XP</span>"+bar(s.xp,s.xp_goal,s.xp_done?"is-done":"")+"</div>";
-    if(s.xp_done&&!s.reward_used&&s.reward_until&&Date.parse(s.reward_until)>Date.now())
-      h+='<p class="lc106-win">'+ic("gift")+"XP goal reached: your Sprint price is <b>"+E(s.pct)+" % off</b> your first Pro or VIP payment, until "+E(new Date(s.reward_until).toLocaleDateString("en-GB",{day:"numeric",month:"long"}))+".</p>"
-        +(full?'<div class="btn-row">'+[["monthly",2,"Pro, monthly"],["yearly",2,"Pro, yearly"],["monthly",3,"VIP, monthly"],["yearly",3,"VIP, yearly"]].map(b=>'<button type="button" class="btn btn-sm '+(b[1]===2&&b[0]==="yearly"?"btn-primary":"btn-ghost")+'" data-lc106-buy="'+b[0]+'" data-lc106-tier="'+b[1]+'">'+E(b[2])+"</button>").join("")+"</div>":'<div class="btn-row"><a class="btn btn-primary btn-sm" href="#sprint">Use my Sprint price</a></div>');
-    else if(s.xp_done&&s.reward_used)h+='<p class="small muted">'+ic("check")+"You used your Sprint price. Thank you.</p>";
-    else if(!over)h+='<p class="small muted">'+nf(Math.max(0,s.xp_goal-s.xp))+" XP to go for "+E(s.pct||20)+" % off. Every drill, puzzle and game review counts.</p>";
+    const w1end=Date.parse(s.week1_until||0);
+    if(!s.week1_done&&w1end>Date.now())h+='<div class="lc106-row"><span><b>Week 1</b> '+nf(Math.min(s.xp,s.week1_xp||500))+" / "+nf(s.week1_xp||500)+" XP · keep your 3 tokens a day for one more week</span>"+bar(s.xp,s.week1_xp||500)+"</div>";
+    else if(s.week1_done&&!over)h+='<p class="small muted">'+ic("check")+"Week 1 done: your 3 tokens a day stay for one more week ("+nf(s.week1_tokens||14)+" bonus tokens).</p>";
+    if(active(s)){
+      const plans=month(s)?[["yearly",2,"Pro, 13 months"],["yearly",3,"VIP, 13 months"]]:[["monthly",2,"Pro, monthly"],["yearly",2,"Pro, yearly"],["monthly",3,"VIP, monthly"],["yearly",3,"VIP, yearly"]];
+      h+='<p class="lc106-win">'+ic("gift")+"Goal reached. Your Sprint bonus: <b>"+E(rewardTxt(s))+"</b>. It ends in "+cd(s.reward_until)+".</p>"
+        +(full?'<div class="btn-row">'+plans.map((b,i)=>'<button type="button" class="btn btn-sm '+(i===0?"btn-primary":"btn-ghost")+'" data-lc106-buy="'+b[0]+'" data-lc106-tier="'+b[1]+'">'+E(b[2])+"</button>").join("")+"</div>":'<div class="btn-row"><a class="btn btn-primary btn-sm" href="#sprint">Claim my bonus</a></div>');
+    }
+    else if(s.reward_used)h+='<p class="small muted">'+ic("check")+"You used your Sprint bonus. Thank you.</p>";
+    else if(!over&&!s.reward_at)h+='<p class="small muted">'+nf(Math.max(0,s.xp_goal-s.xp))+" XP or +"+Math.max(0,need-gain)+" rating to go for "+E(rewardTxt(s))+". Every drill, puzzle and game review counts.</p>";
     if(s.rating_done)h+='<p class="lc106-win">'+ic("trophy")+"Rating goal reached: +"+gain+'. Tell Kyenzo: your result can go on the Wall of Love.</p><div class="btn-row"><button type="button" class="btn btn-ghost btn-sm" data-lc106="proof">Tell Kyenzo</button></div>';
     if(d>=6||over||full)h+=achHTML(ACH,over?"What changed in your Sprint":"What changed so far");
     if(!full)h+='<p class="small"><a href="#sprint">Open my Sprint →</a></p>';
@@ -132,7 +150,7 @@ const LC106=(()=>{
   }
   const CSS=".lc106{display:grid;gap:8px;padding:12px 14px;border-color:var(--accent-line,#38bdf8)}.lc106 p{margin:0}.lc106-k{font-weight:700;font-size:.92rem}.lc106-t{font-size:1.05rem;font-weight:700}"
     +".lc106-row{display:grid;gap:4px;font-size:.9rem}.lc106-bar{display:block;height:8px;border-radius:6px;background:rgba(148,163,184,.25);overflow:hidden}.lc106-bar i{display:block;height:100%;background:#38bdf8;border-radius:6px}"
-    +".lc106-bar.is-done i{background:#22c55e}.lc106-win{font-size:.9rem}.lc106-ach ul{margin:4px 0 0;padding-left:18px;font-size:.9rem}.lc106-ach li{margin:2px 0}.lc106-tbl{width:100%;font-size:.8rem;border-collapse:collapse}"
+    +".lc106-bar.is-done i{background:#22c55e}.lc106-cd{font-variant-numeric:tabular-nums;color:#38bdf8}.lc106-win{font-size:.9rem}.lc106-ach ul{margin:4px 0 0;padding-left:18px;font-size:.9rem}.lc106-ach li{margin:2px 0}.lc106-tbl{width:100%;font-size:.8rem;border-collapse:collapse}"
     +".lc106-tbl td,.lc106-tbl th{padding:4px 6px;border-bottom:1px solid rgba(148,163,184,.2);text-align:left}.lc106-cfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}";
   function css(){if(Q("#lc106-css"))return;const st=D.createElement("style");st.id="lc106-css";st.textContent=CSS;D.head.appendChild(st)}
   function paintHome(){
@@ -153,7 +171,9 @@ const LC106=(()=>{
     h+='<div class="panel lc106" style="margin-top:12px"><p class="lc106-k">How the Sprint works</p><ul class="small" style="margin:0;padding-left:18px">'
       +"<li>Link your Chess.com or Lichess account. Your start is your rating now, or your highest rating of the last 7 days when that is higher.</li>"
       +"<li>Your rating target depends on where you start: under 1000 +100, under 1400 +75, under 1800 +50, above that +30. The server reads your public rating, so nobody can fake it.</li>"
-      +"<li>Your training target: "+nf(s.xp_goal||1500)+" XP in 14 days. That is the part you control. Reach it and your Sprint price is "+E(s.pct||20)+" % off your first Pro or VIP payment.</li>"
+      +"<li>Your training target: "+nf(s.xp_goal||1500)+" XP in 14 days. That is the part you control.</li>"
+      +"<li>Reach either target and you get "+E(rewardTxt(s.joined?s:null))+". The bonus stays open until 48 hours after your Sprint and your free trial end.</li>"
+      +"<li>Week 1: "+nf(s.week1_xp||500)+" XP in your first 7 days keeps your 3 tokens a day for one more week.</li>"
       +"<li>Reach your rating target and Kyenzo can put your result on the Wall of Love.</li>"
       +"<li>One Sprint per account and per chess account.</li></ul></div>";
     if(owner())h+='<div class="panel lc106" style="margin-top:12px" data-lc106-admin><p class="lc106-k">Owner: every Sprint and the settings</p><p class="small muted">Loading…</p></div>';
@@ -169,20 +189,28 @@ const LC106=(()=>{
     box.innerHTML='<p class="lc106-k">Owner: every Sprint ('+rowsA.length+")</p>"
       +(rowsA.length?'<div style="overflow-x:auto"><table class="lc106-tbl"><tr><th>Member</th><th>Start</th><th>Rating</th><th>XP</th><th>Price</th><th>Wall</th></tr>'
         +rowsA.map(r=>"<tr><td>"+E(r.email)+"<br><small>"+E(r.site)+" "+E(r.uname)+"</small></td><td>"+dt(r.started_at)+"</td><td>"+E(r.start)+" → "+E(r.now==null?"?":r.now)+" / +"+E(r.target)+(r.rating_done?" ✓":"")+"</td><td>"+nf(r.xp)+" / "+nf(r.xp_goal)+(r.xp_done?" ✓":"")+"</td><td>"+(r.xp_done?E(r.pct)+" %"+(r.reward_used?" used":""):"")+"</td><td>"+(r.proof_ok?"asked":"")+"</td></tr>").join("")+"</table></div>":'<p class="small muted">Nobody started a Sprint yet.</p>')
-      +'<div class="lc106-cfg">'+f("xp_goal","XP goal",c.xp_goal)+f("pct","Sprint price: % off",c.pct)+f("days","Sprint days",c.days)+f("reward_days","Price valid (days after)",c.reward_days)+f("xp_day_max","XP counted a day (max)",c.xp_day_max)+"</div>"
+      +'<div class="lc106-cfg"><label class="field"><span class="field-label">Reward</span><select class="input" data-lc106-cfg="reward"><option value="month"'+((c.reward||"month")==="month"?" selected":"")+'>13th month on the yearly plan</option><option value="pct"'+(c.reward==="pct"?" selected":"")+'>% off the first payment</option></select></label>'
+      +f("pct","If %: how much off",c.pct)+f("reward_hours","Bonus open (hours after Sprint / trial end)",c.reward_hours||48)+f("xp_goal","XP goal (14 days)",c.xp_goal)+f("days","Sprint days",c.days)+f("xp_day_max","XP counted a day (max)",c.xp_day_max)
+      +f("week1_xp","Week 1: XP goal",c.week1_xp||500)+f("week1_tokens","Week 1: bonus tokens",c.week1_tokens||14)+"</div>"
       +'<label class="switch-row"><span>Sprint on</span><input type="checkbox" data-lc106-cfg="on"'+(c.on!==false?" checked":"")+'></label><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-lc106="save">Save</button></div><p class="small muted">Targets per start rating stay in lc106_cfg (targets). Paying with the Sprint price needs the stripe function of 9.74.0.</p>';
   }
   async function saveCfg(box){
-    const o={};QA("[data-lc106-cfg]",box).forEach(i=>{const k=i.getAttribute("data-lc106-cfg");o[k]=i.type==="checkbox"?i.checked:+i.value});
+    const o={};QA("[data-lc106-cfg]",box).forEach(i=>{const k=i.getAttribute("data-lc106-cfg");o[k]=i.type==="checkbox"?i.checked:i.tagName==="SELECT"?i.value:+i.value});
     const v=await authed("lc106_cfg_save",{p_v:o});say(v&&v.ok?"Saved.":"Not saved ("+E(v&&(v.reason||v.error)||"no answer")+").",v&&v.ok?"good":"bad");if(v&&v.ok)paintAdmin(box);
   }
 
   /* ---------- the Sprint price checkout: the same consent step as every paid step (LC99), then the stripe route "sprint" ---------- */
   const KEEP14="I can still withdraw within 14 days with “Withdraw from contract here” (Account); I then pay only for the days I used and get the rest back.";
+  function wordsFor(plan,tier){
+    const nm=tier===3?"VIP":"Pro",pct=+(S&&S.pct)||0;
+    if(month(S))return"I ask for "+nm+" to start right away. Today I pay the yearly price; with my Sprint bonus the first period is 13 months, then the yearly price every year until I cancel. "+KEEP14;
+    return"I ask for my plan to start right away. Today I pay the first payment with my Sprint price ("+pct+" % off), then the normal price of the plan I picked until I cancel. "+KEEP14;
+  }
   function buy(plan,tier){
-    const nm=(tier===3?"VIP":"Pro")+", "+plan,pct=+(S&&S.pct)||0;
-    const words="I ask for my plan to start right away. Today I pay the first payment with my Sprint price ("+pct+" % off), then the normal price of the plan I picked until I cancel. "+KEEP14;
-    const terms=["Today: the first "+(plan==="yearly"?"year":"month")+" of "+nm+" with "+pct+" % off. Stripe shows the exact amount before you pay.",
+    const nm=(tier===3?"VIP":"Pro")+", "+(month(S)?"13 months":plan),pct=+(S&&S.pct)||0,words=wordsFor(plan,tier);
+    const terms=month(S)?["Today: the yearly price of "+(tier===3?"VIP":"Pro")+" (Stripe shows the exact amount before you pay).","Your first period is 13 months instead of 12: the first renewal comes one month later.",
+        "Then the yearly price every year until you cancel (Account > Manage subscription).","Changed your mind? Within 14 days, “Withdraw from contract here” in Account: you pay only for the days you used and get the rest back."]
+      :["Today: the first "+(plan==="yearly"?"year":"month")+" of "+nm+" with "+pct+" % off. Stripe shows the exact amount before you pay.",
       "Then the normal price every "+(plan==="yearly"?"year":"month")+" until you cancel (Account > Manage subscription).",
       "Changed your mind? Within 14 days, “Withdraw from contract here” in Account: you pay only for the days you used and get the rest back."];
     if(typeof openSheet!=="function")return;
@@ -193,9 +221,17 @@ const LC106=(()=>{
         pay.addEventListener("click",async()=>{if(!ok.checked)return;pay.disabled=true;msg.textContent="Opening secure checkout…";
           const r=await post("sprint",{plan:plan,tier:tier,consent:true,consent_v:(typeof LC99!=="undefined"&&LC99.CONSENT_V)||"w2-2026-11-23",consent_text:words});
           if(r&&r.ok&&r.url){try{if(typeof LC36!=="undefined"&&LC36.support&&LC36.support.go)LC36.support.go(r.url);else location.href=r.url}catch(e){location.href=r.url}return}
-          pay.disabled=false;msg.textContent=r&&r.reason==="no_sprint_price"?"Your Sprint price is not active (used, expired, or the XP goal is not reached yet).":r&&r.reason==="sign_in"?"Sign in again first.":"The checkout did not open ("+((r&&(r.reason||r.status))||"no connection")+").";});
+          pay.disabled=false;msg.textContent=why(r);});
       }});
   }
+  const why=r=>r&&r.reason==="no_sprint_price"?"Your Sprint bonus is not active (used, past its deadline, or no goal reached yet).":r&&r.reason==="yearly_only"?"The 13th month comes with the yearly plan.":r&&r.reason==="sign_in"?"Sign in again first.":"The checkout did not open ("+((r&&(r.reason||r.status))||"no connection")+").";
+  /* LC97's post-trial pop-up pays the yearly plan through here while the bonus is open (its own consent step already ran) */
+  async function pay(plan,tier,words){
+    const r=await post("sprint",{plan:plan==="monthly"?"monthly":"yearly",tier:tier===3?3:2,consent:true,consent_v:(typeof LC99!=="undefined"&&LC99.CONSENT_V)||"w2-2026-11-23",consent_text:String(words||wordsFor(plan,tier))});
+    if(r&&r.ok&&r.url){try{if(typeof LC36!=="undefined"&&LC36.support&&LC36.support.go)LC36.support.go(r.url);else location.href=r.url}catch(e){location.href=r.url}return{ok:true}}
+    return{ok:false,msg:why(r)};
+  }
+  function bonus(){return active(S)?{kind:S.reward_kind||"month",pct:S.pct,until:S.reward_until,text:rewardTxt(S),cd:cd(S.reward_until)}:null}
   async function post(path,body){
     try{const c=LC26.sync.cfg(),s=LC26.sync.session(),dv=(()=>{try{return deviceId()}catch(e){return""}})();
       const r=await fetch(String(c.url).replace(/\/+$/,"")+"/functions/v1/stripe/"+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.assign({token:s&&s.access_token||"",device:dv},body))});
@@ -205,10 +241,12 @@ const LC106=(()=>{
   /* ---------- LC88 (one guide at a time): one step after the first review, until the Sprint started or was waved away ---------- */
   function guide(){
     try{
+      if(active(S))return{html:"<b>Your Sprint bonus: "+E(rewardTxt(S))+".</b> <span class=\"lc88-s\">Ends in "+cd(S.reward_until)+".</span>",
+        acts:[{label:"Claim it",href:"#sprint",primary:true}],sig:"sprint-bonus"};
       if(!S||S.joined||S.ok===false&&S.reason==="off")return null;
       const x=+ls.get(KX,0)||0;if(x&&Date.now()-x<4*DAY)return null;
       const done=ls.get("lc94-done",{})||{};if(!done.first_review_done)return null;
-      return{html:"<b>Start your 2-Week Rating Sprint.</b> <span class=\"lc88-s\">One rating target that fits your level, one training target you control. Hit the training target and Pro or VIP costs "+E(S.pct||20)+" % less.</span>",
+      return{html:"<b>Start your 2-Week Rating Sprint.</b> <span class=\"lc88-s\">One rating target that fits your level, one training target you control. Hit either one and you get "+E(rewardTxt(S))+".</span>",
         acts:[{label:"See my target",href:"#sprint",primary:true},{label:"×",dismiss:true,run:()=>ls.set(KX,Date.now())}],sig:"sprint"};
     }catch(e){return null}
   }
@@ -217,7 +255,7 @@ const LC106=(()=>{
     try{
       if(!S||!S.joined)return"";
       const left=+S.days_left||0,d=achHTML(ACH,"What changed in your first "+Math.min(dayOf(S),14)+" days");
-      const line=S.over?"":'<p class="lc90-trial">'+ic("flag-checkered")+"Your Sprint has "+left+(left===1?" day":" days")+" left: Pro gives you every course and the full coach for the rest of it."+(S.xp_done&&!S.reward_used?" Your Sprint price ("+E(S.pct)+" % off) counts on the first payment, also after a trial.":"")+"</p>";
+      const line=S.over?"":'<p class="lc90-trial">'+ic("flag-checkered")+"Your Sprint has "+left+(left===1?" day":" days")+" left: Pro gives you every course and the full coach for the rest of it."+(active(S)?" Your Sprint bonus ("+E(rewardTxt(S))+") is waiting.":"")+"</p>";
       return d||line?'<div class="lc106-pop">'+d+line+"</div>":"";
     }catch(e){return""}
   }
@@ -255,7 +293,7 @@ const LC106=(()=>{
   }
   function init(){
     try{
-      css();D.addEventListener("click",onClick);
+      css();D.addEventListener("click",onClick);setInterval(tickCd,1000);
       /* the Sprint is the onboarding storyline: its page opens from quest level 1 */
       try{const lv=LC26.levels,o=lv.minLevel;if(lv&&!lv.__lc106){lv.__lc106=1;lv.minLevel=r=>r==="sprint"?1:o(r)}}catch(e){}
       W.addEventListener("lc39-signed-in",()=>sync(true));
@@ -263,6 +301,6 @@ const LC106=(()=>{
       if(S&&S.joined)refreshAch();
     }catch(e){console.error("lc106",e)}
   }
-  return{init:init,afterRender:afterRender,mount:mount,sync:sync,start:start,guide:guide,popupHTML:popupHTML,version:VERSION,state:()=>S,
-    _t:{targetFor:targetFor,weekPeak:weekPeak,changes:changes,dayOf:dayOf,cardHTML:cardHTML,set:v=>{S=v;ls.set(KEY,v)},setAch:a=>{ACH=a||[]}}};
+  return{init:init,afterRender:afterRender,mount:mount,sync:sync,start:start,guide:guide,popupHTML:popupHTML,bonus:bonus,pay:pay,version:VERSION,state:()=>S,
+    _t:{left:left,rewardTxt:rewardTxt,wordsFor:wordsFor,targetFor:targetFor,weekPeak:weekPeak,changes:changes,dayOf:dayOf,cardHTML:cardHTML,set:v=>{S=v;ls.set(KEY,v)},setAch:a=>{ACH=a||[]}}};
 })(); /*@@end lc106*/

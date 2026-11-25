@@ -98,13 +98,17 @@ const LC97=(()=>{
     return{yearly:y,yearlyTxt:eur(y),month:eur(Math.round(y/12)),rate:{1:"Founding Member",2:"Early Adopter",3:"Launch",4:"Pro"}[t]||"Pro",tranche:t,
       dl:eur(+ds.cents||2500),dlAnchor:eur(+ds.anchor_cents||(p&&+p.monthly)||3900),dlDays:+ds.days||30};
   }
+  /* 9.75.0: the Sprint bonus (LC106: a 13th month on the yearly plan, with its own deadline) rides on the yearly option */
+  const bonus=()=>{try{return typeof LC106!=="undefined"&&LC106.bonus?LC106.bonus():null}catch(e){return null}};
   function dsHTML(n,s,preview){
+    const bn=bonus();
     const len=s&&s.trial&&s.trial.started_at&&s.trial.ends_at?Math.max(1,Math.round((new Date(s.trial.ends_at)-new Date(s.trial.started_at))/DAY)):7;
     return'<div class="lc97">'+(preview?'<p class="lc97-pv">'+ic("eye")+" Preview: this is what a student sees. Buttons do not open checkout or change anything.</p>":"")
       +'<p class="lc97-lead">For '+E(len)+" days you trained with every Pro tool. Pick how you want to keep going.</p>"
       +'<button type="button" class="lc97-opt lc97-main" data-lc97="yearly"><span class="lc97-t">'+ic("crown")+" Keep Pro and unlock all courses for 1 year</span>"
         +'<span class="lc97-p"><strong>'+E(n.month)+"</strong>/month billed yearly</span>"
-        +"<small>"+E(n.yearlyTxt)+" a year"+(n.tranche<4?" · "+E(n.rate)+" rate, kept for as long as your subscription stays active":"")+"</small></button>"
+        +"<small>"+E(n.yearlyTxt)+" a year"+(n.tranche<4?" · "+E(n.rate)+" rate, kept for as long as your subscription stays active":"")+"</small>"
+        +(bn&&bn.kind==="month"?'<small class="lc97-bonus">Your Sprint bonus: 13 months for the price of 12 · ends in '+bn.cd+"</small>":"")+"</button>"
       +'<button type="button" class="lc97-opt lc97-disc" data-lc97="discount"><span class="lc97-tag">One-time offer · only here</span><span class="lc97-t">Get 1 month of full Pro for an exclusive discount</span>'
         +'<span class="lc97-p"><s>'+E(n.dlAnchor)+"/month</s> <strong>"+E(n.dl)+"/month</strong></span><small>One payment for "+E(n.dlDays)+" days. No subscription: it does not renew.</small></button>"
       +'<div class="lc97-cf" data-lc97-cf hidden></div>'
@@ -115,13 +119,14 @@ const LC97=(()=>{
   /* the confirm step (9.64.0): the plain terms, then the unchecked withdrawal box; the wording is sent along and stored as shown */
   function wording(kind,n){
     return kind==="discount"?"I ask for my Pro month to start right away. I pay "+n.dl+" once for "+n.dlDays+" days of full Pro; it does not renew. I can still withdraw within 14 days with “Withdraw from contract here” (Account); I then pay only for the days I used and get the rest back."
+      :bonus()&&bonus().kind==="month"?"I ask for Pro to start right away. I pay "+n.yearlyTxt+" today; with my Sprint bonus the first period is 13 months, then the same each year until I cancel. I can still withdraw within 14 days with “Withdraw from contract here” (Account); I then pay only for the days I used and get the rest back."
       :"I ask for Pro to start right away. I pay "+n.yearlyTxt+" today for one year, then the same each year until I cancel. I can still withdraw within 14 days with “Withdraw from contract here” (Account); I then pay only for the days I used and get the rest back.";
   }
   function cfHTML(kind,n){
     const terms=kind==="discount"?[n.dl+" today, paid once. No subscription: it does not renew and nothing else is charged.",n.dlDays+" days of full Pro, starting the moment you pay.",
         "Want to keep Pro after that? During your month (and 7 days after it) you can switch to yearly, and your "+n.dl+" counts toward the first year."]
       :[n.yearlyTxt+" today for your first year (about "+n.month+" a month)"+(n.tranche<4?", at the "+n.rate+" rate":"")+".",
-        "It renews at the same rate every year until you cancel. Cancel any time in Account > Manage subscription; cancel before the renewal date and nothing more is charged."];
+        "It renews at the same rate every year until you cancel. Cancel any time in Account > Manage subscription; cancel before the renewal date and nothing more is charged."].concat(bonus()&&bonus().kind==="month"?["Your Sprint bonus: the first period is 13 months, so the first renewal comes one month later."]:[]);
     return'<p class="lc97-cfh">'+(kind==="discount"?"Your one-time Pro month":"Pro for 1 year")+'</p><ul class="lc97-terms">'+terms.map(x=>"<li>"+E(x)+"</li>").join("")+"</ul>"
       +'<label class="lc97-ok"><input type="checkbox" data-lc97-ok> <span>'+E(wording(kind,n))+"</span></label>"
       +'<div class="lc97-cfb"><button type="button" class="btn btn-primary" data-lc97="pay" data-k="'+kind+'" disabled>'+ic("lock")+" "+E(kind==="discount"?"Pay "+n.dl+" securely":"Continue to secure payment")+"</button>"
@@ -169,7 +174,9 @@ const LC97=(()=>{
         const text=wording(kind,n);
         if(kind==="yearly"){picked=true;b.disabled=true;mark("yearly").catch(()=>{});
           await Promise.race([rpc("lc99_consent_note",{p_flow:"yearly",p_version:CONSENT_V,p_wording:text,p_device:dev()}),new Promise(res=>setTimeout(res,1500))]).catch(()=>{});
-          try{sessionStorage.setItem(REOPEN,String(Date.now()))}catch(x){}sh.close();checkout("yearly",2);return}
+          try{sessionStorage.setItem(REOPEN,String(Date.now()))}catch(x){}
+          const bn=bonus();if(bn&&bn.kind==="month"){msg("Opening secure checkout…");const r=await LC106.pay("yearly",2,text);if(!r.ok){picked=false;b.disabled=false;msg(r.msg);}else sh.close();return}   /* 9.75.0: the 13th month goes through the stripe route "sprint" */
+          sh.close();checkout("yearly",2);return}
         if(kind==="discount"){
           picked=true;b.disabled=true;msg("Opening secure checkout…");mark("discount").catch(()=>{});
           const j=await stripeCall("downsell",{token:await tok(),device:dev(),consent:true,consent_v:CONSENT_V,consent_text:text});

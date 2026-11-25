@@ -94,9 +94,22 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (kind) { const c = await refCoupon(); if (c) { form.discounts = [{ coupon: c }]; meta.ref_disc = kind; meta.ref_email = email; } else kind = ''; }
     return kind;
   }
-  /* LC106 (9.74.0): the 2-Week Rating Sprint price. The database decides (public._lc106_reward_pct: the XP goal reached, not used,
-     still in its window); the browser never sends a percentage. Missing SQL or a database hiccup = no Sprint price (fails closed). */
-  async function sprintPct(email) {
+  /* LC106 (9.74.0) / 9.75.0: the 2-Week Rating Sprint reward. The database decides (public._lc106_reward: a goal reached, not used,
+     before its deadline = 48 hours after the later of the Sprint's end and the trial's end); the browser never sends a reward.
+     kind 'month' (default): the yearly plan runs 13 months for the price of 12 (extendMonth after the payment); kind 'pct': a one-time
+     percent coupon on the first payment (9.74.0). Missing SQL or a database hiccup = no reward (fails closed). */
+  async function sprintReward(email) {
+    let r = null;
+    if (email) { try { r = await DB.prepare('SELECT public._lc106_reward(?) AS r').bind(email).first(); } catch (e) { r = null; } }
+    let v = r && r.r; if (typeof v === 'string') { try { v = JSON.parse(v); } catch (e) { v = null; } }
+    if (!v || typeof v !== 'object') {   /* the 9.74.0 database (only the percentage helper) */
+      const p = await sprintPctOld(email); return p ? { kind: 'pct', pct: p } : null;
+    }
+    const pct = Number(v.pct);
+    if (v.kind === 'month') return { kind: 'month', pct: 0 };
+    return Number.isInteger(pct) && pct >= 1 && pct <= 60 ? { kind: 'pct', pct } : null;
+  }
+  async function sprintPctOld(email) {
     const r = email ? await q1('SELECT public._lc106_reward_pct(?) AS p', email) : null, p = r ? Number(r.p) : 0;
     return Number.isInteger(p) && p >= 1 && p <= 60 ? p : 0;
   }
@@ -104,6 +117,21 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const id = 'LC-SPRINT' + pct;
     try { await stripe('GET', 'coupons/' + encodeURIComponent(id)); return id; }
     catch (e) { try { await stripe('POST', 'coupons', { id, percent_off: pct, duration: 'once', name: '2-Week Rating Sprint: ' + pct + '% off' }); return id; } catch (e2) { return ''; } }
+  }
+  /* 9.75.0: the 13th month. The year is paid now; the first renewal moves 30 days later (Stripe: trial_end on the subscription, no
+     proration: Stripe shows that extra month as a free period) and the licence runs 30 days longer. Once per reward (_lc106_used). */
+  async function extendMonth(subId, licKey) {
+    if (!/^sub_[A-Za-z0-9]+$/.test(String(subId || ''))) return false;
+    let sub = null;
+    try { sub = await stripe('GET', 'subscriptions/' + subId); } catch (e) { sub = null; }
+    const it = sub && sub.items && sub.items.data && sub.items.data[0];
+    const end = Math.max(+((sub && sub.current_period_end) || (it && it.current_period_end) || 0), +((sub && sub.trial_end) || 0));
+    if (!end) { console.error('LC106: no period end on ' + subId + ': the 13th month was not added'); return false; }
+    const to = end + 30 * 86400;
+    try { await stripe('POST', 'subscriptions/' + subId, { trial_end: to, proration_behavior: 'none', metadata: { sprint_month: '1' } }); }
+    catch (e) { console.error('LC106: the 13th month could not be added on ' + subId); return false; }
+    if (licKey) await run1("UPDATE public.licenses SET expires_at = expires_at + interval '30 days' WHERE upper(license_key) = upper(?) AND coalesce(revoked, false) = false", licKey);
+    return true;
   }
   async function fixedCoupon(id, cents, name) {
     try { await stripe('GET', 'coupons/' + encodeURIComponent(id)); return id; }
@@ -191,8 +219,10 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (!email) return { status: 401, body: { ok: false, reason: 'sign_in' } };
     const c = consentOf(body, 'sprint');
     if (!c) return { status: 400, body: { ok: false, reason: 'consent' } };
-    if (!(await sprintPct(email))) return { status: 409, body: { ok: false, reason: 'no_sprint_price' } };
+    const rw = await sprintReward(email);
+    if (!rw) return { status: 409, body: { ok: false, reason: 'no_sprint_price' } };
     const plan = body.plan === 'yearly' ? 'yearly' : 'monthly', tier = Number(body.tier) === 3 ? 3 : 2;
+    if (rw.kind === 'month' && plan !== 'yearly') return { status: 409, body: { ok: false, reason: 'yearly_only' } };   /* the 13th month is a yearly reward */
     return subscribe({ plan, tier, email, ret: body.ret, device: body.device }, ip, { email, consent: c, meta: { src: 'sprint' } });
   }
   /* ----- LC100 (9.65.0): the withdrawal function (Consumer Rights Directive art. 11a). The app's "Withdraw from contract here" sends a name, the
@@ -444,9 +474,12 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       if (c) form.discounts = [{ coupon: c }];
       const cus = await customerOf(row.email); if (cus) { form.customer = cus; delete form.customer_email; }
     } else {
-      const sp = await sprintPct(row.email), spc = sp ? await sprintCoupon(sp) : '';
-      if (spc) { await personalise(form, row.email, meta, false); form.discounts = [{ coupon: spc }]; meta.sprint = '1'; meta.sprint_pct = String(sp); form.subscription_data.metadata = meta; }   /* LC106: the Sprint price replaces the 10 % referral discount (never both) */
-      else await personalise(form, row.email, meta, plan === 'yearly' || !opt.trial);
+      const rw = await sprintReward(row.email), spc = rw && rw.kind === 'pct' ? await sprintCoupon(rw.pct) : '';
+      if (spc) { await personalise(form, row.email, meta, false); form.discounts = [{ coupon: spc }]; meta.sprint = '1'; meta.sprint_pct = String(rw.pct); form.subscription_data.metadata = meta; }   /* LC106: the Sprint price replaces the 10 % referral discount (never both) */
+      else {
+        if (rw && rw.kind === 'month' && plan === 'yearly' && !opt.trial) { meta.sprint = '1'; meta.sprint_month = '1'; form.subscription_data.metadata = meta; }   /* 9.75.0: the 13th month, added after the payment */
+        await personalise(form, row.email, meta, plan === 'yearly' || !opt.trial);
+      }
     }
     let sess;
     try { sess = await stripe('POST', 'checkout/sessions', form); }
@@ -599,6 +632,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       .bind(email, 'stripe', (sale.tier === 3 ? 'VIP ' : 'Pro ') + sale.plan, 2, false, new Date(until).toISOString(), P34().dailyTokens, flags, 3).first();   /* an object, not a string: the driver encodes jsonb itself */
     if (!lic || !lic.license_key) throw new Error('licence not created');   /* throwing makes Stripe retry the webhook; nothing is lost */
     await DB.prepare('UPDATE arena.lc34_pro_sales SET license_key = ?, license_expires = ? WHERE session_id = ?').bind(lic.license_key, until, o.id).run();
+    if (m.sprint_month === '1' && sale.plan === 'yearly' && o.subscription) await extendMonth(o.subscription, lic.license_key);   /* 9.75.0: the 13th month */
   }
   async function proEvent(ev, o) {
     const m = o.metadata || {};
@@ -620,9 +654,11 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       const subId = o.subscription || (o.parent && o.parent.subscription_details && o.parent.subscription_details.subscription) || '';
       const sale = subId && await DB.prepare("SELECT * FROM arena.lc34_pro_sales WHERE subscription_id = ? AND status = 'paid'").bind(subId).first();
       if (!sale) return false;
+      let sprint13 = false;
       if (o.billing_reason === 'subscription_cycle') await vipCredit(sale, sale.email, o.id);   /* the first invoice is credited by the checkout event */
       if (+o.amount_paid > 0) {   /* LC73: the first paid invoice after a trial converts it and opens the rescue offer for 14 days; later ones are renewals */
         const tr = await q1('SELECT session_id FROM public.lc73_trials WHERE subscription_id = ? AND converted_at IS NULL', subId);
+        if (tr && sale.plan === 'yearly') { const rw = await sprintReward(sale.email); if (rw && rw.kind === 'month') sprint13 = true; }   /* 9.75.0: a yearly trial that converts inside the Sprint reward window */
         if (tr) { await run1("UPDATE public.lc73_trials SET converted_at = now(), rescue_until = now() + interval '14 days' WHERE session_id = ?", tr.session_id); await run1("INSERT INTO public.lc73_sub_events (kind, email, amount_cents, ref) VALUES ('trial_convert', ?, ?, ?) ON CONFLICT DO NOTHING", sale.email || '', +o.amount_paid, o.id); await note97(String(sale.email || '').toLowerCase(), 'trial_convert', o.id); }
         else if (o.billing_reason === 'subscription_cycle') await run1("INSERT INTO public.lc73_sub_events (kind, email, amount_cents, ref) VALUES ('renewal', ?, ?, ?) ON CONFLICT DO NOTHING", sale.email || '', +o.amount_paid, o.id);
       }
@@ -632,6 +668,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
         await DB.prepare('UPDATE public.licenses SET expires_at = GREATEST(coalesce(expires_at, to_timestamp(0)), ?::timestamptz) WHERE upper(license_key) = upper(?) AND coalesce(revoked, false) = false').bind(new Date(until).toISOString(), sale.license_key).run();
         await DB.prepare('UPDATE arena.lc34_pro_sales SET license_expires = GREATEST(coalesce(license_expires, 0), ?) WHERE session_id = ?').bind(until, sale.session_id).run();
       }
+      if (sprint13 && await extendMonth(subId, sale.license_key)) await run1('SELECT public._lc106_used(?, ?)', sale.email, o.id);
       return true;
     }
     if (ev.type === 'charge.refunded' && o.refunded === true && o.customer) {
