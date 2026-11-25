@@ -132,6 +132,7 @@
       if(!ok){if(b){b.classList.remove("is-on");b.hidden=true}return}
       try{if(W.__lcWall)W.__lcWall.admin(true)}catch(e){}
       try{if(W.__lcSegAdmin)W.__lcSegAdmin()}catch(e){}   /* 9.65.0: the link to the Elo videos editor under the segment bar */
+      try{bearer().then(function(t){if(t&&typeof LC94!=="undefined"&&LC94.excludeMe)LC94.excludeMe(t)})}catch(e){}   /* 9.74.0: the owner's device never counts in the funnel */
       if(b){b.hidden=false;b.classList.add("is-on");b.addEventListener("click",function(){enter()})}
       if(/[?&]edit=1(&|$)/.test(location.search))enter();
     });

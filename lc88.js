@@ -34,6 +34,7 @@ const LC88=(()=>{
     {id:"level",model:levelModel,kind:"Quest",page:"quests"},
     {id:"quest",sel:"#lc39-q",kind:"Quest"},
     {id:"done",sel:"#lc71-road-done",kind:"Today"},
+    {id:"sprint",model:()=>{try{return typeof LC106!=="undefined"?LC106.guide():null}catch(e){return null}},kind:"Sprint"},   /* 9.74.0: the 2-Week Rating Sprint, after the first review */
     {id:"kick",sel:"#lc37-kick",kind:"Coach"},   /* 9.59.0: Coach Lanckriet's daily tip on Home was a second guide next to the road */
     {id:"hero",sel:"[data-lc62-card]",kind:"Your story"},
     {id:"save",sel:"#lc40-nudge",kind:"Tip"},

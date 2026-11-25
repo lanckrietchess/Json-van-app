@@ -94,6 +94,17 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     if (kind) { const c = await refCoupon(); if (c) { form.discounts = [{ coupon: c }]; meta.ref_disc = kind; meta.ref_email = email; } else kind = ''; }
     return kind;
   }
+  /* LC106 (9.74.0): the 2-Week Rating Sprint price. The database decides (public._lc106_reward_pct: the XP goal reached, not used,
+     still in its window); the browser never sends a percentage. Missing SQL or a database hiccup = no Sprint price (fails closed). */
+  async function sprintPct(email) {
+    const r = email ? await q1('SELECT public._lc106_reward_pct(?) AS p', email) : null, p = r ? Number(r.p) : 0;
+    return Number.isInteger(p) && p >= 1 && p <= 60 ? p : 0;
+  }
+  async function sprintCoupon(pct) {
+    const id = 'LC-SPRINT' + pct;
+    try { await stripe('GET', 'coupons/' + encodeURIComponent(id)); return id; }
+    catch (e) { try { await stripe('POST', 'coupons', { id, percent_off: pct, duration: 'once', name: '2-Week Rating Sprint: ' + pct + '% off' }); return id; } catch (e2) { return ''; } }
+  }
   async function fixedCoupon(id, cents, name) {
     try { await stripe('GET', 'coupons/' + encodeURIComponent(id)); return id; }
     catch (e) { try { await stripe('POST', 'coupons', { id, amount_off: cents, currency: 'eur', duration: 'once', name }); return id; } catch (e2) { return ''; } }
@@ -144,6 +155,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
   const CONSENT_TXT = {
     trial: 'I ask for Pro to start right away. EUR 0 today, then the plan I picked when the trial ends until I cancel. ' + KEEP14,
     downsell: 'I ask for my Pro month to start right away. I pay EUR 25 once for 30 days of full Pro; it does not renew. ' + KEEP14,
+    sprint: 'I ask for my plan to start right away. Today I pay the first payment with my Sprint price, then the normal price of the plan I picked until I cancel. ' + KEEP14,
     annual25: 'I ask for the yearly plan to start right away. Today I pay the first year minus what I paid for my Pro month, then the yearly rate each year until I cancel. ' + KEEP14
   };
   const RECEIPT_WAIVER = 'You asked for Pro to start right away. You can withdraw within 14 days of the purchase ("Withdraw from contract here" in the app, Account); you then pay only for the days you used and get the rest back.';
@@ -170,6 +182,18 @@ export function makeStripeHandler(sql, env, fetchImpl) {
     const plan = body.plan === 'yearly' ? 'yearly' : 'monthly', c = consentOf(body, 'trial');
     if (!c) console.error('LC99: a trial checkout without the withdrawal waiver (an old app?) for ' + email.replace(/^(.).*@/, '$1…@'));
     return subscribe({ plan, tier: 2, email, ret: body.ret, device: body.device }, ip, { trial: true, trialDays: days, email, consent: c, meta: { trial: '1', trial_days: String(days), src: clean(body.src, 20) || undefined } });
+  }
+  /* LC106 (9.74.0): Pro or VIP, monthly or yearly, with the Sprint price on the first payment. Signed in, the ticked box (LC99), and the
+     database must say the member reached the Sprint's XP goal (the price itself is added in subscribe, from the database). */
+  async function sprintBuy(body, ip) {
+    if (limited(ip)) return { status: 429, body: { ok: false, reason: 'slow_down' } };
+    const email = await userEmail(body.token);
+    if (!email) return { status: 401, body: { ok: false, reason: 'sign_in' } };
+    const c = consentOf(body, 'sprint');
+    if (!c) return { status: 400, body: { ok: false, reason: 'consent' } };
+    if (!(await sprintPct(email))) return { status: 409, body: { ok: false, reason: 'no_sprint_price' } };
+    const plan = body.plan === 'yearly' ? 'yearly' : 'monthly', tier = Number(body.tier) === 3 ? 3 : 2;
+    return subscribe({ plan, tier, email, ret: body.ret, device: body.device }, ip, { email, consent: c, meta: { src: 'sprint' } });
   }
   /* ----- LC100 (9.65.0): the withdrawal function (Consumer Rights Directive art. 11a). The app's "Withdraw from contract here" sends a name, the
      contract and an e-mail after ONE confirmation tap; the statement is stored with its date and time (public._lc100_withdraw) and the
@@ -419,7 +443,11 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       if (typeof opt.submit === 'function') form.custom_text = { submit: { message: opt.submit(amount) } };
       if (c) form.discounts = [{ coupon: c }];
       const cus = await customerOf(row.email); if (cus) { form.customer = cus; delete form.customer_email; }
-    } else await personalise(form, row.email, meta, plan === 'yearly' || !opt.trial);
+    } else {
+      const sp = await sprintPct(row.email), spc = sp ? await sprintCoupon(sp) : '';
+      if (spc) { await personalise(form, row.email, meta, false); form.discounts = [{ coupon: spc }]; meta.sprint = '1'; meta.sprint_pct = String(sp); form.subscription_data.metadata = meta; }   /* LC106: the Sprint price replaces the 10 % referral discount (never both) */
+      else await personalise(form, row.email, meta, plan === 'yearly' || !opt.trial);
+    }
     let sess;
     try { sess = await stripe('POST', 'checkout/sessions', form); }
     catch (e) { await DB.prepare('DELETE FROM arena.lc34_pro_sales WHERE session_id = ?').bind(tmp).run(); throw e; }
@@ -560,6 +588,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
       await run1("INSERT INTO public.lc73_sub_events (kind, email, amount_cents, ref) VALUES ('rescue', ?, ?, ?) ON CONFLICT DO NOTHING", email, o.amount_total || 0, o.id);
       if (/^sub_[A-Za-z0-9]+$/.test(m.cancel_sub || '') && m.cancel_sub !== o.subscription) { try { await stripe('DELETE', 'subscriptions/' + m.cancel_sub); } catch (e) { console.error('LC73: could not cancel the monthly plan ' + m.cancel_sub); } }
     }
+    if (m.sprint === '1') await run1('SELECT public._lc106_used(?, ?)', email, o.id);   /* LC106: the Sprint price is used, once */
     if (m.annual25 === '1') {   /* LC99: the yearly plan with the one-time month's credit is paid: the credit is used, once */
       try { await DB.prepare('SELECT public._lc99_note(?, ?, ?)').bind(email, 'annual25_paid', o.id).run(); }
       catch (e) { console.error('LC99: the credit was not marked used for ' + o.id + ': ' + String((e && e.message) || e).slice(0, 120)); }
@@ -683,6 +712,7 @@ export function makeStripeHandler(sql, env, fetchImpl) {
         else if (path === 'rescue') r = await rescue(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'annual25') r = await annual25(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'withdraw') r = await withdraw(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
+        else if (path === 'sprint') r = await sprintBuy(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'downsell') r = await downsell(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
         else if (path === 'pricing') r = readLimited((req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim()) ? { status: 429, body: { ok: false, reason: 'slow_down' } } : { status: 200, body: Object.assign(await pricingState(2), { vip: await pricingState(3), downsell: { cents: DL().cents, anchor_cents: DL().anchor, days: DL().days }, packs: Object.keys(PACKS).map((k) => ({ id: k, cents: PACKS[k].cents, tokens: PACKS[k].tokens })), portal: /^https:\/\/[^\s]{4,300}$/.test(String(E.BILLING_PORTAL_URL || '')) ? String(E.BILLING_PORTAL_URL) : '' }) };
         else if (path === 'claim') r = await claim(body, (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim());
