@@ -1,0 +1,42 @@
+# Course popularity (9.73.0): asks the Lichess opening explorer how often every branch of the opening courses is played
+# (players' database rated 1000-1800 and the masters database) and commits tools/course_popularity.json to the same branch.
+# tools/course_popularity.py apply then orders the courses by it (most popular line first). Needs the repository secret
+# LICHESS_TOKEN (a Lichess token without any scope: lichess.org/account/oauth/token/create); without it only the masters
+# database is asked. Incremental: positions already in the file are not asked again.
+name: Course popularity (Lichess)
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main, master-data]
+    paths: [tools/course_popularity.py, .github/workflows/course-popularity.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: course-popularity-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install -q python-chess
+      - name: Ask the explorer
+        env:
+          LICHESS_TOKEN: ${{ secrets.LICHESS_TOKEN }}
+        run: timeout 320m python3 tools/course_popularity.py fetch || true
+      - name: Commit the file to this branch
+        run: |
+          git config user.name "course-popularity[bot]"
+          git config user.email "course-popularity@users.noreply.github.com"
+          git add tools/course_popularity.json
+          git diff --cached --quiet && { echo "nothing new"; exit 0; }
+          git commit -m "Course popularity: Lichess explorer counts"
+          git pull --rebase -q origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"
