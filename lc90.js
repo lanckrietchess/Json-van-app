@@ -156,7 +156,7 @@ const LC90=(()=>{
   function html(c,n,preview){
     const trial=c.trial_days>0,vip=c.vip_on;
     return'<div class="lc90">'+(preview?'<p class="lc90-pv">'+ic("eye")+" Preview: this is what a student sees. Buttons do not open checkout.</p>":"")
-      +'<p class="lc90-eye">'+E(fill(c.eyebrow,n))+"</p>"+'<p class="lc90-sub">'+E(fill(c.subtitle,n))+"</p>"+'<p class="lc90-body">'+E(fill(c.body,n))+"</p>"+(trial?'<p class="lc90-trial">'+ic("gift")+" "+E(fill(c.trial_line,n))+"</p>":"")
+      +'<p class="lc90-eye">'+E(fill(c.eyebrow,n))+"</p>"+'<p class="lc90-sub">'+E(fill(c.subtitle,n))+"</p>"+(!preview&&typeof LC106!=="undefined"&&LC106.popupHTML?LC106.popupHTML():"")+'<p class="lc90-body">'+E(fill(c.body,n))+"</p>"+(trial?'<p class="lc90-trial">'+ic("gift")+" "+E(fill(c.trial_line,n))+"</p>":"")
       +(n.tranche<4&&n.pct>0?'<p class="lc90-badge">'+E(fill(c.badge,n).replace(/\s*·\s*$/,"").replace(/·\s*places left$/,""))+"</p>":"")
       +(vip?'<div class="lc90-tiers" role="radiogroup" aria-label="Choose Pro or VIP">'
         +'<label class="lc90-tier is-on"><input type="radio" name="lc90-tier" value="pro" checked><span><b>'+E(fill(c.pro_name,n))+"</b><small>"+E(fill(c.pro_tag,n))+"</small><em>"+E(n.yearly)+" a year · "+E(n.monthly)+" a month</em></span></label>"

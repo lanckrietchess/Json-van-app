@@ -19,6 +19,23 @@ const LC42=(()=>{
   /* 9.59.0: a mate score is not "99.6 pawns". Engine.toCp turns a mate into +-(10000 - 10 per move): say what it means instead. */
   const MATE=9000,pw=x=>(Math.round(Math.abs(+x||0)/10)/10).toFixed(1);
   const evalWords=cp=>{cp=+cp||0;return cp>=MATE?"winning by force (a checkmate was there)":cp<=-MATE?"getting checkmated":cp>=0?"about "+pw(cp)+" pawns better":"about "+pw(cp)+" pawns worse"};
+  /* 9.74.0: the first review in the same frame as Kyenzo's reels: "instinct versus MSPC". LC103's instinct ranking says what kind of move
+     the played one was (a recapture, a capture, a check, a quiet move ...) and where the better move sits on that list; nothing is
+     claimed that the ranking did not find. Without LC103 the block is left out. */
+  function instinctHTML(fen,r,ps,bestSan){
+    try{
+      const inst=typeof LC103!=="undefined"?(LC103.instinct||LC103._t&&LC103._t.instinct):null;   /* LC103 keeps it under _t */
+      if(typeof inst!=="function")return"";
+      const list=inst(fen,null)||[],uci=x=>String(x||"").slice(0,4);
+      const pu=r.played&&(r.played.uci||((r.played.from||"")+(r.played.to||"")))||"",bu=String(r.bestUci||"");
+      const pi=list.findIndex(m=>uci(m.uci)===uci(pu)),bi=list.findIndex(m=>uci(m.uci)===uci(bu));
+      if(bi<0)return"";
+      const tag=pi>=0&&list[pi].tags&&list[pi].tags.length?list[pi].tags[0]:"";
+      const kind=tag&&tag!=="quiet"?" (a "+tag+")":"";
+      const rank=bi>=2?" It is number "+(bi+1)+" of "+list.length+" on the list of moves that come to mind first: instinct skips it, the MSPC check finds it.":bi===1?" It was the second move that comes to mind: one check of their reply would have shown it.":" It was right there: the first move that comes to mind. The check before playing is what was missing.";
+      return'<h4>Instinct versus MSPC</h4><p><b>Instinct played '+E(ps)+'</b>'+E(kind)+'. <b>MSPC finds '+E(bestSan)+'</b>.'+E(rank)+'</p>';
+    }catch(e){return""}
+  }
   const costLine=(r,you)=>{const a=+r.after||0,b=+r.before||0,rs=String(r.replySan||"");
     if(a<=-MATE)return /#$/.test(rs)?"It allowed checkmate: "+rs+".":"It allowed a forced checkmate.";
     if(b>=MATE)return "It let a forced checkmate slip away.";
@@ -171,7 +188,7 @@ const LC42=(()=>{
       const bk=/#/.test(bestSan)?"gives checkmate":/\+/.test(bestSan)?"gives check":/x/.test(bestSan)?"is a capture":"is a quiet move";
       /* 9.56.0: THIS mistake, read from the board and Stockfish (LC83.diagnose); the stock lines are only the fallback */
       let dg=null;try{dg=LC83.diagnose({fen:fen,color:g.color,played:r.played,bestUci:r.bestUci,replyUci:r.replyUci})}catch(e){dg=null}
-      box.innerHTML='<h4>What went wrong</h4><p>'+E(dg&&dg.error||y.d)+'</p>'
+      box.innerHTML=instinctHTML(fen,r,ps,bestSan)+'<h4>What went wrong</h4><p>'+E(dg&&dg.error||y.d)+'</p>'
         +'<h4>The better move: '+E(bestSan)+'</h4><p>'+E(bestSan)+' '+bk+'. Before your move you were '+E(evalWords(r.before))+'; after '+E(ps)+' you were '+E(evalWords(r.after))+'.</p>'
         +'<h4>How you could have found it</h4><p>'+E(dg&&dg.find||THINKK[y.k])+'</p>'
         +'<p class="lc52-next"><b>In your next game:</b> '+E(dg?dg.action:NEXTK[y.k])+'</p>'+(()=>{try{return LC61.tail({fen:fen,color:g.color,k:dg?dg.k:y.k,why:y.d,ps:ps,diag:dg})}catch(e){return""}})();
@@ -649,6 +666,6 @@ const LC42=(()=>{
       }
     }catch(e){console.error("lc42",e)}
   }
-  return{init:init,afterRender:afterRender,begin:begin,startFirst:startFirst,fill:fill,owns:owns,eligible:eligible,_t:{st:st,put:put,tick:tick,firstDone:firstDone,secondDone:secondDone,onListened:onListened,scanRest:scanRest,paint:paint,stripHTML:stripHTML,teaser:teaser,importRest:importRest,firstMistake:firstMistake,leaksAll:leaksAll,marathon:marathon,mNext:mNext,scanMore:scanMore,enrich:enrich}};
+  return{init:init,afterRender:afterRender,begin:begin,startFirst:startFirst,fill:fill,owns:owns,eligible:eligible,_t:{instinctHTML:instinctHTML,st:st,put:put,tick:tick,firstDone:firstDone,secondDone:secondDone,onListened:onListened,scanRest:scanRest,paint:paint,stripHTML:stripHTML,teaser:teaser,importRest:importRest,firstMistake:firstMistake,leaksAll:leaksAll,marathon:marathon,mNext:mNext,scanMore:scanMore,enrich:enrich}};
 })();
 /*@@end lc42*/

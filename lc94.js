@@ -14,10 +14,14 @@ const LC94=(()=>{
      3b. (9.67.0) The landing's quick start no longer jumps into the app: LC102 keeps the name (localStorage "lc102-handoff"), starts the
         install and shows an "Open the app" card. The app reads that handoff when it is opened without ?u= (readHand), once, 7 days max.
      4. In an Instagram / TikTok / Facebook browser (LC87 soft mode) one LC88 step after the first review: "Keep this review", which opens the same
-        game in Chrome / Safari (the in-app browser keeps nothing once it is closed). */
-  const W=window,D=document,VERSION="9.59.0";
+        game in Chrome / Safari (the in-app browser keeps nothing once it is closed).
+     5. (9.74.0) Clean numbers: nothing is sent from a Vercel preview address (*-lanckrietchess.vercel.app), with ?lc94=0, or from a device
+        that was marked as the owner's (localStorage "lc94-excluded"). A device is marked when the owner's account is signed in (LC49) or the
+        landing editor (LC89) confirmed an admin session; excludeMe(token) also asks the server (lc94_exclude_me, admin only), which deletes
+        the device's old rows and ignores it from then on. */
+  const W=window,D=document,VERSION="9.74.0";
   const STEPS=["landing","iab_open","first_open","name_entered","first_review_done","signed_in","install","day2_return","paywall_seen","checkout_started","paid"];
-  const K_DONE="lc94-done",K_SRC="lc94-src",K_FIRST="lc94-first",K_DEEP="lc94-deep",K_IABX="lc94-iab-x",K_DEV="lc-hub-device";
+  const K_X="lc94-excluded",K_DONE="lc94-done",K_SRC="lc94-src",K_FIRST="lc94-first",K_DEEP="lc94-deep",K_IABX="lc94-iab-x",K_DEV="lc-hub-device";
   const NAME=/^[A-Za-z0-9_-]{2,30}$/,DEV_RE=/^d-[a-z0-9]{12,40}$/;
   const isApp=()=>/\/app(\.html)?$/.test(location.pathname);
   const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}};
@@ -60,10 +64,34 @@ const LC94=(()=>{
     return/^https:\/\//.test(u||"")&&k?{u:String(u).replace(/\/+$/,""),k:k}:null;
   }
   const sent=()=>lsGet(K_DONE,{})||{};
+  const preview=h=>/-lanckrietchess\.vercel\.app$/i.test(String(h==null?location.hostname:h));
+  const excluded=()=>{try{return!!lsGet(K_X,0)||preview()||/[?&]lc94=0(&|$)/.test(location.search)}catch(e){return false}};
+  let xAsked=0;
+  /* the owner's device: never counted again; with a session token the server also drops its old rows (admin only) */
+  function excludeMe(token){
+    try{
+      lsSet(K_X,Date.now());
+      const ep=endpoint();if(!ep||!token||xAsked||typeof fetch!=="function")return false;
+      xAsked=1;
+      fetch(ep.u+"/rest/v1/rpc/lc94_exclude_me",{method:"POST",credentials:"omit",headers:{"Content-Type":"application/json",apikey:ep.k,Authorization:"Bearer "+token},
+        body:JSON.stringify({p_aid:dev()})}).then(r=>{if(!r||!r.ok)xAsked=0}).catch(()=>{xAsked=0});
+      return true;
+    }catch(e){return false}
+  }
+  function ownerHere(){
+    try{if(typeof LC49!=="undefined"&&(LC49.ownerAccount&&LC49.ownerAccount()||LC49.hard&&LC49.hard()))return true}catch(e){}
+    try{if(typeof Admin!=="undefined"&&Admin.real&&Admin.real())return true}catch(e){}
+    return false;
+  }
+  function checkOwner(){
+    if(xAsked||!ownerHere())return;
+    let t="";try{const s=LC26.sync.session();t=s&&s.access_token||""}catch(e){}
+    if(t)excludeMe(t);else lsSet(K_X,Date.now());
+  }
   const pending={};
   function step(name){
     try{
-      if(STEPS.indexOf(name)<0||name==="paid"||admin())return false;
+      if(STEPS.indexOf(name)<0||name==="paid"||admin()||excluded())return false;
       if(sent()[name]||pending[name])return false;
       const ep=endpoint();if(!ep||typeof fetch!=="function")return false;
       pending[name]=1;
@@ -192,6 +220,7 @@ const LC94=(()=>{
   let tick=0;
   function watch(){
     if(D.hidden)return;
+    checkOwner();
     const s=sent();
     if(!s.first_review_done&&reviewDone())step("first_review_done");
     if(!s.paywall_seen&&D.querySelector(".lc90-sheet")&&!admin())step("paywall_seen");
@@ -214,6 +243,7 @@ const LC94=(()=>{
   function init(){
     try{
       captureSource();
+      if(isApp())checkOwner();
       const standalone=(()=>{try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}})();
       if(iab())step("iab_open");
       W.addEventListener("appinstalled",()=>step("install"));
@@ -234,7 +264,7 @@ const LC94=(()=>{
       if(!tick)tick=setInterval(watch,4000);
     }catch(e){console.error("lc94",e)}
   }
-  return{VERSION:VERSION,STEPS:STEPS,init:init,step:step,deepStart:deepStart,iabStep:iabStep,src:src,
-    _t:{readHand:readHand,captureSource:captureSource,platformOf:platformOf,attrFromSource:attrFromSource,quickStart:quickStart,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
+  return{VERSION:VERSION,STEPS:STEPS,init:init,step:step,excludeMe:excludeMe,excluded:excluded,deepStart:deepStart,iabStep:iabStep,src:src,
+    _t:{preview:preview,ownerHere:ownerHere,readHand:readHand,captureSource:captureSource,platformOf:platformOf,attrFromSource:attrFromSource,quickStart:quickStart,readDeep:readDeep,resumeUrl:resumeUrl,reviewDone:reviewDone,dev:dev,watch:watch}};
 })();
 /*@@end lc94*/
