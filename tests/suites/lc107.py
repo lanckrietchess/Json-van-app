@@ -58,6 +58,11 @@ with sync_playwright() as p:
     out('Library card [on #books, links to #roadmap]', pg.evaluate("(() => { const a = document.querySelector('[data-lc107-lib] a'); return a ? [a.getAttribute('href'), /The 2000 Elo Roadmap/.test(a.textContent)] : null; })()"))
     # a review report with 3 key moments
     pg.evaluate("location.hash = '#trim'"); pg.wait_for_timeout(1500)
+    out('before the Day-7 pop-up [no sale card, no book step]', pg.evaluate("""(async () => { localStorage.removeItem('lc90-seen'); localStorage.setItem('lc94-first', JSON.stringify(Date.now() - 3 * 864e5)); try { LC97.hadTrial = () => false } catch (e) {}
+      LC107._t.setBook({ id: 'roadmap-2000', kind: 'book', title: 'The 2000 Elo Roadmap', price_cents: 999, buy_link: 'https://buy.stripe.com/test123' });
+      let r = document.querySelector('#an-report'); if (!r) { r = document.createElement('div'); r.id = 'an-report'; document.querySelector('#view').appendChild(r) }
+      r.innerHTML = '<ul><li><button data-act="goto">m1</button></li></ul>'; await LC107._t.reviewCard(); return [!!document.querySelector('#an-report [data-lc107-sale]'), LC107._t.afterPopup(), LC107.bookStep()]; })()"""))
+    pg.evaluate("localStorage.setItem('lc90-seen', JSON.stringify(Date.now())); 0")
     pg.evaluate("""(() => { localStorage.removeItem('lc107-cards'); LC107._t.setBook(null); try { LC97.trialEligible = () => true } catch (e) {}
       let r = document.querySelector('#an-report'); if (!r) { r = document.createElement('div'); r.id = 'an-report'; document.querySelector('#view').appendChild(r) }
       r.innerHTML = '<ul class="rv-keys"><li><button data-act="goto">m1</button></li><li><button data-act="goto">m2</button></li><li><button data-act="goto">m3</button></li></ul>'; })()""")
@@ -67,8 +72,8 @@ with sync_playwright() as p:
     pg.evaluate("""(() => { const r = document.querySelector('#an-report'); r.innerHTML = '<p>other game</p><ul><li><button data-act="goto">x</button></li></ul>'; LC107._t.setBook({ id: 'roadmap-2000', kind: 'book', title: 'The 2000 Elo Roadmap', price_cents: 999, buy_link: 'https://buy.stripe.com/test123' }); })()""")
     pg.wait_for_timeout(1500)
     out('second review [the book takes its turn, at the end, price]', pg.evaluate("""(() => { const c = document.querySelector('#an-report [data-lc107-sale]'); return c ? [c.getAttribute('data-lc107-sale'), c === document.querySelector('#an-report').lastElementChild, /€9\\.99/.test(c.textContent)] : null; })()"""))
-    out('day-4 book step [shown after day 4, not before]', pg.evaluate("""(() => { try { LC97.hadTrial = () => false } catch (e) {} localStorage.setItem('lc94-first', JSON.stringify(Date.now() - 4 * 864e5)); const a = LC107.bookStep();
-      localStorage.setItem('lc94-first', JSON.stringify(Date.now() - 1 * 864e5)); const b = LC107.bookStep(); return [!!a && a.acts[0].label, b]; })()"""))
+    out('book step [after the Day-7 pop-up; not after a trial]', pg.evaluate("""(() => { try { LC97.hadTrial = () => false } catch (e) {} const a = LC107.bookStep();
+      LC97.hadTrial = () => true; const b = LC107.bookStep(); LC97.hadTrial = () => false; return [!!a && a.acts[0].label, b]; })()"""))
     out('first review in plain words [no system words, last lost game first]', pg.evaluate("""(() => { const p = LC42._t.plain, o = LC42._t.gameOrder;
       const t = p('A CCA scan finds it. Name the Alarm Signal and run the Working Point (the P of MSPC). Action Step: look.');
       return [/CCA|Alarm|Working|MSPC|Action Step/.test(t), t, o([{pgn: 'a', res: 'win'}, {pgn: 'b', res: 'loss'}, {res: 'loss'}, {pgn: 'c', res: 'draw'}, {pgn: 'd', res: 'loss'}]).map(g => g.pgn).join('')]; })()"""))

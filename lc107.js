@@ -9,13 +9,15 @@ const LC107=(()=>{
      2. The Library: #roadmap (the five videos, the player's own first) and a card on top of #books, so the roadmap is always one tap
         away, also for people who skipped it after the review.
      3. One sale at a time, after value, never in the first review:
+          9.76.0: only AFTER LC90's Day-7 pop-up was shown (the offers are spread: the Sprint bonus right after the onboarding
+          quest, the trial in the Day-7 pop-up, then trial and book come back at the reviews, the one-time €25 month at the trial end).
           after a game review (Trim, a review with key moments): one card in the report, right after the first key moment when there are
           three or more (mid-review), otherwise at its end. A free player who can still start the trial gets "Try Pro free", taking
           turns with the book; a player whose trial is used gets the book; paying members get nothing.
-          day 4+ (since the first visit), no trial started, no purchase: one LC88 step for the book.
+          after the Day-7 pop-up, no trial started, no purchase: one LC88 step for the book.
         The book is an LC70 Library item: id "roadmap-2000" (or the first pinned, live book with a euro price and a Payment Link).
         Until Kyenzo adds it there, only the trial card shows. */
-  const VERSION="9.75.0",W=window,D=document;
+  const VERSION="9.76.0",W=window,D=document;
   const Q=(s,r)=>(r||D).querySelector(s),QA=(s,r)=>[].slice.call((r||D).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const ic=n=>{try{return typeof icon==="function"?icon(n)+" ":""}catch(e){return""}};
@@ -135,6 +137,9 @@ const LC107=(()=>{
     return BOOK;
   }
   const firstSeen=()=>{const v=+ls.get("lc94-first",0)||0;return v||Date.now()};
+  /* 9.76.0: LC90's Day-7 pop-up was shown on this device (or a trial was started, or the first visit is 8+ days old) */
+  const afterPopup=()=>{try{if(+JSON.parse(localStorage.getItem("lc90-seen")||"0")>0)return true}catch(e){}
+    try{if(typeof LC97!=="undefined"&&LC97.hadTrial&&LC97.hadTrial())return true}catch(e){}return Date.now()-firstSeen()>=8*DAY};
   const inFirstReview=()=>{try{return/^(tease|first)$/.test(String(LC42._t.st().step||""))}catch(e){return false}};
   const eur=c=>"€"+(Math.round(+c||0)/100).toFixed(2);
   function cardHTML(kind,n){
@@ -147,7 +152,7 @@ const LC107=(()=>{
   /* the review report (#an-report): one card per game, after the first key moment when there are 3+, else at the end */
   async function reviewCard(){
     try{
-      if(cur!=="trim"||inFirstReview()||member())return;
+      if(cur!=="trim"||inFirstReview()||member()||!afterPopup())return;
       const rep=Q("#an-report");if(!rep||Q("[data-lc107-sale]",rep))return;
       const keys=QA('[data-act="goto"]',rep);if(!keys.length)return;
       const gid=(()=>{try{return String((App.ui.trimLoad&&App.ui.trimLoad.pgn)||rep.textContent).slice(0,160)}catch(e){return rep.textContent.slice(0,160)}})();
@@ -166,7 +171,7 @@ const LC107=(()=>{
   function bookStep(){
     try{
       if(!BOOK||BOOK.access||member())return null;
-      if(Date.now()-firstSeen()<3*DAY)return null;
+      if(!afterPopup())return null;
       try{if(typeof LC97!=="undefined"&&LC97.hadTrial&&LC97.hadTrial())return null}catch(e){}   /* a trial was started: the yearly offer, not the book */
       const x=+ls.get(K_BOOKX,0)||0;if(x&&Date.now()-x<5*DAY)return null;
       return{html:"<b>My story and every system in one book.</b> <span class=\"lc88-s\">"+E(BOOK.title||"The 2000 Elo Roadmap")+(BOOK.price_cents?", "+eur(BOOK.price_cents):"")+": how I went from 304 to 2105 and why the app trains you the way it does.</span>",
@@ -211,5 +216,5 @@ const LC107=(()=>{
     }catch(e){console.error("lc107",e)}
   }
   return{init:init,afterRender:afterRender,mount:mount,giftHTML:giftHTML,watch:watch,install:install,bookStep:bookStep,openBook:openBook,version:VERSION,
-    _t:{segOf:segOf,ytId:ytId,pickCard:pickCard,loadCfg:loadCfg,book:book,reviewCard:reviewCard,setCfg:v=>{CFG=v},setBook:v=>{BOOK=v;bookAt=Date.now()},SEGS:SEGS}};
+    _t:{afterPopup:afterPopup,segOf:segOf,ytId:ytId,pickCard:pickCard,loadCfg:loadCfg,book:book,reviewCard:reviewCard,setCfg:v=>{CFG=v},setBook:v=>{BOOK=v;bookAt=Date.now()},SEGS:SEGS}};
 })(); /*@@end lc107*/

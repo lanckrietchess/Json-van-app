@@ -18,8 +18,10 @@ const LC106=(()=>{
      for the price of 12), unlocked by EITHER goal (XP or rating), open until 48 hours after the later of the Sprint's end and the
      trial's end (a live countdown in the LC88 step, on the card and in LC97's post-trial pop-up); the owner can switch back to a
      percentage. Week 1: 500 XP in the first 7 days of the Sprint = 14 bonus tokens (the 3 a day kept for one more week), claimed at
-     once. Somebody who missed both goals never sees a "you missed it" message. */
-  const VERSION="9.75.0",W=window,D=document;
+     once. Somebody who missed both goals never sees a "you missed it" message.
+     9.76.0: the invitation comes right after the onboarding quest (LC19's quest levels done), not before; "Start my Sprint" is one
+     tap: signed out, it opens the sign-in and the Sprint starts by itself the moment the sign-in lands (lc106-go, 30 minutes). */
+  const VERSION="9.76.0",W=window,D=document;
   const Q=(s,r)=>(r||D).querySelector(s),QA=(s,r)=>[].slice.call((r||D).querySelectorAll(s));
   const E=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const ic=n=>{try{return typeof icon==="function"?icon(n)+" ":""}catch(e){return""}};
@@ -37,6 +39,8 @@ const LC106=(()=>{
   function left(ms){const d=Math.max(0,ms-Date.now()),h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),x=Math.floor(d%6e4/1e3);return(h?h+"h ":"")+String(m).padStart(2,"0")+"m "+String(x).padStart(2,"0")+"s"}
   const cd=until=>'<b class="lc106-cd" data-lc106-cd="'+Date.parse(until)+'">'+left(Date.parse(until))+"</b>";
   function tickCd(){QA("[data-lc106-cd]").forEach(el=>{const t=+el.getAttribute("data-lc106-cd");if(t)el.textContent=left(t)})}
+  /* the onboarding quest (LC19's quest levels) is over, or never ran for this player */
+  const questsDone=()=>{try{const q=LC19.quest,st=q&&q._t&&q._t.state&&q._t.state();return!st||!st.on}catch(e){return true}};
   const active=s=>!!(s&&s.joined&&s.reward_active&&!s.reward_used&&s.reward_until&&Date.parse(s.reward_until)>Date.now());
 
   /* ---------- pure (tested) ---------- */
@@ -101,7 +105,8 @@ const LC106=(()=>{
     busy=false;paintAll();return S;
   }
   async function start(){
-    if(!signed()){say("Sign in first: your Sprint is kept on your account.");try{LC40._t.openAuth()}catch(e){location.hash="#account"}return}
+    if(!signed()){ls.set("lc106-go",Date.now());say("One step: sign in, and your Sprint starts right after.");try{LC40._t.openAuth()}catch(e){location.hash="#account"}return}
+    ls.set("lc106-go",0);
     say("Reading your rating…");
     try{if(typeof LC59!=="undefined"&&LC59.verify)await LC59.verify(true)}catch(e){}
     const peak=weekPeak(await loadRows());
@@ -146,6 +151,7 @@ const LC106=(()=>{
   }
   function cardHTML(full){
     if(!S||S.ok===false&&S.reason==="off")return"";
+    if(!S.joined&&!questsDone()&&!full)return"";   /* 9.76.0: the invitation waits for the end of the onboarding quest */
     return'<div class="panel lc106" data-lc106-card>'+(S.joined?progressHTML(S,full):inviteHTML(S))+"</div>";
   }
   const CSS=".lc106{display:grid;gap:8px;padding:12px 14px;border-color:var(--accent-line,#38bdf8)}.lc106 p{margin:0}.lc106-k{font-weight:700;font-size:.92rem}.lc106-t{font-size:1.05rem;font-weight:700}"
@@ -243,7 +249,7 @@ const LC106=(()=>{
     try{
       if(active(S))return{html:"<b>Your Sprint bonus: "+E(rewardTxt(S))+".</b> <span class=\"lc88-s\">Ends in "+cd(S.reward_until)+".</span>",
         acts:[{label:"Claim it",href:"#sprint",primary:true}],sig:"sprint-bonus"};
-      if(!S||S.joined||S.ok===false&&S.reason==="off")return null;
+      if(!S||S.joined||S.ok===false&&S.reason==="off"||!questsDone())return null;
       const x=+ls.get(KX,0)||0;if(x&&Date.now()-x<4*DAY)return null;
       const done=ls.get("lc94-done",{})||{};if(!done.first_review_done)return null;
       return{html:"<b>Start your 2-Week Rating Sprint.</b> <span class=\"lc88-s\">One rating target that fits your level, one training target you control. Hit either one and you get "+E(rewardTxt(S))+".</span>",
@@ -296,11 +302,11 @@ const LC106=(()=>{
       css();D.addEventListener("click",onClick);setInterval(tickCd,1000);
       /* the Sprint is the onboarding storyline: its page opens from quest level 1 */
       try{const lv=LC26.levels,o=lv.minLevel;if(lv&&!lv.__lc106){lv.__lc106=1;lv.minLevel=r=>r==="sprint"?1:o(r)}}catch(e){}
-      W.addEventListener("lc39-signed-in",()=>sync(true));
+      W.addEventListener("lc39-signed-in",()=>{const g=+ls.get("lc106-go",0)||0;if(g&&Date.now()-g<30*60e3)setTimeout(start,800);else sync(true)});
       let t=0;new MutationObserver(()=>{if(t)return;t=setTimeout(()=>{t=0;ownerRow();if(HOME[cur]&&!Q("[data-lc106-home]"))paintHome()},300)}).observe(D.body,{childList:true,subtree:true});
       if(S&&S.joined)refreshAch();
     }catch(e){console.error("lc106",e)}
   }
   return{init:init,afterRender:afterRender,mount:mount,sync:sync,start:start,guide:guide,popupHTML:popupHTML,bonus:bonus,pay:pay,version:VERSION,state:()=>S,
-    _t:{left:left,rewardTxt:rewardTxt,wordsFor:wordsFor,targetFor:targetFor,weekPeak:weekPeak,changes:changes,dayOf:dayOf,cardHTML:cardHTML,set:v=>{S=v;ls.set(KEY,v)},setAch:a=>{ACH=a||[]}}};
+    _t:{questsDone:questsDone,left:left,rewardTxt:rewardTxt,wordsFor:wordsFor,targetFor:targetFor,weekPeak:weekPeak,changes:changes,dayOf:dayOf,cardHTML:cardHTML,set:v=>{S=v;ls.set(KEY,v)},setAch:a=>{ACH=a||[]}}};
 })(); /*@@end lc106*/
