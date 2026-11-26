@@ -8,7 +8,7 @@ APP = 'http://127.0.0.1:8765/app.html'
 SB = 'https://wllljllajadiwjdsageu.supabase.co'
 MEMBER = "localStorage.setItem('lc26-auth', JSON.stringify({ access_token: 'm', refresh_token: '', exp: Date.now() + 36e5, email: 'free@example.com' }))"
 OWNER = "localStorage.setItem('lc26-auth', JSON.stringify({ access_token: 'x', refresh_token: '', exp: Date.now() + 36e5, email: 'lanckrietchess@gmail.com' }))"
-OLD = "localStorage.setItem('lc34-first', JSON.stringify(Date.now() - 20 * 864e5))"
+OLD = "localStorage.setItem('lc34-first', JSON.stringify(Date.now() - 20 * 864e5)); localStorage.setItem('lc19-sw', JSON.stringify({ on: false, level: 3, done: Date.now() }))"
 OVER = "Math.max(0, document.documentElement.scrollWidth - innerWidth)"
 def stub(pg, calls, box):
     def rpc(route, request):
@@ -73,6 +73,19 @@ with sync_playwright() as p:
     pg.check('.lc106-sheet [data-lc106-ok]'); pg.click('.lc106-sheet [data-lc106-pay]'); pg.wait_for_timeout(1500)
     s = [b for n, b in calls if n == 'stripe/sprint']
     out('sprint checkout [route, plan, tier, consent, no percentage from the browser, opened]', [len(s), s[0].get('plan') if s else '', s[0].get('tier') if s else 0, s[0].get('consent') if s else None, 'pct' in (s[0] if s else {}), 'checkout=sprint' in pg.url])
+    c.close()
+    # 9.76.0: the invitation waits for the end of the onboarding quest; one tap starts it, also when signed out
+    c, pg, calls, box = fresh(br, 'quest', pre="localStorage.setItem('lc19-sw', JSON.stringify({ on: true, level: 2 }))")
+    out('onboarding quest running [no invitation card, no LC88 step]', pg.evaluate("[!!document.querySelector('[data-lc106-home] [data-lc106=start]'), LC106.guide()]"))
+    pg.evaluate("localStorage.setItem('lc19-sw', JSON.stringify({ on: false, level: 3, done: Date.now() })); LC106.afterRender('home'); 0"); pg.wait_for_timeout(600)
+    out('onboarding quest done [invitation card, LC88 step]', pg.evaluate("[!!document.querySelector('[data-lc106-home] [data-lc106=start]'), !!LC106.guide()]"))
+    c.close()
+    c, pg, calls, box = fresh(br, 'go', who=None, hash='#sprint')
+    pg.evaluate("window.__auth = 0; try { LC40._t.openAuth = () => { window.__auth++ } } catch (e) {} 0")
+    pg.evaluate("LC106.start(); 0"); pg.wait_for_timeout(400)
+    out('signed out, Start my Sprint [sign-in opens, the intent is kept]', pg.evaluate("[window.__auth, +JSON.parse(localStorage.getItem('lc106-go') || '0') > 0]"))
+    pg.evaluate(MEMBER + "; window.dispatchEvent(new Event('lc39-signed-in')); 0"); pg.wait_for_timeout(2500)
+    out('the sign-in lands [the Sprint starts by itself, intent cleared]', [len([1 for n, b in calls if n == 'lc106_join']), pg.evaluate("+JSON.parse(localStorage.getItem('lc106-go') || '0')")])
     c.close()
     c, pg, calls, box = fresh(br, 'owner', who=OWNER, hash='#sprint')
     pg.wait_for_timeout(1200)
