@@ -59,7 +59,9 @@ with sync_playwright() as p:
     for i in range(6):
         pg.wait_for_function("(() => { const P = LC108._t.po(); return P && !P.busy && (P.over || P.g.turn() === P.side); })()", timeout=30000)
         if pg.evaluate("LC108._t.po().over"): break
-        mv = pg.evaluate("(() => { const P = LC108._t.po(); const g = new Chess(P.g.fen()); const m = g.moves({verbose: true}).find(x => x.captured) || g.moves({verbose: true}).find(x => x.piece === 'k'); return m ? {from: m.from, to: m.to} : null; })()")
+        mv = pg.evaluate("""(() => { const P = LC108._t.po(); const g = new Chess(P.g.fen()); const ms = g.moves({verbose: true}); const pw = (() => { for (const r of g.board()) for (const q of r) if (q && q.type === 'p' && q.color === 'b') return q.square; return null; })();
+      const d = (a, b) => Math.max(Math.abs(a.charCodeAt(0) - b.charCodeAt(0)), Math.abs(+a[1] - +b[1]));
+      const m = ms.find(x => x.captured) || ms.filter(x => x.piece === 'k').sort((x, y) => pw ? d(x.to, pw) - d(y.to, pw) : 0)[0]; return m ? {from: m.from, to: m.to} : null; })()""")
         if not mv: break
         pg.evaluate("m => LC108._t.move(m)", mv)
     pg.wait_for_timeout(800)
