@@ -258,7 +258,7 @@ export function run(content, engine, opts) {
     const e = engine[d.id]; if (!e || e.err) { report.audit.push({id: d.id, msg: 'no engine data'}); continue; }
     const best = e.lines[0].pv && e.lines[0].pv[0];
     if (best && best !== e.ours[0]) report.solutions.push({id: d.id, ours: san(e.P0, e.ours[0]), engine: san(e.P0, best), ev: e.lines[0], after: {cp: e.after.cp, mate: e.after.mate}});
-    if (!/^(lc|mg-lc|kg|mg-kg)-/.test(d.id)) {
+    if (!/^(lc|mg-lc|kg|mg-kg|ldb|mg-ldb)-/.test(d.id)) {
       const bad = claimsCheck(textsOf(d), fensOf(d.puzzle_fen || d.fen, d.solution_moves || []), [], 2);
       if (bad.length) report.audit.push({id: d.id, msg: 'hand-written text names ' + bad.join(', ') + ', not on the board'});
       continue;

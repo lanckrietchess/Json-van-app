@@ -1,88 +1,88 @@
 # Course examples (tools/course_examples.py, 9.77.0)
 
-- egt-laws-l1: 6 examples for R0.1, R0.2, R0.3, R0.4, R0.5, R0.6, R0.12, C0.6
-- egt-wincondition-l1: 6 examples for F0.1, F0.2, F0.3, L0.1, L0.2, L0.3, L0.4, L0.5, R0.7, C0.1
+- egt-laws-l1: 13 examples for R0.1, R0.2, R0.3, R0.4, R0.5, R0.6, R0.12, C0.6
+- egt-wincondition-l1: 12 examples for F0.1, F0.2, F0.3, L0.1, L0.2, L0.3, L0.4, L0.5, R0.7, C0.1
 - egt-mates-l1: 0 examples for R0.11, C0.2, C0.3, P0.1
-- egt-principles-l1: 4 examples for R0.8, R0.9, R0.10, C0.4, T0.errors, T0.triggers, APPC
-- egt-square-l1: 11 examples for R0.13, R0.14, R0.15, R0.16, R0.17, C0.5, P0.2, P0.3, P0.4
-- egt-wincondition-l2: 2 examples for F0.5, F0.6
-- egt-opposition-l2: 12 examples for R1.1, R1.2, R1.3, R1.4, R1.5, R1.6, R1.7, C1.1, C1.2, C1.3, C1.4, P1.1
-- egt-passers-l2: 8 examples for R1.8, R1.9, R1.10, R1.11, C1.5, C1.6, P1.2
-- egt-rook-l2: 5 examples for R1.16, R1.17, R1.18, R1.19, R1.20, R1.21, C1.7, C1.8, P1.4, P1.5
+- egt-principles-l1: 8 examples for R0.8, R0.9, R0.10, C0.4, T0.errors, T0.triggers, APPC
+- egt-square-l1: 23 examples for R0.13, R0.14, R0.15, R0.16, R0.17, C0.5, P0.2, P0.3, P0.4
+- egt-wincondition-l2: 3 examples for F0.5, F0.6
+- egt-opposition-l2: 27 examples for R1.1, R1.2, R1.3, R1.4, R1.5, R1.6, R1.7, C1.1, C1.2, C1.3, C1.4, P1.1
+- egt-passers-l2: 20 examples for R1.8, R1.9, R1.10, R1.11, C1.5, C1.6, P1.2
+- egt-rook-l2: 9 examples for R1.16, R1.17, R1.18, R1.19, R1.20, R1.21, C1.7, C1.8, P1.4, P1.5
 - egt-queen-l2: 0 examples for R1.13, R1.14
-- egt-bishop-knight-l2: 4 examples for R1.12, R1.15, P1.3
-- egt-conversion-l2: 4 examples for R1.22, R1.23, T1.errors, T1.triggers
-- egt-wincondition-l3: 8 examples for F0.4, D0.1, D0.2, D0.3, D0.4, D0.5, D0.6, D0.7
-- egt-opposition-l3: 3 examples for R2.1, R2.2, R2.3, R2.4, R2.5, C2.1, C2.2, P2.2
-- egt-passers-l3: 9 examples for R2.6, R2.7, R2.8, R2.9, R2.10, R2.11, P2.1, P2.3
-- egt-rook-l3: 7 examples for R2.12, R2.13, R2.14, R2.15, R2.16, R2.17, R2.18, C2.3, C2.7
-- egt-bishop-knight-l3: 7 examples for R2.19, R2.20, R2.21, R2.25, C2.4, C2.5
+- egt-bishop-knight-l2: 6 examples for R1.12, R1.15, P1.3
+- egt-conversion-l2: 7 examples for R1.22, R1.23, T1.errors, T1.triggers
+- egt-wincondition-l3: 12 examples for F0.4, D0.1, D0.2, D0.3, D0.4, D0.5, D0.6, D0.7
+- egt-opposition-l3: 12 examples for R2.1, R2.2, R2.3, R2.4, R2.5, C2.1, C2.2, P2.2
+- egt-passers-l3: 19 examples for R2.6, R2.7, R2.8, R2.9, R2.10, R2.11, P2.1, P2.3
+- egt-rook-l3: 15 examples for R2.12, R2.13, R2.14, R2.15, R2.16, R2.17, R2.18, C2.3, C2.7
+- egt-bishop-knight-l3: 14 examples for R2.19, R2.20, R2.21, R2.25, C2.4, C2.5
 - egt-opposite-l3: 2 examples for R2.22, R2.23
 - egt-pieces-vs-l3: 2 examples for R2.24, P2.4
-- egt-conversion-l3: 3 examples for R2.26, R2.27, R2.28, C2.6, T2.errors, T2.triggers
+- egt-conversion-l3: 8 examples for R2.26, R2.27, R2.28, C2.6, T2.errors, T2.triggers
 - egt-wincondition-l4: 2 examples for C3A.1, C3A.2
 - egt-mates-l4: 1 examples for R3A.16, R3A.17, R3A.18
-- egt-opposition-l4: 2 examples for R3A.1, R3A.2
-- egt-passers-l4: 2 examples for R3A.3, R3A.4
+- egt-opposition-l4: 7 examples for R3A.1, R3A.2
+- egt-passers-l4: 4 examples for R3A.3, R3A.4
 - egt-rook-l4: 2 examples for R3A.5, R3A.6, R3A.7, R3A.8, R3A.9, R3A.10, P3A.1, P3A.3
-- egt-queen-l4: 3 examples for R3A.11, R3A.12, R3A.13, R3A.14, R3A.15, C3A.5, P3A.2, P3A.4
+- egt-queen-l4: 5 examples for R3A.11, R3A.12, R3A.13, R3A.14, R3A.15, C3A.5, P3A.2, P3A.4
 - egt-bishop-knight-l4: 1 examples for R3A.20, R3A.24, R3A.25
 - egt-pieces-vs-l4: 1 examples for R3A.19, R3A.21, R3A.22, R3A.23
 - egt-conversion-l4: 1 examples for C3A.3, C3A.4, C3A.6, APPA, T3A.errors, T3A.triggers
-- egt-wincondition-l5: 4 examples for C3B.1, R3C.9, R3C.10, R3C.11, C3C.3
-- egt-opposition-l5: 4 examples for R3C.5, R3C.6, R3C.7, R3C.8, C3C.2
-- egt-passers-l5: 4 examples for R3B.13, R3B.15
-- egt-rook-l5: 1 examples for R3B.20, R3B.21, R3C.12, R3C.13, R3C.14
-- egt-queen-l5: 0 examples for R3B.25, R3C.15, R3C.16
+- egt-wincondition-l5: 12 examples for C3B.1, R3C.9, R3C.10, R3C.11, C3C.3
+- egt-opposition-l5: 8 examples for R3C.5, R3C.6, R3C.7, R3C.8, C3C.2
+- egt-passers-l5: 8 examples for R3B.13, R3B.15
+- egt-rook-l5: 3 examples for R3B.20, R3B.21, R3C.12, R3C.13, R3C.14
+- egt-queen-l5: 2 examples for R3B.25, R3C.15, R3C.16
 - egt-bishop-knight-l5: 2 examples for R3B.22, R3B.23
 - egt-opposite-l5: 0 examples for R3B.24
 - egt-pieces-vs-l5: 4 examples for R3B.9, R3B.10
-- egt-conversion-l5: 7 examples for R3B.5, R3B.6, R3B.7, R3B.8, APPB, T3B.errors, T3B.triggers
-- egt-planning-l5: 4 examples for R3B.1, R3B.2, R3B.3, R3B.4, R3B.18, R3B.19, R3B.26, R3B.27, C3B.2, C3B.3, C3B.4
-- egt-transform-l5: 6 examples for R3B.11, R3B.12, R3B.14, R3B.16, R3B.17, C3B.5
+- egt-conversion-l5: 11 examples for R3B.5, R3B.6, R3B.7, R3B.8, APPB, T3B.errors, T3B.triggers
+- egt-planning-l5: 12 examples for R3B.1, R3B.2, R3B.3, R3B.4, R3B.18, R3B.19, R3B.26, R3B.27, C3B.2, C3B.3, C3B.4
+- egt-transform-l5: 12 examples for R3B.11, R3B.12, R3B.14, R3B.16, R3B.17, C3B.5
 - egt-fortress-l5: 5 examples for R3C.1, R3C.2, R3C.3, R3C.4, C3C.1
 - egt-gm-l5: 2 examples for R3C.17, R3C.18, R3C.19, R3C.20, R3C.21, R3C.22, R3C.23, R3C.24, C3C.4, C3C.5, T3C.errors, T3C.standard
 - mgt-ch_t0_01 (mg-ch-t0-01): 6 examples
-- mgt-ch_t0_02 (mg-ch-t0-02): 6 examples
-- mgt-ch_t0_03 (mg-ch-t0-03): 6 examples
+- mgt-ch_t0_02 (mg-ch-t0-02): 7 examples
+- mgt-ch_t0_03 (mg-ch-t0-03): 7 examples
 - mgt-ch_t0_04 (mg-ch-t0-04): 6 examples
-- mgt-ch_t0_05 (mg-ch-t0-05): 6 examples
-- mgt-ch_t0_06 (mg-planning): 6 examples
-- mgt-ch_t1_01 (mg-ch-t1-01): 6 examples
-- mgt-ch_t1_02 (mg-ch-t1-02): 6 examples
-- mgt-ch_t1_03 (mg-ch-t1-03): 6 examples
-- mgt-ch_t1_04 (mg-ch-t1-04): 6 examples
-- mgt-ch_t1_05 (mg-ch-t1-05): 3 examples
+- mgt-ch_t0_05 (mg-ch-t0-05): 7 examples
+- mgt-ch_t0_06 (mg-planning): 7 examples
+- mgt-ch_t1_01 (mg-ch-t1-01): 7 examples
+- mgt-ch_t1_02 (mg-ch-t1-02): 7 examples
+- mgt-ch_t1_03 (mg-ch-t1-03): 7 examples
+- mgt-ch_t1_04 (mg-ch-t1-04): 7 examples
+- mgt-ch_t1_05 (mg-ch-t1-05): 6 examples
 - mgt-ch_t1_06 (mg-defence): 6 examples
 - mgt-ch_t2_01 (mg-prophylaxis): 6 examples
-- mgt-ch_t2_02 (mg-ch-t2-02): 6 examples
-- mgt-ch_t2_03 (mg-ch-t2-03): 6 examples
-- mgt-ch_t2_04 (mg-ch-t2-04): 6 examples
-- mgt-ch_t2_05 (mg-ch-t2-05): 6 examples
-- mgt-ch_t2_06 (mg-ch-t2-06): 6 examples
-- mgt-ch_t2_07 (mg-ch-t2-07): 2 examples
-- mgt-ch_t2_08 (mg-ch-t2-08): 6 examples
-- mgt-ch_t2_09 (mg-ch-t2-09): 6 examples
-- mgt-ch_t3a_01 (mg-planning): 6 examples
-- mgt-ch_t3a_02 (mg-ch-t3a-02): 6 examples
-- mgt-ch_t3a_03 (mg-ch-t3a-03): 6 examples
-- mgt-ch_t3a_04 (mg-ch-t3a-04): 6 examples
-- mgt-ch_t3a_05 (mg-ch-t3a-05): 6 examples
-- mgt-ch_t3a_06 (mg-ch-t3a-06): 6 examples
-- mgt-ch_t3a_07 (mg-ch-t3a-07): 6 examples
+- mgt-ch_t2_02 (mg-ch-t2-02): 7 examples
+- mgt-ch_t2_03 (mg-ch-t2-03): 7 examples
+- mgt-ch_t2_04 (mg-ch-t2-04): 7 examples
+- mgt-ch_t2_05 (mg-ch-t2-05): 7 examples
+- mgt-ch_t2_06 (mg-ch-t2-06): 7 examples
+- mgt-ch_t2_07 (mg-ch-t2-07): 5 examples
+- mgt-ch_t2_08 (mg-ch-t2-08): 7 examples
+- mgt-ch_t2_09 (mg-ch-t2-09): 7 examples
+- mgt-ch_t3a_01 (mg-planning): 7 examples
+- mgt-ch_t3a_02 (mg-ch-t3a-02): 7 examples
+- mgt-ch_t3a_03 (mg-ch-t3a-03): 7 examples
+- mgt-ch_t3a_04 (mg-ch-t3a-04): 7 examples
+- mgt-ch_t3a_05 (mg-ch-t3a-05): 7 examples
+- mgt-ch_t3a_06 (mg-ch-t3a-06): 7 examples
+- mgt-ch_t3a_07 (mg-ch-t3a-07): 7 examples
 - mgt-ch_t3a_08 (mg-ch-t3a-08): 6 examples
 - mgt-ch_t3b_01 (mg-prophylaxis): 6 examples
-- mgt-ch_t3b_02 (mg-ch-t3b-02): 6 examples
-- mgt-ch_t3b_03 (mg-ch-t3b-03): 6 examples
-- mgt-ch_t3b_04 (mg-ch-t3b-04): 6 examples
-- mgt-ch_t3b_05 (mg-transitions): 6 examples
-- mgt-ch_t3b_06 (mg-transitions): 6 examples
+- mgt-ch_t3b_02 (mg-ch-t3b-02): 7 examples
+- mgt-ch_t3b_03 (mg-ch-t3b-03): 7 examples
+- mgt-ch_t3b_04 (mg-ch-t3b-04): 7 examples
+- mgt-ch_t3b_05 (mg-transitions): 7 examples
+- mgt-ch_t3b_06 (mg-transitions): 7 examples
 - mgt-ch_t3b_07 (mg-defence): 5 examples
-- mgt-ch_t3b_08 (mg-ch-t3b-08): 6 examples
-- mgt-ch_t3c_01 (mg-ch-t3c-01): 6 examples
+- mgt-ch_t3b_08 (mg-ch-t3b-08): 7 examples
+- mgt-ch_t3c_01 (mg-ch-t3c-01): 7 examples
 
-## Rules with examples: 142 of 199
+## Rules with examples: 147 of 199
 
-Without an example (no board test, or nothing passed Stockfish): F0.1, F0.2, F0.3, L0.3, F0.4, R0.4, R0.9, R0.12, C0.1, R1.19, R2.1, R2.2, R2.3, R2.4, R2.16, R2.26, C2.6, R3A.7, R3A.8, R3A.13, R3A.14, R3A.15, R3A.16, R3A.17, R3A.24, C3A.1, C3A.5, C3A.6, R3B.2, R3B.4, R3B.14, R3B.16, R3B.18, R3B.19, R3B.20, R3B.25, R3B.26, R3B.27, C3B.1, C3B.3, C3B.4, C3B.5, R3C.3, R3C.4, R3C.5, R3C.7, R3C.13, R3C.15, R3C.16, R3C.18, R3C.20, R3C.21, R3C.22, R3C.23, R3C.24, C3C.2, C3C.5
+Without an example (no board test, or nothing passed Stockfish): F0.1, F0.2, F0.3, L0.3, F0.4, R0.4, R0.9, C0.1, R1.19, R2.1, R2.2, R2.4, R2.16, R2.26, C2.6, R3A.7, R3A.8, R3A.13, R3A.15, R3A.16, R3A.17, R3A.24, C3A.1, C3A.5, C3A.6, R3B.2, R3B.14, R3B.16, R3B.18, R3B.19, R3B.20, R3B.25, R3B.26, R3B.27, C3B.1, C3B.3, C3B.4, C3B.5, R3C.3, R3C.4, R3C.5, R3C.7, R3C.13, R3C.16, R3C.18, R3C.20, R3C.21, R3C.22, R3C.23, R3C.24, C3C.2, C3C.5
 
-Lichess database: {"ok": false, "why": "not run yet"}
+Lichess database: {"ok": true, "started": "2026-11-27 10:52 UTC", "source": "https://database.lichess.org/lichess_db_puzzle.csv.zst", "rows": 6193530, "read": 4615567, "candidates": {"endgame": {"R2.27": 300, "R1.16": 300, "R2.28": 300, "R3B.7": 300, "R3B.8": 300, "R0.7": 300, "R3C.9": 300, "C3C.3": 300, "R1.1": 300, "R1.4": 300, "C1.2": 300, "R2.10": 300, "D0.6": 300, "R0.3": 300, "R3B.11": 300, "R3B.17": 300, "L0.5": 300, "R1.22": 300, "R3B.6": 300, "R1.6": 300, "C1.1": 300, "C1.4": 300, "R2.9": 300, "R3A.1": 300, "R3A.2": 300, "R3C.6": 300, "D0.7": 300, "R0.6": 300, "R0.16": 300, "R3B.13": 300, "R3C.11": 300, "R2.7": 300, "R2.8": 300, "R2.12": 300, "R1.9": 300, "D0.1": 300, "R0.17": 300, "R1.15": 300, "R2.25": 300, "C2.5": 300, "C2.7": 300, "R1.10": 300, "R3C.10": 300, "R2.6": 300, "R3B.12": 300, "R3B.4": 300, "R0.13": 300, "R3B.1": 300, "R3B.3": 300, "C0.5": 300, "R1.8": 300, "C1.5": 300, "R3B.15": 300, "R0.8": 300, "R1.17": 300, "C2.3": 300, "R2.14": 300, "R2.15": 300, "R3A.6": 300, "C3B.2": 300, "R3C.8": 300, "R2.21": 300, "L0.4": 300, "R1.11": 300, "C2.1": 300, "R1.5": 300, "R3A.4": 300, "R1.2": 300, "C1.3": 300, "R0.14": 300, "R2.13": 300, "R3B.21": 300, "C1.6": 300, "R1.18": 300, "C1.7": 300, "R3A.14": 300, "R3C.15": 300, "R2.3": 300, "C0.4": 300, "R2.5": 300, "C2.2": 300, "R3A.15": 300, "C3A.5": 300, "R0.1": 221, "R0.12": 221, "R1.20": 43, "D0.2": 15, "R0.2": 15, "F0.5": 1, "F0.6": 1, "R1.23": 1, "R0.15": 2}, "middlegame": {"mg-ch-t0-02": 300, "mg-defence": 300, "mg-ch-t2-06": 300, "mg-ch-t3a-06": 300, "mg-ch-t3b-02": 300, "mg-transitions": 300, "mg-ch-t0-03": 300, "mg-ch-t1-02": 300, "mg-prophylaxis": 300, "mg-ch-t3a-02": 300, "mg-ch-t3b-03": 300, "mg-ch-t3b-08": 300, "mg-ch-t1-03": 300, "mg-ch-t3a-03": 300, "mg-ch-t0-05": 300, "mg-ch-t1-05": 300, "mg-ch-t3a-07": 300, "mg-ch-t3c-01": 300, "mg-ch-t1-04": 300, "mg-planning": 300, "mg-ch-t2-04": 300, "mg-ch-t2-09": 300, "mg-ch-t3b-04": 300, "mg-ch-t2-03": 300, "mg-ch-t0-04": 300, "mg-ch-t2-08": 300, "mg-ch-t1-01": 300, "mg-ch-t2-05": 300, "mg-ch-t3a-04": 300, "mg-ch-t3a-05": 300, "mg-ch-t2-07": 300, "mg-ch-t2-02": 300}}, "scan_minutes": 151.0, "minutes": 167.8}

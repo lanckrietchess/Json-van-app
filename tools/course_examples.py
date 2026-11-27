@@ -294,10 +294,10 @@ def d_defend_front(c):
             return c.san() + ': the defending king stays in front of the ' + sqn(s) + '-pawn.'
     return None
 def d_tempo(c):
-    if not c.m or c.typ != 'kp' or c.pt() != P_ or c.cap(): return None
+    if not c.m or c.typ != 'kp' or c.pt() != P_ or not c.quiet(): return None
     if passed(c.b, c.m.from_square, c.me): return None
     if chess.square_distance(c.b.king(True), c.b.king(False)) <= 3:
-        return c.san() + ': a spare pawn move. It hands the move to them, and in this king position that is zugzwang.'
+        return c.san() + ': the pawn move that wins the tempo battle. In pawn endings every tempo counts, and Stockfish says only this move keeps the result.'
     return None
 def outside_passer(b, me):
     other = [fil(s) for s in pawns(b, True) + pawns(b, False)]
@@ -365,7 +365,8 @@ def d_rook_active(c):
 def d_rook_active_down(c):
     return d_rook_active(c) if c.mat <= -1 else None
 def d_cutoff(c):
-    if not c.m or c.pt() != R_ or not is_rook_eg(c) or c.cap() or c.chk(): return None
+    if not c.m or c.pt() != R_ or c.typ != 'rook' or c.cap() or c.chk(): return None
+    if any(c.a.piece_at(x) and c.a.piece_at(x).color != c.me and c.a.piece_at(x).piece_type != P_ for x in c.a.attacks(c.m.to_square) if x not in c.b.attacks(c.m.from_square)): return None
     ek = c.b.king(not c.me)
     for s in passers(c.b, c.me):
         tf, kf, pf = fil(c.m.to_square), fil(ek), fil(s)
@@ -810,7 +811,7 @@ def d_mg_kingattack(c):
     return None
 def open_file(b, f): return not any(fil(s) == f for s in b.pieces(P_, True) | b.pieces(P_, False))
 def d_mg_openfile(c):
-    if not mg_ok(c) or c.pt() not in (R_, Q_) or c.cap(): return None
+    if not mg_ok(c) or c.pt() not in (R_, Q_) or c.cap() or c.a.is_checkmate(): return None
     t = c.m.to_square
     if c.pt() == R_ and rel(t, c.me) == 6 and rel(c.m.from_square, c.me) != 6: return c.san() + ': the rook reaches the 7th rank.'
     if open_file(c.b, fil(t)) and fil(t) != fil(c.m.from_square):
@@ -818,7 +819,7 @@ def d_mg_openfile(c):
         return c.san() + ': the ' + NAME[c.pt()] + ' takes the open ' + 'abcdefgh'[fil(t)] + '-file' + (', doubling with the other heavy piece.' if other else '.')
     return None
 def d_mg_lever(c):
-    if not mg_ok(c) or c.pt() != P_ or c.cap(): return None
+    if not mg_ok(c) or c.pt() != P_ or c.cap() or c.a.is_checkmate(): return None
     hits = [s for s in c.a.attacks(c.m.to_square) if c.a.piece_at(s) and c.a.piece_at(s).piece_type == P_ and c.a.piece_at(s).color != c.me]
     if hits: return c.san() + ': a pawn lever against ' + sqn(hits[0]) + '. It opens lines for your pieces.'
     return None
@@ -911,7 +912,7 @@ def d_mg_colour(c):
         return c.san() + ': their ' + ('light' if cols == {1} else 'dark') + '-squared bishop is the only one left, so the ' + ('dark' if cols == {1} else 'light') + ' squares around their king are yours.'
     return None
 def d_mg_space(c):
-    if not mg_ok(c) or c.pt() != P_ or c.cap() or rel(c.m.to_square, c.me) not in (4, 5): return None
+    if not mg_ok(c) or c.pt() != P_ or not c.quiet() or rel(c.m.to_square, c.me) not in (4, 5): return None
     drop = total_mob(c.b, not c.me) - total_mob(c.a, not c.me)
     if drop >= 3: return c.san() + ': space. The pawn takes ' + str(drop) + ' squares from their pieces.'
     return None
