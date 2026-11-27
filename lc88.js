@@ -35,6 +35,7 @@ const LC88=(()=>{
     {id:"quest",sel:"#lc39-q",kind:"Quest"},
     {id:"done",sel:"#lc71-road-done",kind:"Today"},
     {id:"sprint",model:()=>{try{return typeof LC106!=="undefined"?LC106.guide():null}catch(e){return null}},kind:"Sprint"},   /* 9.74.0: the 2-Week Rating Sprint, after the first review */
+    {id:"core",model:()=>{try{return typeof LC110!=="undefined"?LC110.guide():null}catch(e){return null}},kind:"Level 20"},   /* 9.81.0: the full Hub opened at Level 20, the optional explore quest */
     {id:"kick",sel:"#lc37-kick",kind:"Coach"},   /* 9.59.0: Coach Lanckriet's daily tip on Home was a second guide next to the road */
     {id:"hero",sel:"[data-lc62-card]",kind:"Your story"},
     {id:"save",sel:"#lc40-nudge",kind:"Tip"},
