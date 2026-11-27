@@ -194,7 +194,7 @@ def d_stalemate_save(c):
 def d_dead(c):
     if not c.m or not c.eg or c.mat > -1: return None
     if c.end.is_insufficient_material() and not c.b.is_insufficient_material():
-        return c.san() + ' removes the last material that could mate: what is left is a dead position, a draw.'
+        return 'You are behind, and ' + c.san() + ' starts the line that ends in a dead position: what is left cannot mate. A draw.'
     return None
 def d_perpetual(c):
     if not c.m or not c.chk() or c.mat > -2: return None
@@ -674,6 +674,9 @@ d_fortress = make_find('d_fortress', lambda c: c.mat <= -2 and npieces(c.b, not 
 d_gm_eg = make_find('d_gm_eg', lambda c: c.meta.get('tier') == '2000+' or (c.meta.get('rating') or 0) >= 2100, lambda c: 'A critical endgame moment at master level: ' + c.san() + ' is the only move that keeps the result.')
 d_qvp7_find = make_find('d_qvp7_find', lambda c: p_qvp7(c.b, c.me), lambda c: 'Queen against a pawn on the 7th: ' + c.san() + ' is the only move that keeps the result.')
 d_wrongb_find = make_find('d_wrongb_find', lambda c: p_wrongb(c.b, c.me) and c.pt() == K_, lambda c: 'The wrong bishop: ' + c.san() + ' heads for the corner the bishop cannot cover.')
+d_bpvb_find = make_find('d_bpvb_find', lambda c: p_bpvb(c.b, c.me), lambda c: 'Bishop and pawn against a same-coloured bishop: ' + c.san() + ' is the only move that keeps the result.')
+d_npvn_find = make_find('d_npvn_find', lambda c: p_npvn(c.b, c.me), lambda c: 'Knight and pawn against knight: ' + c.san() + ' is the only move that keeps the result.')
+d_nvrp7_find = make_find('d_nvrp7_find', lambda c: p_nvrp7(c.b, c.me), lambda c: 'Knight against a rook pawn on the 7th: ' + c.san() + ' is the only move that keeps the result.')
 d_queen_eg = make_find('d_queen_eg', lambda c: c.typ == 'queen', lambda c: 'Queen ending: ' + c.san() + ' is the only move that keeps the result.')
 
 # rule id -> detectors: ('find', fn, claim) or ('play', fn, goal) ; goal 'win' / 'draw' / 'eval' (from Stockfish)
@@ -723,8 +726,8 @@ for rid, extra in {
     'R2.22': [('find', d_ocb_hold, 'draw')], 'D0.4': [('find', d_ocb_hold, 'draw'), ('find', d_fortress, 'draw')], 'R2.23': [('find', d_ocb_heavy, 'win')], 'R3B.24': [('find', d_ocb_win, 'win')],
     'R2.24': [('find', d_rvminor_hold, 'draw')], 'R3B.10': [('find', d_exchange_up, 'win')], 'R3B.9': [('find', d_minor_eg, 'only')], 'R3B.22': [('find', d_nvbadb, 'win')],
     'R3B.23': [('find', d_bvn_wings, 'win')], 'R2.20': [('find', d_bvn_wings, 'win')], 'R2.19': [('find', d_badb, 'win')], 'R3A.19': [('find', d_pawnless, 'only')],
-    'R3A.21': [('find', d_pawnless, 'only')], 'R3A.22': [('find', d_pawnless, 'only')], 'R3A.23': [('find', d_pawnless, 'only')], 'R3A.24': [('find', d_minor_eg, 'only')],
-    'R3A.25': [('find', d_minor_eg, 'only')], 'R3A.20': [('find', d_minor_eg, 'only')], 'R3C.1': [('find', d_fortress, 'draw')], 'R3C.2': [('find', d_fortress, 'draw')],
+    'R3A.21': [('find', d_pawnless, 'only')], 'R3A.22': [('find', d_pawnless, 'only')], 'R3A.23': [('find', d_pawnless, 'only')], 'R3A.24': [('find', d_bpvb_find, 'only')],
+    'R3A.25': [('find', d_npvn_find, 'only')], 'R3A.20': [('find', d_nvrp7_find, 'only')], 'R3C.1': [('find', d_fortress, 'draw')], 'R3C.2': [('find', d_fortress, 'draw')],
     'C3C.1': [('find', d_fortress, 'draw')], 'R3C.17': [('find', d_gm_eg, 'only')], 'C3C.4': [('find', d_gm_eg, 'only')], 'R3A.11': [('find', d_qvp7_find, 'only')],
     'R3A.12': [('find', d_pawnless, 'only')], 'R3A.13': [('find', d_queen_eg, 'only')], 'R1.12': [('find', d_wrongb_find, 'draw')], 'C3A.2': [('find', d_flank, 'draw'), ('find', d_cutoff, 'only')],
     'C3A.1': [('find', d_lucena_find, 'win'), ('find', d_philidor_find, 'draw')], 'R3A.18': [('find', d_pawnless, 'only')],
@@ -1014,7 +1017,7 @@ def detect(c, grp):
     if grp == 'endgame':
         for rule, dets in E.items():
             for mode, fn, claim in dets:
-                if mode == 'find' and c.m is None: continue
+                if mode == 'find' and (c.m is None or c.b.is_check()): continue   # an answer to a check is forced, not a rule
                 try:
                     r = fn(c) if mode == 'find' or fn.__code__.co_argcount == 1 else (fn(c.b, c.me) and 'shape')
                 except Exception: r = None
@@ -1391,6 +1394,19 @@ def main():
         except Exception: pass
     write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier)
 
+def recheck(rec, grp, rule):
+    """a Lichess record found by an older version of the tests: keep it only if today's test for its rule still says so (its sentence too)"""
+    c = Ctx(rec['fen'], rec['best'], rec['line'], rec['prev'], rec['prev_fen'], {'src': 'lichess', 'phase': grp, 'rating': rec.get('rating')})
+    if not c.ok or c.b.is_check() and grp == 'endgame': return None
+    hits = detect(c, grp).get(rule) or []
+    hits = [h for h in hits if h[0] == 'find']
+    if not hits: return None
+    m = re.search(r' \((If you pass|If they ignore it)[^)]*\)\s*$', rec.get('reason') or '')
+    suffix = m.group(0) if m else ''
+    if suffix and rec.get('claim') == 'threat_made': suffix = suffix.replace('(If you pass, they ', '(If they ignore it, you ')
+    rec = dict(rec); rec['reason'] = hits[0][2] + suffix
+    return rec
+
 def threat_words(v, r):
     t = v.get('threat')
     if not t: return ''
@@ -1448,8 +1464,8 @@ def write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier):
                 eg_ex[rule].append({'mode': 'play', 'id': 'kp-' + str(m['game']) + '-' + str(m['ply']), 'fen': r['fen'], 'side': 'w' if chess.Board(r['fen']).turn else 'b', 'goal': v['goal'],
                                     'eval': v['score'], 'src': 'mine', 'source': ex_source(m), 'mateOnly': r['fn'] in ('p_kqk', 'p_krk', 'p_kbnk', 'p_2b'), 'reason': PLAY_WORDS.get(r['fn'], '')})
     for rule, recs in (LI.get('endgame') or {}).items():
+        recs = [x for x in (recheck(x, 'endgame', rule) for x in recs) if x]
         for rec in recs[:2]:
-            if rec.get('claim') == 'threat_made': rec['reason'] = rec['reason'].replace('(If you pass, they ', '(If they ignore it, you ')
             r = {'fen': rec['fen'], 'best': rec['best'], 'line': rec['line'], 'prev': rec['prev'], 'prev_fen': rec['prev_fen'], 'reason': rec['reason'],
                  'meta': {'src': 'lichess', 'pid': rec['pid'], 'rating': rec['rating'], 'level': rating_tier(rec['rating'])}}
             v = {'line': rec['line_ok'], 'lines': rec['engine']['lines'], 'after': rec['engine']['after'], 'engine': rec['engine']}
@@ -1469,8 +1485,8 @@ def write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier):
             drills['middlegame'].append(d); mg_ex[topic].append(d['id'])
     for topic, recs in (LI.get('middlegame') or {}).items():
         les = lessons.get(topic, {})
+        recs = [x for x in (recheck(x, 'middlegame', topic) for x in recs) if x]
         for rec in recs[:4]:
-            if rec.get('claim') == 'threat_made': rec['reason'] = rec['reason'].replace('(If you pass, they ', '(If they ignore it, you ')
             r = {'fen': rec['fen'], 'best': rec['best'], 'line': rec['line'], 'prev': rec['prev'], 'prev_fen': rec['prev_fen'], 'reason': rec['reason'],
                  'meta': {'src': 'lichess', 'pid': rec['pid'], 'rating': rec['rating'], 'level': rating_tier(rec['rating'])}}
             v = {'line': rec['line_ok'], 'lines': rec['engine']['lines'], 'after': rec['engine']['after'], 'engine': rec['engine']}
