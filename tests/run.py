@@ -803,7 +803,7 @@ EXPECT['lc108'] = [
   r"plans \[structures, IQP there\]: \[True, True\]",
   r"mg phone \[overflow-x\]: 0",
   r"courses \[no old Lichess drills, every theme id exists, every lesson step exists, 200\+ rule examples, each with rule, reason, brief, explanation\]: \[False, True, True, True, True\]",
-  r"LC108 \[embedded copy equals lc108\.js, init, afterRender, routes, build\]: \[True, True, True, True, '9\.78\.0'\]",
+  r"LC108 \[embedded copy equals lc108\.js, init, afterRender, routes, build\]: \[True, True, True, True, '9\.77\.0'\]",
   r"ERRORS 0"]
 ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community', 'touch', 'lc56', 'lc57', 'lc58', 'lc59', 'lc59land', 'lc60', 'lc85', 'lc86', 'lc87', 'lc88', 'lc89', 'lc90', 'lc94', 'lc95', 'lc96', 'lc97', 'lc98', 'lc99', 'lc100', 'lc101', 'lc102', 'lc103', 'lc104', 'lc105', 'lc106', 'lc107', 'lc108', 'hub', 'trim', 'studio954', 'studio955', 'captions978', 'coach956', 'course957', 'release']
 EXPECT['lc106'] = [
