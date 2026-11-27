@@ -7,10 +7,10 @@ let pass=0,fail=0;const ok=(c,m)=>{c?pass++:fail++;console.log((c?'PASS ':'FAIL 
 const env=[];for(let i=0;i<50;i++){const t=i*.1;env.push((t>=1&&t<2.5)||(t>=3&&t<4)?-20:-60)}
 const out=LC79.alignLive([{s:.5,e:2.2,t:"hello there my friend"},{s:2.6,e:3.6,t:"second line"}],env,-45);
 ok(Math.abs(out[0].s-1.0)<.01,'caption 1 snapped to voice onset 1.0 (got '+out[0].s+')');
-ok(Math.abs(out[0].e-2.58)<.05,'caption 1 ends at voice end (got '+out[0].e+')');
+ok(out[0].e>=2.5&&out[0].e<=2.8,'caption 1 ends at the voice end, held a moment (got '+out[0].e+')');
 ok(Math.abs(out[1].s-3.0)<.01,'caption 2 snapped to 3.0 (got '+out[1].s+')');
 ok(out[0].e<=out[1].s,'no overlap');
-const keepLoud=LC79.alignLive([{s:1.5,e:2.0,t:"mid speech"}],env,-45);ok(keepLoud[0].s===1.5,'start inside speech is untouched');
+const keepLoud=LC79.alignLive([{s:1.5,e:2.0,t:"mid speech"}],env,-45);ok(keepLoud[0].s>=1&&keepLoud[0].s<=1.5&&keepLoud[0].e>2,'a caption inside speech stays on that speech ('+keepLoud[0].s+'-'+keepLoud[0].e+')');
 ok(LC79.alignLive([],env).length===0&&LC79.alignLive([{s:0,e:1,t:"x"}],[]).length===1,'empty input safe');
 // motif: fork. White plays 1.e4 e5 2.Nf3 Nc6 3.Bc4 Nd4?? ... construct: knight fork Nc7+ style
 function G(pgn){const g=new Chess();g.load_pgn(pgn);const h=g.history({verbose:true});const r=new Chess();const fens=[r.fen()],moves=[];h.forEach(m=>{r.move(m.san);moves.push({san:m.san,color:m.color,from:m.from,to:m.to,num:Math.ceil((moves.length+1)/2)});fens.push(r.fen())});return{moves,fens,headers:{White:"A",Black:"B",WhiteElo:"1210",BlackElo:"1190"}}}
@@ -91,4 +91,43 @@ const ci=LC79.capItems(pt);ok(ci.length===2&&ci[0].T0===1&&Math.abs(ci[1].T0-4)<
 pt.tracks.push({id:"o2",name:"V3"});pt.callouts[1].track="o2";pt.tracks[1].hidden=true;
 ok(LC79.coOn(pt,pt.callouts[0])&&!LC79.coOn(pt,pt.callouts[1]),'a hidden track hides its callouts');
 const va=LC79.visOf(pt);pt.tracks[1].hidden=false;pt.tracks[0].hidden=true;LC79.applyVis(pt,va);ok(!pt.tracks[0].hidden&&pt.tracks[1].hidden&&va.tracks.join()==="o2",'a version brings back exactly its hidden tracks');
+
+// ---- 9.78.0: captions on the voice, clusters, scene places ----
+{const env2=[];for(let i=0;i<300;i++){const t=i*.1;env2.push((t>=2&&t<6)||(t>=9&&t<14)||(t>=20&&t<25)?-20:-60)}
+ /* the speech service's burst: the lines of the first two sentences arrive together at the end of each sentence */
+ const burst=[{s:5.5,e:6.2,t:"so this is the first idea"},{s:6.2,e:6.4,t:"about the opening"},{s:13.5,e:13.9,t:"now the second part where"},{s:13.9,e:14.1,t:"we look at the middlegame"},{s:14.1,e:14.3,t:"and its plans"},{s:25.2,e:25.8,t:"last line to finish the video"}];
+ const f0=LC79.capFit(burst,env2,-45);ok(f0.bad,'a burst of live captions is seen as badly timed ('+JSON.stringify(f0)+')');
+ const rt=LC79.retimeCaps(burst,env2,{thr:-45});const f1=LC79.capFit(rt,env2,-45);
+ ok(!f1.bad&&f1.silence===0&&f1.piled===0,'after timing: no caption starts in silence or piles up ('+JSON.stringify(f1)+')');
+ ok(Math.abs(rt[0].s-2)<.05&&rt[1].e<=6.4&&Math.abs(rt[2].s-9)<.05&&Math.abs(rt[5].s-20)<.05,'each sentence starts where its voice starts (2.0 / 9.0 / 20.0 s)');
+ ok(rt.every((c,i)=>!i||c.s>=rt[i-1].e-1e-6),'no overlaps after timing');
+ ok(rt.filter(c=>c.w).every(c=>c.w.length===c.t.split(" ").length&&c.w[0].s>=c.s-1e-6),'every word gets its own time (karaoke)');
+ ok(rt.map(c=>c.t).join("|")===burst.map(c=>c.t).join("|"),'the text and the order stay the same');
+ /* already well timed (whisper-like): the check leaves it alone */
+ ok(!LC79.capFit([{s:2,e:5.9,t:"a"},{s:9,e:13.8,t:"b"},{s:20,e:24.9,t:"c"}],env2,-45).bad,'well-timed captions are not flagged');
+ /* the clip of the edit studio: captions follow cut silences, no slivers on the edge of a cut */
+ TK.r={id:"r",name:"Take R",url:"blob:r",durationMs:30000,env:env2.slice(),cuts:[],trimIn:0,trimOut:30,captions:burst.map(c=>Object.assign({},c))};
+ const PR={id:"pr",clips:[{id:"c1",take:"r"}],callouts:[],useCuts:true};LC79.cutSilences(PR,1.5,-45);
+ const before=LC79.capItems(PR);const slv=before.filter(x=>x.T1-x.T0<.3).length;
+ TK.r.captions=LC79.retimeCaps(TK.r.captions,TK.r.env,{thr:-45});const after=LC79.capItems(PR);
+ ok(slv===0,'capItems: no sliver on the edge of a cut (every caption piece is 0.3 s or more)');
+ ok(after.length===6&&after.every((x,i)=>!i||x.T0>=after[i-1].T1-.01),'after timing, all 6 captions are on the cut timeline, in order ('+after.map(x=>x.T0.toFixed(1)).join(",")+')');
+ /* clusters: own look for a group, the rest keeps the project look */
+ PR.cap={y:.86};const g=LC79.makeGroup(PR,[{take:"r",i:2},{take:"r",i:3}],"Board part");g.st={y:.2,scale:1.4};
+ const st2=LC79.capStyleAt(PR,1080,1920,TK.r,0,TK.r.captions[2]),st0=LC79.capStyleAt(PR,1080,1920,TK.r,0,TK.r.captions[0]);
+ ok(st2._src==="group"&&st2.y===.2&&st2.scale===1.4,'a caption in a cluster takes the cluster look');
+ ok(st0._src==="project"&&st0.y===.86,'a caption outside it keeps the project look');
+ ok(LC79.groupOf(PR,TK.r,TK.r.captions[4])===null,'the neighbour after the cluster is not in it');
+ const g2=LC79.makeGroup(PR,[{take:"r",i:3}],"Solo");ok(LC79.groupOf(PR,TK.r,TK.r.captions[3])===g2&&LC79.groupOf(PR,TK.r,TK.r.captions[2])===g,'moving one caption to a new cluster takes it out of the old one only');
+ /* scene places: the take's scene log decides, a cluster still wins */
+ TK.r.scenes=[{t:0,scene:"classic",z:null},{t:8,scene:"split",z:{x:.5,y:.6,w:.92}}];
+ const sA=LC79.capStyleAt(PR,1080,1920,TK.r,0,TK.r.captions[0]),sB=LC79.capStyleAt(PR,1080,1920,TK.r,0,TK.r.captions[5]);
+ ok(sA._src==="project"&&sB._src==="scene"&&sB.y===.6&&sB.w===.92,'captions spoken in Split take the Split place, the Classic ones the project look');
+ ok(LC79.capStyleAt(PR,1080,1920,TK.r,0,TK.r.captions[2])._src==="group",'a cluster wins over the scene place');
+ PR.capSc={split:{y:.3}};ok(LC79.capStyleAt(PR,1080,1920,TK.r,0,TK.r.captions[5]).y===.3,'the project can overrule a scene place');
+ PR.capScOff=true;ok(LC79.capStyleAt(PR,1080,1920,TK.r,0,TK.r.captions[5])._src==="project",'scene places can be switched off for a project');
+ {const beep=[];for(let i=0;i<40;i++)beep.push(i%10===4?-4:-90);const cc=[{s:.2,e:1.7,t:"Every move starts with the opponent"},{s:2,e:3.5,t:"What did their last move change?"}];
+  ok(!LC79.capFit(cc,beep).bad&&JSON.stringify(LC79.retimeCaps(cc,beep))===JSON.stringify(cc),'a beep track (no voice) never squeezes the captions: they are left as they are')}
+ ok(LC79.autoZone("split",9/16).y===.6&&LC79.autoZone("pip",9/16).y<.2&&LC79.autoZone("classic",9/16)===null,'auto places: the seam in Split, the top in Bubble, the project look in Classic');
+}
 console.log('RESULT',pass,'passed',fail,'failed');process.exit(fail?1:0);

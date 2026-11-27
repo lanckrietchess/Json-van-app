@@ -256,6 +256,54 @@
   /* ---------- caption box (per project: place, size and style; the text and timing stay on the take, so captions follow every cut) ---------- */
   const CAP_DEF={x:.5,y:0,scale:1,w:.86,box:true,bg:"#05070a",bgA:.72,fg:"#ffffff",stroke:false,sc:"#000000",upper:false,font:"sora",karaoke:false,hl:"#fbbf24"};
   function capStyle(p,W,H){const s=Object.assign({},CAP_DEF,(p&&p.cap)||{});if(!(+s.y>0))s.y=W<H?.78:.86;return s}
+  /* ---------- 9.78.0: caption clusters and scene places ----------
+     A cluster is a group of captions with its own look (place, size, width, box, colours, font): p.capGroups = [{id, name, ranges, st}].
+     Its members are given as take time (ranges = [{take, s, e}]), so a cluster keeps its captions when blocks are moved, trimmed or cut.
+     A scene place comes from the Scene Builder: every take keeps a scene log (t.scenes = [{t, scene, z}], z = where the captions go in that
+     scene, or null for the project's look) and the Edit Studio can overrule a scene's place for the whole project (p.capSc[scene]).
+     The look of one caption = the project's look, then its scene's place, then its cluster (cluster > scene > project). */
+  const CG_COLORS=["#f472b6","#a78bfa","#34d399","#fbbf24","#60a5fa","#fb923c"];
+  const CG_KEYS=["x","y","scale","w","box","bg","bgA","fg","stroke","sc","upper","font","karaoke","hl"];
+  const capMid=c=>((+c.s||0)+(+c.e||0))/2;
+  function groupOf(p,take,c){if(!p||!take||!c||!Array.isArray(p.capGroups))return null;const m=capMid(c);
+    for(const g of p.capGroups){if((g.ranges||[]).some(r=>r.take===take.id&&m>=r.s&&m<=r.e))return g}return null}
+  function sceneAt(take,ct){const L=take&&Array.isArray(take.scenes)?take.scenes:null;if(!L||!L.length)return null;let e=null;for(const x of L){if(x.t<=ct+1e-6)e=x;else break}return e||L[0]}
+  function sceneZone(p,take,ct){if(!p||p.capScOff)return null;const e=sceneAt(take,ct);if(!e)return null;const o=p.capSc&&p.capSc[e.scene];
+    return o?{scene:e.scene,z:o,own:true}:e.z?{scene:e.scene,z:e.z,own:false}:null}
+  /* the look of the caption `line` of `take` at take time ct (line = the caption itself, so the cluster test uses the whole caption) */
+  function capStyleAt(p,W,H,take,ct,line){
+    const s=capStyle(p,W,H);s._src="project";
+    const z=sceneZone(p,take,line?capMid(line):ct);if(z){CG_KEYS.forEach(k=>{if(z.z[k]!=null)s[k]=z.z[k]});s._src="scene";s._scene=z.scene}
+    const g=line?groupOf(p,take,line):null;if(g){CG_KEYS.forEach(k=>{if(g.st&&g.st[k]!=null)s[k]=g.st[k]});s._src="group";s._g=g.id}
+    return s;
+  }
+  /* the style object a drag / wheel / slider in the viewer changes: the cluster's, the scene's (for this project) or the project's */
+  function capEditObj(p,W,H,take,ct,line){
+    const st=capStyleAt(p,W,H,take,ct,line),pick=()=>{const o={};CG_KEYS.forEach(k=>{o[k]=st[k]});return o};
+    if(st._src==="group"){const g=p.capGroups.filter(x=>x.id===st._g)[0];g.st=Object.assign(pick(),g.st||{});return{kind:"group",obj:g.st,g:g}}
+    if(st._src==="scene"){p.capSc=p.capSc||{};if(!p.capSc[st._scene])p.capSc[st._scene]=pick();return{kind:"scene",obj:p.capSc[st._scene],scene:st._scene}}
+    if(!p.cap)p.cap=capStyle(p,W,H);return{kind:"project",obj:p.cap};
+  }
+  function mergeRanges(rs){const out=[];rs.slice().sort((a,b)=>a.take<b.take?-1:a.take>b.take?1:a.s-b.s).forEach(r=>{const l=out[out.length-1];if(l&&l.take===r.take&&r.s<=l.e+.02)l.e=Math.max(l.e,r.e);else out.push({take:r.take,s:+r.s,e:+r.e})});return out.map(r=>({take:r.take,s:+r.s.toFixed(3),e:+r.e.toFixed(3)}))}
+  /* take a caption out of every cluster (its range is split around it) */
+  function ungroupCap(p,take,c){if(!Array.isArray(p.capGroups))return;const m=capMid(c);
+    p.capGroups.forEach(g=>{const out=[];(g.ranges||[]).forEach(r=>{if(r.take!==take.id||m<r.s||m>r.e){out.push(r);return}
+      if(c.s-.005>r.s)out.push({take:r.take,s:r.s,e:+(c.s-.005).toFixed(3)});if(c.e+.005<r.e)out.push({take:r.take,s:+(c.e+.005).toFixed(3),e:r.e})});
+      g.ranges=out.filter(r=>r.e-r.s>.01)})}
+  /* the selected captions (take id + index) as ranges: one range per run of neighbouring captions of a take */
+  function rangesOf(sel){const by={};(sel||[]).forEach(x=>{const t=takeById(x.take),c=t&&t.captions&&t.captions[x.i];if(c)(by[t.id]=by[t.id]||[]).push({i:x.i,c:c})});
+    const out=[];Object.keys(by).forEach(id=>{const L=by[id].sort((a,b)=>a.i-b.i);let run=null;
+      L.forEach(x=>{if(run&&x.i===run.i+1){run.e=Math.max(run.e,x.c.e+.01);run.i=x.i}else{run={take:id,s:x.c.s-.01,e:x.c.e+.01,i:x.i};out.push(run)}})});
+    return mergeRanges(out)}
+  function makeGroup(p,sel,name){
+    const rs=rangesOf(sel);if(!rs.length)return null;p.capGroups=Array.isArray(p.capGroups)?p.capGroups:[];
+    sel.forEach(x=>{const t=takeById(x.take),c=t&&t.captions&&t.captions[x.i];if(c)ungroupCap(p,t,c)});
+    const used=p.capGroups.map(g=>g.color),color=CG_COLORS.filter(c=>used.indexOf(c)<0)[0]||CG_COLORS[p.capGroups.length%CG_COLORS.length];
+    const g={id:"cg"+uid(),name:String(name||"Cluster "+(p.capGroups.length+1)).slice(0,30),color:color,ranges:rs,st:{}};
+    p.capGroups.push(g);p.capGroups.forEach(x=>{x.ranges=(x.ranges||[]).filter(r=>r.e-r.s>.01)});p.capGroups=p.capGroups.filter(x=>x===g||x.ranges.length);return g;
+  }
+  function addToGroup(p,g,sel){if(!g)return;sel.forEach(x=>{const t=takeById(x.take),c=t&&t.captions&&t.captions[x.i];if(c)ungroupCap(p,t,c)});g.ranges=mergeRanges((g.ranges||[]).concat(rangesOf(sel)));
+    p.capGroups=p.capGroups.filter(x=>x===g||(x.ranges||[]).length)}
   function capLine(take,ct){if(!take||!Array.isArray(take.captions))return null;   /* 9.55.0: T1's eye decides (capsOff), not the old Render-edit switch */return take.captions.filter(c=>ct>=c.s&&ct<c.e)[0]||null}
   /* draws one caption line in its box; returns the box (canvas pixels) for dragging */
   function drawCaption(g,W,H,line,st,ct){
@@ -280,7 +328,7 @@
     g.fillStyle="#000";g.fillRect(0,0,W,H);
     if(v&&v.videoWidth){const vw=v.videoWidth,vh=v.videoHeight,k=Math.min(W/vw,H/vh),w=vw*k,h=vh*k;try{g.drawImage(v,(W-w)/2,(H-h)/2,w,h)}catch(e){}}
     if(noOverlay)return;
-    if(!(p&&p.capsOff))try{drawCaption(g,W,H,capLine(take,ct),capStyle(p,W,H),ct)}catch(e){}
+    if(!(p&&p.capsOff))try{const ln=capLine(take,ct);drawCaption(g,W,H,ln,capStyleAt(p,W,H,take,ct,ln),ct)}catch(e){}
     if(p)coOrder(p).forEach(c=>{if(!coOn(p,c))return;try{drawCallout(g,W,H,c,Tp-c.t)}catch(e){}});
     if(p&&p.wmcta&&p.wmcta.on)try{drawWmCta(g,W,H,p,Tp)}catch(e){}
   }
@@ -514,7 +562,8 @@
       ".lc79-tx{min-width:30px;min-height:30px;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:#0A0B0E;color:#fca5a5;cursor:pointer;font-weight:700}.lc79-tx.cc{color:#fbbf24;border-color:rgba(251,191,36,.5);font-size:11px}",
       ".lc79-track{height:44px}.lc79-track.vid{height:64px}.lc79-track.co,.lc79-track.cap{height:44px}.lc79-track.co.tg{background:rgba(0,229,255,.06)}.lc79-track.off{opacity:.45;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 8px,transparent 8px 16px)}",
       ".lc79-track.cap{background:rgba(251,191,36,.05)}.lc79-cl{position:absolute;top:6px;bottom:6px;border-radius:6px;background:#fbbf24;color:#1c1a10;font-size:11px;font-weight:700;padding:0 5px;display:flex;align-items:center;overflow:hidden;white-space:nowrap;cursor:grab;min-width:4px;border:1px solid rgba(0,0,0,.35)}",
-      ".lc79-cl.sel{outline:2px solid #fff;outline-offset:1px}.lc79-capempty{position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#94a3b8}",
+      ".lc79-cl.sel{outline:2px solid #fff;outline-offset:1px}.lc79-cl.msel{outline:2px dashed #fff;outline-offset:1px}.lc79-cl.cg{background:var(--cg);color:#0b0b12;top:12px}.lc79-cgband{position:absolute;top:1px;height:10px;min-height:0;padding:0 4px;border:0;border-radius:4px;font:700 8px/10px system-ui,sans-serif;color:#0b0b12;overflow:hidden;white-space:nowrap;text-align:left;cursor:pointer;opacity:.9;z-index:2}.lc79-cgband.sel{outline:2px solid #fff}.lc79-cgrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.lc79-cgchip{border:0;border-radius:999px;padding:4px 10px;min-height:32px;font-weight:700;color:#0b0b12;cursor:pointer}.lc79-cz{display:flex;flex-wrap:wrap;gap:6px}.lc79-cz .lc79-b.on,.lc79-cz .btn.on{outline:2px solid #00E5FF}"+
+      ".lc79-capempty{position:absolute;inset:0;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#94a3b8}",
       ".lc79-toasts{position:fixed;left:50%;top:calc(66px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none;width:min(560px,92vw)}",
       ".lc79-toast{background:#0b1222;border:1px solid rgba(0,229,255,.45);color:#e5e7eb;padding:10px 14px;border-radius:12px;font-weight:600;font-size:13.5px;box-shadow:0 12px 30px rgba(0,0,0,.55);text-align:center}.lc79-toast.err{border-color:rgba(239,68,68,.7);color:#fecaca}.lc79-toast.ok{border-color:rgba(34,197,94,.6)}",
       /* 9.54.0 layers and versions */
@@ -588,13 +637,14 @@
   const setNle=o=>wr(NK,Object.assign(nle(),o));
   const trThr=()=>{try{const v=T().Trim.thr;return Number.isFinite(v)?v:-45}catch(e){return-45}};
   /* undo: a copy of the project's timeline before every edit (Ctrl+Z) */
-  function snapEd(p){if(!p)return;ED.undo.push({pid:p.id,clips:JSON.stringify(p.clips||[]),callouts:JSON.stringify(p.callouts||[]),cap:JSON.stringify(p.cap||null),tracks:JSON.stringify(p.tracks||null),capsOff:!!p.capsOff});if(ED.undo.length>60)ED.undo.shift();ED.lastSnap=Date.now()}
+  function snapEd(p){if(!p)return;ED.undo.push({pid:p.id,clips:JSON.stringify(p.clips||[]),callouts:JSON.stringify(p.callouts||[]),cap:JSON.stringify(p.cap||null),tracks:JSON.stringify(p.tracks||null),capsOff:!!p.capsOff,cg:JSON.stringify(p.capGroups||null),csc:JSON.stringify(p.capSc||null),cscOff:!!p.capScOff});if(ED.undo.length>60)ED.undo.shift();ED.lastSnap=Date.now()}
   const snapSoft=p=>{if(Date.now()-ED.lastSnap>1500)snapEd(p)};
   function undo(){
     const p=cur();if(!p)return;
     for(let i=ED.undo.length-1;i>=0;i--){if(ED.undo[i].pid!==p.id)continue;const u=ED.undo.splice(i,1)[0];stopPlay();
       p.clips=JSON.parse(u.clips);p.callouts=JSON.parse(u.callouts);const c=JSON.parse(u.cap);if(c)p.cap=c;else delete p.cap;
       if(u.tracks){const tr=JSON.parse(u.tracks);if(tr)p.tracks=tr}if(u.capsOff!=null)p.capsOff=u.capsOff;
+      if(u.cg!=null){const g=JSON.parse(u.cg);if(g)p.capGroups=g;else delete p.capGroups;const z=JSON.parse(u.csc);if(z)p.capSc=z;else delete p.capSc;p.capScOff=!!u.cscOff}
       save(p);ED.sel=null;ED.paint();say("Undone.","",1200);return}
     say("Nothing to undo.","",1500);
   }
@@ -627,7 +677,10 @@
   /* 9.55.0: captions are written in the background after a take is sent to a project, and from T1 (CC). Every take has a visible state
      (writing / done / failed with the engine's own reason); before, a failure was swallowed and the message landed under the Edit Studio. */
   function capDone(t,r,L){
-    if(r&&r.ok&&r.lines&&r.lines.length){t.captions=r.lines.map(x=>Object.assign({},x,{t:L.fixText?L.fixText(x.t):x.t}));try{T().Takes.persistMeta(t)}catch(e){}
+    if(r&&r.ok&&r.lines&&r.lines.length){t.captions=r.lines.map(x=>Object.assign({},x,{t:L.fixText?L.fixText(x.t):x.t}));t.capBy=String(r.engine||"sr");delete t.capPrev;
+      /* 9.78.0: the same check as for the live captions: when the engine's times sit next to the voice, they are put on it */
+      try{if(Array.isArray(t.env)&&t.env.length>=5){const dt=envDt(t),thr=envThr(t.env,trThr());if(capFit(t.captions,t.env,thr,dt).bad){t.capPrev=JSON.parse(JSON.stringify(t.captions));t.captions=retimeCaps(t.captions,t.env,{thr:thr,dt:dt,late:t.capBy==="sr"?.3:0})}}t.capChk=1}catch(e){}
+      try{T().Takes.persistMeta(t)}catch(e){}
       ED.capSt[t.id]={state:"ok",msg:r.lines.length+" lines"+(r.note?" ("+r.note+")":"")};return true}
     ED.capSt[t.id]={state:"fail",msg:(r&&r.error)||"No speech engine answered."};return false;
   }
@@ -686,7 +739,7 @@
       el.addEventListener("click",onEdClick);el.addEventListener("change",onEdChange);el.addEventListener("input",onEdInput);
       bindTimeline(el);bindCanvas(el);bindWmc(el);
     });
-    ED.open=true;ED.paint();
+    ED.open=true;ED.multi=[];capAutoNote(cur());ED.paint();
   }
   ED.paint=function(){if(!ED.el||!ED.el.isConnected)return;paintTop();paintCalls();paintTimeline();paintLayers();paintWmc();paintInsp();paintArchive();showFrame()};
   /* ---------- 9.54.0: layers (hide without deleting) and versions (named sets of hidden layers, exported one after the other) ---------- */
@@ -744,10 +797,34 @@
   const laneEl=()=>Q(".lc79-lane",ED.el);
   const fmtR=s=>{s=Math.round(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")};
   /* the captions of the takes, placed on the project's timeline (they follow every cut and every hidden block) */
+  /* the clusters as thin coloured bands along the top of T1 (one per run of captions in the video); a tap selects the cluster */
+  /* shift = every caption from the last picked one to this one (in video order), ctrl / cmd = add or remove this one */
+  function capPick(p,me,range){
+    let base=(ED.multi||[]).slice();if(!base.length&&ED.sel&&ED.sel.kind==="cl")base=[{take:ED.sel.take,i:ED.sel.i}];
+    const key=x=>x.take+"|"+x.i;
+    if(range&&base.length){const items=capItems(p),ks=items.map(x=>x.take.id+"|"+x.i),a=ks.indexOf(key(base[base.length-1])),b=ks.indexOf(key(me));
+      if(a>=0&&b>=0){const lo=Math.min(a,b),hi=Math.max(a,b),seen={};base.forEach(x=>{seen[key(x)]=1});
+        for(let k=lo;k<=hi;k++){const x={take:items[k].take.id,i:items[k].i};if(!seen[key(x)]){seen[key(x)]=1;base.push(x)}}
+        if(key(base[base.length-1])!==key(me)){base=base.filter(x=>key(x)!==key(me));base.push(me)}return base}}
+    const i=base.findIndex(x=>key(x)===key(me));if(i>=0&&base.length>1)base.splice(i,1);else if(i<0)base.push(me);return base;
+  }
+  function cgBands(p,caps,tot){
+    if(!tot||!Array.isArray(p.capGroups)||!p.capGroups.length)return"";let h="";
+    p.capGroups.forEach(g=>{const runs=[];caps.forEach(x=>{if(x.g!==g)return;const r=runs[runs.length-1];if(r&&x.T0-r.e<1.5)r.e=Math.max(r.e,x.T1);else runs.push({s:x.T0,e:x.T1})});
+      runs.forEach(r=>{h+='<button type="button" class="lc79-cgband'+(ED.sel&&ED.sel.kind==="cg"&&ED.sel.id===g.id?" sel":"")+'" data-a="cg-sel" data-id="'+esc(g.id)+'" style="left:'+(r.s/tot*100)+'%;width:'+Math.max(.6,(r.e-r.s)/tot*100)+'%;background:'+esc(g.color)+'" title="'+esc(g.name)+': tap to edit this cluster" aria-label="Cluster '+esc(g.name)+'">'+esc(g.name)+'</button>'})});
+    return h;
+  }
+  /* 9.78.0: a caption that only touches a cut with its tail is no longer a sliver on the edge of the block: pieces under 0.2 s are left
+     out when the caption has a real piece elsewhere, and a caption that only has slivers keeps its biggest one, made readable. */
   function capItems(p,segs){
-    const out=[];(segs||segments(p)).forEach(sg=>{const t=sg.take;if(!t||!Array.isArray(t.captions))return;
-      t.captions.forEach((c,i)=>{const a=Math.max(c.s,sg.s),b=Math.min(c.e,sg.e);if(b-a<.05)return;out.push({take:t,i:i,c:c,T0:sg.T0+(a-sg.s),T1:sg.T0+(b-sg.s)})})});
-    return out;
+    const S=segs||segments(p),by=new Map();
+    S.forEach(sg=>{const t=sg.take;if(!t||!Array.isArray(t.captions))return;
+      t.captions.forEach((c,i)=>{const a=Math.max(c.s,sg.s),b=Math.min(c.e,sg.e);if(b-a<.05)return;const k=t.id+"|"+i;
+        if(!by.has(k))by.set(k,[]);by.get(k).push({take:t,i:i,c:c,T0:sg.T0+(a-sg.s),T1:sg.T0+(b-sg.s),segS:sg.T0,segE:sg.T0+(sg.e-sg.s)})})});
+    const out=[];
+    by.forEach(L=>{const big=L.filter(x=>x.T1-x.T0>=.2);if(big.length){big.forEach(x=>out.push(x));return}
+      const x=L.slice().sort((a,b)=>(b.T1-b.T0)-(a.T1-a.T0))[0],len=Math.min(.5,x.segE-x.segS);x.T0=Math.max(x.segS,Math.min(x.T0,x.segE-len));x.T1=Math.max(x.T1,x.T0+len);out.push(x)});
+    out.sort((a,b)=>a.T0-b.T0);out.forEach(x=>{delete x.segS;delete x.segE});return out;
   }
   function capState(p){
     const ts={};(p.clips||[]).forEach(c=>{const t=takeById(c.take);if(t&&!c.hidden)ts[t.id]=t});const list=Object.keys(ts).map(k=>ts[k]);
@@ -782,8 +859,9 @@
       html+='<div class="lc79-track co'+(tk.hidden?" off":"")+(ED.target===tk.id?" tg":"")+'" data-track="co" data-tid="'+esc(tk.id)+'" aria-label="'+esc(tk.name)+'">'+items+'</div>'});
     /* the captions track */
     const caps=p?capItems(p,segs):[];
-    html+='<div class="lc79-track cap'+(p&&p.capsOff?" off":"")+'" data-track="cap" aria-label="Captions">'+(caps.length?caps.map(x=>{const l=tot?x.T0/tot*100:0,w=tot?Math.max(.8,(x.T1-x.T0)/tot*100):5,sel=ED.sel&&ED.sel.kind==="cl"&&ED.sel.take===x.take.id&&ED.sel.i===x.i;
-      return'<div class="lc79-cl'+(sel?" sel":"")+'" data-cl="'+esc(x.take.id+"|"+x.i)+'" role="button" tabindex="0" style="left:'+l+'%;width:calc('+w+'% - 1px)" title="'+esc(x.c.t)+'">'+esc(x.c.t)+'</div>'}).join(""):'<div class="lc79-capempty">'+(p&&capState(p).busy.length?"Writing captions…":"No captions yet: tap CC on the left to write them.")+'</div>')+'</div>';
+    html+='<div class="lc79-track cap'+(p&&p.capsOff?" off":"")+'" data-track="cap" aria-label="Captions">'+(caps.length?caps.map(x=>{const l=tot?x.T0/tot*100:0,w=tot?Math.max(.8,(x.T1-x.T0)/tot*100):5,sel=ED.sel&&ED.sel.kind==="cl"&&ED.sel.take===x.take.id&&ED.sel.i===x.i,
+        multi=(ED.multi||[]).some(m=>m.take===x.take.id&&m.i===x.i),g=groupOf(p,x.take,x.c);x.g=g;
+      return'<div class="lc79-cl'+(sel?" sel":"")+(multi?" msel":"")+(g?" cg":"")+'" data-cl="'+esc(x.take.id+"|"+x.i)+'" role="button" tabindex="0" style="left:'+l+'%;width:calc('+w+'% - 1px)'+(g?';--cg:'+esc(g.color):'')+'" title="'+esc(x.c.t+(g?" · "+g.name:""))+'">'+esc(x.c.t)+'</div>'}).join("")+cgBands(p,caps,tot):'<div class="lc79-capempty">'+(p&&capState(p).busy.length?"Writing captions…":"No captions yet: tap CC on the left to write them.")+'</div>')+'</div>';
     /* V1: the video blocks */
     let x=0,vh="";
     (p?p.clips:[]).forEach((c,ci)=>{const t=takeById(c.take);if(t&&c.hidden){vh+='<button type="button" class="lc79-hidmark" data-a="lay-clip" data-id="'+esc(c.id)+'" style="left:'+x+'%" title="Block '+(ci+1)+' is hidden. Tap to show it again." aria-label="Show hidden block '+(ci+1)+': '+esc(t.name)+'">⊘</button>';return}if(!t||!L[ci])return;const w=L[ci]/tot*100,sel=ED.sel&&ED.sel.kind==="clip"&&ED.sel.id===c.id;
@@ -822,14 +900,45 @@
   function paintInsp(){
     const box=Q(".lc79-insp",ED.el),p=cur(),it=selected();
     if(!p){box.innerHTML="";return}
+    if(!(ED.sel&&ED.sel.kind==="cl"))ED.multi=[];
     if(ED.sel&&ED.sel.kind==="cl"&&it){
       const t=takeById(ED.sel.take),n=(t.captions||[]).length,ix=capItems(p).filter(x=>x.take.id===t.id&&x.i===ED.sel.i)[0];
+      const ms=capSel(),gs=p.capGroups||[],g=groupOf(p,t,it),z=sceneZone(p,t,capMid(it));
+      const cgSec='<div class="lc79-sec" style="padding:10px;gap:8px"><b style="color:#fff">Cluster</b>'
+        +'<span class="lc79-hint">'+(ms.length>1?ms.length+' captions selected. ':'')+(g?'In “'+esc(g.name)+'”: it has the look of that cluster.':'Not in a cluster: it has '+(z?'the place of the scene “'+esc(sceneName(z.scene))+'”':'the project look')+'.')+'</span>'
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm pri" data-a="cg-make">Make a cluster of '+(ms.length>1?'these '+ms.length:'this caption')+'</button>'
+        +(gs.length?'<select data-a="cg-add" aria-label="Add to a cluster"><option value="">Add to a cluster…</option>'+gs.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join("")+'</select>':'')
+        +(g?'<button type="button" class="lc79-b sm" data-a="cg-sel" data-id="'+esc(g.id)+'">Edit “'+esc(g.name)+'”</button>':'')
+        +(gs.some(x=>ms.some(m=>{const tt=takeById(m.take),cc=tt&&tt.captions&&tt.captions[m.i];return cc&&groupOf(p,tt,cc)===x}))?'<button type="button" class="lc79-b sm" data-a="cg-out">Take out of its cluster</button>':'')
+        +(ms.length>1?'<button type="button" class="lc79-b sm" data-a="cl-clear">Only this one</button>':'')+'</div>'
+        +'<span class="lc79-hint">Shift-click a caption on T1 to select every caption up to it; Ctrl / Cmd-click adds or removes one.</span></div>';
+      if(ms.length>1){box.innerHTML='<h3>'+ms.length+' captions selected</h3>'+cgSec;return}
       box.innerHTML='<h3>Caption '+(ED.sel.i+1)+' of '+n+'</h3><p class="lc79-hint" style="margin:0">'+esc(t.name)+(ix?' · in the video at '+fmt(ix.T0):' · in a hidden or cut part of the take')+'</p>'
         +'<label class="lc79-f"><span>Text</span><textarea data-f="cl_t" maxlength="240" rows="3" style="min-height:80px">'+esc(it.t)+'</textarea></label>'
         +'<div class="lc79-two"><div class="lc79-f"><span>Start '+it.s.toFixed(2)+' s</span><span class="lc79-row"><button type="button" class="lc79-b sm" data-a="cl-nudge" data-k="s" data-d="-0.1">−0.1</button><button type="button" class="lc79-b sm" data-a="cl-nudge" data-k="s" data-d="0.1">+0.1</button></span></div>'
         +'<div class="lc79-f"><span>End '+it.e.toFixed(2)+' s</span><span class="lc79-row"><button type="button" class="lc79-b sm" data-a="cl-nudge" data-k="e" data-d="-0.1">−0.1</button><button type="button" class="lc79-b sm" data-a="cl-nudge" data-k="e" data-d="0.1">+0.1</button></span></div></div>'
         +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="cl-split">Split at the playhead</button><button type="button" class="lc79-b sm" data-a="cl-add">+ Caption at the playhead</button><button type="button" class="lc79-b sm red" data-a="cl-del">Delete caption</button></div>'
-        +'<p class="lc79-hint" style="margin:0">Drag the caption on T1 to move it in time. Drag it in the viewer to place it on the screen; the look is set in “T1 · Captions”.</p>';
+        +cgSec
+        +'<p class="lc79-hint" style="margin:0">Drag the caption on T1 to move it in time. Drag it in the viewer to place it on the screen: that moves its cluster, its scene place or the project look, the one it follows.</p>';
+      return;
+    }
+    if(ED.sel&&ED.sel.kind==="cg"){
+      const g=(p.capGroups||[]).filter(x=>x.id===ED.sel.id)[0];if(!g){ED.sel={kind:"cap"};return paintInsp()}
+      const sz=previewSize(p,segments(p)),st=capStyle(p,sz[0],sz[1]);CG_KEYS.forEach(k=>{if(g.st&&g.st[k]!=null)st[k]=g.st[k]});
+      const its=capItems(p).filter(x=>groupOf(p,x.take,x.c)===g),sec=its.reduce((a,x)=>a+x.T1-x.T0,0);
+      box.innerHTML='<h3><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:'+esc(g.color)+'"></span> Cluster</h3>'
+        +'<label class="lc79-f"><span>Name</span><input type="text" data-f="cg_name" maxlength="30" value="'+esc(g.name)+'"></label>'
+        +'<p class="lc79-hint" style="margin:0">'+its.length+' caption'+(its.length===1?'':'s')+' in the video ('+fmt(sec)+'). This look is only for them; every other caption keeps its own look.</p>'
+        +capFields("g_",st)
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="cg-pick">Select its captions</button><button type="button" class="lc79-b sm" data-a="cg-reset">Use the project look</button><button type="button" class="lc79-b sm red" data-a="cg-del">Delete cluster</button></div>';
+      return;
+    }
+    if(ED.sel&&ED.sel.kind==="csc"){
+      const k=ED.sel.scene,own=!!(p.capSc&&p.capSc[k]),sz=previewSize(p,segments(p)),st=capStyle(p,sz[0],sz[1]),z=own?p.capSc[k]:sceneZ0(p,k);if(z)CG_KEYS.forEach(q=>{if(z[q]!=null)st[q]=z[q]});
+      box.innerHTML='<h3>Scene place: '+esc(sceneName(k))+'</h3>'
+        +'<p class="lc79-hint" style="margin:0">'+(own?(Object.keys(p.capSc[k]).length?'Set for this project (it overrules the Scene Builder).':'This project uses the project look in this scene.'):(z?'From the Scene Builder, as it was when you recorded.':'The Scene Builder gave this scene no place: the project look is used.'))+' Every caption spoken in this scene follows it, unless it is in a cluster.</p>'
+        +capFields("s_",st)
+        +'<div class="lc79-row">'+(own?'<button type="button" class="lc79-b sm" data-a="csc-reset" data-scene="'+esc(k)+'">Back to the Scene Builder’s place</button>':'')+'<button type="button" class="lc79-b sm" data-a="csc-proj">Use the project look in this scene</button></div>';
       return;
     }
     if(ED.sel&&ED.sel.kind==="trk"&&it){
@@ -859,14 +968,15 @@
         +'<div class="lc79-row"><button type="button" class="lc79-b sm pri" data-a="cc-gen"'+(ED.capBusy?" disabled":"")+'>CC Write missing captions ('+cs.none.length+')</button><button type="button" class="lc79-b sm" data-a="cc-regen"'+(ED.capBusy||!cs.list.length?" disabled":"")+'>Rewrite all</button>'
         +'<button type="button" class="lc79-b sm" data-a="cc-script"'+(under?'':' disabled')+' title="Spreads your Studio script over the spoken parts of the take under the playhead">From script</button></div>'
         +'<span class="lc79-hint">The speech engine listens to every take on V1. Exact captions need the “captions” server function; without it this device does it (the first time it downloads a model of about 80 MB). Click a caption on T1 to fix a word.</span></div>'
-        +'<p class="lc79-hint" style="margin:0">Drag the captions in the viewer to move them. Drag the corner, or scroll on them, to resize them. One style for the whole project, burned into the export.</p>'
-        +rng("c_scale",st.scale,.4,3,.05,"Size")+rng("c_w",st.w,.3,.98,.01,"Line width")
-        +'<div class="lc79-two">'+rng("c_x",st.x,0,1,.01,"Left ↔ right")+rng("c_y",st.y,0,1,.01,"Top ↕ bottom")+'</div>'
-        +chk("c_box",st.box,"Background box")
-        +'<div class="lc79-row">'+col("c_bg",st.bg,"Box colour")+'<span class="lc79-grow">'+rng("c_bgA",st.bgA,0,1,.05,"Box opacity")+'</span></div>'
-        +'<div class="lc79-row">'+col("c_fg",st.fg,"Text colour")+chk("c_stroke",st.stroke,"Outline")+col("c_sc",st.sc,"Outline colour")+'</div>'
-        +'<div class="lc79-two"><label class="lc79-f"><span>Font</span><select data-f="c_font">'+FONT_NAMES.map(f=>'<option value="'+f[0]+'"'+(f[0]===st.font?" selected":"")+'>'+f[1]+'</option>').join("")+'</select></label>'+chk("c_upper",st.upper,"ALL CAPS")+'</div>'
-        +'<div class="lc79-row">'+chk("c_karaoke",st.karaoke,"Highlight the spoken word")+col("c_hl",st.hl,"Highlight")+'</div>'
+        +'<div class="lc79-sec" style="padding:10px;gap:8px"><b style="color:#fff">Timing</b><span class="lc79-hint">Puts every caption on your voice, measured from the take’s own sound: no captions piled up on the edge of a cut or in a silence. Done by itself when a take’s captions sit badly.</span>'
+        +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="cc-time"'+(cs.n?'':' disabled')+'>⏱ Time captions to my voice</button>'+(cs.list.some(t=>Array.isArray(t.capPrev))?'<button type="button" class="lc79-b sm" data-a="cc-untime">Undo timing</button>':'')+'</div></div>'
+        +'<div class="lc79-sec" style="padding:10px;gap:8px"><b style="color:#fff">Clusters</b>'
+        +((p.capGroups||[]).length?'<div class="lc79-cgrow">'+p.capGroups.map(g=>'<button type="button" class="lc79-cgchip" data-a="cg-sel" data-id="'+esc(g.id)+'" style="background:'+esc(g.color)+'">'+esc(g.name)+'</button>').join("")+'</div>':'')
+        +'<span class="lc79-hint">A cluster is a group of captions with its own place and look. Tap a caption on T1, Shift-click the last one of the group, then “Make a cluster”.</span></div>'
+        +(projScenes(p).length?'<div class="lc79-sec" style="padding:10px;gap:8px"><b style="color:#fff">Scenes</b>'+chk("cscon",!p.capScOff,"Captions follow the place set per scene in the Scene Builder")
+          +'<div class="lc79-cgrow">'+projScenes(p).map(k=>'<button type="button" class="lc79-b sm" data-a="csc-sel" data-scene="'+esc(k)+'">'+esc(sceneName(k))+(p.capSc&&p.capSc[k]?' (own)':'')+'</button>').join("")+'</div></div>':'')
+        +'<h3 style="margin:6px 0 0">Project look</h3><p class="lc79-hint" style="margin:0">Drag the captions in the viewer to move them. Drag the corner, or scroll on them, to resize them. For every caption that is not in a cluster or a scene place; burned into the export.</p>'
+        +capFields("c_",st)
         +'<div class="lc79-row"><button type="button" class="lc79-b sm" data-a="capreset">Reset the box</button></div>'
         +(p.capsOff?'<p class="lc79-hint lc79-err" style="margin:0">T1 is hidden (eye): the export has no captions. Tap the eye to show them.</p>':'');
       return;
@@ -932,9 +1042,12 @@
   function compose(){
     const cv=Q(".lc79-stagebox canvas",ED.el),p=cur();if(!cv||!ED.base||ED.playing||!p)return;
     cv.width=ED.base.width;cv.height=ED.base.height;const g=cv.getContext("2d");g.drawImage(ED.base,0,0);
-    const capSel=!!(ED.sel&&ED.sel.kind==="cap"),bi=ED.baseInfo||{};ED.capRect=null;
-    if(!p.capsOff||capSel){let line=capLine(bi.take,bi.ct);if(!line&&capSel)line={t:"Your captions appear here"};
-      try{ED.capRect=drawCaption(g,cv.width,cv.height,line,capStyle(p,cv.width,cv.height),bi.ct)}catch(e){ED.capRect=null}
+    const capSel=!!(ED.sel&&/^(cap|cg|csc)$/.test(ED.sel.kind)),bi=ED.baseInfo||{};ED.capRect=null;ED.capLn=null;
+    if(!p.capsOff||capSel){let line=capLine(bi.take,bi.ct);ED.capLn=line;if(!line&&capSel)line={t:"Your captions appear here"};
+      let st=capStyleAt(p,cv.width,cv.height,bi.take,bi.ct,ED.capLn);
+      if(!ED.capLn&&ED.sel&&ED.sel.kind==="cg"){const g=(p.capGroups||[]).filter(x=>x.id===ED.sel.id)[0];if(g){st=capStyle(p,cv.width,cv.height);CG_KEYS.forEach(k=>{if(g.st&&g.st[k]!=null)st[k]=g.st[k]})}}
+      ED.capSrc=st._src;
+      try{ED.capRect=drawCaption(g,cv.width,cv.height,line,st,bi.ct)}catch(e){ED.capRect=null}
       if(capSel&&ED.capRect){const r=ED.capRect,k=Math.max(1,cv.width/540),hs=12*k;g.save();g.setLineDash([6*k,4*k]);g.strokeStyle="#00E5FF";g.lineWidth=2*k;g.strokeRect(r.x-3*k,r.y-3*k,r.w+6*k,r.h+6*k);g.setLineDash([]);g.fillStyle="#00E5FF";g.fillRect(r.x+r.w+3*k-hs/2,r.y+r.h+3*k-hs/2,hs,hs);g.restore()}}
     coOrder(p).forEach(c=>{if(!coOn(p,c))return;let lt=ED.T-c.t;if(ED.sel&&ED.sel.kind==="co"&&ED.sel.id===c.id)lt=clamp(lt,.9,Math.max(.9,c.dur-.3));try{drawCallout(g,cv.width,cv.height,c,lt)}catch(e){}});
   }
@@ -1043,12 +1156,51 @@
     if(sc&&lane){const x=frac*lane.clientWidth;sc.scrollLeft=Math.max(0,x-sc.clientWidth/2)}
   }
   function setCap(p,f,el){
-    const sz=previewSize(p,segments(p));if(!p.cap)p.cap=capStyle(p,sz[0],sz[1]);const k=f.slice(2),c=p.cap;
+    const c=capObjFor(p,f);if(!c)return;const k=f.slice(2);
     if(/^(box|stroke|upper|karaoke)$/.test(k))c[k]=!!el.checked;
     else if(/^(bg|fg|sc|hl)$/.test(k)){if(/^#[0-9a-f]{6}$/i.test(el.value))c[k]=el.value}
     else if(k==="font"){if(FONTS[el.value])c.font=el.value}
     else if(/^(scale|w|x|y|bgA)$/.test(k)){const v=+el.value;if(Number.isFinite(v))c[k]=k==="scale"?clamp(v,.4,3):k==="w"?clamp(v,.3,.98):clamp(v,0,1)}
   }
+  /* c_ = the project's look, g_ = the selected cluster, s_ = the selected scene place (this project) */
+  function capObjFor(p,f){
+    const sz=previewSize(p,segments(p));
+    if(/^c_/.test(f)){if(!p.cap)p.cap=capStyle(p,sz[0],sz[1]);return p.cap}
+    if(/^g_/.test(f)&&ED.sel&&ED.sel.kind==="cg"){const g=(p.capGroups||[]).filter(x=>x.id===ED.sel.id)[0];if(!g)return null;g.st=g.st||{};return g.st}
+    if(/^s_/.test(f)&&ED.sel&&ED.sel.kind==="csc"){p.capSc=p.capSc||{};const k=ED.sel.scene;if(!p.capSc[k]){const z=sceneZ0(p,k),o={};const st=capStyle(p,sz[0],sz[1]);CG_KEYS.forEach(q=>{o[q]=z&&z[q]!=null?z[q]:st[q]});p.capSc[k]=o}return p.capSc[k]}
+    return null;
+  }
+  /* the place the Scene Builder gave a scene in this project's takes (the first one found) */
+  function sceneZ0(p,scene){let z=null;(p.clips||[]).some(c=>{const t=takeById(c.take);return(t&&t.scenes||[]).some(e=>{if(e.scene===scene&&e.z){z=e.z;return true}return false})});return z}
+  function projScenes(p){const seen={},out=[];(p.clips||[]).forEach(c=>{const t=takeById(c.take);(t&&t.scenes||[]).forEach(e=>{if(!seen[e.scene]){seen[e.scene]=1;out.push(e.scene)}})});return out}
+  const sceneName=k=>({classic:"Classic",cam:"Full-screen camera",split:"Split (camera + input)",pip:"Bubble (input + camera)"})[k]||String(k||"");
+  const CAP_PRE=[["top","Top",.1],["upper","Upper third",.3],["mid","Middle",.5],["lower","Lower third",.68],["bottom","Bottom",.86]];
+  /* the same set of look controls for the project (c_), a cluster (g_) and a scene place (s_) */
+  function capFields(px,st){
+    return'<div class="lc79-cz" role="group" aria-label="Place">'+CAP_PRE.map(o=>'<button type="button" class="lc79-b sm'+(Math.abs((+st.y||0)-o[2])<.03&&Math.abs((+st.x||.5)-.5)<.03?" on":"")+'" data-a="cappre" data-px="'+px+'" data-v="'+o[2]+'">'+o[1]+'</button>').join("")+'</div>'
+      +rng(px+"scale",st.scale,.4,3,.05,"Size")+rng(px+"w",st.w,.3,.98,.01,"Line width")
+      +'<div class="lc79-two">'+rng(px+"x",st.x,0,1,.01,"Left ↔ right")+rng(px+"y",st.y,0,1,.01,"Top ↕ bottom")+'</div>'
+      +chk(px+"box",st.box,"Background box")
+      +'<div class="lc79-row">'+col(px+"bg",st.bg,"Box colour")+'<span class="lc79-grow">'+rng(px+"bgA",st.bgA,0,1,.05,"Box opacity")+'</span></div>'
+      +'<div class="lc79-row">'+col(px+"fg",st.fg,"Text colour")+chk(px+"stroke",st.stroke,"Outline")+col(px+"sc",st.sc,"Outline colour")+'</div>'
+      +'<div class="lc79-two"><label class="lc79-f"><span>Font</span><select data-f="'+px+'font">'+FONT_NAMES.map(f=>'<option value="'+f[0]+'"'+(f[0]===st.font?" selected":"")+'>'+f[1]+'</option>').join("")+'</select></label>'+chk(px+"upper",st.upper,"ALL CAPS")+'</div>'
+      +'<div class="lc79-row">'+chk(px+"karaoke",st.karaoke,"Highlight the spoken word")+col(px+"hl",st.hl,"Highlight")+'</div>';
+  }
+  /* 9.78.0: put the captions of the project's takes on the voice. force = every take with a level track; otherwise only the takes whose
+     captions sit badly (start in silence, piled up, tiny) and that were not checked before. The old timing is kept once (Undo timing). */
+  function capAutoTime(p,force){
+    if(!p)return 0;let n=0;const seen={};
+    (p.clips||[]).forEach(c=>{const t=takeById(c.take);if(!t||seen[t.id]||!Array.isArray(t.captions)||!t.captions.length||!Array.isArray(t.env)||t.env.length<5)return;seen[t.id]=1;
+      if(!force&&t.capChk)return;const dt=envDt(t),thr=envThr(t.env,trThr());
+      if(force||capFit(t.captions,t.env,thr,dt).bad){t.capPrev=JSON.parse(JSON.stringify(t.captions));t.captions=retimeCaps(t.captions,t.env,{thr:thr,dt:dt,late:t.capBy==="device"||t.capBy==="exact"?0:.3});n++}
+      t.capChk=1;try{T().Takes.persistMeta(t)}catch(e){}});
+    return n;
+  }
+  function capUntime(p){let n=0;(p.clips||[]).forEach(c=>{const t=takeById(c.take);if(t&&Array.isArray(t.capPrev)){t.captions=t.capPrev;delete t.capPrev;n++;try{T().Takes.persistMeta(t)}catch(e){}}});return n}
+  /* the captions the inspector works on: the multi-selection on T1, or the one selected caption */
+  function capSel(){if(ED.multi&&ED.multi.length)return ED.multi.slice();if(ED.sel&&ED.sel.kind==="cl")return[{take:ED.sel.take,i:ED.sel.i}];return[]}
+  function groupAtT(p,T){const S=segments(p),sg=segAt(S,T);if(!sg)return null;const ct=sg.s+(T-sg.T0),ln=capLine(sg.take,ct);return ln?groupOf(p,sg.take,ln):null}
+  function capAutoNote(p){try{const n=capAutoTime(p,false);if(n)say("The captions of "+n+" take"+(n===1?"":"s")+" sat next to the voice (piled up or in silences): they are put on your voice now. T1 · Captions > Undo timing brings the old times back.","ok",6500)}catch(e){}}
   function onEdClick(e){
     const b=e.target.closest("[data-a]");if(!b||b.tagName==="SELECT"||b.type==="range")return;
     const a=b.getAttribute("data-a"),p=cur(),it=selected();
@@ -1059,6 +1211,22 @@
     if(a==="export")return exportProject();
     if(a==="caps"&&p){p.capsOff=!p.capsOff;save(p);paintTop();paintInsp();say(p.capsOff?"Captions hidden: the export has no captions.":"Captions on: missing captions are written automatically when you export.","",3000);return showFrame()}
     if(a==="capstyle"){stopPlay();ED.sel=ED.sel&&ED.sel.kind==="cap"?null:{kind:"cap"};paintTop();paintTimeline();paintInsp();return showFrame()}
+    if(a==="cappre"&&p){const px=b.getAttribute("data-px"),y=+b.getAttribute("data-v");snapEd(p);const o=capObjFor(p,px+"y");if(o){o.y=y;o.x=.5;save(p);paintInsp();compose()}return}
+    if(a==="cg-make"&&p){const sel=capSel();if(!sel.length){say("Tap a caption on T1 first.","",2000);return}snapEd(p);const g=makeGroup(p,sel);if(!g)return;save(p);ED.sel={kind:"cg",id:g.id};ED.multi=[];
+      say("“"+g.name+"”: "+sel.length+" caption"+(sel.length===1?"":"s")+". Set its place and look here, or drag it in the viewer; the other captions stay as they are.","ok",4500);ED.paint();return}
+    if(a==="cg-sel"&&p){const id=b.getAttribute("data-id"),g=(p.capGroups||[]).filter(x=>x.id===id)[0];if(!g)return;stopPlay();ED.sel={kind:"cg",id:id};
+      const it=capItems(p).filter(x=>groupOf(p,x.take,x.c)===g)[0];if(it&&!(ED.T>=it.T0&&groupAtT(p,ED.T)===g))ED.T=it.T0+.05;paintTop();paintTimeline();paintInsp();return showFrame()}
+    if(a==="cg-out"&&p){snapEd(p);capSel().forEach(x=>{const t=takeById(x.take),c=t&&t.captions&&t.captions[x.i];if(c)ungroupCap(p,t,c)});p.capGroups=(p.capGroups||[]).filter(g=>(g.ranges||[]).length);save(p);paintTimeline();paintInsp();return compose()}
+    if(a==="cg-del"&&p&&ED.sel&&ED.sel.kind==="cg"){snapEd(p);p.capGroups=(p.capGroups||[]).filter(g=>g.id!==ED.sel.id);ED.sel={kind:"cap"};save(p);say("Cluster removed: its captions have the project look again.","",2500);paintTimeline();paintInsp();return compose()}
+    if(a==="cg-reset"&&p&&ED.sel&&ED.sel.kind==="cg"){const g=(p.capGroups||[]).filter(x=>x.id===ED.sel.id)[0];if(g){snapEd(p);g.st={};save(p);paintInsp();compose()}return}
+    if(a==="cg-pick"&&p&&ED.sel&&ED.sel.kind==="cg"){const g=(p.capGroups||[]).filter(x=>x.id===ED.sel.id)[0];if(!g)return;ED.multi=capItems(p).filter(x=>groupOf(p,x.take,x.c)===g).map(x=>({take:x.take.id,i:x.i}));
+      if(ED.multi.length){const f=ED.multi[0];ED.sel={kind:"cl",take:f.take,i:f.i}}paintTimeline();return paintInsp()}
+    if(a==="cl-clear"){ED.multi=[];if(ED.sel&&ED.sel.kind==="cl")ED.multi=[{take:ED.sel.take,i:ED.sel.i}];paintTimeline();return paintInsp()}
+    if(a==="csc-sel"&&p){ED.sel={kind:"csc",scene:b.getAttribute("data-scene")};paintTop();paintTimeline();paintInsp();return compose()}
+    if(a==="csc-reset"&&p){const k=b.getAttribute("data-scene")||(ED.sel&&ED.sel.scene);if(p.capSc&&p.capSc[k]){snapEd(p);delete p.capSc[k];save(p)}paintInsp();return compose()}
+    if(a==="csc-proj"&&p&&ED.sel&&ED.sel.kind==="csc"){snapEd(p);p.capSc=p.capSc||{};p.capSc[ED.sel.scene]={};save(p);paintInsp();return compose()}
+    if(a==="cc-time"&&p){stopPlay();const n=capAutoTime(p,true);say(n?"Captions of "+n+" take"+(n===1?"":"s")+" put on your voice. Undo timing brings the old times back.":"No take with captions and a level track on V1.",n?"ok":"",4000);ED.paint();return}
+    if(a==="cc-untime"&&p){stopPlay();const n=capUntime(p);say(n?"The old caption times are back ("+n+" take"+(n===1?"":"s")+").":"Nothing to undo.","",3000);ED.paint();return}
     if(a==="capreset"&&p){snapEd(p);delete p.cap;save(p);paintInsp();return compose()}
     if(a==="writecaps"&&p)return writeCaps(p,null).then(()=>{ED.paint()});
     if(a==="captions"){stopPlay();ED.sel={kind:"cap"};paintTop();paintTimeline();paintInsp();return showFrame()}   /* 9.55.0: captions are edited here, on T1 */
@@ -1141,7 +1309,8 @@
     if(el.matches('[data-f="trk_name"]')&&p&&ED.sel&&ED.sel.kind==="trk"){const t=trackOf(p,ED.sel.id);if(t){t.name=String(el.value||"").trim().slice(0,30)||t.name;save(p);paintCalls();paintTimeline()}return}
     if(el.matches('[data-f="cl_t"]')&&ED.sel&&ED.sel.kind==="cl"){const t=takeById(ED.sel.take),c=t&&t.captions&&t.captions[ED.sel.i];if(c){const nt=String(el.value||"").replace(/\s+/g," ").trim().slice(0,240);if(c.w&&nt.split(" ").length!==c.w.length)delete c.w;c.t=nt;try{T().Takes.persistMeta(t)}catch(x){}paintTimeline();compose()}return}
     if(el.matches('[data-f="track"]')&&p&&ED.sel&&ED.sel.kind==="co"){const c=selected();if(c&&trackOf(p,el.value)){snapEd(p);c.track=el.value;save(p);paintTimeline();compose()}return}
-    if(el.matches('[data-a="pick"]')){stopPlay();db().cur=el.value;persist();ED.sel=null;ED.T=0;return ED.paint()}
+    if(el.matches('[data-a="pick"]')){stopPlay();db().cur=el.value;persist();ED.sel=null;ED.multi=[];ED.T=0;capAutoNote(cur());return ED.paint()}
+    if(el.matches('[data-a="cg-add"]')&&p){const g=(p.capGroups||[]).filter(x=>x.id===el.value)[0];el.value="";if(!g)return;snapEd(p);addToGroup(p,g,capSel());save(p);say("Added to “"+g.name+"”.","ok",1800);paintTimeline();paintInsp();return compose()}
     if(el.matches('[data-a="silmin"]')){setNle({cutMin:clamp(+el.value||4,.5,8)});return paintTop()}
     if(!p||!el.hasAttribute("data-f"))return;
     const f=el.getAttribute("data-f"),it=selected();
@@ -1151,7 +1320,9 @@
     if(f==="pname"){p.name=String(el.value||"").trim().slice(0,60)||p.name;save(p);return paintTop()}
     if(f==="size"){p.size=el.value;save(p);return showFrame()}
     if(f==="useCuts"){p.useCuts=el.checked;save(p);return ED.paint()}
-    if(/^c_/.test(f)&&ED.sel&&ED.sel.kind==="cap"){snapSoft(p);setCap(p,f,el);save(p);return compose()}
+    if(f==="cscon"){snapEd(p);p.capScOff=!el.checked;save(p);paintTimeline();return compose()}
+    if(f==="cg_name"&&ED.sel&&ED.sel.kind==="cg"){const g=(p.capGroups||[]).filter(x=>x.id===ED.sel.id)[0];if(g){g.name=String(el.value||"").trim().slice(0,30)||g.name;save(p);paintTimeline()}return}
+    if(/^[cgs]_/.test(f)&&ED.sel&&/^(cap|cg|csc)$/.test(ED.sel.kind)){snapSoft(p);setCap(p,f,el);save(p);return compose()}
     if(!it)return;
     if(ED.sel.kind==="clip"&&(f==="in"||f==="out")){snapEd(p);const t=takeById(it.take),D=t.durationMs/1e3,x=clamp(+el.value||0,0,D);trimClip(p,it.id,f==="in"?"l":"r",x);save(p);return ED.paint()}
     if(ED.sel.kind==="co"){snapSoft(p);setCo(it,f,el);p.callouts.sort((a,b)=>a.t-b.t);save(p);paintTimeline();if(f==="t")return showFrame();return}
@@ -1170,7 +1341,7 @@
     if(el.matches('[data-a="silmin"]')){const v=clamp(+el.value||4,.5,8),o=Q("[data-silv]",ED.el);if(o)o.textContent=v.toFixed(1)+" s";return}
     if(!el.hasAttribute("data-f")||!ED.sel)return;
     const f=el.getAttribute("data-f"),p=cur();
-    if(ED.sel.kind==="cap"&&/^c_/.test(f)&&p){snapSoft(p);setCap(p,f,el);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>save(p),350);return}
+    if(/^(cap|cg|csc)$/.test(ED.sel.kind)&&/^[cgs]_/.test(f)&&f!=="cg_name"&&p){snapSoft(p);setCap(p,f,el);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>save(p),350);return}
     if(ED.sel.kind!=="co"||f==="t"||f==="dur")return;
     const c=selected();if(!c)return;snapSoft(p);setCo(c,f,el);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>{save(cur());paintTimeline()},350);
   }
@@ -1224,7 +1395,7 @@
       if(!d)return;const p=cur(),dd=d;d=null;const ins=Q(".lc79-ins",tl);if(ins)ins.remove();
       if(dd.trim){if(dd.moved){save(p);ED.paint();return}ED.undo.pop();const s=segments(p).filter(x=>x.clip.id===dd.trim.id)[0];if(s)ED.T=s.T0;paintTop();paintTimeline();paintInsp();return showFrame()}
       if(dd.clip&&dd.moved&&dd.idx!=null){const id=dd.clip.getAttribute("data-clip"),i=p.clips.findIndex(c=>c.id===id);if(i>=0){let j=dd.idx;if(j>i)j--;if(j!==i){snapEd(p);const c=p.clips.splice(i,1)[0];p.clips.splice(j,0,c);save(p)}}ED.sel={kind:"clip",id:id};return ED.paint()}
-      if(dd.cl){ED.sel={kind:"cl",take:dd.cl.take.id,i:dd.cl.i};stopPlay();if(dd.moved){try{T().Takes.persistMeta(dd.cl.take)}catch(x){}}
+      if(dd.cl){const me={take:dd.cl.take.id,i:dd.cl.i};ED.multi=!dd.moved&&(e.shiftKey||e.ctrlKey||e.metaKey)?capPick(p,me,e.shiftKey):[me];ED.sel={kind:"cl",take:dd.cl.take.id,i:dd.cl.i};stopPlay();if(dd.moved){try{T().Takes.persistMeta(dd.cl.take)}catch(x){}}
         const it=capItems(p).filter(x=>x.take.id===dd.cl.take.id&&x.i===dd.cl.i)[0];if(it)ED.T=it.T0;paintTop();paintTimeline();paintInsp();return showFrame()}
       if(dd.c){if(dd.newTrack&&trackOf(p,dd.newTrack)){dd.c.track=dd.newTrack;dd.moved=true}if(!dd.moved)ED.undo.pop();else{p.callouts.sort((a,b)=>a.t-b.t);save(p);if(dd.newTrack)say("Moved to "+trackOf(p,dd.newTrack).name+".","",1600)}ED.sel={kind:"co",id:dd.c.id};stopPlay();ED.T=dd.c.t;paintTop();paintTimeline();paintInsp();return showFrame()}
       if(dd.clip){const id=dd.clip.getAttribute("data-clip");ED.sel={kind:"clip",id:id};stopPlay();const x=clamp((e.clientX-dd.r.left)/dd.r.width*dd.tot,0,dd.tot);ED.T=x;paintTop();paintTimeline();paintInsp();return showFrame()}
@@ -1244,12 +1415,13 @@
     const pt=e=>{const r=cv.getBoundingClientRect(),w=Math.max(1,r.width),h=Math.max(1,r.height);return{r:r,fx:(e.clientX-r.left)/w,fy:(e.clientY-r.top)/h,px:(e.clientX-r.left)/w*cv.width,py:(e.clientY-r.top)/h*cv.height,k:cv.width/w}};
     /* 2 = the resize corner of the selected caption box, 1 = inside the box */
     const onCap=q=>{const c=ED.capRect;if(!c||ED.playing)return 0;const hs=18*q.k,pad=6*q.k;
-      if(ED.sel&&ED.sel.kind==="cap"&&Math.abs(q.px-(c.x+c.w))<hs&&Math.abs(q.py-(c.y+c.h))<hs)return 2;
+      if(ED.sel&&/^(cap|cg|csc)$/.test(ED.sel.kind)&&Math.abs(q.px-(c.x+c.w))<hs&&Math.abs(q.py-(c.y+c.h))<hs)return 2;
       return q.px>=c.x-pad&&q.px<=c.x+c.w+pad&&q.py>=c.y-pad&&q.py<=c.y+c.h+pad?1:0};
     cv.addEventListener("pointerdown",e=>{
       if(ED.playing)return;const q=pt(e),p=cur();if(!p)return;const hit=onCap(q);
-      if(hit){snapEd(p);if(!p.cap)p.cap=capStyle(p,cv.width,cv.height);d={cap:true,resize:hit===2,st0:Object.assign({},p.cap),q0:q,cr:Object.assign({},ED.capRect),moved:false};
-        if(!(ED.sel&&ED.sel.kind==="cap")){ED.sel={kind:"cap"};paintTop();paintTimeline();paintInsp();compose()}
+      if(hit){snapEd(p);const bi=ED.baseInfo||{},tg=capEditObj(p,cv.width,cv.height,bi.take,bi.ct,ED.capLn);d={cap:true,obj:tg.obj,resize:hit===2,st0:Object.assign({},tg.obj),q0:q,cr:Object.assign({},ED.capRect),moved:false};
+        const want=tg.kind==="group"?{kind:"cg",id:tg.g.id}:tg.kind==="scene"?{kind:"csc",scene:tg.scene}:{kind:"cap"};
+        if(!ED.sel||ED.sel.kind!==want.kind||ED.sel.id!==want.id||ED.sel.scene!==want.scene){ED.sel=want;paintTop();paintTimeline();paintInsp();compose()}
         try{cv.setPointerCapture(e.pointerId)}catch(x){}e.preventDefault();return}
       if(!ED.sel||ED.sel.kind!=="co")return;const c=selected();if(!c)return;
       snapEd(p);const tip=c.arrow&&Math.hypot((q.fx-c.ax)*q.r.width,(q.fy-c.ay)*q.r.height)<36;d={c:c,tip:tip,r:q.r};try{cv.setPointerCapture(e.pointerId)}catch(x){}
@@ -1258,15 +1430,15 @@
     cv.addEventListener("pointermove",e=>{
       const q=pt(e);
       if(!d){const h=onCap(q);cv.style.cursor=h===2?"nwse-resize":h?"move":"";return}
-      if(d.cap){const c=cur().cap;d.moved=true;
+      if(d.cap){const c=d.obj;d.moved=true;
         if(d.resize){const ratio=Math.max(.2,(q.px-d.cr.x)/Math.max(10,d.cr.w));c.scale=+clamp(d.st0.scale*ratio,.4,3).toFixed(3)}
         else{c.x=+clamp(d.st0.x+(q.px-d.q0.px)/cv.width,0,1).toFixed(4);c.y=+clamp(d.st0.y+(q.py-d.q0.py)/cv.height,0,1).toFixed(4)}
         return compose()}
       const fx=clamp((e.clientX-d.r.left)/d.r.width,0,1),fy=clamp((e.clientY-d.r.top)/d.r.height,0,1);if(d.tip){d.c.ax=fx;d.c.ay=fy}else{d.c.x=clamp(fx,.05,.95);d.c.y=clamp(fy,.05,.95)}compose();
     });
     const up=()=>{if(!d)return;const dd=d;d=null;if(dd.cap&&!dd.moved){ED.undo.pop();return}save(cur());paintInsp()};cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
-    cv.addEventListener("wheel",e=>{const q=pt(e);if(!onCap(q))return;e.preventDefault();const p=cur();snapSoft(p);if(!p.cap)p.cap=capStyle(p,cv.width,cv.height);
-      p.cap.scale=+clamp((+p.cap.scale||1)*(e.deltaY<0?1.06:1/1.06),.4,3).toFixed(3);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>{save(p);if(ED.sel&&ED.sel.kind==="cap")paintInsp()},300)},{passive:false});
+    cv.addEventListener("wheel",e=>{const q=pt(e);if(!onCap(q))return;e.preventDefault();const p=cur();snapSoft(p);const bi=ED.baseInfo||{},o=capEditObj(p,cv.width,cv.height,bi.take,bi.ct,ED.capLn).obj;
+      o.scale=+clamp((+o.scale||1)*(e.deltaY<0?1.06:1/1.06),.4,3).toFixed(3);compose();clearTimeout(saveTo);saveTo=setTimeout(()=>{save(p);if(ED.sel&&/^(cap|cg|csc)$/.test(ED.sel.kind))paintInsp()},300)},{passive:false});
   }
 
   /* ---------- Game-to-Script AI ---------- */
@@ -2135,23 +2307,82 @@ BCLOSE);
     });
   }
 
-  /* ---------- 1. captions: tighten the live speech captions to the voice ---------- */
-  function alignLive(caps,env,thr){
-    if(!Array.isArray(caps)||!caps.length||!Array.isArray(env)||env.length<5)return caps;
-    if(!Number.isFinite(thr)){try{thr=T().Trim.thr}catch(e){thr=-45}if(!Number.isFinite(thr))thr=-45}
-    const dt=.1,n=env.length,D=n*dt,loud=env.map(d=>+d>=thr),on=[],off=[];
-    for(let i=0;i<n;i++){if(loud[i]&&(i===0||!loud[i-1]))on.push(i*dt);if(!loud[i]&&i>0&&loud[i-1])off.push(i*dt)}
-    if(loud[n-1])off.push(D);if(!on.length)return caps;
-    const near=(arr,t,w)=>{let b=null,bd=w;arr.forEach(x=>{const d=Math.abs(x-t);if(d<=bd){bd=d;b=x}});return b};
-    const isLoud=t=>{const i=Math.floor(t/dt+1e-6);return i>=0&&i<n&&loud[i]};
-    const out=caps.map(c=>Object.assign({},c));
-    out.forEach(c=>{const len=Math.max(.3,c.e-c.s);
-      if(!isLoud(c.s+.05)){const o=near(on.filter(x=>x>=c.s-.6),c.s,.9);if(o!=null)c.s=o}
-      const f=near(off,c.e,.6);if(f!=null&&f>c.s+.3)c.e=f+.08;
-      if(c.e<c.s+.3)c.e=c.s+len;delete c.w});
-    for(let i=1;i<out.length;i++){if(out[i].s<out[i-1].s+.2)out[i].s=out[i-1].s+.2;if(out[i-1].e>out[i].s-.02)out[i-1].e=Math.max(out[i-1].s+.2,out[i].s-.02)}
-    out.forEach(c=>{c.s=+c.s.toFixed(2);c.e=+Math.max(c.s+.2,c.e).toFixed(2);if(c.e>D+.5)c.e=+Math.max(c.s+.2,D+.2).toFixed(2)});
+  /* ---------- 1. captions: tighten the live speech captions to the voice ----------
+     9.78.0: the old version moved each caption to the nearest loud moment and then kept every caption at least 0.2 s after the one before.
+     The speech service hands its results over in bursts, so a burst of 4 to 8 lines became a staircase of tiny captions on one spot, and
+     after "Cut silences" those piles sat on the edge of a cut (the start or the end of a block) instead of under the words. Now the take's
+     own level track decides: the voice is cut into speech blocks (pauses of 0.45 s and more), every caption goes to one block in order
+     (a small dynamic programme: the text a block gets must fit its length at the speaker's own speed, and a caption stays close to where the
+     service put it), and inside a block the words are spread over the voiced time, so every word gets a start and an end (karaoke works). */
+  function voiceBlocks(env,thr,dt,gap){
+    dt=dt>0?dt:SIL_DT;gap=gap>0?gap:.45;const out=[];let cur=null,last=-1e9;
+    for(let i=0;i<(env||[]).length;i++){if(lvAt(env,i)<thr)continue;const t=i*dt;
+      if(cur&&t-(last+dt)<gap-1e-9){cur.e=t+dt;cur.fr.push(i)}else{cur={s:t,e:t+dt,fr:[i]};out.push(cur)}last=t}
+    const big=out.filter(b=>b.fr.length>=2);return big.length?big:out;
+  }
+  /* how well the captions sit on the voice: share of captions that start in silence, piled-up ones (under 0.25 s after the previous one),
+     tiny ones (under 0.3 s) and the share of caption time that is voiced. bad = worth timing again. */
+  function capFit(caps,env,thr,dt){
+    const n=(caps||[]).length;if(!n||!Array.isArray(env)||env.length<5)return{n:n,bad:false};
+    dt=dt>0?dt:SIL_DT;if(!Number.isFinite(thr))thr=envThr(env);
+    const loudAt=t=>{const i=Math.floor(t/dt+1e-6);return i>=0&&i<env.length&&lvAt(env,i)>=thr};
+    const nearLoud=(t,w)=>{for(let x=t;x<=t+w+1e-9;x+=dt)if(loudAt(x))return true;return false};
+    const cs=caps.slice().sort((a,b)=>a.s-b.s);let sil=0,pile=0,tiny=0,vt=0,tt=0;
+    cs.forEach((c,i)=>{if(!nearLoud(c.s,.3))sil++;if(i&&c.s-cs[i-1].s<.25)pile++;if(c.e-c.s<.3)tiny++;
+      for(let x=c.s;x<c.e;x+=dt){tt+=dt;if(loudAt(x))vt+=dt}});
+    const r={n:n,silence:+(sil/n).toFixed(2),piled:+(pile/n).toFixed(2),tiny:+(tiny/n).toFixed(2),voiced:tt?+(vt/tt).toFixed(2):0};
+    /* the level track must be able to hold the words (at 25 letters a second at most): a beep, a click track or music is no voice */
+    const chars=cs.reduce((a,c)=>a+String(c.t||"").length,0),vox=env.reduce((a,x,i)=>a+(lvAt(env,i)>=thr?dt:0),0);r.speech=vox*25>=chars;
+    r.bad=n>=2&&r.speech&&(r.silence>.4||r.piled+r.tiny>.3||r.voiced<.35);return r;
+  }
+  function retimeCaps(caps,env,o){
+    o=o||{};if(!Array.isArray(caps)||!caps.length||!Array.isArray(env)||env.length<5)return caps;
+    const dt=o.dt>0?clamp(+o.dt,.05,.25):SIL_DT;let thr=o.thr;if(!Number.isFinite(thr))thr=envThr(env,-45);
+    const B=voiceBlocks(env,thr,dt,o.gap);if(!B.length)return caps;
+    const late=o.late==null?.3:+o.late,D=env.length*dt;
+    const C=caps.map((c,i)=>{const s=+c.s||0;return{c:c,i:i,n:Math.max(1,String(c.t||"").replace(/\s+/g," ").trim().length),s:s,e:Math.max(+c.e||0,s+.1)}}).sort((a,b)=>a.s-b.s||a.i-b.i);
+    const n=C.length,m=B.length,vd=B.map(b=>b.fr.length*dt),totV=vd.reduce((a,x)=>a+x,0),totC=C.reduce((a,x)=>a+x.n,0);
+    if(totV*25<totC)return caps;                                         /* the level track cannot hold these words: not a voice, leave them */
+    const R=clamp(totC/Math.max(.5,totV),7,22),A=.8,W=1,K=80,INF=1e18,pc=[0];C.forEach(x=>pc.push(pc[pc.length-1]+x.n));
+    const dist=(x,b)=>Math.min(8,Math.max(0,b.s-(x.e-late),(x.s-late)-b.e));
+    let f=new Float64Array(n+1).fill(INF);f[0]=0;const choice=[];
+    for(let j=0;j<m;j++){
+      const b=B[j],d=vd[j],P=new Float64Array(n+1);for(let i=0;i<n;i++)P[i+1]=P[i]+dist(C[i],b);
+      const g=new Float64Array(n+1).fill(INF),ch=new Int32Array(n+1);
+      for(let i=0;i<=n;i++)for(let k=i;k>=0&&k>=i-K;k--){if(f[k]>=INF)continue;const v=f[k]+A*Math.abs((pc[i]-pc[k])/R-d)+W*(P[i]-P[k]);if(v<g[i]){g[i]=v;ch[i]=k}}
+      choice.push(ch);f=g;
+    }
+    if(!(f[n]<INF))return caps;
+    const asg=new Array(m);let i=n;for(let j=m-1;j>=0;j--){const k=choice[j][i];asg[j]=[k,i];i=k}
+    const at=(b,u)=>{const k=clamp(Math.floor(u/dt+1e-9),0,b.fr.length-1);return b.fr[k]*dt+clamp(u-k*dt,0,dt)};
+    const out=[];
+    B.forEach((b,j)=>{const r=asg[j];if(!r||r[1]<=r[0])return;const L=C.slice(r[0],r[1]),S=L.reduce((a,x)=>a+x.n,0),d=vd[j];
+      const need=S/18,nb=B[j+1],room=(nb?nb.s-.05:D)-b.s;
+      if(need>d*1.3&&room>d){
+        /* more text than voice in this block (fast speech, a quiet word): spread it over the block and the silence after it, at a fast pace */
+        const span=Math.min(room,need),k=span/Math.max(1,S+L.length);let u=b.s;
+        L.forEach(x=>{const len=(x.n+1)*k,cc=Object.assign({},x.c,{s:+u.toFixed(2),e:+(u+len).toFixed(2)});delete cc.w;out.push(cc);u+=len});
+      }else if(S/R>=.6*d||L.length>1&&S/R>=.45*d){
+        /* the block is this text: spread the words over its voiced time */
+        let u=0;const k=d/Math.max(1,S+L.length);
+        L.forEach(x=>{const ws=String(x.c.t||"").split(" ").filter(Boolean),tot=ws.reduce((a,w)=>a+w.length+1,0)||1,len=(x.n+1)*k;let a=u;
+          const w=ws.map(wd=>{const dd=len*(wd.length+1)/tot,o2={s:+at(b,a).toFixed(2),e:+at(b,Math.max(a,a+dd-1e-6)).toFixed(2)};a+=dd;return o2});
+          out.push(Object.assign({},x.c,{s:+at(b,u).toFixed(2),e:+at(b,u+len-1e-6).toFixed(2),w:w.length?w:undefined}));u+=len});
+      }else{
+        /* more voice than text (the service missed words): keep each caption near where it was, inside the block */
+        let prevE=b.s-1;
+        L.forEach(x=>{const len=Math.min(b.e-b.s,Math.max(.6,x.n/R));let s=clamp(x.s-late,b.s,Math.max(b.s,b.e-len));s=Math.max(s,prevE+.05);
+          const e=Math.min(Math.max(s+.3,s+len),Math.max(b.e,s+.3));const cc=Object.assign({},x.c,{s:+s.toFixed(2),e:+e.toFixed(2)});delete cc.w;out.push(cc);prevE=e});
+      }});
+    out.sort((a,b)=>a.s-b.s);
+    /* readable: hold a caption a moment after the voice (never into the next one) and give it at least half a second when there is room */
+    out.forEach((c,k)=>{const nx=out[k+1],lim=nx?nx.s-.02:D+.3;let e=Math.min(c.e+.25,lim);if(e-c.s<.5)e=Math.min(c.s+.5,lim);c.e=+Math.max(c.s+.1,e).toFixed(2);if(!c.w)delete c.w});
     return out;
+  }
+  function alignLive(caps,env,thr,dt){
+    if(!Array.isArray(caps)||!caps.length||!Array.isArray(env)||env.length<5)return caps;
+    if(!Number.isFinite(thr)){let fb=-45;try{const v=T().Trim.thr;if(Number.isFinite(v))fb=v}catch(e){}thr=envThr(env,fb)}
+    return retimeCaps(caps,env,{thr:thr,dt:dt});
   }
 
   /* ---------- 9.45.0: OBS-style scenes, flexible input block, crop / zoom / pan, and the record bar out of the board ----------
@@ -2212,7 +2443,7 @@ BCLOSE);
     }
     scPut({scene:S.scene,src:S.src,classic:keep,aspect:L.aspect});
     if(layers&&!api54.apply({aspect:L.aspect,layers:layers})){scPut({scene:prev.scene,src:prev.src});return false}
-    inputSync();paintScn();dirty();return true;
+    inputSync();paintScn();dirty();sceneMark();return true;
   }
   function inRect(){const S=scS(),L=LAY();if(!sceneOn()||!L)return null;return sceneRects(S.scene,aspectA(L)).inp}
   /* ----- the live page sources (landing page, the app): an iframe over the input block, clickable and scrollable ----- */
@@ -2376,6 +2607,50 @@ BCLOSE);
     try{api().lc54.apply({aspect:L.aspect,layers:{camera:cm}})}catch(e){}paintXf();dirty();
   }
   /* ----- the scene row (above the stage) ----- */
+  /* ---------- 9.78.0: where the captions go in each scene (Scene Builder > CC Captions) ----------
+     Per scene: Auto (clear of the camera: the seam between board and camera in Split, the top in Bubble; the project look in Classic and
+     Full camera), one of five places, your own place (drag the dashed box on the stage) or the project look. While recording, every scene
+     switch is written into the take's scene log with the place of that moment, so the Edit Studio puts each caption where its scene wants
+     it, also after cuts. The dashed box is page UI: it is never in the recording. */
+  const CZ_PRE=[["auto","Auto"],["top","Top",.1],["upper","Upper third",.3],["mid","Middle",.5],["lower","Lower third",.68],["bottom","Bottom",.86],["own","My own place"],["project","Project look"]];
+  function autoZone(scene,A){const port=A<1;
+    if(scene==="split")return port?{x:.5,y:.6,w:.92}:{x:.82,y:.86,w:.32,scale:.8};
+    if(scene==="pip")return port?{x:.5,y:.1,w:.9}:{x:.4,y:.88,w:.7};
+    return null}
+  const czOf=scene=>{const o=(scS().capz||{})[scene];return o&&typeof o==="object"?o:{mode:"auto"}};
+  function zoneFor(scene,A){const o=czOf(scene),m=o.mode||"auto";if(m==="project")return null;if(m==="auto")return autoZone(scene,A);
+    const pre=CZ_PRE.filter(x=>x[0]===m&&x[2]!=null)[0],z={x:pre?.5:clamp(+o.x||.5,0,1),y:pre?pre[2]:clamp(+o.y||.86,0,1)};
+    if(+o.scale>0)z.scale=clamp(+o.scale,.4,3);if(+o.w>0)z.w=clamp(+o.w,.3,.98);return z}
+  function czPut(scene,o){const S=scS(),all=Object.assign({},S.capz||{});all[scene]=Object.assign({},czOf(scene),o);scPut({capz:all});sceneMark()}
+  const recNow=()=>{try{const R=api().rec;return R&&R.state!=="idle"?R:null}catch(e){return null}};
+  function sceneLogStart(){const S=scS();return[{t:0,scene:S.scene,z:zoneFor(S.scene,aspectA(LAY()))}]}
+  function sceneMark(){const R=recNow();if(!R||!Array.isArray(R.scenes))return;const S=scS(),e={t:+(R.elapsed()/1e3).toFixed(2),scene:S.scene,z:zoneFor(S.scene,aspectA(LAY()))},l=R.scenes[R.scenes.length-1];
+    if(l&&l.scene===e.scene&&JSON.stringify(l.z)===JSON.stringify(e.z))return;if(l&&e.t-l.t<.05)R.scenes[R.scenes.length-1]=e;else R.scenes.push(e)}
+  function czBox(){
+    const sr=studioRoot(),st=sr&&Q("#stage",sr);if(!st)return;let bx=Q("#lc79-czbox",sr);const S=scS();
+    if(!S.czOpen){if(bx)bx.remove();return}
+    if(!bx){bx=document.createElement("div");bx.id="lc79-czbox";bx.setAttribute("aria-label","Where the captions go in this scene. Drag to move.");
+      bx.style.cssText="position:absolute;z-index:40;border:2px dashed #00E5FF;border-radius:8px;background:rgba(0,229,255,.12);color:#e6fbff;font:700 12px system-ui,sans-serif;display:flex;align-items:center;justify-content:center;text-align:center;cursor:move;touch-action:none;pointer-events:auto;box-sizing:border-box";
+      bx.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();const r=st.getBoundingClientRect();try{bx.setPointerCapture(e.pointerId)}catch(x){}
+        const mv=ev=>{const o=czOf(scS().scene),z=zoneFor(scS().scene,aspectA(LAY()))||{};czPut(scS().scene,{mode:"own",scale:+o.scale||z.scale||1,w:+o.w||z.w||.86,x:+clamp((ev.clientX-r.left)/r.width,0,1).toFixed(3),y:+clamp((ev.clientY-r.top)/r.height,0,1).toFixed(3)});czBox();paintCz()};
+        const up=()=>{bx.removeEventListener("pointermove",mv);bx.removeEventListener("pointerup",up);bx.removeEventListener("pointercancel",up)};
+        bx.addEventListener("pointermove",mv);bx.addEventListener("pointerup",up);bx.addEventListener("pointercancel",up)});
+      try{if(getComputedStyle(st).position==="static")st.style.position="relative"}catch(e){}st.appendChild(bx)}
+    const W=st.clientWidth,H=st.clientHeight,A=aspectA(LAY()),z=zoneFor(S.scene,A)||{x:.5,y:A<1?.78:.86,project:true};
+    const size=Math.min(W,H)*(A<1?.052:.04)*clamp(+z.scale||1,.4,3),w=W*clamp(+z.w||.86,.3,.98),h=Math.max(18,size*1.28*2+size*.5);
+    bx.style.left=clamp(z.x*W-w/2,0,Math.max(0,W-w))+"px";bx.style.top=clamp(z.y*H-h/2,0,Math.max(0,H-h))+"px";bx.style.width=w+"px";bx.style.height=h+"px";
+    bx.textContent=z.project?"Captions: the project look (Edit Studio)":"Captions in this scene";
+  }
+  function paintCz(){
+    const sr=studioRoot(),pn=sr&&Q("#lc79-czp",sr);if(!pn)return;const S=scS();pn.hidden=!S.czOpen;czBox();if(!S.czOpen)return;
+    const o=czOf(S.scene),m=o.mode||"auto",z=zoneFor(S.scene,aspectA(LAY()));
+    const h='<div class="lc79-xrow"><b style="color:#fff">Captions in “'+esc(sceneName(S.scene))+'”</b></div>'
+      +'<div class="lc79-cz" role="group" aria-label="Place of the captions">'+CZ_PRE.map(x=>'<button type="button" class="btn sm lc79-dockb'+(x[0]===m?" on":"")+'" data-cz="'+x[0]+'" aria-pressed="'+(x[0]===m)+'">'+x[1]+'</button>').join("")+'</div>'
+      +(m!=="project"?'<label class="lc79-sl lc79-xs"><span>Size <b>'+Math.round((+(z&&z.scale)||1)*100)+'%</b></span><input type="range" data-czr="scale" min="40" max="250" step="5" value="'+Math.round((+(z&&z.scale)||1)*100)+'" aria-label="Caption size in this scene"></label>'
+        +'<label class="lc79-sl lc79-xs"><span>Width <b>'+Math.round((+(z&&z.w)||.86)*100)+'%</b></span><input type="range" data-czr="w" min="30" max="98" step="1" value="'+Math.round((+(z&&z.w)||.86)*100)+'" aria-label="Caption line width in this scene"></label>':'')
+      +'<p class="lc79-hint lc79-xnote">'+(m==="auto"?(z?"Auto keeps the captions clear of the camera in this scene.":"Auto: this scene uses the project look."):m==="project"?"This scene uses the project look of the Edit Studio.":"Drag the dashed box on the stage to place it.")+' Every take you record keeps this per scene: in the Edit Studio the captions land there by themselves.</p>';
+    if(pn.innerHTML!==h&&!(sr.activeElement&&sr.activeElement.matches&&sr.activeElement.matches("[data-czr]")))pn.innerHTML=h;
+  }
   function paintScn(){
     const sr=studioRoot(),row=sr&&Q("#lc79-scn",sr);if(!row)return;const S=scS();
     const sc=Q("[data-s=scene]",row);if(sc&&sc.value!==S.scene)sc.value=S.scene;
@@ -2383,7 +2658,8 @@ BCLOSE);
     const fl=Q("[data-s=film]",row);if(fl){fl.hidden=!(usesInput()&&(S.src==="landing"||S.src==="app"));fl.textContent=IN.live?"● Filming live":"Film it live"}
     const sh=Q("[data-s=share]",row);if(sh){sh.hidden=!(usesInput()&&S.src==="screen");sh.textContent=IN.shotV?"Change the shared screen":"Share screen"}
     const xb=Q("[data-s=xf]",row);if(xb){xb.setAttribute("aria-pressed",String(!!S.xfOpen));xb.classList.toggle("lc79-on",!!S.xfOpen)}
-    paintXf();
+    const cb=Q("[data-s=cz]",row);if(cb){cb.setAttribute("aria-pressed",String(!!S.czOpen));cb.classList.toggle("lc79-on",!!S.czOpen)}
+    paintXf();paintCz();
   }
   function buildScn(sr){
     const col=Q("#stage",sr)&&Q("#stage",sr).closest(".stage-wrap");if(!col||Q("#lc79-scn",sr))return;
@@ -2391,7 +2667,8 @@ BCLOSE);
     row.innerHTML='<label class="lc79-sl"><span>Scene</span><select class="lc79-dsel" data-s="scene">'+SCENES.map(o=>'<option value="'+o[0]+'">'+esc(o[1])+"</option>").join("")+'</select></label>'
       +'<label class="lc79-sl"><span>Input</span><select class="lc79-dsel" data-s="src">'+SOURCES.map(o=>'<option value="'+o[0]+'">'+esc(o[1])+"</option>").join("")+"</select></label>"
       +'<button type="button" class="btn sm lc79-dockb" data-s="share" hidden>Share screen</button><button type="button" class="btn sm lc79-dockb" data-s="film" hidden title="Chrome / Edge: film the page in the block live instead of one picture a second">Film it live</button>'
-      +'<button type="button" class="btn sm lc79-dockb" data-s="xf" aria-controls="lc79-xf" aria-pressed="false">⤢ Crop & zoom</button>';
+      +'<button type="button" class="btn sm lc79-dockb" data-s="xf" aria-controls="lc79-xf" aria-pressed="false">⤢ Crop & zoom</button>'
+      +'<button type="button" class="btn sm lc79-dockb" data-s="cz" aria-controls="lc79-czp" aria-pressed="false" title="Where the captions go in this scene">CC Captions</button>';
     const xf=document.createElement("div");xf.id="lc79-xf";xf.className="lc79-xf";xf.hidden=true;
     xf.innerHTML='<div class="lc79-xrow"><label class="lc79-sl"><span>Edit</span><select class="lc79-dsel" data-x="target"><option value="cam">The camera</option><option value="in">The input block</option></select></label>'
       +'<label class="lc79-sl"><span>Setting</span><select class="lc79-dsel" data-x="param"></select></label>'
@@ -2399,12 +2676,20 @@ BCLOSE);
       +'<label class="lc79-sl"><span>Camera frame</span><select class="lc79-dsel" data-x="shape"><option value="free">Free rectangle</option><option value="rect">Rounded</option><option value="circle">Circle</option></select></label>'
       +'<button type="button" class="btn sm lc79-dockb" data-x="reset">Reset</button></div>'
       +'<p class="lc79-hint lc79-xnote"></p>';
-    col.parentNode.insertBefore(row,col);col.parentNode.insertBefore(xf,col);
+    const czp=document.createElement("div");czp.id="lc79-czp";czp.className="lc79-xf";czp.hidden=true;
+    col.parentNode.insertBefore(row,col);col.parentNode.insertBefore(xf,col);col.parentNode.insertBefore(czp,col);
+    czp.addEventListener("click",e=>{const b=e.target.closest("[data-cz]");if(!b)return;const m=b.getAttribute("data-cz"),S=scS();
+      if(m==="own"){const z=zoneFor(S.scene,aspectA(LAY()))||{x:.5,y:.86};czPut(S.scene,{mode:"own",x:z.x,y:z.y})}else czPut(S.scene,{mode:m});paintCz()});
+    czp.addEventListener("input",e=>{const k=e.target.getAttribute("data-czr");if(!k)return;const S=scS(),o=czOf(S.scene),v=+e.target.value/100;
+      if((o.mode||"auto")!=="own"){const z=zoneFor(S.scene,aspectA(LAY()))||{x:.5,y:aspectA(LAY())<1?.78:.86};czPut(S.scene,{mode:"own",x:z.x,y:z.y,scale:z.scale||1,w:z.w||.86})}
+      czPut(S.scene,{[k]:v});czBox();const lab=e.target.closest("label").querySelector("b");if(lab)lab.textContent=Math.round(v*100)+"%"});
+    czp.addEventListener("change",()=>paintCz());
     row.addEventListener("change",e=>{const k=e.target.getAttribute("data-s");if(!k)return;const v=e.target.value;
       if(k==="scene"){if(!applyScene({scene:v}))paintScn();else say(SCENES.filter(o=>o[0]===v)[0][1]+".","ok",1600)}
       if(k==="src"){applyScene({src:v});if(v==="screen"&&!IN.shotV)shareScreen().then(()=>{paintScn();dirty()})}});
     row.addEventListener("click",e=>{const b=e.target.closest("[data-s]");if(!b||b.tagName==="SELECT")return;const k=b.getAttribute("data-s");
-      if(k==="xf"){scPut({xfOpen:!scS().xfOpen});paintScn();inputSync();placeHandle()}
+      if(k==="xf"){scPut({xfOpen:!scS().xfOpen,czOpen:false});paintScn();inputSync();placeHandle()}
+      if(k==="cz"){scPut({czOpen:!scS().czOpen,xfOpen:false});paintScn();inputSync();placeHandle()}
       if(k==="share")shareScreen().then(()=>{paintScn();dirty()});
       if(k==="film")inFilmLive()});
     xf.addEventListener("input",e=>{if(e.target.getAttribute("data-x")!=="val")return;const S=scS(),k=S.param||"z",brd=xfTarget()==="in"&&S.src==="board",v=+e.target.value;
@@ -2449,7 +2734,7 @@ BCLOSE);
     let fs=Q("#lc79-fit",sr);if(!fs){fs=document.createElement("style");fs.id="lc79-fit";sr.appendChild(fs)}
     col.classList.add("lc79-fitcol");
     const xfTop=Math.round(wrap.offsetTop+pt);
-    const css=(phone?"":".lc79-fitcol{position:relative}.lc79-fitcol>#lc79-xf:not([hidden]){position:absolute;z-index:30;left:10px;top:"+xfTop+"px;width:min(300px,calc(100% - 20px));max-height:calc(100% - "+(xfTop+pad+10)+"px);overflow:auto;margin:0;padding:10px;border-radius:12px;background:rgba(10,11,14,.94);border:1px solid rgba(0,229,255,.35);box-shadow:0 12px 30px rgba(0,0,0,.5)}.lc79-fitcol>#lc79-xf .lc79-xrow{flex-direction:column;align-items:stretch}")+(compact?".lc79-fitcol{padding-bottom:"+padS+"px!important;height:auto!important}.panel:has(.lc79-fitcol),.p-body:has(.lc79-fitcol){height:auto!important;max-height:none!important}.panel:has(.lc79-fitcol){bottom:auto!important}.canvas:has(.lc79-fitcol){overflow-y:auto!important}":".lc79-fitcol{padding-bottom:"+pad+"px!important}")
+    const css=(phone?"":".lc79-fitcol{position:relative}.lc79-fitcol>#lc79-xf:not([hidden]),.lc79-fitcol>#lc79-czp:not([hidden]){position:absolute;z-index:30;left:10px;top:"+xfTop+"px;width:min(300px,calc(100% - 20px));max-height:calc(100% - "+(xfTop+pad+10)+"px);overflow:auto;margin:0;padding:10px;border-radius:12px;background:rgba(10,11,14,.94);border:1px solid rgba(0,229,255,.35);box-shadow:0 12px 30px rgba(0,0,0,.5)}.lc79-fitcol>#lc79-xf .lc79-xrow,.lc79-fitcol>#lc79-czp .lc79-xrow{flex-direction:column;align-items:stretch}")+(compact?".lc79-fitcol{padding-bottom:"+padS+"px!important;height:auto!important}.panel:has(.lc79-fitcol),.p-body:has(.lc79-fitcol){height:auto!important;max-height:none!important}.panel:has(.lc79-fitcol){bottom:auto!important}.canvas:has(.lc79-fitcol){overflow-y:auto!important}":".lc79-fitcol{padding-bottom:"+pad+"px!important}")
       +".lc79-fitcol>.stage-wrap{flex:none!important;height:"+Math.round(hh+pt+pb)+"px!important;max-width:"+w+"px!important;width:100%;margin-left:auto!important;margin-right:auto!important}";
     if(fs.textContent!==css&&Date.now()-fitAt>250){fitAt=Date.now();fs.textContent=css}
   }
@@ -2458,6 +2743,7 @@ BCLOSE);
     const S=scS(),L=LAY();if(L&&sceneOn()&&S.aspect&&S.aspect!==L.aspect)applyScene({});     /* the format changed: put the blocks back in place */
     if(usesInput()&&(S.src==="landing"||S.src==="app")&&!(IN.el&&IN.el.isConnected))inputSync();
     if(S.xfOpen&&!IN.raf)IN.raf=requestAnimationFrame(inLoop);
+    if(S.czOpen)czBox();
   }
   function sceneStop(){inUnmount();shotStop();if(IN.raf){cancelAnimationFrame(IN.raf);IN.raf=0}}
 
@@ -2710,7 +2996,7 @@ BCLOSE);
     window.addEventListener("hashchange",()=>{if(route()!=="studio")["lc79-ed","lc79-ai","lc79-ctaset"].forEach(id=>closeLayer(id,true))});
     window.addEventListener("pointerdown",()=>{if(route()==="studio"&&Date.now()-lastTick>1500)loopTick()},true);   /* watchdog */
   }
-  return{camSrc:camSrc,drawUnder:drawUnder,applyScene:applyScene,scene:scS,srcRect:srcRect,sceneRects:sceneRects,boardIn:boardIn,shareScreen:shareScreen,inState:()=>({kind:IN.kind,live:IN.live,snap:!!IN.snap,shot:!!IN.shotV,el:!!IN.el}),writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
+  return{camSrc:camSrc,drawUnder:drawUnder,applyScene:applyScene,scene:scS,srcRect:srcRect,sceneRects:sceneRects,boardIn:boardIn,shareScreen:shareScreen,inState:()=>({kind:IN.kind,live:IN.live,snap:!!IN.snap,shot:!!IN.shotV,el:!!IN.el}),writeCaps:writeCaps,needsCaps:needsCaps,live:()=>LV,liveOn:liveOn,liveOff:liveOff,afterTake:afterTake,setStep:setStep,mkProject:mkProject,makeCase:makeCase,gotoCaptions:gotoCaptions,openFromProject:openFromProject,flow:()=>FL,pgnKey:pgnKey,boardChange:boardChange,numbered:numbered,CLOSE:CLOSE,init:init,afterRender:afterRender,drawLive:drawLive,alignLive:alignLive,retimeCaps:retimeCaps,sceneLogStart:sceneLogStart,sceneMark:sceneMark,zoneFor:zoneFor,autoZone:autoZone,capStyleAt:capStyleAt,groupOf:groupOf,makeGroup:makeGroup,rangesOf:rangesOf,capItems:capItems,capAutoTime:capAutoTime,capFit:capFit,voiceBlocks:voiceBlocks,takeGone:takeGone,openProjects:openProjects,openScript:openScript,openCtaSettings:openCtaSettings,ctaToggle:ctaToggle,
     segments:segments,run:run,envThr:envThr,findQuiet:findQuiet,envDt:envDt,speechRanges:speechRanges,minus:minus,complement:complement,clipsFor:clipsFor,splitClip:splitClip,splitAt:splitAt,trimClip:trimClip,deleteClip:deleteClip,cutSilences:cutSilences,autoSilence:autoSilence,envOf:envOf,capStyle:capStyle,capLine:capLine,drawCaption:drawCaption,nle:nle,undo:undo,drawCallout:drawCallout,makeCallout:makeCallout,wmcNorm:wmcNorm,wmcActive:wmcActive,wmcPlace:wmcPlace,drawWmCta:drawWmCta,WMC_DEF:WMC_DEF,drawFrame:drawFrame,motifOf:motifOf,socratic:socratic,trimmedPgn:trimmedPgn,buildPrompt:buildPrompt,pawnCheck:pawnCheck,BCLOSE:BCLOSE,boardSVG:boardSVG,sfx:sfx,
     BUILT:BUILT,db:db,newProject:newProject,tracksOf:tracksOf,coOn:coOn,capItems:capItems,visOf:visOf,applyVis:applyVis,_ai:AI,_ed:ED,grabLanding:grabLanding,state:()=>({ctaOn:ctaOn,snap:!!snap}),version:VERSION};
 })(); /*@@end lc79*/
