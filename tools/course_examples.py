@@ -116,6 +116,7 @@ def sac_kind(b, m):
     cap = b.piece_at(m.to_square); cv = V[cap.piece_type] if cap else (1 if b.is_en_passant(m) else 0)
     pv = V[p.piece_type]
     a = b.copy(); a.push(m)
+    if a.is_checkmate(): return None
     att = [V[a.piece_at(s).piece_type] for s in a.attackers(not me, m.to_square)]
     if not att: return None
     defended = bool(a.attackers(me, m.to_square))
@@ -651,6 +652,30 @@ def p_r_vs_passers(b, me):
             if any(abs(fil(x) - fil(y)) == 1 for x in ps for y in ps if x != y): return True
     return False
 
+def make_find(name, test, text):
+    def f(c):
+        if not c.m or not c.eg: return None
+        try: ok = test(c)
+        except Exception: ok = False
+        return text(c) if ok else None
+    f.__name__ = name
+    return f
+d_ocb_hold = make_find('d_ocb_hold', lambda c: c.typ == 'bb-opp' and c.mat <= -1, lambda c: 'Opposite-coloured bishops, ' + str(-c.mat) + ' down: ' + c.san() + ' is the move that keeps the draw (Stockfish: the others lose).')
+d_ocb_heavy = make_find('d_ocb_heavy', lambda c: p_ocb_heavy(c.b, c.me) and c.mat >= 0, lambda c: 'Opposite bishops with heavy pieces: their bishop cannot defend the other colour. ' + c.san() + '.')
+d_ocb_win = make_find('d_ocb_win', lambda c: c.typ == 'bb-opp' and c.mat >= 1, lambda c: 'Opposite bishops, ' + str(c.mat) + ' up: ' + c.san() + ' keeps the win (the recipe: passed pawns far apart).')
+d_rvminor_hold = make_find('d_rvminor_hold', lambda c: p_rvminor0(c.b, c.me), lambda c: 'Rook against your minor piece, no pawns: ' + c.san() + ' is the move that keeps the draw.')
+d_exchange_up = make_find('d_exchange_up', lambda c: p_exchange_up(c.b, c.me), lambda c: 'Up the exchange with pawns on the board: ' + c.san() + ' is the move that keeps the win.')
+d_minor_eg = make_find('d_minor_eg', lambda c: c.typ in ('nb', 'bb-same', 'nn'), lambda c: 'Minor-piece ending: ' + c.san() + ' is the only move that keeps the result.')
+d_nvbadb = make_find('d_nvbadb', lambda c: p_nvbadb(c.b, c.me), lambda c: 'Good knight against a bad bishop (its pawns are fixed on its own colour): ' + c.san() + ' keeps the win.')
+d_bvn_wings = make_find('d_bvn_wings', lambda c: p_bvn_wings(c.b, c.me), lambda c: 'Bishop against knight with pawns on both wings: ' + c.san() + ' keeps the win.')
+d_badb = make_find('d_badb', lambda c: p_badbishop(c.b, c.me), lambda c: 'Their bishop is bad, its pawns are fixed on its colour: ' + c.san() + ' keeps the win.')
+d_pawnless = make_find('d_pawnless', lambda c: not pawns(c.b, True) and not pawns(c.b, False) and npieces(c.b, True) + npieces(c.b, False) >= 3, lambda c: 'A pawnless ending: ' + c.san() + ' is the only move that keeps the result.')
+d_fortress = make_find('d_fortress', lambda c: c.mat <= -2 and npieces(c.b, not c.me) >= 1, lambda c: 'You are ' + str(-c.mat) + ' points down and still not lost: ' + c.san() + ' is the only move that keeps the draw.')
+d_gm_eg = make_find('d_gm_eg', lambda c: c.meta.get('tier') == '2000+' or (c.meta.get('rating') or 0) >= 2100, lambda c: 'A critical endgame moment at master level: ' + c.san() + ' is the only move that keeps the result.')
+d_qvp7_find = make_find('d_qvp7_find', lambda c: p_qvp7(c.b, c.me), lambda c: 'Queen against a pawn on the 7th: ' + c.san() + ' is the only move that keeps the result.')
+d_wrongb_find = make_find('d_wrongb_find', lambda c: p_wrongb(c.b, c.me) and c.pt() == K_, lambda c: 'The wrong bishop: ' + c.san() + ' heads for the corner the bishop cannot cover.')
+d_queen_eg = make_find('d_queen_eg', lambda c: c.typ == 'queen', lambda c: 'Queen ending: ' + c.san() + ' is the only move that keeps the result.')
+
 # rule id -> detectors: ('find', fn, claim) or ('play', fn, goal) ; goal 'win' / 'draw' / 'eval' (from Stockfish)
 E = {
  'L0.1': [('play', p_mat_draw, 'draw')], 'L0.2': [('play', p_mat_draw, 'draw')], 'L0.4': [('find', d_race, 'only')], 'L0.5': [('find', d_transform, 'win')],
@@ -694,6 +719,18 @@ E = {
  'R3C.9': [('find', d_mate, 'win')], 'R3C.10': [('find', d_decoy, 'win')], 'R3C.11': [('find', d_counter, 'only')], 'R3C.12': [('play', p_rook_down2, 'eval')], 'R3C.14': [('play', p_philidor, 'draw'), ('play', p_vancura, 'draw')],
  'R3C.15': [('find', d_q_passer, 'win')], 'C3C.3': [('find', d_mate, 'win')],
 }
+for rid, extra in {
+    'R2.22': [('find', d_ocb_hold, 'draw')], 'D0.4': [('find', d_ocb_hold, 'draw'), ('find', d_fortress, 'draw')], 'R2.23': [('find', d_ocb_heavy, 'win')], 'R3B.24': [('find', d_ocb_win, 'win')],
+    'R2.24': [('find', d_rvminor_hold, 'draw')], 'R3B.10': [('find', d_exchange_up, 'win')], 'R3B.9': [('find', d_minor_eg, 'only')], 'R3B.22': [('find', d_nvbadb, 'win')],
+    'R3B.23': [('find', d_bvn_wings, 'win')], 'R2.20': [('find', d_bvn_wings, 'win')], 'R2.19': [('find', d_badb, 'win')], 'R3A.19': [('find', d_pawnless, 'only')],
+    'R3A.21': [('find', d_pawnless, 'only')], 'R3A.22': [('find', d_pawnless, 'only')], 'R3A.23': [('find', d_pawnless, 'only')], 'R3A.24': [('find', d_minor_eg, 'only')],
+    'R3A.25': [('find', d_minor_eg, 'only')], 'R3A.20': [('find', d_minor_eg, 'only')], 'R3C.1': [('find', d_fortress, 'draw')], 'R3C.2': [('find', d_fortress, 'draw')],
+    'C3C.1': [('find', d_fortress, 'draw')], 'R3C.17': [('find', d_gm_eg, 'only')], 'C3C.4': [('find', d_gm_eg, 'only')], 'R3A.11': [('find', d_qvp7_find, 'only')],
+    'R3A.12': [('find', d_pawnless, 'only')], 'R3A.13': [('find', d_queen_eg, 'only')], 'R1.12': [('find', d_wrongb_find, 'draw')], 'C3A.2': [('find', d_flank, 'draw'), ('find', d_cutoff, 'only')],
+    'C3A.1': [('find', d_lucena_find, 'win'), ('find', d_philidor_find, 'draw')], 'R3A.18': [('find', d_pawnless, 'only')],
+}.items():
+    E.setdefault(rid, [])
+    E[rid] = E[rid] + extra
 # rules that need Stockfish beyond the only-move test: the pawn ending after the capture must be worse
 ENGINE_EXTRA = {d_avoid_kp: 'kp_trade_worse'}
 
@@ -762,11 +799,11 @@ def d_mg_kingattack(c):
     if not mg_ok(c): return None
     k = sac_kind(c.b, c.m)
     if k == 'greek-gift': return c.san() + ': the Greek Gift. The bishop takes the pawn in front of their king with check; the knight and queen come next.'
-    if k in ('rook-king', 'bishop-king'): return c.san() + ': a sacrifice on the king\'s cover to open it for the other pieces.'
     if c.end.is_checkmate() and c.end.turn != c.me and len(c.own_moves()) >= 2:
         ek = c.end.king(not c.me)
         if ek is not None and rel(ek, not c.me) == 0: return 'A mating pattern against the castled king: the line ends in mate on the back rank (' + c.steps[-1][0].san(c.steps[-1][1]) + ').'
         return 'A mating attack on the king: the line ends in mate (' + c.steps[-1][0].san(c.steps[-1][1]) + ').'
+    if k in ('rook-king', 'bishop-king'): return c.san() + ': a sacrifice on the king\'s cover to open it for the other pieces.'
     return None
 def open_file(b, f): return not any(fil(s) == f for s in b.pieces(P_, True) | b.pieces(P_, False))
 def d_mg_openfile(c):
@@ -1228,7 +1265,7 @@ def mine_endings(G):
 # ---------------------------------------------------------------- build
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('cmd', choices=['build', 'parse'])
+    ap.add_argument('cmd', choices=['build', 'parse', 'finish'])
     ap.add_argument('--games', default=''); ap.add_argument('--content', default=os.path.join(ROOT, 'content.json'))
     ap.add_argument('--book', default=os.path.join(ROOT, 'sources', 'endgame-blueprint.md'))
     ap.add_argument('--lichess', default=os.path.join(HERE, 'lichess_examples.json'))
@@ -1240,6 +1277,8 @@ def main():
     book['parts'] = [p for p in book['parts'] if p['id'] != 'T3']
     if a.cmd == 'parse':
         print(json.dumps(book, ensure_ascii=False, indent=1)[:4000]); return
+    if a.cmd == 'finish':
+        return finish(a, book)
     rng = random.Random(a.seed); t0 = time.time()
     doc = json.load(open(a.content, encoding='utf-8')); L = doc['lists']
     rule_tier = {}
@@ -1352,6 +1391,12 @@ def main():
         except Exception: pass
     write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier)
 
+def threat_words(v, r):
+    t = v.get('threat')
+    if not t: return ''
+    if r.get('claim') == 'threat_made': return ' (If they ignore it, you ' + ('mate' if t == 'mate' else 'win ' + str(t) + ' points') + '.)'
+    return ' (If you pass, they ' + ('mate' if t == 'mate' else 'win ' + str(t) + ' points') + '.)'
+
 def ex_source(meta):
     if meta.get('src') == 'lichess':
         return 'Lichess database: a real game, puzzle rated ' + str(meta.get('rating')) + (' (' + str(meta.get('year')) + ')' if meta.get('year') else '')
@@ -1386,7 +1431,7 @@ def write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier):
              'source': ex_source(meta) + ('' if src == 'lichess' else ('; in the game I found it' if meta.get('kind') in GOOD else '; in the game I went wrong here' if meta.get('kind') else '')),
              'verified': 'Stockfish 16, depth ' + str(a.depth) + ': the only good move' + (', every move of the line' if len(v['line']) > 1 else ''),
              'rating': meta.get('rating') or {0: 700, 1: 1000, 2: 1400, 3: 1800, 4: 2050}.get(meta.get('level', 2)), 'pieces': len(b1.piece_map()), 'plies': len(sol), 'themes': [],
-             'setup': True, 'rule': rule_or_topic, 'reason': r['reason'] + ((' (If you pass, they ' + ('mate' if v['threat'] == 'mate' else 'win ' + str(v['threat']) + ' points') + '.)') if v.get('threat') else ''), 'src': src,
+             'setup': True, 'rule': rule_or_topic, 'reason': r['reason'] + threat_words(v, r), 'src': src,
              'kg': {'game': meta.get('game'), 'ply': meta.get('ply'), 'kind': meta.get('kind'), 'tier': meta.get('tier'), 'played': r.get('played_san')} if src != 'lichess' else {'puzzle': meta.get('pid'), 'rating': meta.get('rating')}}
         engine_out[did] = v.get('engine') or {'setup': r['prev'], 'P0': b1.fen(), 'ours': v['line'], 'legal': True, 'lines': v['lines'], 'after': v['after'], 'opp': v.get('opp') or {'best': None, 'pv': [], 'cp': None, 'mate': None}}
         return d
@@ -1404,6 +1449,7 @@ def write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier):
                                     'eval': v['score'], 'src': 'mine', 'source': ex_source(m), 'mateOnly': r['fn'] in ('p_kqk', 'p_krk', 'p_kbnk', 'p_2b'), 'reason': PLAY_WORDS.get(r['fn'], '')})
     for rule, recs in (LI.get('endgame') or {}).items():
         for rec in recs[:2]:
+            if rec.get('claim') == 'threat_made': rec['reason'] = rec['reason'].replace('(If you pass, they ', '(If they ignore it, you ')
             r = {'fen': rec['fen'], 'best': rec['best'], 'line': rec['line'], 'prev': rec['prev'], 'prev_fen': rec['prev_fen'], 'reason': rec['reason'],
                  'meta': {'src': 'lichess', 'pid': rec['pid'], 'rating': rec['rating'], 'level': rating_tier(rec['rating'])}}
             v = {'line': rec['line_ok'], 'lines': rec['engine']['lines'], 'after': rec['engine']['after'], 'engine': rec['engine']}
@@ -1424,6 +1470,7 @@ def write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier):
     for topic, recs in (LI.get('middlegame') or {}).items():
         les = lessons.get(topic, {})
         for rec in recs[:4]:
+            if rec.get('claim') == 'threat_made': rec['reason'] = rec['reason'].replace('(If you pass, they ', '(If they ignore it, you ')
             r = {'fen': rec['fen'], 'best': rec['best'], 'line': rec['line'], 'prev': rec['prev'], 'prev_fen': rec['prev_fen'], 'reason': rec['reason'],
                  'meta': {'src': 'lichess', 'pid': rec['pid'], 'rating': rec['rating'], 'level': rating_tier(rec['rating'])}}
             v = {'line': rec['line_ok'], 'lines': rec['engine']['lines'], 'after': rec['engine']['after'], 'engine': rec['engine']}
@@ -1442,8 +1489,18 @@ def write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier):
     les_eg = {x['id']: x for x in L['courses.endgame']}
     report = ['# Course examples (tools/course_examples.py, 9.77.0)', '']
     for th in L['egthemes']:
-        cov = th.get('covers') or []
+        cov = []
+        for x in th.get('covers') or []:
+            if x.startswith('fw:'):
+                n_ = x[3:]; cov.append('F' + n_)
+                if n_ == '0.3': cov += ['L0.' + str(i) for i in range(1, 6)]
+                if n_ == '0.4': cov += ['D0.' + str(i) for i in range(1, 8)]
+            else: cov.append(x)
+        bp = ['bp-' + x.lower().replace('.', '-') for x in cov if re.match(r'^P\d', x)]
+        if 'R1.18' in cov or 'R3A.5' in cov: bp += ['th-rvp-cut-' + str(i) for i in range(1, 6)]
+        if 'R1.13' in cov or 'R1.14' in cov or 'R3A.11' in cov: bp += ['th-qvp-7th-' + str(i) for i in range(1, 6)]
         book_ids = [x for x in [th.get('anchorId')] + (th.get('simpleIds') or []) + (th.get('hardIds') or []) if x in base]
+        book_ids += [x for x in bp if x in base and x not in book_ids]
         ex = []
         for rid in cov:
             for e in eg_ex.get(rid, []):
@@ -1506,6 +1563,7 @@ def write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier):
                 d = dmap[e['drill']]
                 xs.append({'mode': 'find', 'id': d['id'], 'fen': d['fen'], 'solution': d['solution_moves'], 'side': d['side'], 'reason': e['reason'], 'source': d['source'], 'src': d['src'], 'rating': d['rating']})
             else: xs.append(e)
+        seen_ = set(); xs = [x for x in xs if not ((x.get('id') or x.get('fen')) in seen_ or seen_.add(x.get('id') or x.get('fen')))]
         if xs: it['examples'] = xs[:5]
     for p in book['parts']:
         for s in p['sections']:
@@ -1526,6 +1584,67 @@ def write_all(a, doc, L, book, found, mg_found, looks, LI, rule_tier):
     json.dump(eng, open(ce, 'w'))
     json.dump(book, open(os.path.join(ROOT, 'data', 'eg-blueprint.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     open(os.path.join(HERE, 'course_examples.md'), 'w').write('\n'.join(report) + '\n')
+
+def finish(a, book):
+    """after tools/course_truth.mjs: the rule / lesson leads the texts of the example drills (course_truth's motif texts stay as the facts)"""
+    doc = json.load(open(a.content, encoding='utf-8')); L = doc['lists']
+    rules = {}
+    for p in book['parts']:
+        for s_ in p['sections']:
+            if s_.get('id'): rules[s_['id']] = {'title': re.sub(r'^\d\.\d\s*', '', s_['title']), 'text': ' '.join(s_['text'])}
+            for it in s_['items']: rules[it['id']] = it
+        for it in p['concepts']: rules[it['id']] = it
+    les = {x['topicId']: x for x in L['courses.middlegame']}
+    n = 0
+    for grp in ('endgame', 'middlegame'):
+        for d in L[grp]:
+            if not re.match(r'^(kg|mg-kg|ldb|mg-ldb)-', d['id']) or not d.get('rule'): continue
+            n += 1
+            if grp == 'endgame':
+                r = rules.get(d['rule'], {}); t = re.sub(r'\*', '', r.get('title', '')); tx = re.sub(r'^[—–-]\s*', '', re.sub(r'\*', '', r.get('text', '')))
+                d['principle'] = (d['rule'] + ' · ' + t + '. ' + tx).strip()[:420]
+                d['alarm_signal'] = 'Alarm Signal · ' + d['rule'] + ' ' + t + ': ' + (tx.split('. ')[0] if tx else t) + '.'
+                hint = ' Rule ' + d['rule'] + ': ' + t + '.'
+            else:
+                l = les.get(d['rule'], {}); P_line = next((x['t'] for x in l.get('debrief') or [] if x.get('k') == 'P'), '')
+                d['principle'] = l.get('takeaway') or l.get('idea') or d.get('principle', '')
+                d['alarm_signal'] = 'Alarm Signal · ' + (l.get('title') or '') + ': ' + (l.get('idea') or '').split(';')[0].split('. ')[0] + '.'
+                hint = ' Plan: ' + (l.get('idea') or '').split(';')[0].split('. ')[0] + '. Then your checks, captures and attacks: which one supports it?'
+                m = d.get('ms_pc_breakdown') or {}
+                if P_line and not (m.get('P') or '').startswith('The plan of this lesson'):
+                    m['P'] = 'The plan of this lesson: ' + re.sub(r'\s+', ' ', P_line.split('\n')[0]).strip() + ' ' + (m.get('P') or '')
+                try:
+                    b = chess.Board(d['fen']); b.push(chess.Move.from_uci(d['solution_moves'][0]))
+                    st = [name for sid, name, test, kw in MP.STRUCTURES if test(b, b.turn) and sid != 'queenless']
+                    if st and not (m.get('S') or '').startswith('Structure:'): m['S'] = 'Structure: ' + '; '.join(st) + '. ' + (m.get('S') or '')
+                except Exception: pass
+                if m: d['ms_pc_breakdown'] = m
+            if hint.strip() not in (d.get('brief') or ''): d['brief'] = (d.get('brief') or '').rstrip() + hint
+            ex = d.get('explanation') or ''
+            if d.get('reason') and d['reason'] not in ex: d['explanation'] = (ex + ' ' + d['reason']).strip()
+            if d.get('kg', {}).get('played') and 'In my game I played' not in d['explanation']:
+                d['explanation'] += ' In my game I played ' + d['kg']['played'] + ' instead.'
+    # a drill whose texts tools/course_truth.mjs could not write (its claim check failed) goes, with every link to it
+    bad = {d['id'] for g in ('endgame', 'middlegame') for d in L[g] if re.match(r'^(kg|mg-kg|ldb|mg-ldb)-', d['id']) and not d.get('ms_pc_breakdown')}
+    if bad:
+        for g in ('endgame', 'middlegame'): L[g] = [d for d in L[g] if d['id'] not in bad]
+        for t in L['egthemes'] + L['mgthemes']:
+            t['simpleIds'] = [x for x in t.get('simpleIds') or [] if x not in bad]; t['hardIds'] = [x for x in t.get('hardIds') or [] if x not in bad]
+            if t.get('anchorId') in bad:
+                rest = t['simpleIds'] + t['hardIds']; t['anchorId'] = rest[0] if rest else ''
+                if rest: (t['simpleIds'] if t['simpleIds'] and t['simpleIds'][0] == rest[0] else t['hardIds']).remove(rest[0])
+        for l in L['courses.endgame'] + L['courses.middlegame']:
+            if l.get('steps'): l['steps'] = [x for x in l['steps'] if x.get('ref') not in bad]
+        bp = os.path.join(ROOT, 'data', 'eg-blueprint.json')
+        if os.path.exists(bp):
+            B = json.load(open(bp, encoding='utf-8'))
+            for p_ in B['parts']:
+                for it in [s_ for s_ in p_['sections']] + [i for s_ in p_['sections'] for i in s_['items']] + p_['concepts']:
+                    if it.get('examples'): it['examples'] = [x for x in it['examples'] if x.get('id') not in bad]
+            json.dump(B, open(bp, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
+        print('dropped', len(bad), 'drills whose texts failed the check:', ', '.join(sorted(bad)))
+    open(a.content, 'w', encoding='utf-8').write(json.dumps(doc, ensure_ascii=False, indent=1) + '\n')
+    print('finished', n, 'example drills')
 
 PLAY_WORDS = {
     'p_mat_draw': 'You are material down, but there is no Wincondition for them: hold it.', 'p_philidor': 'Philidor: the third-rank defence holds.',

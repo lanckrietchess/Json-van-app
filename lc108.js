@@ -29,9 +29,11 @@ const LC108=(()=>{
     try{if(typeof App.isPro==="function")return !!App.isPro()}catch(e){}
     try{return String(App.access&&App.access.tier||"free")!=="free"}catch(e){return false}
   }
-  let EG=null,MG=null,LEG=null,LMG=null,cur="",S={type:"",mgTab:"sacs",open:""},PO=null;
+  let EG=null,MG=null,LEG=null,LMG=null,BOOK=null,LBK=null,cur="",S={type:"",mgTab:"sacs",open:"",view:"book",part:"T0"},PO=null,FR=null;
   function loadEG(){if(EG)return Promise.resolve(EG);if(!LEG)LEG=fetch(EG_URL,{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(d=>(EG=d&&Array.isArray(d.types)?d:{types:[]})).catch(()=>(EG={types:[]}));return LEG}
   function loadMG(){if(MG)return Promise.resolve(MG);if(!LMG)LMG=fetch(MG_URL,{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(d=>(MG=d&&Array.isArray(d.sacs)?d:{sacs:[],plans:[]})).catch(()=>(MG={sacs:[],plans:[]}));return LMG}
+  const BOOK_URL="data/eg-blueprint.json?v="+VERSION;
+  function loadBook(){if(BOOK)return Promise.resolve(BOOK);if(!LBK)LBK=fetch(BOOK_URL,{cache:"no-cache"}).then(r=>r.ok?r.json():null).then(d=>(BOOK=d&&Array.isArray(d.parts)?d:{parts:[]})).catch(()=>(BOOK={parts:[]}));return LBK}
   const type=id=>(EG&&EG.types||[]).find(t=>t.id===id)||null;
   const done=()=>store.get("lc108-done",{});
   const markDone=id=>{const d=done();d[id]=Date.now();store.set("lc108-done",d)};
@@ -52,7 +54,9 @@ const LC108=(()=>{
     '.lc108 details{border-top:1px solid var(--rule);padding:6px 0}.lc108 summary{cursor:pointer;font-weight:700}'+
     '.lc108-po{display:grid;gap:10px}.lc108-po .lc108-bd{width:min(100%,460px);margin:0 auto}.lc108-po .lc108-st{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}'+
     '.lc108-msg{padding:10px 12px;border-radius:10px;background:rgba(148,163,184,.12)}.lc108-msg.is-ok{background:rgba(34,197,94,.15)}.lc108-msg.is-bad{background:rgba(239,68,68,.15)}'+
-    '.lc108-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.lc108-hero{display:grid;gap:6px}';
+    '.lc108-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}'+
+    '.lc108-ex{font:inherit;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;border:1px solid #38bdf8;background:rgba(56,189,248,.12);color:#38bdf8;cursor:pointer}'+
+    '.lc108-ex span{font-weight:500;opacity:.8}.lc108-ex.is-lock{border-color:var(--rule);background:transparent;color:var(--muted,#94a3b8)}.lc108-hero{display:grid;gap:6px}';
   function css(){if(Q("#lc108-css"))return;const s=document.createElement("style");s.id="lc108-css";s.textContent=CSS;document.head.appendChild(s)}
 
   /* ---------------- Endgame Lab ---------------- */
@@ -63,9 +67,127 @@ const LC108=(()=>{
     const t=type(S.type);
     const grid=T.map(x=>'<button type="button" class="lc108-type'+(x.id===S.type?" is-on":"")+'" data-lc108-type="'+H(x.id)+'" aria-pressed="'+(x.id===S.type)+'"><b>'+H(x.name)+'</b><span>'+
       [(x.theory||[]).length?(x.theory.length+" to know"):"",(x.play||[]).length?(x.play.length+" to play out"):"",(x.moments||[]).length?(x.moments.length+" key moments"):""].filter(Boolean).join(" · ")+"</span></button>").join("");
-    return'<section class="section lc108" data-lc108-eg><h1 style="margin-bottom:4px">'+ic("chess-pawn")+'Endgame Lab</h1>'+
+    const head='<h1 style="margin-bottom:4px">'+ic("chess-pawn")+'Endgame Lab</h1>'+
+      '<div class="lc108-tabs" role="group" aria-label="View">'+[["book","The Blueprint: every rule"],["types","By endgame type"]].map(([k,l])=>'<button type="button" class="btn btn-sm '+(S.view===k?"btn-primary":"btn-quiet")+'" data-lc108-view="'+k+'" aria-pressed="'+(S.view===k)+'">'+l+"</button>").join("")+"</div>";
+    if(S.view==="book")return'<section class="section lc108" data-lc108-eg>'+head+bookHTML()+"</section>";
+    return'<section class="section lc108" data-lc108-eg>'+head+
       '<p class="muted" style="margin-top:0">Pick the endgame you want to get better at. Learn its rules, play the positions you must know by heart, then play my own endgames out against Stockfish: sometimes you have to win, sometimes you have to hold the draw.</p>'+
       '<div class="lc108-grid" role="group" aria-label="Endgame type">'+grid+"</div>"+(t?typeHTML(t):"")+"</section>";
+  }
+  /* ---------------- the Endgame Blueprint (data/eg-blueprint.json): every rule, law and concept with its examples ---------------- */
+  const md=t=>H(t).replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/\*([^*]+)\*/g,"<i>$1</i>").replace(/`([^`]+)`/g,"<code>$1</code>");
+  const partFree=id=>/^(P0|T0|T1|A)/.test(id);
+  const trig=()=>store.get("lc108-trig",{});
+  function exBtn(it,i,x,lock){
+    const lab=x.mode==="find"?"Find the move":x.mode==="play"?(x.goal==="win"?"Win it":"Hold it"):"See it";
+    const src=x.src==="lichess"?"Lichess":"my game";
+    return'<button type="button" class="lc108-ex'+(lock?" is-lock":"")+'" data-lc108-ex="'+H(it.id)+'|'+i+'">'+(lock?ic("lock"):"")+H(lab)+' <span>· '+H(src)+(done()[x.id||x.drill]?" ✓":"")+"</span></button>";
+  }
+  function ruleHTML(it,pid){
+    const xs=it.examples||[],lock=!partFree(pid)&&!pro();
+    return'<div class="lc108-row" id="lc108-r-'+H(it.id)+'" style="display:block"><div><span class="lc108-chip is-'+(it.tag==="LAW"?"hold":"win")+'" style="margin:0 6px 0 0">'+H(it.tag||"")+'</span><b>'+H(it.id)+" · "+md(it.title||"")+"</b>"+
+      (it.refines?' <span class="small muted">refines '+H(it.refines)+"</span>":"")+"</div>"+(it.text?'<p class="small" style="margin:4px 0">'+md(String(it.text).replace(/^[—–-]\s*/,""))+"</p>":"")+
+      ((it.bullets||[]).length?'<ul class="small">'+it.bullets.map(b=>"<li>"+md(b)+"</li>").join("")+"</ul>":"")+
+      (xs.length?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+xs.map((x,i)=>exBtn(it,i,x,lock)).join("")+"</div>":"")+"</div>";
+  }
+  function bookHTML(){
+    if(!BOOK)return'<p class="muted">Loading the Blueprint…</p>';
+    const parts=BOOK.parts.filter(p=>p.id!=="T3");
+    if(!parts.length)return'<p class="muted">The Blueprint could not load. Check your connection and open this page again.</p>';
+    const tabs=parts.filter(p=>!/^A/.test(p.id)).concat(parts.some(p=>/^A/.test(p.id))?[{id:"A",label:"Appendix",title:""}]:[]);
+    if(!tabs.some(p=>p.id===S.part))S.part=tabs[0].id;
+    const sel=S.part==="A"?parts.filter(p=>/^A/.test(p.id)):parts.filter(p=>p.id===S.part);
+    const T=trig();
+    const body=sel.map(p=>{
+      const secs=(p.sections||[]).map(s=>'<div class="panel"><h2>'+md(s.title.replace(/^\d\.\d\s*/,""))+"</h2>"+(s.text||[]).map(t=>'<p class="small" style="margin:4px 0">'+md(t.replace(/^- /,"• "))+"</p>").join("")+
+        (s.id&&(s.examples||[]).length?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">'+s.examples.map((x,i)=>exBtn({id:s.id},i,x,!partFree(p.id)&&!pro())).join("")+"</div>":"")+(s.items||[]).map(it=>ruleHTML(it,p.id)).join("")+"</div>").join("");
+      const con=(p.concepts||[]).length?'<div class="panel"><h2>Concepts</h2>'+p.concepts.map(it=>ruleHTML(Object.assign({tag:"CONCEPT"},it),p.id)).join("")+"</div>":"";
+      const pos=(p.positions||[]).length?'<div class="panel"><h2>'+ic("brain")+'Must-know positions</h2><p class="small muted" style="margin:0 0 4px">Play each one against Stockfish until you can do it from memory, from both sides.</p>'+p.positions.map(it=>'<div class="lc108-row" style="display:block"><b>'+H(it.id)+" · "+H(it.title)+"</b>"+(it.text?'<p class="small" style="margin:4px 0">'+md(it.text)+"</p>":"")+
+        (it.fens||[]).map((f,j)=>f.verdict==="win"||f.verdict==="draw"?'<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px">'+(f.text?'<span class="small grow" style="flex:1 1 200px">'+md(f.text)+"</span>":'<span class="small grow muted" style="flex:1 1 200px">'+H((f.side==="w"?"White":"Black")+" to move · Stockfish: "+f.verdict)+"</span>")+
+          '<button type="button" class="btn btn-primary btn-sm" data-lc108-pos="'+H(it.id)+'|'+j+'">'+ic("play")+H((f.side==="w"?"White":"Black")+": "+(f.verdict==="win"?"win it":"hold it"))+"</button></div>":"").join("")+"</div>").join("")+"</div>":"";
+      const err=(p.errors||[]).length?'<div class="panel"><h2>Typical errors</h2><ul class="small">'+p.errors.map(x=>"<li>"+md(x)+"</li>").join("")+"</ul></div>":"";
+      const tr=(p.triggers||[]).length?'<div class="panel"><h2>'+H(p.triggerTitle||"Upgrade triggers")+'</h2><p class="small muted" style="margin:0 0 4px">Move up when you can DO these, not when you reach a rating. Tick what you can do.</p>'+p.triggers.map((x,j)=>{const k=p.id+"-"+j;return'<label class="small" style="display:flex;gap:8px;align-items:flex-start;margin:6px 0"><input type="checkbox" data-lc108-trig="'+k+'"'+(T[k]?" checked":"")+"> <span>"+md(x)+"</span></label>"}).join("")+"</div>":"";
+      const txt=(p.text||[]).length?'<div class="panel">'+p.text.map(t=>'<p class="small" style="margin:4px 0">'+md(t.replace(/^- /,"• "))+"</p>").join("")+"</div>":"";
+      return'<h2 style="margin:12px 0 2px">'+H(p.label)+" · "+md(p.title)+(p.range?' <span class="small muted">('+H(p.range)+" Elo)</span>":"")+"</h2>"+(p.mission?'<p class="muted" style="margin:0 0 8px"><b>Mission:</b> '+md(p.mission)+"</p>":"")+txt+secs+con+pos+err+tr}).join("");
+    const n=parts.reduce((a,p)=>a+[].concat(...(p.sections||[]).map(s=>(s.items||[]).concat(s.id?[s]:[])),p.concepts||[]).filter(x=>(x.examples||[]).length).length,0);
+    return'<p class="muted" style="margin-top:0">My Endgame Blueprint, from zero to grandmaster: every law, rule and concept, with positions from my own games and from the Lichess database that show it. '+H(n)+" rules have examples so far. Find the move, or play it out against Stockfish.</p>"+
+      '<div class="lc108-tabs" role="group" aria-label="Tier">'+tabs.map(p=>'<button type="button" class="btn btn-sm '+(S.part===p.id?"btn-primary":"btn-quiet")+'" data-lc108-part="'+H(p.id)+'" aria-pressed="'+(S.part===p.id)+'">'+H(p.label)+"</button>").join("")+"</div>"+body;
+  }
+  function bookRule(id){for(const p of (BOOK&&BOOK.parts)||[]){for(const s of p.sections||[]){if(s.id===id)return{it:Object.assign({title:s.title},s),p:p};for(const it of s.items||[])if(it.id===id)return{it:it,p:p}}for(const it of p.concepts||[])if(it.id===id)return{it:it,p:p}}return null}
+  function openExample(rid,i){
+    const f=bookRule(rid);if(!f)return;const x=(f.it.examples||[])[+i];if(!x)return;
+    if(!partFree(f.p.id)&&!pro()){try{LC90.open({from:"blueprint"})}catch(e){location.hash="#upgrades"}return}
+    const title=rid+" · "+String(f.it.title||"").replace(/\*/g,"");
+    if(x.mode==="find")return findOpen(x,title,f.it);
+    if(x.mode==="play")return playItem({id:x.id,fen:x.fen,side:x.side,goal:x.goal,mateOnly:x.mateOnly,title:title,how:[x.reason,x.source].filter(Boolean)},{name:"Blueprint"},"book");
+    lookOpen(x,title);
+  }
+  function openPos(pid,j){
+    for(const p of (BOOK&&BOOK.parts)||[])for(const it of p.positions||[])if(it.id===pid){const f=(it.fens||[])[+j];if(!f)return;
+      return playItem({id:pid+"-"+j,fen:f.fen,side:f.side,goal:f.verdict==="win"?"win":"draw",title:pid+" · "+it.title,how:[f.text||it.text,f.proof].filter(Boolean),mateOnly:false},{name:"Blueprint"},"book")}
+  }
+  function lookOpen(x,title){
+    try{openSheet({title:title,cls:"lc108-sheet",html:'<div class="lc108-po"><div class="lc108-bd" data-lc108-look></div><div class="lc108-msg">'+H(x.text||"")+'</div><p class="small muted">'+H(x.source||"")+"</p></div>",
+      onMount:api=>{const el=Q("[data-lc108-look]",api&&api.el||api);if(!el)return;const b=Board(el,{});try{b.orientation("white")}catch(e){}b.setPosition(x.fen,{animate:false});b.setInteractive(null)}})}catch(e){console.error("lc108",e)}
+  }
+  /* ---------------- find the move (a rule example): the solution line, another move judged by Stockfish ---------------- */
+  function findOpen(x,title,rule){
+    if(PO){PO.tok++;PO=null}
+    FR={x:x,title:title,rule:rule,g:new Chess(x.fen),i:1,side:x.side,over:false,busy:false,tok:0,tries:0,board:null};
+    try{openSheet({title:title,cls:"lc108-sheet",html:'<div class="lc108-po" data-lc108-fr><div class="lc108-msg"><b>'+H(x.side==="w"?"White":"Black")+' to move after their last move.</b> Find the move. '+H(String(rule&&rule.title||"").replace(/\*/g,""))+'.</div><div class="lc108-bd" data-lc108-bd></div><div data-lc108-fb></div>'+
+      '<div class="btn-row" style="display:flex;flex-wrap:wrap;gap:6px"><button type="button" class="btn btn-quiet btn-sm" data-lc108-fr="show">'+ic("lightbulb")+'Show the move</button><button type="button" class="btn btn-quiet btn-sm" data-lc108-fr="again">'+ic("rotate")+"Again</button></div></div>",
+      onMount:mountFR,onClose:()=>{if(FR)FR.tok++;FR=null}})}catch(e){console.error("lc108",e)}
+  }
+  function mountFR(api){
+    const root=api&&api.el||api,host=Q("[data-lc108-bd]",root);if(!host||!FR)return;
+    FR.root=root;FR.board=Board(host,{});try{FR.board.orientation(FR.side==="w"?"white":"black")}catch(e){}
+    FR.board.setOnMove(frMove);frStart();
+  }
+  function frFb(kind,h){const el=FR&&FR.root&&Q("[data-lc108-fb]",FR.root);if(el)el.innerHTML=h?'<div class="lc108-msg'+(kind?" is-"+kind:"")+'">'+h+"</div>":""}
+  async function frStart(){
+    if(!FR)return;const tok=++FR.tok;FR.g=new Chess(FR.x.fen);FR.i=1;FR.over=false;FR.board.setArrows([]);frFb("","");
+    FR.board.setPosition(FR.g.fen(),{animate:false});FR.board.setInteractive(null);
+    await sleep(500);if(!FR||tok!==FR.tok)return;
+    const u=FR.x.solution[0],mv=FR.g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||undefined});
+    if(mv)FR.board.setPosition(FR.g.fen(),{animate:true,lastMove:{from:mv.from,to:mv.to}});
+    FR.board.setInteractive(FR.side);
+  }
+  async function frMove(m){
+    if(!FR||FR.over||FR.busy){if(FR)FR.board.setPosition(FR.g.fen(),{animate:false});return}
+    const want=FR.x.solution[FR.i]||"",before=FR.g.fen();
+    const mv=FR.g.move({from:m.from,to:m.to,promotion:m.promotion||(want[4]||"q")});
+    if(!mv){FR.board.setPosition(FR.g.fen(),{animate:false});return}
+    const u=mv.from+mv.to+(mv.promotion||"");
+    FR.board.setPosition(FR.g.fen(),{animate:false,lastMove:{from:mv.from,to:mv.to}});
+    if(u===want){
+      FR.i++;
+      if(FR.i>=FR.x.solution.length)return frDone(true,"");
+      FR.busy=true;FR.board.setInteractive(null);const tok=FR.tok;await sleep(450);if(!FR||tok!==FR.tok)return;
+      const r=FR.x.solution[FR.i],rm=FR.g.move({from:r.slice(0,2),to:r.slice(2,4),promotion:r[4]||undefined});FR.i++;FR.busy=false;
+      if(rm)FR.board.setPosition(FR.g.fen(),{animate:true,lastMove:{from:rm.from,to:rm.to}});
+      if(FR.i>=FR.x.solution.length)return frDone(true,"");
+      frFb("","Good. Keep going.");FR.board.setInteractive(FR.side);return;
+    }
+    /* another move: Stockfish decides */
+    FR.busy=true;FR.board.setInteractive(null);frFb("","Checking your move with Stockfish…");const tok=FR.tok;
+    let ok=false,lossTxt="";
+    try{const a=await ask(before,{movetime:500}),b=await ask(FR.g.fen(),{movetime:500});
+      const best=forMe(a.lines&&a.lines[0],FR.side),mine=forMe(b.lines&&b.lines[0],FR.side),loss=best-mine;
+      ok=loss<=35&&!(best>=9000&&mine<9000);lossTxt=Math.abs(loss)>=9000?"it misses the mate":"it gives away "+(loss/100).toFixed(1)}catch(e){lossTxt="Stockfish did not answer"}
+    if(!FR||tok!==FR.tok)return;FR.busy=false;
+    if(ok)return frDone(true,"Also good: Stockfish rates "+mv.san+" as strong as the move of the line.");
+    FR.tries++;FR.g.undo();FR.board.setPosition(FR.g.fen(),{animate:false});FR.board.setInteractive(FR.side);
+    frFb("bad","Not this one: "+H(mv.san)+" ("+H(lossTxt)+"). Look again: what does the rule ask for here?");
+  }
+  function frDone(ok,extra){
+    if(!FR)return;FR.over=true;FR.board.setInteractive(null);
+    const x=FR.x;let line="";try{line=san(x.fen,x.solution)}catch(e){}
+    frFb(ok?"ok":"","<b>"+(ok?(FR.tries?"Solved.":"Solved, first try."):"The move.")+"</b> "+H(extra?extra+" ":"")+H(x.reason||"")+(line?'<br><span class="small">The line: '+H(line)+"</span>":"")+'<br><span class="small muted">'+H(x.source||"")+"</span>");
+    if(ok){markDone(x.id);try{App.score("endgame",true)}catch(e){}try{V6.addXp("endgame",FR.tries?10:20,{noBench:true})}catch(e){}}
+  }
+  function frShow(){
+    if(!FR||FR.over)return;const u=FR.x.solution[FR.i];if(!u)return;
+    FR.board.setArrows([{from:u.slice(0,2),to:u.slice(2,4),kind:"best"}]);FR.tries++;
   }
   function typeHTML(t){
     const d=done(),P=pro();
@@ -104,9 +226,12 @@ const LC108=(()=>{
   function playOpen(id,kind){
     const f=findItem(id);if(!f)return;
     if(f.kind==="play"&&!pro()&&f.t.play.indexOf(f.it)>=FREE_PLAY){try{LC90.open({from:"lab"})}catch(e){location.hash="#upgrades"}return}
-    const it=f.it;
-    PO={id:id,it:it,t:f.t,kind:f.kind,g:new Chess(it.fen),side:it.side,busy:false,over:false,bad:0,myMoves:0,ev:null,hints:0,tok:0,board:null};
-    try{openSheet({title:(it.title||((it.goal==="win"?"Win: ":"Hold: ")+f.t.name)),cls:"lc108-sheet",html:poHTML(),onMount:mountPO,onClose:()=>{if(PO)PO.tok++;PO=null}})}catch(e){console.error("lc108",e)}
+    playItem(f.it,f.t,f.kind);
+  }
+  function playItem(it,t,kind){
+    if(FR){FR.tok++;FR=null}
+    PO={id:it.id,it:it,t:t,kind:kind,g:new Chess(it.fen),side:it.side,busy:false,over:false,bad:0,myMoves:0,ev:null,hints:0,tok:0,board:null};
+    try{openSheet({title:(it.title||((it.goal==="win"?"Win: ":"Hold: ")+t.name)),cls:"lc108-sheet",html:poHTML(),onMount:mountPO,onClose:()=>{if(PO)PO.tok++;PO=null}})}catch(e){console.error("lc108",e)}
   }
   function poHTML(){
     const it=PO.it;
@@ -115,7 +240,7 @@ const LC108=(()=>{
       ((it.how||[]).length?'<details><summary class="small">How to do it</summary><ol class="small">'+it.how.map(x=>"<li>"+H(x)+"</li>").join("")+"</ol></details>":"")+
       '<div class="lc108-bd" data-lc108-bd></div><div class="lc108-st small" data-lc108-st></div><div data-lc108-fb></div>'+
       '<div class="btn-row" style="display:flex;flex-wrap:wrap;gap:6px"><button type="button" class="btn btn-quiet btn-sm" data-lc108-po="hint">'+ic("lightbulb")+'Hint</button><button type="button" class="btn btn-quiet btn-sm" data-lc108-po="restart">'+ic("rotate")+"Restart</button>"+
-      (PO.kind==="play"?'<button type="button" class="btn btn-quiet btn-sm" data-lc108-po="mine">How I played it</button>':"")+"</div></div>";
+      ((PO.it.played||[]).length?'<button type="button" class="btn btn-quiet btn-sm" data-lc108-po="mine">How I played it</button>':"")+"</div></div>";
   }
   function mountPO(api){
     const root=api&&api.el||api;const host=Q("[data-lc108-bd]",root);if(!host||!PO)return;
@@ -159,7 +284,7 @@ const LC108=(()=>{
   }
   function finish(ok,text){
     if(!PO)return;PO.over=true;PO.busy=false;PO.board.setInteractive(null);status();
-    fb(ok?"ok":"bad","<b>"+(ok?"Done.":"Not this time.")+"</b> "+H(text)+(PO.kind==="play"?' <button type="button" class="btn btn-quiet btn-sm" data-lc108-po="mine">How I played it</button>':"")+' <button type="button" class="btn btn-primary btn-sm" data-lc108-po="restart">'+(ok?"Again":"Try again")+"</button>");
+    fb(ok?"ok":"bad","<b>"+(ok?"Done.":"Not this time.")+"</b> "+H(text)+((PO.it.played||[]).length?' <button type="button" class="btn btn-quiet btn-sm" data-lc108-po="mine">How I played it</button>':"")+' <button type="button" class="btn btn-primary btn-sm" data-lc108-po="restart">'+(ok?"Again":"Try again")+"</button>");
     if(ok){markDone(PO.id);try{App.score("endgame",true)}catch(e){}try{V6.addXp("endgame",PO.kind==="theory"?20:30,{noBench:true})}catch(e){}
       try{Telemetry.log("lc108_done",{id:PO.id,goal:PO.it.goal,hints:PO.hints})}catch(e){}}
   }
@@ -197,7 +322,7 @@ const LC108=(()=>{
     if(u){PO.board.setArrows([{from:u.slice(0,2),to:u.slice(2,4),kind:"best"}]);fb("","Stockfish’s move: <b>"+H(san(PO.g.fen(),[u]).replace(/^\d+\.+/,""))+"</b>.")}
   }
   function mine(){
-    if(!PO||PO.kind!=="play")return;const it=PO.it;PO.tok++;PO.over=true;PO.busy=false;PO.board.setInteractive(null);
+    if(!PO||!(PO.it.played||[]).length)return;const it=PO.it;PO.tok++;PO.over=true;PO.busy=false;PO.board.setInteractive(null);
     const line=san(it.fen,it.played||[]);
     fb("","<b>How I played it.</b> "+H(resTxt(it.result)?resTxt(it.result)+".":"")+" "+(line?"My game went on: "+H(line)+".":"")+' <button type="button" class="btn btn-quiet btn-sm" data-lc108-po="replay">Replay on the board</button> <button type="button" class="btn btn-primary btn-sm" data-lc108-po="restart">Play it yourself</button>');
   }
@@ -207,8 +332,8 @@ const LC108=(()=>{
   }
   /* ---------------- the cards on Theory > Endgame / Middlegame ---------------- */
   function cardHTML(kind){
-    if(kind==="eg")return'<div class="panel lc108-hero" style="padding:12px 14px;border:1px solid #38bdf8"><p style="margin:0;font-weight:800">'+ic("chess-pawn")+'Endgame Lab: train by endgame type</p>'+
-      '<p class="small muted" style="margin:0">Rook endings, king and pawn, knight against bishop, opposite bishops, queen endings. The rules, the positions to know by heart (Lucena, Philidor, opposition, the square…) and my own endgames to play out against Stockfish: win it or hold the draw.</p>'+
+    if(kind==="eg")return'<div class="panel lc108-hero" style="padding:12px 14px;border:1px solid #38bdf8"><p style="margin:0;font-weight:800">'+ic("chess-pawn")+'Endgame Lab: the Blueprint with examples</p>'+
+      '<p class="small muted" style="margin:0">Every law, rule and concept of my Endgame Blueprint, from Tier 0 to grandmaster, with positions from my own games and the Lichess database. Or train by type: rook endings, king and pawn, knight against bishop, opposite bishops, queen endings, the positions to know by heart, and my endgames to play out against Stockfish.</p>'+
       '<div><a class="btn btn-primary btn-sm" href="#eg-lab">'+ic("play")+"Open the Endgame Lab</a></div></div>";
     return'<div class="panel lc108-hero" style="padding:12px 14px;border:1px solid #38bdf8"><p style="margin:0;font-weight:800">'+ic("chess-knight")+'Middlegame Lab: plans and sacrifices</p>'+
       '<p class="small muted" style="margin:0">The Greek Gift, the exchange sacrifice, the knight on d5 / f5, and the plan for every pawn structure, trained on the moments of my own games where it was the only good move.</p>'+
@@ -226,11 +351,19 @@ const LC108=(()=>{
   }
   /* ---------------- routes ---------------- */
   function paint(){const v=Q("#view");if(!v)return;if(cur==="eg-lab")v.innerHTML=egHTML();else if(cur==="mg-lab")v.innerHTML=mgHTML()}
-  function mountEG(view){css();cur="eg-lab";view.innerHTML=egHTML();loadEG().then(()=>{if(cur==="eg-lab"&&Q("#view")===view)paint()});return()=>{}}
+  function mountEG(view){css();cur="eg-lab";S.view=store.get("lc108-view","book");
+    try{const f=JSON.parse(sessionStorage.getItem("lc108-open")||"null");if(f){sessionStorage.removeItem("lc108-open");if(f.view)S.view=f.view;if(f.part)S.part=f.part;if(f.type)S.type=f.type;S.focus=f.rule||""}}catch(e){}
+    view.innerHTML=egHTML();Promise.all([loadEG(),loadBook()]).then(()=>{if(cur==="eg-lab"&&Q("#view")===view){paint();if(S.focus){const el=document.getElementById("lc108-r-"+S.focus);S.focus="";if(el)try{el.scrollIntoView({block:"center"});el.style.outline="2px solid #38bdf8"}catch(e){}}}});return()=>{}}
   function mountMG(view){css();cur="mg-lab";view.innerHTML=mgHTML();loadMG().then(()=>{if(cur==="mg-lab"&&Q("#view")===view)paint()});return()=>{}}
   function onClick(e){
     const t=e.target&&e.target.closest?e.target:null;if(!t)return;
     const ty=t.closest("[data-lc108-type]");if(ty){S.type=ty.getAttribute("data-lc108-type");paint();return}
+    const vw=t.closest("[data-lc108-view]");if(vw){S.view=vw.getAttribute("data-lc108-view");store.set("lc108-view",S.view);paint();return}
+    const pt=t.closest("[data-lc108-part]");if(pt){S.part=pt.getAttribute("data-lc108-part");paint();const v=Q("#view");if(v)try{v.querySelector("[data-lc108-eg]").scrollIntoView({block:"start"})}catch(x){}return}
+    const ex=t.closest("[data-lc108-ex]");if(ex){const a=ex.getAttribute("data-lc108-ex").split("|");openExample(a[0],a[1]);return}
+    const ps=t.closest("[data-lc108-pos]");if(ps){const a=ps.getAttribute("data-lc108-pos").split("|");openPos(a[0],a[1]);return}
+    const tg=t.closest("[data-lc108-trig]");if(tg){const T=trig();T[tg.getAttribute("data-lc108-trig")]=tg.checked?Date.now():0;store.set("lc108-trig",T);return}
+    const fr=t.closest("button[data-lc108-fr]");if(fr){const a=fr.getAttribute("data-lc108-fr");if(a==="again"){FR&&(FR.tries=0);frStart()}else if(a==="show")frShow();return}
     const pl=t.closest("[data-lc108-play]");if(pl){playOpen(pl.getAttribute("data-lc108-play"),pl.getAttribute("data-lc108-kind"));return}
     const po=t.closest("[data-lc108-po]");if(po&&po.tagName==="BUTTON"){const a=po.getAttribute("data-lc108-po");if(a==="restart")restart();else if(a==="hint")hint();else if(a==="mine")mine();else if(a==="replay")replay();return}
     const ls=t.closest("[data-lc108-lesson],[data-lc108-mglesson]");
@@ -242,9 +375,22 @@ const LC108=(()=>{
       openMoments(s[w]||[],s.name+(w==="missed"?": where I missed it":w==="found"?": find it":": find the plan move"));return}
   }
   function onToggle(e){const d=e.target;if(d&&d.matches&&d.matches("[data-lc108-det]")&&d.open)S.open=d.getAttribute("data-lc108-det")}
+  /* the MSPC Plan Check (V9.PlanLab: choose the specifics, then the plan) lives on Ranked since 9.77.0; the middlegame course is Learn + Drill */
+  let planLab=null;
+  function paintPlan(){
+    const view=Q("#view");if(!view||Q("[data-lc108-plan]",view))return;
+    try{if(typeof V9==="undefined"||!V9.planCheckCard)return}catch(e){return}
+    const box=document.createElement("div");box.setAttribute("data-lc108-plan","");
+    box.innerHTML='<section class="section"><div class="section-head"><div><h2>'+ic("magic-sparkles")+'MSPC Plan Check</h2><p class="small muted" style="margin:0">Name the specifics of the position, then the plan. One check a day for free.</p></div></div></section>'+V9.planCheckCard();
+    const first=view.querySelector(":scope > section");
+    if(first&&first.nextSibling)view.insertBefore(box,first.nextSibling);else view.appendChild(box);
+    try{planLab=V9.planCheckMount(box)}catch(e){console.error("lc108 plan",e)}
+  }
   function afterRender(route){
     cur=String(route||"");
+    if(planLab&&cur!=="ranked"){try{planLab.destroy()}catch(e){}planLab=null}
     if(cur==="middlegame"||cur==="endgame"){css();paintCard(cur)}
+    if(cur==="ranked")setTimeout(paintPlan,300);
   }
   function init(){
     try{
@@ -254,6 +400,6 @@ const LC108=(()=>{
       let t=0;new MutationObserver(()=>{if(t||(cur!=="middlegame"&&cur!=="endgame"))return;t=setTimeout(()=>{t=0;paintCard(cur)},400)}).observe(document.body,{childList:true,subtree:true});
     }catch(e){console.error("lc108",e)}
   }
-  return{init:init,afterRender:afterRender,mountEG:mountEG,mountMG:mountMG,loadEG:loadEG,loadMG:loadMG,version:VERSION,
-    _t:{egHTML:egHTML,mgHTML:mgHTML,playOpen:playOpen,judgeEnd:()=>PO&&judgeEnd(),judgeEval:()=>PO&&judgeEval(),po:()=>PO,state:S,forMe:forMe,move:m=>onMove(m)}};
+  return{init:init,afterRender:afterRender,mountEG:mountEG,mountMG:mountMG,loadEG:loadEG,loadMG:loadMG,loadBook:loadBook,version:VERSION,
+    _t:{egHTML:egHTML,mgHTML:mgHTML,playOpen:playOpen,judgeEnd:()=>PO&&judgeEnd(),judgeEval:()=>PO&&judgeEval(),po:()=>PO,fr:()=>FR,state:S,forMe:forMe,move:m=>onMove(m),frMove:m=>frMove(m),openExample:openExample,openPos:openPos,bookRule:bookRule}};
 })(); /*@@end lc108*/

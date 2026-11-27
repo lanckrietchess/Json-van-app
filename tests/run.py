@@ -777,6 +777,15 @@ EXPECT['lc105'] = [
   r"instructive mistake \[status, one moment, under 60 s\]: \['An instructive mistake from my game \(.*\)', 1, True\]",
   r"ERRORS 0"]
 EXPECT['lc108'] = [
+  r"blueprint \[default view, tier tabs, Tier 0 mission, rules with tags, examples\]: \['book', True, True, True, True\]",
+  r"Tier 1 \[R1\.16 shown, Lucena P1\.4 playable, triggers\]: \[True, True, 4\]",
+  r"find the move \[sheet, board, their move played, your turn\]: \[True, True, 1, True\]",
+  r"find the move, solved \[over, solved text, the reason, the source\]: \[True, True, True, True\]",
+  r"Lucena from the book \[play-out, goal win\]: \[True, 'win', 'w'\]",
+  r"upgrade trigger \[saved\]: True",
+  r"free player, Tier 2 example \[locked, LC90 opens\]: \[True, 'blueprint'\]",
+  r"middlegame course \[no Plan Check\]: \[True, True\]",
+  r"Ranked \[Plan Check there, its board\]: \[True, True\]",
   r"endgame lab \[title, types, rook first, checklist, lessons, positions to know, my endgames, key moments\]: \['Endgame Lab.*', True, 'Rook endings', True, True, 3, True, True\]",
   r"rook: Lucena and Philidor, goals: \['Lucena: build the bridge / Win it', 'Philidor: the third-rank defence / Hold the draw', 'Rook against pawn: cut the king off / Win it'\]",
   r"phone \[overflow-x\]: 0",
@@ -793,7 +802,7 @@ EXPECT['lc108'] = [
   r"Greek Gift \[LC95 gets my positions\]: \[True, 'The Greek Gift \(Bxh7\+ / \.\.\.Bxh2\+\): find it', '#think'\]",
   r"plans \[structures, IQP there\]: \[True, True\]",
   r"mg phone \[overflow-x\]: 0",
-  r"courses \[no Lichess drills, every theme id exists, drills from his games\]: \[False, True, True, True\]",
+  r"courses \[no old Lichess drills, every theme id exists, every lesson step exists, 200\+ rule examples, each with rule, reason, brief, explanation\]: \[False, True, True, True, True\]",
   r"LC108 \[embedded copy equals lc108\.js, init, afterRender, routes, build\]: \[True, True, True, True, '9\.77\.0'\]",
   r"ERRORS 0"]
 ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community', 'touch', 'lc56', 'lc57', 'lc58', 'lc59', 'lc59land', 'lc60', 'lc85', 'lc86', 'lc87', 'lc88', 'lc89', 'lc90', 'lc94', 'lc95', 'lc96', 'lc97', 'lc98', 'lc99', 'lc100', 'lc101', 'lc102', 'lc103', 'lc104', 'lc105', 'lc106', 'lc107', 'lc108', 'hub', 'trim', 'studio954', 'studio955', 'coach956', 'course957', 'release']

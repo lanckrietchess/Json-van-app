@@ -1,4 +1,6 @@
-# lc108 (9.77.0): the Endgame Lab (#eg-lab) and the Middlegame Lab (#mg-lab), the cards on Theory > Endgame / Middlegame, the
+# lc108 (9.77.0): the Endgame Lab (#eg-lab: the Blueprint view with every rule and its examples, the find-the-move runner,
+# the must-know positions, the upgrade triggers; and the view by endgame type) and the Middlegame Lab (#mg-lab), the Plan Check on
+# Ranked (not in the middlegame course any more), the lesson steps (every ref exists), the cards on Theory > Endgame / Middlegame, the
 # play-out against the real Stockfish (the rule of the square, played to the draw), the end rules (stalemate when you must win),
 # the Pro gate on my endgames, the LC95 hand-over of the key moments, and the courses without Lichess drills.
 # Real Chromium, signed in as the owner, the real data/eg-lab.json and data/mg-lab.json.
@@ -17,6 +19,29 @@ def boot(br, tag, hash, w=390, h=844):
 with sync_playwright() as p:
     br = p.chromium.launch()
     c, pg = boot(br, 'eg', '#eg-lab')
+    pg.wait_for_timeout(1200)
+    out('blueprint [default view, tier tabs, Tier 0 mission, rules with tags, examples]', pg.evaluate("""(() => { const r = document.querySelector('[data-lc108-eg]');
+      return [LC108._t.state.view, r.querySelectorAll('[data-lc108-part]').length >= 7, /know what wins, what draws/.test(r.textContent), r.querySelectorAll('.lc108-chip').length > 10, r.querySelectorAll('[data-lc108-ex]').length > 5]; })()"""))
+    pg.click('[data-lc108-part="T1"]'); pg.wait_for_timeout(400)
+    out('Tier 1 [R1.16 shown, Lucena P1.4 playable, triggers]', pg.evaluate("""(() => { const r = document.querySelector('[data-lc108-eg]');
+      return [!!document.getElementById('lc108-r-R1.16'), !!r.querySelector('[data-lc108-pos^="P1.4|"]'), r.querySelectorAll('[data-lc108-trig]').length]; })()"""))
+    ex = pg.evaluate("""(() => { const b = [...document.querySelectorAll('[data-lc108-ex]')].find(x => /Find the move/.test(x.textContent)); return b ? b.getAttribute('data-lc108-ex') : null; })()""")
+    pg.evaluate("k => document.querySelector('[data-lc108-ex=\"' + k + '\"]').click()", ex); pg.wait_for_timeout(1600)
+    out('find the move [sheet, board, their move played, your turn]', pg.evaluate("(() => { const F = LC108._t.fr(); return [!!document.querySelector('[data-lc108-fr]'), !!document.querySelector('[data-lc108-fr] [data-lc108-bd] *'), F.i, F.g.turn() === F.side]; })()"))
+    for i in range(8):
+        st = pg.evaluate("(() => { const F = LC108._t.fr(); if (!F || F.over) return 'over'; if (F.busy || F.g.turn() !== F.side) return 'wait'; const u = F.x.solution[F.i]; return u; })()")
+        if st == 'over': break
+        if st == 'wait': pg.wait_for_timeout(500); continue
+        pg.evaluate("u => LC108._t.frMove({from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4]})", st); pg.wait_for_timeout(700)
+    out('find the move, solved [over, solved text, the reason, the source]', pg.evaluate("""(() => { const F = LC108._t.fr(); const f = document.querySelector('[data-lc108-fr] [data-lc108-fb]').textContent;
+      return [F.over, /Solved/.test(f), f.indexOf(F.x.reason.slice(0, 20)) >= 0, /my game|Lichess database/i.test(f)]; })()"""))
+    pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())"); pg.wait_for_timeout(400)
+    pg.click('[data-lc108-pos^="P1.4|"]'); pg.wait_for_timeout(1500)
+    out('Lucena from the book [play-out, goal win]', pg.evaluate("(() => { const P = LC108._t.po(); return [!!P, P && P.it.goal, P && P.side]; })()"))
+    pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())"); pg.wait_for_timeout(400)
+    pg.click('[data-lc108-trig="T1-0"]'); pg.wait_for_timeout(200)
+    out('upgrade trigger [saved]', pg.evaluate("!!JSON.parse(localStorage.getItem('lc108-trig') || '{}')['T1-0']"))
+    pg.click('[data-lc108-view="types"]'); pg.wait_for_timeout(500)
     out('endgame lab [title, types, rook first, checklist, lessons, positions to know, my endgames, key moments]', pg.evaluate("""(() => { const r = document.querySelector('[data-lc108-eg]');
       return [r.querySelector('h1').textContent.trim(), r.querySelectorAll('[data-lc108-type]').length >= 8, r.querySelector('.lc108-type.is-on b').textContent,
         r.querySelectorAll('ol li').length >= 4, r.querySelectorAll('details').length >= 2, r.querySelectorAll('[data-lc108-kind=theory]').length, r.querySelectorAll('[data-lc108-kind=play]').length >= 10, !!r.querySelector('[data-lc108-mom]')]; })()"""))
@@ -56,6 +81,11 @@ with sync_playwright() as p:
     pg.evaluate(SPY)
     pg.click('[data-lc108-mom="rook"]'); pg.wait_for_timeout(1500)
     out('key moments [LC95 gets the ids and the label, opens the trainer]', pg.evaluate("[window.__lc95.ids.length > 10, window.__lc95.label, location.hash]"))
+    pg.evaluate("location.hash = '#eg-lab'"); pg.wait_for_timeout(1500)
+    pg.click('[data-lc108-view="book"]'); pg.wait_for_timeout(300); pg.click('[data-lc108-part="T2"]'); pg.wait_for_timeout(300)
+    out('free player, Tier 2 example [locked, LC90 opens]', pg.evaluate("""(() => { window.__lc90 = []; const b = document.querySelector('[data-lc108-ex]'); if (!b) return ['none']; const lock = !!b.querySelector('svg, i, .icon') || /btn-quiet/.test(b.className); b.click();
+      return [lock, window.__lc90.length ? window.__lc90[0].from : null]; })()"""))
+    pg.evaluate("document.querySelectorAll('.sheet-wrap [data-close]').forEach(b => b.click())"); pg.wait_for_timeout(300)
     pg.evaluate("location.hash = '#endgame'"); pg.wait_for_timeout(2400)
     out('endgame card [shown, link]', pg.evaluate("(() => { const c = document.querySelector('[data-lc108-card]'); return c ? [true, c.querySelector('a').getAttribute('href')] : [false]; })()"))
     pg.evaluate("location.hash = '#middlegame'"); pg.wait_for_timeout(2400)
@@ -71,9 +101,15 @@ with sync_playwright() as p:
     pg.click('[data-lc108-mgtab="plans"]'); pg.wait_for_timeout(300)
     out('plans [structures, IQP there]', pg.evaluate("[document.querySelectorAll('[data-lc108-det]').length >= 8, !!document.querySelector('[data-lc108-det=\"iqp-mine\"]')]"))
     out('mg phone [overflow-x]', pg.evaluate(OVER))
-    out('courses [no Lichess drills, every theme id exists, drills from his games]', pg.evaluate("""fetch('content.json').then(r => r.json()).then(d => { const L = d.lists; const ids = new Set([...L.endgame, ...L.middlegame].map(x => x.id));
+    pg.evaluate("location.hash = '#middlegame'"); pg.wait_for_timeout(2600)
+    out('middlegame course [no Plan Check]', pg.evaluate("[!document.querySelector('#v9-plan-host'), !/PLAN CHECK/i.test(document.querySelector('#view').innerText)]"))
+    pg.evaluate("location.hash = '#ranked'"); pg.wait_for_timeout(3000)
+    out('Ranked [Plan Check there, its board]', pg.evaluate("[!!document.querySelector('[data-lc108-plan] #v9-plan-host'), !!document.querySelector('[data-lc108-plan] #v9-plan-host *')]"))
+    out('courses [no old Lichess drills, every theme id exists, every lesson step exists, 200+ rule examples, each with rule, reason, brief, explanation]', pg.evaluate("""fetch('content.json').then(r => r.json()).then(d => { const L = d.lists; const ids = new Set([...L.endgame, ...L.middlegame].map(x => x.id));
       const th = [...L.egthemes, ...L.mgthemes].flatMap(t => [t.anchorId, ...(t.simpleIds || []), ...(t.hardIds || [])]).filter(Boolean);
-      return [[...ids].some(i => /^(lc|mg-lc)-/.test(i)), th.every(i => ids.has(i)), L.endgame.filter(x => /^kg-/.test(x.id)).length > 200, L.middlegame.filter(x => /^mg-kg-/.test(x.id)).length > 200]; })"""))
+      const st = [...L['courses.endgame'], ...L['courses.middlegame']].flatMap(l => (l.steps || []).map(s => s.ref)).filter(Boolean);
+      const ex = [...L.endgame, ...L.middlegame].filter(x => /^(kg|mg-kg|ldb|mg-ldb)-/.test(x.id));
+      return [[...ids].some(i => /^(lc|mg-lc)-/.test(i)), th.every(i => ids.has(i)), st.length > 150 && st.every(i => ids.has(i)), ex.length > 200, ex.every(x => x.rule && x.reason && x.brief && x.explanation)]; })"""))
     out('LC108 [embedded copy equals lc108.js, init, afterRender, routes, build]', pg.evaluate("""(async () => {
       const src = await (await fetch('lc108.js')).text(), html = await (await fetch('app.html')).text();
       const a = html.indexOf('/*@@module lc108*/'), b = html.indexOf('/*@@end lc108*/') + 15;
