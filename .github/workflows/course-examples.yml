@@ -1,0 +1,39 @@
+# Course examples (9.77.0): the Lichess database part of the course examples (tools/lichess_examples.py). Reads the official
+# Lichess puzzle database (real positions of rated Lichess games), runs the same rule tests as Kyenzo's own games
+# (tools/course_examples.py), checks the candidates with Stockfish and commits tools/lichess_examples.json to the same branch.
+# Then `python3 tools/course_examples.py build --games <master-data> --write` puts them into the courses. No secret needed.
+name: Course examples (Lichess)
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore: [main, master-data]
+    paths: [tools/lichess_examples.py, .github/workflows/course-examples.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: course-examples-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install -q python-chess zstandard
+      - run: sudo apt-get update -q && sudo apt-get install -y -q stockfish
+      - name: Scan the Lichess database and check with Stockfish
+        run: timeout 320m python3 tools/lichess_examples.py --minutes 170 --threads 4 || true
+      - name: Commit the file to this branch
+        run: |
+          git config user.name "course-examples[bot]"
+          git config user.email "course-examples@users.noreply.github.com"
+          git add tools/lichess_examples.json
+          git diff --cached --quiet && { echo "nothing new"; exit 0; }
+          git commit -m "Course examples: Lichess database"
+          for i in 1 2 3; do git pull --rebase -q origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && break; sleep 10; done

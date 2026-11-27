@@ -5,7 +5,8 @@
 //   node tools/course_truth.mjs content.json tools/course_engine.json --write    # writes content.json + tools/course_audit.md
 //
 // course_engine.json comes from `python3 tools/course_engine.py` (Stockfish 19 in Chromium, depth 16, see that file).
-// What changes, per drill (lists.endgame "lc-*", lists.middlegame "mg-lc-*"): title, brief, description, principle, ann (notes on
+// What changes, per drill (lists.endgame "kg-*", lists.middlegame "mg-kg-*": since 9.77.0 positions of Kyenzo's own games, from
+// tools/course_rework.py, which also writes their engine entries; before that the Lichess "lc-*" / "mg-lc-*" drills): title, brief, description, principle, ann (notes on
 // your moves), explanation, ms_pc_breakdown (M, S, P, C), alarm_signal, coaching_tip, elo_insight.foundation / .advanced.
 // What never changes: the position, the solution, the source, the chapter. The Endgame Blueprint drills ("bp-*") and the MSPC
 // trainer cases (lists.think) are hand-written: they are only AUDITED (every move and "piece on square" checked), never rewritten.
@@ -257,7 +258,7 @@ export function run(content, engine, opts) {
     const e = engine[d.id]; if (!e || e.err) { report.audit.push({id: d.id, msg: 'no engine data'}); continue; }
     const best = e.lines[0].pv && e.lines[0].pv[0];
     if (best && best !== e.ours[0]) report.solutions.push({id: d.id, ours: san(e.P0, e.ours[0]), engine: san(e.P0, best), ev: e.lines[0], after: {cp: e.after.cp, mate: e.after.mate}});
-    if (!/^(lc|mg-lc)-/.test(d.id)) {
+    if (!/^(lc|mg-lc|kg|mg-kg)-/.test(d.id)) {
       const bad = claimsCheck(textsOf(d), fensOf(d.puzzle_fen || d.fen, d.solution_moves || []), [], 2);
       if (bad.length) report.audit.push({id: d.id, msg: 'hand-written text names ' + bad.join(', ') + ', not on the board'});
       continue;
