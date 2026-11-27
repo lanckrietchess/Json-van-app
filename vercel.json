@@ -54,6 +54,10 @@
     {
       "source": "/l/:code",
       "destination": "/l.html"
+    },
+    {
+      "source": "/l/:code/:rest*",
+      "destination": "/l.html"
     }
   ]
 }

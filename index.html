@@ -129,15 +129,15 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A 2100+ ELO personal chess coach in your pocket">
 <meta property="og:description" content="MSPC and Triple-T: the methods behind a 2105 peak in 2 years and 10 months. Scan your last 10 games and see what to fix first.">
-<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.78.0">
+<meta property="og:image" content="https://lanckrietchesstrainerhub.vercel.app/icons/icon-512.png?v=9.79.0">
 <meta property="og:url" content="https://lanckrietchesstrainerhub.vercel.app/">
 <link rel="canonical" href="https://lanckrietchesstrainerhub.vercel.app/">
 <meta name="twitter:card" content="summary">
 <meta name="robots" content="index,follow">
-<link rel="icon" href="/icons/icon-192.png?v=9.78.0" sizes="192x192">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.78.0">
+<link rel="icon" href="/icons/icon-192.png?v=9.79.0" sizes="192x192">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png?v=9.79.0">
 <!-- 9.33.0: the app's manifest, so Chrome, Edge and Samsung Internet can offer their own one-click install prompt on this page (start_url and scope: /app.html) -->
-<link rel="manifest" href="/manifest.webmanifest?v=9.78.0">
+<link rel="manifest" href="/manifest.webmanifest?v=9.79.0">
 <!-- the three public connections of this page: the Stripe function, and the Supabase project (the URL and anon key are public: the app has them too) -->
 <meta name="lc-api" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/stripe">
 <meta name="lc-arena" content="https://wllljllajadiwjdsageu.supabase.co/functions/v1/arena">
@@ -624,7 +624,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
     <!-- 9.65.0: the EU withdrawal function (CRD art. 11a), outside the CMS so it can never be hidden -->
     <p class="lc-withdraw"><a href="/app.html#withdraw">Withdraw from contract here</a> <span class="mute">(within 14 days of a purchase)</span></p>
   </div>
-<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.78.0</p></footer>
+<p class="small mute" style="text-align:center;margin:.6rem 0 0">Site build 9.79.0</p></footer>
 <button type="button" class="lc72-edit" id="lc89-edit" hidden>✎ Edit this page</button>
 <script>
 /*@@module lc89*/
@@ -1234,7 +1234,7 @@ h1.mission{font-size:clamp(1.85rem,5.4vw,3.1rem);line-height:1.12}
   syncLabels();
 
   /* the same service worker as the app (same address, so one registration): Chrome's install prompt wants one on the page */
-  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.78.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
+  try{if("serviceWorker" in navigator&&location.protocol==="https:"&&!/[?&]preview=/.test(location.search))navigator.serviceWorker.register("/sw.js?v=9.79.0",{updateViaCache:"none"}).catch(function(){})}catch(e){}
 
   /* 3. prices and checkout */
   function post0(path,body,hdr){
@@ -1765,8 +1765,9 @@ const LC94=(()=>{
     try{
       const P=new URLSearchParams(search==null?location.search:search),u=String(P.get("u")||"").trim();
       if(!NAME.test(u))return null;
-      const site=/^li/i.test(String(P.get("site")||""))?"lichess":"chesscom";
-      return{u:u,site:site};
+      const site=/^li/i.test(String(P.get("site")||""))?"lichess":"chesscom",e=parseInt(P.get("elo")||"",10);
+      /* 9.79.0: an LC109 short link (ManyChat) may also bring the rating: used when the site's own rating cannot be read */
+      return e>=100&&e<=3500?{u:u,site:site,elo:e}:{u:u,site:site};
     }catch(e){return null}
   }
   /* 9.67.0: the landing's quick start (LC102) keeps the name in localStorage "lc102-handoff". An installed app opens on its own start
@@ -1783,7 +1784,7 @@ const LC94=(()=>{
   function stripDeep(){
     try{
       const url=new URL(location.href);let ch=false;
-      ["u","site","resume"].forEach(k=>{if(url.searchParams.has(k)){url.searchParams.delete(k);ch=true}});
+      ["u","site","resume","elo"].forEach(k=>{if(url.searchParams.has(k)){url.searchParams.delete(k);ch=true}});
       if(ch)history.replaceState(history.state,"",url.pathname+(url.searchParams.toString()?"?"+url.searchParams.toString():"")+url.hash);
     }catch(e){}
   }
@@ -1816,7 +1817,8 @@ const LC94=(()=>{
       attrFromSource();
       try{if(typeof LC50!=="undefined")LC50.pre.start(d.site,d.u)}catch(e){}
       /* 9.59.0: the rating too, like LC30's Connect does (the Learn page's "Active ELO" and the coach's level read it) */
-      try{if(typeof Elo!=="undefined"&&Elo.fetchProfile)Elo.fetchProfile(d.site,d.u).then(pr=>{const r=pr&&(pr.rapid||pr.blitz||pr.bullet);if(r&&typeof App!=="undefined"&&!(App.profile||{}).elo){App.profile=Object.assign({},App.profile,{elo:r});try{App.save()}catch(e){}}}).catch(()=>{})}catch(e){}
+      const setElo=r=>{if(r&&typeof App!=="undefined"&&!(App.profile||{}).elo){App.profile=Object.assign({},App.profile,{elo:r});try{App.save()}catch(e){}}};
+      try{if(typeof Elo!=="undefined"&&Elo.fetchProfile)Elo.fetchProfile(d.site,d.u).then(pr=>{setElo(pr&&(pr.rapid||pr.blitz||pr.bullet)||d.elo)}).catch(()=>setElo(d.elo));else setElo(d.elo)}catch(e){}
       setTimeout(()=>{try{if(typeof LC42!=="undefined"&&LC42.begin(d.site==="lichess"?{li:d.u}:{cc:d.u}))step("name_entered")}catch(e){console.error("lc94 deep",e)}},600);
       return true;
     }catch(e){console.error("lc94 deep",e);return false}
@@ -1854,6 +1856,10 @@ const LC94=(()=>{
     let site="chesscom";
     const label=()=>{if(inp)inp.placeholder=site==="lichess"?"Your Lichess username":"Your Chess.com username";if(sw)sw.textContent=site==="lichess"?"I play on Chess.com":"I play on Lichess"};
     if(sw)sw.addEventListener("click",e=>{e.preventDefault();site=site==="lichess"?"chesscom":"lichess";label();try{inp.focus()}catch(x){}});
+    /* 9.79.0: an LC109 short link set to "landing page" brings the name (?u=&site=): it is filled in, one tap starts the review */
+    try{const d=readDeep();if(d&&inp){inp.value=d.u;site=d.site;f.setAttribute("data-lc109-filled","1");
+      if(msg)msg.textContent="Your "+(site==="lichess"?"Lichess":"Chess.com")+" name is filled in: one tap and I show you your biggest mistake.";
+      const b=f.querySelector("button[type=submit],button:not([type])");if(b)try{b.focus({preventScroll:true})}catch(x){}}}catch(x){}
     f.addEventListener("submit",e=>{
       e.preventDefault();
       let u=String(inp&&inp.value||"").trim().replace(/^@/,"");
