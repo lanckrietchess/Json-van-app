@@ -1,4 +1,4 @@
-# lc100 (9.65.0): the withdrawal function and the consent step before every Payment Link (legal review), Kyenzo's games in Theory /
+# lc100 (9.82.0: the brilliant fixture is a real sacrifice, Bxh7+ from Kyenzo's games; the old Nf3 is no brilliant by the 9.82.0 rule) (9.65.0): the withdrawal function and the consent step before every Payment Link (legal review), Kyenzo's games in Theory /
 # Trim / Ranked, the students' game opt-in, the community auto-join and the giveaway end date.
 # Real Chromium, 390x844 (and 1280x800 for the withdrawal page), Supabase, the Stripe function and the master-data positions file stubbed.
 import json as _json, copy as _copy
@@ -10,8 +10,8 @@ OLD = "localStorage.setItem('lc34-first', JSON.stringify(Date.now() - 20 * 864e5
 PRICING = {'ok': True, 'tier': 2, 'tranche': 1, 'left': [37, 100, 100], 'sold': [63, 0, 0], 'caps': [100, 100, 100], 'yearly': [19950, 29925, 35910, 39900], 'base': 39900, 'monthly': 3900,
            'discountPct': [50, 25, 10], 'vip': {'ok': True, 'tier': 3, 'tranche': 1, 'left': [100, 100, 100], 'yearly': [29950, 44925, 53910, 59900], 'base': 59900, 'monthly': 5900, 'discountPct': [50, 25, 10]}}
 E4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
-PZ = [{'id': 'p1', 'game_id': '111111111', 'kind': 'brilliant', 'fen': 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2', 'side': 'w', 'played': 'g1f3', 'best': 'g1f3',
-       'solution': ['g1f3'], 'line': ['g1f3'], 'prev': 'e7e5', 'prev_fen': E4, 'tier': '1600-1999', 'eco': 'C20', 'phase': 'middlegame', 'tags': [], 'featured': False,
+PZ = [{'id': 'p1', 'game_id': '111111111', 'kind': 'brilliant', 'fen': 'r1bq1rk1/ppppnppp/2n5/4P3/3P4/2PB1N2/P1PB2PP/R2QK2R w KQ - 3 11', 'side': 'w', 'played': 'd3h7', 'best': 'd3h7',
+       'solution': ['d3h7', 'g8h7', 'f3g5'], 'line': ['d3h7', 'g8h7', 'f3g5'], 'reply': ['g8h7', 'f3g5'], 'prev': 'e8g8', 'prev_fen': 'r1bqk2r/ppppnppp/2n5/4P3/3P4/2PB1N2/P1PB2PP/R2QK2R b KQkq - 2 10', 'tier': '1600-1999', 'eco': 'C20', 'phase': 'middlegame', 'tags': [], 'featured': False,
        'my_rating': 1850, 'opp_rating': 1900, 'time_class': 'rapid', 'end_time': '2026-03-01T10:00:00Z', 'opening': 'King’s Pawn', 'result': 'win', 'url': 'https://www.chess.com/game/live/111111111'}]
 GAMES = [{'id': '222222222', 'url': 'https://www.chess.com/game/live/222222222', 'end_time': '2026-04-01T10:00:00Z', 'time_class': 'blitz', 'color': 'w', 'my_rating': 1500, 'opp_rating': 2000,
           'tier': '1200-1599', 'result': 'win', 'termination': 'resigned', 'eco': 'D02', 'opening': 'Colle System', 'plies': 60, 'acc_me': 97.5, 'acc_opp': 80, 'brilliant': 1, 'great': 2, 'blunder': 0, 'mistake': 0, 'gap': 500}]

@@ -9,22 +9,24 @@ const LC92=(()=>{
      - The AI gets a fact sheet: the board, Stockfish's lines and the Coach Brain's diagnosis. It may only phrase and connect
        those facts. Every move, square and "piece on square" in its answer is checked against the board and Stockfish's lines
        (check()); an answer with an invented move is retried once, then dropped, and the standard coach stays on screen.
-     - Answers are cached per position and move (lc92-cache), so opening the same mistake again costs no quota. */
-  const VERSION="9.56.0",KEY="lc92-ai",CACHE="lc92-cache";
+     - Answers are cached per position and move (lc92-cache), so opening the same mistake again costs no quota.
+     9.82.0: bring your own key everywhere. AI.chat (every bot in the app) and Make My Own call complete() here; the Arena no longer
+     answers AI questions. #ai-keys "Power the app with AI" (Account menu) explains the providers, free versus paid and the set-up. */
+  const VERSION="9.82.0",KEY="lc92-ai",CACHE="lc92-cache";
   const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const ls={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
   const PROV={
     gemini:{name:"Google Gemini",tag:"free tier",kind:"gemini",keyUrl:"https://aistudio.google.com/apikey",model:"gemini-flash-latest",pref:[/^gemini-flash-latest$/,/flash(?!.*(image|tts|live|audio))/,/pro/],
       steps:["Open aistudio.google.com/apikey and sign in with a Google account.","Click “Create API key”. No credit card is needed for the free tier.","Copy the key (it starts with AIza) and paste it here."],
-      note:"Free tier: a daily limit per Google project. Google may use free-tier requests to improve its products."},
+      note:"Free within a daily limit per Google project (your limits are shown in AI Studio). In the EU, the UK and Switzerland Google applies its paid-service data terms to the free quota too; elsewhere free-tier requests may be used to improve Google’s products."},
     groq:{name:"Groq",tag:"free tier",kind:"openai",base:"https://api.groq.com/openai/v1",keyUrl:"https://console.groq.com/keys",model:"openai/gpt-oss-120b",pref:[/gpt-oss-120b/,/llama-3\.3-70b/,/70b/,/gpt-oss/],
       steps:["Open console.groq.com/keys and sign in.","Click “Create API Key”. The free plan needs no card.","Copy the key (it starts with gsk_) and paste it here."],
-      note:"Free plan: limits per minute and per day, shown in your Groq console."},
+      note:"Free plan: you are never charged. Over the limit (per minute and per day, shown in your Groq console) it simply stops until the limit resets."},
     openrouter:{name:"OpenRouter",tag:"free models",kind:"openai",base:"https://openrouter.ai/api/v1",keyUrl:"https://openrouter.ai/settings/keys",model:"openrouter/free",pref:[/^openrouter\/free$/,/:free$/],
       steps:["Open openrouter.ai/settings/keys and sign in.","Click “Create Key”.","Copy the key (it starts with sk-or-) and paste it here. Models ending in :free cost nothing."],
-      note:"Free models: about 50 requests a day (1,000 a day after a one-time $10 top-up), and they change over time."},
+      note:"Free models: 20 requests a minute and 50 a day (1,000 a day after a one-time $10 top-up). The free models change over time."},
     anthropic:{name:"Anthropic Claude",tag:"paid",kind:"anthropic",keyUrl:"https://console.anthropic.com/settings/keys",model:"claude-haiku-5-5",pref:[/haiku/,/sonnet/],
-      steps:["Open console.anthropic.com/settings/keys.","Create a key. This one is paid per use: a game review costs a fraction of a cent.","Paste it here."],note:"Paid per use, billed by Anthropic to you."},
+      steps:["Open console.anthropic.com and add a little credit under Billing (set a spend limit there too).","Open Settings > API keys and create a key.","Paste it here and press Test and save. The app picks Claude Haiku: the cheapest, and strong at chess explanations."],note:"Paid per use, billed by Anthropic to you. Claude Haiku 5.5: $0.10 per million input tokens and $0.50 per million output tokens, so one explanation of a mistake costs a small fraction of a cent."},
     openai:{name:"OpenAI",tag:"paid",kind:"openai",base:"https://api.openai.com/v1",keyUrl:"https://platform.openai.com/api-keys",model:"",pref:[/mini/,/gpt/],
       steps:["Open platform.openai.com/api-keys.","Create a key. Paid per use.","Paste it here, then press Test to pick a model."],note:"Paid per use, billed by OpenAI to you."},
     chrome:{name:"Chrome built-in AI",tag:"free, no key",kind:"chrome",keyUrl:"",model:"",pref:[],
@@ -98,16 +100,17 @@ const LC92=(()=>{
       const err=new Error(res.status===429?"Your quota at this provider is used up for now ("+msg+"). The standard coach keeps working.":res.status===401||res.status===403?"The provider refused the key ("+msg+").":"The provider answered "+res.status+": "+msg);err.status=res.status;throw err}
     return body;
   }
-  async function complete(c,sys,user){
-    const P=PROV[c.prov];if(!P)throw new Error("Pick a provider first.");
+  /* o.text: a plain-text answer (the coach chat, the bots, scripts); otherwise Gemini is asked for JSON (the ✨ explanation). o.max: output tokens */
+  async function complete(c,sys,user,o){
+    o=o||{};const P=PROV[c.prov];if(!P)throw new Error("Pick a provider first.");
     if(P.kind==="gemini"){
       const b=await http("https://generativelanguage.googleapis.com/v1beta/models/"+encodeURIComponent(c.model||P.model)+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":c.key},
-        body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:{temperature:0.3,responseMimeType:"application/json",maxOutputTokens:4096}})});
+        body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:user}]}],generationConfig:Object.assign({temperature:0.3,maxOutputTokens:Math.max(4096,o.max||0)},o.text?{}:{responseMimeType:"application/json"})})});
       const parts=b&&b.candidates&&b.candidates[0]&&b.candidates[0].content&&b.candidates[0].content.parts||[];return parts.map(x=>x.text||"").join("");
     }
     if(P.kind==="anthropic"){
       const b=await http("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":c.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:c.model||P.model,max_tokens:1200,system:sys,messages:[{role:"user",content:user}]})});
+        body:JSON.stringify({model:c.model||P.model,max_tokens:o.max||1200,system:sys,messages:[{role:"user",content:user}]})});
       return(b&&b.content||[]).filter(x=>x.type==="text").map(x=>x.text).join("");
     }
     if(P.kind==="openai"){
@@ -201,17 +204,57 @@ const LC92=(()=>{
     const ft=JSON.stringify(F);(ft.match(SAN_RE)||[]).forEach(s=>{W.sans[s.replace(/[+#]/g,"")]=1});(ft.match(SQ_RE)||[]).forEach(s=>{W.sqs[s]=1});
     const sys=SYS.split("\n").slice(0,4).join("\n")+"\nAnswer the student's question about this position in at most 110 words, plain text, no markdown. Use only moves and squares from the facts.";
     let user="FACTS (board + Stockfish, all true):\n"+JSON.stringify(F,null,1)+"\n\nSTUDENT: "+String(q).slice(0,600),txt="",bad=[];
-    for(let t=0;t<2;t++){txt=String(await complete(cfg(),sys,user)||"").trim();bad=check({t:txt},W);if(!bad.length)break;user+="\n\nYou mentioned "+bad.slice(0,6).join(", ")+", which is not in the facts. Answer again using only the facts."}
+    for(let t=0;t<2;t++){txt=String(await complete(cfg(),sys,user,{text:true})||"").trim();bad=check({t:txt},W);if(!bad.length)break;user+="\n\nYou mentioned "+bad.slice(0,6).join(", ")+", which is not in the facts. Answer again using only the facts."}
     if(!txt||bad.length)return null;
     return{text:txt.slice(0,1500),ai:true};
   }
 
+
+  /* ---------------- 9.82.0: the page "Power the app with AI" (#ai-keys, Account menu) ---------------- */
+  const ROUTE="ai-keys";
+  const isOwner=()=>{try{return !!(Admin.active||(typeof LC49!=="undefined"&&LC49.owner()))}catch(e){return false}};
+  const PICK=[
+    {k:"gemini",badge:"Free · recommended",why:"The best free start: strong models, a generous daily limit, no card.",cost:"Free within a daily limit per Google project. Over the limit the coach simply falls back to its standard explanation until the limit resets."},
+    {k:"anthropic",badge:"Paid · recommended",why:"The most careful explanations. Pay only for what you use, billed by Anthropic to you.",cost:"Claude Haiku 5.5 costs $0.10 per million input tokens and $0.50 per million output tokens: one explanation of a mistake is a small fraction of a cent. Set a spend limit in your Anthropic console."},
+    {k:"groq",badge:"Free",why:"Very fast answers on open models. Never charged on the free plan.",cost:"Over the free limit it stops until the limit resets; you are never billed."},
+    {k:"openrouter",badge:"Free models",why:"One key for many free models.",cost:"20 requests a minute and 50 a day on free models (1,000 a day after a one-time $10 top-up). The free models change over time."},
+    {k:"openai",badge:"Paid",why:"If you already have an OpenAI account.",cost:"Paid per use, billed by OpenAI to you."},
+    {k:"chrome",badge:"Free, no key",why:"Chrome's own small model, on your computer. No account, no key.",cost:"Needs Chrome on a strong computer; not on phones. Its answers are checked extra strictly."}];
+  function pageHTML(){
+    const c=cfg(),act=on(),P=act?PROV[c.prov]:null;
+    const card=x=>{const P2=PROV[x.k];return'<li class="lc92-pk'+(act&&c.prov===x.k?" is-on":"")+'"><div class="lc92-pkh"><b>'+esc(P2.name)+'</b><span class="lc92-tag">'+esc(x.badge)+'</span></div><p>'+esc(x.why)+'</p><p class="small">'+esc(x.cost)+'</p>'
+      +'<details><summary>How to get the key</summary><ol class="lc92-steps">'+P2.steps.map(t=>'<li>'+esc(t)+'</li>').join("")+'</ol>'+(P2.note?'<p class="small">'+esc(P2.note)+'</p>':'')+'</details>'
+      +'<div class="btn-row">'+(P2.keyUrl?'<a class="btn btn-quiet btn-sm" href="'+esc(P2.keyUrl)+'" target="_blank" rel="noopener noreferrer">Get a '+esc(P2.name)+' key</a>':'')+'<button type="button" class="btn btn-primary btn-sm" data-lc92="open" data-p="'+esc(x.k)+'">'+(act&&c.prov===x.k?"Change":"Use "+esc(P2.name))+'</button></div></li>'};
+    return'<div class="lc92-page" data-lc92-page><header><p class="lc92-k">Account</p><h1>Power the app with AI</h1>'
+      +'<p>Everything in the Hub works without AI: Stockfish runs on your device and the coach explains every mistake from the board, for free. Add your own AI key and the coach thinks along with you.</p></header>'
+      +'<section class="lc92-card lc92-status" data-lc92-status>'+(act?'<p><b>Active on this device:</b> '+esc(P.name)+(c.model?' · '+esc(c.model):'')+'</p><div class="btn-row"><button type="button" class="btn btn-quiet btn-sm" data-lc92="open">Change or test</button><button type="button" class="btn btn-ghost btn-sm" data-lc92="forget">Remove my key</button></div>'
+        :'<p><b>No AI key on this device yet.</b> The standard coach is on.</p><div class="btn-row"><button type="button" class="btn btn-primary btn-sm" data-lc92="open" data-p="gemini">Set up a free key (2 minutes)</button></div>')+'</section>'
+      +'<section class="lc92-card"><h2>What a key adds</h2><ul class="lc92-list">'
+      +'<li><b>Game reviews:</b> every key moment gets a deeper explanation (✨) that connects the board, Stockfish’s line and the habit behind your move.</li>'
+      +'<li><b>The coach chat:</b> ask your own questions about a position and get an answer about that position.</li>'
+      +'<li><b>The Pro coach:</b> ask it about your mistakes and the course chapter that fixes them, and it talks you through it.</li>'
+      +'<li><b>Creators:</b> Make My Own scripts, hooks and thumbnail ideas in the Creator Studio.</li></ul>'
+      +'<p class="small">Every move, square and piece the AI names is checked against the board and Stockfish. An answer with an invented move is thrown away and the standard coach stays on screen.</p></section>'
+      +'<section class="lc92-card"><h2>Which key should I use?</h2><ul class="lc92-pks">'+PICK.map(card).join("")+'</ul></section>'
+      +'<section class="lc92-card"><h2>Free or paid: the difference</h2><ul class="lc92-list">'
+      +'<li><b>Limits:</b> a free key has a daily (and per-minute) cap. When you hit it, the coach falls back to its standard explanation. A paid key has no practical cap: you pay per use.</li>'
+      +'<li><b>Quality:</b> the paid models reason more carefully about a position and its plans. The free routes are good for most explanations.</li>'
+      +'<li><b>Your data:</b> each provider has its own terms. Google, for example, may use free-tier requests to improve its products outside the EU, the UK and Switzerland, but not paid requests.</li>'
+      +'<li><b>Age:</b> providers set their own rules for who may use their API; Google’s terms ask API users to be 18 or older.</li>'
+      +'<li><b>Cost for Lanckriet Chess:</b> none. It is your key and your account, free or paid.</li></ul></section>'
+      +'<section class="lc92-card"><h2>How it works</h2><ol class="lc92-steps"><li>Pick a provider above and open its key page.</li><li>Create a key and copy it.</li><li>Press “Use …”, paste the key and press Test and save.</li><li>Done. The ✨ buttons, the coach chat and the Pro coach use it on this device.</li></ol>'
+      +'<p class="small"><b>Your key stays on this device.</b> It is stored in this browser only and goes only to the provider you picked, straight from your device. It never goes to our server. On a new phone or computer, set it up again. Remove it here any time.</p></section>'
+      +(isOwner()?'<section class="lc92-card lc92-own"><h2>Owner: your own key</h2><p>Put your Claude key in here (Use Anthropic Claude). It powers your own pages on this device: your reviews, the coach chat, Game-to-Script’s “Write the script with my key” and Make My Own. It is never shared with members: a key inside the page would be readable by anyone who opens the app, so every member uses their own key (or the standard coach).</p></section>':'')
+      +'</div>';
+  }
+  function paintPage(){const h=document.querySelector("[data-lc92-host]");if(h)h.innerHTML=pageHTML()}
+  function mount(view){css();const v=view||document.getElementById("view");if(!v)return;v.innerHTML='<div data-lc92-host>'+pageHTML()+'</div>'}
   /* ---------------- the set-up sheet ---------------- */
-  function open(){
-    close();const c=cfg(),sel=c.prov||"gemini";
+  function open(pick){
+    close();const c=cfg(),sel=(pick&&PROV[pick])?pick:(c.prov||"gemini");
     const w=document.createElement("div");w.className="lc92-wrap";w.setAttribute("role","dialog");w.setAttribute("aria-modal","true");w.setAttribute("aria-labelledby","lc92-t");
     w.innerHTML='<div class="lc92-sheet"><button type="button" class="lc92-x" data-lc92="close" aria-label="Close">×</button>'
-      +'<h2 id="lc92-t">AI coach on your own key</h2>'
+      +'<h2 id="lc92-t">Power the app with AI</h2>'
       +'<p class="small">The coach already explains every mistake from the board and Stockfish, for free. With an AI key it adds a deeper, personal explanation and answers your own questions in the coach chat. <b>Your key stays on this device</b> and goes only to the provider you pick. Lanckriet Chess never sees it and never pays for it, and you pay nothing with a free key.</p>'
       +'<label class="lc92-f"><span>Provider</span><select data-lc92-f="prov">'+Object.keys(PROV).map(k=>'<option value="'+k+'"'+(k===sel?" selected":"")+'>'+esc(PROV[k].name)+' ('+esc(PROV[k].tag)+')</option>').join("")+'</select></label>'
       +'<div data-lc92-steps></div>'
@@ -235,14 +278,14 @@ const LC92=(()=>{
     st.textContent="Testing the connection…";
     try{const r=await test({prov:prov,key:key,model:model});ls.set(KEY,{prov:prov,key:prov==="chrome"?"":key,model:r.model,at:Date.now()});
       st.textContent="Works: "+PROV[prov].name+" · "+r.model+". The ✨ buttons and the coach chat now use it.";say("AI coach ready: "+PROV[prov].name,"good");
-      try{w.querySelector('[data-lc92-f="model"]').value=r.model}catch(e){}}
+      try{w.querySelector('[data-lc92-f="model"]').value=r.model}catch(e){}try{paintPage()}catch(e){}}
     catch(e){st.textContent=e.message||String(e);try{console.error("LC92 test",e)}catch(x){}}
   }
-  function forget(){ls.del(KEY);ls.del(CACHE);close();say("Your AI key is removed from this device.","good")}
+  function forget(){ls.del(KEY);ls.del(CACHE);close();say("Your AI key is removed from this device.","good");try{paintPage()}catch(e){}}
   function onClick(e){
     const el=e.target.closest&&e.target.closest("[data-lc92]");if(!el)return;const a=el.getAttribute("data-lc92");
     if(a==="explain"){e.preventDefault();run(el.getAttribute("data-j"),el)}
-    else if(a==="open"){e.preventDefault();open()}
+    else if(a==="open"){e.preventDefault();open(el.getAttribute("data-p")||"")}
     else if(a==="close"){e.preventDefault();close()}
     else if(a==="save"){e.preventDefault();save(el.closest(".lc92-wrap"))}
     else if(a==="forget"){e.preventDefault();forget()}
@@ -257,14 +300,23 @@ const LC92=(()=>{
       +".lc92-f{display:grid;gap:4px;margin:10px 0}.lc92-f span{font-size:13px;color:#94a3b8}.lc92-f input,.lc92-f select{background:#0f172a;color:#e2e8f0;border:1px solid #334155;border-radius:10px;padding:10px;font-size:15px;width:100%;box-sizing:border-box}"
       +".lc92-steps{margin:8px 0;padding-left:20px;font-size:14px}.lc92-steps li{margin:3px 0}.lc92-sheet a{color:#38bdf8}"
       +".lc92-box{margin-top:6px}.lc92-ans{border:1px solid rgba(56,189,248,.35);background:rgba(56,189,248,.07);border-radius:12px;padding:10px 12px;margin-top:8px}.lc92-ans p{margin:4px 0}"
-      +".lc92-by{font-size:11px;color:#94a3b8;font-weight:400}.lc92-err{color:#fca5a5}";
+      +".lc92-by{font-size:11px;color:#94a3b8;font-weight:400}.lc92-err{color:#fca5a5}"
+      +".lc92-page{max-width:760px;margin:0 auto;display:grid;gap:14px}.lc92-page h1{margin:2px 0 6px}.lc92-k{margin:0;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#38bdf8}"
+      +".lc92-card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:14px 16px;display:grid;gap:8px;min-width:0}.lc92-card h2{margin:0;font-size:17px}.lc92-card p{margin:0;line-height:1.5}"
+      +".lc92-status{border-color:rgba(56,189,248,.45)}.lc92-list{margin:0;padding-left:18px;display:grid;gap:6px}.lc92-pks{list-style:none;margin:0;padding:0;display:grid;gap:8px}"
+      +".lc92-pk{border:1px solid #334155;border-radius:12px;background:#0f172a;padding:10px 12px;display:grid;gap:6px;min-width:0}.lc92-pk.is-on{border-color:#38bdf8}.lc92-pkh{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}"
+      +".lc92-tag{font-size:11px;font-weight:700;color:#38bdf8;border:1px solid rgba(56,189,248,.5);border-radius:999px;padding:1px 8px}.lc92-pk summary{cursor:pointer;min-height:40px;display:flex;align-items:center;color:#cbd5e1}"
+      +".lc92-page .btn-row{display:flex;flex-wrap:wrap;gap:8px}.lc92-page .btn{min-height:44px}.lc92-page a{color:#38bdf8;overflow-wrap:anywhere}.lc92-own{border-color:rgba(251,191,36,.5)}";
     document.head.appendChild(s);
   }
   function init(){css();document.addEventListener("click",onClick);
+    try{if(typeof MOUNT!=="undefined"){MOUNT[ROUTE]=mount;try{DOC_TITLES[ROUTE]="Power the app with AI";ROUTE_TITLES[ROUTE]="power the app with AI"}catch(e){}}}catch(e){}
+    try{const lv=LC26.levels,o=lv.minLevel;if(lv&&!lv.__lc92){lv.__lc92=1;lv.minLevel=r=>r===ROUTE?1:o(r)}}catch(e){}
+    try{if(typeof PM_ITEMS!=="undefined"&&!PM_ITEMS.some(x=>x[0]==="#"+ROUTE)){const i=PM_ITEMS.findIndex(x=>x[0]==="#upgrades");PM_ITEMS.splice(i>=0?i+1:PM_ITEMS.length,0,["#"+ROUTE,"wand-magic-sparkles","Power the app with AI"])}}catch(e){}
     const go=()=>{if(String(location.hash||"").toLowerCase()==="#ai-coach"){open();try{history.replaceState(null,"",location.pathname+location.search+"#home")}catch(e){}}};
     window.addEventListener("hashchange",go);go()}
   if(typeof document!=="undefined"){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init()}
-  return{on:on,open:open,close:close,block:block,button:button,explain:explain,chat:chat,check:check,world:world,facts:facts,parseJSON:parseJSON,complete:complete,test:test,pickModel:pickModel,PROV:PROV,_cfg:cfg,version:VERSION};
+  return{on:on,open:open,close:close,mount:mount,pageHTML:pageHTML,block:block,button:button,explain:explain,chat:chat,check:check,world:world,facts:facts,parseJSON:parseJSON,complete:complete,test:test,pickModel:pickModel,PROV:PROV,_cfg:cfg,version:VERSION};
 })();
 window.LC92=LC92;
 /*@@end lc92*/

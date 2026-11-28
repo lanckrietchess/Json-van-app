@@ -98,11 +98,23 @@ const LC103=(()=>{
     out.sort((a,b)=>b.s-a.s);
     return out;
   }
-  /* material for the mover along a line: the lowest point that lasts past the mover's next move = a sacrifice */
-  function sacOf(fen,pv,me){
-    try{const g=new Chess(fen),m0=material(fen),base=m0[me]-m0[other(me)],d=[0];
-      for(let k=0;k<Math.min(8,(pv||[]).length);k++){const u=pv[k];if(!g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||"q"}))break;const m=material(g.fen());d.push(m[me]-m[other(me)]-base)}
-      for(const k of[2,4])if(d.length>k&&d[k]<=-2&&(d.length<=k+1||d[k+1]<=-1))return{down:-d[k],at:k,net:d.length>k+1?-d[k+1]:-d[k]};
+  /* material for the mover along a line (index 0 = now, 1 = after the move, 2 = after their reply, 3 = after the mover's next move) */
+  function lineMat(fen,pv,me){
+    const d=[0];try{const g=new Chess(fen),m0=material(fen),base=m0[me]-m0[other(me)];
+      for(let k=0;k<Math.min(8,(pv||[]).length);k++){const u=pv[k];if(!g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||"q"}))break;const m=material(g.fen());d.push(m[me]-m[other(me)]-base)}}catch(e){}
+    return d;
+  }
+  /* 9.82.0: a sacrifice is made by THIS move. Before, a deficit two moves later in the engine line also counted (20…Ne4 21.Qd1 Nxf2 22.Kxf2
+     made 20…Ne4 "brilliant" although Ne4 gives nothing). Now: (1) the board rule sacrificeOf (the moved piece can be won, or the move leaves
+     another piece where the opponent wins 2+), unless the line shows they take it and the mover simply wins it back at once (a trade, not a
+     sacrifice); or (2) the line itself: they take 2+ with their reply and the mover is still down after the next move. */
+  function sacOf(fen,pv,me,played){
+    if(!played&&pv&&pv[0])played=pv[0];
+    try{
+      const d=lineMat(fen,pv,me);
+      const so=(typeof sacrificeOf==="function"&&played)?sacrificeOf(fen,played):null;
+      if(so&&!(d.length>3&&d[2]<=-2&&d[3]>=0))return{down:so.down,piece:so.piece,sq:so.sq,moved:!!so.moved,at:1,net:d.length>3?-d[3]:so.down};
+      if(d.length>2&&d[2]<=-2&&(d.length<=3||d[3]<=-1))return{down:-d[2],at:2,net:d.length>3?-d[3]:-d[2],piece:""};
       return null}catch(e){return null}
   }
   function sanLine(fen,pv,n){try{const g=new Chess(fen),out=[];let num=+(String(fen).split(" ")[5])||1;(pv||[]).slice(0,n||6).forEach((u,i)=>{const side=g.turn(),m=g.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||"q"});if(!m)return;out.push(side==="w"?num+". "+m.san:(i===0?num+"... "+m.san:m.san));if(side==="b")num++});return out.join(" ")}catch(e){return""}}
@@ -150,8 +162,9 @@ const LC103=(()=>{
     const prev=i>0&&S.J?S.J[i-1]:null,punish=!!(prev&&prev.loss>=20&&prev.color!==me);
     if(isBest&&E0.legal>=3&&loss<=1.5){
       const trivial=rank===1&&(/#/.test(m.san)||inst.tags.some(t=>/recapture|saves a|free piece/.test(t)));
-      const sac=sacOf(fen,(E0.map[played]||{}).pv,me)||(inst.tags.indexOf("gives material")>=0?{down:(VAL[pc]||0)-(VAL[inst.cap]||0),offer:true}:null),mateLine=(E0.map[played]||{}).mate!=null&&((E0.map[played].mate>0)===(me==="w"));
-      if(sac&&wPlayed>=45&&(wBest<96||(mateLine&&rank>=3))&&(VAL[pc]||0)>=3&&i>=6){out.types.push("brilliant");out.sac=sac}
+      const sac=sacOf(fen,(E0.map[played]||{}).pv,me,played),mateLine=(E0.map[played]||{}).mate!=null&&((E0.map[played].mate>0)===(me==="w"));
+      const sacVal=sac?(sac.piece?VAL[sac.piece]||0:sac.down):0;
+      if(sac&&sacVal>=3&&wPlayed>=45&&(wBest<92||(mateLine&&rank>=3))&&i>=6){out.types.push("brilliant");out.sac=sac}
       else if((gap>=15&&!trivial&&(rank>=2||gap>=30))||(punish&&gap>=8&&!trivial))out.types.push("great");
       else if(i>=8&&rank>=4&&gap>=4&&wBest>=10&&wBest<=95&&!trivial)out.types.push("top");
       if(punish)out.punish=prev.san;
@@ -202,7 +215,7 @@ const LC103=(()=>{
       const tl=(j.traps||[]).slice(0,3).map(t=>t.san+(t.tag&&t.tag!=="quiet"?" ("+t.tag+")":"")).join(", ");
       return"Instinct says "+j.traps[0].san+", but "+j.traps.length+" of "+j.natural+" natural moves lose ("+tl+"). Only "+(j.safe.slice(0,2).join(" / ")||j.bestSan)+" hold"+(j.safe.length===1?"s":"")+"."+(j.fell?" "+mv+" fell in.":j.loss<=6?" "+mv+" found the path.":" "+mv+" avoided the traps but drifted.");
     }
-    if(p==="brilliant")return"Sacrifice: "+mv+" gives up "+(j.sac&&j.sac.down>=5?"big material":j.sac&&j.sac.down>=3?"a piece":"material")+" and it works: "+(j.bestLine||mv)+"."+(j.types.indexOf("minefield")>=0?" Natural moves lose here.":"");
+    if(p==="brilliant")return"Sacrifice: "+mv+(j.sac&&j.sac.piece&&j.sac.sq?(j.sac.moved?" puts the "+NAME[j.sac.piece]+" on "+j.sac.sq+" where it can be taken":" leaves the "+NAME[j.sac.piece]+" on "+j.sac.sq+" to be taken"):" gives up "+(j.sac&&j.sac.down>=5?"big material":j.sac&&j.sac.down>=3?"a piece":"material"))+", and it works: "+(j.bestLine||mv)+"."+(j.types.indexOf("minefield")>=0?" Natural moves lose here.":"");
     if(p==="great")return(j.punish?"Punishes "+j.punish+": ":"Only move: ")+mv+" holds"+(j.gap?"; the next best drops "+Math.round(j.gap)+" points":"")+"."+(j.bestMotif&&j.bestMotif.id!=="quiet"?" "+j.bestMotif.label+".":"")+(j.types.indexOf("minefield")>=0?" Natural moves lose here.":"");
     if(p==="top"){const tr=(j.tags||[]).filter(t=>/retreat|quiet|king walk|gives material/.test(t))[0]||"not the obvious move";return"Hard to find: "+mv+" ("+tr+") is Stockfish's first choice; instinct ranks it #"+j.rank+" of "+j.legal+"."}
     return mv;
