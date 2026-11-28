@@ -449,6 +449,9 @@ const ACTIONS = {
 
   /* ----- the AI coach ----- */
   async chat(b, env) {
+    // 9.82.0: bring your own key. The app answers every AI question on the player's own key (LC92, browser -> provider), so this
+    // server no longer spends the owner's key on chat answers. Set SERVER_AI=on to switch the old server path back on.
+    if (String(env.SERVER_AI || '').toLowerCase() !== 'on') return { ok: false, reason: 'byok' };
     if (!env.ANTHROPIC_API_KEY) return { ok: false, reason: 'no_ai' };
     const me = await touch(env, b), doc = await loadDoc(env), bot = String(b.bot || '');
     const adminBot = bot === 'content' || bot === 'teacher', coachBot = bot === 'coachPaid' || bot === 'coachFree';

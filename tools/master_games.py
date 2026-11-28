@@ -15,8 +15,7 @@ Definitions (from the board and Stockfish, never Chess.com's private labels: the
   loss          wc before the move minus wc after it, from the mover's side (0..2)
   blunder >= 0.30, mistake >= 0.20, inaccuracy >= 0.10 (Lichess thresholds)
   great         the played move is Stockfish's best and the second best is at least 0.25 wc worse (an only move)
-  brilliant     a great move that is also a real sacrifice (the mover is >= 2 points of material down two plies later in
-                Stockfish's line and stays down >= 1 point four plies later), not played from an already won position
+  brilliant     a great move that is also a real sacrifice made BY THIS MOVE (9.82.0: see _is_sacrifice), not played from an already won position
                 (wc before <= 0.80) and not leaving a losing one (wc after >= -0.10)
   punish        the opponent's previous move was a blunder and Kyenzo found the best (or a 0.05-wc-close) reply
   missed        the opponent's previous move was a blunder and Kyenzo did not punish it (loss >= 0.20)
@@ -305,16 +304,39 @@ def _acc(xs):
     harm = len(xs) / sum(1 / max(x, 1.0) for x in xs)
     return round((mean + harm) / 2, 1)
 
+def _see(b, sq):
+    """material the side to move wins by a legal exchange on sq (least valuable attacker first, may stop)"""
+    p = b.piece_at(sq)
+    if not p or p.piece_type == chess.KING: return 0
+    caps = [m for m in b.legal_moves if m.to_square == sq]
+    if not caps: return 0
+    m = min(caps, key=lambda x: 99 if b.piece_type_at(x.from_square) == chess.KING else VALUES[b.piece_type_at(x.from_square)])
+    b2 = b.copy(); b2.push(m)
+    return max(0, VALUES[p.piece_type] - _see(b2, sq))
+
 def _is_sacrifice(board, move, reply_pv, me):
-    b = board.copy(); m0 = material(b, me); b.push(move)
+    """9.82.0 (the app's rule, sacrificeOf + lineSacrifice): THIS move gives material. (a) the moved piece (worth 3+) can be taken
+    and it costs the mover 2+ (no defender, or a cheaper attacker); (b) the move leaves another piece (worth 3+) where the opponent
+    wins 2+ by a legal exchange; or (c) the engine line: they take 2+ with their reply and the mover is still down after the next
+    move. Before 9.82.0 a deficit after the mover's NEXT move also counted, so a quiet move before a later sacrifice became
+    "brilliant"."""
+    b = board.copy(); pt = b.piece_type_at(move.from_square); val = VALUES[move.promotion or pt]
+    got = VALUES[b.piece_type_at(move.to_square)] if b.piece_at(move.to_square) else (1 if b.is_en_passant(move) else 0)
+    m0 = material(b, me); b.push(move)
+    if b.is_checkmate(): return False
+    to = move.to_square
+    att = [x for x in b.legal_moves if x.to_square == to]
+    if pt != chess.KING and val >= 3 and val - got >= 2 and att:
+        cheap = min(100 if b.piece_type_at(x.from_square) == chess.KING else VALUES[b.piece_type_at(x.from_square)] for x in att)
+        if not b.attackers(me, to) or cheap < val: return True
+    for sq, p in b.piece_map().items():
+        if p.color == me and p.piece_type not in (chess.KING, chess.PAWN) and sq != to and _see(b, sq) >= 2: return True
     seq = []
-    for u in reply_pv[:4]:
+    for u in (reply_pv or [])[:2]:
         mv = chess.Move.from_uci(u)
         if mv not in b.legal_moves: break
         b.push(mv); seq.append(material(b, me) - m0)
-    if len(seq) < 2: return False
-    worst2 = min(seq[:2])
-    return worst2 <= -2 and (seq[3] if len(seq) >= 4 else seq[-1]) <= -1
+    return len(seq) >= 1 and seq[0] <= -2 and (len(seq) < 2 or seq[1] <= -1)
 
 def _tags(board, pv):
     t = []

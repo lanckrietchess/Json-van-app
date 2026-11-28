@@ -1782,16 +1782,16 @@
       +(c.diag&&c.diag.line&&c.diag.line.ref?'<div class="lc79-fact"><b>Stockfish:</b> after '+esc(it.san)+': '+esc(c.diag.line.ref)+(c.diag.line.best?'. Better: '+esc(c.diag.line.best):'')+'.</div>':'')
       +(c.diag&&c.diag.train?'<div class="lc79-fact"><b>Training theme:</b> '+esc(c.diag.train.label)+'</div>':'')
       +(c.diag&&window.LC92?LC92.block(c.diag,{fen:c.fen||(AI.g&&AI.g.fens[it.i]),color:it.color,san:it.san,num:it.num}):'')
-      +'<div class="lc79-fact al"><b>Alarm Signal:</b> '+(c.alarm?esc(c.alarm.label)+". "+esc(c.alarm.say):"none of the standard alarms; the error came from skipping an MSPC step.")+'</div>'
+      +'<div class="lc79-fact al"><b>Alarm Signal:</b> '+(c.alarm?esc(c.alarm.label)+". "+esc(c.alarm.say):good?"none of the standard alarms; the move came from running the MSPC steps to the end.":"none of the standard alarms; the error came from skipping an MSPC step.")+'</div>'
       +'<div class="lc79-fact wp"><b>Working Point ('+LN[c.letter]+'):</b> '+esc(c.wp)+'</div>'
       +'<div class="lc79-fact"><b>Action Step:</b> '+esc(c.action)+'</div>'
       +'<div class="lc79-fact" data-cloud>'+cloudHTML()+'</div></div></div>'
-      +'<h4>The Socratic trim: the questions that would have saved the game</h4><ol class="lc79-q">'+c.qs.map(q=>'<li><b>'+q[0]+'</b>'+esc(q[1])+' <span class="lc79-hint">'+esc(q[2])+'</span></li>').join("")+'</ol>'
+      +'<h4>The Socratic trim: '+(good?'the questions that find this move':'the questions that would have saved the game')+'</h4><ol class="lc79-q">'+c.qs.map(q=>'<li><b>'+q[0]+'</b>'+esc(q[1])+' <span class="lc79-hint">'+esc(q[2])+'</span></li>').join("")+'</ol>'
       +'<h4>Trimmed game (the video starts at move '+c.start+')</h4><div class="lc79-pre" tabindex="0">'+esc(c.pgn)+'</div>'
       +'<div class="lc79-row">'+(projectFor(key,it.i)?'<button type="button" class="lc79-b sm" data-a="openproj" data-p="'+esc(projectFor(key,it.i).id)+'">Project made: open</button>':'<button type="button" class="lc79-b sm pri" data-a="mkproj" data-i="'+AI.ci+'">Make a video project</button>')+'<button type="button" class="lc79-b sm" data-a="toboard">Load into the Studio board</button><button type="button" class="lc79-b sm gold" data-a="toshoot">Load and go to Shoot</button><button type="button" class="lc79-b sm" data-a="copypgn">Copy PGN</button></div></section>';
     h+='<section class="lc79-sec" aria-labelledby="lc79-s3"><h3 id="lc79-s3">4. A similar position for the re-hook</h3><div data-sim>'+simHTML()+'</div><div class="lc79-row"><button type="button" class="lc79-b sm" data-a="sim">Find another one</button></div></section>';
     h+='<section class="lc79-sec" aria-labelledby="lc79-s4"><h3 id="lc79-s4">5. Prompt for Claude</h3><p class="lc79-hint" style="margin:0">The game data goes out: game context, the MSPC diagnosis and the Lichess position (Bullet Points adds the pawn check and the Release Giveaway). The script style comes from your own Claude instructions.</p>'
-      +'<div class="lc79-row"><button type="button" class="lc79-b pri" data-a="copyprompt">Get Prompt: Full Script</button><button type="button" class="lc79-b gold" data-a="copybullets">Get Prompt: Bullet Points</button><button type="button" class="lc79-b sm" data-a="showprompt">Show the prompt</button></div><p class="lc79-hint" style="margin:0"><b>Full Script</b>: Claude writes every word. <b>Bullet Points</b>: a freestyle skeleton (the exact hook, 2 to 3 core points with the pawn check, the aha moment, the bridge to the app, the Release Giveaway CTA) so you talk freely on camera.</p><div class="lc79-pre" data-prompt hidden tabindex="0"></div>'
+      +'<div class="lc79-row"><button type="button" class="lc79-b pri" data-a="copyprompt">Get Prompt: Full Script</button><button type="button" class="lc79-b gold" data-a="copybullets">Get Prompt: Bullet Points</button>'+(typeof LC92!=="undefined"&&LC92.on()?'<button type="button" class="lc79-b pri" data-a="aiwrite" data-m="full">✨ Write the script with my key</button><button type="button" class="lc79-b sm" data-a="aiwrite" data-m="bullets">✨ Bullet Points with my key</button>':'<a class="lc79-b sm" href="/app.html#ai-keys">✨ Write it in the app: add your AI key</a>')+'<button type="button" class="lc79-b sm" data-a="showprompt">Show the prompt</button></div><p class="lc79-hint" style="margin:0"><b>Full Script</b>: Claude writes every word. <b>Bullet Points</b>: a freestyle skeleton (the exact hook, 2 to 3 core points with the pawn check, the aha moment, the bridge to the app, the Release Giveaway CTA) so you talk freely on camera.</p><div class="lc79-pre" data-prompt hidden tabindex="0"></div>'
       +'<label class="lc79-f"><span>Paste Claude’s script here</span><textarea data-f="answer" placeholder="Paste the script Claude wrote, then press Use as my script."></textarea></label><div class="lc79-row"><button type="button" class="lc79-b gold" data-a="usescript">Use as my script</button><span class="lc79-hint">It replaces the text in the Studio’s script panel and prompter.</span></div></section>';
     return h;
   }
@@ -1942,6 +1942,16 @@ BCLOSE);
       say("Loaded: the Studio board shows the position before the mistake. Use the arrows on the board to step through.","ok",4500);return;
     }
     if(a==="showprompt"){const p=Q("#lc79-ai [data-prompt]");p.hidden=!p.hidden;if(!p.hidden)p.textContent=buildPrompt(AI.pmode);b.textContent=p.hidden?"Show the prompt":"Hide the prompt";return}
+    /* 9.82.0: the same prompt, answered by the owner's OWN key (LC92, browser -> provider), straight into the answer box */
+    if(a==="aiwrite"){
+      if(typeof LC92==="undefined"||!LC92.on()){location.hash="#ai-keys";return}
+      AI.pmode=b.getAttribute("data-m")==="bullets"?"bullets":"full";const t=buildPrompt(AI.pmode);b.disabled=true;const was=b.textContent;b.textContent="Writing…";
+      try{const out=String(await LC92.complete(LC92._cfg(),"You write short chess video scripts for Lanckriet Chess, exactly as the request below asks. Use only the moves and facts in it. Plain text.",t,{text:true,max:3000})||"").trim();
+        const ta=Q('#lc79-ai [data-f="answer"]');if(ta&&out){ta.value=out;try{ta.dispatchEvent(new Event("input",{bubbles:true}))}catch(x){}}
+        say(out?"Script written with your key. Check it, then press Use as my script.":"The AI gave no answer. Try again.",out?"ok":"err",4000)}
+      catch(x){say("Your AI key answered: "+String(x&&x.message||x).slice(0,160),"err",6000)}
+      finally{b.disabled=false;b.textContent=was}
+      return}
     if(a==="copyprompt"||a==="copybullets"){AI.pmode=a==="copybullets"?"bullets":"full";const t=buildPrompt(AI.pmode),ok=await copyText(t);const p=Q("#lc79-ai [data-prompt]");if(p&&!p.hidden)p.textContent=t;
       return say(ok?(AI.pmode==="bullets"?"Bullet Points prompt copied. Paste it into Claude.":"Full Script prompt copied. Paste it into Claude."):"Could not copy. Press Show the prompt and copy it by hand.",ok?"ok":"err",3500)}
     if(a==="mkproj"){const p=mkProject(+b.getAttribute("data-i"));if(p){wr(RK,p.id);try{paintDock()}catch(x){}}return paintAi()}

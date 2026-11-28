@@ -45,7 +45,10 @@ const LC95=(()=>{
   const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
   async function rpc(fn,args,auth){
     try{const h={};if(auth){const t=await LC26.sync.token();if(!t)return{status:401,data:null};h.Authorization="Bearer "+t}
-      return await LC26.sync.http("/rest/v1/rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(args||{})})}catch(e){return{status:0,data:null}}
+      const r=await LC26.sync.http("/rest/v1/rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(args||{})});
+      /* 9.82.0: a stored "brilliant" that is not a sacrifice by the current rule shows as an only move */
+      try{if(r&&Array.isArray(r.data)&&typeof brilliantChecked==="function")r.data=r.data.map(brilliantChecked)}catch(e){}
+      return r}catch(e){return{status:0,data:null}}
   }
   const missing=r=>!!(r&&(r.status===404||(r.data&&/PGRST202|does not exist|42883|42P01/i.test(String(r.data.code||"")+String(r.data.message||"")))));
 

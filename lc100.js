@@ -35,7 +35,10 @@ const LC100=(()=>{
   }
   async function rpc(fn,args,auth){
     try{const h={};if(auth){const t=await LC26.sync.token();if(!t)return{status:401,data:null};h.Authorization="Bearer "+t}
-      return await LC26.sync.http("/rest/v1/rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(args||{})})}catch(e){return{status:0,data:null}}
+      const r=await LC26.sync.http("/rest/v1/rpc/"+fn,{method:"POST",headers:h,body:JSON.stringify(args||{})});
+      /* 9.82.0: a stored "brilliant" that is not a sacrifice by the current rule shows as an only move */
+      try{if(r&&Array.isArray(r.data)&&typeof brilliantChecked==="function")r.data=r.data.map(brilliantChecked)}catch(e){}
+      return r}catch(e){return{status:0,data:null}}
   }
   const missing=r=>!!(r&&(r.status===404||(r.data&&/PGRST202|does not exist|42883|42P01/i.test(String(r.data.code||"")+String(r.data.message||"")))));
   const today=()=>new Date().toISOString().slice(0,10);
@@ -163,7 +166,7 @@ const LC100=(()=>{
     let l=G.cache[G.tab];
     if(!l){b.innerHTML='<p class="small muted">Loading…</p>';const r=await rpc("mg_gems",{p_kind:G.tab,p_limit:24});
       if(missing(r)){b.innerHTML='<div class="panel pad"><p>'+(owner()?"Run "+E(SQLF)+" in Supabase first.":"My games are being prepared. Check back soon.")+"</p></div>";return}
-      l=G.cache[G.tab]=Array.isArray(r&&r.data)?r.data:[]}
+      l=G.cache[G.tab]=(Array.isArray(r&&r.data)?r.data:[]).filter(x=>G.tab!=="brilliant"||!x.kind||x.kind==="brilliant")}
     if(!l.length){b.innerHTML='<div class="panel pad"><p>Nothing here yet.</p></div>';return}
     const isPos=G.tab==="brilliant"||G.tab==="great";
     b.innerHTML=(isPos&&!pro()?'<p class="small muted">Free: these count toward your 3 positions a day from my games. Pro plays every one.</p>':"")
