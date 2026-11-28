@@ -94,7 +94,9 @@ const LC100=(()=>{
   }
   const chipTimers=new WeakMap();
   function onFen(ev){
-    const host=ev.target;if(!host||!host.closest||route()!=="openings"||host.closest(".sheet")||host.closest("[data-lc100-nochip]"))return;
+    /* 9.83.0: never inside a trainer (the chip sat under the board and squeezed it, and it counted his games with both colours); the
+       opening trainer has LC111's "Model games" tab instead */
+    const host=ev.target;if(!host||!host.closest||route()!=="openings"||host.closest(".sheet")||host.closest("[data-lc100-nochip]")||host.closest(".trainer,.board-col,[id^=op-board]"))return;
     clearTimeout(chipTimers.get(host));chipTimers.set(host,setTimeout(()=>paintChip(host,ev.detail&&ev.detail.fen),180));
   }
   async function paintChip(host,fen){
@@ -300,7 +302,6 @@ const LC100=(()=>{
       if(r==="middlegame"||r==="endgame")phaseCard(r);
       if(r==="trim"||r==="games")trimCard(r);
       if(r==="account")contribPanel();
-      if(r==="openings")positions();
       joinMain();ownerRows();
     }catch(e){console.error("lc100",e)}},400);
   }

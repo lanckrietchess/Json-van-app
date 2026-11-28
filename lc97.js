@@ -89,6 +89,13 @@ const LC97=(()=>{
     return s&&s.ok&&s.signed_in?!!s.trial_eligible:trialEligibleNow();
   }
   function hadTrial(){const s=cached();return !!(s&&s.ok&&s.trial&&s.trial.used)}
+  /* 9.83.0: the trial right now, from the cached server state (LC111's hold on the deepest opening levels); null = not in a trial or not known */
+  function trialing(){
+    const s=cached();if(!s||!s.ok||!s.signed_in)return null;const st=String(s.sub_status||""),t=s.trial||{};
+    if(st!=="trialing"&&st!=="trial_cancelled")return null;
+    if(t.ends_at&&Date.parse(t.ends_at)<Date.now())return null;
+    return{status:st,cancelled:st==="trial_cancelled",ends_at:t.ends_at||null};
+  }
 
   /* ---------- the post-trial pop-up ---------- */
   async function pricing(){try{return await Promise.race([LC34._t.pricing(),new Promise(res=>setTimeout(()=>res(null),2000))])}catch(e){return null}}
@@ -386,7 +393,7 @@ const LC97=(()=>{
       setTimeout(handleReturn,1200);
     }catch(e){console.error("lc97",e)}
   }
-  return{init:init,afterRender:afterRender,version:VERSION,state:state,decide:decide,trialEligible:trialEligible,trialEligibleNow:trialEligibleNow,hadTrial:hadTrial,
+  return{init:init,afterRender:afterRender,version:VERSION,state:state,decide:decide,trialEligible:trialEligible,trialEligibleNow:trialEligibleNow,hadTrial:hadTrial,trialing:trialing,
     slot:slot,open:openDownsell,preview:()=>openDownsell({preview:true}),check:check,
     _t:{decide:decide,simulate:simulate,numbers:numbers,dsHTML:dsHTML,statusHTML:statusHTML,SCEN:SCEN,WHY:WHY,reset(){MEM=null;memAt=0;busy=false}}};
 })(); /*@@end lc97*/
