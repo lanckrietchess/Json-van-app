@@ -13,19 +13,66 @@
 <main><p>Opening Lanckriet Chess… <a id="go" href="/">Tap here if nothing happens</a></p></main>
 <script>
 /* 9.37.0 LC73: short links. /l/<code> (vercel.json rewrite) counts one click for the code and opens its destination with ?src=<code>;
-   the landing page and the app keep that source on this device and link it to the account at sign-in. */
+   the landing page and the app keep that source on this device and link it to the account at sign-in.
+   9.79.0 LC109: a link can carry a player (ManyChat fills it in):
+     /l/<code>/c/<name>   a Chess.com username     /l/<code>/lc/<name>   a Lichess username
+     /l/<code>/<name>     the site the link is set to (Either: this page asks Chess.com and Lichess which one has the name)
+     ?elo=<rating>        optional; also ?u=<name>&site=chesscom|lichess. A pasted profile address (chess.com/member/x, lichess.org/@/x) works too.
+   When the link is set to fill in a name, the person lands on the review of their last lost game (/app.html?u=&site=&src=), or on the
+   landing page with the name filled in. An empty or unfilled field ({{...}}, "USERNAME") is ignored: the link then works as a plain link. */
 (function(){
   function m(n){var e=document.querySelector('meta[name="'+n+'"]');return e?e.getAttribute("content")||"":""}
-  var code=String((location.pathname.match(/\/l\/([A-Za-z0-9-]{2,24})/)||[])[1]||"").toLowerCase(),u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");
+  var NAME=/^[A-Za-z0-9_-]{2,30}$/;
+  function parse(path,search){
+    var segs=String(path||"").replace(/^\/+|\/+$/g,"").split("/"),out={code:"",name:"",site:"",elo:null};
+    if(segs[0]!=="l")return out;
+    out.code=String(segs[1]||"").toLowerCase();if(!/^[a-z0-9-]{2,24}$/.test(out.code)){out.code="";return out}
+    var rest=segs.slice(2).map(function(x){try{return decodeURIComponent(x)}catch(e){return x}}),pre=String(rest[0]||"").toLowerCase();
+    if(rest.length>1&&/^(c|cc|chess|chesscom|chess\.com)$/.test(pre)){out.site="chesscom";rest=rest.slice(1)}
+    else if(rest.length>1&&/^(lc|li|lichess|lichess\.org)$/.test(pre)){out.site="lichess";rest=rest.slice(1)}
+    var raw=rest.join("/"),P;try{P=new URLSearchParams(search||"")}catch(e){P=null}
+    if(!raw&&P&&P.get("u"))raw=P.get("u");
+    if(!out.site&&P&&P.get("site"))out.site=/^li/i.test(P.get("site"))?"lichess":/^c/i.test(P.get("site"))?"chesscom":"";
+    raw=String(raw||"").trim().replace(/^@\/?/,"");
+    var mm=/chess\.com\/(?:[a-z-]+\/)?member\/([A-Za-z0-9_-]{2,30})/i.exec(raw),ml=/lichess\.org\/(?:@\/)?([A-Za-z0-9_-]{2,30})/i.exec(raw);
+    if(mm){out.site="chesscom";raw=mm[1]}else if(ml){out.site="lichess";raw=ml[1]}
+    if(NAME.test(raw)&&!/^(username|user|name|naam|chess_?username|lichess_?username)$/i.test(raw))out.name=raw;
+    var e=P&&parseInt(P.get("elo")||"",10);if(e>=100&&e<=3500)out.elo=e;
+    return out;
+  }
+  window.__lcLinkParse=parse;
+  function probe(name){
+    /* Either: which site knows this name? Chess.com first (most players), then Lichess; 1.8 s at most, Chess.com when nobody answers */
+    function get(u){return new Promise(function(res){var c=null;try{c=new AbortController()}catch(e){}var t=setTimeout(function(){try{c&&c.abort()}catch(e){}res(false)},1800);
+      fetch(u,{signal:c?c.signal:undefined,headers:{Accept:"application/json"}}).then(function(r){clearTimeout(t);res(!!r&&r.ok)}).catch(function(){clearTimeout(t);res(false)})})}
+    return Promise.all([get("https://api.chess.com/pub/player/"+encodeURIComponent(name.toLowerCase())),get("https://lichess.org/api/user/"+encodeURIComponent(name))])
+      .then(function(r){return r[0]?"chesscom":r[1]?"lichess":"chesscom"});
+  }
+  if(window.__lcLinkTest)return;
+  var L=parse(location.pathname,location.search),code=L.code,u=m("lc-sb-url").replace(/\/+$/,""),k=m("lc-sb-key");
   var cur=null;try{cur=JSON.parse(localStorage.getItem("lc73-src")||"null")}catch(e){}
   var dev=(cur&&cur.device)||("w-"+Math.random().toString(36).slice(2,12)+Date.now().toString(36));
   if(!cur){try{localStorage.setItem("lc73-src",JSON.stringify({device:dev,at:Date.now()}))}catch(e){}}
   try{document.cookie="lc73_src="+encodeURIComponent(JSON.stringify({code:code,device:dev,at:Date.now()}))+";max-age=2592000;path=/;SameSite=Lax;Secure"}catch(e){}
-  function go(dest){dest=/^\/[A-Za-z0-9_.\/?=&#-]{0,200}$/.test(dest||"")?dest:"/";var h=dest.split("#"),q=h[0].indexOf("?")>=0?"&":"?";var to=h[0]+(code?q+"src="+encodeURIComponent(code):"")+(h[1]?"#"+h[1]:"");document.getElementById("go").href=to;location.replace(to)}
+  function to(dest,extra){dest=/^\/[A-Za-z0-9_.\/?=&#-]{0,200}$/.test(dest||"")?dest:"/";var h=dest.split("#"),q=h[0].indexOf("?")>=0?"&":"?",add=[];
+    if(code)add.push("src="+encodeURIComponent(code));(extra||[]).forEach(function(x){add.push(x[0]+"="+encodeURIComponent(x[1]))});
+    return h[0]+(add.length?q+add.join("&"):"")+(h[1]?"#"+h[1]:"")}
+  function go(href){document.getElementById("go").href=href;location.replace(href)}
+  function rpc(site){return fetch(u+"/rest/v1/rpc/lc73_link_open",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},
+      body:JSON.stringify({p_code:code,p_device:dev,p_name:L.name,p_site:site||"",p_elo:L.elo})}).then(function(r){return r.ok?r.json():null}).catch(function(){return null})}
   if(!code||!u||!k){go("/");return}
-  var done=false,t=setTimeout(function(){if(!done){done=true;go("/")}},2500);
-  fetch(u+"/rest/v1/rpc/lc73_link_open",{method:"POST",headers:{"Content-Type":"application/json",apikey:k,Authorization:"Bearer "+k},body:JSON.stringify({p_code:code,p_device:dev})})
-    .then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(function(j){if(done)return;done=true;clearTimeout(t);go(j&&j.dest||"/")});
+  var done=false,t=setTimeout(function(){if(!done){done=true;go(L.name?to("/app.html",[["u",L.name],["site",L.site||"chesscom"]]):"/")}},4500);
+  rpc(L.site).then(function(j){
+    if(done)return;
+    var fill=j&&j.fill||"";
+    if(!j||!fill||!L.name){done=true;clearTimeout(t);go(to(j&&j.dest||"/",L.elo&&j&&j.fill_elo?[["elo",L.elo]]:[]));return}
+    var site=L.site||(fill==="chesscom"||fill==="lichess"?fill:"");
+    (site?Promise.resolve(site):probe(L.name).then(function(s){rpc(s);return s})).then(function(s){
+      if(done)return;done=true;clearTimeout(t);
+      var x=[["u",L.name],["site",s]];if(L.elo&&j.fill_elo)x.push(["elo",L.elo]);
+      go(to(j.fill_dest==="landing"?"/":"/app.html",x));
+    });
+  });
 })();
 </script>
 </body>

@@ -110,8 +110,9 @@ const LC94=(()=>{
     try{
       const P=new URLSearchParams(search==null?location.search:search),u=String(P.get("u")||"").trim();
       if(!NAME.test(u))return null;
-      const site=/^li/i.test(String(P.get("site")||""))?"lichess":"chesscom";
-      return{u:u,site:site};
+      const site=/^li/i.test(String(P.get("site")||""))?"lichess":"chesscom",e=parseInt(P.get("elo")||"",10);
+      /* 9.79.0: an LC109 short link (ManyChat) may also bring the rating: used when the site's own rating cannot be read */
+      return e>=100&&e<=3500?{u:u,site:site,elo:e}:{u:u,site:site};
     }catch(e){return null}
   }
   /* 9.67.0: the landing's quick start (LC102) keeps the name in localStorage "lc102-handoff". An installed app opens on its own start
@@ -128,7 +129,7 @@ const LC94=(()=>{
   function stripDeep(){
     try{
       const url=new URL(location.href);let ch=false;
-      ["u","site","resume"].forEach(k=>{if(url.searchParams.has(k)){url.searchParams.delete(k);ch=true}});
+      ["u","site","resume","elo"].forEach(k=>{if(url.searchParams.has(k)){url.searchParams.delete(k);ch=true}});
       if(ch)history.replaceState(history.state,"",url.pathname+(url.searchParams.toString()?"?"+url.searchParams.toString():"")+url.hash);
     }catch(e){}
   }
@@ -161,7 +162,8 @@ const LC94=(()=>{
       attrFromSource();
       try{if(typeof LC50!=="undefined")LC50.pre.start(d.site,d.u)}catch(e){}
       /* 9.59.0: the rating too, like LC30's Connect does (the Learn page's "Active ELO" and the coach's level read it) */
-      try{if(typeof Elo!=="undefined"&&Elo.fetchProfile)Elo.fetchProfile(d.site,d.u).then(pr=>{const r=pr&&(pr.rapid||pr.blitz||pr.bullet);if(r&&typeof App!=="undefined"&&!(App.profile||{}).elo){App.profile=Object.assign({},App.profile,{elo:r});try{App.save()}catch(e){}}}).catch(()=>{})}catch(e){}
+      const setElo=r=>{if(r&&typeof App!=="undefined"&&!(App.profile||{}).elo){App.profile=Object.assign({},App.profile,{elo:r});try{App.save()}catch(e){}}};
+      try{if(typeof Elo!=="undefined"&&Elo.fetchProfile)Elo.fetchProfile(d.site,d.u).then(pr=>{setElo(pr&&(pr.rapid||pr.blitz||pr.bullet)||d.elo)}).catch(()=>setElo(d.elo));else setElo(d.elo)}catch(e){}
       setTimeout(()=>{try{if(typeof LC42!=="undefined"&&LC42.begin(d.site==="lichess"?{li:d.u}:{cc:d.u}))step("name_entered")}catch(e){console.error("lc94 deep",e)}},600);
       return true;
     }catch(e){console.error("lc94 deep",e);return false}
@@ -199,6 +201,10 @@ const LC94=(()=>{
     let site="chesscom";
     const label=()=>{if(inp)inp.placeholder=site==="lichess"?"Your Lichess username":"Your Chess.com username";if(sw)sw.textContent=site==="lichess"?"I play on Chess.com":"I play on Lichess"};
     if(sw)sw.addEventListener("click",e=>{e.preventDefault();site=site==="lichess"?"chesscom":"lichess";label();try{inp.focus()}catch(x){}});
+    /* 9.79.0: an LC109 short link set to "landing page" brings the name (?u=&site=): it is filled in, one tap starts the review */
+    try{const d=readDeep();if(d&&inp){inp.value=d.u;site=d.site;f.setAttribute("data-lc109-filled","1");
+      if(msg)msg.textContent="Your "+(site==="lichess"?"Lichess":"Chess.com")+" name is filled in: one tap and I show you your biggest mistake.";
+      const b=f.querySelector("button[type=submit],button:not([type])");if(b)try{b.focus({preventScroll:true})}catch(x){}}}catch(x){}
     f.addEventListener("submit",e=>{
       e.preventDefault();
       let u=String(inp&&inp.value||"").trim().replace(/^@/,"");

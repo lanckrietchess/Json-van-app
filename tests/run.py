@@ -11,7 +11,7 @@ prints. Exit code 1 when anything fails. Screenshots land in tests/shots/."""
 import os, re, sys, subprocess, shutil
 TESTS = os.path.dirname(os.path.abspath(__file__)); REPO = os.path.dirname(TESTS)
 EXPECT = {
-  'release': [r"versions \[CONFIG\.version, assetVersion, sw, version\.json\]: \['9\.79\.0', '9\.79\.0', 'sw\.js\?v=9\.79\.0', '\{\"build\":\"9\.79\.0\"\}'\]",
+  'release': [r"versions \[CONFIG\.version, assetVersion, sw, version\.json\]: \['9\.80\.0', '9\.80\.0', 'sw\.js\?v=9\.80\.0', '\{\"build\":\"9\.80\.0\"\}'\]",
               r"old address left in app/landing/stripe defaults: \[0, 0, 1\]", r"landing \[launch links, manifest link, install buttons\]: \[0, True, 6\]",
               r"manifest \[id, start_url, scope\]: \['/app\.html', '/app\.html\?source=pwa', '/'\]", r"reset target: https://lanckrietchesstrainerhub\.vercel\.app/app\.html\?fresh=1793615024470",
               r"assetlinks \[relation, package\]: \['delegate_permission/common\.handle_all_urls', 'com\.lanckrietchess\.app'\]", r"node tests/sw\.test\.js: 14 passed", r"node tests/sw\.test\.mjs: 10 passed, 0 failed", r"node tests/stripe\.test\.mjs: 12 passed, 0 failed",
@@ -31,9 +31,9 @@ EXPECT = {
               r"studio recording \[while recording: Stop, timer runs, pause shown\], \[after: Record, Export shown, takes\]: \[\['Stop', True, False\], \['Record', True\]\]",
               r"studio scenes \[saved, board off, loaded back\]: \[\['Board and camera'\], True, True\]", r"studio subtitles \[position, size saved for Render edit\]: \[0\.3, 'l'\]",
               r"studio \[silence default, auto subtitles button\]: \['\.8', True\]", r"landing install click \[prompted, still on landing, message\]: \[1, True, 'Installing",
-              r"landing phone \[overflow-x\]: 0", r"no prompt available \[no new page, steps sheet open, steps, use-in-browser link\]: \[1, \[True, 1, True\]\]", r"app \[CONFIG\.version, footer shows, SiteURL production\]: \['9\.79\.0', 'v9\.79\.0', 'https://lanckrietchesstrainerhub\.vercel\.app/'\]",
-              r"preview check \[live, old live, per-commit link, localhost\]: \[False, False, True, False\]", r"service worker \[script, controls the page, caches\]: \['/sw\.js\?v=9\.79\.0', True, \[[^\]]*'lc-shell-nf1-9\.79\.0'[^\]]*\]\]",
-              r"old 9\.25\.0 shell cache deleted: True", r"network-first: the page is the newest build: 9\.79\.0", r"owner \[owner account, admin on, switcher, label\]: \[True, True, True, 'Admin Mode", r"auto subtitles \[ok, on device, captions, track not mic, busy after, players left\]: \[True, True, [23], \['audio', False\], False, 0\]", r"auto subtitles \[first two lines, max 8 words, inside the clip\]: \[\['Every move starts with the opponent', 'what did their last move'\], [1-8], True\]"],
+              r"landing phone \[overflow-x\]: 0", r"no prompt available \[no new page, steps sheet open, steps, use-in-browser link\]: \[1, \[True, 1, True\]\]", r"app \[CONFIG\.version, footer shows, SiteURL production\]: \['9\.80\.0', 'v9\.80\.0', 'https://lanckrietchesstrainerhub\.vercel\.app/'\]",
+              r"preview check \[live, old live, per-commit link, localhost\]: \[False, False, True, False\]", r"service worker \[script, controls the page, caches\]: \['/sw\.js\?v=9\.80\.0', True, \[[^\]]*'lc-shell-nf1-9\.80\.0'[^\]]*\]\]",
+              r"old 9\.25\.0 shell cache deleted: True", r"network-first: the page is the newest build: 9\.80\.0", r"owner \[owner account, admin on, switcher, label\]: \[True, True, True, 'Admin Mode", r"auto subtitles \[ok, on device, captions, track not mic, busy after, players left\]: \[True, True, [23], \['audio', False\], False, 0\]", r"auto subtitles \[first two lines, max 8 words, inside the clip\]: \[\['Every move starts with the opponent', 'what did their last move'\], [1-8], True\]"],
   'mspc': [r"\[multiple-choice buttons, interactive steps\]: \[0, 1\]", r"M, after tapping \w\d: Correct", r"S \(tap stage from the file\): Correct", r"P, check: Correct",
            r"after dragging 170px left \[columns, session, board px\]: \['\d+px \d+px', '\{\"trainer\":0\.\d+\}', \d+\]", r"phone \[handle hidden, inline columns, overflow-x\]: \[True, '', 0\]",
            r"clinic S, wrong phase: Not that phase", r"clinic C, Ndf6: Correct", r"clinic miscalc \[feedback, struggles, log\]: \['Tagged: .*\['calc'\], 1\]",
@@ -63,7 +63,7 @@ EXPECT = {
                 r"B sees the ELO board: .*#1 KY KyenzoTest 2105", r"admin insights: Last 30 days, from players who share anonymous stats\. 2 on the leaderboard\. 1 Players 1 Drills finished 25% First-try accuracy 1 Coach questions",
                 r"admin insights \[players on the board, question\]: \[True, True\]", r"admin insights, wrong token: The worker refused the admin secret\.", r"admin hides Bram: Bram \(hidden\), Anna", r"A board after the admin hid Bram: Anna / 1"],
   'touch': [r"touch drag without LC55 \[page scrolls, piece in the air\]: \[True, True\]", r"touch drag with LC55 \[page stays put, piece in the air\]: \[True, True\]",
-            r"touch swipe from an empty square with LC55 \[page scrolls, no piece in the air\]: \[True, True\]", r"touch real app \[LC55 on, build, embedded copy equals lc55\.js\]: \[True, '9\.79\.0', True\]"],
+            r"touch swipe from an empty square with LC55 \[page scrolls, no piece in the air\]: \[True, True\]", r"touch real app \[LC55 on, build, embedded copy equals lc55\.js\]: \[True, '9\.80\.0', True\]"],
   'lc56': [r"bot\ \[board\ starts\ above\ 560\ px,\ board\ ends\ inside\ the\ 844\ px\ screen,\ quest\ strip\ below\ the\ board,\ touch\-action\]:\ \[True,\ True,\ True,\ 'none'\]",
             r"trim\ \[board\ starts\ above\ 300\ px,\ controls\ under\ it,\ scan\ button\ in\ the\ controls\]:\ \[True,\ True,\ True\]",
             r"middlegame\ \[Instant\ Play\ above\ 460\ px,\ stats\ below\ it\]:\ \[True,\ True\]",
@@ -84,7 +84,7 @@ EXPECT = {
             r"scan,\ no\ connection\ \[message,\ no\ crash,\ spinner\ gone\]:\ \[True,\ True\]",
             r"scan,\ free\ member\ \[no\ camera,\ upgrade\ pop\-up\]:\ \[True,\ True\]",
             r"scan,\ guest\ \[no\ camera,\ sign\-in\ hint\]:\ \[True,\ True\]",
-            r"LC56\ \[embedded\ copy\ equals\ lc56\.js,\ build,\ init\]:\ \[True,\ '9\.79\.0',\ True\]"],
+            r"LC56\ \[embedded\ copy\ equals\ lc56\.js,\ build,\ init\]:\ \[True,\ '9\.80\.0',\ True\]"],
   'lc57': [r"sheet\ \[benefit\ wording,\ not\ the\ old\ two\-button\ text\]:\ \[True,\ True,\ True\]",
             r"sheet\ \[box\ NOT\ pre\-ticked,\ button\ off,\ No\ thanks\ present\]:\ \[False,\ True,\ True\]",
             r"sheet,\ ticked\ and\ accepted\ \[button\ on,\ consent\ stored,\ queued,\ mail\ sent,\ inbox\ message\ with\ the\ address\]:\ \[True,\ True,\ True,\ True,\ True\]",
@@ -98,7 +98,7 @@ EXPECT = {
             r"mail\ not\ configured,\ Redeem\ now\ \[token\ credited\ once,\ wallet\ claimed\]:\ \[True,\ True\]",
             r"No\ thanks\ \[no\ consent,\ nothing\ queued,\ no\ mail,\ sheet\ closed,\ not\ asked\ again\]:\ \[False,\ False,\ 0,\ True,\ False\]",
             r"account\ card,\ first\ time\ \[unticked\ \+\ button\ off;\ ticking\ and\ accepting\ shows\ the\ key\ field\]:\ \[\[False,\ True\],\ True,\ True\]",
-            r"LC57\ \[embedded\ copy\ equals\ lc57\.js,\ both\ old\ sheets\ hand\ over\ to\ it,\ build\]:\ \[True,\ 2,\ '9\.79\.0'\]"],
+            r"LC57\ \[embedded\ copy\ equals\ lc57\.js,\ both\ old\ sheets\ hand\ over\ to\ it,\ build\]:\ \[True,\ 2,\ '9\.80\.0'\]"],
   'lc58': [r"before\ the\ scan\ \[no\ working\ points,\ no\ cached\ games\]:\ \[0,\ 0\]",
             r"scan\ of\ 4\ games\ \[4\ games\ cached,\ 4\ graphs\ saved,\ 4\ mistake\ counts,\ own\-colour\ leaks\ only:\ P\ and\ S/M,\ never\ the\ opponent's\ C\]:\ \[4,\ 4,\ 4,\ True\]",
             r"working\ points\ \[filled\ by\ the\ scan,\ 3\ at\ most,\ a\ toast\ told\ the\ member\]:\ \[3,\ True,\ True\]",
@@ -109,7 +109,7 @@ EXPECT = {
             r"no\ linked\ account\ \[nothing\ scanned,\ nothing\ cached\]:\ \[0,\ 0\]",
             r"switched\ off\ \[lc58\-off\ stops\ it\]:\ 0",
             r"three\ working\ points\ already\ there\ \[kept,\ none\ added,\ no\ \"filled\ in\"\ toast\]:\ \[3,\ True\]",
-            r"LC58\ \[embedded\ copy\ equals\ lc58\.js,\ build\]:\ \[True,\ '9\.79\.0'\]"],
+            r"LC58\ \[embedded\ copy\ equals\ lc58\.js,\ build\]:\ \[True,\ '9\.80\.0'\]"],
   'lc59': [r"join\ at\ 1437\ \[Catch\-Up\ Bonus\ pop\-up:\ \+6,\ one\ token\ per\ hundred,\ tokens\ claimed\ into\ the\ wallet,\ no\ milestone\ pop\-up\ for\ hundreds\ below\ the\ start\]:\ \[True,\ 6,\ True,\ True\]",
             r"milestone\ 1500\ \[congratulation,\ the\ three\-step\ reward\ ladder,\ Peak\ Gain\ line,\ box\ unticked,\ fields\ hidden\ until\ ticked\]:\ \[True,\ True,\ True,\ \[False,\ True\]\]",
             r"ticking\ the\ website\ box\ shows\ first\ name\ \+\ message:\ True",
@@ -628,7 +628,7 @@ EXPECT['lc98'] = [r"landing,\ no\ segment\ saved\ \(9\.65\.0:\ the\ bar\ is\ alw
   r"Command\ Center\ \[Sources\ \&\ lanes\ panel\ with\ rows,\ LC73\ sources\ have\ Copy\ link\]:\ \[3,\ \['https://lanckrietchesstrainerhub\.vercel\.app/\?src=fb\-ads',\ 'https://lanckrietchesstrainerhub\.vercel\.app/'\]\]",
   r"member\ \[lanes\ page\ owner\ only,\ seg\ editor\ owner\ only,\ no\ lane\ calls\]:\ \[True,\ True,\ True\]",
   r"helpers\ \[slugify,\ slug\ rules,\ landing\ link,\ app\ link,\ deep\ link\]:\ \['facebook\-ads\-nov\-2026\-te',\ \[True,\ False,\ False,\ False,\ True\],\ 'https://lanckrietchesstrainerhub\.vercel\.app/\?src=fb\-ads\&elo=2000\-plus',\ 'https://lanckrietchesstrainerhub\.vercel\.app/app\.html\?src=tt\-bio',\ 'https://lanckrietchesstrainerhub\.vercel\.app/app\.html\?u=USERNAME\&site=chesscom\&src=mc\-x',\ 'https://lanckrietchesstrainerhub\.vercel\.app/'\]",
-  r"LC98\ \[embedded\ copy\ equals\ lc98\.js,\ LC73\ and\ LC75\ too,\ init\ and\ afterRender\ wired,\ build\]:\ \[True,\ True,\ True,\ True,\ True,\ '9\.79\.0'\]"]
+  r"LC98\ \[embedded\ copy\ equals\ lc98\.js,\ LC73\ and\ LC75\ too,\ init\ and\ afterRender\ wired,\ build\]:\ \[True,\ True,\ True,\ True,\ True,\ '9\.80\.0'\]"]
 EXPECT['lc99'] = [r"phone\ one\-time\ month\ confirm\ \[open,\ heading,\ terms,\ box\ unchecked,\ pay\ off,\ pay\ label,\ options\ hidden\]:\ \[True,\ 'Your\ one\-time\ Pro\ month',\ \['€25\ today,\ paid\ once\.\ No\ subscription:\ it\ does\ not\ renew\ and\ nothing\ else\ is\ charged\.',\ '30\ days\ of\ full\ Pro,\ starting\ the\ moment\ you\ pay\.',\ 'Want\ to\ keep\ Pro\ after\ that\?\ During\ your\ month\ \(and\ 7\ days\ after\ it\)\ you\ can\ switch\ to\ yearly,\ and\ your\ €25\ counts\ toward\ the\ first\ year\.'\],\ False,\ True,\ 'Pay\ €25\ securely',\ True\]",
   r"phone\ waiver\ wording:\ I\ ask\ for\ my\ Pro\ month\ to\ start\ right\ away\.\ I\ pay\ €25\ once\ for\ 30\ days\ of\ full\ Pro;\ it\ does\ not\ renew\.\ I\ can\ still\ withdraw\ within\ 14\ days\ with\ “Withdraw\ from\ contract\ here”\ \(Account\);\ I\ then\ pay\ only\ for\ the\ days\ I\ used\ and\ get\ the\ rest\ back\.",
   r"phone\ confirm\ layout\ \[overflow\-x,\ box\ >=\ 44px\ tall,\ pay\ >=\ 44px\]:\ \[0,\ True,\ True\]",
@@ -665,7 +665,7 @@ EXPECT['lc99'] = [r"phone\ one\-time\ month\ confirm\ \[open,\ heading,\ terms,\
   r"owner\ log\ layout\ \[overflow\-x\]:\ 0",
   r"member\ \[owner\ only,\ no\ admin\ call\]:\ \[True,\ True\]",
   r"helpers\ \[numbers,\ credit\ capped\ below\ the\ price,\ wording\]:\ \[\[19950,\ 2500,\ 17450,\ 'Founding\ Member'\],\ 100,\ 'I\ ask\ for\ the\ yearly\ plan\ to\ start\ right\ away\.\ I\ pay\ €174\.50\ today\ for\ my\ first\ year,\ then\ €199\.50\ each\ year\ until\ I\ cancel\.\ I\ can\ still\ withdraw\ within\ 14\ days\ with\ “Withdraw\ from\ contract\ here”\ \(Account\);\ I\ then\ pay\ only\ for\ the\ days\ I\ used\ and\ get\ the\ rest\ back\.'\]",
-  r"LC99\ \[embedded\ copies\ equal\ lc73\ /\ lc90\ /\ lc97\ /\ lc99,\ init\ \+\ afterRender\ wired,\ one\ waiver\ version\ everywhere,\ build\]:\ \[True,\ True,\ True,\ True,\ True,\ True,\ True,\ '9\.79\.0'\]"]
+  r"LC99\ \[embedded\ copies\ equal\ lc73\ /\ lc90\ /\ lc97\ /\ lc99,\ init\ \+\ afterRender\ wired,\ one\ waiver\ version\ everywhere,\ build\]:\ \[True,\ True,\ True,\ True,\ True,\ True,\ True,\ '9\.80\.0'\]"]
 EXPECT['lc100'] = [
     r"phone\ withdraw\ page\ \[h1,\ fields,\ contract\ options\]:\ \['Withdraw\ from\ contract\ here💬',\ True,\ 9\]",
     r"phone\ empty\ form\ \[message,\ no\ call\]:\ \['Enter\ your\ name\.',\ True\]",
@@ -718,7 +718,7 @@ EXPECT['lc100'] = [
     r"landing\ segments\ without\ any\ video\ saved\ \[bar\ shown,\ 5\ segments,\ coming\ soon,\ MSPC\ card\ hidden,\ no\ owner\ link\]:\ \[True,\ \['0\ \-\ 800\ Elo',\ '800\ \-\ 1200\ Elo',\ '1200\ \-\ 1600\ Elo',\ '1600\ \-\ 2000\ Elo',\ '2000\+\ Elo'\],\ 'The\ 800\ \-\ 1200\ Elo\ video\ is\ coming\ soon\.',\ True,\ True\]",
     r"landing\ owner\ link\ \(after\ the\ server\ confirms\ an\ admin\):\ /app\.html\#seg\-videos",
     r"giveaway\ page\ heading:\ Gain\ the\ most\ ELO\ by\ 9\ December\?💬",
-    r"LC100\ \[embedded.*\]:\ \[True,\ True,\ True,\ True,\ True,\ True,\ True,\ True,\ True,\ True,\ '9\.79\.0'\]",
+    r"LC100\ \[embedded.*\]:\ \[True,\ True,\ True,\ True,\ True,\ True,\ True,\ True,\ True,\ True,\ '9\.80\.0'\]",
     r"ERRORS 0"]
 EXPECT['lc102'] = [
   r"quick start text \[quick\.3\]: No account, no install\. I read your last lost game right here, on your own device\.",
@@ -830,7 +830,7 @@ EXPECT['lc109'] = [
     r"LC109\ \[embedded\ copy\ equals\ lc109\.js,\ init,\ afterRender,\ route,\ LC88\ source,\ build\]:\ \[True,\ True,\ True,\ True,\ True,\ '9\.79\.0'\]",
     r"\?book=blueprint\ \[unlocked,\ on\ the\ page\]:\ \[True,\ '\#blueprint30',\ True\]",
     'ERRORS 0']
-ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community', 'touch', 'lc56', 'lc57', 'lc58', 'lc59', 'lc59land', 'lc60', 'lc85', 'lc86', 'lc87', 'lc88', 'lc89', 'lc90', 'lc94', 'lc95', 'lc96', 'lc97', 'lc98', 'lc99', 'lc100', 'lc101', 'lc102', 'lc103', 'lc104', 'lc105', 'lc106', 'lc107', 'lc108', 'lc109', 'hub', 'trim', 'studio954', 'studio955', 'captions978', 'coach956', 'course957', 'release']
+ORDER = ['unit', 'mspc', 'arena', 'formats', 'server', 'ai', 'members', 'community', 'touch', 'lc56', 'lc57', 'lc58', 'lc59', 'lc59land', 'lc60', 'lc85', 'lc86', 'lc87', 'lc88', 'lc89', 'lc90', 'lc94', 'lc95', 'lc96', 'lc97', 'lc98', 'lc99', 'lc100', 'lc101', 'lc102', 'lc103', 'lc104', 'lc105', 'lc106', 'lc107', 'lc108', 'lc109', 'shortfill', 'hub', 'trim', 'studio954', 'studio955', 'captions978', 'coach956', 'course957', 'release']
 EXPECT['lc106'] = [
   r"pure \[targets, week peak, nothing old counts\]: \[\[100, 75, 75, 50, 30\], 1215, None\]",
   r"what changed \[only true improvements, strongest first\]: \['rating: \+35 rating since your Sprint started \(1180 → 1215\)\.', 'blunders: Blunders per game: 2\.7 → 0\.7 \(75 % fewer\)\.', 'accuracy: Average accuracy: 70\.3 % → 78 %\.'\]",
@@ -887,7 +887,7 @@ EXPECT['lc101'] = [
     r"guest:\ no\ welcome\ call:\ 0",
     r"owner\ inbox\ \[line,\ pinned\ row\]:\ \['Every\ member\ who\ wrote\ to\ you\ or\ got\ a\ message\ from\ you',\ True\]",
     r"owner\ automated\ messages\ \[first\ form,\ its\ title\]:\ \['welcome',\ 'Welcome:\ the\ first\ time\ a\ member\ is\ signed\ in\ sent\ 3×'\]",
-    r"LC101\ \[embedded\ copies\ equal\ lc72\ /\ lc99,\ menu\ line,\ build\]:\ \[True,\ True,\ True,\ '9\.79\.0'\]",
+    r"LC101\ \[embedded\ copies\ equal\ lc72\ /\ lc99,\ menu\ line,\ build\]:\ \[True,\ True,\ True,\ '9\.80\.0'\]",
     r"ERRORS\ 0"]
 EXPECT['lc103'] = [
     "menu\\ \\[Moments\\ button,\\ before\\ a\\ scan:\\ no\\ Showbar\\]:\\ \\['◆\\ Moments',\\ True\\]",
@@ -967,6 +967,21 @@ EXPECT['captions978'] = [
     r"8\. after a reload \[scenes, clusters, Split place, 1st start\]: \[2, 1, True, 0\.4\]",
     r"9\. phone \[captions panel, page overflow-x\]: \[True, 0\]",
     'ERRORS 0']
+EXPECT['shortfill'] = [
+    "1\\.\\ parse\\ \\[name,\\ site,\\ elo\\]\\ per\\ link:\\ \\[\\['igm',\\ 'MagnusCarlsen',\\ 'chesscom',\\ None\\],\\ \\['igm',\\ 'DrNykterstein',\\ 'lichess',\\ None\\],\\ \\['igm',\\ 'hikaru',\\ '',\\ 1350\\],\\ \\['igm',\\ 'anna_b',\\ 'lichess',\\ None\\],\\ \\['igm',\\ 'GothamChess',\\ 'chesscom',\\ None\\],\\ \\['igm',\\ 'penguingim1',\\ 'lichess',\\ None\\],\\ \\['igm',\\ '',\\ 'chesscom',\\ None\\],\\ \\['igm',\\ '',\\ '',\\ None\\],\\ \\['igm',\\ '',\\ '',\\ None\\]\\]",
+    "2\\.\\ /l/igm/c/MagnusCarlsen\\?elo=1350\\ \\[opens,\\ sent\\ to\\ the\\ server\\]:\\ \\['/app\\.html\\?src=igm\\&u=MagnusCarlsen\\&site=chesscom\\&elo=1350',\\ \\['igm',\\ 'MagnusCarlsen',\\ 'chesscom',\\ 1350\\],\\ 1\\]",
+    "3\\.\\ /l/igm/DrNykterstein,\\ only\\ Lichess\\ knows\\ it\\ \\[opens,\\ calls,\\ site\\ sent\\ the\\ second\\ time\\]:\\ \\['/app\\.html\\?src=igm\\&u=DrNykterstein\\&site=lichess',\\ 2,\\ 'lichess'\\]",
+    "4\\.\\ landing\\ link\\ \\[address,\\ quick\\ start\\ filled\\ in,\\ site,\\ message\\]:\\ \\['/\\?src=igm\\&u=DrNykterstein\\&site=lichess',\\ 'DrNykterstein',\\ 'Your\\ Lichess\\ username',\\ 'Your\\ Lichess\\ name\\ is\\ filled\\ in:\\ one\\ tap\\ and\\ I\\ show\\ you\\ your\\ biggest\\ mistake\\.'\\]",
+    "5\\.\\ normal\\ link\\ with\\ a\\ name\\ /\\ unfilled\\ field\\ \\[opens\\]:\\ \\['/app\\.html\\?src=plain',\\ '/\\?src=igm'\\]",
+    "6\\.\\ New\\ short\\ link\\ form\\ \\[ManyChat\\ DM\\ type,\\ fill\\-in\\ choices,\\ opens\\ choices\\]:\\ \\[True,\\ \\['',\\ 'chesscom',\\ 'lichess',\\ 'either'\\],\\ \\['review',\\ 'landing'\\]\\]",
+    "6b\\.\\ created\\ \\[fill\\-in\\ saved,\\ ManyChat\\ sheet\\ open,\\ addresses\\]:\\ \\[\\{'p_code':\\ 'igm',\\ 'p':\\ \\{'fill':\\ 'either',\\ 'fill_on':\\ True,\\ 'fill_elo':\\ True,\\ 'fill_dest':\\ 'review'\\}\\},\\ True,\\ \\['https://lanckrietchesstrainerhub\\.vercel\\.app/l/igm/c/\\{\\{username\\}\\}\\?elo=\\{\\{elo\\}\\}',\\ 'https://lanckrietchesstrainerhub\\.vercel\\.app/l/igm/lc/\\{\\{username\\}\\}\\?elo=\\{\\{elo\\}\\}',\\ 'https://lanckrietchesstrainerhub\\.vercel\\.app/l/igm/\\{\\{username\\}\\}\\?elo=\\{\\{elo\\}\\}'\\]\\]",
+    "6c\\.\\ the\\ link\\ row\\ \\[fill\\ line,\\ buttons\\]:\\ \\['Fills\\ in\\ a\\ Chess\\.com\\ or\\ Lichess\\ username\\ \\+\\ rating\\ →\\ review\\ ·\\ 2\\ people',\\ \\['Copy',\\ 'ManyChat\\ link',\\ 'People',\\ 'Stop'\\]\\]",
+    "6d\\.\\ People\\ \\[rows,\\ profile\\ link,\\ CSV\\ button\\]:\\ \\[2,\\ 'https://www\\.chess\\.com/member/MagnusCarlsen',\\ True\\]",
+    "6e\\.\\ CSV\\ \\[file,\\ header\\ \\+\\ rows\\]:\\ \\['link\\-igm\\-people\\.csv',\\ 3\\]",
+    "6f\\.\\ Start\\ a\\ stopped\\ link\\ \\[sent,\\ row\\ active\\]:\\ \\[\\{'p_code':\\ 'old',\\ 'p':\\ \\{'active':\\ True\\}\\},\\ True\\]",
+    '7\\.\\ phone\\ \\[ManyChat\\ sheet\\ open,\\ page\\ overflow\\-x,\\ sheet\\ overflow\\-x\\]:\\ \\[True,\\ 0,\\ 0\\]',
+    '8\\.\\ build\\ \\[lc73\\ inline,\\ lc94\\ inline\\ in\\ both\\ pages,\\ vercel\\ rewrite\\ for\\ /l/code/\\.\\.\\.\\]:\\ \\[True,\\ True,\\ True\\]',
+    'ERRORS\\ 0',]
 NEEDS_NODE = {'unit', 'server', 'ai', 'members', 'community'}
 def node_ok():
     try: v = subprocess.run(['node', '--version'], capture_output=True, text=True).stdout.strip().lstrip('v').split('.'); return (int(v[0]), int(v[1])) >= (22, 5)
