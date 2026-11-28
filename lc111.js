@@ -87,7 +87,7 @@ const LC111=(()=>{
   function metaOf(g){
     const tc=g.tc?g.tc[0].toUpperCase()+g.tc.slice(1):"";let d="";
     try{if(g.end_time)d=new Date(g.end_time*1000).toLocaleDateString("en-GB",{month:"short",year:"numeric"})}catch(e){d=""}
-    return[tc,g.me?"Kyenzo "+g.me:"",g.opp?"opponent "+g.opp:"",END[g.end]||"won",g.acc?Math.round(g.acc)+"% accuracy":"",d].filter(Boolean).join(" · ");
+    return[tc+(g.site==="lichess"?" on Lichess":g.site==="chesscom"?" on Chess.com":""),g.me?"Kyenzo "+g.me:"",g.opp?"opponent "+g.opp:"",END[g.end]||"won",g.acc?Math.round(g.acc)+"% accuracy":"",d].filter(Boolean).join(" · ");
   }
   const moveNo=(i)=>Math.floor(i/2)+1;
   const label=(i,san)=>moveNo(i)+(i%2===0?". ":"... ")+san;

@@ -76,7 +76,8 @@ def build(content, games, cap=12):
         out[t['id']].append({'id': str(g['id']), 'end_time': int(float(g.get('end_time') or 0)), 'tc': g.get('time_class') or '',
             'me': int(float(g.get('my_rating') or 0)) or None, 'opp': int(float(g.get('opp_rating') or 0)) or None, 'acc': acc,
             'end': term, 'plies': len(sans), 'line': d, 'left': sans[ply] if ply < len(sans) else '', 'leftPly': ply if ply < len(sans) else None,
-            'free': free, 'san': sans[:free], 'eco': g.get('eco') or '', 'opening': g.get('opening') or ''})
+            'free': free, 'san': sans[:free], 'eco': g.get('eco') or '', 'opening': g.get('opening') or '',
+            'site': 'lichess' if 'lichess.org' in str(g.get('url') or '') or not str(g['id']).isdigit() else 'chesscom'})
         used += 1
     for k in out:
         out[k].sort(key=lambda x: (-x['line'], x['end'] == 'time', -(x['acc'] or 0), -x['end_time']))
