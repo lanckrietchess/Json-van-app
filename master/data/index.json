@@ -1,6 +1,6 @@
 {
  "version": 1,
- "built": 1795614275,
+ "built": 1795869770,
  "files": [
   {
    "name": "games-2023-2.json",
@@ -8,15 +8,15 @@
   },
   {
    "name": "games-2024-1.json",
-   "rows": 987
+   "rows": 1738
   },
   {
    "name": "games-2024-2.json",
-   "rows": 776
+   "rows": 794
   },
   {
    "name": "games-2025-1.json",
-   "rows": 441
+   "rows": 536
   },
   {
    "name": "games-2025-2.json",
@@ -28,7 +28,7 @@
   },
   {
    "name": "games-2026-2.json",
-   "rows": 1473
+   "rows": 1550
   },
   {
    "name": "puzzles-2023-2.json",
@@ -36,15 +36,15 @@
   },
   {
    "name": "puzzles-2024-1.json",
-   "rows": 4376
+   "rows": 7579
   },
   {
    "name": "puzzles-2024-2.json",
-   "rows": 3088
+   "rows": 3151
   },
   {
    "name": "puzzles-2025-1.json",
-   "rows": 1738
+   "rows": 2131
   },
   {
    "name": "puzzles-2025-2.json",
@@ -56,7 +56,7 @@
   },
   {
    "name": "puzzles-2026-2.json",
-   "rows": 5564
+   "rows": 5861
   }
  ]
 }
