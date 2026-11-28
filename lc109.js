@@ -181,7 +181,7 @@ const LC109=(()=>{
 
   /* ---------- actions ---------- */
   function setBox(d,k,on){const s=st();const r=s.days[d]||{};r[k]=on?1:0;if(on)r.skip=0;s.days[d]=r;s.answered[d]=1;save(s);
-    try{if(on&&complete(s,d)&&typeof V6!=="undefined"&&V6.addXp)V6.addXp(10,"Blueprint day "+d)}catch(e){}}
+    try{if(on&&complete(s,d)&&typeof V6!=="undefined"&&V6.addXp)V6.addXp("think",10,{noBench:true,noFw:true})}catch(e){}}
   function onClick(e){
     const t=e.target&&e.target.closest?e.target:null;if(!t)return;
     const dayBtn=t.closest("[data-lc109-day]");
