@@ -93,8 +93,9 @@ const LC77=(()=>{
   /* the e-book (PDF) of an item: replace the file, test it in the reader, publish */
   async function pdfSheet(id){
     const it=await getItem(id);if(!it){say("Could not open this item.","bad");return}
+    let fileLink=it.ebook_url;try{if(fileLink&&typeof LC70!=="undefined"&&LC70.signBook)fileLink=await LC70.signBook(fileLink)}catch(e){}   /* 9.84.0: private bucket */
     try{openSheet({title:"E-book (PDF): "+it.title,noFocus:true,cls:"lc77-sheet",html:'<form class="stack" data-lc77-pdfform novalidate>'
-      +(it.ebook_url?'<p class="small">Current file: <a href="'+esc(it.ebook_url)+'" target="_blank" rel="noopener noreferrer">open the PDF</a></p>':'<p class="small muted">No PDF yet.</p>')
+      +(it.ebook_url?'<p class="small">Current file: <a href="'+esc(fileLink)+'" target="_blank" rel="noopener noreferrer">open the PDF</a></p>':'<p class="small muted">No PDF yet.</p>')
       +pdfField.replace('name="ebook_url" ','name="ebook_url" value="'+esc(it.ebook_url||"")+'" ')
       +'<p class="small muted">Write the book in Word or Google Docs and export it as PDF. Readers see it page by page in the app and can download it.</p>'
       +'<div class="btn-row"><button class="btn btn-primary" type="submit">Save the PDF</button><button type="button" class="btn btn-ghost" data-lc77-try>Read it in the app</button><button type="button" class="btn '+(it.status==="live"?"btn-ghost":"btn-gold")+'" data-lc77-pub>'+(it.status==="live"?"Unpublish":"Publish")+'</button></div><p class="form-msg" aria-live="polite"></p></form>',

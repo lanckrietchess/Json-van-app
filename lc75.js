@@ -235,6 +235,7 @@ const LC75=(()=>{
     let d={ok:true,ebook_url:"",body:""};
     if(!opts.preview){const r=await rpc("lc70_open",{p_id:id},true);d=r.data||{};if(!d.ok){say(d.error==="sign_in"?"Sign in first.":"This is not in your library yet.","bad");return}
     }else d.html=opts.html||"";
+    if(d.ebook_url&&typeof LC70!=="undefined"&&LC70.signBook)d.ebook_url=await LC70.signBook(d.ebook_url);   /* 9.84.0: private bucket, signed for one hour */
     const url=String(d.ebook_url||""),isPdf=/\.pdf(\?|#|$)/i.test(url)||/\/pdf/i.test(url);
     let ov=Q("#lc75-reader");if(ov)ov.remove();ov=document.createElement("div");ov.id="lc75-reader";ov.setAttribute("role","dialog");ov.setAttribute("aria-modal","true");ov.setAttribute("aria-label",it.title||"E-book");
     ov.innerHTML='<header><button type="button" class="lc75-x" data-r="close" aria-label="Close the reader">✕</button><b>'+(opts.preview?"Preview: ":"")+esc(it.title||"E-book")+'</b><span data-r="pg">…</span><span class="lc75-rt"><button type="button" data-r="zo" aria-label="Smaller">−</button><button type="button" data-r="zi" aria-label="Bigger">+</button>'

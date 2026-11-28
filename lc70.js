@@ -133,11 +133,27 @@
   }
   const repaintAll=force=>{if(force)invalidate();QA("[data-lc70-shelf]").forEach(h=>paintShelf(h,h.getAttribute("data-lc70-shelf"),force))};
 
+  /* ---------- 9.84.0: e-books in a PRIVATE bucket. The stored address (…/object/public/lc78-books/<path>) is only a name: before it opens,
+     the app asks Storage for a signed link of one hour, which Storage gives only when the caller may read the item (the policy
+     lc112_books_read, sql/20261128150000_lc112_private_books.sql). A forwarded link stops working after that hour. ---------- */
+  const BOOK_RE=/\/storage\/v1\/object\/(?:public|authenticated|sign)\/lc78-books\/([^?#]+)/;
+  async function signBook(url){
+    const m=String(url||"").match(BOOK_RE);if(!m)return url;
+    let c={};try{c=LC26.sync.cfg()}catch(e){c={}}if(!c.url||!c.key)return url;
+    const t=await tok();
+    try{const r=await fetch(c.url+"/storage/v1/object/sign/lc78-books/"+m[1],{method:"POST",headers:{Authorization:"Bearer "+(t||c.key),apikey:c.key,"Content-Type":"application/json"},body:JSON.stringify({expiresIn:3600})});
+      const j=await r.json().catch(()=>null),u=j&&(j.signedURL||j.signedUrl);
+      if(r.ok&&u)return c.url+"/storage/v1"+(u.charAt(0)==="/"?u:"/"+u);
+    }catch(e){}
+    return url;   /* a public bucket (before the SQL) still opens the plain address */
+  }
+
   /* ---------- open an item ---------- */
   function ytId(u){const m=String(u||"").match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([A-Za-z0-9_-]{6,20})/);return m?m[1]:""}
   async function openItem(it){
     const r=await rpc("lc70_open",{p_id:it.id},true);const d=r.data||{};
     if(!d.ok){if(d.error==="sign_in"){needSignIn();return}say(d.error==="no_access"?"This is not in your library yet.":"Could not open it. Try again.","bad");return}
+    if(d.ebook_url)d.ebook_url=await signBook(d.ebook_url);
     const vids=(d.videos||[]).filter(v=>ytId(v.url));
     let html='<p class="small muted">'+esc(KIND[it.kind]||"")+(it.shelf==="guest"?" by "+esc(it.creator||"a guest creator"):"")+" · "+esc(accessLabel(d.access))+"</p>";
     if(d.ebook_url)html+='<p><a class="btn btn-primary" href="'+esc(d.ebook_url)+'" target="_blank" rel="noopener noreferrer">'+ic("book-open")+" Open the e-book</a></p><p class=\"small muted\">Please keep the file for yourself: it is licensed to your account.</p>";
@@ -416,5 +432,5 @@
       new MutationObserver(()=>{clearTimeout(deb);deb=setTimeout(()=>{try{ownerRows()}catch(e){}},120)}).observe(document.body,{childList:true});
     }catch(e){console.error("lc70",e)}
   }
-  return{init:init,afterRender:afterRender,catalog:catalog,paintShelf:paintShelf,openItem:openItem,ytId:ytId,toCents:toCents,cardHTML:cardHTML,buyTokens:buyTokens,buyEuro:buyEuro,repaint:repaintAll,version:"9.38.0"};
+  return{init:init,afterRender:afterRender,catalog:catalog,paintShelf:paintShelf,openItem:openItem,signBook:signBook,ytId:ytId,toCents:toCents,cardHTML:cardHTML,buyTokens:buyTokens,buyEuro:buyEuro,repaint:repaintAll,version:"9.38.0"};
 })(); /*@@end lc70*/

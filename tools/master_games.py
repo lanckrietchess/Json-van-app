@@ -338,6 +338,21 @@ def _is_sacrifice(board, move, reply_pv, me):
         b.push(mv); seq.append(material(b, me) - m0)
     return len(seq) >= 1 and seq[0] <= -2 and (len(seq) < 2 or seq[1] <= -1)
 
+def _recheck(p):
+    """9.84.0: a run is incremental (old games keep their puzzles), so a "brilliant" stored before the 9.82.0 rule stayed one. Every run
+    now checks the stored brilliants again with _is_sacrifice; one that fails becomes "great" (an only move). Returns True when changed."""
+    if p.get('kind') != 'brilliant': return False
+    try:
+        b = chess.Board(p['fen']); mv = chess.Move.from_uci(p.get('played') or p.get('best') or '')
+        me = chess.WHITE if p.get('side') == 'w' else chess.BLACK
+        reply = p.get('reply') or (p.get('line') or [])[1:3]
+        if mv not in b.legal_moves or b.piece_type_at(mv.from_square) == chess.KING or not _is_sacrifice(b, mv, reply, me):
+            p['kind'] = 'great'; p['tags'] = [t for t in (p.get('tags') or []) if t != 'sacrifice']
+            return True
+    except Exception:
+        return False
+    return False
+
 def _tags(board, pv):
     t = []
     if not pv: return t
@@ -361,6 +376,11 @@ def run_year(user, year, workers, nodes, games=None, half=0):
     gpath, ppath = os.path.join(OUT, 'games-%s.json' % tag), os.path.join(OUT, 'puzzles-%s.json' % tag)
     old_g = {r['id']: r for r in (json.load(open(gpath)) if os.path.exists(gpath) else []) if r.get('v') == VERSION}
     old_p = [p for p in (json.load(open(ppath)) if os.path.exists(ppath) else []) if p['game_id'] in old_g]
+    fixed = [p for p in old_p if _recheck(p)]
+    for p in fixed:
+        c = (old_g.get(p['game_id']) or {}).get('counts')
+        if isinstance(c, dict): c['brilliant'] = max(0, (c.get('brilliant') or 0) - 1); c['great'] = (c.get('great') or 0) + 1
+    if fixed: print('rechecked: %d stored brilliant moves are only moves (great): %s' % (len(fixed), ', '.join(p['id'] for p in fixed[:20])), flush=True)
     if games is None:
         games = fetch_year(user, year, half)
         li = os.environ.get('LICHESS_USER', '').strip()
